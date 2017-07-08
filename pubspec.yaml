@@ -1,0 +1,24 @@
+name: elec_server
+description: A web server built using the shelf package.
+version: 0.0.1
+#homepage: https://www.example.com
+#author: tony humbert <email@example.com>
+
+environment:
+  sdk: '>=1.20.1 <2.0.0'
+
+dependencies:
+  args: ^0.13.7
+  date:
+      git:
+          url: git://github.com/thumbert/date.git
+  logging: '>=0.11.2 <0.12.0'
+  logging_handlers: ">=0.8.0 <0.9.0"
+  mongo_dart: 0.2.10
+  rpc: ^0.5.7+1
+  timezone: '>=0.4.3 <0.5.0'
+  tuple: '>=1.0.0 <2.0.0'
+
+
+dev_dependencies:
+  test: ^0.12.0

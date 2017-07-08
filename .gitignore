@@ -1,0 +1,20 @@
+# Directory created by dartdoc
+doc/api/
+.buildlog
+.DS_Store
+.idea
+.packages
+.project
+.settings
+.pub/
+build/
+packages
+pubspec.lock
+
+out
+docs
+
+
+*.iml
+*.js
+*.js_
