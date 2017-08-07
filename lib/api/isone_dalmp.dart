@@ -167,10 +167,9 @@ class DaLmp {
 
 
 
-  /**
-   * For the pipeline aggregation queries
-   * start and end are Strings in yyyy-mm-dd format.
-   */
+
+  /// For the pipeline aggregation queries
+  /// start and end are Strings in yyyy-mm-dd format.
   Map _constructMatchClause(List<int> ptids, String start, String end) {
     Map aux = {};
     if (ptids != null) aux['ptid'] = {'\$in': ptids};

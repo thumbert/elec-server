@@ -9,7 +9,7 @@ import 'package:rpc/rpc.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
 
-import 'package:elec_server/src/isone_dalmp.dart';
+import 'package:elec_server/api/isone_dalmp.dart';
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
