@@ -100,7 +100,7 @@ class DamArchive extends ComponentConfig with DailyArchive {
       HttpClientRequest request = await client.getUrl(Uri.parse(URL));
       HttpClientResponse response = await request.close();
       await response.pipe(fileout.openWrite());
-      print('Downloaded nepool da prices for $date.');
+      print('Downloaded ISONE DAM prices for $date.');
     }
   }
 

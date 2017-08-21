@@ -9,6 +9,17 @@ import 'package:elec_server/src/db/isone_da_lmp.dart';
 import 'package:elec_server/src/db/config.dart';
 
 
+downloadPrices() async {
+  Date start = new Date(2016,1,1);
+  Date end = new Date(2016,12,31);
+  DamArchive arch = new DamArchive();
+
+  var days = new TimeIterable(start, end).toList();
+  for (var day in days) {
+    await arch.oneDayDownload(day);
+  }
+}
+
 setupArchive(Config config) async {
   DamArchive arch = new DamArchive();
   await arch.setup();
@@ -32,13 +43,13 @@ testNepoolDamArchive() async {
 
 main() async {
 
-  Map env = Platform.environment;
+//  Map env = Platform.environment;
+//  Config config = new TestConfig();
+//  config.isone_dam_lmp_hourly
+//    ..DIR = env['HOME'] + '/Downloads/Archive/DA_LMP/Raw/Csv';
+//  await setupArchive(config);
 
-  Config config = new TestConfig();
-  config.isone_dam_lmp_hourly
-    ..DIR = env['HOME'] + '/Downloads/Archive/DA_LMP/Raw/Csv';
-  await setupArchive(config);
-
+  downloadPrices();
 
 
 //  await config.open();
