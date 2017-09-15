@@ -10,6 +10,8 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
 
 import 'package:elec_server/api/isone_dalmp.dart';
+import 'package:elec_server/api/isone_bindingconstraints.dart';
+import 'package:elec_server/src/utils/timezone_utils.dart';
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
@@ -22,6 +24,12 @@ registerApis() async {
   DaLmp dalmp = new DaLmp(db);
   _apiServer.addApi(dalmp);
 
+  Db db2 = new Db('mongodb://$host/isone');
+  await db2.open();
+  BindingConstraints bindingConstraints = new BindingConstraints(db2);
+  _apiServer.addApi(bindingConstraints);
+
+
 //  var api = new ApiTemperatureNoaa();
 //  await api.init();
 //  _apiServer.addApi(api);
@@ -33,9 +41,7 @@ main() async {
   if (stdout.hasTerminal)
     Logger.root.onRecord.listen(new LogPrintHandler());
 
-  Map env = Platform.environment;
-  String tzdb = env['HOME'] + '/.pub-cache/hosted/pub.dartlang.org/timezone-0.4.3/lib/data/2015b.tzf';
-  initializeTimeZoneSync(tzdb);
+  initializeTimeZoneSync( getLocationTzdb() );
 
   await registerApis();
 

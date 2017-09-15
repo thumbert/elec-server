@@ -6,18 +6,36 @@
 </head>
 <body>
     <ul>
-        <li>ISONE DAM hourly prices (all history):
-            <div><a href="http://localhost:8080/dalmp/v1/lmp/bycolumn/ptid/4000">dalmp/v1/lmp/bycolumn/ptid/4000</a></div>
-            <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000">dalmp/v1/congestion/bycolumn/ptid/4000</a></div>
-            <div><a href="http://localhost:8080/dalmp/v1/loss/bycolumn/ptid/4000">dalmp/v1/loss/bycolumn/ptid/4000</a></div>
+        <li><h3>ISONE DAM hourly prices</h3>
+            <ul>
+                <li>All history by node ptid, for any of the 3 components (lmp, congestion, loss)
+                    <div><a href="http://localhost:8080/dalmp/v1/lmp/bycolumn/ptid/4000">dalmp/v1/lmp/bycolumn/ptid/4000</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000">dalmp/v1/congestion/bycolumn/ptid/4000</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/loss/bycolumn/ptid/4000">dalmp/v1/loss/bycolumn/ptid/4000</a></div>
+                </li>
+                <li>Selected history by ptid
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330</a></div>
+                </li>
+            </ul>
         </li>
 
-        <li>ISONE DAM congestion hourly prices (selected history):
-            <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101</a></div>
-            <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330</a></div>
-            <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330</a></div>
-        </li>
 
+        <li><h3>ISONE DAM binding constraints</h3>
+            <ul>
+                <li>
+                    Get all the occurrences of a given constraint
+                    <div><a href="http://localhost:8080/bc/v1/market/da/constraintname/BRIGHTON329-530       A LN">bc/v1/market/da/constraintname/BRIGHTON329-530       A LN</a></div>
+                </li>
+                <li>
+                    Get all the constraints between a two dates
+                    <div><a href="http://localhost:8080/bc/v1/market/da/start/20170101/end/20170102">bc/v1/market/da/start/20170101/end/20170102</a></div>
+                </li>
+            </ul>
+        </li>
     </ul>
+
+
 </body>
 </html>

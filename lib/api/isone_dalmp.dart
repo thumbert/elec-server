@@ -1,4 +1,4 @@
-library api.nepool_lmp;
+library api.isone_dalmp;
 
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -8,9 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:tuple/tuple.dart';
 
-
-
-/// update it from the package elec.
 @ApiClass(name: 'dalmp', version: 'v1')
 class DaLmp {
   DbCollection coll;
