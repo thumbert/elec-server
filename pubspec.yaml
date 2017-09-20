@@ -17,7 +17,7 @@ dependencies:
             url: git://github.com/thumbert/elec.git
   logging: '>=0.11.2 <0.12.0'
   logging_handlers: ">=0.8.0 <0.9.0"
-  mongo_dart: 0.2.10
+  mongo_dart: 0.3.0
   rpc: ^0.5.7+1
   timezone: '>=0.4.3 <0.5.0'
   tuple: '>=1.0.0 <2.0.0'
