@@ -1,5 +1,3 @@
-// Copyright (c) 2017, adrian. All rights reserved. Use of this source code
-// is governed by a BSD-style license that can be found in the LICENSE file.
 
 import 'dart:io';
 
@@ -11,6 +9,7 @@ import 'package:timezone/standalone.dart';
 
 import 'package:elec_server/api/isone_dalmp.dart';
 import 'package:elec_server/api/isone_bindingconstraints.dart';
+import 'package:elec_server/api/api_isone_ptids.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
 const String _API_PREFIX = '';
@@ -21,13 +20,12 @@ const String host = '127.0.0.1';
 registerApis() async {
   Db db = new Db('mongodb://$host/isone_dam');
   await db.open();
-  DaLmp dalmp = new DaLmp(db);
-  _apiServer.addApi(dalmp);
+  _apiServer.addApi( new DaLmp(db) );
 
   Db db2 = new Db('mongodb://$host/isone');
   await db2.open();
-  BindingConstraints bindingConstraints = new BindingConstraints(db2);
-  _apiServer.addApi(bindingConstraints);
+  _apiServer.addApi( new BindingConstraints(db2) );
+  _apiServer.addApi( new ApiPtids(db2) );
 
 
 //  var api = new ApiTemperatureNoaa();
@@ -36,7 +34,7 @@ registerApis() async {
 }
 
 main() async {
-  Logger.root.level = Level.ALL;
+  Logger.root.level = Level.SEVERE;
   Logger.root.onRecord.listen(new SyncFileLoggingHandler('myLogFile.txt'));
   if (stdout.hasTerminal)
     Logger.root.onRecord.listen(new LogPrintHandler());
