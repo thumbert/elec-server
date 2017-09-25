@@ -7,27 +7,31 @@ import 'package:timezone/standalone.dart' as tz;
 import 'package:date/date.dart';
 
 import '../utils/iso_timestamp.dart';
+import '../utils/timezone_utils.dart';
 import 'archive.dart';
 import 'config.dart';
 
 
 /// Deal with downloading the data, massaging it, and loading it into mongo.
-class DamArchive extends ComponentConfig with DailyArchive {
-  DbCollection coll;
+class DamArchive extends DailyArchive {
   tz.Location location;
+  ComponentConfig config;
 
-  DamArchive({Config config}) {
-    if (config == null) config = new TestConfig();
-    ComponentConfig component = config.isone_dam_lmp_hourly;
-    host = component.host;
-    dbName = component.dbName;
-    DIR = component.DIR;
-    collectionName = component.collectionName;
+  DamArchive({this.config}) {
+    if (config == null) {
+      Map env = Platform.environment;
+      config = new ComponentConfig()
+        ..host = '127.0.0.1'
+        ..dbName = 'isone_dam'
+        ..collectionName = 'lmp_hourly'
+        ..DIR = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+    }
 
-    coll = db.collection(collectionName);
-    tz.initializeTimeZoneSync(config.tzdb);
+    tz.initializeTimeZoneSync(getLocationTzdb());
     location = tz.getLocation('America/New_York');
   }
+
+  Db get db => config.db;
 
   String yyyymmdd(Date date) {
     var mm = date.month.toString().padLeft(2, '0');
@@ -39,7 +43,7 @@ class DamArchive extends ComponentConfig with DailyArchive {
   /// Read the csv file and prepare it for ingestion into mongo.
   /// DateTimes need to be hourBeginning UTC, etc.
   List<Map> oneDayRead(Date date) {
-    File file = new File(DIR + "/WW_DALMP_ISO_${yyyymmdd(date)}.csv");
+    File file = new File(config.DIR + "/WW_DALMP_ISO_${yyyymmdd(date)}.csv");
     if (file.existsSync()) {
       List<String> keys = [
         'hourBeginning',
@@ -81,7 +85,7 @@ class DamArchive extends ComponentConfig with DailyArchive {
     }
 
     print('Inserting day $date into db');
-    return coll
+    return config.coll
         .insertAll(data)
         .then((_) => print('--->  SUCCESS'))
         .catchError((e) => print('   ' + e.toString()));
@@ -89,7 +93,7 @@ class DamArchive extends ComponentConfig with DailyArchive {
 
   /// Download the file if not in the archive folder.  If file is already downloaded, no nothing.
   Future oneDayDownload(Date date) async {
-    File fileout = new File(DIR + "/WW_DALMP_ISO_${yyyymmdd(date)}.csv");
+    File fileout = new File(config.DIR + "/WW_DALMP_ISO_${yyyymmdd(date)}.csv");
     if (fileout.existsSync()) {
       print('  file already downloaded');
       return new Future.value(print('Day $date was already downloaded.'));
@@ -119,7 +123,7 @@ class DamArchive extends ComponentConfig with DailyArchive {
     };
     pipeline.add(group);
 
-    Map v = await coll.aggregate(pipeline);
+    Map v = await config.coll.aggregate(pipeline);
     Map aux = v['result'].first;
     lastDay = aux['last']; // a local datetime
     return new Date(lastDay.year, lastDay.month, lastDay.day);
@@ -139,27 +143,27 @@ class DamArchive extends ComponentConfig with DailyArchive {
         new tz.TZDateTime(location, next.year, next.month, next.day).toUtc();
     sb = sb.lt('hourBeginning', end);
 
-    await coll.remove(sb);
+    await config.coll.remove(sb);
   }
 
 
   /// Recreate the collection from scratch.
   setup() async {
-    if (!new Directory(DIR).existsSync())
-      new Directory(DIR).createSync(recursive: true);
+    if (!new Directory(config.DIR).existsSync())
+      new Directory(config.DIR).createSync(recursive: true);
     await oneDayDownload(new Date(2014, 1, 1));
 
     await db.open();
     List<String> collections = await db.getCollectionNames();
     print('Collections in db:');
     print(collections);
-    if (collections.contains(collectionName)) await coll.drop();
+    if (collections.contains(config.collectionName)) await config.coll.drop();
     await oneDayMongoInsert(new Date(2014, 1, 1));
 
     // this indexing assures that I don't insert the same data twice
-    await db.createIndex(collectionName,
+    await db.createIndex(config.collectionName,
         keys: {'hourBeginning': 1, 'ptid': 1}, unique: true);
-    await db.createIndex(collectionName, keys: {'ptid': 1});
+    await db.createIndex(config.collectionName, keys: {'ptid': 1});
 
     await db.close();
   }

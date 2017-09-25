@@ -14,30 +14,25 @@ import 'config.dart';
 import '../utils/timezone_utils.dart';
 import '../utils/iso_timestamp.dart';
 
-Config config;
-
 
 /// Deal with downloading the data, massaging it, and loading it into mongo.
-class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
-  DbCollection coll;
-  Location location;
-  Map<String, String> env;
-  final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
-  Db db;
+class DaBindingConstraintArchive extends DailyArchive {
+  ComponentConfig config;
 
-  DaBindingConstraintArchive() {
-    if (config == null) config = new TestConfig();
-    ComponentConfig component = config.isone_binding_constraints_da;
-    dbName = component.dbName;
-    DIR = component.DIR;
-    collectionName = component.collectionName;
-    db = component.db;
+  DaBindingConstraintArchive({this.config}) {
+    if (config == null) {
+      Map env = Platform.environment;
+      config = new ComponentConfig()
+        ..host = '127.0.0.1'
+        ..dbName = 'isone'
+        ..collectionName = 'binding_constraints'
+        ..DIR = env['HOME'] + '/Downloads/Archive/DA_BindingConstraints/Raw/';
+    }
 
-    coll = db.collection(collectionName);
     initializeTimeZoneSync( getLocationTzdb() );
-    location = getLocation('US/Eastern');
-    env = Platform.environment;
   }
+
+  Db get db => config.db;
 
   String yyyymmdd(Date date) {
     var mm = date.month.toString().padLeft(2, '0');
@@ -49,7 +44,7 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
   /// DateTimes need to be hourBeginning UTC, etc.
   List<Map> oneDayRead(Date date) {
     List<Map> data;
-    File file = new File(DIR + "da_binding_constraints_final_${yyyymmdd(date)}.csv");
+    File file = new File(config.DIR + "da_binding_constraints_final_${yyyymmdd(date)}.csv");
     if (file.existsSync()) {
       data = mis.readReportAsMap(file, tab: 0);
       if (data.isEmpty) {
@@ -86,7 +81,7 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
     }
 
     print('Inserting day $date into db');
-    return coll
+    return config.coll
         .insertAll(data)
         .then((_) => print('--->  SUCCESS'))
         .catchError((e) => print('   ' + e.toString()));
@@ -94,7 +89,7 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
 
   /// Download the file if not in the archive folder.  If file is already downloaded, no nothing.
   Future oneDayDownload(Date date) async {
-    File fileout = new File(DIR + "da_binding_constraints_final_${yyyymmdd(date)}.csv");
+    File fileout = new File(config.DIR + "da_binding_constraints_final_${yyyymmdd(date)}.csv");
     if (fileout.existsSync()) {
       print('  file already downloaded for $date');
       return new Future.value(print('Day $date was already downloaded.'));
@@ -123,7 +118,7 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
     };
     pipeline.add(group);
 
-    Map v = await coll.aggregate(pipeline);
+    Map v = await config.coll.aggregate(pipeline);
     Map aux = v['result'].first;
     return Date.parse(aux['last']);
   }
@@ -131,7 +126,7 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
 
   /// Recreate the collection from scratch.
   setup() async {
-    if (!new Directory(DIR).existsSync()) new Directory(DIR)
+    if (!new Directory(config.DIR).existsSync()) new Directory(config.DIR)
         .createSync(recursive: true);
     /// check that the credentials are set
 
@@ -141,14 +136,14 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
     List<String> collections = await db.getCollectionNames();
     print('Collections in db:');
     print(collections);
-    if (collections.contains(collectionName)) await coll.drop();
+    if (collections.contains(config.collectionName)) await config.coll.drop();
     await oneDayMongoInsert(new Date(2014, 1, 1));
 
     // this indexing assures that I don't insert the same data twice
-    await db.createIndex(collectionName,
+    await db.createIndex(config.collectionName,
         keys: {'hourBeginning': 1, 'Constraint Name': 1, 'Contingency Name': 1, 'market': 1}, unique: true);
-    await db.createIndex(collectionName, keys: {'Constraint Name': 1, 'market': 1});
-    await db.createIndex(collectionName, keys: {'date': 1, 'market': 1});
+    await db.createIndex(config.collectionName, keys: {'Constraint Name': 1, 'market': 1});
+    await db.createIndex(config.collectionName, keys: {'date': 1, 'market': 1});
 
     await db.close();
   }
