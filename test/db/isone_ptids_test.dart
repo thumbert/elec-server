@@ -17,6 +17,14 @@ ComponentConfig config = new ComponentConfig()
   ..collectionName = 'pnode_table'
   ..DIR = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
 
+downloadFile() async {
+  var archive = new PtidArchive(config: config);
+  String url =
+      'https://www.iso-ne.com/static-assets/documents/2017/08/pnode_table_2017_08_03.xls';
+  archive.downloadFile(url);
+}
+
+
 ingestionTest() async {
   var archive = new PtidArchive(config: config);
   await archive.setup();
@@ -27,9 +35,6 @@ ingestionTest() async {
 //  await archive.insertMongo(file);
 //  await archive.db.close();
 
-//  String url =
-//      'https://www.iso-ne.com/static-assets/documents/2017/08/pnode_table_2017_08_03.xls';
-  //archive.downloadFile(url);
 }
 
 apiTest() async {

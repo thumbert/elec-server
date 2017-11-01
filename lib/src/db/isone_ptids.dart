@@ -69,7 +69,7 @@ class PtidArchive {
     }
 
     /// rows 13:16 are Reserve Zones
-    for (int r=13; r<16; r++) {
+    for (int r=13; r<17; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -77,7 +77,7 @@ class PtidArchive {
     }
 
     /// rows 18:23 are Interfaces
-    for (int r=18; r<23; r++) {
+    for (int r=18; r<24; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -141,6 +141,7 @@ class PtidArchive {
 
 
   /// Recreate the collection from scratch.
+  /// Insert all the files in the archive directory.
   setup() async {
     if (!new Directory(config.DIR).existsSync()) new Directory(config.DIR)
         .createSync(recursive: true);

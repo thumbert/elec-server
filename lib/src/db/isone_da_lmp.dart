@@ -53,8 +53,11 @@ class DamArchive extends DailyArchive {
         'loss'
       ];
 
-      List<Map> data = file
-          .readAsLinesSync()
+      var aux = file.readAsLinesSync();
+      if (!aux.last.startsWith('"T"'))
+        throw 'Incomplete file for day $date';
+
+      List<Map> data = aux
           .map((String row) => row.split(','))
           .where((List row) => row.first == '"D"')
           .map((List row) {

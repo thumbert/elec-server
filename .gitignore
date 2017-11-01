@@ -13,7 +13,7 @@ pubspec.lock
 
 out
 docs
-
+web/assets/
 
 *.iml
 *.js
