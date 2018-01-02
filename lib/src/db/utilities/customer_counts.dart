@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
+import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -39,8 +41,6 @@ class NGridCustomerCountsArchive {
         .catchError((e) => print('   ' + e.toString()));
   }
 
-
-
   /// Read the entire contents of a given spreadsheet, and prepare it for
   /// Mongo insertion.
   List<Map> readXlsx(File file) {
@@ -59,81 +59,86 @@ class NGridCustomerCountsArchive {
 
   /// read one sheet at a time
   List<Map> _readSheet(String sheet) {
-
     int nRowsTown = 52;
 
     List<Map> res = [];
     var table = _decoder.tables[sheet];
+
     /// the first row is the months, starts in column 3
     List<Date> months = table.rows[0]
         .sublist(2)
-        .map((x) => new Date.fromDateTime(convertXlsxDateTime(x)))
+        .map((x) => new Date.fromTZDateTime(
+            new TZDateTime.from(convertXlsxDateTime(x), UTC)))
         .where((Date d) => d != null)
         .toList();
 
     int nMonths = months.length;
-    int nTowns = ((table.rows.length-1) / nRowsTown).round();
+    int nTowns = ((table.rows.length - 1) / nRowsTown).round();
     print('number of towns for $sheet: $nTowns');
 
-    for (int iTown=0; iTown < nTowns; iTown++) {
-      int startIdx = iTown*nRowsTown;
-      var townName = table.rows[startIdx+1][0];
+    for (int iTown = 0; iTown < nTowns; iTown++) {
+      int startIdx = iTown * nRowsTown;
+      var townName = table.rows[startIdx + 1][0];
       var header = {
         'zone': sheet,
         'town': townName,
       };
+
       /// get the customer counts on utility service, relative rows 5:11
-      for (int r=6; r<=12; r++) {
+      for (int r = 6; r <= 12; r++) {
         var aux = new Map.from(header);
         aux['rateClass'] = table.rows[startIdx + r][1];
-        for (int m=0; m<nMonths; m++) {
-          if (table.rows[startIdx+r][m+2] != null) {
+        for (int m = 0; m < nMonths; m++) {
+          if (table.rows[startIdx + r][m + 2] != null) {
             aux['provider'] = 'utility';
             aux['month'] = months[m].toString();
             aux['variable'] = 'customer counts';
-            aux['value'] = table.rows[startIdx+r][m+2];
+            aux['value'] = table.rows[startIdx + r][m + 2];
             res.add(new Map.from(aux));
           }
         }
       }
+
       /// get the customer counts on utility service, relative rows 17:23
-      for (int r=18; r<=24; r++) {
+      for (int r = 18; r <= 24; r++) {
         var aux = new Map.from(header);
         aux['rateClass'] = table.rows[startIdx + r][1];
-        for (int m=0; m<nMonths; m++) {
-          if (table.rows[startIdx+r][m+2] != null) {
+        for (int m = 0; m < nMonths; m++) {
+          if (table.rows[startIdx + r][m + 2] != null) {
             aux['provider'] = 'utility';
             aux['month'] = months[m].toString();
             aux['variable'] = 'kWh';
-            aux['value'] = table.rows[startIdx+r][m+2];
+            aux['value'] = table.rows[startIdx + r][m + 2];
             res.add(new Map.from(aux));
           }
         }
       }
+
       /// get the customer counts on competitive supply, relative rows 31:37
-      for (int r=31; r<=37; r++) {
+      for (int r = 31; r <= 37; r++) {
         var aux = new Map.from(header);
         aux['rateClass'] = table.rows[startIdx + r][1];
-        for (int m=0; m<nMonths; m++) {
-          if (table.rows[startIdx+r][m+2] != null) {
+        for (int m = 0; m < nMonths; m++) {
+          if (table.rows[startIdx + r][m + 2] != null) {
             aux['provider'] = 'competitive supply';
             aux['month'] = months[m].toString();
             aux['variable'] = 'customer counts';
-            aux['value'] = table.rows[startIdx+r][m+2];
+            aux['value'] = table.rows[startIdx + r][m + 2];
             res.add(new Map.from(aux));
           }
         }
       }
+
       /// get the customer counts on utility service, relative rows 44:49
-      for (int r=43; r<=49; r++) {
+      for (int r = 43; r <= 49; r++) {
         var aux = new Map.from(header);
         aux['rateClass'] = table.rows[startIdx + r][1];
-        for (int m=0; m<nMonths; m++) {
-          if (table.rows[startIdx+r][m+2] != null) {
+        for (int m = 0; m < nMonths; m++) {
+          if (table.rows[startIdx + r][m + 2] != null) {
             aux['provider'] = 'competitive supply';
             aux['month'] = months[m].toString();
             aux['variable'] = 'kWh';
-            aux['value'] = table.rows[startIdx+r][m+2];
+            aux['value'] = table.rows[startIdx + r][m + 2];
             res.add(new Map.from(aux));
           }
         }
@@ -182,10 +187,9 @@ class NGridCustomerCountsArchive {
             response.pipe(fileout.openWrite()));
   }
 
-
   Future<Null> setup() async {
-    if (!new Directory(config.DIR).existsSync()) new Directory(config.DIR)
-        .createSync(recursive: true);
+    if (!new Directory(config.DIR).existsSync())
+      new Directory(config.DIR).createSync(recursive: true);
 
     await config.db.open();
     List<String> collections = await config.db.getCollectionNames();
@@ -195,11 +199,8 @@ class NGridCustomerCountsArchive {
 
     await insertMongo(file: getLatestFile());
 
-    await config.db.createIndex(config.collectionName, keys: {
-      'variable': 1,
-      'zone': 1,
-      'town': 1
-    });
+    await config.db.createIndex(config.collectionName,
+        keys: {'variable': 1, 'zone': 1, 'town': 1});
 
     await config.db.close();
   }

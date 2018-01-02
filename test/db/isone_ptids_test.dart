@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 
 import 'package:elec_server/src/db/config.dart';
-import 'package:elec_server/src/db/isone_ptids.dart';
+import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
 
 Map env = Platform.environment;

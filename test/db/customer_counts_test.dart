@@ -1,7 +1,7 @@
 library test.customer_counts;
 
 import 'dart:io';
-import 'package:elec_server/src/db/customer_counts.dart';
+import 'package:elec_server/src/db/utilities/customer_counts.dart';
 import 'package:elec_server/src/db/config.dart';
 
 import 'package:elec_server/api/api_customer_counts.dart';
