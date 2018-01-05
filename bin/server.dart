@@ -10,6 +10,7 @@ import 'package:timezone/standalone.dart';
 import 'package:elec_server/api/api_isone_dalmp.dart';
 import 'package:elec_server/api/api_isone_bindingconstraints.dart';
 import 'package:elec_server/api/api_isone_energyoffers.dart';
+import 'package:elec_server/api/api_isone_demandbids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
 import 'package:elec_server/api/api_customer_counts.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
@@ -23,14 +24,15 @@ registerApis() async {
 
   Db db2 = new Db('mongodb://$host/isone');
   await db2.open();
-  _apiServer.addApi( new BindingConstraints(db2) );
   _apiServer.addApi( new ApiPtids(db2) );
   _apiServer.addApi( new ApiCustomerCounts(db2) );
 
   Db db3 = new Db('mongodb://$host/isoexpress');
   await db3.open();
   _apiServer.addApi( new DaLmp(db3) );
+  _apiServer.addApi( new BindingConstraints(db3) );
   _apiServer.addApi( new DaEnergyOffers(db3) );
+  _apiServer.addApi( new DaDemandBids(db3) );
 
 
 
@@ -51,7 +53,9 @@ main() async {
 
   _apiServer.enableDiscoveryApi();
 
-  HttpServer server = await HttpServer.bind(InternetAddress.ANY_IP_V4, 8080);
+  var port = 8080;  // production
+  //var port = 8081;  // test
+  HttpServer server = await HttpServer.bind(InternetAddress.ANY_IP_V4, port);
   server.listen(_apiServer.httpRequestHandler);
 }
 
