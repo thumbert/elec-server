@@ -3,59 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title>API documentation</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" type="text/css" href="assets/documentation.css">
     <link rel="shortcut icon" type="image/png" href="assets/favicon.ico">
 </head>
 <body>
-    <ul>
-        <li><h3>ISONE DAM hourly prices</h3>
-            <ul>
-                <li>All history by node ptid, for any of the 3 components (lmp, congestion, loss)
-                    <div><a href="http://localhost:8080/dalmp/v1/lmp/bycolumn/ptid/4000">dalmp/v1/lmp/bycolumn/ptid/4000</a></div>
-                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000">dalmp/v1/congestion/bycolumn/ptid/4000</a></div>
-                    <div><a href="http://localhost:8080/dalmp/v1/loss/bycolumn/ptid/4000">dalmp/v1/loss/bycolumn/ptid/4000</a></div>
-                </li>
-                <li>Selected history by ptid
-                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101</a></div>
-                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330</a></div>
-                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330</a></div>
-                </li>
-            </ul>
-        </li>
+<div class="wrapper">
+    <div>
+        <h2>Applications</h2>
+        <ul>
+            <li>
+                <div><a href="http://localhost:8095/demand_viewer.html">Masked demand bids viewer</a></div>
+            </li>
+        </ul>
+    </div>
 
-
-        <li><h3>ISONE DAM binding constraints</h3>
-            <ul>
-                <li>
-                    Get all the occurrences of a given constraint
-                    <div><a href="http://localhost:8080/bc/v1/market/da/constraintname/BRIGHTON329-530       A LN">bc/v1/market/da/constraintname/BRIGHTON329-530       A LN</a></div>
-                </li>
-                <li>
-                    Get all the constraints between a two dates
-                    <div><a href="http://localhost:8080/bc/v1/market/da/start/20170101/end/20170102">bc/v1/market/da/start/20170101/end/20170102</a></div>
-                </li>
-            </ul>
-        </li>
-        
-        
-        <li><h3>ISONE ptid table</h3>
-            <ul>
-                <li>
-                    Get the latest ptid table (node name, zone, etc.)
-                    <div><a href="http://localhost:8080/ptids/v1/current">ptids/v1/current</a></div>
-                </li>
-                <li>
-                    Get the ptid table available as of a given date
-                    <div><a href="http://localhost:8080/ptids/v1/asofdate/20170810">ptids/v1/asofdate/20170810</a></div>
-                </li>
-                <li>
-                    Get the dates when the ptid table was modified
-                    <div><a href="http://localhost:8080/ptids/v1/dates">ptids/v1/dates</a></div>
-                </li>
-            </ul>
-        </li>
-
-
-        <li><h3>NGrid customer counts data</h3>
+    <div>
+        <h2>API</h2>
+        <ul>
+            <li><a href="#customer-counts-ngrid">Customer counts for NGrid</a></li>
+            <li><a href="#dam-hourly-prices">DAM hourly prices</a></li>
+            <li><a href="#dam-binding-constraints">DAM binding constraints</a></li>
+            <li><a href="#epa-emission-data">EPA emission data</a></li>
+            <li><a href="#masked-da-demand-bids">Masked DA demand bids</a></li>
+            <li><a href="#masked-da-energy-offers">Masked DA energy offers</a></li>
+            <li><a href="#ptid-table">Ptid table</a></li>
+        </ul>
+        <div id="customer-counts-ngrid">
+            <h4>Customer counts for NGrid</h4>
             <ul>
                 <li>
                     Get the historical usage of the town of Attleboro, for all customer classes (utility and competitive supply)
@@ -79,9 +55,123 @@
                 </li>
 
             </ul>
-        </li>
-        
-    </ul>
+        </div>
+        <div id="dam-hourly-prices">
+            <h4>DAM hourly prices</h4>
+            <ul>
+                <li>All history by node ptid, for any of the 3 components (lmp, congestion, loss)
+                    <div><a href="http://localhost:8080/dalmp/v1/lmp/bycolumn/ptid/4000">dalmp/v1/lmp/bycolumn/ptid/4000</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000">dalmp/v1/congestion/bycolumn/ptid/4000</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/loss/bycolumn/ptid/4000">dalmp/v1/loss/bycolumn/ptid/4000</a></div>
+                </li>
+                <li>Selected history by ptid
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/end/20170330</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330">dalmp/v1/congestion/bycolumn/ptid/4000/start/20170101/end/20170330</a></div>
+                </li>
+            </ul>
+        </div>
+        <div id="dam-binding-constraints">
+            <h4>DAM binding constraints</h4>
+            <ul>
+                <li>
+                    Get all the occurrences of a given constraint
+                    <div><a href="http://localhost:8080/bc/v1/market/da/constraintname/BRIGHTON329-530       A LN">bc/v1/market/da/constraintname/BRIGHTON329-530       A LN</a></div>
+                </li>
+                <li>
+                    Get all the constraints between a two dates
+                    <div><a href="http://localhost:8080/bc/v1/market/da/start/20170101/end/20170102">bc/v1/market/da/start/20170101/end/20170102</a></div>
+                </li>
+            </ul>
+        </div>
+        <div id="epa-emission-data">
+            <h4>EPA emission data</h4>
+            <ul>
+                <li>
+                    Get historical emission data by facility.  Each power plant is specified by a facility id and an unit id.
+                    The query returns data for all units in the facility when there was CO2 emitted.  For older periods of
+                    time, there may be NOX data only for a given day.  This query will not return that data.
+                    <div><a href="http://localhost:8080/epa_emissions/v1/fac_id/328/start/20170101/end/20170131">
+                        epa_emissions/v1/fac_id/328/start/20170101/end/20170131</a></div>
+                </li>
+                <li>
+                    Get the EPA emission data by power plant.  Each power plant is specified by a facility id and an unit id.
+                    To get the existing ids, see the [/units] route below.
+                    <div><a href="http://localhost:8080/epa_emissions/v1/fac_id/328/unit_id/1083/start/20170101/end/20170131">
+                        epa_emissions/v1/fac_id/328/unit_id/1083/start/20170101/end/20170131</a></div>
+                </li>
+                <li>
+                    Get the unique combination of facility id and unit id in the database.
+                    <div><a href="http://localhost:8080/epa_emissions/v1/units">
+                        epa_emissions/v1/units</a></div>
+                </li>
+                <li>
+                    Get all the facilities tracked in the database.  Note that the [FACILITY_NAME] is not unique.
+                    <div><a href="http://localhost:8080/epa_emissions/v1/facilities">
+                        epa_emissions/v1/facilities</a></div>
+                </li>
+                <li>
+                    Get the daily CO2 emissions for facilities that are subject to the MA GHG 310 CMR 7.74 ruling.  The
+                    [CO2_MASS] value is in short tons.
+                    <div><a href="http://localhost:8080/epa_emissions/v1/ma_compliance/start/20170101/end/20171231">
+                        epa_emissions/v1/ma_compliance/start/20170101/end/20171231</a></div>
+                </li>
+            </ul>
+
+        </div>
+        <div id="masked-da-demand-bids">
+            <h4>Masked DA demand bids</h4>
+            <ul>
+                <li>
+                    Get the total MWh demand bids by day and load zone for given a participant between two
+                    dates.
+                    <div><a href="http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001">da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001</a></div>
+                </li>
+                <li>
+                    Get the total MWh demand bids by day, participant, and load zone between two dates.
+                    <div><a href="http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001">da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001</a></div>
+                </li>
+                <li>
+                    Get the total MWh demand bids by day and participant between two dates (aggregate over the load zones).
+                    <div><a href="http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001">da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001</a></div>
+                </li>
+
+            </ul>
+        </div>
+        <div id="masked-da-energy-offers">
+            <h4>Masked DA energy offers</h4>
+            <ul>
+                <li>
+                    Get all the occurrences of a given constraint
+                    <div><a href="http://localhost:8080/bc/v1/market/da/constraintname/BRIGHTON329-530       A LN">bc/v1/market/da/constraintname/BRIGHTON329-530       A LN</a></div>
+                </li>
+                <li>
+                    Get all the constraints between a two dates
+                    <div><a href="http://localhost:8080/bc/v1/market/da/start/20170101/end/20170102">bc/v1/market/da/start/20170101/end/20170102</a></div>
+                </li>
+            </ul>
+        </div>
+        <div id="ptid-table">
+            <h4>Ptid table</h4>
+            <ul>
+                <li>
+                    Get the latest ptid table (node name, zone, etc.)
+                    <div><a href="http://localhost:8080/ptids/v1/current">ptids/v1/current</a></div>
+                </li>
+                <li>
+                    Get the ptid table available as of a given date
+                    <div><a href="http://localhost:8080/ptids/v1/asofdate/20170810">ptids/v1/asofdate/20170810</a></div>
+                </li>
+                <li>
+                    Get the dates when the ptid table was modified
+                    <div><a href="http://localhost:8080/ptids/v1/dates">ptids/v1/dates</a></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
 
 
 </body>

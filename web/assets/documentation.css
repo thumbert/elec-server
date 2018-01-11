@@ -1,0 +1,29 @@
+body {
+ font-family: Roboto,"Helvetica Neue",Arial,Helvetica,sans-serif;
+ max-width: 1200px;
+ min-height: 110vh;
+ margin: 40px 40px;
+}
+a:link, a:visited, a:active {
+ color: rgb(66, 133, 244);
+ text-decoration: none;
+}
+a:hover {
+ color: rgb(46, 113, 224);
+ text-decoration: none;
+}
+hr {
+ border: 0;
+ height: 0;
+ border-top: 1px solid rgba(0, 0, 0, 0.1);
+ border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+ color: lightgray;
+ margin: 2em 0;
+}
+.wrapper {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+}
+.main-footer {
+ grid-area: footer;
+}

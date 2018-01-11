@@ -35,6 +35,14 @@ ApiTest() async {
       var x = data.firstWhere((Map e) => e['participantId'] == 206845);
       expect(x['MWh'], 36709.3);
     });
+    test('mwh by participant,zone,day', () async {
+      var participantId = 206845.toString();
+      var start = '20170101';
+      var end = '20170105';
+      var ptid = 4008.toString();
+      var data = await api.mwhByDayParticipantThisLoadZone(participantId, ptid, start, end);
+      expect(data.length, 5);
+    });
   });
 }
 
