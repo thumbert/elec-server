@@ -17,7 +17,7 @@ class ComponentConfig {
   /// name of the mongo collection
   String collectionName;
   /// location on hard drive where external data is held
-  String DIR;
+  //String DIR;
   /// get the mongo database
   Db get db {
     if (_db == null) _db = new Db('mongodb://$host/$dbName');
@@ -48,28 +48,3 @@ abstract class Config {
 
 }
 
-
-class TestConfig extends Config {
-  String configName = 'test';
-  String host = '127.0.0.1';
-
-  TestConfig() {
-    Map env = Platform.environment;
-    tzdb = getLocationTzdb();
-
-    isone_binding_constraints_da = new ComponentConfig()
-      ..host = host
-      ..dbName = 'isone'
-      ..collectionName = 'binding_constraints'
-      ..DIR = env['HOME'] + '/Downloads/Archive/DA_BindingConstraints/Raw/';
-
-    isone_dam_lmp_hourly = new ComponentConfig()
-      ..host = host
-      ..dbName = 'isone_dam'
-      ..collectionName = 'lmp_hourly'
-      ..DIR = env['HOME'] + '/Downloads/Archive/DA_LMP/Raw/Csv';
-
-  }
-
-
-}

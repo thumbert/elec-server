@@ -10,16 +10,18 @@ import 'package:elec_server/src/db/config.dart';
 
 class PtidArchive {
   ComponentConfig config;
+  String dir;
 
-  PtidArchive({this.config}) {
+  PtidArchive({this.config, this.dir}) {
     Map env = Platform.environment;
     if (config == null) {
       config = new ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isone'
-        ..collectionName = 'pnode_table'
-        ..DIR = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+        ..collectionName = 'pnode_table';
     }
+    if (dir == null)
+      dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
   }
 
   Db get db => config.db;
@@ -126,7 +128,7 @@ class PtidArchive {
   /// Download a ptid file from the ISO.  Save it with the same name.
   Future downloadFile(String url) async {
     String filename = path.basename(url);
-    File fileout = new File(config.DIR + filename);
+    File fileout = new File(dir + filename);
 
     if (fileout.existsSync()) {
       print("File $filename is already downloaded.");
@@ -143,7 +145,7 @@ class PtidArchive {
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
   setup() async {
-    if (!new Directory(config.DIR).existsSync()) new Directory(config.DIR)
+    if (!new Directory(dir).existsSync()) new Directory(dir)
         .createSync(recursive: true);
     String fname = 'pnode_table_2017_08_03.xls';
     String url = 'https://www.iso-ne.com/static-assets/documents/2017/08/$fname';
@@ -156,7 +158,7 @@ class PtidArchive {
     if (collections.contains(config.collectionName)) await config.coll.drop();
 
     // insert all xlsx files in the Raw/ directory
-    Directory directory = new Directory(config.DIR);
+    Directory directory = new Directory(dir);
     var files = directory.listSync().where((f) => path.extension(f.path).toLowerCase() == '.xlsx').toList();
     for (var file in files) {
       await insertMongo(file);
@@ -166,7 +168,6 @@ class PtidArchive {
     await config.db.createIndex(config.collectionName,
         keys: {'asOfDate': 1, 'ptid': 1}, unique: true);
     await config.db.createIndex(config.collectionName, keys: {'asOfDate': 1});
-
     await config.db.close();
   }
 

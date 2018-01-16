@@ -25,7 +25,7 @@ DaBindingConstraintsTest() async {
     test('read binding constraints files', () async {
       var archive = new DaBindingConstraintsReportArchive();
       File file = archive.getFilename(new Date(2017,12,13));
-      var report = new mis.Report(file);
+      var report = new mis.MisReport(file);
       expect(await report.forDate(), new Date(2017,12,13));
       expect(await report.filename(), 'da_binding_constraints_final_20171213.csv');
       var data = report.readTabAsMap(tab: 0);
@@ -36,7 +36,7 @@ DaBindingConstraintsTest() async {
 
     test('DA Binding Constraints Report - empty', () async {
       File file = new DaBindingConstraintsReportArchive().getFilename(new Date(2015,2,17));
-      var report = new mis.Report(file);
+      var report = new mis.MisReport(file);
       var res = report.readTabAsMap(tab: 0);
       expect(res, []);
     });

@@ -14,11 +14,11 @@ Map env = Platform.environment;
 ComponentConfig config = new ComponentConfig()
   ..host = '127.0.0.1'
   ..dbName = 'isone'
-  ..collectionName = 'pnode_table'
-  ..DIR = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+  ..collectionName = 'pnode_table';
+String dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
 
 downloadFile() async {
-  var archive = new PtidArchive(config: config);
+  var archive = new PtidArchive(config: config, dir: dir);
   String url =
       'https://www.iso-ne.com/static-assets/documents/2017/08/pnode_table_2017_08_03.xls';
   archive.downloadFile(url);

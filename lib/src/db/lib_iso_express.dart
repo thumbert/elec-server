@@ -42,6 +42,9 @@ abstract class IsoExpressReport {
 
 /// An archive that gets daily updates.  Easy to update!
 abstract class DailyIsoExpressReport extends IsoExpressReport {
+  /// the location of this report on disk
+  String dir;
+
   /// Get the url of this report for this date
   String getUrl(Date asOfDate);
 

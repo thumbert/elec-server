@@ -11,34 +11,31 @@ import '../lib_iso_express.dart';
 import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
-
 class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
+  String dir;
 
-  RtSystemDemandReportArchive({this.dbConfig}) {
+  RtSystemDemandReportArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isoexpress'
-        ..collectionName = 'system_demand'
-        ..DIR = baseDir + 'EnergyReports/RtHourlyDemand/Raw/';
+        ..collectionName = 'system_demand';
     }
+    if (dir == null) dir = baseDir + 'EnergyReports/RtHourlyDemand/Raw/';
   }
-  String reportName =
-      'Real-Time Hourly System Load Report';
+  String reportName = 'Real-Time Hourly System Load Report';
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hourlysystemdemand?start=' +
-          yyyymmdd(asOfDate) +
-          '&end=' +
-          yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) => new File(dbConfig.DIR +
-      'rt_hourlydemand_' +
       yyyymmdd(asOfDate) +
-      '.csv');
+      '&end=' +
+      yyyymmdd(asOfDate);
+  File getFilename(Date asOfDate) =>
+      new File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
-  Func1<List<Map>,Map> converter = (List<Map> rows) {
+  Func1<List<Map>, Map> converter = (List<Map> rows) {
     Map row = rows.first;
-    var localDate = (row['Date'] as String).substring(0,10);
+    var localDate = (row['Date'] as String).substring(0, 10);
     var hourEnding = row['Hour Ending'];
     row['hourBeginning'] = parseHourEndingStamp(localDate, hourEnding);
     row['date'] = formatDate(localDate);
@@ -58,20 +55,24 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   setupDb() async {
     await dbConfig.db.open();
     List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName)) await dbConfig.coll.drop();
+    if (collections.contains(dbConfig.collectionName))
+      await dbConfig.coll.drop();
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'market': 1, 'hourBeginning': 1}, unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1, 'market': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
     await dbConfig.db.close();
   }
 
-  Future<Map<String,String>> lastDay() async {
+  Future<Map<String, String>> lastDay() async {
     List pipeline = [];
-    pipeline.add({'\$group': {
-      '_id': 0,
-      'lastDay': {'\$max': '\$date'}}});
+    pipeline.add({
+      '\$group': {
+        '_id': 0,
+        'lastDay': {'\$max': '\$date'}
+      }
+    });
     Map res = await dbConfig.coll.aggregate(pipeline);
     return {'lastDay': res['result'][0]['lastDay']};
   }

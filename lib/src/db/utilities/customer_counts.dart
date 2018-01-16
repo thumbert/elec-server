@@ -12,21 +12,23 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
 
 class NGridCustomerCountsArchive {
-  ComponentConfig config;
+  ComponentConfig dbConfig;
   SpreadsheetDecoder _decoder;
+  String dir;
 
-  NGridCustomerCountsArchive({this.config}) {
-    if (config == null) {
-      Map env = Platform.environment;
-      config = new ComponentConfig()
+  NGridCustomerCountsArchive({this.dbConfig, this.dir}) {
+    Map env = Platform.environment;
+    if (dbConfig == null) {
+      dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isone'
-        ..collectionName = 'ngrid_customer_counts'
-        ..DIR = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
+        ..collectionName = 'ngrid_customer_counts';
     }
+    if (dir == null)
+      dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
   }
 
-  Db get db => config.db;
+  Db get db => dbConfig.db;
 
   /// Insert one xlsx file into the collection.
   /// [file] points to the downloaded xlsx file.  NOTE that you have to convert
@@ -35,7 +37,7 @@ class NGridCustomerCountsArchive {
     file ??= getLatestFile();
     List<Map> data = readXlsx(file);
     print('Inserting ${file.path} into db');
-    return config.coll
+    return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  SUCCESS'))
         .catchError((e) => print('   ' + e.toString()));
@@ -155,7 +157,7 @@ class NGridCustomerCountsArchive {
 
   /// Get the most recent file in the archive folder
   File getLatestFile() {
-    Directory directory = new Directory(config.DIR);
+    Directory directory = new Directory(dir);
     var files = directory
         .listSync()
         .where((f) => path.extension(f.path).toLowerCase() == '.xlsx')
@@ -173,7 +175,7 @@ class NGridCustomerCountsArchive {
     var match = matches.elementAt(0);
 
     String filename = path.basename(url);
-    File fileout = new File(config.DIR + match.group(2) + '_' + filename);
+    File fileout = new File(dir + match.group(2) + '_' + filename);
     print(fileout);
 
     if (fileout.existsSync()) {
@@ -188,20 +190,17 @@ class NGridCustomerCountsArchive {
   }
 
   Future<Null> setup() async {
-    if (!new Directory(config.DIR).existsSync())
-      new Directory(config.DIR).createSync(recursive: true);
+    if (!new Directory(dir).existsSync())
+      new Directory(dir).createSync(recursive: true);
 
-    await config.db.open();
-    List<String> collections = await config.db.getCollectionNames();
-    print('Collections in ${config.dbName} db:');
+    await dbConfig.db.open();
+    List<String> collections = await dbConfig.db.getCollectionNames();
+    print('Collections in ${dbConfig.dbName} db:');
     print(collections);
-    if (collections.contains(config.collectionName)) await config.coll.drop();
-
+    if (collections.contains(dbConfig.collectionName)) await dbConfig.coll.drop();
     await insertMongo(file: getLatestFile());
-
-    await config.db.createIndex(config.collectionName,
+    await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'variable': 1, 'zone': 1, 'town': 1});
-
-    await config.db.close();
+    await dbConfig.db.close();
   }
 }

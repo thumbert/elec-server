@@ -13,22 +13,25 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaLmpHourlyArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
+  String dir;
 
-  DaLmpHourlyArchive({this.dbConfig}) {
+  DaLmpHourlyArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isoexpress'
-        ..collectionName = 'da_lmp_hourly'
-        ..DIR = baseDir + 'PricingReports/DaLmpHourly/Raw/';
+        ..collectionName = 'da_lmp_hourly';
     }
+    if (dir == null)
+      dir = baseDir + 'PricingReports/DaLmpHourly/Raw/';
+
   }
   String reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/' +
       'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv';
   File getFilename(Date asOfDate) =>
-      new File(dbConfig.DIR + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
+      new File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
   Func1<List<Map>, Map> converter = (List<Map> rows) {
     Map row = {};

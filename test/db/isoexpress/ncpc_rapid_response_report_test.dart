@@ -22,7 +22,7 @@ ncpcRapidResponseTest() async {
     var archive = new NcpcRapidResponsePricingReportArchive();
     test('read files', () async {
       File file = archive.getFilename(new Date(2017,12,13));
-      var report = new mis.Report(file);
+      var report = new mis.MisReport(file);
       expect(await report.forDate(), new Date(2017,12,13));
       expect(await report.filename(), 'ncpc_rrp_20171213.csv');
       var data = report.readTabAsMap(tab: 0);

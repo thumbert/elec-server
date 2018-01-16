@@ -14,15 +14,17 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
+  String dir;
 
-  DaBindingConstraintsReportArchive({this.dbConfig}) {
+  DaBindingConstraintsReportArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isoexpress'
-        ..collectionName = 'binding_constraints'
-        ..DIR = baseDir + 'GridReports/DaBindingConstraints/Raw/';
+        ..collectionName = 'binding_constraints';
     }
+    if (dir == null)
+      dir = baseDir + 'GridReports/DaBindingConstraints/Raw/';
   }
   String reportName =
       'Day-Ahead Energy Market Hourly Final Binding Constraints Report';
@@ -31,9 +33,8 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
           yyyymmdd(asOfDate) +
           '&end=' +
           yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) => new File(baseDir +
-      'GridReports/DaBindingConstraints/Raw/da_binding_constraints_final_' +
-      yyyymmdd(asOfDate) +
+  File getFilename(Date asOfDate) => new File(dir +
+      'da_binding_constraints_final_' + yyyymmdd(asOfDate) +
       '.csv');
 
   Func1<List<Map>,Map> converter = (List<Map> rows) {

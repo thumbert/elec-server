@@ -11,12 +11,12 @@ Map env = Platform.environment;
 ComponentConfig config = new ComponentConfig()
   ..host = '127.0.0.1'
   ..dbName = 'isone'
-  ..collectionName = 'ngrid_customer_counts'
-  ..DIR = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
+  ..collectionName = 'ngrid_customer_counts';
+String dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
 
 updateDb() async {
 
-  var archive = new NGridCustomerCountsArchive();
+  var archive = new NGridCustomerCountsArchive(dbConfig: config, dir: dir);
   String url = 'https://www9.nationalgridus.com/energysupply/current/20170811/Monthly_Aggregation_customer count and usage.xlsx';
   //await archive.downloadFile(url);
 

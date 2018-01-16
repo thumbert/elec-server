@@ -13,22 +13,24 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaDemandBidArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
+  String dir;
 
-  DaDemandBidArchive({this.dbConfig}) {
+  DaDemandBidArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isoexpress'
-        ..collectionName = 'da_demand_bid'
-        ..DIR = baseDir + 'PricingReports/DaDemandBid/Raw/';
+        ..collectionName = 'da_demand_bid';
     }
+    if (dir == null)
+      dir = baseDir + 'PricingReports/DaDemandBid/Raw/';
   }
   String reportName = 'Day-Ahead Energy Market Demand Historical Demand Bid Report';
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-dmd-bid/' +
           'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.csv';
   File getFilename(Date asOfDate) =>
-      new File(dbConfig.DIR + 'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.csv');
+      new File(dir + 'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one location id
   Func1<List<Map>, Map> converter = (List<Map> rows) {
