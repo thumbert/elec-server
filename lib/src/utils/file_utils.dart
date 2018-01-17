@@ -15,6 +15,7 @@ List<File> listFiles(Directory dir, {Pattern pattern}) {
   List files = dir.listSync()
       .where((entity) => entity is File)
       .where((entity) => basenameWithoutExtension((entity as File).path).contains(pattern))
+      .map((e) => e as File)
       .toList();
   files.sort((File a, File b) => a.path.compareTo(b.path));
   return files;
