@@ -55,17 +55,24 @@ class MisReport {
 
   DateFormat _fmt1 = new DateFormat('MM/DD/yyyy HH:mm:ss zzz');
 
-  /// Parse the report date from the comments section.
-  Future<Date> forDate() async {
-    List<String> _comments = await comments();
-    var regex = new RegExp(r'Report for: (.*)(")');
-    var matches = regex.firstMatch(_comments[2]);
-    var mmddyyyy = matches.group(1);
-    return new Date(
-        int.parse(mmddyyyy.substring(6, 10)),
-        int.parse(mmddyyyy.substring(0, 2)),
-        int.parse(mmddyyyy.substring(3, 5)));
+  /// Get the report date from the filename
+  Date forDate() {
+      var split = basename(file.path).split('_');
+      var date = split.elementAt(split.length-1).substring(0,8);
+      return Date.parse(date);
   }
+  
+  /// Parse the report date from the comments section.
+  //Future<Date> forDate() async {
+  //  List<String> _comments = await comments();
+  //  var regex = new RegExp(r'Report for: (.*)(")');
+  //  var matches = regex.firstMatch(_comments[2]);
+  //  var mmddyyyy = matches.group(1);
+  //  return new Date(
+  //      int.parse(mmddyyyy.substring(6, 10)),
+  //      int.parse(mmddyyyy.substring(0, 2)),
+  //      int.parse(mmddyyyy.substring(3, 5)));
+  //}
   
   /// Read the filename from the reports comments section.  This
   /// is the ISO filename, may be different from the filename of
