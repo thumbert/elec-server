@@ -59,7 +59,7 @@ class MisReport {
   /// Get the report date from the filename
   Date forDate() {
       var split = basename(file.path).split('_');
-      var date = split.elementAt(split.length-1).substring(0,8);
+      var date = split.elementAt(split.length-2).substring(0,8);
       return Date.parse(date);
   }
   
