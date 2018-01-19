@@ -11,7 +11,9 @@ File latestFile(Directory dir) {
 }
 
 /// List all the files from a directory that contain a pattern in the filename. 
+/// If the directory doesn't exist, return [];
 List<File> listFiles(Directory dir, {Pattern pattern}) {
+  if (!dir.existsSync()) return [];
   List files = dir.listSync()
       .where((entity) => entity is File)
       .where((entity) => basenameWithoutExtension((entity as File).path).contains(pattern))
