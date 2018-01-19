@@ -172,7 +172,7 @@ class DaDemandBids {
   /// Get the total daily MWh demand bids by participant between a start and end
   /// date for this zone.
   Future<List<Map<String, String>>> mwhByDayThisLoadZone(
-      String participantId, String ptid, String start, String end) async {
+      String ptid, String start, String end) async {
     List pipeline = [];
     pipeline.add({
       '\$match': {
@@ -214,7 +214,6 @@ class DaDemandBids {
 
   //http://localhost:8080/da_demand_bids/v1/mwh/participant/start/20170701/end/20171001
   @ApiMethod(path: 'mwh/participant/start/{start}/end/{end}')
-
   /// Get total MWh demand bids by participant between a start and end date.
   Future<List<Map<String, String>>> marketShare(
       String start, String end) async {

@@ -142,12 +142,20 @@
             <h4>Masked DA energy offers</h4>
             <ul>
                 <li>
-                    Get all the occurrences of a given constraint
-                    <div><a href="http://localhost:8080/bc/v1/market/da/constraintname/BRIGHTON329-530       A LN">bc/v1/market/da/constraintname/BRIGHTON329-530       A LN</a></div>
+                    Get all the generation offers for a given date and hour ending.  For the extra hour in the fall, enter '02X' same as the ISONE.
+                    <div><a href="http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16">da_energy_offers/v1/date/20170701/hourending/16</a></div>
                 </li>
                 <li>
-                    Get all the constraints between a two dates
-                    <div><a href="http://localhost:8080/bc/v1/market/da/start/20170101/end/20170102">bc/v1/market/da/start/20170101/end/20170102</a></div>
+                    Get all the daily data for all the generators for a day
+                    <div><a href="http://localhost:8080/da_energy_offers/v1/daily_data/day/20170701">da_energy_offers/v1/daily_data/day/20170701</a></div>
+                </li>
+                <li>
+                    Get one variable for one generator between a start and end date, in this example the 'Economic Maximum'
+                    <div><a href="http://localhost:8080/da_energy_offers/v1/assetId/41406/variable/Economic Maximum/start/20170701/end/20171001">da_energy_offers/v1/assetId/41406/variable/Economic Maximum/start/20170701/end/20171001</a></div>
+                </li>
+                <li>
+                    Get one variable for all the generators between a start and end date, in this example the 'Economic Maximum'
+                    <div><a href="http://localhost:8080/da_energy_offers/v1/variable/Economic Maximum/start/20170701/end/20171001">da_energy_offers/v1/variable/Economic Maximum/start/20170701/end/20171001</a></div>
                 </li>
             </ul>
         </div>

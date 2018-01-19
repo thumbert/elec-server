@@ -12,7 +12,7 @@ ApiTest(Db db) async {
   var api = new DaEnergyOffers(db);
   test('get stack for one hour', () async {
     await db.open();
-    var data = await api.getStack('20170701', '16');
+    var data = await api.getEnergyOffers('20170701','16');
     print(data);
     //expect(dt, dt2);
     await db.close();

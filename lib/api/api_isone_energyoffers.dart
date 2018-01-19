@@ -21,10 +21,10 @@ class DaEnergyOffers {
   }
 
 
-  //http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
-  @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
+  //http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16
+  @ApiMethod(path: 'date/{date}/hourending/{hourending}')
   /// Return the stack (price/quantity pairs) for a given datetime.
-  Future<List<Map<String, String>>> getStack(String date, String hourending) async {
+  Future<List<Map<String, String>>> getEnergyOffers(String date, String hourending) async {
     if (hourending.length == 1)
       hourending = hourending.padLeft(2, '0');
     Date day = Date.parse(date);
@@ -68,8 +68,8 @@ class DaEnergyOffers {
     return out;
   }
 
-  //http://localhost:8080/da_energy_offers/v1/assetid/41406/variable/Economic Maximum/start/20170701/end/20171001
-  @ApiMethod(path: 'assetid/{assetId}/variable/{variable}/start/{start}/end/{end}')
+  //http://localhost:8080/da_energy_offers/v1/assetId/41406/variable/Economic Maximum/start/20170701/end/20171001
+  @ApiMethod(path: 'assetId/{assetId}/variable/{variable}/start/{start}/end/{end}')
   /// Get one variable between a start and end date for one asset.
   Future<List<Map<String, String>>> oneAssetVariable(String assetId,
       String variable, String start, String end) async {
