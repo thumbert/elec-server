@@ -15,6 +15,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
 
+  static List<String> _unitStates = ['UNAVAILABLE', 'MUST_RUN', 'ECONOMIC'];
+
   DaEnergyOfferArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
@@ -22,29 +24,34 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
         ..dbName = 'isoexpress'
         ..collectionName = 'da_energy_offer';
     }
-    if (dir == null)
-      dir = baseDir + 'PricingReports/DaEnergyOffer/Raw/';
+    if (dir == null) dir = baseDir + 'PricingReports/DaEnergyOffer/Raw/';
   }
   String reportName = 'Day-Ahead Energy Market Historical Offer Report';
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/' +
-          'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv';
+      'hbdayaheadenergyoffer_' +
+      yyyymmdd(asOfDate) +
+      '.csv';
   File getFilename(Date asOfDate) =>
       new File(dir + 'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
-  Func1<List<Map>, Map> converter = (List<Map> rows) {
+  Map converter(List<Map> rows) {
     Map row = {};
+
     /// daily info
     row['date'] = formatDate(rows.first['Day']);
-    row['Masked Lead Participant ID'] = rows.first['Masked Lead Participant ID'];
+    row['Masked Lead Participant ID'] =
+        rows.first['Masked Lead Participant ID'];
     row['Masked Asset ID'] = rows.first['Masked Asset ID'];
     row['Must Take Energy'] = rows.first['Must Take Energy'];
-    row['Maximum Daily Energy Available'] = rows.first['Maximum Daily Energy Available'];
+    row['Maximum Daily Energy Available'] =
+        rows.first['Maximum Daily Energy Available'];
     row['Economic Maximum'] = rows.first['Economic Maximum'];
     row['Economic Minimum'] = rows.first['Economic Minimum'];
     row['Cold Startup Price'] = rows.first['Cold Startup Price'];
-    row['Intermediate Startup Price'] = rows.first['Intermediate Startup Price'];
+    row['Intermediate Startup Price'] =
+        rows.first['Intermediate Startup Price'];
     row['Hot Startup Price'] = rows.first['Hot Startup Price'];
     row['No Load Price'] = rows.first['No Load Price'];
     row['Unit Status'] = rows.first['Unit Status'];
@@ -55,13 +62,14 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     row['hours'] = [];
     rows.forEach((Map hour) {
       Map aux = {};
-      aux['hourBeginning'] = parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
+      aux['hourBeginning'] =
+          parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
+
       /// add the non empty price/quantity pairs
       var pricesHour = [];
       var quantitiesHour = [];
       for (int i = 1; i <= 10; i++) {
-        if (!(hour['Segment $i Price'] is num))
-          break;
+        if (!(hour['Segment $i Price'] is num)) break;
         pricesHour.add(hour['Segment $i Price']);
         quantitiesHour.add(hour['Segment $i MW']);
       }
@@ -69,12 +77,15 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       aux['quantity'] = quantitiesHour;
       row['hours'].add(aux);
     });
+    validateDocument(row);
     return row;
-  };
+  }
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     Map dataByAssetId = _groupBy(data, (row) => row['Masked Asset ID']);
-    return dataByAssetId.keys.map((ptid) => converter(dataByAssetId[ptid])).toList();
+    return dataByAssetId.keys
+        .map((ptid) => converter(dataByAssetId[ptid]))
+        .toList();
   }
 
   /// Recreate the collection from scratch.
@@ -94,11 +105,14 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     await dbConfig.db.close();
   }
 
-  Future<Map<String,String>> lastDay() async {
+  Future<Map<String, String>> lastDay() async {
     List pipeline = [];
-    pipeline.add({'\$group': {
-      '_id': 0,
-      'lastDay': {'\$max': '\$date'}}});
+    pipeline.add({
+      '\$group': {
+        '_id': 0,
+        'lastDay': {'\$max': '\$date'}
+      }
+    });
     Map res = await dbConfig.coll.aggregate(pipeline);
     return {'lastDay': res['result'][0]['lastDay']};
   }
@@ -106,15 +120,22 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   /// return the last day of the fourth month before the current month.
   Date lastDayAvailable() {
     Month m3 = Month.current().subtract(3);
-    return new Date(m3.year, m3.month,1).previous;
+    return new Date(m3.year, m3.month, 1).previous;
   }
+
   Future<Null> deleteDay(Date day) async {
     return await dbConfig.coll.remove(where.eq('date', day.toString()));
   }
 
+  /// Check if this document is OK.  Throws otherwise.  May not catch all
+  /// issues.
+  void validateDocument(Map row) {
+    if (row.containsKey('Unit Status') &&
+        !_unitStates.contains(row['Unit Status']))
+      throw new StateError('Invalid unit state: ${row['Unit State']}.');
+  }
 
 }
-
 
 Map _groupBy(Iterable x, Function f) {
   Map result = new Map();

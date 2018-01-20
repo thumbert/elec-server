@@ -7,24 +7,31 @@ import 'package:date/date.dart';
 import 'package:elec_server/api/api_isone_energyoffers.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
-
-ApiTest(Db db) async {
-  var api = new DaEnergyOffers(db);
-  test('get stack for one hour', () async {
+ApiTest() async {
+  Db db;
+  DaEnergyOffers api;
+  setUp(() async {
+    db = new Db('mongodb://localhost/isoexpress');
+    api = new DaEnergyOffers(db);
     await db.open();
-    var data = await api.getEnergyOffers('20170701','16');
-    print(data);
-    //expect(dt, dt2);
+  });
+  tearDown(() async {
     await db.close();
+  });
+  group('api energy offers', () {
+    test('get energy offers for one hour', () async {
+      List data = await api.getEnergyOffers('20170701', '16');
+      expect(data.length, 733);
+    });
+    test('get stack for one hour', () async {
+      List data = await api.getGenerationStack('20170701', '16');
+      data.forEach(print);
+      expect(data.length, 698);
+    });
   });
 }
 
-
 main() async {
-  initializeTimeZoneSync( getLocationTzdb() );
-  Db db = new Db('mongodb://localhost/isoexpress');
-  await ApiTest(db);
-
-
-
+  initializeTimeZoneSync(getLocationTzdb());
+  await ApiTest();
 }

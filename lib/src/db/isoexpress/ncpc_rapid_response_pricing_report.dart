@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-import 'package:func/func.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -29,12 +28,12 @@ class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) =>
       new File(dir + 'ncpc_rrp_' + yyyymmdd(asOfDate) + '.csv');
 
-  Func1<List<Map>, Map> converter = (List<Map> rows) {
+  Map converter(List<Map> rows) {
     Map row = rows.first;
     row['Operating Day'] = formatDate(row['Operating Day']);
     row.remove('H');
     return row;
-  };
+  }
 
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);

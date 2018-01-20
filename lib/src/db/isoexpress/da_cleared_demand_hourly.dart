@@ -2,7 +2,6 @@ library db.isoexpress.da_clearead_demand_hourly;
 
 import 'dart:io';
 import 'dart:async';
-import 'package:func/func.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -33,7 +32,7 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) =>
       new File(dir + 'da_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
-  Func1<List<Map>, Map> converter = (List<Map> rows) {
+  Map converter(List<Map> rows) {
     Map row = rows.first;
     var localDate = (row['Date'] as String).substring(0, 10);
     var hourEnding = row['Hour Ending'];
@@ -44,7 +43,8 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
     row.remove('Hour Ending');
     row.remove('H');
     return row;
-  };
+  }
+
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     data.forEach((row) => converter([row]));

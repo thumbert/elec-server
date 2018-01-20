@@ -37,7 +37,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
       'da_binding_constraints_final_' + yyyymmdd(asOfDate) +
       '.csv');
 
-  Func1<List<Map>,Map> converter = (List<Map> rows) {
+  Map converter(List<Map> rows) {
     Map row = rows.first;
     var localDate = (row['Local Date'] as String).substring(0,10);
     var hourEnding = row['Hour Ending'];
@@ -48,7 +48,8 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
     row.remove('Hour Ending');
     row.remove('H');
     return row;
-  };
+  }
+
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     data.forEach((row) => converter([row]));

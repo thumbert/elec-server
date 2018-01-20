@@ -5,6 +5,7 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
 import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
+import 'package:more/ordering.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
@@ -14,16 +15,45 @@ class DaEnergyOffers {
   Location location;
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'da_energy_offer';
+  Ordering ordering;
 
   DaEnergyOffers(Db db) {
     coll = db.collection(collectionName);
     location = getLocation('US/Eastern');
+    /// create an ordering by price and assetId to use when sorting the stack
+    var natural = new Ordering.natural();
+    var byPrice = natural.onResultOf((Map e) => e['price']);
+    var byAssetId = natural.onResultOf((Map e) => e['assetId']);
+    ordering = byPrice.compound(byAssetId);
   }
 
+  /// return the stack
+  Future<List<Map>> getGenerationStack(String date, String hourending) async {
+    var stack = [];
+    List eo = await getEnergyOffers(date, hourending);
+    /// get rid of the unavailable units (some still submit offers!), and make
+    /// the must run units have $-150 prices.
+    eo.forEach((Map e) {
+      if (e['Unit Status'] == 'ECONOMIC') {
+        stack.add(e);
+      } else if (e['Unit Status'] == 'MUST_RUN') {
+        /// this started at a date, I forgot when ...
+        e['price'] = -150;
+        stack.add(e);
+      }
+    });
+    ordering.sort(stack);
+    num cumMWh = 0;
+    stack.forEach((Map e) {
+      cumMWh += e['quantity'];
+      e['cummulative qty'] = cumMWh;
+    });
+    return stack;
+  }
 
   //http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16
   @ApiMethod(path: 'date/{date}/hourending/{hourending}')
-  /// Return the stack (price/quantity pairs) for a given datetime.
+  /// Return the energy offers (price/quantity pairs) for a given datetime.
   Future<List<Map<String, String>>> getEnergyOffers(String date, String hourending) async {
     if (hourending.length == 1)
       hourending = hourending.padLeft(2, '0');
@@ -38,6 +68,7 @@ class DaEnergyOffers {
     Map project = {
       '_id': 0,
       'Masked Asset ID': 1,
+      'Unit Status': 1,
       'hours': {
         '\$filter': {
           'input': '\$hours',
@@ -52,13 +83,14 @@ class DaEnergyOffers {
     var res = coll.aggregateToStream(pipeline);
     /// flatten the map in Dart
     List out = [];
-    List keys = ['assetId', 'hourBeginning', 'price', 'quantity'];
+    List keys = ['assetId', 'Unit Status', 'hourBeginning', 'price', 'quantity'];
     await for (Map e in res) {
       //print(e);
       List prices = e['hours']['price'];
       for (int i=0; i<prices.length; i++) {
         out.add(new Map.fromIterables(keys, [
           e['Masked Asset ID'],
+          e['Unit Status'],
           new TZDateTime.from(e['hours']['hourBeginning'], location).toString(),
           e['hours']['price'][i],
           e['hours']['quantity'][i]

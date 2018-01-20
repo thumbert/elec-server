@@ -2,7 +2,6 @@ library iso.isone.isoexpress;
 
 import 'dart:async';
 import 'dart:io';
-import 'package:func/func.dart';
 import 'package:date/date.dart';
 import 'package:path/path.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -19,7 +18,7 @@ abstract class IsoExpressReport {
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
-  Func1<List<Map>, Map> converter;
+  Map converter(List<Map> rows);
 
   /// Setup the database from scratch again, including the index
   Future<Null> setupDb();

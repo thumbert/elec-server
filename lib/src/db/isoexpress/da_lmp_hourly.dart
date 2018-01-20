@@ -2,7 +2,6 @@ library db.isoexpress.da_lmp_hourly;
 
 import 'dart:io';
 import 'dart:async';
-import 'package:func/func.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -33,7 +32,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) =>
       new File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
-  Func1<List<Map>, Map> converter = (List<Map> rows) {
+  Map converter(List<Map> rows) {
     Map row = {};
     row['date'] = formatDate(rows.first['Date']);
     row['ptid'] = int.parse(rows.first['Location ID']);
@@ -48,7 +47,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
       row['marginal_loss'].add(e['Marginal Loss Component']);
     });
     return row;
-  };
+  }
+
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     Map dataByPtids = _groupBy(data, (row) => row['Location ID']);
