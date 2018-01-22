@@ -27,8 +27,10 @@ class DaEnergyOffers {
     ordering = byPrice.compound(byAssetId);
   }
 
+  //http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
+  @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
   /// return the stack
-  Future<List<Map>> getGenerationStack(String date, String hourending) async {
+  Future<List<Map<String,String>>> getGenerationStack(String date, String hourending) async {
     var stack = [];
     List eo = await getEnergyOffers(date, hourending);
     /// get rid of the unavailable units (some still submit offers!), and make
