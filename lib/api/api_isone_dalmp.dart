@@ -99,8 +99,8 @@ class DaLmp {
       'ptid': {'\$eq': ptid}
     };
     Map date = {};
-    if (startDate != null) date = {'\$gte': startDate.toString()};
-    if (endDate != null) date = {'\$lt': endDate.add(1).toString()};
+    if (startDate != null) date['\$gte'] = startDate.toString();
+    if (endDate != null) date['\$lt'] = endDate.add(1).toString();
     if (date.isNotEmpty) match['date'] = date;
 
     Map project;
