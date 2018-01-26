@@ -34,15 +34,17 @@ class DaEnergyOffers {
     var stack = [];
     List eo = await getEnergyOffers(date, hourending);
     /// get rid of the unavailable units (some still submit offers!), and make
-    /// the must run units have $-150 prices.
-    eo.forEach((Map e) {
-      if (e['Unit Status'] == 'ECONOMIC') {
-        stack.add(e);
-      } else if (e['Unit Status'] == 'MUST_RUN') {
-        /// this started at a date, I forgot when ...
-        e['price'] = -150;
-        stack.add(e);
+    /// the must run units have $-150 prices in the first block only.
+    var gEo = _groupBy(eo.where((Map e) => e['Unit Status'] != 'UNAVAILABLE'),
+        (Map e) => e['assetId']);
+    gEo.keys.forEach((assetId) {
+      List offers = gEo[assetId];
+      if (offers.first['Unit Status'] == 'MUST_RUN') {
+        /// need to sort them just in case ...
+        offers.sort((a,b) => a['price'].compareTo(b['price']));
+        offers.first['price'] = -150;
       }
+      stack.addAll(offers);
     });
     ordering.sort(stack);
     num cumMWh = 0;
@@ -208,4 +210,11 @@ class DaEnergyOffers {
   }
 
 
+}
+
+
+Map _groupBy(Iterable x, Function f) {
+  Map result = new Map();
+  x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
+  return result;
 }

@@ -7,6 +7,7 @@ import 'package:date/date.dart';
 import 'package:elec_server/api/api_isone_energyoffers.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
+
 ApiTest() async {
   Db db;
   DaEnergyOffers api;
@@ -25,7 +26,7 @@ ApiTest() async {
     });
     test('get stack for one hour', () async {
       List data = await api.getGenerationStack('20170701', '16');
-      data.forEach(print);
+      //data.forEach(print);
       expect(data.length, 698);
     });
   });
