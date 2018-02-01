@@ -36,6 +36,7 @@ abstract class MisReportArchive {
 
   /// Insert this data into the database.
   Future insertData(List<Map> data) async {
+    if (data.isEmpty) return new Future.value(null);
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
