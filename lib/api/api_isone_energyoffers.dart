@@ -50,7 +50,7 @@ class DaEnergyOffers {
     num cumMWh = 0;
     stack.forEach((Map e) {
       cumMWh += e['quantity'];
-      e['cummulative qty'] = cumMWh;
+      e['cumulative qty'] = cumMWh;
     });
     return stack;
   }

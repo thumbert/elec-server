@@ -46,7 +46,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     row['hours'] = [];
     rows.forEach((Map hour) {
       Map aux = {};
-      String he = fixHourEnding(hour['Hour']);
+      String he = stringHourEnding(hour['Hour']);
       aux['hourBeginning'] = parseHourEndingStamp(hour['Day'], he);
       /// add the non empty price/quantity pairs
       var pricesHour = [];

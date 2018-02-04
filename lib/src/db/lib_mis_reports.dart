@@ -15,7 +15,6 @@ abstract class DbDataConverter {
   List<Map> convert(List<Map> data);
 }
 
-
 abstract class MisReportArchive {
   String reportName;
   ComponentConfig dbConfig;
@@ -44,9 +43,6 @@ abstract class MisReportArchive {
   }
 }
 
-
-
-
 class MisReport {
   /// the location of where this report lives on the disk
   File file;
@@ -59,11 +55,11 @@ class MisReport {
 
   /// Get the report date from the filename
   Date forDate() {
-      var split = basename(file.path).split('_');
-      var date = split.elementAt(split.length-2).substring(0,8);
-      return Date.parse(date);
+    var split = basename(file.path).split('_');
+    var date = split.elementAt(split.length - 2).substring(0, 8);
+    return Date.parse(date);
   }
-  
+
   /// Parse the report date from the comments section.
   //Future<Date> forDate() async {
   //  List<String> _comments = await comments();
@@ -75,23 +71,24 @@ class MisReport {
   //      int.parse(mmddyyyy.substring(0, 2)),
   //      int.parse(mmddyyyy.substring(3, 5)));
   //}
-  
+
   /// Read the filename from the reports comments section.  This
   /// is the ISO filename, may be different from the filename of
-  /// the report in local archive.  Return an UTC DateTime. 
+  /// the report in local archive.  Return an UTC DateTime.
   DateTime timestamp() {
-      var name = file.path.toUpperCase();
-      var ind = name.lastIndexOf('_');
-      var dt = name.substring(ind+1);
-      return new DateTime.utc(
-          int.parse(dt.substring(0, 4)),    // year
-          int.parse(dt.substring(4, 6)),    // month
-          int.parse(dt.substring(6, 8)),    // day
-          int.parse(dt.substring(8, 10)),   // hour
-          int.parse(dt.substring(10, 12)),  // minute
-          int.parse(dt.substring(12, 14))   // second
-      );
+    var name = file.path.toUpperCase();
+    var ind = name.lastIndexOf('_');
+    var dt = name.substring(ind + 1);
+    return new DateTime.utc(
+        int.parse(dt.substring(0, 4)), // year
+        int.parse(dt.substring(4, 6)), // month
+        int.parse(dt.substring(6, 8)), // day
+        int.parse(dt.substring(8, 10)), // hour
+        int.parse(dt.substring(10, 12)), // minute
+        int.parse(dt.substring(12, 14)) // second
+        );
   }
+
   Future<String> filename() async {
     List<String> _comments = await comments();
     var regex = new RegExp(r'Filename: (.*)(")');
@@ -142,8 +139,7 @@ class MisReport {
 /// with keys taken from the header.
 /// If there are no data rows (empty report), return an empty List.
 List<Map> readReportTabAsMap(File file, {int tab: 0}) {
-  if (!file.existsSync())
-    throw 'File ${file.path} doesn\'t exist.';
+  if (!file.existsSync()) throw 'File ${file.path} doesn\'t exist.';
   List allData = _readReport(file, tab: tab);
   List columnNames = allData.firstWhere((List e) => e[0] == 'H');
   return allData
@@ -154,17 +150,18 @@ List<Map> readReportTabAsMap(File file, {int tab: 0}) {
 
 /// Read/process MIS reports.  Read all the report in memory, but
 /// only parses the csv for the tab you are interested in.
-/// Return each row of the [tab] as a List (all rows: C, H, D, T).
+/// Return each row of the [tab] as a List (all rows in the report: C, H, D, T).
+/// Sometimes the ISO doesn't quote the report.  Really frustrating!
 List<List> _readReport(File file, {int tab: 0}) {
   var converter = new CsvToListConverter();
   var lines = file.readAsLinesSync();
-  if (!lines.last.startsWith('"T"'))
+  if (!(lines.last.startsWith('"T"') || lines.last.startsWith('T')))
     throw new IncompleteReportException('Incomplete CSV file ${file.path}');
 
-  int nHeaders = 0;
+  int nHeaders = -1;
   return lines
       .where((e) {
-        if (e[0] == 'H') ++nHeaders;
+        if (e[0] == 'H') nHeaders++;
         if (nHeaders == 2 * tab || nHeaders == (2 * tab + 1))
           return true;
         else
@@ -173,7 +170,6 @@ List<List> _readReport(File file, {int tab: 0}) {
       .map((String row) => converter.convert(row).first)
       .toList();
 }
-
 
 class IncompleteReportException implements Exception {
   String message;
