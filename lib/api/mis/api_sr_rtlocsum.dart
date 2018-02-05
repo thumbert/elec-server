@@ -25,11 +25,11 @@ class SrRtLocSum {
       path:
           'tab/{tab}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
   /// Get one column in this tab for a given location.
-  Future<List<Map<String, String>>> apiGetColumn (
+  Future<List<Map<String, String>>> apiGetColumn (String account, 
       int tab, int locationId, String column, String start, String end) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
-    Stream data = _getData(tab, locationId, column, startDate, endDate);
+    Stream data = _getData(account, tab, locationId, column, startDate, endDate);
     List out = [];
     List keys = ['hourBeginning', column];
     await for (Map e in data) {
@@ -45,11 +45,12 @@ class SrRtLocSum {
 
   /// Workhorse to extract the data ...
   /// returns one element for each day
-  Stream _getData(
+  Stream _getData(String account, 
       int tab, int locationId, String column, Date startDate, Date endDate) {
     List pipeline = [];
     pipeline.add({
       '\$match': {
+        'account': {'\$eq': account},
         'tab': {'\$eq': tab},
         'Location ID': {'\$eq': locationId},
         'date': {
