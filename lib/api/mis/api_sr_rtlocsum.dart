@@ -20,10 +20,10 @@ class SrRtLocSum {
     _location = getLocation('US/Eastern');
   }
 
-  /// http://localhost:8080/sr_rtlocsum/v1/tab/0/locationId/401/column/Real Time Load Obligation/start/20170101/end/20170101
+  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/tab/0/locationId/401/column/Real Time Load Obligation/start/20170101/end/20170101
   @ApiMethod(
       path:
-          'tab/{tab}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
+          'account/{account}/tab/{tab}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
   /// Get one column in this tab for a given location.
   Future<List<Map<String, String>>> apiGetColumn (String account, 
       int tab, int locationId, String column, String start, String end) async {
