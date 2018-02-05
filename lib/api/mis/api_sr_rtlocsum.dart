@@ -7,7 +7,6 @@ import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:tuple/tuple.dart';
-import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 
 @ApiClass(name: 'sr_rtlocsum', version: 'v1')
 class SrRtLocSum {
@@ -36,7 +35,7 @@ class SrRtLocSum {
     await for (Map e in data) {
       for (int i=0; i<e['hourBeginning'].length; i++){
         out.add(new Map.fromIterables(keys, [
-          new TZDateTime.from(e['hourBeginning'][i], _location),
+          new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
           e[column][i]
         ]));
       }
