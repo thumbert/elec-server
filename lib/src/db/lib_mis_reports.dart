@@ -161,7 +161,7 @@ List<List> _readReport(File file, {int tab: 0}) {
   int nHeaders = -1;
   return lines
       .where((e) {
-        if (e[0] == 'H') nHeaders++;
+        if (e[0] == 'H' || e.startsWith('"H"')) nHeaders++;
         if (nHeaders == 2 * tab || nHeaders == (2 * tab + 1))
           return true;
         else
