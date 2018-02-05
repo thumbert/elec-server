@@ -53,6 +53,14 @@ class MisReport {
 
   DateFormat _fmt1 = new DateFormat('MM/DD/yyyy HH:mm:ss zzz');
 
+  /// Get the name of the company from the report.
+  Future<String> companyName() async {
+    List _comments = await comments();
+    var converter = new CsvToListConverter();
+    var aux = converter.convert(_comments[2])[0];
+    return aux[1];
+  }
+  
   /// Get the report date from the filename
   Date forDate() {
     var split = basename(file.path).split('_');
