@@ -30,7 +30,7 @@ class SrRtLocSum {
       int tab, int locationId, String column, String start, String end) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
-    Stream data = getData(tab, locationId, column, startDate, endDate);
+    Stream data = _getData(tab, locationId, column, startDate, endDate);
     List out = [];
     List keys = ['hourBeginning', column];
     await for (Map e in data) {
@@ -46,7 +46,7 @@ class SrRtLocSum {
 
   /// Workhorse to extract the data ...
   /// returns one element for each day
-  Stream getData(
+  Stream _getData(
       int tab, int locationId, String column, Date startDate, Date endDate) {
     List pipeline = [];
     pipeline.add({
@@ -64,7 +64,7 @@ class SrRtLocSum {
       'hourBeginning': 1,
       '${column}': 1,
     }});
-    print(pipeline);
+    //print(pipeline);
     return coll.aggregateToStream(pipeline);
   }
 }
