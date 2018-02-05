@@ -36,6 +36,7 @@ class SrRtLocSum {
       for (int i=0; i<e['hourBeginning'].length; i++){
         out.add(new Map.fromIterables(keys, [
           new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+          e['version][i].toString(),
           e[column][i]
         ]));
       }
@@ -62,6 +63,7 @@ class SrRtLocSum {
     pipeline.add({'\$project': {
       '_id': 0,
       'hourBeginning': 1,
+      'version': 1,
       '${column}': 1,
     }});
     //print(pipeline);
