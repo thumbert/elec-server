@@ -53,6 +53,13 @@ class MisReport {
 
   DateFormat _fmt1 = new DateFormat('MM/DD/yyyy HH:mm:ss zzz');
 
+  
+  /// Get the account number from the filename.
+  String accountNumber() {
+    var split = basename(file.path).split('_');
+    return split.elementAt(split.length - 3);
+  }
+  
   /// Get the name of the company from the report.
   Future<String> companyName() async {
     List _comments = await comments();
@@ -61,7 +68,7 @@ class MisReport {
     return aux[1];
   }
   
-  /// Get the report date from the filename
+  /// Get the report date (operating day) from the filename
   Date forDate() {
     var split = basename(file.path).split('_');
     var date = split.elementAt(split.length - 2).substring(0, 8);
