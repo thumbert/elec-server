@@ -21,8 +21,9 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   /// for the first tab
-  Map rowConverter0(List<Map> rows, Date reportDate, DateTime version) {
+  Map rowConverter0(List<Map> rows, String account, Date reportDate, DateTime version) {
     Map row = {};
+    row['account'] = account;
     row['tab'] = 0;
     row['date'] = reportDate.toString();
     row['version'] = version;
@@ -56,11 +57,12 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     /// tab 0: company data
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
+    var account = report.accountNumber();
     var reportDate = report.forDate();
     var version = report.timestamp();
     Map dataById = _groupBy(data, (row) => row['Location ID']);
     var res0 = dataById.keys
-        .map((assetId) => rowConverter0(dataById[assetId], reportDate, version))
+        .map((assetId) => rowConverter0(dataById[assetId], account, reportDate, version))
         .toList();
 
     /// tab 1: subaccount data
@@ -75,7 +77,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'tab': 1, 'Location ID': 1, 'date': 1, 'version': 1},
+        keys: {'account': 1, 'tab': 1, 'Location ID': 1, 'date': 1, 'version': 1},
         unique: true);
     await dbConfig.db.close();
   }
