@@ -31,12 +31,12 @@ class SrRtLocSum {
     Date endDate = Date.parse(end);
     Stream data = _getData(account, tab, locationId, column, startDate, endDate);
     List out = [];
-    List keys = ['hourBeginning', column];
+    List keys = ['hourBeginning', 'version', column];
     await for (Map e in data) {
       for (int i=0; i<e['hourBeginning'].length; i++){
         out.add(new Map.fromIterables(keys, [
           new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
-          e['version'][i].toString(),
+          e['version'].toString(),
           e[column][i]
         ]));
       }
