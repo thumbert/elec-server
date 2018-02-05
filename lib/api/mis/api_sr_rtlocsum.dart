@@ -36,7 +36,7 @@ class SrRtLocSum {
       for (int i=0; i<e['hourBeginning'].length; i++){
         out.add(new Map.fromIterables(keys, [
           new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
-          e['version][i].toString(),
+          e['version'][i].toString(),
           e[column][i]
         ]));
       }
