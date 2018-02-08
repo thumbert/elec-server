@@ -31,10 +31,11 @@ abstract class MisReportArchive {
 
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.
-  List<Map> processFile(File file);
+  /// Each tab is one element of the returned list. 
+  List<List<Map>> processFile(File file);
 
   /// Insert this data into the database.
-  Future insertData(List<Map> data) async {
+  Future insertTabData(List<Map> data) async {
     if (data.isEmpty) return new Future.value(null);
     return dbConfig.coll
         .insertAll(data)
