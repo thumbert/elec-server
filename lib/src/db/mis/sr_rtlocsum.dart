@@ -2,6 +2,7 @@ library elec.load.sr_rtlocsum;
 
 import 'dart:async';
 import 'dart:io';
+import 'package:tuple/tuple.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
@@ -52,8 +53,44 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     return row;
   }
 
+  /// for the second tab (subaccount info)
+  Map rowConverter1(List<Map> rows, String account, Date reportDate, DateTime version) {
+    Map row = {};
+    row['account'] = account;
+    row['Subaccount ID'] = rows.first['Subaccount ID'];
+    row['tab'] = 1;
+    row['date'] = reportDate.toString();
+    row['version'] = version;
+    row['Location ID'] = rows.first['Location ID'];
+    row['hourBeginning'] = [];
+    List excludeColumns = [
+      'H',
+      'Subaccount ID',
+      'Subaccount Name',
+      'Location ID',
+      'Trading Interval',
+      'Location Name',
+      'Location Type',
+      ''
+    ];
+    List keepColumns = rows.first.keys.toList();
+    keepColumns.removeWhere((e) => excludeColumns.contains(e));
+    keepColumns.forEach((column) {
+      row[column] = [];
+    });
+    rows.forEach((e) {
+      row['hourBeginning'].add(parseHourEndingStamp(
+          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])));
+      keepColumns.forEach((column) {
+        row[column].add(e[column]);
+      });
+    });
+    return row;
+  }
+
+
   @override
-  List<Map> processFile(File file) {
+  List<List<Map>> processFile(File file) {
     /// tab 0: company data
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
@@ -66,8 +103,16 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
         .toList();
 
     /// tab 1: subaccount data
+    data = mis.readReportTabAsMap(file, tab: 1);
+    List res1 = [];
+    if (data.isNotEmpty) {
+      Map dataById = _groupBy(data, (row) => new Tuple2(row['Subaccount ID'],row['Location ID']));
+      res1 = dataById.keys
+          .map((tuple) => rowConverter1(dataById[tuple], account, reportDate, version))
+          .toList();
+    }
 
-    return res0;
+    return [res0, res1];
   }
 
   @override
