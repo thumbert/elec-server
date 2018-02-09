@@ -41,13 +41,13 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     List keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     keepColumns.forEach((column) {
-      row[column] = [];
+      row[mis.removeParanthesesEnd(column)] = [];
     });
     rows.forEach((e) {
       row['hourBeginning'].add(parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])));
       keepColumns.forEach((column) {
-        row[column].add(e[column]);
+        row[mis.removeParanthesesEnd(column)].add(e[column]);
       });
     });
     return row;
@@ -76,13 +76,13 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     List keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     keepColumns.forEach((column) {
-      row[column] = [];
+      row[mis.removeParanthesesEnd(column)] = [];
     });
     rows.forEach((e) {
       row['hourBeginning'].add(parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])));
       keepColumns.forEach((column) {
-        row[column].add(e[column]);
+        row[mis.removeParanthesesEnd(column)].add(e[column]);
       });
     });
     return row;
