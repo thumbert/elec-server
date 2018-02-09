@@ -23,7 +23,7 @@ class SrRtLocSum {
   /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/tab/0/locationId/401/column/Real Time Load Obligation/start/20170101/end/20170101
   @ApiMethod(
       path:
-          '/accountId/{accountId}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
+          'accountId/{accountId}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
   /// Get one column in this tab for a given location.
   Future<List<Map<String, String>>> apiGetColumnTab0 (String accountId,
       int locationId, String column, String start, String end) async {
@@ -46,7 +46,7 @@ class SrRtLocSum {
 
   @ApiMethod(
       path:
-      '/accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
+      'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
   /// Get one column in this tab for a given location.
   Future<List<Map<String, String>>> apiGetColumnTab1 (String accountId,
       String subaccountId,
