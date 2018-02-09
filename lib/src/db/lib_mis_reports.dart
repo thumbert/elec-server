@@ -187,6 +187,18 @@ List<List> _readReport(File file, {int tab: 0}) {
       .toList();
 }
 
+/// Colnames in MIS reports sometimes have unnecessary parantheses.
+/// For example: 'Internal Bilateral For Load (F)'.  Remove them.
+String removeParanthesesEnd(String x) {
+  int ind = x.indexOf(new RegExp('\\(.*\\)'));
+  if (ind != -1) {
+    x = x.substring(0,ind);
+  }
+  return x.trim();
+}
+
+
+
 class IncompleteReportException implements Exception {
   String message;
   IncompleteReportException(this.message);
