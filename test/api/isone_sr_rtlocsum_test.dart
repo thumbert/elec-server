@@ -13,7 +13,7 @@ SrRtLocSumTest(Db db) async {
   var api = new SrRtLocSum(db);
   test('get testing data', () async {
     await db.open();
-    var data = await api.apiGetColumn(0, 401, 'Real Time Load Obligation',
+    var data = await api.apiGetColumnTab0('0', 401, 'Real Time Load Obligation',
         '2015-06-01', '2015-06-01');
     print(data);
     //expect(data.length, 2);

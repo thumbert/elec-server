@@ -39,12 +39,12 @@ class SdRtloadArchive extends mis.MisReportArchive {
   };
 
   @override
-  List<Map> processFile(File file) {
+  List<List<Map>> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     data.forEach((row) => converter([row]));
     /// add the report date
     //var date =
-    return data;
+    return [data];
   }
 
   @override

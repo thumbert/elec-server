@@ -4,10 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
-import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 
 srRtLocSumTest() async{
@@ -29,7 +27,7 @@ srRtLocSumTest() async{
     test('read report', () async {
       var data = archive.processFile(file);
       expect(data.length, 17);
-      await archive.insertData(data);
+      await archive.insertTabData(data.first);
     });
 
   });

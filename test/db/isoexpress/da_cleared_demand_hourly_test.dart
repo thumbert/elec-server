@@ -21,18 +21,14 @@ prepareData() async {
 }
 
 
-DaBindingConstraintsTest() async {
-  group('DA binding constraints report', (){
-    test('read binding constraints files', () async {
+DaClearedDemandTest() async {
+  group('DA Cleared Demand report', (){
+    test('read da cleared demand files', () async {
       var archive = new DaClearedDemandReportArchive();
-      File file = archive.getFilename(new Date(2017,12,13));
-      var report = new mis.MisReport(file);
-      expect(await report.forDate(), new Date(2017,12,13));
-      expect(await report.filename(), 'da_binding_constraints_final_20171213.csv');
-      var data = report.readTabAsMap(tab: 0);
-      expect(data.length, 38);
-      var data2 = data.map((Map row) => archive.converter([row])).toList();
-      expect(data2.first['Marginal Value'] is num, true);
+      File file = archive.getFilename(new Date(2017,1,1));
+      var data = archive.processFile(file);
+      expect(data.length, 1);
+      expect(data.first['Day-Ahead Cleared Demand'].first, 11167.0);
     });
   });
 }
@@ -40,7 +36,7 @@ DaBindingConstraintsTest() async {
 uploadDaysDa() async {
   var archive = new DaClearedDemandReportArchive();
   List days =
-  new Interval(new DateTime(2017, 1, 5), new DateTime(2017, 12, 20))
+  new Interval(new DateTime(2017, 1, 1), new DateTime(2018, 1, 1))
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   await for (var day in new Stream.fromIterable(days)) {
@@ -69,8 +65,11 @@ main() async {
   await initializeTimeZone(getLocationTzdb());
 
   //await new DaClearedDemandReportArchive().setupDb();
-  //await uploadDaysDa();
-  await uploadDaysRt();
+  await DaClearedDemandTest();
+
+  await uploadDaysDa();
+
+  //await uploadDaysRt();
 
 
 

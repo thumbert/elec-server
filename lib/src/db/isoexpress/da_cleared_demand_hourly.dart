@@ -33,22 +33,24 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
       new File(dir + 'da_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
   Map converter(List<Map> rows) {
-    Map row = rows.first;
-    var localDate = (row['Date'] as String).substring(0, 10);
-    var hourEnding = row['Hour Ending'];
-    row['hourBeginning'] = parseHourEndingStamp(localDate, hourEnding);
+    Map row = {};
+    var localDate = (rows.first['Date'] as String).substring(0, 10);
     row['date'] = formatDate(localDate);
     row['market'] = 'DA';
-    row.remove('Date');
-    row.remove('Hour Ending');
-    row.remove('H');
+    row['hourBeginning'] = [];
+    row['Day-Ahead Cleared Demand'] = [];
+    rows.forEach((e) {
+      row['hourBeginning'].add(parseHourEndingStamp(localDate,
+        e['Hour Ending']));
+      row['Day-Ahead Cleared Demand'].add(e['Day-Ahead Cleared Demand']);
+    });
     return row;
   }
 
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
-    data.forEach((row) => converter([row]));
-    return data;
+    //data.forEach((row) => converter([row]));
+    return [converter(data)];
   }
 
   /// Recreate the collection from scratch.
@@ -59,9 +61,7 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
       await dbConfig.coll.drop();
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'market': 1, 'hourBeginning': 1}, unique: true);
-    await dbConfig.db
-        .createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
+        keys: {'date': 1, 'market': 1}, unique: true);
     await dbConfig.db.close();
   }
 
@@ -78,7 +78,9 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
   }
 
   Date lastDayAvailable() => Date.today().next;
+
   Future<Null> deleteDay(Date day) async {
     return await dbConfig.coll.remove(where.eq('date', day.toString()));
   }
 }
+
