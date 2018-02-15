@@ -14,6 +14,7 @@ import 'package:elec_server/api/api_isone_demandbids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
 import 'package:elec_server/api/api_customer_counts.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
+import 'package:elec_server/api/api_system_demand.dart';
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
@@ -33,6 +34,7 @@ registerApis() async {
   _apiServer.addApi( new BindingConstraints(db3) );
   _apiServer.addApi( new DaEnergyOffers(db3) );
   _apiServer.addApi( new DaDemandBids(db3) );
+  _apiServer.addApi( new SystemDemand(db3) );
 
 
 

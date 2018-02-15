@@ -6,6 +6,7 @@ import 'package:timezone/standalone.dart';
 Location _eastern = getLocation('US/Eastern');
 
 
+
 /// Convert from an ISONE string tuple.
 /// [localDate] is a String in format 'mm/dd/yyyy'
 /// [hourEnding] is of the form '01', '02', '02X', '03', ... '24'
@@ -26,6 +27,15 @@ TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
 
   return res;
 }
+
+/// Convert an hour beginning timestamp to the ISO hour ending format.
+/// Return a two element list with the date and hour ending.
+/// E.g. ['']
+List<String> toIsoHourEndingFormat(TZDateTime hourBeginning) {
+
+}
+
+
 
 /// When you read the reports with csv, the hour ending is an integer.
 /// Fix it with this function.

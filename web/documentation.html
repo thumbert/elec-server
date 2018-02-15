@@ -29,6 +29,7 @@
             <li><a href="#masked-da-demand-bids">Masked DA demand bids</a></li>
             <li><a href="#masked-da-energy-offers">Masked DA energy offers</a></li>
             <li><a href="#ptid-table">Ptid table</a></li>
+            <li><a href="#system-demand">ISONE system demand, DA and RT</a></li>
         </ul>
         <div id="customer-counts-ngrid">
             <h4>Customer counts for NGrid</h4>
@@ -178,6 +179,19 @@
                 <li>
                     Get the dates when the ptid table was modified
                     <div><a href="http://localhost:8080/ptids/v1/dates">ptids/v1/dates</a></div>
+                </li>
+            </ul>
+        </div>
+        <div id="system-demand">
+            <h4>ISONE system demand, DA and RT</h4>
+            <ul>
+                <li>
+                    Get historical Day-Ahead Cleared Demand bids between two dates.
+                    <div><a href="http://localhost:8080/system_demand/v1/market/da/start/20170101/end/20170101">system_demand/v1/market/da/start/20170101/end/20170101</a></div>
+                </li>
+                <li>
+                    Get historical Total Load (Real-Time Hourly System Demand) between two dates.
+                    <div><a href="http://localhost:8080/system_demand/v1/market/rt/start/20170101/end/20170101">system_demand/v1/market/rt/start/20170101/end/20170101</a></div>
                 </li>
             </ul>
         </div>

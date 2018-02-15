@@ -33,21 +33,23 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
       new File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
  Map converter(List<Map> rows) {
-    Map row = rows.first;
-    var localDate = (row['Date'] as String).substring(0, 10);
-    var hourEnding = row['Hour Ending'];
-    row['hourBeginning'] = parseHourEndingStamp(localDate, hourEnding);
-    row['date'] = formatDate(localDate);
+    Map row = {};
+    var localDate = (rows.first['Date'] as String).substring(0, 10);
+    row ['date'] = formatDate(localDate);
     row['market'] = 'RT';
-    row.remove('Date');
-    row.remove('Hour Ending');
-    row.remove('H');
+
+    row['hourBeginning'] = [];
+    row['Total Load'] = [];
+    rows.forEach((e) {
+      row['hourBeginning'].add(parseHourEndingStamp(localDate,
+          e['Hour Ending']));
+      row['Total Load'].add(e['Total Load']);
+    });
     return row;
   }
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
-    data.forEach((row) => converter([row]));
-    return data;
+    return [converter(data)];
   }
 
   /// Recreate the collection from scratch.
@@ -58,9 +60,7 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
       await dbConfig.coll.drop();
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'market': 1, 'hourBeginning': 1}, unique: true);
-    await dbConfig.db
-        .createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
+        keys: {'market': 1, 'date': 1}, unique: true);
     await dbConfig.db.close();
   }
 

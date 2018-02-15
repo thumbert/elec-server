@@ -1,14 +1,11 @@
 library api.system_demand;
 
-
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
 import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/isoexpress/da_cleared_demand_hourly.dart';
-
 
 @ApiClass(name: 'system_demand', version: 'v1')
 class SystemDemand {
@@ -17,45 +14,55 @@ class SystemDemand {
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'system_demand';
 
-  DaLmp(Db db) {
+  SystemDemand(Db db) {
     coll = db.collection(collectionName);
     _location = getLocation('US/Eastern');
   }
 
-  /// http://localhost:8080/dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170101
-  @ApiMethod(path: 'byrow/{component}/ptid/{ptid}/start/{start}/end/{end}')
-  Future<List<Map<String, String>>> apiGetHourlyDataByRow(String component,
-      int ptid, String start, String end) {
+  /// http://localhost:8080/system_demand/v1/market/da/start/20170101/end/20170101
+  @ApiMethod(path: 'market/{market}/start/{start}/end/{end}')
+  Future<List<Map<String, String>>> apiGetSystemDemand(
+      String market, String start, String end) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
-    return getHourlyDataRow(ptid, component,
-        startDate: startDate, endDate: endDate);
+    List res = [];
+    var data = _getData(market.toUpperCase(), startDate, endDate);
+    String columnName;
+    if (market.toUpperCase() == 'DA')
+      columnName = 'Day-Ahead Cleared Demand';
+    else if (market.toUpperCase() == 'RT')
+      columnName = 'Total Load';
+    await for (var e in data) {
+      for (int i = 0; i < e['hourBeginning'].length; i++) {
+        res.add({
+          'hourBeginning':
+              new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+          columnName: e[columnName][i]
+        });
+      }
+    }
+    return res;
   }
-
 
   /// Workhorse to extract the data ...
   /// returns one element for each day
-  Stream getHourlyData(int ptid, String component,
-      {Date startDate, Date endDate}) {
+  Stream _getData(String market, Date startDate, Date endDate) {
     List pipeline = [];
-    Map match = {
-      'ptid': {'\$eq': ptid}
-    };
-    Map date = {};
-    if (startDate != null) date['\$gte'] = startDate.toString();
-    if (endDate != null) date['\$lt'] = endDate.add(1).toString();
-    if (date.isNotEmpty) match['date'] = date;
-
-    Map project;
-    if (component == 'lmp') {
-      project = {'_id': 0, 'hourBeginning': 1, 'price': '\$lmp'};
-    } else if (component == 'congestion') {
-      project = {'_id': 0, 'hourBeginning': 1, 'price': '\$congestion'};
-    } else if (component == 'marginal_loss') {
-      project = {'_id': 0, 'hourBeginning': 1, 'price': '\$marginal_loss'};
-    }
-    pipeline.add({'\$match': match});
-    pipeline.add({'\$project': project});
+    pipeline.add({
+      '\$match': {
+        'market': {'\$eq': market},
+        'date': {
+          '\$gte': startDate.toString(),
+          '\$lte': endDate.toString(),
+        },
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'market': 0,
+      }
+    });
     return coll.aggregateToStream(pipeline);
   }
 }

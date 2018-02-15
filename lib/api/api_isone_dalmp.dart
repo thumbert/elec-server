@@ -86,7 +86,6 @@ class DaLmp {
         hoursBeginning.add(new TZDateTime.from(dt, _location).toString());
       for (var price in e['price']) prices.add(price);
     }
-    ;
     return new Tuple2(hoursBeginning, prices);
   }
 

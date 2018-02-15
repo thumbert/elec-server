@@ -5,10 +5,8 @@ import 'dart:async';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
-import 'package:elec_server/api/api_isone_dalmp.dart';
 
 /// prepare data by downloading a few reports
 prepareData() async {

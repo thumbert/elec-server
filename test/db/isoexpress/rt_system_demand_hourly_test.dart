@@ -13,8 +13,8 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 prepareData() async {
   var archive = new RtSystemDemandReportArchive();
   var days = [
-    new Date(2015,2,17),    // empty file
-    new Date(2017,12,13)    // plenty of constraints
+    new Date(2015,2,17),
+    new Date(2017,12,13)
   ];
   await archive.downloadDays(days);
 }
