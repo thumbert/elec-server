@@ -68,11 +68,13 @@ test_parseIsoTimestamp() {
     List<Hour> hB = new Interval(new TZDateTime(location,2015,1,1),
         new TZDateTime(location,2015,1,1,4))
         .splitLeft((dt) => new Hour.beginning(dt));
+    hB.add(new Hour.beginning(new TZDateTime(location,2015,1,1,23)));
     List out = [
       ['2015-01-01', '01'],
       ['2015-01-01', '02'],
       ['2015-01-01', '03'],
       ['2015-01-01', '04'],
+      ['2015-01-01', '24'],
     ];
     for (int i=0; i<out.length; i++) {
       expect(toIsoHourEndingStamp(hB[i].start), out[i]);

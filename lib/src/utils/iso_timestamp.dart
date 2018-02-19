@@ -29,21 +29,25 @@ TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
 /// Convert an hour beginning timestamp to the ISO hour ending format.
 /// The [hourBeginning] timestamp needs to be in the eastern time zone.
 /// Return a two element list with the date and hour ending.
-/// E.g. ['2018-02-01', '03']
+/// E.g. ['2018-02-01', '03'], ['2018-02-11', '24'].
 List<String> toIsoHourEndingStamp(TZDateTime hourBeginning) {
   Hour hour = new Hour.beginning(hourBeginning);
   int offsetStart = hour.start.timeZoneOffset.inHours;
   bool isFallBack = isFallBackDate(new Date(
       hourBeginning.year, hourBeginning.month, hourBeginning.day));
-  List res = [hourBeginning.toString().substring(0, 10)];
+  List res = [hour.start.toString().substring(0,10)];
 
-  if (isFallBack) {
-   if (hour.start.hour == 0) res.add('01');
-   else if (hour.start.hour == 1 && offsetStart == -4) res.add('02');
-   else if (hour.start.hour == 1 && offsetStart == -5) res.add('02X');
-   else res.add(hour.end.hour.toString().padLeft(2, '0'));
-  } else {
-    res.add(hour.end.hour.toString().padLeft(2, '0'));
+  if (hourBeginning.hour == 23)
+    res.add('24');
+  else {
+    if (isFallBack) {
+      if (hour.start.hour == 0) res.add('01');
+      else if (hour.start.hour == 1 && offsetStart == -4) res.add('02');
+      else if (hour.start.hour == 1 && offsetStart == -5) res.add('02X');
+      else res.add(hour.end.hour.toString().padLeft(2, '0'));
+    } else {
+      res.add(hour.end.hour.toString().padLeft(2, '0'));
+    }
   }
 
   return res;
