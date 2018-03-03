@@ -33,8 +33,9 @@ class DaEnergyOffers {
   Future<List<Map<String,String>>> getGenerationStack(String date, String hourending) async {
     var stack = [];
     List eo = await getEnergyOffers(date, hourending);
-    /// get rid of the unavailable units (some still submit offers!), and make
-    /// the must run units have $-150 prices in the first block only.
+    /// 1) get rid of the unavailable units (some still submit offers!),
+    /// 2) make the must run units have $-150 prices in the first block only.
+    /// 3) some units have MW for a segment > Ecomax.
     var gEo = _groupBy(eo.where((Map e) => e['Unit Status'] != 'UNAVAILABLE'),
         (Map e) => e['assetId']);
     gEo.keys.forEach((assetId) {
@@ -44,9 +45,14 @@ class DaEnergyOffers {
         offers.sort((a,b) => a['price'].compareTo(b['price']));
         offers.first['price'] = -150;
       }
-      stack.addAll(offers);
+      offers.forEach((Map e){
+        if (e['quantity'] > e['Economic Maximum'])
+          e['quantity'] = e['Economic Maximum']/offers.length;
+      });
+      stack.addAll(offers.where((Map e) => e['quantity'] <= e['Economic Maximum']));
     });
     ordering.sort(stack);
+    /// calculate the cumulative quantity
     num cumMWh = 0;
     stack.forEach((Map e) {
       cumMWh += e['quantity'];
@@ -59,8 +65,7 @@ class DaEnergyOffers {
   @ApiMethod(path: 'date/{date}/hourending/{hourending}')
   /// Return the energy offers (price/quantity pairs) for a given datetime.
   Future<List<Map<String, String>>> getEnergyOffers(String date, String hourending) async {
-    if (hourending.length == 1)
-      hourending = hourending.padLeft(2, '0');
+    hourending = hourending.padLeft(2, '0');
     Date day = Date.parse(date);
     TZDateTime dt = parseHourEndingStamp(mmddyyyy(day), hourending);
     List pipeline = [];
@@ -73,6 +78,7 @@ class DaEnergyOffers {
       '_id': 0,
       'Masked Asset ID': 1,
       'Unit Status': 1,
+      'Economic Maximum': 1,
       'hours': {
         '\$filter': {
           'input': '\$hours',
@@ -87,14 +93,16 @@ class DaEnergyOffers {
     var res = coll.aggregateToStream(pipeline);
     /// flatten the map in Dart
     List out = [];
-    List keys = ['assetId', 'Unit Status', 'hourBeginning', 'price', 'quantity'];
+    List keys = ['assetId', 'Unit Status', 'Economic Maximum',
+      'hourBeginning', 'price', 'quantity'];
+
     await for (Map e in res) {
-      //print(e);
       List prices = e['hours']['price'];
       for (int i=0; i<prices.length; i++) {
         out.add(new Map.fromIterables(keys, [
           e['Masked Asset ID'],
           e['Unit Status'],
+          e['hours']['Economic Maximum'],
           new TZDateTime.from(e['hours']['hourBeginning'], location).toString(),
           e['hours']['price'][i],
           e['hours']['quantity'][i]

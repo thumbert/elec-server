@@ -47,13 +47,6 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     row['Must Take Energy'] = rows.first['Must Take Energy'];
     row['Maximum Daily Energy Available'] =
         rows.first['Maximum Daily Energy Available'];
-    row['Economic Maximum'] = rows.first['Economic Maximum'];
-    row['Economic Minimum'] = rows.first['Economic Minimum'];
-    row['Cold Startup Price'] = rows.first['Cold Startup Price'];
-    row['Intermediate Startup Price'] =
-        rows.first['Intermediate Startup Price'];
-    row['Hot Startup Price'] = rows.first['Hot Startup Price'];
-    row['No Load Price'] = rows.first['No Load Price'];
     row['Unit Status'] = rows.first['Unit Status'];
     row['Claim 10'] = rows.first['Claim 10'];
     row['Claim 30'] = rows.first['Claim 30'];
@@ -64,6 +57,12 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       Map aux = {};
       aux['hourBeginning'] =
           parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
+      aux['Economic Maximum'] = hour['Economic Maximum'];
+      aux['Economic Minimum'] = hour['Economic Minimum'];
+      aux['Cold Startup Price'] = hour['Cold Startup Price'];
+      aux['Intermediate Startup Price'] = hour['Intermediate Startup Price'];
+      aux['Hot Startup Price'] = hour['Hot Startup Price'];
+      aux['No Load Price'] = hour['No Load Price'];
 
       /// add the non empty price/quantity pairs
       var pricesHour = [];

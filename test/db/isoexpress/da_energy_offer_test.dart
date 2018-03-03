@@ -57,10 +57,10 @@ Future soloTest() async {
 
 Future insertDays() async {
   var archive = new DaEnergyOfferArchive();
-  List days = new Interval(new DateTime(2017, 1, 1), new DateTime(2017, 9, 30))
+  List days = new Interval(new DateTime(2017, 1, 2), new DateTime(2017, 7, 1))
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
-  await for (var day in new Stream.fromIterable(days)) {
+  for (var day in days) {
     await archive.downloadDay(day);
     await archive.insertDay(day);
   }
