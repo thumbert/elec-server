@@ -39,7 +39,7 @@ class DaLmp {
     Date endDate = Date.parse(end);
     var t2 = await getHourlyDataColumn(ptid, component,
         startDate: startDate, endDate: endDate);
-    return {'hourBeginning': t2.item1, 'congestion': t2.item2};
+    return {'hourBeginning': t2.item1, component: t2.item2};
   }
 
 

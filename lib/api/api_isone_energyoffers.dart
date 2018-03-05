@@ -29,7 +29,7 @@ class DaEnergyOffers {
 
   //http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
   @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
-  /// return the stack
+  /// return the stack, energy offers sorted.
   Future<List<Map<String,String>>> getGenerationStack(String date, String hourending) async {
     var stack = [];
     List eo = await getEnergyOffers(date, hourending);
@@ -49,15 +49,9 @@ class DaEnergyOffers {
         if (e['quantity'] > e['Economic Maximum'])
           e['quantity'] = e['Economic Maximum']/offers.length;
       });
-      stack.addAll(offers.where((Map e) => e['quantity'] <= e['Economic Maximum']));
+      stack.addAll(offers);
     });
     ordering.sort(stack);
-    /// calculate the cumulative quantity
-    num cumMWh = 0;
-    stack.forEach((Map e) {
-      cumMWh += e['quantity'];
-      e['cumulative qty'] = cumMWh;
-    });
     return stack;
   }
 
