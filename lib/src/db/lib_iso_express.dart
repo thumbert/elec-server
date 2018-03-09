@@ -84,6 +84,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
     var data;
     try {
       data = processFile(file);
+      if (data.isEmpty) return new Future.value(null);
     } on mis.IncompleteReportException {
       file.delete();
       return new Future.value(null);

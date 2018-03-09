@@ -49,6 +49,7 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
 
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return [];
     return [converter(data)];
   }
 
