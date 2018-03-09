@@ -7,7 +7,8 @@ import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:tuple/tuple.dart';
-import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
+import 'package:elec/elec.dart';
+import 'package:table/table.dart';
 
 @ApiClass(name: 'dalmp', version: 'v1')
 class DaLmp {
@@ -20,6 +21,52 @@ class DaLmp {
     coll = db.collection(collectionName);
     _location = getLocation('US/Eastern');
   }
+
+  /// http://localhost:8080/dalmp/v1/daily/lmp/ptid/4000/start/20170101/end/20170101/bucket/5x16
+  @ApiMethod(path: 'daily/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
+  Future<List<Map<String, String>>> apiGetDailyBucketPrice(
+      String component, int ptid, String start, String end, String bucket) async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+    Bucket bucketO = Bucket.parse(bucket);
+
+    Stream aux = getHourlyData(ptid, component, startDate: startDate, endDate: endDate);
+    List out = [];  // keep only the hours in the right bucket
+    List keys = ['hourBeginning', component];
+    await for (var e in aux) {
+      /// each element is a list of 24 hours, prices
+      for (int i = 0; i < e['hourBeginning'].length; i++) {
+        TZDateTime hb = new TZDateTime.from(e['hourBeginning'][i], _location);
+        if (bucketO.containsHour(new Hour.beginning(hb))) {
+          out.add(new Map.fromIterables(keys, [
+            new TZDateTime.from(e['hourBeginning'][i], _location),
+            e['price'][i]
+          ]));
+        }
+      }
+    }
+    /// do the daily aggregation
+    Nest nest = new Nest()
+      ..key((Map e) => new Date.fromTZDateTime(e['hourBeginning']))
+      ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
+    List<Map> res = nest.entries(out);
+    return res.map((Map e) => {
+      'date': e['key'].toString(),
+      component : e['values']
+    }).toList();
+  }
+
+  num _mean(Iterable<num> x) {
+    int i = 0;
+    num res = 0;
+    x.forEach((e) {
+      res += e;
+      i++;
+    });
+    return res/i;
+  }
+
+
 
   /// http://localhost:8080/dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170101
   @ApiMethod(path: 'byrow/{component}/ptid/{ptid}/start/{start}/end/{end}')

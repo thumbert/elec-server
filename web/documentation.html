@@ -23,6 +23,7 @@
         <h2>API</h2>
         <ul>
             <li><a href="#customer-counts-ngrid">Customer counts for NGrid</a></li>
+            <li><a href="#dam-daily-prices">DAM daily prices by bucket</a></li>
             <li><a href="#dam-hourly-prices">DAM hourly prices</a></li>
             <li><a href="#dam-binding-constraints">DAM binding constraints</a></li>
             <li><a href="#epa-emission-data">EPA emission data</a></li>
@@ -57,18 +58,28 @@
 
             </ul>
         </div>
+        <div id="dam-daily-prices">
+            <h4>DAM daily prices by bucket</h4>
+            <ul>
+                <li>Calculate daily prices (average over the hourly prices) for of the 3 components
+                    (lmp, congestion, marginal_loss), by bucket (standard bucket names are supported).
+                    <div><a href="http://localhost:8080/dalmp/v1/daily/lmp/ptid/4000/start/20170101/end/20170105/bucket/5x16">dalmp/daily/lmp/ptid/4000/start/20170101/end/20170105/bucket/5x16</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/daily/congestion/ptid/4000/start/20170101/end/20170105/bucket/2x16H">dalmp/daily/congestion/ptid/4000/start/20170101/end/20170105/bucket/2x16H</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/daily/marginal_loss/ptid/4000/start/20170101/end/20170105/bucket/flat">dalmp/daily/marginal_loss/ptid/4000/start/20170101/end/20170105/bucket/flat</a></div>
+                </li>
+            </ul>
+        </div>
         <div id="dam-hourly-prices">
             <h4>DAM hourly prices</h4>
             <ul>
-                <li>All history by node ptid, for any of the 3 components (lmp, congestion, loss)
+                <li>All history by node ptid, for any of the 3 components (lmp, congestion, marginal_loss)
                     <div><a href="http://localhost:8080/dalmp/v1/bycolumn/lmp/ptid/4000/start/20170701/end/20170701">dalmp/v1/bycolumn/lmp/ptid/4000/start/20170701/end/20170701</a></div>
                     <div><a href="http://localhost:8080/dalmp/v1/bycolumn/congestion/ptid/4000/start/20170701/end/20170701">dalmp/v1/bycolumn/congestion/ptid/4000/start/20170701/end/20170701</a></div>
-                    <div><a href="http://localhost:8080/dalmp/v1/bycolumn/loss/ptid/4000/start/20170701/end/20170701">dalmp/v1/bycolumn/loss/ptid/4000/start/20170701/end/20170701</a></div>
-                </li>
+                    <div><a href="http://localhost:8080/dalmp/v1/bycolumn/marginal_loss/ptid/4000/start/20170701/end/20170701">dalmp/v1/bycolumn/marginal_loss/ptid/4000/start/20170701/end/20170701</a></div>                </li>
                 <li>Selected history by ptid
                     <div><a href="http://localhost:8080/dalmp/v1/byrow/lmp/ptid/4000/start/20170101/end/20170131">dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170131</a></div>
                     <div><a href="http://localhost:8080/dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170131">dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170131</a></div>
-                    <div><a href="http://localhost:8080/dalmp/v1/byrow/loss/ptid/4000/start/20170101/end/20170131">dalmp/v1/byrow/loss/ptid/4000/start/20170101/end/20170131</a></div>
+                    <div><a href="http://localhost:8080/dalmp/v1/byrow/marginal_loss/ptid/4000/start/20170101/end/20170131">dalmp/v1/byrow/marginal_loss/ptid/4000/start/20170101/end/20170131</a></div>
                 </li>
             </ul>
         </div>
