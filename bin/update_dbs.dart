@@ -22,14 +22,14 @@ import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 main() async {
   initializeTimeZoneSync( getLocationTzdb() );
 
-  await new DaLmpHourlyArchive().updateDb();
-  await new DaBindingConstraintsReportArchive().updateDb();
-  await new DaClearedDemandReportArchive().updateDb();
-  await new RtSystemDemandReportArchive().updateDb();
-
-  await new NcpcRapidResponsePricingReportArchive().updateDb();
+//  await new DaLmpHourlyArchive().updateDb();
+//  await new DaBindingConstraintsReportArchive().updateDb();
+//  await new DaClearedDemandReportArchive().updateDb();
+//  await new RtSystemDemandReportArchive().updateDb();
+//
+//  await new NcpcRapidResponsePricingReportArchive().updateDb();
 
   await new DaEnergyOfferArchive().updateDb();
-  await new DaDemandBidArchive().updateDb();
+//  await new DaDemandBidArchive().updateDb();
 
 }

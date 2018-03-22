@@ -24,7 +24,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
         ..dbName = 'isoexpress'
         ..collectionName = 'da_energy_offer';
     }
-    if (dir == null) dir = baseDir + 'PricingReports/DaEnergyOffer/Raw/';
+    dir ??= baseDir + 'PricingReports/DaEnergyOffer/Raw/';
   }
   String reportName = 'Day-Ahead Energy Market Historical Offer Report';
   String getUrl(Date asOfDate) =>

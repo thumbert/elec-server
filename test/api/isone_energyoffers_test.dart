@@ -6,7 +6,7 @@ import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/api/api_isone_energyoffers.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
-
+import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 
 ApiTest() async {
   Db db;
@@ -35,13 +35,25 @@ ApiTest() async {
 
       Map fixedData = data.firstWhere((Map e) => e['assetId'] == 87105);
       print(fixedData);
-
     });
   });
+}
+
+insertDays(Month month) async {
+  var archive = new DaEnergyOfferArchive();
+  await archive.dbConfig.db.open();
+  for (var day in month.days()) {
+    await archive.downloadDay(day);
+    await archive.insertDay(day);
+  }
+  await archive.dbConfig.db.close();
 }
 
 
 main() async {
   initializeTimeZoneSync(getLocationTzdb());
-  await ApiTest();
+  //await ApiTest();
+
+  insertDays(new Month(2017, 12));
+
 }
