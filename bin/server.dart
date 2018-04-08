@@ -8,6 +8,7 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
 
 import 'package:elec_server/api/api_isone_dalmp.dart';
+import 'package:elec_server/api/api_isone_rtlmp.dart';
 import 'package:elec_server/api/api_isone_bindingconstraints.dart';
 import 'package:elec_server/api/api_isone_energyoffers.dart';
 import 'package:elec_server/api/api_isone_demandbids.dart';
@@ -31,6 +32,7 @@ registerApis() async {
   Db db3 = new Db('mongodb://$host/isoexpress');
   await db3.open();
   _apiServer.addApi( new DaLmp(db3) );
+  _apiServer.addApi( new RtLmp(db3) );
   _apiServer.addApi( new BindingConstraints(db3) );
   _apiServer.addApi( new DaEnergyOffers(db3) );
   _apiServer.addApi( new DaDemandBids(db3) );
