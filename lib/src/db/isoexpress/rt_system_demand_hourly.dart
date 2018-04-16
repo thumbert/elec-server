@@ -76,7 +76,7 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
     return {'lastDay': res['result'][0]['lastDay']};
   }
 
-  Date lastDayAvailable() => Date.today().next;
+  Date lastDayAvailable() => Date.today().subtract(2);
   Future<Null> deleteDay(Date day) async {
     return await dbConfig.coll.remove(where.eq('date', day.toString()));
   }
