@@ -44,7 +44,8 @@ apiTest() async {
 
 main() async {
 
-//  await updateDb();
+  await updateDb();
 
-  await apiTest();
+//  await apiTest();
+
 }

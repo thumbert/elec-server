@@ -13,8 +13,8 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 prepareData() async {
   var archive = new RtSystemDemandReportArchive();
   var days = [
-    new Date(2015,2,17),
-    new Date(2017,12,13)
+    new Date(2018,1,1),
+    new Date(2018,1,31)
   ];
   await archive.downloadDays(days);
 }
@@ -39,11 +39,12 @@ prepareData() async {
 uploadDays() async {
   var archive = new RtSystemDemandReportArchive();
   List days =
-  new Interval(new DateTime(2017, 1, 1), new DateTime(2017, 1, 5))
+  new Interval(new DateTime(2014, 1, 1), new DateTime(2018, 4, 1))
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
-  await for (var day in new Stream.fromIterable(days)) {
-    await archive.downloadDay(day);
+  for (var day in days) {
+    print(day);
+    //await archive.downloadDay(day, override: false);
     await archive.insertDay(day);
   }
   archive.dbConfig.db.close();
@@ -56,8 +57,7 @@ main() async {
   //await new RtSystemDemandReportArchive().setupDb();
   await uploadDays();
 
-//  await prepareData();
-//  await DaBindingConstraintsTest();
+  //await prepareData();
 
 //  await soloTest();
 
