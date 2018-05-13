@@ -22,6 +22,9 @@ dependencies:
   more: ^1.8.1
   rpc: ^0.5.7+1
   spreadsheet_decoder: 0.3.2
+  table:
+        git:
+            url: git://github.com/thumbert/table.git
   timezone: '>=0.4.3 <0.5.0'
   tuple: '>=1.0.0 <2.0.0'
 
