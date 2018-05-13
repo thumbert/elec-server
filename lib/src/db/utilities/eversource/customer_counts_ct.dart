@@ -75,8 +75,8 @@ class EversourceCtCustomerCountsArchive {
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
-        ..dbName = 'isone'
-        ..collectionName = 'eversource_customer_counts_ct';
+        ..dbName = 'eversource'
+        ..collectionName = 'customer_counts_ct';
     }
     if (dir == null)
       dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/CT/';

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:elec_server/src/db/utilities/customer_counts.dart';
 import 'package:elec_server/src/db/config.dart';
 
-import 'package:elec_server/api/api_customer_counts.dart';
+import 'package:elec_server/api/utilities/api_customer_counts.dart';
 
 Map env = Platform.environment;
 

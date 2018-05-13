@@ -6,7 +6,7 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/utilities/eversource/customer_counts_ct.dart';
 import 'package:elec_server/src/db/config.dart';
 
-import 'package:elec_server/api/api_customer_counts.dart';
+import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart';
 
 
 
@@ -39,17 +39,14 @@ updateDb() async {
 apiTest() async {
   ComponentConfig config = new ComponentConfig()
     ..host = '127.0.0.1'
-    ..dbName = 'isone'
-    ..collectionName = 'eversource_customer_counts';
+    ..dbName = 'eversource'
+    ..collectionName = 'customer_counts_ct';
 
   var api = new ApiCustomerCounts(config.db);
 
   await config.db.open();
-  //var res = await api.apiKwhTown('Attleboro');
-  //var res = await api.apiKwhZoneRateClass('SEMA', 'R1');
-  var res = await api.getAvailableTowns();
+  var res = await api.customerCountsCt();
   res.forEach(print);
-
 
   await config.db.close();
 }
@@ -57,7 +54,7 @@ apiTest() async {
 
 main() async {
 
-  await updateDb();
+  //await updateDb();
 
-  //await apiTest();
+  await apiTest();
 }
