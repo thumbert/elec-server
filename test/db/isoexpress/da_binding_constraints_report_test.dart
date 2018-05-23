@@ -46,10 +46,12 @@ DaBindingConstraintsTest() async {
 }
 
 uploadDays() async {
+  Location location = getLocation('US/Eastern');
   var archive = new DaBindingConstraintsReportArchive();
   List days =
-  new Interval(new DateTime(2017, 1, 1), new DateTime(2017, 1, 5))
-      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+  new Interval(new TZDateTime(location, 2017, 1, 1),
+      new TZDateTime(location, 2017, 1, 5))
+      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day, location: location));
   await archive.dbConfig.db.open();
   await for (var day in new Stream.fromIterable(days)) {
     await archive.downloadDay(day);

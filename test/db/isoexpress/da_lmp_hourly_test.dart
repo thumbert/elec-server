@@ -15,7 +15,6 @@ prepareData() async {
   await archive.downloadDays(days);
 }
 
-
 DaLmpHourlyTest() async {
   group('DA hourly lmp report', () {
     var archive = new DaLmpHourlyArchive();
@@ -35,9 +34,10 @@ DaLmpHourlyTest() async {
       await archive.dbConfig.db.close();
     });
     test('insert several days', () async {
-      List days =
-          new Interval(new DateTime(2017, 1, 1), new DateTime(2017, 1, 5))
-              .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+      Location location = getLocation('US/Eastern');
+      List days = new Interval(new TZDateTime(location, 2017, 1, 1),
+              new TZDateTime(location, 2017, 1, 5))
+          .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
       await archive.dbConfig.db.open();
       await for (var day in new Stream.fromIterable(days)) {
         await archive.downloadDay(day);
@@ -48,24 +48,29 @@ DaLmpHourlyTest() async {
   });
 }
 
-
 Future soloTest() async {
   var archive = new DaLmpHourlyArchive();
-  var data = await archive.processFile(archive.getFilename(new Date(2017,12,30)));
-  print(data);
+  Location location = getLocation('US/Eastern');
+  List days = new Interval(new TZDateTime(location, 2018, 1, 1),
+      new TZDateTime(location, 2018, 5, 1))
+      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+  await archive.dbConfig.db.open();
+  await for (var day in new Stream.fromIterable(days)) {
+    await archive.downloadDay(day);
+    await archive.insertDay(day);
+  }
+  archive.dbConfig.db.close();
 }
-
 
 main() async {
   await initializeTimeZone(getLocationTzdb());
   // //await new DaLmpHourlyArchive().setupDb();
   // await prepareData();
 
-   await DaLmpHourlyTest();
+//  await DaLmpHourlyTest();
 
 //  Db db = new Db('mongodb://localhost/isoexpress');
 //  await new DaLmpHourlyArchive().updateDb(new DaLmp(db));
 
-  //await soloTest();
+  await soloTest();
 }
-

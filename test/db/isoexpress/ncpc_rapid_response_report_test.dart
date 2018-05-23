@@ -36,7 +36,7 @@ ncpcRapidResponseTest() async {
       await archive.dbConfig.db.close();
     });
     test('insert several days', () async {
-      List days = new Interval(new DateTime(2017,3,2), new DateTime(2017,4))
+      List days = new Interval(new Date(2017,3,2).start, new Date(2017,4,1).start)
           .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
       await archive.dbConfig.db.open();
       await for (var day in new Stream.fromIterable(days)) {

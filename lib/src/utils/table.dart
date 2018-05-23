@@ -12,6 +12,8 @@ class Table {
   List<int> _sortDirection;
 
   /// A simple html table with sorting.
+  /// The [options] Map can be used to specify a format function for a
+  /// given column, e.g. {'columnName': {'valueFormat': (num x) => x.round()}}
   Table(this.tableWrapper, this.data, {this.options}) {
     _columnNames = data.first.keys.toList();
     _tableHeaders = new List(_columnNames.length);
@@ -36,7 +38,7 @@ class Table {
       List values = data[r].values.toList();
       var tRow = tBody.insertRow(r);
       for (int j=0; j<_columnNames.length; j++) {
-        if (options.containsKey(_columnNames[j]) && (options[_columnNames[j]].containsKey('valueFormat'))) {
+        if (options != null && options.containsKey(_columnNames[j]) && (options[_columnNames[j]].containsKey('valueFormat'))) {
           var aux = options[_columnNames[j]]['valueFormat'](values[j]);
           tRow..insertCell(j).text = aux;
         } else {
