@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   args: ^0.13.7
+  dart_to_js_script_rewriter: ^1.0.1
   date:
       git:
           url: git://github.com/thumbert/date.git
@@ -32,7 +33,6 @@ dependencies:
 
 dev_dependencies:
   browser: ^0.10.0
-  dart_to_js_script_rewriter: ^1.0.1
   test: ^0.12.0
 
 transformers:
