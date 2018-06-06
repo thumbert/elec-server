@@ -14,7 +14,10 @@ class Table {
   /// A simple html table with sorting.
   /// The [options] Map can be used to specify a format function for a
   /// given column, e.g. {'columnName': {'valueFormat': (num x) => x.round()}}
+  /// By default the table has column names.
+  /// If you don't want column names, use {'noColumnNames': true}
   Table(this.tableWrapper, this.data, {this.options}) {
+    options ??= {};
     _columnNames = data.first.keys.toList();
     _tableHeaders = new List(_columnNames.length);
     _sortDirection = new List(_columnNames.length);
@@ -28,7 +31,11 @@ class Table {
     TableRowElement headerRow = table.tHead.insertRow(0);
     for (int i=0; i<_columnNames.length; i++) {
       _tableHeaders[i] =  new Element.th();
-      _tableHeaders[i].text = _columnNames[i];
+      if (options.containsKey('noColumnNames') && options['noColumnNames']) {
+        _tableHeaders[i].text = '';
+      } else {
+        _tableHeaders[i].text = _columnNames[i];
+      }
       _tableHeaders[i].onClick.listen((e) => _sortByColumn(i));
       headerRow.nodes.add(_tableHeaders[i]);
     }
@@ -38,7 +45,7 @@ class Table {
       List values = data[r].values.toList();
       var tRow = tBody.insertRow(r);
       for (int j=0; j<_columnNames.length; j++) {
-        if (options != null && options.containsKey(_columnNames[j]) && (options[_columnNames[j]].containsKey('valueFormat'))) {
+        if (options.containsKey(_columnNames[j]) && (options[_columnNames[j]].containsKey('valueFormat'))) {
           var aux = options[_columnNames[j]]['valueFormat'](values[j]);
           tRow..insertCell(j).text = aux;
         } else {
