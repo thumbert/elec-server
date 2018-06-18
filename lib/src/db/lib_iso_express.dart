@@ -66,8 +66,25 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// Download one day.  Check if the file has downloaded successfully.
   /// If [override] is true, re-download the day.
   Future<Null> downloadDay(Date day, {bool override: true}) async {
-    return await _downloadUrl(getUrl(day), getFilename(day),
+    return await downloadUrl(getUrl(day), getFilename(day),
         override: override);
+  }
+
+  /// Download this url to a file.
+  Future downloadUrl(String url, File fileout, {bool override: true}) async {
+    if (fileout.existsSync() && !override) {
+      return new Future.value(
+          print('File ${fileout.path} was already downloaded.  Skipping.'));
+    } else {
+      if (!new Directory(dirname(fileout.path)).existsSync()) {
+        new Directory(dirname(fileout.path)).createSync(recursive: true);
+        print('Created directory ${dirname(fileout.path)}');
+      }
+      HttpClient client = new HttpClient();
+      HttpClientRequest request = await client.getUrl(Uri.parse(url));
+      HttpClientResponse response = await request.close();
+      await response.pipe(fileout.openWrite());
+    }
   }
 
   /// Download a list of days from the website.
@@ -110,22 +127,6 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   }
 }
 
-/// Download this url to a file.
-Future _downloadUrl(String url, File fileout, {bool override: true}) async {
-  if (fileout.existsSync() && !override) {
-    return new Future.value(
-        print('File ${fileout.path} was already downloaded.  Skipping.'));
-  } else {
-    if (!new Directory(dirname(fileout.path)).existsSync()) {
-      new Directory(dirname(fileout.path)).createSync(recursive: true);
-      print('Created directory ${dirname(fileout.path)}');
-    }
-    HttpClient client = new HttpClient();
-    HttpClientRequest request = await client.getUrl(Uri.parse(url));
-    HttpClientResponse response = await request.close();
-    await response.pipe(fileout.openWrite());
-  }
-}
 
 /// Format a date to the yyyymmdd format, e.g. 20170115.
 String yyyymmdd(Date date) => date.toString().replaceAll('-', '');
