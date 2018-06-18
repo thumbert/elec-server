@@ -9,6 +9,7 @@ import 'package:elec_server/src/db/isoexpress/da_cleared_demand_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_demand_hourly.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
+Location location = getLocation('US/Eastern');
 
 /// prepare data by downloading a few reports
 prepareData() async {
@@ -36,7 +37,8 @@ DaClearedDemandTest() async {
 uploadDaysDa() async {
   var archive = new DaClearedDemandReportArchive();
   List days =
-  new Interval(new DateTime(2017, 1, 1), new DateTime(2018, 1, 1))
+  new Interval(new TZDateTime(location, 2017, 1, 1),
+      new TZDateTime(location, 2018, 1, 1))
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   await for (var day in new Stream.fromIterable(days)) {
@@ -50,7 +52,8 @@ uploadDaysDa() async {
 uploadDaysRt() async {
   var archive = new RtSystemDemandReportArchive();
   List days =
-  new Interval(new DateTime(2017, 1, 5), new DateTime(2017, 12, 20))
+  new Interval(new TZDateTime(location, 2017, 1, 5),
+      new TZDateTime(location, 2017, 12, 20))
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   await for (var day in new Stream.fromIterable(days)) {

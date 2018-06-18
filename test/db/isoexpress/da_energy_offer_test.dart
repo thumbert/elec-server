@@ -56,8 +56,10 @@ Future soloTest() async {
 }
 
 Future insertDays() async {
+  Location location = getLocation('US/Eastern');
   var archive = new DaEnergyOfferArchive();
-  List days = new Interval(new DateTime(2017, 1, 2), new DateTime(2017, 7, 1))
+  List days = new Interval(new TZDateTime(location, 2017, 12, 1),
+      new TZDateTime(location,2018, 2, 1))
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   for (var day in days) {

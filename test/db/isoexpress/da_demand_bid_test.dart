@@ -50,8 +50,10 @@ DaEnergyOffersTest() async {
 
 
 Future insertDays() async {
+  Location location = getLocation('US/Eastern');
   var archive = new DaDemandBidArchive();
-  List days = new Interval(new DateTime(2017, 1, 1), new DateTime(2017, 9, 30))
+  List days = new Interval(new TZDateTime(location, 2017, 1, 1),
+      new TZDateTime(location, 2017, 9, 30))
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   await for (var day in new Stream.fromIterable(days)) {

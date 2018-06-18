@@ -42,7 +42,7 @@ RtLmpHourlyTest() async {
     });
     test('insert several days', () async {
       List days =
-          new Interval(new DateTime(2017, 1, 1), new DateTime(2017, 1, 5))
+          new Interval(new Date(2017, 1, 1).start, new Date(2017, 1, 5).start)
               .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
       for (var day in days) {
         await archive.downloadDay(day);
@@ -55,7 +55,7 @@ RtLmpHourlyTest() async {
 Future fillDb() async {
   var archive = new RtLmpHourlyArchive();
   await archive.dbConfig.db.open();
-  List days = new Interval(new DateTime(2017,12,31), new DateTime(2018,1,1))
+  List days = new Interval(new Date(2017,12,31).start, new Date(2018,1,1).start)
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   for (var day in days) {
     await archive.downloadDay(day);
