@@ -30,6 +30,23 @@ abstract class IsoExpressReport {
   /// Make it ready for insertion in the database.
   List<Map> processFile(File file);
 
+  /// Download this url to a file.
+  Future downloadUrl(String url, File fileout, {bool override: true}) async {
+    if (fileout.existsSync() && !override) {
+      return new Future.value(
+          print('File ${fileout.path} was already downloaded.  Skipping.'));
+    } else {
+      if (!new Directory(dirname(fileout.path)).existsSync()) {
+        new Directory(dirname(fileout.path)).createSync(recursive: true);
+        print('Created directory ${dirname(fileout.path)}');
+      }
+      HttpClient client = new HttpClient();
+      HttpClientRequest request = await client.getUrl(Uri.parse(url));
+      HttpClientResponse response = await request.close();
+      await response.pipe(fileout.openWrite());
+    }
+  }
+
   /// Insert this data into the database.
   Future insertData(List<Map> data) async {
     return dbConfig.coll
@@ -68,23 +85,6 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   Future<Null> downloadDay(Date day, {bool override: true}) async {
     return await downloadUrl(getUrl(day), getFilename(day),
         override: override);
-  }
-
-  /// Download this url to a file.
-  Future downloadUrl(String url, File fileout, {bool override: true}) async {
-    if (fileout.existsSync() && !override) {
-      return new Future.value(
-          print('File ${fileout.path} was already downloaded.  Skipping.'));
-    } else {
-      if (!new Directory(dirname(fileout.path)).existsSync()) {
-        new Directory(dirname(fileout.path)).createSync(recursive: true);
-        print('Created directory ${dirname(fileout.path)}');
-      }
-      HttpClient client = new HttpClient();
-      HttpClientRequest request = await client.getUrl(Uri.parse(url));
-      HttpClientResponse response = await request.close();
-      await response.pipe(fileout.openWrite());
-    }
   }
 
   /// Download a list of days from the website.

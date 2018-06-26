@@ -16,8 +16,6 @@ class ComponentConfig {
   String host;
   /// name of the mongo collection
   String collectionName;
-  /// location on hard drive where external data is held
-  //String DIR;
   /// get the mongo database
   Db get db {
     if (_db == null) _db = new Db('mongodb://$host/$dbName');
