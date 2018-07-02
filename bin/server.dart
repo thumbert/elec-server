@@ -17,6 +17,7 @@ import 'package:elec_server/api/utilities/api_customer_counts.dart';
 import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart' as eversource;
 import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/api_system_demand.dart';
+import 'package:elec_server/api/api_isone_zonal_demand.dart';
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
@@ -38,6 +39,7 @@ registerApis() async {
   _apiServer.addApi( new DaEnergyOffers(db3) );
   _apiServer.addApi( new DaDemandBids(db3) );
   _apiServer.addApi( new SystemDemand(db3) );
+  _apiServer.addApi( new ZonalDemand(db3) );
 
   Db db4 = new Db('mongodb://$host/eversource');
   await db4.open();
