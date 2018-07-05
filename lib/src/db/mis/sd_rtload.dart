@@ -2,61 +2,66 @@ library db.mis.sd_rtload;
 
 import 'dart:async';
 import 'dart:io';
-import 'package:func/func.dart';
-import '../config.dart';
-import '../lib_mis_reports.dart' as mis;
-import '../converters.dart';
+import 'package:date/date.dart';
+import 'package:elec_server/src/db/config.dart';
+import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
-
 
 class SdRtloadArchive extends mis.MisReportArchive {
   ComponentConfig dbConfig;
 
-  SdRtloadArchive(this.dbConfig) {
+  SdRtloadArchive({this.dbConfig}) {
+    reportName = 'SD_RTLOAD';
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
-        ..dbName = 'mis'
-        ..collectionName = 'sd_rtload';
+        ..dbName = 'mis';
     }
+    dbConfig.collectionName = 'sd_rtload';
   }
 
-  Func1<List<Map>, Map> converter = (List<Map> rows) {
+  Map rowConverter(List<Map> rows, Date reportDate, DateTime version) {
     Map row = {};
-    row['date'] = formatDate(rows.first['Date']);
-    row['ptid'] = int.parse(rows.first['Location ID']);
+    row['date'] = reportDate.toString();
+    row['version'] = version;
+    row['Asset ID'] = rows.first['Asset ID'];
     row['hourBeginning'] = [];
-    row['congestion'] = [];
-    row['lmp'] = [];
-    row['marginal_loss'] = [];
+    row['Load Reading'] = [];
+    row['Ownership Share'] = [];
+    row['Share of Load Reading'] = [];
     rows.forEach((e) {
-      row['hourBeginning'].add(parseHourEndingStamp(e['Date'], e['Hour Ending']));
-      row['lmp'].add(e['Locational Marginal Price']);
-      row['congestion'].add(e['Congestion Component']);
-      row['marginal_loss'].add(e['Marginal Loss Component']);
+      row['hourBeginning'].add(
+          parseHourEndingStamp(mmddyyyy(reportDate), e['Trading interval']));
+      row['Load Reading'].add(e['Load Reading']);
+      row['Ownership Share'].add(e['Ownership Share']);
+      row['Share of Load Reading'].add(e['Share of Load Reading']);
     });
     return row;
-  };
+  }
 
   @override
   List<List<Map>> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
-    data.forEach((row) => converter([row]));
-    /// add the report date
-    //var date =
-    return [data];
+    var report = new mis.MisReport(file);
+    var reportDate = report.forDate();
+    var version = report.timestamp();
+    Map dataByAssetId = _groupBy(data, (row) => row['Asset ID']);
+    var res = dataByAssetId.keys
+        .map((assetId) =>
+            rowConverter(dataByAssetId[assetId], reportDate, version))
+        .toList();
+    return [res];
   }
 
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
     List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName)) await dbConfig.coll.drop();
-
+    if (collections.contains(dbConfig.collectionName))
+      await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1, 'Asset ID': 1, 'Contingency Name': 1, 'market': 1}, unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'Constraint Name': 1, 'market': 1});
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
+        keys: {'Asset ID': 1, 'date': 1,  'version': 1},
+        unique: true);
     await dbConfig.db.close();
   }
 
@@ -70,6 +75,4 @@ class SdRtloadArchive extends mis.MisReportArchive {
     x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
     return result;
   }
-
-
 }
