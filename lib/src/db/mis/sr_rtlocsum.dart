@@ -21,6 +21,16 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     dbConfig.collectionName = 'sr_rtlocsum';
   }
 
+  /// Override the implementation.  Keep quiet about the errors because I can
+  /// trust the index.
+  Future insertTabData(List<Map> data) async {
+    if (data.isEmpty) return new Future.value(null);
+    return dbConfig.coll
+        .insertAll(data)
+        .then((_) => print('--->  Inserted successfully'))
+        .catchError((e) => null);
+  }
+  
   /// for the first tab
   Map rowConverter0(List<Map> rows, String account, Date reportDate, DateTime version) {
     Map row = {};
@@ -122,8 +132,32 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'account': 1, 'tab': 1, 'Location ID': 1, 'date': 1, 'version': 1},
-        unique: true);
+        keys: {
+          'account': 1,
+          'tab': 1,
+          'Location ID': 1,
+          'date': 1,
+          'version': 1
+        },
+        unique: true,
+        partialFilterExpression: {
+          'tab': {'\$eq': 0},
+        });
+    await dbConfig.db.createIndex(dbConfig.collectionName,
+        keys: {
+          'account': 1,
+          'tab': 1,
+          'Subaccount ID': 1,
+          'Location ID': 1,
+          'date': 1,
+          'version': 1
+        },
+        unique: true,
+        partialFilterExpression: {
+          'Subaccount ID': {'\$exists': true},
+          'tab': {'\$eq': 1},
+        });
+    
     await dbConfig.db.close();
   }
 
