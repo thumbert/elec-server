@@ -76,7 +76,7 @@ class SrRtLocSum {
     return _processStream(data, hasLocationId: false);
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}start/{start}/end/{end}')
+  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
   /// Get all data for a subaccount for a given location, one column.
   Future<List<Map<String, String>>> apiGetTab1ByLocationColumn (String accountId,
       String subaccountId, int locationId, String columnName, String start, String end) async {
