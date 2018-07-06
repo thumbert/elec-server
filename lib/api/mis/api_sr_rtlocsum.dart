@@ -20,107 +20,138 @@ class SrRtLocSum {
     _location = getLocation('US/Eastern');
   }
 
-  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/tab/0/locationId/401/column/Real Time Load Obligation/start/20170101/end/20170101
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
-  /// Get one column in this tab for a given location.
-  Future<List<Map<String, String>>> apiGetColumnTab0 (String accountId,
-      int locationId, String column, String start, String end) async {
+  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/tab/0/start/20170101/end/20170101
+  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+  /// Get all data in tab 0 for a given location.
+  Future<List<Map<String, String>>> apiGetTab0 (String accountId,
+      String start, String end) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
-    Stream data = _getData0(accountId, locationId, column, startDate, endDate);
+    Stream data = _getData(accountId, null, null, null, startDate, endDate);
+    return _processStream(data);
+  }
+
+  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/tab/0/locationId/401/start/20170101/end/20170101
+  @ApiMethod(
+      path: 'accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}')
+  /// Get all data (all locations) for the account.
+  Future<List<Map<String, String>>> apiGetTab0ByLocation (String accountId,
+      int locationId, String start, String end) async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+    Stream data = _getData(accountId, null, locationId, null, startDate, endDate);
+    return _processStream(data, hasLocationId: false);
+  }
+
+  @ApiMethod(
+      path: 'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
+  /// Get one location, one column for the account.
+  Future<List<Map<String, String>>> apiGetTab0ByLocationColumn (String accountId,
+      int locationId, String columnName, String start, String end) async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+    Stream data = _getData(accountId, null, locationId, columnName, startDate, endDate);
+    return _processStream(data, hasLocationId: false);
+  }
+
+  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
+  /// Get all data in tab 1 for all locations.
+  Future<List<Map<String, String>>> apiGetTab1 (String accountId, 
+      String subaccountId, String start, String end) async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+    Stream data = _getData(accountId, subaccountId, null, null, startDate, endDate);
+    //var aux = await data.toList(); print(aux);
+    return _processStream(data);
+  }
+
+  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}')
+  /// Get all data in tab 1 for a given location.
+  Future<List<Map<String, String>>> apiGetTab1ByLocation (String accountId,
+      String subaccountId, int locationId, String start, String end) async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+    Stream data = _getData(accountId, subaccountId, locationId, null, startDate, endDate);
+    //var aux = await data.toList(); print(aux);
+    return _processStream(data, hasLocationId: false);
+  }
+
+  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}start/{start}/end/{end}')
+  /// Get all data for a subaccount for a given location, one column.
+  Future<List<Map<String, String>>> apiGetTab1ByLocationColumn (String accountId,
+      String subaccountId, int locationId, String columnName, String start, String end) async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+    Stream data = _getData(accountId, subaccountId, locationId, columnName, startDate, endDate);
+    //var aux = await data.toList(); print(aux);
+    return _processStream(data, hasLocationId: false);
+  }
+
+
+  Future<List<Map>> _processStream(Stream data, {bool hasLocationId: true}) async {
     List out = [];
-    List keys = ['hourBeginning', 'version', column];
+    List otherKeys;
     await for (Map e in data) {
-      for (int i=0; i<e['hourBeginning'].length; i++){
-        out.add(new Map.fromIterables(keys, [
-          new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
-          new TZDateTime.from(e['version'], _location).toString(),
-          e[column][i]
-        ]));
+      otherKeys ??= e.keys.toList()
+        ..remove('hourBeginning')
+        ..remove('version')
+        ..remove('Location ID');
+      for (int i=0; i<e['hourBeginning'].length; i++) {
+        Map aux = {
+          'hourBeginning': new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+          'version': new TZDateTime.from(e['version'], _location).toString(),
+        };
+        if (hasLocationId) aux['Location ID'] = e['Location ID'];
+        for (String key in otherKeys) {
+          aux[key] = e[key][i];
+        }
+        out.add(aux);
       }
     }
     return out;
   }
 
-  @ApiMethod(
-      path:
-      'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{column}/start/{start}/end/{end}')
-  /// Get one column in this tab for a given location.
-  Future<List<Map<String, String>>> apiGetColumnTab1 (String accountId,
-      String subaccountId,
-      int locationId, String column, String start, String end) async {
-    Date startDate = Date.parse(start);
-    Date endDate = Date.parse(end);
-    Stream data = _getData1(accountId, subaccountId, locationId, column, startDate, endDate);
-    List out = [];
-    List keys = ['hourBeginning', 'version', column];
-    await for (Map e in data) {
-      for (int i=0; i<e['hourBeginning'].length; i++){
-        out.add(new Map.fromIterables(keys, [
-          new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
-          new TZDateTime.from(e['version'], _location).toString(),
-          e[column][i]
-        ]));
-      }
-    }
-    return out;
-  }
-
-
-  /// Extract data for tab 0
+  
+  /// Extract data from tab 0
   /// returns one element for each day
-  Stream _getData0(String account,
+  /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
+  /// If [locationId] is [null] return all locations
+  /// If [column] is [null] return all columns
+  Stream _getData(String account, String subaccountId,
       int locationId, String column, Date startDate, Date endDate) {
     List pipeline = [];
-    pipeline.add({
-      '\$match': {
-        'account': {'\$eq': account},
-        'tab': {'\$eq': 0},
-        'Location ID': {'\$eq': locationId},
-        'date': {
-          '\$gte': startDate.toString(),
-          '\$lte': endDate.toString(),
-        },
-      }
-    });
-    pipeline.add({'\$project': {
+    Map match = {'account': {'\$eq': account}};
+    if (subaccountId == null) {
+      match['tab'] = {'\$eq': 0};
+    } else {
+      match['tab'] = {'\$eq': 1};
+      match['Subaccount ID'] = {'\$eq': subaccountId};
+    }
+    match['date'] = {
+        '\$gte': startDate.toString(),
+        '\$lte': endDate.toString(),
+    };
+    if (locationId != null) match['Location ID']= {'\$eq': locationId};
+    pipeline.add({'\$match': match});
+    Map project = {
       '_id': 0,
-      'hourBeginning': 1,
-      'version': 1,
-      '${column}': 1,
-    }});
+      'account': 0,
+      'tab': 0,
+      'date': 0,
+    };
+    if (subaccountId != null) project['Subaccount ID'] = 0;
+    pipeline.add({'\$project': project});
+    
+    if (column != null) {
+      /// add another projection to get only this column
+      pipeline.add({'\$project': {
+        'hourBeginning': 1,
+        'version': 1,
+        column: 1,
+      }});
+    }
     return coll.aggregateToStream(pipeline);
   }
-
-
-  /// Extract data for tab 1
-  /// returns one element for each day
-  Stream _getData1(String accountId,
-      String subaccountId, int locationId, String column, Date startDate, Date endDate) {
-    List pipeline = [];
-    pipeline.add({
-      '\$match': {
-        'account': {'\$eq': accountId},
-        'tab': {'\$eq': 1},
-        'Subaccount ID': {'\$eq': subaccountId},
-        'Location ID': {'\$eq': locationId},
-        'date': {
-          '\$gte': startDate.toString(),
-          '\$lte': endDate.toString(),
-        },
-      }
-    });
-    pipeline.add({'\$project': {
-      '_id': 0,
-      'hourBeginning': 1,
-      'version': 1,
-      '${column}': 1,
-    }});
-    return coll.aggregateToStream(pipeline);
-  }
-
 
 }
 
