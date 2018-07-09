@@ -1,4 +1,4 @@
-library api.mis.sr_rtlocsum;
+library api.mis.sr_dalocsum;
 
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -6,16 +6,16 @@ import 'package:rpc/rpc.dart';
 import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:tuple/tuple.dart';
 
-@ApiClass(name: 'sr_rtlocsum', version: 'v1')
-class SrRtLocSum {
+
+@ApiClass(name: 'sr_dalocsum', version: 'v1')
+class SrDaLocSum {
   DbCollection coll;
   Location _location;
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
-  String collectionName = 'sr_rtlocsum';
+  String collectionName = 'sr_dalocsum';
 
-  SrRtLocSum(Db db) {
+  SrDaLocSum(Db db) {
     coll = db.collection(collectionName);
     _location = getLocation('US/Eastern');
   }
@@ -53,11 +53,11 @@ class SrRtLocSum {
     return _processStream(data, hasLocationId: false);
   }
 
-  
-  
+
+
   @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for all locations.
-  Future<List<Map<String, String>>> apiGetTab1 (String accountId, 
+  Future<List<Map<String, String>>> apiGetTab1 (String accountId,
       String subaccountId, String start, String end) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
@@ -112,7 +112,7 @@ class SrRtLocSum {
     return out;
   }
 
-  
+
   /// Extract data from tab 0
   /// returns one element for each day
   /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
@@ -129,8 +129,8 @@ class SrRtLocSum {
       match['Subaccount ID'] = {'\$eq': subaccountId};
     }
     match['date'] = {
-        '\$gte': startDate.toString(),
-        '\$lte': endDate.toString(),
+      '\$gte': startDate.toString(),
+      '\$lte': endDate.toString(),
     };
     if (locationId != null) match['Location ID']= {'\$eq': locationId};
     pipeline.add({'\$match': match});
@@ -142,7 +142,7 @@ class SrRtLocSum {
     };
     if (subaccountId != null) project['Subaccount ID'] = 0;
     pipeline.add({'\$project': project});
-    
+
     if (column != null) {
       /// add another projection to get only this column
       pipeline.add({'\$project': {
@@ -153,9 +153,8 @@ class SrRtLocSum {
     }
     return coll.aggregateToStream(pipeline);
   }
-
+  
 }
-
 
 
 
