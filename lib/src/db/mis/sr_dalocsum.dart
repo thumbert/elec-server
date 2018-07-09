@@ -164,8 +164,8 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
         },
         unique: true,
         partialFilterExpression: {
-          'Subaccount ID': {'\$exists': true},
           'tab': {'\$eq': 1},
+          'Subaccount ID': {'\$exists': true},
         });
     await dbConfig.db.close();
   }
