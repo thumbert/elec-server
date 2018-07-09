@@ -20,7 +20,7 @@ class SrRtLocSum {
     _location = getLocation('US/Eastern');
   }
 
-  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/tab/0/start/20170101/end/20170101
+  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/start/20170101/end/20170101
   @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
   /// Get all data in tab 0 for a given location.
   Future<List<Map<String, String>>> apiGetTab0 (String accountId,
@@ -31,7 +31,6 @@ class SrRtLocSum {
     return _processStream(data);
   }
 
-  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/tab/0/locationId/401/start/20170101/end/20170101
   @ApiMethod(
       path: 'accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}')
   /// Get all data (all locations) for the account.
@@ -54,6 +53,8 @@ class SrRtLocSum {
     return _processStream(data, hasLocationId: false);
   }
 
+  
+  
   @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for all locations.
   Future<List<Map<String, String>>> apiGetTab1 (String accountId, 
@@ -154,5 +155,7 @@ class SrRtLocSum {
   }
 
 }
+
+
 
 
