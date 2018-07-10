@@ -157,6 +157,7 @@ class MisReport {
 List<Map> readReportTabAsMap(File file, {int tab: 0}) {
   if (!file.existsSync()) throw 'File ${file.path} doesn\'t exist.';
   List allData = _readReport(file, tab: tab);
+  if (allData.isEmpty) return [];
   List columnNames = allData.firstWhere((List e) => e[0] == 'H');
   return allData
       .where((List e) => e[0] == 'D')
@@ -168,6 +169,8 @@ List<Map> readReportTabAsMap(File file, {int tab: 0}) {
 /// only parses the csv for the tab you are interested in.
 /// Return each row of the [tab] as a List (all rows in the report: C, H, D, T).
 /// Sometimes the ISO doesn't quote the report.  Really frustrating!
+/// [tab] the tab number to parse.  If the report changes and the tab
+/// doesn't exist return an empty list.
 List<List> _readReport(File file, {int tab: 0}) {
   var converter = new CsvToListConverter();
   var lines = file.readAsLinesSync();
