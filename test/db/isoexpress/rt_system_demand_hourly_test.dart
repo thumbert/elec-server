@@ -39,7 +39,7 @@ prepareData() async {
 uploadDays() async {
   var archive = new RtSystemDemandReportArchive();
   List days =
-  new Interval(new Date(2014, 1, 1).start, new Date(2018, 4, 1).start)
+  new Interval(new Date(2018, 7, 13).start, new Date(2018, 7, 14).start)
       .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   for (var day in days) {

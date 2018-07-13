@@ -1,7 +1,8 @@
-
+import 'package:date/date.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
+import 'package:elec_server/src/db/isoexpress/rt_lmp_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/ncpc_rapid_response_pricing_report.dart';
 import 'package:elec_server/src/db/isoexpress/da_cleared_demand_hourly.dart';
@@ -9,6 +10,30 @@ import 'package:elec_server/src/db/isoexpress/rt_system_demand_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 
+updateIsoExpressData() async {
+  Month month = new Month(2018, 7);
+  List<Date> days = month.splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+  days = days.where((day) => day.isBefore(Date.today().next.next)).toList();
+
+  var archives = [
+    new DaLmpHourlyArchive(),
+    new RtLmpHourlyArchive(),
+    new DaBindingConstraintsReportArchive(),
+    new DaClearedDemandReportArchive(),
+    new RtSystemDemandReportArchive(),
+  ];
+
+  for (var archive in archives) {
+    await archive.dbConfig.db.open();
+    for (var day in days) {
+      if (!await archive.hasDay(day)) {
+        await archive.downloadDay(day);
+        await archive.insertDay(day);
+      }
+    }
+    await archive.dbConfig.db.close();
+  }
+}
 
 /// The assumption is that when the ISO publishes an ISO Express report, the
 /// report is final.  Manual updates are always possible, but should be avoided.
@@ -20,9 +45,11 @@ import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 ///    Forward Reserve auctions, etc.
 ///
 main() async {
-  initializeTimeZoneSync( getLocationTzdb() );
+  initializeTimeZoneSync(getLocationTzdb());
 
-  await new DaLmpHourlyArchive().updateDb();
+  await updateIsoExpressData();
+
+//  await new DaLmpHourlyArchive().updateDb();
 //  await new DaBindingConstraintsReportArchive().updateDb();
 //  await new DaClearedDemandReportArchive().updateDb();
 //  await new RtSystemDemandReportArchive().updateDb();
@@ -31,5 +58,4 @@ main() async {
 
 //  await new DaEnergyOfferArchive().updateDb();
 //  await new DaDemandBidArchive().updateDb();
-
 }

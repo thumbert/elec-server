@@ -16,8 +16,15 @@ prepareData() async {
 }
 
 DaLmpHourlyTest() async {
+  Location location = getLocation('US/Eastern');
   group('DA hourly lmp report', () {
     var archive = new DaLmpHourlyArchive();
+    setUp(() async {
+      await archive.dbConfig.db.open();
+    });
+    tearDown(() async {
+      await archive.dbConfig.db.close();
+    });
     test('DA hourly lmp report, DST day spring', () async {
       File file = archive.getFilename(new Date(2017, 3, 12));
       var res = await archive.processFile(file);
@@ -29,21 +36,28 @@ DaLmpHourlyTest() async {
       expect(res.first['hourBeginning'].length, 25);
     });
     test('Insert one day', () async {
-      await archive.dbConfig.db.open();
-      await archive.insertDay(new Date(2017, 1, 1));
-      await archive.dbConfig.db.close();
+      var date = new Date(2017, 1, 1);
+      if (!await archive.hasDay(date)) await archive.insertDay(date);
     });
     test('insert several days', () async {
-      Location location = getLocation('US/Eastern');
       List days = new Interval(new TZDateTime(location, 2017, 1, 1),
               new TZDateTime(location, 2017, 1, 5))
           .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
-      await archive.dbConfig.db.open();
       await for (var day in new Stream.fromIterable(days)) {
-        await archive.downloadDay(day);
-        await archive.insertDay(day);
+        if (!await archive.hasDay(day)) {
+          await archive.downloadDay(day);
+          await archive.insertDay(day);
+        }
       }
-      archive.dbConfig.db.close();
+    });
+    test('hasDay', () async {
+      var d1 = new Date(2017, 1, 1);
+      var res = await archive.hasDay(d1);
+      expect(res, true);
+      var d2 = Date.today().next.next;
+      res = await archive.hasDay(d2);
+      expect(res, false);
+
     });
   });
 }
@@ -67,10 +81,10 @@ main() async {
   // //await new DaLmpHourlyArchive().setupDb();
   // await prepareData();
 
-//  await DaLmpHourlyTest();
+  await DaLmpHourlyTest();
 
 //  Db db = new Db('mongodb://localhost/isoexpress');
 //  await new DaLmpHourlyArchive().updateDb(new DaLmp(db));
 
-  await soloTest();
+//  await soloTest();
 }

@@ -51,9 +51,18 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
 
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return [];
     Map dataByPtids = _groupBy(data, (row) => row['Location ID']);
     return dataByPtids.keys.map((ptid) => converter(dataByPtids[ptid])).toList();
   }
+
+  /// Check if this date is in the db already
+  Future<bool> hasDay(Date date) async {
+    var res = await dbConfig.coll.findOne({'date': date.toString()});
+    if (res == null || res.isEmpty) return false;
+    return true;
+  }
+
 
   /// Recreate the collection from scratch.
   Future<Null> setupDb() async {
@@ -68,6 +77,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
           'date': 1,
         },
         unique: true);
+    await dbConfig.db.createIndex(dbConfig.collectionName,
+        keys: {'date': 1});
     await dbConfig.db.close();
   }
 

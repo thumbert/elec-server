@@ -21,12 +21,18 @@ prepareData() async {
 
 
 DaBindingConstraintsTest() async {
-  group('DA binding constraints report', (){
+  group('DA binding constraints report', () {
+    var archive = new DaBindingConstraintsReportArchive();
+    setUp(() async {
+      await archive.dbConfig.db.open();
+    });
+    tearDown(() async {
+      await archive.dbConfig.db.close();
+    });
     test('read binding constraints files', () async {
-      var archive = new DaBindingConstraintsReportArchive();
       File file = archive.getFilename(new Date(2017,12,13));
       var report = new mis.MisReport(file);
-      expect(await report.forDate(), new Date(2017,12,13));
+      //expect(await report.forDate(), new Date(2017,12,13));
       expect(await report.filename(), 'da_binding_constraints_final_20171213.csv');
       var data = report.readTabAsMap(tab: 0);
       expect(data.length, 38);
@@ -40,6 +46,15 @@ DaBindingConstraintsTest() async {
       var res = report.readTabAsMap(tab: 0);
       expect(res, []);
     });
+
+    test('DA Binding Constraints Report for 2018-07-10 has duplicates', () async {
+      File file = new DaBindingConstraintsReportArchive().getFilename(new Date(2018,7,10));
+      var report = new mis.MisReport(file);
+      var res = report.readTabAsMap(tab: 0);
+      await archive.insertDay(new Date(2018, 7, 10));
+      expect(res.length, 20);
+    });
+
 
 
   });
@@ -67,7 +82,7 @@ main() async {
   //await new DaBindingConstraintsReportArchive().setupDb();
 
 //  await prepareData();
-//  await DaBindingConstraintsTest();
+  await DaBindingConstraintsTest();
 
 //  await soloTest();
 

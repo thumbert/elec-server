@@ -3,6 +3,7 @@ library db.isoexpress.rt_system_demand_hourly;
 import 'dart:io';
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import '../lib_mis_reports.dart' as mis;
@@ -13,6 +14,7 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
+  Location location = getLocation('US/Eastern');
 
   RtSystemDemandReportArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
@@ -32,9 +34,15 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) =>
       new File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
- Map converter(List<Map> rows) {
+  /// File may be incomplete if downloaded during the day ...
+  Map converter(List<Map> rows) {
     Map row = {};
     var localDate = (rows.first['Date'] as String).substring(0, 10);
+    int numberOfHours = Date.parse(formatDate(localDate), location: location)
+      .splitLeft((dt) => new Hour.beginning(dt)).length;
+    if (rows.length != numberOfHours)
+      throw new mis.IncompleteReportException('$reportName for $localDate');
+
     row ['date'] = formatDate(localDate);
     row['market'] = 'RT';
 
@@ -47,10 +55,22 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
     });
     return row;
   }
+
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return [];
     return [converter(data)];
   }
+
+  /// Check if this date is in the db already
+  Future<bool> hasDay(Date date) async {
+    var res = await dbConfig.coll.findOne({
+      'market': 'RT',
+      'date': date.toString()});
+    if (res == null || res.isEmpty) return false;
+    return true;
+  }
+
 
   /// Recreate the collection from scratch.
   setupDb() async {

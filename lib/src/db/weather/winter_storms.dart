@@ -2,10 +2,12 @@ library db.weather.winter_storms;
 
 import 'dart:async';
 import 'dart:io';
+import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart';
 import 'package:csv/csv.dart';
+import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import '../lib_iso_express.dart';
-
 
 /// Go to https://www.weather.gov/box/pastevents#
 List<String> winterStorms() {
@@ -147,7 +149,8 @@ List<String> winterStorms() {
 class WinterStormsArchive extends IsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
-
+  Location location = getLocation('US/Eastern');
+  var _fmt = new DateFormat('M/dd/yyyy h:mm a');
 
   WinterStormsArchive({this.dbConfig, this.dir}) {
     dir ??= env['HOME'] + '/Downloads/Archive/Weather/WinterStorms/Raw/';
@@ -158,17 +161,65 @@ class WinterStormsArchive extends IsoExpressReport {
         ..collectionName = 'winter_storms';
     }
   }
-  
-  Map converter(List<Map> rows) {
-  }
 
+  Map converter(List<Map> rows) {}
+
+  /// SNOW total accumulation, RAIN totals (inches), and wind speeds are reported.
+  ///
   List<Map> processFile(File file) {
+    print(file.path);
     var aux = file.readAsStringSync();
+
     /// keep only the metadata lines, which start with ':'
     var lines = aux.split('\n').where((String line) => line.startsWith(':'));
     var converter = new CsvToListConverter();
-    var out = lines.map((String row) => converter.convert(row).first).toList();
-    print(lines);
+    var rows = lines.map((String row) => converter.convert(row).first).toList();
+    List<Map> out = [];
+    List keys = [
+      'date',
+      'timestamp',
+      'state',
+      'county',
+      'location',
+      'type',
+      'total',
+      'unit',
+      'comments'
+    ];
+    for (List row in rows) {
+      if (row.length == 14) {
+        /// some of the total is entered 'T', I will ignore that
+        if (row[10] == 'T') continue;
+//        if ((row[11] as String).trim() != 'Inch')
+//          throw new StateError('Unit is not Inch.  Do something! \n$row');
+        var dt = parseTimestamp(row[0], row[1]);
+        out.add(new Map.fromIterables(keys, [
+          new Date.fromTZDateTime(dt).toString(),
+          dt,
+          (row[2] as String).trim(), // state
+          (row[3] as String).trim(), // county
+          (row[4] as String).trim(), // location
+          row[7], // latitude
+          row[8], // longitude
+          (row[9] as String)
+              .trim(), // type: SNOW, RAIN, TSTM (thunderstorm), NON-TSTM, SUST (sustained winds).
+          row[10], // total
+          (row[11] as String).trim(), // unit
+          (row[12] as String).trim(), // comments
+        ]));
+      }
+    }
+    return out;
+  }
+
+  /// date is ":4/19/2018", time is " 700 AM"
+  TZDateTime parseTimestamp(String date, String time) {
+    // need to add a : between hours and minutes!
+    time = time.substring(0, 3) + ':' + time.substring(3);
+    time = time.trimLeft();
+    date = date.substring(1);
+    var dt = _fmt.parse('$date $time');
+    return new TZDateTime.from(dt, location);
   }
 
   /// Check if this storm has been inserted already.  Should be a fast check.
@@ -178,7 +229,6 @@ class WinterStormsArchive extends IsoExpressReport {
       return true;
     });
   }
-
 
   Future<Null> setupDb() async {
     await dbConfig.db.open();
@@ -190,7 +240,6 @@ class WinterStormsArchive extends IsoExpressReport {
     await dbConfig.db.close();
   }
 
-
   /// Update the db by going through the list of storms, downloading them and
   /// inserting them into the db.
   Future<Null> updateDb() async {
@@ -200,23 +249,20 @@ class WinterStormsArchive extends IsoExpressReport {
       if (!inDb) {
         var url = _makeUrl(stormId);
         var file = new File(_makeUrl(stormId, base: dir));
-        if (!file.existsSync())
-          await downloadUrl(url, file);
+        if (!file.existsSync()) await downloadUrl(url, file);
         var rows = processFile(file);
-        rows.take(4).forEach(print);
-      }  
+        rows.forEach(print);
+      }
     }
-    
   }
 
-  /// Construct the url to download from the stormId.  A stormId is the 
+  /// Construct the url to download from the stormId.  A stormId is the
   /// dates in the required format, as returned by winterStorms()
   String _makeUrl(String stormId, {String base}) {
-    base ??= 'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/';
+    base ??=
+        'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/';
     return base + '$stormId/${stormId}_Text_Xml.xml';
   }
-
-
 }
 
 String url =

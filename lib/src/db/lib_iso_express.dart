@@ -75,7 +75,10 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// What is the last day available from the ISO website.  For example,
   /// NCPC reports are 4-7 days later.  Offer data is 4 months later.
   /// If data is not available, the reports will be empty, so no harm done.
-  Date lastDayAvailable();
+  //Date lastDayAvailable();
+
+  /// Check if this date is in the archive already.  Return [true] if it is.
+  Future<bool> hasDay(Date day);
 
   /// Delete one day from the archive.
   Future<Null> deleteDay(Date day);
@@ -108,23 +111,24 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
     }
     return dbConfig.coll
         .insertAll(data)
-        .then((_) => print('--->  Inserted day ${day}'))
+        .then((_) => print('--->  Inserted ${reportName} for day ${day}'))
         .catchError((e) => print('  ' + e.toString()));
   }
 
   Future<Null> updateDb() async {
-    await dbConfig.db.open();
-    var response = await lastDay();
-    Date last = await Date.parse(response['lastDay']);
-
-    Date current = last;
-    while (current.isBefore(lastDayAvailable().next)) {
-      current = current.next;
-      await downloadDay(current);
-      await insertDay(current);
-    }
-    await dbConfig.db.close();
+//    await dbConfig.db.open();
+//    var response = await lastDay();
+//    Date last = await Date.parse(response['lastDay']);
+//
+//    Date current = last;
+//    while (current.isBefore(lastDayAvailable().next)) {
+//      current = current.next;
+//      await downloadDay(current);
+//      await insertDay(current);
+//    }
+//    await dbConfig.db.close();
   }
+
 }
 
 

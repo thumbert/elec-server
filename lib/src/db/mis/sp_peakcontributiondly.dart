@@ -43,7 +43,7 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
   /// remove documents that have Trading Date with a version earlier than a
   /// [maxVersion] is an UTC DateTime
   remove(DateTime maxVersion, List<String> days, List<num> assetIds) async {
-    List futs = [];
+    List<Future> futs = [];
     for(String date in days) {
       var selector = where
           .eq('Trading Date', date)

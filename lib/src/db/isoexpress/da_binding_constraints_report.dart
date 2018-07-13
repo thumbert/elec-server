@@ -2,7 +2,7 @@ library db.isoexpress.da_binding_constraints_report;
 
 import 'dart:io';
 import 'dart:async';
-import 'package:func/func.dart';
+import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -11,10 +11,10 @@ import '../lib_iso_express.dart';
 import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
-
 class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
+  static const _rowEquality = const MapEquality<String,dynamic>();
 
   DaBindingConstraintsReportArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
@@ -23,23 +23,21 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
         ..dbName = 'isoexpress'
         ..collectionName = 'binding_constraints';
     }
-    if (dir == null)
-      dir = baseDir + 'GridReports/DaBindingConstraints/Raw/';
+    if (dir == null) dir = baseDir + 'GridReports/DaBindingConstraints/Raw/';
   }
   String reportName =
       'Day-Ahead Energy Market Hourly Final Binding Constraints Report';
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hourlydayaheadconstraints?start=' +
-          yyyymmdd(asOfDate) +
-          '&end=' +
-          yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) => new File(dir +
-      'da_binding_constraints_final_' + yyyymmdd(asOfDate) +
-      '.csv');
+      yyyymmdd(asOfDate) +
+      '&end=' +
+      yyyymmdd(asOfDate);
+  File getFilename(Date asOfDate) => new File(
+      dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.csv');
 
   Map converter(List<Map> rows) {
     Map row = rows.first;
-    var localDate = (row['Local Date'] as String).substring(0,10);
+    var localDate = (row['Local Date'] as String).substring(0, 10);
     var hourEnding = row['Hour Ending'];
     row['hourBeginning'] = parseHourEndingStamp(localDate, hourEnding);
     row['market'] = 'DA';
@@ -52,28 +50,48 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
 
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return [];
     data.forEach((row) => converter([row]));
+    //Set uRows = new LinkedHashSet()
     return data;
+  }
+
+  /// Check if this date is in the db already
+  Future<bool> hasDay(Date date) async {
+    var res = await dbConfig.coll.findOne({'date': date.toString()});
+    if (res == null || res.isEmpty) return false;
+    return true;
   }
 
   /// Recreate the collection from scratch.
   setupDb() async {
     await dbConfig.db.open();
     List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName)) await dbConfig.coll.drop();
+    if (collections.contains(dbConfig.collectionName))
+      await dbConfig.coll.drop();
 
+    ///
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {
+      'hourBeginning': 1,
+      'Constraint Name': 1,
+      'Contingency Name': 1,
+      'market': 1
+    }, unique: true);
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'hourBeginning': 1, 'Constraint Name': 1, 'Contingency Name': 1, 'market': 1}, unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'Constraint Name': 1, 'market': 1});
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
+        keys: {'Constraint Name': 1, 'market': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
     await dbConfig.db.close();
   }
 
-  Future<Map<String,String>> lastDay() async {
+  Future<Map<String, String>> lastDay() async {
     List pipeline = [];
-    pipeline.add({'\$group': {
-      '_id': 0,
-      'lastDay': {'\$max': '\$date'}}});
+    pipeline.add({
+      '\$group': {
+        '_id': 0,
+        'lastDay': {'\$max': '\$date'}
+      }
+    });
     Map res = await dbConfig.coll.aggregate(pipeline);
     return {'lastDay': res['result'][0]['lastDay']};
   }
@@ -82,5 +100,4 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   Future<Null> deleteDay(Date day) async {
     return await dbConfig.coll.remove(where.eq('date', day.toString()));
   }
-
 }

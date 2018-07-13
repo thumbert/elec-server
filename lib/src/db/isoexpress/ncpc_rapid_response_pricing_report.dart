@@ -37,9 +37,18 @@ class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
 
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return [];
     data.forEach((row) => converter([row]));
     return data;
   }
+
+  /// Check if this date is in the db already
+  Future<bool> hasDay(Date date) async {
+    var res = await dbConfig.coll.findOne({'Operating Day': date.toString()});
+    if (res == null || res.isEmpty) return false;
+    return true;
+  }
+
 
   Future<Null> setupDb() async {
     await dbConfig.db.open();

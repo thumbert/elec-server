@@ -53,6 +53,16 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
     return [converter(data)];
   }
 
+  /// Check if this date is in the db already
+  Future<bool> hasDay(Date date) async {
+    var res = await dbConfig.coll.findOne({
+      'market': 'DA',
+      'date': date.toString()});
+    if (res == null || res.isEmpty) return false;
+    return true;
+  }
+
+
   /// Recreate the collection from scratch.
   setupDb() async {
     await dbConfig.db.open();
@@ -61,7 +71,7 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
       await dbConfig.coll.drop();
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1, 'market': 1}, unique: true);
+        keys: {'market': 1, 'date': 1}, unique: true);
     await dbConfig.db.close();
   }
 

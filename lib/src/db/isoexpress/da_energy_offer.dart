@@ -81,11 +81,20 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   }
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return [];
     Map dataByAssetId = _groupBy(data, (row) => row['Masked Asset ID']);
     return dataByAssetId.keys
         .map((ptid) => converter(dataByAssetId[ptid]))
         .toList();
   }
+
+  /// Check if this date is in the db already
+  Future<bool> hasDay(Date date) async {
+    var res = await dbConfig.coll.findOne({'date': date.toString()});
+    if (res == null || res.isEmpty) return false;
+    return true;
+  }
+
 
   /// Recreate the collection from scratch.
   setupDb() async {
@@ -101,6 +110,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
           'Masked Lead Participant ID': 1,
         },
         unique: true);
+    await dbConfig.db.createIndex(dbConfig.collectionName,
+        keys: {'date': 1});
     await dbConfig.db.close();
   }
 
