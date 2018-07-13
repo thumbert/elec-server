@@ -1,7 +1,7 @@
 
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'package:elec_server/src/utils/table.dart';
+import 'package:elec_server/src/utils/html_table.dart';
 
 
 simpleTable() {
@@ -33,6 +33,11 @@ tableWithFormat() {
     }
   };
   new Table(querySelector('#wrapper-table-format'), data, options: options);
+
+  options['rowNumbers'] = true;
+  new Table(querySelector('#wrapper-table-format-rownumbers'), data, options: options);
+
+
 }
 
 

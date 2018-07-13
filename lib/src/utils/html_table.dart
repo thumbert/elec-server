@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
 
+
 class Table {
   Element tableWrapper;
   List<Map<String,dynamic>> data;
@@ -15,9 +16,21 @@ class Table {
   /// The [options] Map can be used to specify a format function for a
   /// given column, e.g. {'columnName': {'valueFormat': (num x) => x.round()}}
   /// By default the table has column names.
-  /// If you don't want column names, use {'noColumnNames': true}
+  /// <p>If you don't want column names, use {'noColumnNames': true}, the default
+  ///   is
+  /// to add row numbers, use {'rowNumbers': true}, the default is false;
   Table(this.tableWrapper, this.data, {this.options}) {
     options ??= {};
+    options.putIfAbsent('makeHeader', () => true);
+    options.putIfAbsent('rowNumbers', () => false);
+
+    if (options['rowNumbers']) {
+      for (int i=0; i<data.length; i++) {
+        data[i] = {'#':i+1}..addAll(data[i]);
+      }
+    }
+
+    /// Get the column names from the keys of the first element
     _columnNames = data.first.keys.toList();
     _tableHeaders = new List(_columnNames.length);
     _sortDirection = new List(_columnNames.length);
@@ -31,10 +44,10 @@ class Table {
     TableRowElement headerRow = table.tHead.insertRow(0);
     for (int i=0; i<_columnNames.length; i++) {
       _tableHeaders[i] =  new Element.th();
-      if (options.containsKey('noColumnNames') && options['noColumnNames']) {
-        _tableHeaders[i].text = '';
-      } else {
+      if (options['makeHeader']) {
         _tableHeaders[i].text = _columnNames[i];
+      } else {
+        _tableHeaders[i].text = '';
       }
       _tableHeaders[i].onClick.listen((e) => _sortByColumn(i));
       headerRow.nodes.add(_tableHeaders[i]);
