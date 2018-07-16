@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
+import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';
@@ -23,7 +24,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
         ..dbName = 'isoexpress'
         ..collectionName = 'binding_constraints';
     }
-    if (dir == null) dir = baseDir + 'GridReports/DaBindingConstraints/Raw/';
+    dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
   }
   String reportName =
       'Day-Ahead Energy Market Hourly Final Binding Constraints Report';
@@ -48,17 +49,21 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
     return row;
   }
 
+  /// Need to take the unique rows.  On 2018-07-10, there were duplicates!
   List<Map> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
     data.forEach((row) => converter([row]));
-    //Set uRows = new LinkedHashSet()
-    return data;
+    var uRows = unique(data);
+    return uRows;
   }
 
   /// Check if this date is in the db already
-  Future<bool> hasDay(Date date) async {
-    var res = await dbConfig.coll.findOne({'date': date.toString()});
+  Future<bool> hasDay(Date date, String market) async {
+    var res = await dbConfig.coll.findOne({
+      'date': date.toString(), 
+      'market': market
+    });
     if (res == null || res.isEmpty) return false;
     return true;
   }
