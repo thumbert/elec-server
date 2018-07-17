@@ -21,15 +21,64 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     dbConfig.collectionName = 'sr_rtlocsum';
   }
 
-  /// Override the implementation.  Keep quiet about the errors because I can
-  /// trust the index.
-  Future insertTabData(List<Map> data) async {
+  /// Override the implementation.
+  Future insertTabData(List<Map> data, {int tab: 0}) async {
     if (data.isEmpty) return new Future.value(null);
-    return dbConfig.coll
-        .insertAll(data)
-        .then((_) => print('--->  Inserted successfully'))
-        .catchError((e) => null);
+    if (tab == 0) await insertTabData0(data);
+    else if (tab == 1) await insertTabData1(data);
+    else
+      throw new ArgumentError('Unsupported tab $tab for report ${reportName}');
   }
+
+  Future<Null> insertTabData0(List<Map> data) async {
+    if (data.isEmpty) return new Future.value(null);
+    String account = data.first['account'];
+    /// split the data by Location ID, date, version
+    Map groups = _groupBy(data, (Map e) =>
+    new Tuple3(e['Location ID'], e['date'], e['version']));
+    try {
+      for (Tuple3 key in groups.keys) {
+        await dbConfig.coll.remove({
+          'account': account,
+          'tab': 0,
+          'Location ID': key.item1,
+          'date': key.item2,
+          'version': key.item3,
+        });
+        await dbConfig.coll.insertAll(groups[key]);
+      }
+      print('--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 0 successfully');
+    } catch (e) {
+      print('XXX ' + e.toString());
+    }
+  }
+
+  Future<Null> insertTabData1(List<Map> data) async {
+    if (data.isEmpty) return new Future.value(null);
+    String account = data.first['account'];
+    /// split the data by Asset ID, date, version
+    Map groups = _groupBy(data, (Map e) =>
+    new Tuple4(e['Subaccount ID'],  e['Location ID'], e['date'], e['version']));
+    try {
+      for (Tuple4 key in groups.keys) {
+        await dbConfig.coll.remove({
+          'account': account,
+          'tab': 1,
+          'Subaccount ID': key.item1,
+          'Location ID': key.item2,
+          'date': key.item3,
+          'version': key.item4,
+        });
+        await dbConfig.coll.insertAll(groups[key]);
+      }
+      print('--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 1 successfully');
+    } catch (e) {
+      print('XXX ' + e.toString());
+    }
+  }
+
+
+  
   
   /// for the first tab
   Map rowConverter0(List<Map> rows, String account, Date reportDate, DateTime version) {
