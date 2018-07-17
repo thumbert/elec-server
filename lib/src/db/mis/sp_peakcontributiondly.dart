@@ -48,7 +48,7 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
       var selector = where
           .eq('Trading Date', date)
           .oneFrom('Asset ID', assetIds)
-          .lt('version', maxVersion);
+          .lte('version', maxVersion);
       futs.add(dbConfig.coll.remove(selector));
     }
     return Future.wait(futs);
