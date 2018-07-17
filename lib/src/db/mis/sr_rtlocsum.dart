@@ -31,7 +31,6 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   Future<Null> insertTabData0(List<Map> data) async {
-    if (data.isEmpty) return new Future.value(null);
     String account = data.first['account'];
     /// split the data by Location ID, date, version
     Map groups = _groupBy(data, (Map e) =>
@@ -54,7 +53,6 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   Future<Null> insertTabData1(List<Map> data) async {
-    if (data.isEmpty) return new Future.value(null);
     String account = data.first['account'];
     /// split the data by Asset ID, date, version
     Map groups = _groupBy(data, (Map e) =>
