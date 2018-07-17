@@ -40,7 +40,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  List<List<Map>> processFile(File file) {
+  Map<int,List<Map>> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
     var reportDate = report.forDate();
@@ -50,7 +50,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
         .map((assetId) =>
             rowConverter(dataByAssetId[assetId], reportDate, version))
         .toList();
-    return [res];
+    return {0: res};
   }
 
   @override
