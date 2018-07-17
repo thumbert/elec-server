@@ -34,8 +34,8 @@ abstract class MisReportArchive {
   /// Each tab is one element of the returned list. 
   List<List<Map>> processFile(File file);
 
-  /// Insert this data into the database.
-  Future insertTabData(List<Map> data) async {
+  /// Insert this data into the database.  Likely to be overwritten in the implementation. 
+  Future insertTabData(List<Map> data, {int tab: 0}) async {
     if (data.isEmpty) return new Future.value(null);
     return dbConfig.coll
         .insertAll(data)
