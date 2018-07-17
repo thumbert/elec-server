@@ -31,7 +31,7 @@ abstract class MisReportArchive {
 
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.
-  /// Each tab is one element of the returned list. 
+  /// Each tab is one element of the returned list.  Read all tabs, don't be lazy. 
   List<List<Map>> processFile(File file);
 
   /// Insert this data into the database.  Likely to be overwritten in the implementation. 
