@@ -154,7 +154,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
   }
 
   @override
-  List<List<Map>> processFile(File file) {
+  Map<List<Map>> processFile(File file) {
     /// tab 0: company data
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
@@ -179,7 +179,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
           .toList();
     }
 
-    return [res0, res1];
+    return {0: res0, 1: res1};
   }
 
   @override
