@@ -38,36 +38,37 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
     return {0: res};
   }
 
-  /// Report publishes every day of the month all the previous days of the
+    /// Report publishes every day of the month all the previous days of the
   /// month, so it's best to
   /// remove documents that have Trading Date with a version earlier than a
   /// [maxVersion] is an UTC DateTime
-  remove(DateTime maxVersion, List<String> days, List<num> assetIds) async {
+  Future remove(DateTime maxVersion, List<String> days, List<num> assetIds) async {
     List<Future> futs = [];
     for(String date in days) {
       var selector = where
           .eq('Trading Date', date)
           .oneFrom('Asset ID', assetIds)
           .lt('version', maxVersion);
-//      var N = await dbConfig.coll.count(selector);
-//      print('number of docs to be removed: $N');
       futs.add(dbConfig.coll.remove(selector));
     }
-    Future.wait(futs);
+    return Future.wait(futs);
   }
 
   @override
-  insertTabData(List<Map> data, {int tab: 0}) {
+  insertTabData(List<Map> data, {int tab: 0}) async {
     List<String> days = data.map((e) => e['Trading Date']).toSet().toList();
     DateTime maxVersion = data.first['version'];
     List<num> assetIds = data.map((e) => e['Asset ID']).toSet().toList();
-//    print('days: $days, maxVersion: $maxVersion');
-    return remove(maxVersion, days, assetIds).then((_) async {
-      await super.insertTabData(data);
-//      var N = await dbConfig.coll.count();
-//      print('number of docs: $N');
-    });
+    try{
+      await remove(maxVersion, days, assetIds);
+      await dbConfig.coll.insertAll(data);
+      print('--->  Inserted $reportName for ${data.first['Trading Date']}, version ${data.first['version']} successfully');
+    } catch (e) {
+      print('XXX ' + e.toString());
+    }
   }
+
+  
 
   @override
   Future<Null> setupDb() async {
