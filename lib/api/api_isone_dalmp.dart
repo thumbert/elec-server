@@ -22,6 +22,42 @@ class DaLmp {
     _location = getLocation('US/Eastern');
   }
 
+  /// http://localhost:8080/dalmp/v1/monthly/lmp/ptid/4000/start/201701/end/201701/bucket/5x16
+  @ApiMethod(path: 'monthly/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
+  Future<List<Map<String, String>>> apiGetMonthlyBucketPrice(
+      String component, int ptid, String start, String end, String bucket) async {
+    Date startDate = new Date(int.parse(start.substring(0,4)),
+      int.parse(start.substring(4,6)), 1);
+    Date endDate = new Month(int.parse(end.substring(0,4)),
+        int.parse(end.substring(4,6))).endDate;
+    Bucket bucketO = Bucket.parse(bucket);
+
+    Stream aux = getHourlyData(ptid, component, startDate: startDate, endDate: endDate);
+    List out = [];  // keep only the hours in the right bucket
+    List keys = ['hourBeginning', component];
+    await for (var e in aux) {
+      /// each element is a list of 24 hours, prices
+      for (int i = 0; i < e['hourBeginning'].length; i++) {
+        TZDateTime hb = new TZDateTime.from(e['hourBeginning'][i], _location);
+        if (bucketO.containsHour(new Hour.beginning(hb))) {
+          out.add(new Map.fromIterables(keys, [
+            new TZDateTime.from(e['hourBeginning'][i], _location),
+            e['price'][i]
+          ]));
+        }
+      }
+    }
+    /// do the monthly aggregation
+    Nest _monthlyNest = new Nest()
+      ..key((Map e) => new Month.fromTZDateTime(e['hourBeginning']))
+      ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
+    List<Map> res = _monthlyNest.entries(out);
+    return res.map((Map e) => {
+      'month': (e['key'] as Month).toIso8601String(),
+      component : e['values']
+    }).toList();
+  }
+  
   /// http://localhost:8080/dalmp/v1/daily/lmp/ptid/4000/start/20170101/end/20170101/bucket/5x16
   @ApiMethod(path: 'daily/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
   Future<List<Map<String, String>>> apiGetDailyBucketPrice(
