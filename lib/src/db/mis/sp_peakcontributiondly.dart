@@ -28,14 +28,14 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
   }
 
   @override
-  List<List<Map>> processFile(File file) {
+  Map<int,List<Map>> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
     var version = report.timestamp();
     var res = data
         .map((Map row) => rowConverter(row, version))
         .toList();
-    return [res];
+    return {0: res};
   }
 
   /// Report publishes every day of the month all the previous days of the
