@@ -54,7 +54,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> insertTabData(List<Map> data) async {
+  Future<Null> insertTabData(List<Map> data, {int tab: 0}) async {
     if (data.isEmpty) return new Future.value(null);
     /// split the data by Asset ID, date, version
     Map groups = _groupBy(data, (Map e) =>
