@@ -57,7 +57,7 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
   }
 
   @override
-  insertTabData(List<Map> data) {
+  insertTabData(List<Map> data, {int tab: 0}) {
     List<String> days = data.map((e) => e['Trading Date']).toSet().toList();
     DateTime maxVersion = data.first['version'];
     List<num> assetIds = data.map((e) => e['Asset ID']).toSet().toList();
