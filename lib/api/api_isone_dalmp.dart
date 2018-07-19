@@ -41,7 +41,7 @@ class DaLmp {
         TZDateTime hb = new TZDateTime.from(e['hourBeginning'][i], _location);
         if (bucketO.containsHour(new Hour.beginning(hb))) {
           out.add(new Map.fromIterables(keys, [
-            hB,
+            hb,
             e['price'][i]
           ]));
         }
@@ -75,7 +75,7 @@ class DaLmp {
         TZDateTime hb = new TZDateTime.from(e['hourBeginning'][i], _location);
         if (bucketO.containsHour(new Hour.beginning(hb))) {
           out.add(new Map.fromIterables(keys, [
-            new TZDateTime.from(e['hourBeginning'][i], _location),
+            hb,
             e['price'][i]
           ]));
         }
