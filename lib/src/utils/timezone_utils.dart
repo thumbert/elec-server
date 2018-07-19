@@ -7,7 +7,12 @@ import 'dart:io';
 String getLocationTzdb() {
   String tzdb = 'hosted/pub.dartlang.org/timezone-0.4.3/lib/data/2015b.tzf';
   if (Platform.isWindows) {
-    tzdb = Platform.environment['USERPROFILE'] + '/AppData/Roaming/Pub/Cache/' + tzdb;
+    Map env = Platform.environment;
+    if (env['USERNAME'].toString().toLowerCase() == 'procmon2') {
+      tzdb = 'S:\\All\\Structured Risk\\NEPOOL\\Software\\Dart\\pub_cache' + tzdb;
+    } else {
+      tzdb = Platform.environment['USERPROFILE'] + '/AppData/Roaming/Pub/Cache/' + tzdb;
+    }
   } else if (Platform.isLinux) {
     tzdb = Platform.environment['HOME'] + '/.pub-cache/' + tzdb;
   }
