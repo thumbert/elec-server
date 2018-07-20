@@ -9,7 +9,7 @@ String getLocationTzdb() {
   if (Platform.isWindows) {
     Map env = Platform.environment;
     if (env['USERNAME'].toString().toLowerCase() == 'procmon2') {
-      tzdb = 'S:\\All\\Structured Risk\\NEPOOL\\Software\\Dart\\pub_cache' + tzdb;
+      tzdb = 'S:/All/Structured Risk/NEPOOL/Software/Dart/pub_cache/' + tzdb;
     } else {
       tzdb = Platform.environment['USERPROFILE'] + '/AppData/Roaming/Pub/Cache/' + tzdb;
     }
