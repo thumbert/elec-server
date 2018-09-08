@@ -10,6 +10,7 @@ doc/api/
 build/
 packages
 pubspec.lock
+.dart_tool/
 
 out
 docs
