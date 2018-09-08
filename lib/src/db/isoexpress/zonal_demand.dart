@@ -77,10 +77,10 @@ class ZonalDemandArchive extends IsoExpressReport {
       ]));
     });
     /// group the data by date and zone
-    Map byDay = _groupBy(aux, (Map x) => x['date']);
-    List<Map> out = [];
-    byDay.forEach((k, List v) {
-      Map one = {
+    var byDay = _groupBy(aux, (Map x) => x['date']);
+    var out = <Map>[];
+    byDay.forEach((k, List<Map> v) {
+      var one = {
         'date': v.first['date'],
         'zoneName': v.first['zoneName'],
         'hourBeginning': [],
@@ -140,7 +140,7 @@ class ZonalDemandArchive extends IsoExpressReport {
 
   updateDb() {}
 
-  Map _groupBy(Iterable x, Function f) {
+  Map<dynamic,List<Map>> _groupBy(Iterable x, Function f) {
     Map result = new Map();
     x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
     return result;

@@ -33,8 +33,8 @@ abstract class IsoExpressReport {
   /// Download this url to a file.
   Future downloadUrl(String url, File fileout, {bool override: true}) async {
     if (fileout.existsSync() && !override) {
-      return new Future.value(
-          print('File ${fileout.path} was already downloaded.  Skipping.'));
+      print('File ${fileout.path} was already downloaded.  Skipping.');
+      return new Future.value(1);
     } else {
       if (!new Directory(dirname(fileout.path)).existsSync()) {
         new Directory(dirname(fileout.path)).createSync(recursive: true);

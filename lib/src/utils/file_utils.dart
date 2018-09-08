@@ -5,8 +5,8 @@ import 'package:path/path.dart';
 /// Get the last file updated in the directory.  Does not follow links or
 /// search recursively.  It can be slow ...
 File latestFile(Directory dir) {
-  List files = dir.listSync().where((entity) => entity is File).toList();
-  files.sort((File a, File b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
+  var files = dir.listSync().whereType<File>().toList();
+  files.sort((a,b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
   return files.last;
 }
 
@@ -14,11 +14,11 @@ File latestFile(Directory dir) {
 /// If the directory doesn't exist, return [];
 List<File> listFiles(Directory dir, {Pattern pattern}) {
   if (!dir.existsSync()) return [];
-  List files = dir.listSync()
+  var files = dir.listSync()
       .where((entity) => entity is File)
       .where((entity) => basenameWithoutExtension((entity as File).path).contains(pattern))
-      .map((e) => e as File)
+      .whereType<File>()
       .toList();
-  files.sort((File a, File b) => a.path.compareTo(b.path));
+  files.sort((a,b) => a.path.compareTo(b.path));
   return files;
 }

@@ -132,8 +132,8 @@ class EversourceCtLoadArchive {
     }
 
     /// group by date
-    var aux = _groupBy(res, (Map row) => row['date']);
-    List<Map> data = [];
+    Map<String,List<Map>> aux = _groupBy(res, (Map row) => row['date']);
+    var data = <Map>[];
     aux.keys.forEach((String date) {
       List bux = aux[date];
       var hB = [];
@@ -188,7 +188,7 @@ class EversourceCtLoadArchive {
   }
 }
 
-Map _groupBy(Iterable x, Function f) {
+Map<dynamic,List<Map>> _groupBy(Iterable<Map> x, Function f) {
   Map result = new Map();
   x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
   return result;

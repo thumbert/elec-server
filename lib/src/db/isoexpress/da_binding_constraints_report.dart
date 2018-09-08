@@ -59,10 +59,10 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   }
 
   /// Check if this date is in the db already
-  Future<bool> hasDay(Date date, String market) async {
+  Future<bool> hasDay(Date date) async {
     var res = await dbConfig.coll.findOne({
       'date': date.toString(), 
-      'market': market
+      'market': 'DA'
     });
     if (res == null || res.isEmpty) return false;
     return true;

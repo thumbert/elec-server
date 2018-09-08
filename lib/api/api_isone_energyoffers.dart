@@ -40,10 +40,10 @@ class DaEnergyOffers {
     /// 1) get rid of the unavailable units (some still submit offers!),
     /// 2) make the must run units have $-150 prices in the first block only.
     /// 3) some units have MW for a segment > Ecomax.
-    var gEo = _groupBy(eo.where((Map e) => e['Unit Status'] != 'UNAVAILABLE'),
+    var gEo = _groupBy(eo.where((e) => e['Unit Status'] != 'UNAVAILABLE'),
         (Map e) => e['assetId']);
     gEo.keys.forEach((assetId) {
-      List offers = gEo[assetId];
+      List<Map> offers = gEo[assetId];
       if (offers.first['Unit Status'] == 'MUST_RUN') {
         /// need to sort them just in case ...
         offers.sort((a, b) => a['price'].compareTo(b['price']));
@@ -224,7 +224,7 @@ class DaEnergyOffers {
   }
 }
 
-Map _groupBy(Iterable x, Function f) {
+Map<dynamic, List<Map>> _groupBy(Iterable<Map> x, Function f) {
   Map result = new Map();
   x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
   return result;
