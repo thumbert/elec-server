@@ -50,7 +50,7 @@ class RtLmpHourlyArchive extends DailyIsoExpressReport {
     return row;
   }
 
-  List<Map> processFile(File file) {
+  List<Map<String,dynamic>> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
     Map dataByPtids = _groupBy(data, (row) => row['Location ID']);

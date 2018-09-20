@@ -166,7 +166,7 @@ class WinterStormsArchive extends IsoExpressReport {
 
   /// SNOW total accumulation, RAIN totals (inches), and wind speeds are reported.
   ///
-  List<Map> processFile(File file) {
+  List<Map<String,dynamic>> processFile(File file) {
     print(file.path);
     var aux = file.readAsStringSync();
 

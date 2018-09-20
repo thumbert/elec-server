@@ -6,18 +6,19 @@ import 'package:csv/csv.dart';
 /// the first element of the list.  Usually, the keys of the map are strings.
 String listOfMapToCsv(List<Map> x) {
   var aux = [];
-  var colnames = x.first.keys.toList();
-  aux.add(colnames);
+  var colNames = x.first.keys.toList();
+  aux.add(colNames);
   x.forEach((Map e){
     aux.add(e.values.toList());
   });
   return const ListToCsvConverter().convert(aux);
 }
 
-/// Write a map to CSV.
-String mapToCsv(Map x, {List<String> colnames}) {
+/// Write a map to CSV. Return a two column csv table, first column are the
+/// keys, second column are the values.
+String mapToCsv(Map x, {List<String> columnNames}) {
   var aux = [];
-  if (colnames != null) aux.add(colnames);
+  if (columnNames != null) aux.add(columnNames);
   x.forEach((k,v){
     if (v is Iterable) {
       aux.add([k]..addAll(v));

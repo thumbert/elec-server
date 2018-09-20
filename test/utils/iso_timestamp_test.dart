@@ -3,10 +3,9 @@ library test.elec.iso_parsetime;
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
-test_parseIsoTimestamp() {
+testParseIsoTimestamp() {
   Location location = getLocation('US/Eastern');
 
   List<List> dts = [
@@ -34,7 +33,7 @@ test_parseIsoTimestamp() {
   });
 
   test('to ISO timestamp, spring ahead', () {
-    List<Hour> hB = new Interval(new TZDateTime(location, 2015, 3, 8),
+    var hB = new Interval(new TZDateTime(location, 2015, 3, 8),
             new TZDateTime(location, 2015, 3, 8, 5))
         .splitLeft((dt) => new Hour.beginning(dt));
     List out = [
@@ -49,7 +48,7 @@ test_parseIsoTimestamp() {
   });
 
   test('to ISO timestamp, fall back', () {
-    List<Hour> hB = new Interval(new TZDateTime(location,2015,11,1),
+    var hB = new Interval(new TZDateTime(location,2015,11,1),
         new TZDateTime(location,2015,11,1,4))
         .splitLeft((dt) => new Hour.beginning(dt));
     List out = [
@@ -65,9 +64,9 @@ test_parseIsoTimestamp() {
   });
 
   test('to ISO timestamp, regular day', () {
-    List<Hour> hB = new Interval(new TZDateTime(location,2015,1,1),
+    var hB = new Interval(new TZDateTime(location,2015,1,1),
         new TZDateTime(location,2015,1,1,4))
-        .splitLeft((dt) => new Hour.beginning(dt));
+        .splitLeft((dt) => new Hour.beginning(dt)).cast<Hour>();
     hB.add(new Hour.beginning(new TZDateTime(location,2015,1,1,23)));
     List out = [
       ['2015-01-01', '01'],
@@ -85,7 +84,7 @@ test_parseIsoTimestamp() {
 }
 
 main() async {
-  await initializeTimeZone(getLocationTzdb());
+  await initializeTimeZone();
 
-  test_parseIsoTimestamp();
+  testParseIsoTimestamp();
 }

@@ -1,6 +1,5 @@
 import 'package:date/date.dart';
 import 'package:timezone/standalone.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
@@ -45,7 +44,7 @@ updateIsoExpressData() async {
 ///    Forward Reserve auctions, etc.
 ///
 main() async {
-  initializeTimeZoneSync(getLocationTzdb());
+  await initializeTimeZone();
 
   await updateIsoExpressData();
 

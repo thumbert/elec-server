@@ -2,7 +2,6 @@ library db.isoexpress.da_energy_offer;
 
 import 'dart:io';
 import 'dart:async';
-import 'package:func/func.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -79,7 +78,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     validateDocument(row);
     return row;
   }
-  List<Map> processFile(File file) {
+  List<Map<String,dynamic>> processFile(File file) {
     List<Map> data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
     Map dataByAssetId = _groupBy(data, (row) => row['Masked Asset ID']);

@@ -34,7 +34,7 @@ class ZonalDemandArchive extends IsoExpressReport {
   Map converter(List<Map> rows) => rows.first;
 
   /// need to read all tabs
-  List<Map> processFile(File file) {
+  List<Map<String,dynamic>> processFile(File file) {
     var bytes = file.readAsBytesSync();
     var decoder = new SpreadsheetDecoder.decodeBytes(bytes);
     var canonicalTabs = ['ISONE', 'ME', 'NH', 'VT', 'CT', 'RI', 'SEMA', 'WCMA',

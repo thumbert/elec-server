@@ -21,7 +21,7 @@ ApiTest() async {
   });
   group('api energy offers', () {
     test('get energy offers for one hour', () async {
-      List data = await api.getEnergyOffers('20170701', '16');
+      var data = await api.getEnergyOffers('20170701', '16');
       expect(data.length, 733);
 
       var a87105 = data.firstWhere((Map e) => e['assetId'] == 87105);
@@ -29,7 +29,7 @@ ApiTest() async {
       expect(a87105['quantity'], 9999);
     });
     test('get stack for one hour', () async {
-      List data = await api.getGenerationStack('20170701', '16');
+      var data = await api.getGenerationStack('20170701', '16');
       //data.forEach(print);
       expect(data.length, 698);
 
@@ -51,7 +51,7 @@ insertDays(Month month) async {
 
 
 main() async {
-  initializeTimeZoneSync(getLocationTzdb());
+  await initializeTimeZone();
   //await ApiTest();
 
   insertDays(new Month(2017, 12));

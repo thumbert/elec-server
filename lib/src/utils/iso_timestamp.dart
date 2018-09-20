@@ -35,7 +35,7 @@ List<String> toIsoHourEndingStamp(TZDateTime hourBeginning) {
   int offsetStart = hour.start.timeZoneOffset.inHours;
   bool isFallBack = isFallBackDate(new Date(
       hourBeginning.year, hourBeginning.month, hourBeginning.day));
-  List res = [hour.start.toString().substring(0,10)];
+  List<String> res = [hour.start.toString().substring(0,10)];
 
   if (hourBeginning.hour == 23)
     res.add('24');

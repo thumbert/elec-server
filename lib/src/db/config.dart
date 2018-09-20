@@ -34,7 +34,7 @@ abstract class Config {
   ComponentConfig isone_dam_lmp_hourly;
 
   Future open() async {
-    initializeTimeZoneSync(tzdb);
+    await initializeTimeZone(tzdb);
     await isone_dam_lmp_hourly.db.open();
     await isone_binding_constraints_da.db.open();
   }

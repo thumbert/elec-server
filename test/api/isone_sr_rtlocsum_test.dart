@@ -4,8 +4,6 @@ library test.api.isone_sr_rtlocsum;
 import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
-import 'package:date/date.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 
 
@@ -23,7 +21,7 @@ SrRtLocSumTest(Db db) async {
 
 
 main() async {
-  initializeTimeZoneSync( getLocationTzdb() );
+  await initializeTimeZone();
   Db db = new Db('mongodb://localhost/mis');
   await SrRtLocSumTest(db);
 

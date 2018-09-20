@@ -2,8 +2,7 @@ library test.customer_counts;
 
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
-import 'package:ceg_base/db/utility/eversource/ct/load_archive.dart';
+import 'package:elec_server/src/db/utilities/eversource/load_ct.dart';
 
 
 loadTest() async {
@@ -30,7 +29,7 @@ loadTest() async {
 
 insertYears({List<int> years}) async {
   years ??= [2014, 2015, 2016, 2017, 2018];
-  EversourceCtLoadArchive archive = new EversourceCtLoadArchive(dir: dir);
+  EversourceCtLoadArchive archive = new EversourceCtLoadArchive();
   await archive.dbConfig.db.open();
   for (var year in years) {
     await archive.downloadFile(year);
@@ -56,7 +55,7 @@ apiTest() async {
 
 
 main() async {
-  initializeTimeZoneSync(getLocationTzdb());
+  await initializeTimeZone();
   //await new EversourceCtLoadArchive(dir: dir).setup();
 
   //await loadTest();

@@ -50,11 +50,11 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   }
 
   /// Need to take the unique rows.  On 2018-07-10, there were duplicates!
-  List<Map> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+  List<Map<String,dynamic>> processFile(File file) {
+    var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
     data.forEach((row) => converter([row]));
-    var uRows = unique(data);
+    var uRows = unique(data).cast<Map<String,dynamic>>();
     return uRows;
   }
 

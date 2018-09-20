@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import 'package:path/path.dart';
-import 'package:func/func.dart';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
 import 'package:intl/intl.dart';
@@ -21,7 +20,7 @@ abstract class MisReportArchive {
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
-  Func1<List<Map>, Map> converter;
+  Map Function(List<Map>) converter;
 
   /// Setup the database from scratch again, including the index
   Future<Null> setupDb();
@@ -53,7 +52,7 @@ class MisReport {
   /// because of resettlements.
   MisReport(this.file);
 
-  DateFormat _fmt1 = new DateFormat('MM/DD/yyyy HH:mm:ss zzz');
+  //DateFormat _fmt1 = new DateFormat('MM/DD/yyyy HH:mm:ss zzz');
 
   
   /// Get the account number from the filename.
@@ -130,8 +129,8 @@ class MisReport {
   /// with keys taken from the header.
   /// If there are no data rows (empty report tab), return an empty List.
   List<Map> readTabAsMap({int tab: 0}) {
-    List allData = _readReport(file, tab: tab);
-    List columnNames = allData.firstWhere((List e) => e[0] == 'H');
+    var allData = _readReport(file, tab: tab);
+    var columnNames = allData.firstWhere((List e) => e[0] == 'H');
     return allData
         .where((List e) => e[0] == 'D')
         .map((List e) => new Map.fromIterables(columnNames, e))
@@ -142,8 +141,8 @@ class MisReport {
   Future<List<String>> comments() async {
     return await file
         .openRead()
-        .transform(UTF8.decoder)
-        .transform(new LineSplitter())
+        .transform(Utf8Decoder())
+        .transform(LineSplitter())
         .takeWhile((String line) => line.startsWith('"C"'))
         .toList();
   }
@@ -155,11 +154,11 @@ class MisReport {
 /// Read an MIS report and keep only the data rows, each row becoming a map,
 /// with keys taken from the header.
 /// If there are no data rows (empty report), return an empty List.
-List<Map> readReportTabAsMap(File file, {int tab: 0}) {
+List<Map<String,dynamic>> readReportTabAsMap(File file, {int tab: 0}) {
   if (!file.existsSync()) throw 'File ${file.path} doesn\'t exist.';
-  List allData = _readReport(file, tab: tab);
+  var allData = _readReport(file, tab: tab);
   if (allData.isEmpty) return [];
-  List columnNames = allData.firstWhere((List e) => e[0] == 'H');
+  var columnNames = allData.firstWhere((List e) => e[0] == 'H').cast<String>();
   return allData
       .where((List e) => e[0] == 'D')
       .map((List e) => new Map.fromIterables(columnNames, e))

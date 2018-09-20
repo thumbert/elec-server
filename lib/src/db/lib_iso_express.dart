@@ -28,7 +28,7 @@ abstract class IsoExpressReport {
 
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.
-  List<Map> processFile(File file);
+  List<Map<String,dynamic>> processFile(File file);
 
   /// Download this url to a file.
   Future downloadUrl(String url, File fileout, {bool override: true}) async {

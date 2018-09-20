@@ -19,7 +19,7 @@ winterStormTests() async {
 
 
 main() async {
-  initializeTimeZoneSync(getLocationTzdb());
+  await initializeTimeZone();
   await winterStormTests();
   
 //  var date = '4/19/2018';

@@ -5,12 +5,12 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/api/api_isone_dalmp.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 
 
-ApiDaLmpHourlyTest() async {
+apiTest() async {
   Db db;
   DaLmp api;
+  Location location = getLocation('US/Eastern');
   setUp(() async {
     db = new Db('mongodb://localhost/isoexpress');
     api = new DaLmp(db);
@@ -19,24 +19,32 @@ ApiDaLmpHourlyTest() async {
   tearDown(() async {
     await db.close();
   });
-  group('API DA Hourly prices', (){
+  group('API DA Hourly prices:', (){
     test('get lmp data for 2 days', () async {
-      var data = await api.getHourlyData(4000, 'lmp',
-          startDate: new Date(2017,1,1), endDate: new Date(2017,1,2)).toList();
-      expect(data.length, 2);
+      var aux = await api.getHourlyPrices(4000, new Date(2017,1,1),
+          new Date(2017,1,2), 'lmp');
+      expect(aux.length, 48);
+      expect(aux.first, {
+        'hourBeginning': '2017-01-01 00:00:00.000-0500',
+        'lmp': 35.12,
+      });
     });
-
-    test('get daily lmp prices by peak bycket', () async {
+    test('get daily lmp prices by peak bucket', () async {
       var data = await api.apiGetDailyBucketPrice('lmp', 4000,
           '2017-07-01', '2017-07-07', '5x16');
       expect(data.length, 4);
       expect(data.first, {'date': '2017-07-03', 'lmp': 35.225});
     });
-
-    test('get daily lmp prices by flat bycket', () async {
+    test('get daily lmp prices by flat bucket', () async {
       var data = await api.apiGetDailyBucketPrice('lmp', 4000,
           '2017-07-01', '2017-07-07', 'flat');
       expect(data.length, 7);
+    });
+    test('get monthly lmp prices by flat bucket', () async {
+      var data = await api.apiGetMonthlyBucketPrice('lmp', 4000,
+          '2017-07-01', '2017-08-01', 'flat');
+      expect(data.length, 2);
+      expect(data.first, {'month': '2017-07', 'lmp': 27.604422043010757});
     });
 
 
@@ -46,7 +54,7 @@ ApiDaLmpHourlyTest() async {
 
 
 main() async {
-  initializeTimeZoneSync( getLocationTzdb() );
-  await ApiDaLmpHourlyTest();
+  await initializeTimeZone();
+  await apiTest();
 
 }

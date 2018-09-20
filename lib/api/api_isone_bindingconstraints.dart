@@ -20,14 +20,14 @@ class BindingConstraints {
   }
 
   @ApiMethod(path: 'market/da/start/{start}/end/{end}')
-  Future<List<Map<String, String>>> apiGetDaBindingConstraintsByDay(
+  Future<List<Map<String,Object>>> apiGetDaBindingConstraintsByDay(
       String start, String end) async {
     SelectorBuilder query = where;
     query = query.gte('date', Date.parse(start).toString());
     query = query.lte('date', Date.parse(end).toString());
     query = query.eq('market', 'DA');
     query = query.excludeFields(['_id', 'Hour Ending', 'date', 'market']);
-    return await coll.find(query).map((Map e) {
+    return await coll.find(query).map((Map<String,Object> e) {
       var start = new TZDateTime.from(e['hourBeginning'], _location);
       e['hourBeginning'] = start.toString();
       return e;
@@ -35,13 +35,13 @@ class BindingConstraints {
   }
 
   @ApiMethod(path: 'market/{market}/constraintname/{constraintName}')
-  Future<List<Map<String, String>>> apiGetDaBindingConstraintsByName(
+  Future<List<Map<String,Object>>> apiGetDaBindingConstraintsByName(
       String market, String constraintName) async {
     SelectorBuilder query = where;
     query = query.eq('Constraint Name', constraintName);
     query = query.eq('market', market.toUpperCase());
     query = query.excludeFields(['_id', 'Hour Ending', 'date', 'market']);
-    return await coll.find(query).map((Map e) {
+    return await coll.find(query).map((Map<String,Object> e) {
       var start = new TZDateTime.from(e['hourBeginning'], _location);
       e['hourBeginning'] = start.toString();
       return e;

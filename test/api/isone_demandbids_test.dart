@@ -3,9 +3,7 @@ library test.isone_demandbids_test;
 import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
-import 'package:date/date.dart';
 import 'package:elec_server/api/api_isone_demandbids.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 
 ApiTest() async {
   group('api tests for demand bids', () {
@@ -47,7 +45,7 @@ ApiTest() async {
 }
 
 main() async {
-  initializeTimeZoneSync(getLocationTzdb());
+  await initializeTimeZone();
 
   await ApiTest();
 

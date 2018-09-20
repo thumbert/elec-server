@@ -64,8 +64,8 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     return row;
   }
 
-  List<Map> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+  List<Map<String,dynamic>> processFile(File file) {
+    var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
     Map dataByBidId = _groupBy(data, (row) => row['Bid ID']);
     return dataByBidId.keys.map((ptid) => converter(dataByBidId[ptid])).toList();
