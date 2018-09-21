@@ -1,5 +1,6 @@
 library test.isone_dalmp_test;
 
+import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
@@ -30,23 +31,25 @@ apiTest() async {
       });
     });
     test('get daily lmp prices by peak bucket', () async {
-      var data = await api.apiGetDailyBucketPrice('lmp', 4000,
+      var res = await api.apiGetDailyBucketPrice('lmp', 4000,
           '2017-07-01', '2017-07-07', '5x16');
+      var data = json.decode(res.result);
       expect(data.length, 4);
       expect(data.first, {'date': '2017-07-03', 'lmp': 35.225});
     });
     test('get daily lmp prices by flat bucket', () async {
-      var data = await api.apiGetDailyBucketPrice('lmp', 4000,
+      var res = await api.apiGetDailyBucketPrice('lmp', 4000,
           '2017-07-01', '2017-07-07', 'flat');
+      var data = json.decode(res.result);
       expect(data.length, 7);
     });
     test('get monthly lmp prices by flat bucket', () async {
-      var data = await api.apiGetMonthlyBucketPrice('lmp', 4000,
+      var res = await api.apiGetMonthlyBucketPrice('lmp', 4000,
           '2017-07-01', '2017-08-01', 'flat');
+      var data = json.decode(res.result);
       expect(data.length, 2);
       expect(data.first, {'month': '2017-07', 'lmp': 27.604422043010757});
     });
-
 
   });
 

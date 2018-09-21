@@ -1,14 +1,15 @@
 library api.isone_dalmp;
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
 import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:tuple/tuple.dart';
 import 'package:elec/elec.dart';
 import 'package:table/table.dart';
+import '../src/utils/api_response.dart';
 
 @ApiClass(name: 'dalmp', version: 'v1')
 class DaLmp {
@@ -24,7 +25,7 @@ class DaLmp {
 
   /// http://localhost:8080/dalmp/v1/monthly/lmp/ptid/4000/start/201701/end/201701/bucket/5x16
   @ApiMethod(path: 'monthly/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
-  Future<List<Map<String,String>>> apiGetMonthlyBucketPrice(
+  Future<ApiResponse> apiGetMonthlyBucketPrice(
       String component, int ptid, String start, String end, String bucket) async {
     Date startDate = new Date(int.parse(start.substring(0,4)),
       int.parse(start.substring(5,7)), 1);
@@ -38,22 +39,23 @@ class DaLmp {
       return bucketO.containsHour(new Hour.beginning(hb));
     }).toList();
 
-    /// do the monthly aggregation
+    // do the monthly aggregation
     Nest _monthlyNest = new Nest()
       ..key((Map e) {
         String hb = e['hourBeginning'];
         return hb.substring(0,7);})
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
     List<Map> res = _monthlyNest.entries(out);
-    return res.map((Map e) => {
+    var data = res.map((Map e) => {
       'month': e['key'],
-      component : e['values'].toString()
+      component : e['values']
     }).toList();
+    return new ApiResponse()..result = json.encode(data);
   }
 
   /// http://localhost:8080/dalmp/v1/daily/lmp/ptid/4000/start/20170101/end/20170101/bucket/5x16
   @ApiMethod(path: 'daily/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
-  Future<List<Map<String,String>>> apiGetDailyBucketPrice(
+  Future<ApiResponse> apiGetDailyBucketPrice(
       String component, int ptid, String start, String end, String bucket) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
@@ -65,15 +67,16 @@ class DaLmp {
       return bucketO.containsHour(new Hour.beginning(hb));
     }).toList();
 
-    /// do the daily aggregation
+    // do the daily aggregation
     Nest nest = new Nest()
       ..key((Map e) => Date.parse((e['hourBeginning'] as String).substring(0,10)))
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
     List<Map> res = nest.entries(out);
-    return res.map((Map e) => {
+    var data = res.map((Map e) => {
       'date': e['key'].toString(),
-      component : e['values'].toString()  // THIS SUCKS
+      component : e['values']
     }).toList();
+    return new ApiResponse()..result = json.encode(data);
   }
 
   num _mean(Iterable<num> x) {
@@ -88,11 +91,12 @@ class DaLmp {
 
   /// http://localhost:8080/dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170101
   @ApiMethod(path: 'byrow/{component}/ptid/{ptid}/start/{start}/end/{end}')
-  Future<List<Map<String, String>>> apiGetHourlyDataByRow(
-      String component, int ptid, String start, String end) {
+  Future<ApiResponse> apiGetHourlyDataByRow(
+      String component, int ptid, String start, String end) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
-    return getHourlyPrices(ptid, startDate, endDate, component);
+    var data = await getHourlyPrices(ptid, startDate, endDate, component);
+    return new ApiResponse()..result = json.encode(data);
   }
 
   /// http://localhost:8080/dalmp/v1/bycolumn/congestion/ptid/4000/start/20170101/end/20170101
@@ -178,6 +182,7 @@ class DaLmp {
     print(out);
     return out;
   }
+
 
   Future<List<Map<String, Object>>> getHourlyPrices(
       int ptid, Date start, Date end, String component) async {
