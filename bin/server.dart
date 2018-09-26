@@ -31,9 +31,9 @@ registerApis() async {
   _apiServer.addApi( new ApiPtids(db2) );
 //  _apiServer.addApi( new ApiCustomerCounts(db2) );
 
-//  Db db3 = new Db('mongodb://$host/isoexpress');
-//  await db3.open();
-//  _apiServer.addApi( new DaLmp(db3) );
+  Db db3 = new Db('mongodb://$host/isoexpress');
+  await db3.open();
+  _apiServer.addApi( new DaLmp(db3) );
 //  _apiServer.addApi( new RtLmp(db3) );
 //  _apiServer.addApi( new BindingConstraints(db3) );
 //  _apiServer.addApi( new DaEnergyOffers(db3) );
