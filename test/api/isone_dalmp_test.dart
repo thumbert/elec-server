@@ -30,6 +30,13 @@ apiTest() async {
         'lmp': 35.12,
       });
     });
+    test('get lmp data for 2 days (compact)', () async {
+      var aux = await api.getHourlyPricesCompact('lmp', 4000, '2017-01-01',
+          '2017-01-02');
+      expect(aux.length, 48);
+      expect(aux.first, 35.12);
+    });
+
     test('get daily lmp prices by peak bucket', () async {
       var res = await api.getDailyBucketPrice('lmp', 4000,
           '2017-07-01', '2017-07-07', '5x16');
@@ -46,7 +53,7 @@ apiTest() async {
     });
     test('get monthly lmp prices by flat bucket', () async {
       var res = await api.getMonthlyBucketPrice('lmp', 4000,
-          '2017-07-01', '2017-08-01', 'flat');
+          '201707', '201708', 'flat');
       var data = json.decode(res.result);
       expect(data.length, 2);
       expect(data.first, {'month': '2017-07', 'lmp': 27.604422043010757});

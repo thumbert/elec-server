@@ -102,6 +102,17 @@ class DaLmp {
     return new ApiResponse()..result = json.encode(data);
   }
 
+  /// http://localhost:8080/dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170101/compact
+  @ApiMethod(path: 'component/{component}/ptid/{ptid}/start/{start}/end/{end}/compact')
+  Future<List<double>> getHourlyPricesCompact(
+      String component, int ptid, String start, String end) async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+    var data = await getHourlyData(ptid, startDate, endDate, component);
+    return data.map((e) => e[component] as double).toList();
+  }
+
+
   @ApiMethod(path: 'ptids')
   Future<List<int>> allPtids() async {
     Map res = await coll.distinct('ptid');

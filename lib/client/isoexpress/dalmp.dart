@@ -7,6 +7,7 @@ library elec_server.dalmp.v1;
 import 'dart:collection' as collection;
 import 'dart:async';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
@@ -150,8 +151,8 @@ class DalmpApi {
   ///
   /// If the used [http.Client] completes with an error when making a REST call,
   /// this method will complete with the same error.
-  Future<ApiResponse> getHourlyData(
-      String component, int ptid, String start, String end) {
+  Future<TimeSeries> getHourlyData(
+      LmpComponent component, int ptid, Interval interval) {
     var _url = null;
     var _queryParams = new Map<String, List<String>>();
     var _uploadMedia = null;
@@ -165,21 +166,29 @@ class DalmpApi {
     if (ptid == null) {
       throw new ArgumentError("Parameter ptid is required.");
     }
-    if (start == null) {
-      throw new ArgumentError("Parameter start is required.");
-    }
-    if (end == null) {
-      throw new ArgumentError("Parameter end is required.");
+    if (interval == null) {
+      throw new ArgumentError("Parameter interval is required.");
     }
 
+    String cmp = component.toString().replaceAll('LmpComponent.', '');
+    Date start = Date.fromTZDateTime(interval.start);
+    Date end;
+    if (isBeginningOfDay(interval.end)) {
+      end =
+          Date.fromTZDateTime(interval.end.subtract(new Duration(seconds: 1)));
+    } else {
+      end = Date.fromTZDateTime(interval.end);
+    }
+
+
     _url = 'component/' +
-        commons.Escaper.ecapeVariable('$component') +
+        commons.Escaper.ecapeVariable('$cmp') +
         '/ptid/' +
         commons.Escaper.ecapeVariable('$ptid') +
         '/start/' +
-        commons.Escaper.ecapeVariable('$start') +
+        commons.Escaper.ecapeVariable('${start.toString()}') +
         '/end/' +
-        commons.Escaper.ecapeVariable('$end');
+        commons.Escaper.ecapeVariable('${end.toString()}');
 
     var _response = _requester.request(_url, "GET",
         body: _body,
@@ -187,7 +196,12 @@ class DalmpApi {
         uploadOptions: _uploadOptions,
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
-    return _response.then((data) => new ApiResponse.fromJson(data));
+    return _response.then((data) {
+      var aux = new ApiResponse.fromJson(data);
+      var x = (json.decode(aux.result) as List).cast<Map>();
+      return TimeSeries.fromIterable(x.map((e) => new IntervalTuple(
+          new Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])), e[cmp])));
+    });
   }
 
   /// Request parameters:
@@ -196,7 +210,7 @@ class DalmpApi {
   ///
   /// [ptid] - Path parameter: 'ptid'.
   ///
-  /// [start] - Path parameter: 'start'.
+  /// [interval] - Path parameter: 'interval'.
   ///
   /// [end] - Path parameter: 'end'.
   ///
@@ -209,14 +223,15 @@ class DalmpApi {
   ///
   /// If the used [http.Client] completes with an error when making a REST call,
   /// this method will complete with the same error.
-  Future<ApiResponse> getMonthlyBucketPrice(
-      String component, int ptid, String start, String end, String bucket) {
+  Future<TimeSeries> getMonthlyBucketPrice(
+      LmpComponent component, int ptid, Interval interval, Bucket bucket) {
     var _url = null;
     var _queryParams = new Map<String, List<String>>();
     var _uploadMedia = null;
     var _uploadOptions = null;
     var _downloadOptions = commons.DownloadOptions.Metadata;
     var _body = null;
+    final DateFormat _isoFmt = new DateFormat('yyyy-MM');
 
     if (component == null) {
       throw new ArgumentError("Parameter component is required.");
@@ -224,26 +239,32 @@ class DalmpApi {
     if (ptid == null) {
       throw new ArgumentError("Parameter ptid is required.");
     }
-    if (start == null) {
-      throw new ArgumentError("Parameter start is required.");
-    }
-    if (end == null) {
-      throw new ArgumentError("Parameter end is required.");
+    if (interval == null) {
+      throw new ArgumentError("Parameter interval is required.");
     }
     if (bucket == null) {
       throw new ArgumentError("Parameter bucket is required.");
     }
+    String cmp = component.toString().replaceAll('LmpComponent.', '');
+    Month start = Month.fromTZDateTime(interval.start);
+    Month end;
+    if (isBeginningOfMonth(interval.end)) {
+      end =
+          Month.fromTZDateTime(interval.end.subtract(new Duration(seconds: 1)));
+    } else {
+      end = Month.fromTZDateTime(interval.end);
+    }
 
     _url = 'monthly/' +
-        commons.Escaper.ecapeVariable('$component') +
+        commons.Escaper.ecapeVariable('$cmp') +
         '/ptid/' +
         commons.Escaper.ecapeVariable('$ptid') +
         '/start/' +
-        commons.Escaper.ecapeVariable('$start') +
+        commons.Escaper.ecapeVariable('${start.toIso8601String()}') +
         '/end/' +
-        commons.Escaper.ecapeVariable('$end') +
+        commons.Escaper.ecapeVariable('${end.toIso8601String()}') +
         '/bucket/' +
-        commons.Escaper.ecapeVariable('$bucket');
+        commons.Escaper.ecapeVariable('${bucket.name}');
 
     var _response = _requester.request(_url, "GET",
         body: _body,
@@ -251,7 +272,12 @@ class DalmpApi {
         uploadOptions: _uploadOptions,
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
-    return _response.then((data) => new ApiResponse.fromJson(data));
+    return _response.then((data) {
+      var aux = new ApiResponse.fromJson(data);
+      var x = (json.decode(aux.result) as List).cast<Map>();
+      return TimeSeries.fromIterable(x.map((e) => new IntervalTuple(
+          Month.parse(e['month'], fmt: _isoFmt, location: location), e[cmp])));
+    });
   }
 }
 
