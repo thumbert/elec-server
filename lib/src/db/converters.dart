@@ -5,6 +5,7 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 /// ISO dates are in mm/dd/yyyy.  Return a string in ISO format yyyy-mm-dd.
 String formatDate(String mmddyyyy) {
+  // TODO: make it work even if the input length is not 10 characters!
   return '${mmddyyyy.substring(6,10)}-${mmddyyyy.substring(0,2)}-${mmddyyyy.substring(3,5)}';
 }
 
