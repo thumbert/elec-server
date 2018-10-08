@@ -1,18 +1,17 @@
 library iso.isone.db.converters;
 
+import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
+
+DateFormat _fmt = new DateFormat('MM/dd/yyyy');
 
 /// ISO dates are in mm/dd/yyyy.  Return a string in ISO format yyyy-mm-dd.
 String formatDate(String mmddyyyy) {
 if (mmddyyyy.length == 10)
     return '${mmddyyyy.substring(6,10)}-${mmddyyyy.substring(0,2)}-${mmddyyyy.substring(3,5)}';
   else {
-    // in case the format is not standard, e.g 10/5/2017 instead of 10/05/2017
-    RegExp regExp = new RegExp(r'(\d{1,2})/(\d{1,2})/(\d{4})');
-    var matches = regExp.allMatches(mmddyyyy);
-    var match = matches.elementAt(0);
-    return '${match.group(3)}-${match.group(1).padLeft(2,'0')}-${match.group(2).padLeft(2,'0')}';
+    return _fmt.parse(mmddyyyy).toIso8601String().substring(0,10);  
   }
 }
 
