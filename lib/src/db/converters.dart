@@ -5,11 +5,16 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 /// ISO dates are in mm/dd/yyyy.  Return a string in ISO format yyyy-mm-dd.
 String formatDate(String mmddyyyy) {
-  // TODO: make it work even if the input length is not 10 characters!
-  return '${mmddyyyy.substring(6,10)}-${mmddyyyy.substring(0,2)}-${mmddyyyy.substring(3,5)}';
+if (mmddyyyy.length == 10)
+    return '${mmddyyyy.substring(6,10)}-${mmddyyyy.substring(0,2)}-${mmddyyyy.substring(3,5)}';
+  else {
+    // in case the format is not standard, e.g 10/5/2017 instead of 10/05/2017
+    RegExp regExp = new RegExp(r'(\d{1,2})/(\d{1,2})/(\d{4})');
+    var matches = regExp.allMatches(mmddyyyy);
+    var match = matches.elementAt(0);
+    return '${match.group(3)}-${match.group(1).padLeft(2,'0')}-${match.group(2).padLeft(2,'0')}';
+  }
 }
-
-
 
 
 /// How to convert different columns.  CSV converter is pretty good with the
