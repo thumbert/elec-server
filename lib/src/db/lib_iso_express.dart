@@ -99,6 +99,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// Read the report from the disk, and insert the data into the database.
   /// If the processing of the file throws an IncompleteReportException
   /// delete the file associated with this day.
+  /// Remove the data associated with this [day] before reinserting.
   Future insertDay(Date day) async {
     File file = getFilename(day);
     var data;
@@ -109,6 +110,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
       file.delete();
       return new Future.value(null);
     }
+    await dbConfig.coll.remove({'date': day.toString()});
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted ${reportName} for day ${day}'))

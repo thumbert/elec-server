@@ -4,7 +4,6 @@
 
 library elec_server.dalmp.v1;
 
-import 'dart:collection' as collection;
 import 'dart:async';
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -16,6 +15,7 @@ import 'package:timezone/standalone.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/common_enums.dart';
 import 'package:timeseries/timeseries.dart';
+import 'package:elec_server/src/utils/api_response.dart';
 
 export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
     show ApiRequestError, DetailedApiRequestError;
@@ -32,33 +32,6 @@ class DalmpApi {
       : _requester =
             new commons.ApiRequester(client, rootUrl, servicePath, USER_AGENT);
 
-  /// Request parameters:
-  ///
-  /// Completes with a [ListOfint].
-  ///
-  /// Completes with a [commons.ApiRequestError] if the API endpoint returned an
-  /// error.
-  ///
-  /// If the used [http.Client] completes with an error when making a REST call,
-  /// this method will complete with the same error.
-  Future<ListOfint> allPtids() {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'ptids';
-
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) => new ListOfint.fromJson(data));
-  }
 
   /// Request parameters:
   ///
@@ -127,8 +100,7 @@ class DalmpApi {
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
     return _response.then((data) {
-      var aux = new ApiResponse.fromJson(data);
-      var x = (json.decode(aux.result) as List).cast<Map>();
+      var x = (json.decode(data['result']) as List).cast<Map>();
       return TimeSeries.fromIterable(x.map((e) => new IntervalTuple(
           Date.parse(e['date'], location: location), e[cmp])));
     });
@@ -197,8 +169,7 @@ class DalmpApi {
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
     return _response.then((data) {
-      var aux = new ApiResponse.fromJson(data);
-      var x = (json.decode(aux.result) as List).cast<Map>();
+      var x = (json.decode(data['result']) as List).cast<Map>();
       return TimeSeries.fromIterable(x.map((e) => new IntervalTuple(
           new Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])), e[cmp])));
     });
@@ -273,54 +244,11 @@ class DalmpApi {
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
     return _response.then((data) {
-      var aux = new ApiResponse.fromJson(data);
-      var x = (json.decode(aux.result) as List).cast<Map>();
+      var x = (json.decode(data['result']) as List).cast<Map>();
       return TimeSeries.fromIterable(x.map((e) => new IntervalTuple(
           Month.parse(e['month'], fmt: _isoFmt, location: location), e[cmp])));
     });
   }
 }
 
-class ApiResponse {
-  String result;
 
-  ApiResponse();
-
-  ApiResponse.fromJson(Map _json) {
-    if (_json.containsKey("result")) {
-      result = _json["result"];
-    }
-  }
-
-  Map<String, Object> toJson() {
-    final Map<String, Object> _json = new Map<String, Object>();
-    if (result != null) {
-      _json["result"] = result;
-    }
-    return _json;
-  }
-}
-
-class ListOfint extends collection.ListBase<int> {
-  final List<int> _inner;
-
-  ListOfint() : _inner = [];
-
-  ListOfint.fromJson(List json) : _inner = json.map((value) => value).toList();
-
-  List<int> toJson() {
-    return _inner.map((value) => value).toList();
-  }
-
-  int operator [](int key) => _inner[key];
-
-  void operator []=(int key, int value) {
-    _inner[key] = value;
-  }
-
-  int get length => _inner.length;
-
-  void set length(int newLength) {
-    _inner.length = newLength;
-  }
-}

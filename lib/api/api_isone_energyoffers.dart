@@ -30,7 +30,6 @@ class DaEnergyOffers {
 
   //http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
   @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
-
   /// return the stack, energy offers sorted.
   Future<List<Map<String, String>>> getGenerationStack(
       String date, String hourending) async {
@@ -59,11 +58,11 @@ class DaEnergyOffers {
     return stack;
   }
 
+
   //http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16
   @ApiMethod(path: 'date/{date}/hourending/{hourending}')
-
   /// Return the energy offers (price/quantity pairs) for a given datetime.
-  Future<List<Map<String, String>>> getEnergyOffers(
+  Future<List> getEnergyOffers(
       String date, String hourending) async {
     hourending = hourending.padLeft(2, '0');
     Date day = Date.parse(date);
@@ -90,38 +89,42 @@ class DaEnergyOffers {
       },
     };
     pipeline.add({'\$match': match});
-    pipeline.add({'\$project': project});
+    //pipeline.add({'\$project': project});
     pipeline.add({'\$unwind': '\$hours'});
-    var res = coll.aggregateToStream(pipeline);
+    var res = await coll.aggregate(pipeline);
+
+//    var query = where
+//      ..eq('date', day.toString())
+//      ..eq('hours.hourBeginning', dt);
+//    var data = await coll.find(query).toList();
 
     /// flatten the map in Dart
-    List out = [];
-    List keys = [
+    var out = [];
+    var keys = <String>[
       'assetId', 'Unit Status', 'Economic Maximum',
       // 'hourBeginning',
       'price', 'quantity'
     ];
 
-    await for (Map e in res) {
-      List prices = e['hours']['price'];
-      for (int i = 0; i < prices.length; i++) {
-        out.add(new Map.fromIterables(keys, [
-          e['Masked Asset ID'],
-          e['Unit Status'],
-          e['hours']['Economic Maximum'],
-          //new TZDateTime.from(e['hours']['hourBeginning'], location).toString(),
-          e['hours']['price'][i],
-          e['hours']['quantity'][i]
-        ]));
-      }
-    }
+//    await for (Map e in res) {
+//      List prices = e['hours']['price'];
+//      for (int i = 0; i < prices.length; i++) {
+//        out.add(new Map.fromIterables(keys, [
+//          e['Masked Asset ID'],
+//          e['Unit Status'],
+//          e['hours']['Economic Maximum'],
+//          //new TZDateTime.from(e['hours']['hourBeginning'], location).toString(),
+//          e['hours']['price'][i],
+//          e['hours']['quantity'][i]
+//        ]));
+//      }
+//    }
     return out;
   }
 
   //http://localhost:8080/da_energy_offers/v1/assetId/41406/variable/Economic Maximum/start/20170701/end/20171001
   @ApiMethod(
       path: 'assetId/{assetId}/variable/{variable}/start/{start}/end/{end}')
-
   /// Get one variable between a start and end date for one asset.
   Future<List<Map<String, String>>> oneAssetVariable(
       String assetId, String variable, String start, String end) async {

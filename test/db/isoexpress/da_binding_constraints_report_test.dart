@@ -84,6 +84,6 @@ main() async {
 //  await prepareData();
   await DaBindingConstraintsTest();
 
-//  await soloTest();
+//  await uploadDays();
 
 }

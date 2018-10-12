@@ -28,6 +28,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   }
   String reportName =
       'Day-Ahead Energy Market Hourly Final Binding Constraints Report';
+
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hourlydayaheadconstraints?start=' +
       yyyymmdd(asOfDate) +
@@ -58,6 +59,26 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
     return uRows;
   }
 
+  /// Read the report from the disk, and insert the data into the database.
+  /// If the processing of the file throws an IncompleteReportException
+  /// delete the file associated with this day.
+  Future insertDay(Date day) async {
+    File file = getFilename(day);
+    var data;
+    try {
+      data = processFile(file);
+      if (data.isEmpty) return new Future.value(null);
+    } on mis.IncompleteReportException {
+      file.delete();
+      return new Future.value(null);
+    }
+    await dbConfig.coll.remove({'date': day.toString()});
+    return dbConfig.coll
+        .insertAll(data)
+        .then((_) => print('--->  Inserted ${reportName} for day ${day}'))
+        .catchError((e) => print('xxxx ERROR xxxx ' + e.toString()));
+  }
+
   /// Check if this date is in the db already
   Future<bool> hasDay(Date date) async {
     var res = await dbConfig.coll.findOne({
@@ -75,13 +96,6 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
 
-    ///
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {
-      'hourBeginning': 1,
-      'Constraint Name': 1,
-      'Contingency Name': 1,
-      'market': 1
-    }, unique: true);
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'Constraint Name': 1, 'market': 1});
     await dbConfig.db

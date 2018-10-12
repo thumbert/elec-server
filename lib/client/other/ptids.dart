@@ -4,11 +4,14 @@
 
 library elec_server.ptids.v1;
 
-import 'dart:collection' as collection;
+import 'dart:convert';
 import 'dart:async';
 
 import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
+import 'package:date/date.dart';
+import 'package:elec_server/src/utils/api_response.dart';
+
 
 export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
     show ApiRequestError, DetailedApiRequestError;
@@ -26,7 +29,8 @@ class PtidsApi {
 
   /// Request parameters:
   ///
-  /// [asOfDate] - Path parameter: 'asOfDate'.
+  /// [asOfDate] - Path parameter: 'asOfDate'.  If [null] return the last
+  /// date in the database.
   ///
   /// Completes with a [ApiResponse].
   ///
@@ -35,7 +39,7 @@ class PtidsApi {
   ///
   /// If the used [http.Client] completes with an error when making a REST call,
   /// this method will complete with the same error.
-  Future<ApiResponse> apiPtidTableAsOfDate(String asOfDate) {
+  Future<List<Map<String,Object>>> getPtidTable({Date asOfDate}) async {
     var _url = null;
     var _queryParams = new Map<String, List<String>>();
     var _uploadMedia = null;
@@ -44,47 +48,24 @@ class PtidsApi {
     var _body = null;
 
     if (asOfDate == null) {
-      throw new ArgumentError("Parameter asOfDate is required.");
+      _url = 'current';
+    } else {
+      _url = 'asofdate/' + commons.Escaper.ecapeVariable('$asOfDate');
     }
 
-    _url = 'asofdate/' + commons.Escaper.ecapeVariable('$asOfDate');
-
     var _response = _requester.request(_url, "GET",
         body: _body,
         queryParams: _queryParams,
         uploadOptions: _uploadOptions,
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
-    return _response.then((data) => new ApiResponse.fromJson(data));
+    return _response.then((data) {
+      var aux = new ApiResponse.fromJson(data);
+      return (json.decode(aux.result) as List).cast<Map<String,Object>>();
+    });
+
   }
 
-  /// Request parameters:
-  ///
-  /// Completes with a [ApiResponse].
-  ///
-  /// Completes with a [commons.ApiRequestError] if the API endpoint returned an
-  /// error.
-  ///
-  /// If the used [http.Client] completes with an error when making a REST call,
-  /// this method will complete with the same error.
-  Future<ApiResponse> apiPtidTableCurrent() {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'current';
-
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) => new ApiResponse.fromJson(data));
-  }
 
   /// Request parameters:
   ///
@@ -115,47 +96,4 @@ class PtidsApi {
   }
 }
 
-class ApiResponse {
-  String result;
 
-  ApiResponse();
-
-  ApiResponse.fromJson(Map _json) {
-    if (_json.containsKey("result")) {
-      result = _json["result"];
-    }
-  }
-
-  Map<String, Object> toJson() {
-    final Map<String, Object> _json = new Map<String, Object>();
-    if (result != null) {
-      _json["result"] = result;
-    }
-    return _json;
-  }
-}
-
-class ListOfString extends collection.ListBase<String> {
-  final List<String> _inner;
-
-  ListOfString() : _inner = [];
-
-  ListOfString.fromJson(List json)
-      : _inner = json.map((value) => value).toList();
-
-  List<String> toJson() {
-    return _inner.map((value) => value).toList();
-  }
-
-  String operator [](int key) => _inner[key];
-
-  void operator []=(int key, String value) {
-    _inner[key] = value;
-  }
-
-  int get length => _inner.length;
-
-  void set length(int newLength) {
-    _inner.length = newLength;
-  }
-}

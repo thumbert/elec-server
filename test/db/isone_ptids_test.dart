@@ -41,7 +41,7 @@ ingestionTest() async {
 }
 
 apiTest() async {
-  group('API Ptid table tests:', () {
+  group('Ptid table tests:', () {
     ComponentConfig config;
     PtidArchive archive;
     ApiPtids api;
@@ -94,7 +94,8 @@ apiTest() async {
       expect(data.length > 950, true);
       expect(data.first['ptid'], 4000);
       var me = data.firstWhere((e) => e['ptid'] == 4001);
-      expect(me, {'ptid': 4001, 'name': '.Z.MAINE', 'spokenName': 'MAINE'});
+      expect(me, {'ptid': 4001, 'name': '.Z.MAINE', 'spokenName': 'MAINE',
+        'type': 'zone'});
     });
 
   });

@@ -37,7 +37,6 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   /// [rows] has the data for all the hours of the day for one asset
   Map converter(List<Map> rows) {
     Map row = {};
-
     /// daily info
     row['date'] = formatDate(rows.first['Day']);
     row['Masked Lead Participant ID'] =
