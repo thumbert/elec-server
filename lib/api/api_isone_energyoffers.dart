@@ -40,7 +40,7 @@ class DaEnergyOffers {
     /// 2) make the must run units have $-150 prices in the first block only.
     /// 3) some units have MW for a segment > Ecomax.
     var gEo = _groupBy(eo.where((e) => e['Unit Status'] != 'UNAVAILABLE'),
-        (Map e) => e['assetId']);
+        (e) => e['assetId']);
     gEo.keys.forEach((assetId) {
       List<Map> offers = gEo[assetId];
       if (offers.first['Unit Status'] == 'MUST_RUN') {
@@ -68,12 +68,12 @@ class DaEnergyOffers {
     Date day = Date.parse(date);
     TZDateTime dt = parseHourEndingStamp(mmddyyyy(day), hourending);
     List pipeline = [];
-    Map match = {
+    var match = {
       'date': {
         '\$eq': day.toString(),
       }
     };
-    Map project = {
+    var project = {
       '_id': 0,
       'Masked Asset ID': 1,
       'Unit Status': 1,
@@ -89,14 +89,10 @@ class DaEnergyOffers {
       },
     };
     pipeline.add({'\$match': match});
-    //pipeline.add({'\$project': project});
+    pipeline.add({'\$project': project});
     pipeline.add({'\$unwind': '\$hours'});
-    var res = await coll.aggregate(pipeline);
+    var res = await coll.aggregateToStream(pipeline);
 
-//    var query = where
-//      ..eq('date', day.toString())
-//      ..eq('hours.hourBeginning', dt);
-//    var data = await coll.find(query).toList();
 
     /// flatten the map in Dart
     var out = [];
@@ -106,19 +102,19 @@ class DaEnergyOffers {
       'price', 'quantity'
     ];
 
-//    await for (Map e in res) {
-//      List prices = e['hours']['price'];
-//      for (int i = 0; i < prices.length; i++) {
-//        out.add(new Map.fromIterables(keys, [
-//          e['Masked Asset ID'],
-//          e['Unit Status'],
-//          e['hours']['Economic Maximum'],
-//          //new TZDateTime.from(e['hours']['hourBeginning'], location).toString(),
-//          e['hours']['price'][i],
-//          e['hours']['quantity'][i]
-//        ]));
-//      }
-//    }
+    await for (var e in res) {
+      List prices = e['hours']['price'];
+      for (int i = 0; i < prices.length; i++) {
+        out.add(new Map.fromIterables(keys, [
+          e['Masked Asset ID'],
+          e['Unit Status'],
+          e['hours']['Economic Maximum'],
+          //new TZDateTime.from(e['hours']['hourBeginning'], location).toString(),
+          e['hours']['price'][i],
+          e['hours']['quantity'][i]
+        ]));
+      }
+    }
     return out;
   }
 

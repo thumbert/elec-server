@@ -24,17 +24,17 @@ ApiTest() async {
       var data = await api.getEnergyOffers('20170701', '16');
       expect(data.length, 733);
 
-//      var a87105 = data.firstWhere((Map e) => e['assetId'] == 87105);
-//      expect(a87105['Economic Maximum'], 35);
-//      expect(a87105['quantity'], 9999);
+      var a87105 = data.firstWhere((e) => e['assetId'] == 87105);
+      expect(a87105['Economic Maximum'], 35);
+      expect(a87105['quantity'], 9999);
     });
     test('get stack for one hour', () async {
       var data = await api.getGenerationStack('20170701', '16');
       //data.forEach(print);
       expect(data.length, 698);
 
-      Map fixedData = data.firstWhere((Map e) => e['assetId'] == 87105);
-      print(fixedData);
+//      Map fixedData = data.firstWhere((e) => e['assetId'] == 87105);
+//      print(fixedData);
     });
   });
 }
