@@ -1,7 +1,9 @@
 library db.isoexpress.da_energy_offer;
 
+
 import 'dart:io';
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -35,8 +37,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       new File(dir + 'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
-  Map converter(List<Map> rows) {
-    Map row = {};
+  Map<String,dynamic> converter(List<Map> rows) {
+    var row = <String,dynamic>{};
     /// daily info
     row['date'] = formatDate(rows.first['Day']);
     row['Masked Lead Participant ID'] =
@@ -77,13 +79,22 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     validateDocument(row);
     return row;
   }
+
+  insertData(List<Map<String,dynamic>> data) async {
+    return dbConfig.coll
+        .insertAll(data)
+        .then((_) => print('--->  Inserted successfully'))
+        .catchError((e) => print('   ' + e.toString()));
+  }
+
   List<Map<String,dynamic>> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
-    Map dataByAssetId = _groupBy(data, (row) => row['Masked Asset ID']);
-    return dataByAssetId.keys
-        .map((ptid) => converter(dataByAssetId[ptid]))
-        .toList();
+    var dataByAssetId = groupBy(data, (row) => row['Masked Asset ID']);
+    var out = dataByAssetId.keys
+        .map((ptid) => converter(dataByAssetId[ptid]).cast<String,d>())
+        .toList().cast<Map<String,dynamic>>();
+    return out;
   }
 
   /// Check if this date is in the db already
@@ -92,7 +103,6 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     if (res == null || res.isEmpty) return false;
     return true;
   }
-
 
   /// Recreate the collection from scratch.
   setupDb() async {

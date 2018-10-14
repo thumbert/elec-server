@@ -66,7 +66,7 @@ bool isFallBackDate(Date date) {
   return res;
 }
 
-/// When you read the reports with csv, the hour ending is an integer.
+/// When you read the MIS reports with csv, the hour ending is an integer.
 /// Fix it with this function.
 String stringHourEnding(dynamic hourEnding) {
   if (hourEnding is int) {

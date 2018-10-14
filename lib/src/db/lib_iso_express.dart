@@ -24,7 +24,7 @@ abstract class IsoExpressReport {
   Future<Null> setupDb();
 
   /// Bring the database up to date.
-  Future<Null> updateDb();
+  /// Future<Null> updateDb();
 
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.
@@ -48,7 +48,7 @@ abstract class IsoExpressReport {
   }
 
   /// Insert this data into the database.
-  Future insertData(List<Map> data) async {
+  Future insertData(List<Map<String,dynamic>> data) async {
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
@@ -70,7 +70,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   File getFilename(Date asOfDate);
 
   /// Return the last day inserted in the db.
-  Future<Map<String, String>> lastDay();
+  /// Future<Map<String, String>> lastDay();
 
   /// What is the last day available from the ISO website.  For example,
   /// NCPC reports are 4-7 days later.  Offer data is 4 months later.
@@ -116,21 +116,6 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
         .then((_) => print('--->  Inserted ${reportName} for day ${day}'))
         .catchError((e) => print('  ' + e.toString()));
   }
-
-  Future<Null> updateDb() async {
-//    await dbConfig.db.open();
-//    var response = await lastDay();
-//    Date last = await Date.parse(response['lastDay']);
-//
-//    Date current = last;
-//    while (current.isBefore(lastDayAvailable().next)) {
-//      current = current.next;
-//      await downloadDay(current);
-//      await insertDay(current);
-//    }
-//    await dbConfig.db.close();
-  }
-
 }
 
 
