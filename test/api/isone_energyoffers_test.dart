@@ -1,5 +1,6 @@
 library test.isone_energyoffers_test;
 
+import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
@@ -19,9 +20,10 @@ ApiTest() async {
   tearDown(() async {
     await db.close();
   });
-  group('api energy offers', () {
+  group('Api energy offers', () {
     test('get energy offers for one hour', () async {
-      var data = await api.getEnergyOffers('20170701', '16');
+      var response = await api.getEnergyOffers('20170701', '16');
+      var data = json.decode(response.result);
       expect(data.length, 733);
 
       var a87105 = data.firstWhere((e) => e['assetId'] == 87105);
@@ -29,12 +31,14 @@ ApiTest() async {
       expect(a87105['quantity'], 9999);
     });
     test('get stack for one hour', () async {
-      var data = await api.getGenerationStack('20170701', '16');
-      //data.forEach(print);
+      var response = await api.getGenerationStack('20170701', '16');
+      var data = json.decode(response.result);
       expect(data.length, 698);
-
-//      Map fixedData = data.firstWhere((e) => e['assetId'] == 87105);
-//      print(fixedData);
+    });
+    test('last day inserted', () async {
+      var response = await api.lastDay();
+      var day = json.decode(response.result);
+      expect(Date.parse(day) is Date, true);
     });
   });
 }

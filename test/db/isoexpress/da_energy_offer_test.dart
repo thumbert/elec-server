@@ -26,37 +26,25 @@ tests() async {
     tearDown(() async {
       await archive.dbConfig.db.close();
     });
-    test('download 2018-01-01 and insert it', () async {
-      var date = Date(2018, 1, 1);
+    test('download 2018-02-01 and insert it', () async {
+      var date = Date(2018, 2, 1);
       //await archive.downloadDay(date);
-      //await archive.insertDay(date);
-      var data = archive.processFile(archive.getFilename(date));
-      await archive.dbConfig.coll.insertAll(data);
+      var res = await archive.insertDay(date);
+      expect(res, 0);
     });
-//    test('DA energy offers report, DST day spring', () async {
-//      File file = archive.getFilename(new Date(2017, 3, 12));
-//      var res = await archive.processFile(file);
-//      expect(res.first['hours'].length, 23);
-//    });
-//    test('DA hourly lmp report, DST day fall', () async {
-//      File file = archive.getFilename(new Date(2017, 11, 5));
-//      var res = await archive.processFile(file);
-//      expect(res.first['hourBeginning'].length, 25);
-//    });
-//    test('Insert one day', () async {
-//      await archive.dbConfig.db.open();
-//      await archive.insertDay(new Date(2017, 3, 12));
-//      await archive.dbConfig.db.close();
-//    });
+    test('DA energy offers report, DST day spring', () async {
+      File file = archive.getFilename(new Date(2017, 3, 12));
+      var res = await archive.processFile(file);
+      expect(res.first['hours'].length, 23);
+    });
+    test('DA hourly lmp report, DST day fall', () async {
+      File file = archive.getFilename(new Date(2017, 11, 5));
+      var res = await archive.processFile(file);
+      expect(res.first['hours'].length, 25);
+    });
   });
 }
 
-Future soloTest() async {
-  var archive = new DaEnergyOfferArchive();
-  var data =
-      await archive.processFile(archive.getFilename(new Date(2017, 3, 12)));
-  print(data);
-}
 
 Future insertDays() async {
   Location location = getLocation('US/Eastern');
@@ -78,8 +66,6 @@ main() async {
   //await prepareData();
 
   await tests();
-
-  //await new DaEnergyOfferArchive().updateDb();
 
   //await soloTest();
 

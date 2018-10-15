@@ -28,7 +28,7 @@ abstract class IsoExpressReport {
 
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.
-  List<Map<String,dynamic>> processFile(File file);
+  List<Map<String, dynamic>> processFile(File file);
 
   /// Download this url to a file.
   Future downloadUrl(String url, File fileout, {bool override: true}) async {
@@ -48,7 +48,7 @@ abstract class IsoExpressReport {
   }
 
   /// Insert this data into the database.
-  Future insertData(List<Map<String,dynamic>> data) async {
+  Future insertData(List<Map<String, dynamic>> data) async {
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
@@ -86,8 +86,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// Download one day.  Check if the file has downloaded successfully.
   /// If [override] is true, re-download the day.
   Future<Null> downloadDay(Date day, {bool override: true}) async {
-    return await downloadUrl(getUrl(day), getFilename(day),
-        override: override);
+    return await downloadUrl(getUrl(day), getFilename(day), override: override);
   }
 
   /// Download a list of days from the website.
@@ -100,6 +99,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// If the processing of the file throws an IncompleteReportException
   /// delete the file associated with this day.
   /// Remove the data associated with this [day] before reinserting.
+  /// Returns 0 for success.
   Future insertDay(Date day) async {
     File file = getFilename(day);
     var data;
@@ -111,13 +111,12 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
       return new Future.value(null);
     }
     await dbConfig.coll.remove({'date': day.toString()});
-    return dbConfig.coll
-        .insertAll(data)
-        .then((_) => print('--->  Inserted ${reportName} for day ${day}'))
-        .catchError((e) => print('  ' + e.toString()));
+    return dbConfig.coll.insertAll(data).then((_) {
+      print('--->  Inserted ${reportName} for day ${day}');
+      return 0;
+    }).catchError((e) => print('  ' + e.toString()));
   }
 }
-
 
 /// Format a date to the yyyymmdd format, e.g. 20170115.
 String yyyymmdd(Date date) => date.toString().replaceAll('-', '');

@@ -54,7 +54,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     /// hourly info
     row['hours'] = [];
     rows.forEach((Map hour) {
-      Map aux = {};
+      var aux = <String,dynamic>{};
       aux['hourBeginning'] =
           parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
       aux['Economic Maximum'] = hour['Economic Maximum'];
@@ -65,8 +65,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       aux['No Load Price'] = hour['No Load Price'];
 
       /// add the non empty price/quantity pairs
-      var pricesHour = [];
-      var quantitiesHour = [];
+      var pricesHour = <num>[];
+      var quantitiesHour = <num>[];
       for (int i = 1; i <= 10; i++) {
         if (!(hour['Segment $i Price'] is num)) break;
         pricesHour.add(hour['Segment $i Price']);
@@ -92,8 +92,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     if (data.isEmpty) return [];
     var dataByAssetId = groupBy(data, (row) => row['Masked Asset ID']);
     var out = dataByAssetId.keys
-        .map((ptid) => converter(dataByAssetId[ptid]).cast<String,d>())
-        .toList().cast<Map<String,dynamic>>();
+        .map((ptid) => converter(dataByAssetId[ptid]))
+        .toList();
     return out;
   }
 
