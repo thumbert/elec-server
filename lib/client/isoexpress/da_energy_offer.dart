@@ -22,14 +22,15 @@ export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
 
 const String USER_AGENT = 'dart-api-client da_energy_offer/v1';
 
-class DaEnergyOfferApi {
+class DaEnergyOffers {
   final commons.ApiRequester _requester;
   final location = getLocation('US/Eastern');
 
-  DaEnergyOfferApi(http.Client client,
-      {String rootUrl: "http://localhost:8080/", String servicePath: "da_energy_offers/v1/"})
+  DaEnergyOffers(http.Client client,
+      {String rootUrl: "http://localhost:8080/",
+      String servicePath: "da_energy_offers/v1/"})
       : _requester =
-  new commons.ApiRequester(client, rootUrl, servicePath, USER_AGENT);
+            new commons.ApiRequester(client, rootUrl, servicePath, USER_AGENT);
 
   /// Get all the energy offers for a given hour.  All assets.
   Future<List<Map>> getDaEnergyOffers(Hour hour) {
@@ -39,10 +40,6 @@ class DaEnergyOfferApi {
     var _uploadOptions = null;
     var _downloadOptions = commons.DownloadOptions.Metadata;
     var _body = null;
-
-    if (hour == null) {
-      throw new ArgumentError("Parameter hour is required.");
-    }
 
     var aux = toIsoHourEndingStamp(hour.start);
     String startDate = aux[0];
@@ -62,33 +59,77 @@ class DaEnergyOfferApi {
         .then((data) => (json.decode(data['result']) as List).cast<Map>());
   }
 
+  /// Get the generation stack for this hour
+  Future<List<Map<String, dynamic>>> getGenerationStack(Hour hour) {
+    var _url = null;
+    var _queryParams = new Map<String, List<String>>();
+    var _uploadMedia = null;
+    var _uploadOptions = null;
+    var _downloadOptions = commons.DownloadOptions.Metadata;
+    var _body = null;
 
-  /// Get all the occurrences of this constraint in the history.
-//  Future<List<Map>> getDaBindingConstraint(String name) {
-//    var _url = null;
-//    var _queryParams = new Map<String, List<String>>();
-//    var _uploadMedia = null;
-//    var _uploadOptions = null;
-//    var _downloadOptions = commons.DownloadOptions.Metadata;
-//    var _body = null;
-//
-//    if (name == null) {
-//      throw new ArgumentError("Parameter interval is required.");
-//    }
-//
-//    _url = 'market/da' +
-//        '/constraintname/' +
-//        commons.Escaper.ecapeVariable('${name.toString()}');
-//
-//    var _response = _requester.request(_url, "GET",
-//        body: _body,
-//        queryParams: _queryParams,
-//        uploadOptions: _uploadOptions,
-//        uploadMedia: _uploadMedia,
-//        downloadOptions: _downloadOptions);
-//    return _response
-//        .then((data) => (json.decode(data['result']) as List).cast<Map>());
-//  }
+    var aux = toIsoHourEndingStamp(hour.start);
+    String startDate = aux[0];
+    String hourEnding = aux[1];
+    _url = 'stack/date/' +
+        commons.Escaper.ecapeVariable('${startDate}') +
+        '/hourending/' +
+        commons.Escaper.ecapeVariable('${hourEnding}');
+
+    var _response = _requester.request(_url, "GET",
+        body: _body,
+        queryParams: _queryParams,
+        uploadOptions: _uploadOptions,
+        uploadMedia: _uploadMedia,
+        downloadOptions: _downloadOptions);
+    return _response.then((data) =>
+        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
+  }
+
+
+  /// Get the masked asset id and the masked participant id for this date.
+  Future<List<Map<String, dynamic>>> assetsForDay(Date date) {
+    var _url = null;
+    var _queryParams = new Map<String, List<String>>();
+    var _uploadMedia = null;
+    var _uploadOptions = null;
+    var _downloadOptions = commons.DownloadOptions.Metadata;
+    var _body = null;
+
+    _url = 'assets/day/' +
+        commons.Escaper.ecapeVariable('${date.toString()}');
+
+    var _response = _requester.request(_url, "GET",
+        body: _body,
+        queryParams: _queryParams,
+        uploadOptions: _uploadOptions,
+        uploadMedia: _uploadMedia,
+        downloadOptions: _downloadOptions);
+    return _response.then((data) =>
+        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
+  }
+
+  /// Get the last date inserted in the database
+  Future<Date> lastDate() {
+    var _url = null;
+    var _queryParams = new Map<String, List<String>>();
+    var _uploadMedia = null;
+    var _uploadOptions = null;
+    var _downloadOptions = commons.DownloadOptions.Metadata;
+    var _body = null;
+
+    _url = 'lastday';
+
+    var _response = _requester.request(_url, "GET",
+        body: _body,
+        queryParams: _queryParams,
+        uploadOptions: _uploadOptions,
+        uploadMedia: _uploadMedia,
+        downloadOptions: _downloadOptions);
+    return _response.then((data) =>
+        Date.parse(json.decode(data['result']) as String));
+  }
+
 
 
 }

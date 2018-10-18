@@ -40,6 +40,11 @@ ApiTest() async {
       var day = json.decode(response.result);
       expect(Date.parse(day) is Date, true);
     });
+    test('get assets one day', () async {
+      var response = await api.assetsByDay('20170701');
+      var data = json.decode(response.result);
+      expect(data.length, 308);
+    });
   });
 }
 

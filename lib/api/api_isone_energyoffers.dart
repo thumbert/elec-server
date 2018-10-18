@@ -217,19 +217,12 @@ class DaEnergyOffers {
   /// http://localhost:8080/da_energy_offers/v1/assets/day/20170301
   @ApiMethod(path: 'assets/day/{day}')
   Future<ApiResponse> assetsByDay(String day) async {
-    List pipeline = [];
-    Map match = {
-      'date': {'\$eq': Date.parse(day).toString()}
-    };
-    Map project = {
-      '_id': 0,
-      'Masked Asset ID': 1,
-      'Masked Lead Participant ID': 1
-    };
-    pipeline.add({'\$match': match});
-    pipeline.add({'\$project': project});
-    var aux =  coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(aux);
+    var query = where
+        .eq('date', Date.parse(day).toString())
+        .excludeFields(['_id'])
+        .fields(['Masked Asset ID', 'Masked Lead Participant ID']);
+    var res = await coll.find(query).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 
   /// http://localhost:8080/da_energy_offers/v1/lastday

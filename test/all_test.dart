@@ -6,6 +6,7 @@ import 'utils/iso_timestamp_test.dart' as isoTimestamp;
 import 'db/isone_ptids_test.dart' as apiPtids;
 
 import 'client/isoexpress/binding_constraints_test.dart' as bc;
+import 'client/isoexpress/da_energy_offer_test.dart' as daoffers;
 import 'client/isoexpress/dalmp_test.dart' as dalmp;
 import 'client/other/ptids_test.dart' as ptid;
 
@@ -16,8 +17,10 @@ main() async {
   isoTimestamp.testParseIsoTimestamp();
   apiPtids.apiTest();
 
+  /// Client tests
   bc.tests();
   dalmp.tests();
+  daoffers.tests();
   ptid.tests();
 
 }
