@@ -34,6 +34,7 @@
             <li><a href="#ptid-table">Ptid table</a></li>
             <li><a href="#rt-daily-prices">RT daily prices by bucket</a></li>
             <li><a href="#rt-hourly-prices">RT hourly prices</a></li>
+            <li><a href="#scc-report">Seasonal Claimed Capability report</a></li>
             <li><a href="#system-demand">ISONE system demand, DA and RT</a></li>
             <li><a href="#zonal-demand">ISONE zonal demand, DA and RT</a></li>
         </ul>
@@ -240,6 +241,23 @@
                     <div><a href="http://localhost:8080/rtlmp/v1/byrow/lmp/ptid/4000/start/20170101/end/20170131">rtlmp/v1/byrow/lmp/ptid/4000/start/20170101/end/20170131</a></div>
                     <div><a href="http://localhost:8080/rtlmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170131">rtlmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170131</a></div>
                     <div><a href="http://localhost:8080/rtlmp/v1/byrow/marginal_loss/ptid/4000/start/20170101/end/20170131">rtlmp/v1/byrow/marginal_loss/ptid/4000/start/20170101/end/20170131</a></div>
+                </li>
+            </ul>
+        </div>
+        <div id="scc-report">
+            <h4>Seasonal claimed capability report</h4>
+            <ul>
+                <li>
+                    Get the report for a given month (all assets).
+                    <div><a href="http://localhost:8080/scc_report/v1/month/2018-10">scc_report/v1/month/2017-10</a></div>
+                </li>
+                <li>
+                    Get the SCC history for one asset (all the months in the db).
+                    <div><a href="http://localhost:8080/scc_report/v1/assetId/14614">scc_report/v1/assetId/14614</a></div>
+                </li>
+                <li>
+                    Get the all the existing months in the db.
+                    <div><a href="http://localhost:8080/scc_report/v1/months">scc_report/v1/months</a></div>
                 </li>
             </ul>
         </div>

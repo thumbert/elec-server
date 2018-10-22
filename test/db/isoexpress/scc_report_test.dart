@@ -5,19 +5,24 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
+import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/isoexpress/scc_report.dart';
+import 'package:elec_server/api/api_scc_report.dart';
+
 
 Map env = Platform.environment;
 
 downloadFile() async {
   ComponentConfig config = new ComponentConfig()
     ..host = '127.0.0.1'
-    ..dbName = 'isone'
+    ..dbName = 'isoexpress'
     ..collectionName = 'scc_report';
   String dir = env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
 
   var archive = new SccReportArchive(config: config, dir: dir);
+  await archive.setup();
+
   String url =
     'https://www.iso-ne.com/static-assets/documents/2018/10/scc_october_2018.xls';
   archive.downloadFile(url);
@@ -26,88 +31,68 @@ downloadFile() async {
 ingestionTest() async {
   ComponentConfig config = new ComponentConfig()
     ..host = '127.0.0.1'
-    ..dbName = 'isone'
+    ..dbName = 'isoexpress'
     ..collectionName = 'scc_report';
   String dir = env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
 
   var archive = new SccReportArchive(config: config, dir: dir);
-  //await archive.setup();
+  await archive.setup();
 
   File file = new File(dir + 'scc_october_2018.xlsx');
-  var data = await archive.readXlsx(file)
-  
+  var data = await archive.readXlsx(file, Month(2018,10));
+  //print(data);
+
   await archive.db.open();
-  await archive.insertMongo(file);
+  await archive.insertData(data);
   await archive.db.close();
 }
 
-//apiTest() async {
-//  group('Ptid table tests:', () {
-//    ComponentConfig config;
-//    PtidArchive archive;
-//    ApiPtids api;
-//    setUp(() async {
-//      config = new ComponentConfig()
-//        ..host = '127.0.0.1'
-//        ..dbName = 'isone'
-//        ..collectionName = 'pnode_table';
-//      String dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
-//      archive = new PtidArchive(config: config, dir: dir);
-//
-//      api = new ApiPtids(config.db);
-//      await config.db.open();
-//    });
-//    tearDown(() async {
-//      await config.db.close();
-//    });
-//    test('read file for 2017-09-19', () {
-//      File file = new File(archive.dir + 'pnode_table_2017_09_19.xlsx');
-//      var data = archive.readXlsx(file);
-//      expect(data.length, 1120);
-//      expect(data.first, {'ptid': 4000, 'name': '.H.INTERNAL_HUB',
-//        'spokenName': 'HUB', 'type': 'hub', 'asOfDate': '2017-09-19'});
-//      expect(data[9]['type'], 'reserve zone');
-//    });
-//    test('read file for 2018-09-19', () {
-//      File file = new File(archive.dir + 'pnode_table_2018_09_11.xlsx');
-//      var data = archive.readXlsx(file);
-//      expect(data.length, 1161);
-//      expect(data.first, {'ptid': 4000, 'name': '.H.INTERNAL_HUB',
-//        'spokenName': 'HUB', 'type': 'hub', 'asOfDate': '2018-09-11'});
-//      expect(data[9]['type'], 'reserve zone');
-//      expect(data[19]['type'], 'demand response zone');
-//    });
-//    test('Get the list of available dates', () async {
-//      var res = await api.getAvailableAsOfDates();
-//      expect(res is List<String>, true);
-//    });
-//    test('Get the list of available dates (http)', () async {
-//      var url = 'http://localhost:8080/ptids/v1/dates';
+apiTest() async {
+  group('SCC Report API tests:', () {
+    ComponentConfig config;
+    SccReport api;
+    setUp(() async {
+      config = new ComponentConfig()
+        ..host = '127.0.0.1'
+        ..dbName = 'isoexpress'
+        ..collectionName = 'scc_report';
+
+      api = SccReport(config.db);
+      await config.db.open();
+    });
+    tearDown(() async {
+      await config.db.close();
+    });
+    test('Get the months of the SCC report in the db', () async {
+      var data = await api.getMonths();
+      print(data.result);
+      expect(true, true);
+    });
+
+//    test('Get the list of available months (http)', () async {
+//      var url = 'http://localhost:8080/scc_report/v1/months';
 //      var res = await get(url);
 //      var data = json.decode(res.body);
 //      expect(data is List, true);
 //      expect(data.first is String, true);
 //    });
-//    test('Get all the ptid information for one date (http)', () async {
-//      var url = 'http://localhost:8080/ptids/v1/current';
-//      var res = await get(url);
-//      var data = json.decode(json.decode(res.body)['result']);
-//      expect(data.length > 950, true);
-//      expect(data.first['ptid'], 4000);
-//      var me = data.firstWhere((e) => e['ptid'] == 4001);
-//      expect(me, {'ptid': 4001, 'name': '.Z.MAINE', 'spokenName': 'MAINE',
-//        'type': 'zone'});
-//    });
-//
-//  });
-//}
+    test('Get the SCC report for one month, all assets (http)', () async {
+      var url = 'http://localhost:8080/scc_report/v1/month/2018-10';
+      var res = await get(url);
+      var data = json.decode(json.decode(res.body)['result']);
+      expect(data.length > 950, true);
+    });
+
+  });
+}
 
 main() async {
   await initializeTimeZone();
 
-  await ingestionTest();
+//  await downloadFile();
+//  await ingestionTest();
 
-//  await apiTest();
+  await apiTest();
 
 
 }

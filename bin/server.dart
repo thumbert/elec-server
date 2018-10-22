@@ -13,6 +13,7 @@ import 'package:elec_server/api/api_isone_bindingconstraints.dart';
 import 'package:elec_server/api/api_isone_energyoffers.dart';
 import 'package:elec_server/api/api_isone_demandbids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
+import 'package:elec_server/api/api_scc_report.dart';
 import 'package:elec_server/api/utilities/api_customer_counts.dart';
 import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart' as eversource;
 import 'package:elec_server/src/utils/timezone_utils.dart';
@@ -37,6 +38,8 @@ registerApis() async {
 //  _apiServer.addApi( new RtLmp(db3) );
   _apiServer.addApi( new BindingConstraints(db3) );
   _apiServer.addApi( new DaEnergyOffers(db3) );
+  _apiServer.addApi( new SccReport(db3) );
+
 //  _apiServer.addApi( new DaDemandBids(db3) );
 //  _apiServer.addApi( new SystemDemand(db3) );
 //  _apiServer.addApi( new ZonalDemand(db3) );

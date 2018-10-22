@@ -17,10 +17,11 @@ class SccReportArchive {
     if (config == null) {
       config = new ComponentConfig()
         ..host = '127.0.0.1'
-        ..dbName = 'isone'
+        ..dbName = 'isoexpress'
         ..collectionName = 'scc_report';
     }
-    dir ??= env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
+    dir ??= env['HOME'] +
+        '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
   }
 
   Db get db => config.db;
@@ -28,27 +29,29 @@ class SccReportArchive {
   /// Insert one xlsx file into the collection.
   /// [file] points to the downloaded xlsx file.  NOTE that you have to convert
   /// the file to xlsx by hand (for now).
-  Future insertMongo(File file) {
-    var data = readXlsx(file);
-    return config.coll
-        .insertAll(data)
-        .then((_) => print('--->  SUCCESS inserting ${path.basename(file.path)}'))
-        .catchError((e) => print('   ' + e.toString()));
+  Future<int> insertData(List<Map<String, dynamic>> data) async {
+    var month = data.first['month'];
+    await config.coll.remove({'month': month});
+    return config.coll.insertAll(data).then((_) {
+      print('--->  SUCCESS inserting SCC Report for ${month}');
+      return 0;
+    }).catchError((e) => print(' XXXXX ' + e.toString()));
   }
 
   /// Read an XLSX file.  Note that ISO files are xls, so you will need to
   /// convert it by hand for now.
   ///
-  List<Map<String,dynamic>> readXlsx(File file, Month month) {
+  List<Map<String, dynamic>> readXlsx(File file, Month month) {
     String filename = path.basename(file.path);
     if (path.extension(filename).toLowerCase() != '.xlsx')
       throw 'Filename needs to be in the xlsx format';
 
     var bytes = file.readAsBytesSync();
     var decoder = new SpreadsheetDecoder.decodeBytes(bytes);
-    List<Map<String,Object>> res;
+    List<Map<String, Object>> res;
 
-    res = _readXlsxVersion1(decoder);
+    if (month.isBefore(Month(2030, 12)))
+      res = _readXlsxVersion1(decoder, month);
 
     /// add the asOfDate (as a String) to all rows
     return res.map((e) {
@@ -57,27 +60,42 @@ class SccReportArchive {
     }).toList();
   }
 
-  List<Map<String,Object>> _readXlsxVersion1(SpreadsheetDecoder decoder) {
-    var res = <Map<String,Object>>[];
+  List<Map<String,dynamic>> _readXlsxVersion1(SpreadsheetDecoder decoder,
+      Month month) {
+    var res = <Map<String, dynamic>>[];
     var table = decoder.tables['SCC_Report_Current'];
 
+    var yyyymm = convertXlsxDate(table.rows[0][8]).toString().substring(0,7);
+    if (yyyymm != month.toIso8601String())
+      throw StateError('Month from filename doesn\'t match internal month');
 
+    // Summer and Winter SCC values have the same row names, need to distinguish
+    // them.
+    var rowNames = table.rows[1].cast<String>();
+    var mustHaveColumns = Set()..addAll(['Asset ID', 'Generator Name',
+      'SCC (MW)']);
+    if (!rowNames.toSet().containsAll(mustHaveColumns))
+      throw StateError('Column names of the report have changed too much!');
+
+    var indSummer = Set()..addAll([19,20,21,22,23]);
+    var indWinter = Set()..addAll([24,25,26,27,28]);
 
     int nRows = table.rows.length;
-    for (int r=2; r<nRows; r++) {
+    for (int r = 2; r < nRows; r++) {
       // sometimes the spreadsheet has empty rows
       if (table.rows[r][0] != null) {
-        var aux = {
-          'ptid': table.rows[r][5],
-          'name': table.rows[r][4],
-          'spokenName': table.rows[r][0],
-          'zonePtid': table.rows[r][6],
-          'reservePtid': table.rows[r][7],
-          'rspArea': table.rows[r][8],
-          'dispatchZone': table.rows[r][9],
-        };
-        if (table.rows[r][2] != null) aux['unitName'] = table.rows[r][2];
-        if (table.rows[r][3] != null) aux['unitShortName'] = table.rows[r][3];
+        var aux = <String,dynamic>{};
+        for (int i=0; i<rowNames.length; i++){
+          if (table.rows[r][i] != null) {
+            var name = rowNames[i];
+            if (indSummer.contains(i)) name = 'Summer $name';
+            if (indWinter.contains(i)) name = 'Winter $name';
+            var value = table.rows[r][i];
+            if (i == 23 || i == 28)
+              value = convertXlsxDate(value).toString();
+            aux[name] = value;
+          }
+        }
         res.add(aux);
       }
     }
@@ -85,20 +103,8 @@ class SccReportArchive {
   }
 
 
-
-
-  /// Return the asOfDate in the yyyy-mm-dd format from the filename.
-  /// Filename is usually just the basename, and in the form: 'pnode_table_2017_08_03.xlsx'
-  String _getAsOfDate(String filename) {
-    RegExp regExp = new RegExp(r'pnode_table_(\d{4})_(\d{2})_(\d{2})\.xlsx');
-    var matches = regExp.allMatches(filename);
-    var match = matches.elementAt(0);
-    if (match.groupCount != 3)
-      throw 'Can\'t parse the date from filename: $filename';
-    return '${match.group(1)}-${match.group(2)}-${match.group(3)}';
-  }
-
-  /// Download a ptid file from the ISO.  Save it with the same name.
+  /// Download an SCC report xls file from the ISO.  Save it with the same
+  /// name in the xlsx format.
   Future downloadFile(String url) async {
     String filename = path.basename(url);
     File fileout = new File(dir + filename);
@@ -111,20 +117,17 @@ class SccReportArchive {
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
-        response.pipe(fileout.openWrite()));
+            response.pipe(fileout.openWrite()));
   }
-
 
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
   setup() async {
-    if (!new Directory(dir).existsSync()) new Directory(dir)
-        .createSync(recursive: true);
+    if (!new Directory(dir).existsSync())
+      new Directory(dir).createSync(recursive: true);
 
     await config.db.open();
     List<String> collections = await config.db.getCollectionNames();
-    print('Collections in db:');
-    print(collections);
     if (collections.contains(config.collectionName)) await config.coll.drop();
 
     // this indexing assures that I don't insert the same data twice
@@ -133,6 +136,10 @@ class SccReportArchive {
     await config.db.createIndex(config.collectionName, keys: {'Asset ID': 1});
     await config.db.close();
   }
-
 }
 
+Date convertXlsxDate(num x) {
+  var aux = new DateTime.fromMillisecondsSinceEpoch(((x - 25569) * 86400000).round(),
+      isUtc: true);
+  return new Date(aux.year, aux.month, aux.day);
+}
