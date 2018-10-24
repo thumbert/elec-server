@@ -1,11 +1,13 @@
 library api.system_demand;
 
+import 'dart:convert';
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
 import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
+import 'package:elec_server/src/utils/api_response.dart';
 
 @ApiClass(name: 'system_demand', version: 'v1')
 class SystemDemand {
@@ -21,7 +23,7 @@ class SystemDemand {
 
   /// http://localhost:8080/system_demand/v1/market/da/start/20170101/end/20170101
   @ApiMethod(path: 'market/{market}/start/{start}/end/{end}')
-  Future<List<Map<String, String>>> apiGetSystemDemand(
+  Future<ApiResponse> apiGetSystemDemand(
       String market, String start, String end) async {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
@@ -41,7 +43,7 @@ class SystemDemand {
         });
       }
     }
-    return res;
+    return ApiResponse()..result = json.encode(res);
   }
 
   /// Workhorse to extract the data ...
