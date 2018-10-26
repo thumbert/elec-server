@@ -2,10 +2,10 @@ import 'dart:html';
 import 'package:intl/intl.dart';
 
 
-class Table {
+class HtmlTable {
   Element tableWrapper;
   List<Map<String,dynamic>> data;
-  Map options;
+  Map<String,dynamic> options;
 
   TableElement table;
   List<Element> _tableHeaders;
@@ -17,23 +17,26 @@ class Table {
   /// given column, e.g. {'columnName': {'valueFormat': (num x) => x.round()}}
   /// By default the table has column names.
   /// <p>If you don't want column names, use {'noColumnNames': true}, the default
-  ///   is
-  /// to add row numbers, use {'rowNumbers': true}, the default is false;
-  Table(this.tableWrapper, this.data, {this.options}) {
-    options ??= {};
+  ///   is [false].
+  ///
+  /// To add row numbers, use {'rowNumbers': true}, the default is false;
+  ///
+  /// Use a [null] [tableWrapper] if you are interested in the html only.  
+  HtmlTable(this.tableWrapper, this.data, {this.options}) {
+    options ??= <String,dynamic>{};
     options.putIfAbsent('makeHeader', () => true);
     options.putIfAbsent('rowNumbers', () => false);
 
     if (options['rowNumbers']) {
       for (int i=0; i<data.length; i++) {
-        data[i] = {'#':i+1}..addAll(data[i]);
+        data[i] = <String,dynamic>{'#':i+1}..addAll(data[i]);
       }
     }
 
     /// Get the column names from the keys of the first element
     _columnNames = data.first.keys.toList();
-    _tableHeaders = new List(_columnNames.length);
-    _sortDirection = new List(_columnNames.length);
+    _tableHeaders = List<Element>(_columnNames.length);
+    _sortDirection = List<int>(_columnNames.length);
     _makeTable();
   }
 
@@ -60,16 +63,20 @@ class Table {
       for (int j=0; j<_columnNames.length; j++) {
         if (options.containsKey(_columnNames[j]) && (options[_columnNames[j]].containsKey('valueFormat'))) {
           var aux = options[_columnNames[j]]['valueFormat'](values[j]);
-          tRow..insertCell(j).text = aux;
+          tRow..insertCell(j).text = aux.toString();
         } else {
-          tRow..insertCell(j).text = values[j];
+          tRow..insertCell(j).text = values[j].toString();
         }
       }
     }
-    /// if you already have a table, remove it before you add it back to the dom
-    if (tableWrapper.children.length > 0)
-      tableWrapper.children = [];
-    tableWrapper.append(table);
+
+
+    if (tableWrapper != null) {
+      /// if you already have a table, remove it before you add it back to the dom
+      if (tableWrapper.children.length > 0)
+        tableWrapper.children = [];
+      tableWrapper.append(table);
+    }
   }
 
   /// If you click on a header, sort the data.
@@ -84,3 +91,4 @@ class Table {
   }
 
 }
+
