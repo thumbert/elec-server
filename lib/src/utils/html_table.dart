@@ -16,12 +16,11 @@ class HtmlTable {
   /// The [options] Map can be used to specify a format function for a
   /// given column, e.g. {'columnName': {'valueFormat': (num x) => x.round()}}
   /// By default the table has column names.
-  /// <p>If you don't want column names, use {'noColumnNames': true}, the default
-  ///   is [false].
+  /// <p>If you don't want column names, use {'makeHeader': false}, the default
+  ///   is [true].
   ///
   /// To add row numbers, use {'rowNumbers': true}, the default is false;
   ///
-  /// Use a [null] [tableWrapper] if you are interested in the html only.  
   HtmlTable(this.tableWrapper, this.data, {this.options}) {
     options ??= <String,dynamic>{};
     options.putIfAbsent('makeHeader', () => true);
