@@ -37,7 +37,7 @@ class BindingConstraints {
     return new ApiResponse()..result = json.encode(res);
   }
 
-  @ApiMethod(path: 'market/{market}/constraintname/{constraintName}/start/start/end/end')
+  @ApiMethod(path: 'market/{market}/constraintname/{constraintName}/start/{start}/end/{end}')
   Future<ApiResponse> apiGetBindingConstraintsByName(
       String market, String constraintName, String start, String end) async {
     SelectorBuilder query = where;
