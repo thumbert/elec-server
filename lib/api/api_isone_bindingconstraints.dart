@@ -37,10 +37,12 @@ class BindingConstraints {
     return new ApiResponse()..result = json.encode(res);
   }
 
-  @ApiMethod(path: 'market/{market}/constraintname/{constraintName}')
-  Future<ApiResponse> apiGetDaBindingConstraintsByName(
-      String market, String constraintName) async {
+  @ApiMethod(path: 'market/{market}/constraintname/{constraintName}/start/start/end/end')
+  Future<ApiResponse> apiGetBindingConstraintsByName(
+      String market, String constraintName, String start, String end) async {
     SelectorBuilder query = where;
+    query = query.gte('date', Date.parse(start).toString());
+    query = query.lte('date', Date.parse(end).toString());
     query = query.eq('Constraint Name', constraintName);
     query = query.eq('market', market.toUpperCase());
     query = query.excludeFields(['_id', 'date', 'market']);
