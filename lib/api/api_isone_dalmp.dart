@@ -92,7 +92,7 @@ class DaLmp {
     return res / i;
   }
 
-  /// http://localhost:8080/dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170101
+  /// http://localhost:8080/dalmp/v1/component/congestion/ptid/4000/start/20170101/end/20170101
   @ApiMethod(path: 'component/{component}/ptid/{ptid}/start/{start}/end/{end}')
   Future<ApiResponse> getHourlyPrices(
       String component, int ptid, String start, String end) async {
@@ -102,7 +102,7 @@ class DaLmp {
     return new ApiResponse()..result = json.encode(data);
   }
 
-  /// http://localhost:8080/dalmp/v1/byrow/congestion/ptid/4000/start/20170101/end/20170101/compact
+  /// http://localhost:8080/dalmp/v1/component/congestion/ptid/4000/start/20170101/end/20170101/compact
   @ApiMethod(path: 'component/{component}/ptid/{ptid}/start/{start}/end/{end}/compact')
   Future<List<double>> getHourlyPricesCompact(
       String component, int ptid, String start, String end) async {
