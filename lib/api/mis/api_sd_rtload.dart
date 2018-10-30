@@ -1,11 +1,13 @@
 library api.sd_rtload;
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
 import 'package:timezone/standalone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
+import 'package:elec_server/src/utils/api_response.dart';
 
 @ApiClass(name: 'sd_rtload', version: 'v1')
 class SdRtload {
@@ -21,15 +23,16 @@ class SdRtload {
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201
   @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
-  Future<List<Map<String,String>>> rtload(
+  Future<ApiResponse> rtload(
       String assetId, String start, String end) async {
     var res = _rtloadQuery(assetId, start, end);
-    return _format(res);
+    var out = await _format(res);
+    return ApiResponse()..result = json.encode(out);
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/start/20171201/end/20171201
   @ApiMethod(path: 'start/{start}/end/{end}')
-  Future<List<Map<String,String>>> rtloadAll(
+  Future<ApiResponse> rtloadAll(
       String start, String end) async {
     List pipeline = [];
     pipeline.add({
@@ -46,7 +49,8 @@ class SdRtload {
       }
     });
     var res = coll.aggregateToStream(pipeline);
-    return _format2(res);
+    var out = await _format2(res);
+    return ApiResponse()..result = json.encode(out);
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/1485/start/20171201/end/20171201/csv
@@ -80,7 +84,7 @@ class SdRtload {
   }
 
 
-  Stream<Map> _rtloadQuery(String assetId, String start, String end) {
+  Stream<Map<String,dynamic>> _rtloadQuery(String assetId, String start, String end) {
     List pipeline = [];
     pipeline.add({
       '\$match': {
@@ -99,9 +103,9 @@ class SdRtload {
     return coll.aggregateToStream(pipeline);
   }
 
-  Future<List<Map>> _format(Stream<Map> data) async {
-    List out = [];
-    List keys = [
+  Future<List<Map<String,dynamic>>> _format(Stream<Map<String,dynamic>> data) async {
+    var out = <Map<String,dynamic>>[];
+    var keys = <String>[
       'version',
       'hourBeginning',
       'Load Reading',
@@ -123,9 +127,9 @@ class SdRtload {
     return out;
   }
 
-  Future<List<Map>> _format2(Stream<Map> data) async {
-    List out = [];
-    List keys = [
+  Future<List<Map<String,dynamic>>> _format2(Stream<Map> data) async {
+    var out = <Map<String,dynamic>>[];
+    var keys = <String>[
       'version',
       'hourBeginning',
       'Asset ID',
