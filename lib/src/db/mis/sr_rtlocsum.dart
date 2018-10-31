@@ -1,7 +1,8 @@
-library elec.load.sr_rtlocsum;
+library db.mis.sr_rtlocsum;
 
 import 'dart:async';
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:tuple/tuple.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -22,21 +23,22 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   /// Override the implementation.
-  Future insertTabData(List<Map> data, {int tab: 0}) async {
+  Future<int> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
     if (data.isEmpty) return new Future.value(null);
-    if (tab == 0) await insertTabData0(data);
-    else if (tab == 1) await insertTabData1(data);
-    else
+    if (tab == 0) return await insertTabData0(data);
+    else if (tab == 1) return await insertTabData1(data);
+    else {
       throw new ArgumentError('Unsupported tab $tab for report ${reportName}');
+    }
   }
 
-  Future<Null> insertTabData0(List<Map> data) async {
+  Future<int> insertTabData0(List<Map<String,dynamic>> data) async {
     String account = data.first['account'];
     /// split the data by Location ID, date, version
-    Map groups = _groupBy(data, (Map e) =>
-    new Tuple3(e['Location ID'], e['date'], e['version']));
+    var groups = groupBy(data, (Map e) =>
+      new Tuple3(e['Location ID'], e['date'], e['version']));
     try {
-      for (Tuple3 key in groups.keys) {
+      for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'account': account,
           'tab': 0,
@@ -47,18 +49,20 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
         await dbConfig.coll.insertAll(groups[key]);
       }
       print('--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 0 successfully');
+      return 0;
     } catch (e) {
       print('XXX ' + e.toString());
+      return 1;
     }
   }
 
-  Future<Null> insertTabData1(List<Map> data) async {
+  Future<int> insertTabData1(List<Map<String,dynamic>> data) async {
     String account = data.first['account'];
     /// split the data by Asset ID, date, version
-    Map groups = _groupBy(data, (Map e) =>
-    new Tuple4(e['Subaccount ID'],  e['Location ID'], e['date'], e['version']));
+    var groups = groupBy(data, (Map e) =>
+      new Tuple4(e['Subaccount ID'],  e['Location ID'], e['date'], e['version']));
     try {
-      for (Tuple4 key in groups.keys) {
+      for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'account': account,
           'tab': 1,
@@ -68,10 +72,12 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
           'version': key.item4,
         });
         await dbConfig.coll.insertAll(groups[key]);
+        return 0;
       }
       print('--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 1 successfully');
     } catch (e) {
       print('XXX ' + e.toString());
+      return 1;
     }
   }
 
@@ -79,15 +85,15 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   
   
   /// for the first tab
-  Map rowConverter0(List<Map> rows, String account, Date reportDate, DateTime version) {
-    Map row = {};
+  Map<String,dynamic> rowConverter0(List<Map<String,dynamic>> rows, String account, Date reportDate, DateTime version) {
+    var row = <String,dynamic>{};
     row['account'] = account;
     row['tab'] = 0;
     row['date'] = reportDate.toString();
     row['version'] = version;
     row['Location ID'] = rows.first['Location ID'];
     row['hourBeginning'] = [];
-    List excludeColumns = [
+    var excludeColumns = [
       'H',
       'Location ID',
       'Trading Interval',
@@ -95,7 +101,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
       'Location Type',
       ''
     ];
-    List keepColumns = rows.first.keys.toList();
+    var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     keepColumns.forEach((column) {
       row[mis.removeParanthesesEnd(column)] = [];
@@ -111,8 +117,8 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   /// for the second tab (subaccount info)
-  Map rowConverter1(List<Map> rows, String account, Date reportDate, DateTime version) {
-    Map row = {};
+  Map<String,dynamic> rowConverter1(List<Map> rows, String account, Date reportDate, DateTime version) {
+    var row = <String,dynamic>{};
     row['account'] = account;
     row['Subaccount ID'] = rows.first['Subaccount ID'];
     row['tab'] = 1;
@@ -130,7 +136,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
       'Location Type',
       ''
     ];
-    List keepColumns = rows.first.keys.toList();
+    var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     keepColumns.forEach((column) {
       row[mis.removeParanthesesEnd(column)] = [];
@@ -147,23 +153,23 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
 
 
   @override
-  Map<int,List<Map>> processFile(File file) {
+  Map<int,List<Map<String,dynamic>>> processFile(File file) {
     /// tab 0: company data
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+    var data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
     var account = report.accountNumber();
     var reportDate = report.forDate();
     var version = report.timestamp();
-    Map dataById = _groupBy(data, (row) => row['Location ID']);
+    var dataById = groupBy(data, (row) => row['Location ID']);
     var res0 = dataById.keys
         .map((assetId) => rowConverter0(dataById[assetId], account, reportDate, version))
         .toList();
 
     /// tab 1: subaccount data
     data = mis.readReportTabAsMap(file, tab: 1);
-    List res1 = [];
+    var res1 = <Map<String,dynamic>>[];
     if (data.isNotEmpty) {
-      Map dataById = _groupBy(data, (row) => new Tuple2(row['Subaccount ID'],row['Location ID']));
+      var dataById = groupBy(data, (row) => new Tuple2(row['Subaccount ID'],row['Location ID']));
       res1 = dataById.keys
           .map((tuple) => rowConverter1(dataById[tuple], account, reportDate, version))
           .toList();
@@ -213,9 +219,4 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     // TODO: implement updateDb
   }
 
-  Map _groupBy(Iterable x, Function f) {
-    Map result = new Map();
-    x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
-    return result;
-  }
 }
