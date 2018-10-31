@@ -1,5 +1,3 @@
-	
-	
 library api.mis.sr_rtlocsum;
 	
 import 'dart:async';
@@ -33,10 +31,9 @@ class SrRtLocSum {
 	      String start, String end) async {
 	    Date startDate = Date.parse(start);
 	    Date endDate = Date.parse(end);
-	    var data = _getData(accountId, null, null, null, startDate, endDate);
-	    return _processStream(data).then((aux) {
-	    	return ApiResponse()..result = json.encode(aux);
-			});
+	    var data = await getData(accountId, null, null, null, startDate, endDate);
+	    var aux = _processStream(data);
+    	return ApiResponse()..result = json.encode(aux);
 	  }
 	
 
@@ -47,12 +44,11 @@ class SrRtLocSum {
 	      int locationId, String start, String end) async {
 	    Date startDate = Date.parse(start);
 	    Date endDate = Date.parse(end);
-	    var data = _getData(accountId, null, locationId, null, startDate, endDate);
-	    return _processStream(data, hasLocationId: false).then((aux) {
-        return ApiResponse()..result = json.encode(aux);
-      });
-	  }
-	
+	    var data = await getData(accountId, null, locationId, null, startDate, endDate);
+	    var aux = _processStream(data, hasLocationId: false);
+      return ApiResponse()..result = json.encode(aux);
+ 	  }
+
 
 	  @ApiMethod(
 	      path: 'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
@@ -61,12 +57,11 @@ class SrRtLocSum {
 	      int locationId, String columnName, String start, String end) async {
 	    Date startDate = Date.parse(start);
 	    Date endDate = Date.parse(end);
-	    var data = _getData(accountId, null, locationId, columnName, startDate, endDate);
-	    return _processStream(data, hasLocationId: false).then((aux) {
-        return ApiResponse()..result = json.encode(aux);
-      });
+	    var data = await getData(accountId, null, locationId, columnName, startDate, endDate);
+	    var aux = _processStream(data, hasLocationId: false);
+      return ApiResponse()..result = json.encode(aux);
 	  }
-	
+
 
 	  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
 	  /// Get all data in tab 1 for all locations.
@@ -74,13 +69,11 @@ class SrRtLocSum {
 	      String subaccountId, String start, String end) async {
 	    Date startDate = Date.parse(start);
 	    Date endDate = Date.parse(end);
-	    var data = _getData(accountId, subaccountId, null, null, startDate, endDate);
-	    //var aux = await data.toList(); print(aux);
-	    return _processStream(data).then((aux) {
-        return ApiResponse()..result = json.encode(aux);
-      });
+	    var data = await getData(accountId, subaccountId, null, null, startDate, endDate);
+	    var aux = _processStream(data);
+      return ApiResponse()..result = json.encode(aux);
 	  }
-	
+
 
 	  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}')
 	  /// Get all data in tab 1 for a given location.
@@ -88,13 +81,11 @@ class SrRtLocSum {
 	      String subaccountId, int locationId, String start, String end) async {
 	    Date startDate = Date.parse(start);
 	    Date endDate = Date.parse(end);
-	    var data = _getData(accountId, subaccountId, locationId, null, startDate, endDate);
-	    //var aux = await data.toList(); print(aux);
-	    return _processStream(data, hasLocationId: false).then((aux) {
-        return ApiResponse()..result = json.encode(aux);
-      });
+	    var data = await getData(accountId, subaccountId, locationId, null, startDate, endDate);
+	    var aux = _processStream(data, hasLocationId: false);
+      return ApiResponse()..result = json.encode(aux);
 	  }
-	
+
 
 	  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
 	  /// Get all data for a subaccount for a given location, one column.
@@ -102,19 +93,15 @@ class SrRtLocSum {
 	      String subaccountId, int locationId, String columnName, String start, String end) async {
 	    Date startDate = Date.parse(start);
 	    Date endDate = Date.parse(end);
-	    var data = _getData(accountId, subaccountId, locationId, columnName, startDate, endDate);
-	    //var aux = await data.toList(); print(aux);
-	    return _processStream(data, hasLocationId: false).then((aux) {
-	      print(aux);
-        return ApiResponse()..result = json.encode(aux);
-      });
+	    var data = await getData(accountId, subaccountId, locationId, columnName, startDate, endDate);
+	    var aux = _processStream(data, hasLocationId: false);
+      return ApiResponse()..result = json.encode(aux);
 	  }
 
-
-	  Future<List<Map<String,dynamic>>> _processStream(Stream<Map<String,dynamic>> data, {bool hasLocationId: true}) async {
+	  List<Map<String,dynamic>> _processStream(List<Map<String,dynamic>> data, {bool hasLocationId: true}) {
 	    var out = <Map<String,dynamic>>[];
 	    List<String> otherKeys;
-	    await for (var e in data) {
+	    for (var e in data) {
 	      otherKeys ??= e.keys.toList()
 	        ..remove('hourBeginning')
 	        ..remove('version')
@@ -133,51 +120,41 @@ class SrRtLocSum {
 	    }
 	    return out;
 	  }
-	
 
-	  
-	  /// Extract data from tab 0
-	  /// returns one element for each day
-	  /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
-	  /// If [locationId] is [null] return all locations
-	  /// If [column] is [null] return all columns
-	  Stream<Map<String,dynamic>> _getData(String account, String subaccountId,
-	      int locationId, String column, Date startDate, Date endDate) {
-	    var pipeline = <Map<String,dynamic>>[];
-	    var match = <String,dynamic>{'account': {'\$eq': account}};
+
+
+  /// Extract data from the collection
+  /// returns one element for each day
+  /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
+  /// If [locationId] is [null] return all locations
+  /// If [column] is [null] return all columns
+  Future<List<Map<String,dynamic>>> getData(String account, String subaccountId,
+      int locationId, String column, Date startDate, Date endDate) async {
+    var excludeFields = <String>['_id', 'account', 'tab', 'date'];
+
+    var query = where;
+	    query.eq('account', account);
 	    if (subaccountId == null) {
-	      match['tab'] = {'\$eq': 0};
-	    } else {
-	      match['tab'] = {'\$eq': 1};
-	      match['Subaccount ID'] = {'\$eq': subaccountId};
-	    }
-	    match['date'] = {
-	        '\$gte': startDate.toString(),
-	        '\$lte': endDate.toString(),
-	    };
-	    if (locationId != null) match['Location ID']= {'\$eq': locationId};
-	    pipeline.add({'\$match': match});
-	    Map project = {
-	      '_id': 0,
-	      'account': 0,
-	      'tab': 0,
-	      'date': 0,
-	    };
-	    if (subaccountId != null) project['Subaccount ID'] = 0;
-	    pipeline.add({'\$project': project});
-	    
-	    if (column != null) {
-	      /// add another projection to get only this column
-	      pipeline.add({'\$project': {
-	        'hourBeginning': 1,
-	        'version': 1,
-	        column: 1,
-	      }});
-	    }
-	    return coll.aggregateToStream(pipeline);
-	  }
-	
+        query.eq('tab', 0);
+      } else {
+	      query.eq('tab', 1);
+	      query.eq('Subaccount ID', subaccountId);
+	      excludeFields.add('Subaccount ID');
+      }
+	    query.gte('date', startDate.toString());
+	    query.lte('date', endDate.toString());
+	    if (locationId != null)
+	      query.eq('Location ID', locationId);
+
+	    if (column == null) {
+        query.excludeFields(excludeFields);
+      } else {
+	      query.excludeFields(['_id']);
+	      query.fields(['hourBeginning', 'version', column]);
+      }
+	    return coll.find(query).toList();
+  }
 
 }
-	
+		
 
