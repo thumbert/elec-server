@@ -44,11 +44,14 @@ class RtLmp {
 
     /// do the monthly aggregation
     Nest _monthlyNest = new Nest()
-      ..key((Map e) => new Month.fromTZDateTime(e['hourBeginning']))
+      ..key((Map e) {
+        String hb = e['hourBeginning'];
+        return hb.substring(0,7);
+      })
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
     List<Map> res = _monthlyNest.entries(out);
     var res2 = res.map((Map e) => {
-      'month': (e['key'] as Month).toIso8601String(),
+      'month': e['key'],
       component : e['values']
     }).toList();
     return new ApiResponse()..result = json.encode(res2);
@@ -72,11 +75,14 @@ class RtLmp {
 
     /// do the daily aggregation
     Nest nest = new Nest()
-      ..key((Map e) => new Date.fromTZDateTime(e['hourBeginning']))
+      ..key((Map e) {
+        String hb = e['hourBeginning'];
+        return hb.substring(0,10);
+      })
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
     List<Map> res = nest.entries(out);
     var data = res.map((Map e) => {
-      'date': e['key'].toString(),
+      'date': e['key'],
       component : e['values']
     }).toList();
     return new ApiResponse()..result = json.encode(data);
