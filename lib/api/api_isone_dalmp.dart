@@ -72,12 +72,11 @@ class DaLmp {
 
     // do the daily aggregation
     Nest nest = new Nest()
-      ..key((Map e) =>
-          Date.parse((e['hourBeginning'] as String).substring(0, 10)))
+      ..key((Map e) => (e['hourBeginning'] as String).substring(0, 10))
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
     List<Map> res = nest.entries(out);
     var data = res
-        .map((Map e) => {'date': e['key'].toString(), component: e['values']})
+        .map((Map e) => {'date': e['key'], component: e['values']})
         .toList();
     return new ApiResponse()..result = json.encode(data);
   }
