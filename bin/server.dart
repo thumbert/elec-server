@@ -39,8 +39,7 @@ registerApis() async {
   _apiServer.addApi( new BindingConstraints(db3) );
   _apiServer.addApi( new DaEnergyOffers(db3) );
   _apiServer.addApi( new SccReport(db3) );
-
-//  _apiServer.addApi( new DaDemandBids(db3) );
+  _apiServer.addApi( new DaDemandBids(db3) );
   _apiServer.addApi( new SystemDemand(db3) );
 //  _apiServer.addApi( new ZonalDemand(db3) );
 //
