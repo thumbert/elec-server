@@ -45,6 +45,13 @@ ApiTest() async {
       var data = json.decode(response.result);
       expect(data.length, 308);
     });
+    test('get Economic Maximum for one day', () async {
+      var response = await api.oneVariable('Economic Maximum',
+          '20170701', '20170701');
+      var data = json.decode(response.result);
+      expect(data.length, 308);
+    });
+
   });
 }
 

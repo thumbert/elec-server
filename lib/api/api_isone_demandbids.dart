@@ -77,12 +77,11 @@ class DaDemandBids {
     return ApiResponse()..result = json.encode(out);
   }
 
-  //http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001
-  @ApiMethod(path: 'mwh/participantId/{participantId}/start/{start}/end/{end}')
-
-  /// Get total MWh zonal demand bids by participant between a start and end date,
-  /// return all available zones.
-  Future<List<Map<String, dynamic>>> mwhByDayZoneForParticipant(
+  //http://localhost:8080/da_demand_bids/v1/daily/mwh/participantId/206845/start/20170701/end/20171001
+  @ApiMethod(path: 'daily/mwh/participantId/{participantId}/start/{start}/end/{end}')
+  /// Get daily total MWh zonal demand bids by participant between a start
+  /// and end date, return all available zones.
+  Future<ApiResponse> dailyMwhByZoneForParticipant(
       String participantId, String start, String end) async {
     List pipeline = [];
     pipeline.add({
@@ -119,17 +118,17 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001
   @ApiMethod(
       path:
-          'mwh/participantId/{participantId}/ptid/{ptid}/start/{start}/end/{end}')
-
-  /// Get total MWh zonal demand bids by day for a participant and zone id
+          'daily/mwh/participantId/{participantId}/ptid/{ptid}/start/{start}/end/{end}')
+  /// Get daily total MWh zonal demand bids by day for a participant and zone id
   /// between a start and end date,
-  Future<List<Map<String, dynamic>>> mwhByDayForParticipantAndZone(
+  Future<ApiResponse> dailyMwhForParticipantZone(
       String participantId, String ptid, String start, String end) async {
     List pipeline = [];
     pipeline.add({
@@ -167,15 +166,15 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/ptid/4004/start/20170701/end/20171001
   @ApiMethod(path: 'mwh/ptid/{ptid}/start/{start}/end/{end}')
-
-  /// Get the total daily MWh demand bids by participant between a start and end
-  /// date for this zone.
-  Future<List<Map<String, dynamic>>> mwhByDayForLoadZone(
+  /// Get the total daily MWh demand bids for all participants between a start
+  /// and end date for this zone.
+  Future<ApiResponse> mwhByDayForLoadZone(
       String ptid, String start, String end) async {
     List pipeline = [];
     pipeline.add({
@@ -211,14 +210,14 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/participant/start/20170701/end/20171001
-  @ApiMethod(path: 'mwh/participant/start/{start}/end/{end}')
-
-  /// Get total MWh demand bids by participant between a start and end date.
-  Future<List<Map<String, dynamic>>> totalMwhByParticipant(
+  @ApiMethod(path: 'daily/mwh/participant/start/{start}/end/{end}')
+  /// Get total daily MWh demand bids by participant between a start and end date.
+  Future<ApiResponse> dailyMwhByParticipant(
       String start, String end) async {
     List pipeline = [];
     pipeline.add({
@@ -256,10 +255,12 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 }
 
+/// the zones
 Map<int, int> _unmaskedLocations = {
   4001: 67184,
   4002: 39271,

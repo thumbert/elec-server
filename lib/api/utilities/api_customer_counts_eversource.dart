@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
-import 'package:date/date.dart';
+import '../../src/utils/api_response.dart';
+
 
 @ApiClass(name: 'eversource', version: 'v1')
 class ApiCustomerCounts {
@@ -15,12 +17,13 @@ class ApiCustomerCounts {
 
   /// return the historical counts and usage by rate class
   @ApiMethod(path: 'customercounts/ct')
-  Future<List<Map<String, String>>> customerCountsCt() async {
+  Future<ApiResponse> customerCountsCt() async {
     SelectorBuilder query = where;
 //    query = query.eq('town', town);
 //    query = query.eq('variable', 'kWh');
     query = query.excludeFields(['_id']);
-    return await coll.find(query).toList();
+    var res = await coll.find(query).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 
 }

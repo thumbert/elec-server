@@ -12,7 +12,6 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 import '../src/utils/api_response.dart';
 
-
 @ApiClass(name: 'da_energy_offers', version: 'v1')
 class DaEnergyOffers {
   DbCollection coll;
@@ -35,9 +34,8 @@ class DaEnergyOffers {
   //http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
   @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
   /// return the stack, energy offers sorted.
-  Future<ApiResponse> getGenerationStack(
-      String date, String hourending) async {
-    var stack = <Map<String,dynamic>>[];
+  Future<ApiResponse> getGenerationStack(String date, String hourending) async {
+    var stack = <Map<String, dynamic>>[];
     var eo = await _getEnergyOffers(date, hourending);
 
     /// 1) get rid of the unavailable units (some still submit offers!),
@@ -46,7 +44,7 @@ class DaEnergyOffers {
     var gEo = groupBy(eo.where((e) => e['Unit Status'] != 'UNAVAILABLE'),
         (e) => e['assetId']);
     gEo.keys.forEach((assetId) {
-      var offers = gEo[assetId].cast<Map<String,dynamic>>();
+      var offers = gEo[assetId].cast<Map<String, dynamic>>();
       if (offers.first['Unit Status'] == 'MUST_RUN') {
         /// need to sort them just in case ...
         offers.sort((a, b) => a['price'].compareTo(b['price']));
@@ -62,52 +60,55 @@ class DaEnergyOffers {
     return new ApiResponse()..result = json.encode(stack);
   }
 
-
   //http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16
   @ApiMethod(path: 'date/{date}/hourending/{hourending}')
   /// Return the energy offers (price/quantity pairs) for a given datetime.
-  Future<ApiResponse> getEnergyOffers(
-      String date, String hourending) async {
+  Future<ApiResponse> getEnergyOffers(String date, String hourending) async {
     var data = await _getEnergyOffers(date, hourending);
     return ApiResponse()..result = json.encode(data);
   }
 
-  Future<List<Map<String,dynamic>>> _getEnergyOffers( String date,
-      String hourending) async {
+  Future<List<Map<String, dynamic>>> _getEnergyOffers(
+      String date, String hourending) async {
     hourending = hourending.padLeft(2, '0');
     Date day = Date.parse(date);
     TZDateTime dt = parseHourEndingStamp(mmddyyyy(day), hourending);
     List pipeline = [];
-    var match = {
-      'date': {
-        '\$eq': day.toString(),
-      }
-    };
-    var project = {
-      '_id': 0,
-      'Masked Asset ID': 1,
-      'Unit Status': 1,
-      'Economic Maximum': 1,
-      'hours': {
-        '\$filter': {
-          'input': '\$hours',
-          'as': 'hour',
-          'cond': {
-            '\$eq': ['\$\$hour.hourBeginning', dt]
-          }
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$eq': day.toString(),
         }
-      },
-    };
-    pipeline.add({'\$match': match});
-    pipeline.add({'\$project': project});
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'Masked Asset ID': 1,
+        'Unit Status': 1,
+        'Economic Maximum': 1,
+        'hours': {
+          '\$filter': {
+            'input': '\$hours',
+            'as': 'hour',
+            'cond': {
+              '\$eq': ['\$\$hour.hourBeginning', dt]
+            }
+          }
+        },
+      }
+    });
     pipeline.add({'\$unwind': '\$hours'});
     var res = await coll.aggregateToStream(pipeline);
 
     /// flatten the map in Dart
-    var out = <Map<String,dynamic>>[];
+    var out = <Map<String, dynamic>>[];
     var keys = <String>[
-      'assetId', 'Unit Status', 'Economic Maximum',
-      'price', 'quantity'
+      'assetId',
+      'Unit Status',
+      'Economic Maximum',
+      'price',
+      'quantity'
     ];
 
     await for (var e in res) {
@@ -125,58 +126,63 @@ class DaEnergyOffers {
     return out;
   }
 
-  //http://localhost:8080/da_energy_offers/v1/assetId/41406/variable/Economic Maximum/start/20170701/end/20171001
+  //http://localhost:8080/da_energy_offers/v1/assetId/41406/start/20170701/end/20171001
   @ApiMethod(
-      path: 'assetId/{assetId}/variable/{variable}/start/{start}/end/{end}')
+      path: 'assetId/{assetId}/start/{start}/end/{end}')
   /// Get one variable between a start and end date for one asset.
-  Future<ApiResponse> oneAssetVariable(
-      String assetId, String variable, String start, String end) async {
+  Future<ApiResponse> getEnergyOffersForAssetId(
+      String assetId, String start, String end) async {
     List pipeline = [];
-    Map match = {
-      'date': {
-        '\$gte': Date.parse(start).toString(),
-        '\$lte': Date.parse(end).toString(),
-      },
-      'Masked Asset ID': {'\$eq': int.parse(assetId)}
-    };
-    Map project = {
-      '_id': 0,
-      'date': 1,
-    };
-    project[variable] = 1;
-    pipeline.add({'\$match': match});
-    pipeline.add({'\$project': project});
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Masked Asset ID': {'\$eq': int.parse(assetId)}
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'Masked Asset ID': 0,
+        'Masked Lead Participant ID': 0,
+        'date': 1,
+      }
+    });
     pipeline.add({
       '\$sort': {'date': 1}
     });
-    var aux = coll.aggregateToStream(pipeline).toList();
+    var aux = await coll.aggregateToStream(pipeline).toList();
     return ApiResponse()..result = json.encode(aux);
   }
 
-  //http://localhost:8080/da_energy_offers/v1/variable/Economic Maximum/start/20170701/end/20171001
-  @ApiMethod(path: 'variable/{variable}/start/{start}/end/{end}')
+  //http://localhost:8080/da_energy_offers/v1/daily/variable/Maximum Daily Energy/start/20170701/end/20171001
+  @ApiMethod(path: 'daily/variable/{variable}/start/{start}/end/{end}')
   /// Get a variable between a start and end date for all the assets.
-  Future<ApiResponse> oneVariable(
+  Future<ApiResponse> oneDailyVariable(
       String variable, String start, String end) async {
     List pipeline = [];
-    Map match = {
-      'date': {
-        '\$gte': Date.parse(start).toString(),
-        '\$lte': Date.parse(end).toString(),
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        }
       }
-    };
-    Map project = {
-      '_id': 0,
-      'date': 1,
-      'Masked Asset ID': 1,
-    };
-    project[variable] = 1;
-    pipeline.add({'\$match': match});
-    pipeline.add({'\$project': project});
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'date': 1,
+        'Masked Asset ID': 1,
+        variable: 1,
+      }
+    });
     pipeline.add({
       '\$sort': {'date': 1}
     });
-    var aux = coll.aggregateToStream(pipeline).toList();
+    var aux = await coll.aggregateToStream(pipeline).toList();
     return ApiResponse()..result = json.encode(aux);
   }
 
@@ -184,43 +190,43 @@ class DaEnergyOffers {
   @ApiMethod(path: 'daily_data/day/{day}')
   Future<ApiResponse> dailyData(String day) async {
     List pipeline = [];
-    Map match = {
-      'date': {
-        '\$eq': Date.parse(day).toString(),
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$eq': Date.parse(day).toString(),
+        }
       }
-    };
-    Map project = {
-      '_id': 0,
-      'date': 1,
-      'Masked Asset ID': 1,
-      'Must Take Energy': 1,
-      'Maximum Daily Energy Available': 1,
-      'Economic Maximum': 1,
-      'Economic Minimum': 1,
-      'Cold Startup Price': 1,
-      'Intermediate Startup Price': 1,
-      'Hot Startup Price': 1,
-      'No Load Price': 1,
-      'Unit Status': 1,
-      'Claim 10': 1,
-      'Claim 30': 1,
-    };
-    pipeline.add({'\$match': match});
-    pipeline.add({'\$project': project});
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'date': 1,
+        'Masked Asset ID': 1,
+        'Must Take Energy': 1,
+        'Maximum Daily Energy Available': 1,
+        'Economic Maximum': 1,
+        'Economic Minimum': 1,
+        'Cold Startup Price': 1,
+        'Intermediate Startup Price': 1,
+        'Hot Startup Price': 1,
+        'No Load Price': 1,
+        'Unit Status': 1,
+        'Claim 10': 1,
+        'Claim 30': 1,
+      }
+    });
     pipeline.add({
       '\$sort': {'date': 1}
     });
-    var aux = coll.aggregateToStream(pipeline).toList();
+    var aux = await coll.aggregateToStream(pipeline).toList();
     return ApiResponse()..result = json.encode(aux);
   }
 
   /// http://localhost:8080/da_energy_offers/v1/assets/day/20170301
   @ApiMethod(path: 'assets/day/{day}')
   Future<ApiResponse> assetsByDay(String day) async {
-    var query = where
-        .eq('date', Date.parse(day).toString())
-        .excludeFields(['_id'])
-        .fields(['Masked Asset ID', 'Masked Lead Participant ID']);
+    var query = where.eq('date', Date.parse(day).toString()).excludeFields(
+        ['_id']).fields(['Masked Asset ID', 'Masked Lead Participant ID']);
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }

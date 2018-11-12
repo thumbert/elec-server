@@ -43,23 +43,23 @@
             <ul>
                 <li>
                     Get the historical usage of the town of Attleboro, for all customer classes (utility and competitive supply)
-                    <div><a href="http://localhost:8080/customercounts/v1/kwh/town/Attleboro">customercounts/v1/kwh/town/Attleboro</a></div>
+                    <div><a href="http://localhost:8080/ngrid/v1/customercounts/kwh/town/Attleboro">ngrid/v1/customercounts/kwh/town/Attleboro</a></div>
                 </li>
                 <li>
                     Get the historical usage for each of the towns in zone SEMA, for rate class R1
-                    <div><a href="http://localhost:8080/customercounts/v1/kwh/zone/SEMA/rateclass/R1">customercounts/v1/kwh/zone/SEMA/rateclass/R1</a></div>
+                    <div><a href="http://localhost:8080/ngrid/v1/customercounts/kwh/zone/SEMA/rateclass/R1">ngrid/v1/customercounts/kwh/zone/SEMA/rateclass/R1</a></div>
                 </li>
                 <li>
                     Get all the towns in the collection
-                    <div><a href="http://localhost:8080/customercounts/v1/towns">customercounts/v1/towns</a></div>
+                    <div><a href="http://localhost:8080/ngrid/v1/customercounts/towns">ngrid/v1/customercounts/towns</a></div>
                 </li>
                 <li>
                     Get all the zones in the collection
-                    <div><a href="http://localhost:8080/customercounts/v1/zones">customercounts/v1/zones</a></div>
+                    <div><a href="http://localhost:8080/ngrid/v1/customercounts/zones">ngrid/v1/customercounts/zones</a></div>
                 </li>
                 <li>
                     Get all the available rate classes
-                    <div><a href="http://localhost:8080/customercounts/v1/rateclasses">customercounts/v1/rateclasses</a></div>
+                    <div><a href="http://localhost:8080/ngrid/v1/customercounts/rateclasses">ngrid/v1/customercounts/rateclasses</a></div>
                 </li>
 
             </ul>
@@ -114,10 +114,10 @@
             <ul>
                 <li>
                     Get all the occurrences of a given constraint
-                    <div><a href="http://localhost:8080/bc/v1/market/da/constraintname/BRIGHTON329-530       A LN">bc/v1/market/da/constraintname/BRIGHTON329-530       A LN</a></div>
+                    <div><a href="http://localhost:8080/bc/v1/market/da/constraintname/SHFHGE/start/20170101/end/20170102">bc/v1/market/da/constraintname/SHFHGE/start/20170101/end/20170102</a></div>
                 </li>
                 <li>
-                    Get all the constraints between a two dates
+                    Get all the constraints between a start and end date
                     <div><a href="http://localhost:8080/bc/v1/market/da/start/20170101/end/20170102">bc/v1/market/da/start/20170101/end/20170102</a></div>
                 </li>
             </ul>
@@ -161,17 +161,17 @@
             <h4>Masked DA demand bids</h4>
             <ul>
                 <li>
-                    Get the total MWh demand bids by day and load zone for given a participant between two
+                    Get the daily total MWh demand bids by load zone for given a participant between two
                     dates.
-                    <div><a href="http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001">da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001</a></div>
+                    <div><a href="http://localhost:8080/da_demand_bids/v1/daily/mwh/participantId/206845/start/20170701/end/20171001">da_demand_bids/v1/daily/daily/mwh/participantId/206845/start/20170701/end/20171001</a></div>
                 </li>
                 <li>
-                    Get the total MWh demand bids by day, participant, and load zone between two dates.
-                    <div><a href="http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001">da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001</a></div>
+                    Get the daily total MWh demand bids by participant and load zone between two dates.
+                    <div><a href="http://localhost:8080/da_demand_bids/v1/daily/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001">da_demand_bids/v1/daily/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001</a></div>
                 </li>
                 <li>
                     Get the total MWh demand bids by day and participant between two dates (aggregate over the load zones).
-                    <div><a href="http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001">da_demand_bids/v1/mwh/participantId/206845/start/20170701/end/20171001</a></div>
+                    <div><a href="http://localhost:8080/da_demand_bids/v1/daily/mwh/participantId/206845/start/20170701/end/20171001">da_demand_bids/v1/daily/mwh/participantId/206845/start/20170701/end/20171001</a></div>
                 </li>
 
             </ul>
@@ -193,12 +193,12 @@
                     <div><a href="http://localhost:8080/da_energy_offers/v1/daily_data/day/20170701">da_energy_offers/v1/daily_data/day/20170701</a></div>
                 </li>
                 <li>
-                    Get one variable for one generator between a start and end date, in this example the 'Economic Maximum'
-                    <div><a href="http://localhost:8080/da_energy_offers/v1/assetId/41406/variable/Economic Maximum/start/20170701/end/20171001">da_energy_offers/v1/assetId/41406/variable/Economic Maximum/start/20170701/end/20171001</a></div>
+                    Get the energy offers for one asset ID between a start and end date
+                    <div><a href="http://localhost:8080/da_energy_offers/v1/assetId/41406/start/20170701/end/20171001">da_energy_offers/v1/assetId/41406/start/20170701/end/20171001</a></div>
                 </li>
                 <li>
-                    Get one variable for all the generators between a start and end date, in this example the 'Economic Maximum'
-                    <div><a href="http://localhost:8080/da_energy_offers/v1/variable/Economic Maximum/start/20170701/end/20171001">da_energy_offers/v1/variable/Economic Maximum/start/20170701/end/20171001</a></div>
+                    Get one daily variable for all the generators between a start and end date, in this example the 'Economic Maximum'
+                    <div><a href="http://localhost:8080/da_energy_offers/v1/daily/variable/Maximum Daily Energy/start/20170701/end/20171001">da_energy_offers/v1/daily/variable/Maximum Daily Energy/start/20170701/end/20171001</a></div>
                 </li>
             </ul>
         </div>

@@ -16,22 +16,24 @@ ApiTest() async {
     tearDown(() async {
       await db.close();
     });
-    test('get aggregated demand bids for one hour from all participants',
+    test('get demand bids stack for one hour from all participants',
         () async {
       var aux = await api.getDemandBidsStack('20170701', '16');
       var data = json.decode(aux.result);
       expect(data.length, 905);
     });
-    test('get load zone MWh by day, participant', () async {
+    test('get daily MWh by load zone for participant', () async {
       var participantId = 206845.toString();
       var start = '20170101';
       var end = '20170101';
-      var data = await api.mwhByDayZoneForParticipant(participantId, start, end);
-      Map nema = data.firstWhere((Map e) => e['locationId'] == 37894);
+      var aux = await api.dailyMwhByZoneForParticipant(participantId, start, end);
+      var data = (json.decode(aux.result) as List).cast<Map>();
+      var nema = data.firstWhere((Map e) => e['locationId'] == 37894);
       expect(nema['MWh'], 11435.3);
     });
-    test('total MWh by participant', () async {
-      var data = await api.totalMwhByParticipant('20170101', '20170101');
+    test('total daily MWh by participant', () async {
+      var aux = await api.dailyMwhByParticipant('20170101', '20170101');
+      var data = (json.decode(aux.result) as List).cast<Map>();
       var x = data.firstWhere((Map e) => e['participantId'] == 206845);
       expect(x['MWh'], 36709.3);
     });
@@ -40,7 +42,8 @@ ApiTest() async {
       var start = '20170101';
       var end = '20170105';
       var ptid = 4008.toString();
-      var data = await api.mwhByDayForParticipantAndZone(participantId, ptid, start, end);
+      var aux = await api.dailyMwhForParticipantZone(participantId, ptid, start, end);
+      var data = json.decode(aux.result);
       expect(data.length, 5);
     });
   });

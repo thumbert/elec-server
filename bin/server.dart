@@ -14,7 +14,7 @@ import 'package:elec_server/api/api_isone_energyoffers.dart';
 import 'package:elec_server/api/api_isone_demandbids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
 import 'package:elec_server/api/api_scc_report.dart';
-import 'package:elec_server/api/utilities/api_customer_counts.dart';
+import 'package:elec_server/api/utilities/api_customer_counts_ngrid.dart' as ngrid;
 import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart' as eversource;
 import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/api_system_demand.dart';
@@ -30,7 +30,7 @@ registerApis() async {
   Db db2 = new Db('mongodb://$host/isone');
   await db2.open();
   _apiServer.addApi( new ApiPtids(db2) );
-//  _apiServer.addApi( new ApiCustomerCounts(db2) );
+  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
 
   Db db3 = new Db('mongodb://$host/isoexpress');
   await db3.open();
@@ -43,9 +43,9 @@ registerApis() async {
   _apiServer.addApi( new SystemDemand(db3) );
 //  _apiServer.addApi( new ZonalDemand(db3) );
 //
-//  Db db4 = new Db('mongodb://$host/eversource');
-//  await db4.open();
-//  _apiServer.addApi( new eversource.ApiCustomerCounts(db4) );
+  Db db4 = new Db('mongodb://$host/eversource');
+  await db4.open();
+  _apiServer.addApi( new eversource.ApiCustomerCounts(db4) );
 
 
 //  var api = new ApiTemperatureNoaa();
@@ -53,23 +53,6 @@ registerApis() async {
 //  _apiServer.addApi(api);
 }
 
-//class SyncFileLoggingHandler implements BaseLoggingHandler {
-//
-//  LogRecordTransformer transformer;
-//  final String filename;
-//  File _file;
-//
-//  SyncFileLoggingHandler(String this.filename, {this.transformer}) {
-//    if (this.transformer == null) this.transformer = new StringTransformer();
-//    _file = new File(filename);
-//  }
-//
-//  call(LogRecord logRecord) {
-//    var f = _file.openSync(mode:FileMode.APPEND);
-//    f.writeStringSync(transformer.transform(logRecord) + "\n");
-//    f.closeSync();
-//  }
-//}
 
 main() async {
 //  Logger.root.level = Level.SEVERE;

@@ -1,10 +1,10 @@
 library test.customer_counts;
 
 import 'dart:io';
-import 'package:elec_server/src/db/utilities/customer_counts.dart';
+import 'package:elec_server/src/db/utilities/ngrid/customer_counts.dart';
 import 'package:elec_server/src/db/config.dart';
 
-import 'package:elec_server/api/utilities/api_customer_counts.dart';
+import 'package:elec_server/api/utilities/api_customer_counts_ngrid.dart';
 
 Map env = Platform.environment;
 
