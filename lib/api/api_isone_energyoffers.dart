@@ -129,7 +129,7 @@ class DaEnergyOffers {
   //http://localhost:8080/da_energy_offers/v1/assetId/41406/start/20170701/end/20171001
   @ApiMethod(
       path: 'assetId/{assetId}/start/{start}/end/{end}')
-  /// Get one variable between a start and end date for one asset.
+  /// Get everything for one generator between a start and end date
   Future<ApiResponse> getEnergyOffersForAssetId(
       String assetId, String start, String end) async {
     List pipeline = [];
