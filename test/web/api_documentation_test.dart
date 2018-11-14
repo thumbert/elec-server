@@ -36,8 +36,8 @@ tests(String rootUrl, Set<String> skip) async {
 
   Client client = Client();
   for (var link in links) {
-    var uri = Uri.encodeFull('http://' + rootUrl + link);
-    test('testing url ${uri}', () async {
+    var uri = Uri.encodeFull(rootUrl + link);
+    test('Url ${uri}', () async {
       var response = await client.get(uri);
       expect(response.statusCode, 200);
       //var body = response.body;
@@ -51,7 +51,7 @@ tests(String rootUrl, Set<String> skip) async {
 
 main() async {
 
-  String rootUrl = 'localhost:8080';
+  String rootUrl = 'http://localhost:8080';
   Set<String> skip = Set()..addAll(['epa_emissions']);
 
   tests(rootUrl, skip);
