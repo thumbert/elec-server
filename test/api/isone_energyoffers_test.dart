@@ -46,10 +46,15 @@ ApiTest() async {
       expect(data.length, 308);
     });
     test('get Economic Maximum for one day', () async {
-      var response = await api.oneVariable('Economic Maximum',
+      var response = await api.oneDailyVariable('Economic Maximum',
           '20170701', '20170701');
       var data = json.decode(response.result);
       expect(data.length, 308);
+    });
+    test('get Economic Maximum for one day', () async {
+      var response = await api.getEnergyOffersForAssetId('41406', '20170101', '20170102');
+      var data = json.decode(response.result);
+      expect(data.length, 2);
     });
 
   });
@@ -70,6 +75,6 @@ main() async {
   await initializeTimeZone();
   await ApiTest();
 
-  // insertDays(new Month(2017, 12));
+  //await insertDays(new Month(2017, 1));
 
 }

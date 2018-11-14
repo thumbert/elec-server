@@ -147,13 +147,22 @@ class DaEnergyOffers {
         '_id': 0,
         'Masked Asset ID': 0,
         'Masked Lead Participant ID': 0,
-        'date': 1,
       }
     });
     pipeline.add({
       '\$sort': {'date': 1}
     });
     var aux = await coll.aggregateToStream(pipeline).toList();
+    aux.forEach((document) {
+      document['hours'] = json.encode(document['hours']);
+    });
+
+//    var res = <Map<String,dynamic>>[];
+//    for (Map<String,dynamic> document in aux) {
+//      var hours = json.encode(document['hours']);
+//      print(hours);
+//    }
+
     return ApiResponse()..result = json.encode(aux);
   }
 

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:html/parser.dart';
-import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 
 
 /// Get all the API links from the documentation.html file
@@ -38,7 +37,7 @@ tests(String rootUrl, Set<String> skip) async {
   Client client = Client();
   for (var link in links) {
     var uri = Uri.encodeFull('http://' + rootUrl + link);
-    test('Url ${uri}', () async {
+    test('testing url ${uri}', () async {
       var response = await client.get(uri);
       expect(response.statusCode, 200);
       //var body = response.body;

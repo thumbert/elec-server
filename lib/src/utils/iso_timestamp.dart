@@ -8,7 +8,7 @@ Location _eastern = getLocation('US/Eastern');
 /// Convert from an ISONE string tuple.
 /// [localDate] is a String in format 'mm/dd/yyyy'
 /// [hourEnding] is of the form '01', '02', '02X', '03', ... '24'
-/// Return an hour beginning US/Eastern DateTime
+/// Return an hour beginning UTC TZDateTime
 TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
   TZDateTime res = new TZDateTime(
           _eastern,

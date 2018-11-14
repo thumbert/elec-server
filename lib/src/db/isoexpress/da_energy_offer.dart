@@ -1,10 +1,10 @@
 library db.isoexpress.da_energy_offer;
 
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import '../lib_mis_reports.dart' as mis;
@@ -17,6 +17,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   String dir;
 
   static List<String> _unitStates = ['UNAVAILABLE', 'MUST_RUN', 'ECONOMIC'];
+  var location = getLocation('US/Eastern');
 
   DaEnergyOfferArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
@@ -37,8 +38,9 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       new File(dir + 'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
-  Map<String,dynamic> converter(List<Map> rows) {
-    var row = <String,dynamic>{};
+  Map<String, dynamic> converter(List<Map> rows) {
+    var row = <String, dynamic>{};
+
     /// daily info
     row['date'] = formatDate(rows.first['Day']);
     row['Masked Lead Participant ID'] =
@@ -54,9 +56,11 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     /// hourly info
     row['hours'] = [];
     rows.forEach((Map hour) {
-      var aux = <String,dynamic>{};
-      aux['hourBeginning'] =
-          parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
+      var aux = <String, dynamic>{};
+      var utc = parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
+      aux['hourBeginning'] = TZDateTime.fromMicrosecondsSinceEpoch(
+              location, utc.microsecondsSinceEpoch)
+          .toIso8601String();
       aux['Economic Maximum'] = hour['Economic Maximum'];
       aux['Economic Minimum'] = hour['Economic Minimum'];
       aux['Cold Startup Price'] = hour['Cold Startup Price'];
@@ -80,14 +84,14 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     return row;
   }
 
-  insertData(List<Map<String,dynamic>> data) async {
+  insertData(List<Map<String, dynamic>> data) async {
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
         .catchError((e) => print('   ' + e.toString()));
   }
 
-  List<Map<String,dynamic>> processFile(File file) {
+  List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
     var dataByAssetId = groupBy(data, (row) => row['Masked Asset ID']);
@@ -118,8 +122,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
           'Masked Lead Participant ID': 1,
         },
         unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1});
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1});
     await dbConfig.db.close();
   }
 
@@ -152,11 +155,4 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
         !_unitStates.contains(row['Unit Status']))
       throw new StateError('Invalid unit state: ${row['Unit State']}.');
   }
-
-}
-
-Map _groupBy(Iterable x, Function f) {
-  Map result = new Map();
-  x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
-  return result;
 }

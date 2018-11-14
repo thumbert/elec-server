@@ -46,7 +46,7 @@ apiTest() async {
 
   await config.db.open();
   var res = await api.customerCountsCt();
-  res.forEach(print);
+  print(res);
 
   await config.db.close();
 }
