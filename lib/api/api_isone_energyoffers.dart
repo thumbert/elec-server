@@ -33,6 +33,7 @@ class DaEnergyOffers {
 
   //http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
   @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
+
   /// return the stack, energy offers sorted.
   Future<ApiResponse> getGenerationStack(String date, String hourending) async {
     var stack = <Map<String, dynamic>>[];
@@ -62,6 +63,7 @@ class DaEnergyOffers {
 
   //http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16
   @ApiMethod(path: 'date/{date}/hourending/{hourending}')
+
   /// Return the energy offers (price/quantity pairs) for a given datetime.
   Future<ApiResponse> getEnergyOffers(String date, String hourending) async {
     var data = await _getEnergyOffers(date, hourending);
@@ -73,6 +75,9 @@ class DaEnergyOffers {
     hourending = hourending.padLeft(2, '0');
     Date day = Date.parse(date);
     TZDateTime dt = parseHourEndingStamp(mmddyyyy(day), hourending);
+    String hB = TZDateTime.fromMillisecondsSinceEpoch(
+            location, dt.millisecondsSinceEpoch)
+        .toIso8601String();
     List pipeline = [];
     pipeline.add({
       '\$match': {
@@ -92,7 +97,7 @@ class DaEnergyOffers {
             'input': '\$hours',
             'as': 'hour',
             'cond': {
-              '\$eq': ['\$\$hour.hourBeginning', dt]
+              '\$eq': ['\$\$hour.hourBeginning', hB]
             }
           }
         },
@@ -127,8 +132,8 @@ class DaEnergyOffers {
   }
 
   //http://localhost:8080/da_energy_offers/v1/assetId/41406/start/20170701/end/20171001
-  @ApiMethod(
-      path: 'assetId/{assetId}/start/{start}/end/{end}')
+  @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
+
   /// Get everything for one generator between a start and end date
   Future<ApiResponse> getEnergyOffersForAssetId(
       String assetId, String start, String end) async {
@@ -156,18 +161,12 @@ class DaEnergyOffers {
     aux.forEach((document) {
       document['hours'] = json.encode(document['hours']);
     });
-
-//    var res = <Map<String,dynamic>>[];
-//    for (Map<String,dynamic> document in aux) {
-//      var hours = json.encode(document['hours']);
-//      print(hours);
-//    }
-
     return ApiResponse()..result = json.encode(aux);
   }
 
   //http://localhost:8080/da_energy_offers/v1/daily/variable/Maximum Daily Energy/start/20170701/end/20171001
   @ApiMethod(path: 'daily/variable/{variable}/start/{start}/end/{end}')
+
   /// Get a variable between a start and end date for all the assets.
   Future<ApiResponse> oneDailyVariable(
       String variable, String start, String end) async {
@@ -236,6 +235,20 @@ class DaEnergyOffers {
   Future<ApiResponse> assetsByDay(String day) async {
     var query = where.eq('date', Date.parse(day).toString()).excludeFields(
         ['_id']).fields(['Masked Asset ID', 'Masked Lead Participant ID']);
+    var res = await coll.find(query).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+  /// http://localhost:8080/da_energy_offers/v1/assets/day/20170301
+  @ApiMethod(path: 'assets/participantId/{participantId}/start/{start}/end/{end}')
+  Future<ApiResponse> assetsForParticipant(int participantId,
+      String start, String end) async {
+    var query = where
+        .gte('date', Date.parse(start).toString())
+        .lte('date', Date.parse(end).toString())
+        .eq('Masked Lead Participant ID', participantId)
+        .excludeFields(['_id'])
+        .fields(['date', 'Masked Asset ID']);
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }

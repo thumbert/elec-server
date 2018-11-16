@@ -59,6 +59,36 @@ class DaEnergyOffers {
         .then((data) => (json.decode(data['result']) as List).cast<Map>());
   }
 
+  /// Get the energy offers of an asset between a start/end date
+  Future<List<Map<String, dynamic>>> getDaEnergyOffersForAsset(
+      int maskedAssetId, Date start, Date end) {
+    var _url = null;
+    var _queryParams = new Map<String, List<String>>();
+    var _uploadMedia = null;
+    var _uploadOptions = null;
+    var _downloadOptions = commons.DownloadOptions.Metadata;
+    var _body = null;
+
+    _url = 'assetId/${maskedAssetId.toString()}' +
+        '/start/' +
+        commons.Escaper.ecapeVariable('${start.toString()}') +
+        '/end/' +
+        commons.Escaper.ecapeVariable('${end.toString()}');
+
+    var _response = _requester.request(_url, "GET",
+        body: _body,
+        queryParams: _queryParams,
+        uploadOptions: _uploadOptions,
+        uploadMedia: _uploadMedia,
+        downloadOptions: _downloadOptions);
+    return _response.then((data) {
+      var out =
+          (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
+      out.forEach((e) {e['hours'] = json.decode(e['hours']);});
+      return out;
+    });
+  }
+
   /// Get the generation stack for this hour
   Future<List<Map<String, dynamic>>> getGenerationStack(Hour hour) {
     var _url = null;
@@ -86,7 +116,6 @@ class DaEnergyOffers {
         (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
   }
 
-
   /// Get the masked asset id and the masked participant id for this date.
   Future<List<Map<String, dynamic>>> assetsForDay(Date date) {
     var _url = null;
@@ -96,8 +125,7 @@ class DaEnergyOffers {
     var _downloadOptions = commons.DownloadOptions.Metadata;
     var _body = null;
 
-    _url = 'assets/day/' +
-        commons.Escaper.ecapeVariable('${date.toString()}');
+    _url = 'assets/day/' + commons.Escaper.ecapeVariable('${date.toString()}');
 
     var _response = _requester.request(_url, "GET",
         body: _body,
@@ -108,6 +136,31 @@ class DaEnergyOffers {
     return _response.then((data) =>
         (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
   }
+
+  /// Get the masked asset ids of a masked participant id between a start and end date.
+  Future<List<Map<String, dynamic>>> assetsForParticipantId(int maskedParticipantId,
+      Date start, Date end) {
+    var _url = null;
+    var _queryParams = new Map<String, List<String>>();
+    var _uploadMedia = null;
+    var _uploadOptions = null;
+    var _downloadOptions = commons.DownloadOptions.Metadata;
+    var _body = null;
+
+    _url = 'assets/participantId/${maskedParticipantId}' +
+        '/start/' + commons.Escaper.ecapeVariable('${start.toString()}') +
+        '/end/' + commons.Escaper.ecapeVariable('${end.toString()}');
+
+    var _response = _requester.request(_url, "GET",
+        body: _body,
+        queryParams: _queryParams,
+        uploadOptions: _uploadOptions,
+        uploadMedia: _uploadMedia,
+        downloadOptions: _downloadOptions);
+    return _response.then((data) =>
+        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
+  }
+
 
   /// Get the last date inserted in the database
   Future<Date> lastDate() {
@@ -126,10 +179,7 @@ class DaEnergyOffers {
         uploadOptions: _uploadOptions,
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
-    return _response.then((data) =>
-        Date.parse(json.decode(data['result']) as String));
+    return _response
+        .then((data) => Date.parse(json.decode(data['result']) as String));
   }
-
-
-
 }

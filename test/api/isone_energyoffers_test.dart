@@ -51,7 +51,7 @@ ApiTest() async {
       var data = json.decode(response.result);
       expect(data.length, 308);
     });
-    test('get Economic Maximum for one day', () async {
+    test('get energy offers for one asset between a start/end date', () async {
       var response = await api.getEnergyOffersForAssetId('41406', '20170101', '20170102');
       var data = json.decode(response.result);
       expect(data.length, 2);
@@ -75,6 +75,13 @@ main() async {
   await initializeTimeZone();
   await ApiTest();
 
-  //await insertDays(new Month(2017, 1));
+  //var months = Month.current().subtract(4).previousN(18);
+//  var months = [Month(2018,7)];
+//  months.forEach((month) async {
+//    await insertDays(month);
+//  });
+
+
+
 
 }
