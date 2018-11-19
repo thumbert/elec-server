@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:table/table.dart';
 import 'package:elec_server/client/isoexpress/da_energy_offer.dart';
 
@@ -49,8 +50,19 @@ tests() async {
       expect(date is Date, true);
     });
     test('get energy offers for asset 41406 between 2 dates', () async {
-      var data = await api.getDaEnergyOffersForAsset(41406, Date(2018,4,1), Date(2018,4,2));
+      var data = await api.getDaEnergyOffersForAsset(
+          41406, Date(2018, 4, 1), Date(2018, 4, 2));
       expect(data.length, 2);
+    });
+    test('get energy offers price/quantity timeseries for asset 41406 ',
+        () async {
+      var data = await api.getDaEnergyOffersForAsset(
+          41406, Date(2018, 4, 1), Date(2018, 4, 1));
+      var out = priceQuantityOffers(data);
+      expect(out.length, 5);
+      expect(
+          out.first.first.toString(),
+          '[2018-04-01 00:00:00.000-0400, 2018-04-01 01:00:00.000-0400) -> {price: 15.44, quantity: 332}');
     });
   });
 }
@@ -59,13 +71,13 @@ identifyUnits() async {
   Location location = getLocation('US/Eastern');
   var api = DaEnergyOffers(Client());
 
-  var start = Date(2017,11,1);
-  var end = Date(2018,7,31);
+  var start = Date(2017, 11, 1);
+  var end = Date(2018, 7, 31);
 
-  var assetsStart = (await api.assetsForDay(start))
-      .map((e) => e['Masked Asset ID']).toSet();
-  var assetsEnd = (await api.assetsForDay(end))
-      .map((e) => e['Masked Asset ID']).toSet();
+  var assetsStart =
+      (await api.assetsForDay(start)).map((e) => e['Masked Asset ID']).toSet();
+  var assetsEnd =
+      (await api.assetsForDay(end)).map((e) => e['Masked Asset ID']).toSet();
   //var newAssets = assetsEnd.difference(assetsStart);
 
   var newAssets = [86083, 25645, 54465, 80076, 52323].toSet();
@@ -91,13 +103,14 @@ identifyUnits() async {
 
   /// get Masked Lead Participant ID when you know the Masked Asset ID
   var info = await api.assetsForDay(end);
-  var aux = info.where((e) => newAssets.contains(e['Masked Asset ID'])).toList();
+  var aux =
+      info.where((e) => newAssets.contains(e['Masked Asset ID'])).toList();
   aux.forEach(print);
 
   ///
   int maskedParticipantId = 591975;
-  var data = await api.assetsForParticipantId(maskedParticipantId, Date(2017,1,1),
-      Date(2018,7,1));
+  var data = await api.assetsForParticipantId(
+      maskedParticipantId, Date(2017, 1, 1), Date(2018, 7, 1));
   //print(data);
   //data.forEach(print);
 
@@ -107,21 +120,11 @@ identifyUnits() async {
   var count = nest.map(data);
   count.entries.forEach(print);
   //print(count);
-
 }
-
-
-
-
-
-
-
-
 
 main() async {
   await initializeTimeZone();
-  //await tests();
+  await tests();
 
-  await identifyUnits();
-
+  //await identifyUnits();
 }

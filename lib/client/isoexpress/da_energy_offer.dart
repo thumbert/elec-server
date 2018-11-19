@@ -24,7 +24,7 @@ const String USER_AGENT = 'dart-api-client da_energy_offer/v1';
 
 class DaEnergyOffers {
   final commons.ApiRequester _requester;
-  final location = getLocation('US/Eastern');
+  static final location = getLocation('US/Eastern');
 
   DaEnergyOffers(http.Client client,
       {String rootUrl: "http://localhost:8080/",
@@ -161,9 +161,6 @@ class DaEnergyOffers {
         (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
   }
 
-
-
-
   /// Get the last date inserted in the database
   Future<Date> lastDate() {
     var _url = null;
@@ -184,4 +181,29 @@ class DaEnergyOffers {
     return _response
         .then((data) => Date.parse(json.decode(data['result']) as String));
   }
+}
+
+
+/// Take the historical energy offers of an asset as returned by
+/// [getDaEnergyOffersForAsset] and create the timeseries of price offers.
+/// First offer point for each hour forms the first TimeSeries, etc.
+List<TimeSeries<Map<String,num>>> priceQuantityOffers(List<Map<String,dynamic>> energyOffers) {
+  var out = <TimeSeries<Map<String,num>>>[];
+  for (var row in energyOffers) {
+    var hourlyOffers = (row['hours'] as List).cast<Map<String,dynamic>>();
+    for (var hourlyOffer in hourlyOffers) {
+      int n = hourlyOffer['price'].length;
+      while (n > out.length) {
+        out.add(TimeSeries<Map<String,num>>());
+      }
+      var hour = Hour.beginning(TZDateTime.parse(DaEnergyOffers.location, hourlyOffer['hourBeginning']));
+      for (int i=0; i<n; i++) {
+        out[i].add( IntervalTuple(hour, {
+          'price': hourlyOffer['price'][i],
+          'quantity': hourlyOffer['quantity'][i],
+        }));
+      }
+    }
+  }
+  return out;
 }
