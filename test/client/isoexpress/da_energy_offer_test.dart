@@ -95,7 +95,7 @@ identifyUnits() async {
   aux.forEach(print);
 
   ///
-  int maskedParticipantId = 902793;
+  int maskedParticipantId = 591975;
   var data = await api.assetsForParticipantId(maskedParticipantId, Date(2017,1,1),
       Date(2018,7,1));
   //print(data);
@@ -107,9 +107,6 @@ identifyUnits() async {
   var count = nest.map(data);
   count.entries.forEach(print);
   //print(count);
-
-
-
 
 }
 

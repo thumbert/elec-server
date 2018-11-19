@@ -162,6 +162,8 @@ class DaEnergyOffers {
   }
 
 
+
+
   /// Get the last date inserted in the database
   Future<Date> lastDate() {
     var _url = null;

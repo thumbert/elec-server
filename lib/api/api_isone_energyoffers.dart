@@ -239,7 +239,7 @@ class DaEnergyOffers {
     return ApiResponse()..result = json.encode(res);
   }
 
-  /// http://localhost:8080/da_energy_offers/v1/assets/day/20170301
+  /// http://localhost:8080/da_energy_offers/v1/assets/participantId/355376/start/20170301/end/20170305
   @ApiMethod(path: 'assets/participantId/{participantId}/start/{start}/end/{end}')
   Future<ApiResponse> assetsForParticipant(int participantId,
       String start, String end) async {
@@ -252,6 +252,22 @@ class DaEnergyOffers {
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }
+
+  /// http://localhost:8080/da_energy_offers/v1/ownership/assetId/80076/start/20170501/end/20170801
+  @ApiMethod(path: 'ownership/assetId/{assetId}/start/{start}/end/{end}')
+  Future<ApiResponse> assetOwnership(int assetId,
+      String start, String end) async {
+    var query = where
+        .gte('date', Date.parse(start).toString())
+        .lte('date', Date.parse(end).toString())
+        .eq('Masked Asset ID', assetId)
+        .excludeFields(['_id'])
+        .fields(['date', 'Masked Asset ID', 'Masked Lead Participant ID']);
+    var res = await coll.find(query).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+
 
   /// http://localhost:8080/da_energy_offers/v1/lastday
   @ApiMethod(path: 'lastday')
