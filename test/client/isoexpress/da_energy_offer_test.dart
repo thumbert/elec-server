@@ -17,7 +17,8 @@ tests() async {
       var hour = Hour.beginning(TZDateTime(location, 2017, 7, 1, 16));
       var aux = await api.getDaEnergyOffers(hour);
       expect(aux.length, 731);
-      expect(aux.first, {
+      var e10393 = aux.firstWhere((e) => e['assetId'] == 10393);
+      expect(e10393, {
         'assetId': 10393,
         'Unit Status': 'ECONOMIC',
         'Economic Maximum': 14.9,
@@ -64,6 +65,19 @@ tests() async {
           out.first.first.toString(),
           '[2018-04-01 00:00:00.000-0400, 2018-04-01 01:00:00.000-0400) -> {price: 15.44, quantity: 332}');
     });
+    test('get average energy offers price timeseries for asset 41406 ',
+            () async {
+          var data = await api.getDaEnergyOffersForAsset(
+              41406, Date(2018, 4, 1), Date(2018, 4, 1));
+          var pqOffers = priceQuantityOffers(data);
+          var out = averageOfferPrice(pqOffers);
+          expect(out.length, 24);
+          expect(
+              out.first.toString(),
+              '[2018-04-01 00:00:00.000-0400, 2018-04-01 01:00:00.000-0400) -> {price: 16.59470909090909, quantity: 550}');
+        });
+
+
   });
 }
 

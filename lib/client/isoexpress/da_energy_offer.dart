@@ -84,7 +84,9 @@ class DaEnergyOffers {
     return _response.then((data) {
       var out =
           (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
-      out.forEach((e) {e['hours'] = json.decode(e['hours']);});
+      out.forEach((e) {
+        e['hours'] = json.decode(e['hours']);
+      });
       return out;
     });
   }
@@ -138,8 +140,8 @@ class DaEnergyOffers {
   }
 
   /// Get the masked asset ids of a masked participant id between a start and end date.
-  Future<List<Map<String, dynamic>>> assetsForParticipantId(int maskedParticipantId,
-      Date start, Date end) {
+  Future<List<Map<String, dynamic>>> assetsForParticipantId(
+      int maskedParticipantId, Date start, Date end) {
     var _url = null;
     var _queryParams = new Map<String, List<String>>();
     var _uploadMedia = null;
@@ -148,8 +150,10 @@ class DaEnergyOffers {
     var _body = null;
 
     _url = 'assets/participantId/${maskedParticipantId}' +
-        '/start/' + commons.Escaper.ecapeVariable('${start.toString()}') +
-        '/end/' + commons.Escaper.ecapeVariable('${end.toString()}');
+        '/start/' +
+        commons.Escaper.ecapeVariable('${start.toString()}') +
+        '/end/' +
+        commons.Escaper.ecapeVariable('${end.toString()}');
 
     var _response = _requester.request(_url, "GET",
         body: _body,
@@ -183,27 +187,54 @@ class DaEnergyOffers {
   }
 }
 
-
 /// Take the historical energy offers of an asset as returned by
 /// [getDaEnergyOffersForAsset] and create the timeseries of price offers.
 /// First offer point for each hour forms the first TimeSeries, etc.
-List<TimeSeries<Map<String,num>>> priceQuantityOffers(List<Map<String,dynamic>> energyOffers) {
-  var out = <TimeSeries<Map<String,num>>>[];
+/// TODO: make sure you keep only when the unit is available!
+List<TimeSeries<Map<String, num>>> priceQuantityOffers(
+    List<Map<String, dynamic>> energyOffers) {
+  var out = <TimeSeries<Map<String, num>>>[];
   for (var row in energyOffers) {
-    var hourlyOffers = (row['hours'] as List).cast<Map<String,dynamic>>();
+    var hourlyOffers = (row['hours'] as List).cast<Map<String, dynamic>>();
     for (var hourlyOffer in hourlyOffers) {
       int n = hourlyOffer['price'].length;
       while (n > out.length) {
-        out.add(TimeSeries<Map<String,num>>());
+        out.add(TimeSeries<Map<String, num>>());
       }
-      var hour = Hour.beginning(TZDateTime.parse(DaEnergyOffers.location, hourlyOffer['hourBeginning']));
-      for (int i=0; i<n; i++) {
-        out[i].add( IntervalTuple(hour, {
+      var hour = Hour.beginning(TZDateTime.parse(
+          DaEnergyOffers.location, hourlyOffer['hourBeginning']));
+      for (int i = 0; i < n; i++) {
+        out[i].add(IntervalTuple(hour, {
           'price': hourlyOffer['price'][i],
           'quantity': hourlyOffer['quantity'][i],
         }));
       }
     }
   }
+  return out;
+}
+
+/// Calculate the quantity weighted average price of the offers.  This is a
+/// convenient way to compare energy offers accross different power plants.
+///
+/// Input [pqOffers] is the output of the [priceQuantityOffers] function.
+TimeSeries<Map<String, num>> averageOfferPrice(
+    List<TimeSeries<Map<String, num>>> pqOffers) {
+
+  /// all pqOffers TimeSeries don't always have the same length need to merge
+  var out = pqOffers.reduce((x,y) {
+    var z = x.merge(y, joinType: JoinType.Outer, f: (a,b) {
+      a ??= {'price': 0, 'quantity': 0};
+      b ??= {'price': 0, 'quantity': 0};
+      var totalQ = a['quantity'] + b['quantity'];
+      return {
+        'price': (a['price']*a['quantity'] + b['price']*b['quantity'])/totalQ,
+        'quantity': totalQ,
+      };
+    });
+    return z;
+  });
+
+
   return out;
 }
