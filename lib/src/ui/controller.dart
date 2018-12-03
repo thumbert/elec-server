@@ -18,12 +18,11 @@ class Controller {
   /// <p> To add an entity filter: filters['bucket'] = '5x16'
   /// <p> To add an range filter: ranges['temperature'] = [-30,110]
   Controller({this.checkboxes, this.filters, this.ranges}) {
-//    checkboxes ??= [];
-//
-//    filters ??= {};
-//
-//    ranges ??= <String,List<num>>{};
+    checkboxes ??= <String>[];
 
+    filters ??= <String,dynamic>{};
+
+    ranges ??= <String,List<num>>{};
   }
 }
 
