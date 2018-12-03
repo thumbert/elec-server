@@ -2,17 +2,32 @@ library utils.to_csv;
 
 import 'package:csv/csv.dart';
 
-/// Write a list of maps to CSV.  Column names are taken from the keys of
-/// the first element of the list.  Usually, the keys of the map are strings.
-String listOfMapToCsv(List<Map> x) {
+/// Write a list of maps to CSV.   Usually, the keys of the map are strings.
+///
+/// If [columnNames] are not specified, return all the available columns. 
+String listOfMapToCsv(List<Map> x, {List<String> columnNames}) {
+  if (columnNames == null) {
+    var _cNames = Set<String>();
+    for (var row in x) _cNames.addAll(row.keys.map((e) => e.toString()));
+    columnNames = _cNames.toList();
+  }
+
   var aux = <List>[];
-  var colNames = x.first.keys.toList();
-  aux.add(colNames);
-  x.forEach((Map e){
-    aux.add(e.values.toList());
+  aux.add(columnNames);
+  x.forEach((Map row) {
+    var sRow = [];
+    for (var columnName in columnNames) {
+      if (row.containsKey(columnName)) {
+        sRow.add(row[columnName]);
+      } else {
+        sRow.add('');
+      }
+    }
+    aux.add(sRow);
   });
   return const ListToCsvConverter().convert(aux);
 }
+
 
 /// Write a map to CSV. Return a two column csv table, first column are the
 /// keys, second column are the values.
