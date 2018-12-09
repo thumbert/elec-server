@@ -14,7 +14,7 @@ class CategoricalDropdownCheckboxFilter {
   ///
   /// Variable [name] is the text of the associated label.
   ///
-  /// Need to trigger an action onDataChange.
+  /// Need to trigger an action onChange.
   CategoricalDropdownCheckboxFilter(this.wrapper, List<String> values, this.name) {
     // put both the label and the select element into a div
     var _wrapper = new html.DivElement()
@@ -38,6 +38,6 @@ class CategoricalDropdownCheckboxFilter {
 
   String get value => _selector.value;
 
-  setOnChange(Function x) =>  _selector.onChange.listen(x);
+  onChange(Function x) =>  _selector.onChange.listen(x);
 }
 

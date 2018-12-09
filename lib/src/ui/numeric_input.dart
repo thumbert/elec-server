@@ -16,6 +16,9 @@ class NumericInput {
   NumericInput(this.wrapper, this.name,
       {int size: 5, this.defaultValue}) {
 
+    String aux = '';
+    if (defaultValue != null) aux = defaultValue.toString();
+
     var _wrapper = new html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
     _wrapper.children.add(new html.LabelElement()
@@ -23,9 +26,9 @@ class NumericInput {
       ..setAttribute('style', 'margin-left: 15px'));
     _textInput = new html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
-      ..placeholder = value.toString()
+      ..placeholder = aux
       ..size = size
-      ..value = value.round().toString();
+      ..value = aux;
     _wrapper.children.add(_textInput);
 
     wrapper.children.add(_wrapper);
@@ -42,7 +45,7 @@ class NumericInput {
 
 
   /// trigger a change when either one of the two inputs change
-  setOnChange(Function x) {
+  onChange(Function x) {
     _textInput.onChange.listen(x);
   }
 }
