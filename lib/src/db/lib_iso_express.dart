@@ -18,7 +18,7 @@ abstract class IsoExpressReport {
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
-  Map converter(List<Map> rows);
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows);
 
   /// Setup the database from scratch again, including the index
   Future<Null> setupDb();
