@@ -20,7 +20,7 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
     dbConfig.collectionName = 'sp_peakcontributiondly';
   }
 
-  Map rowConverter(Map row, DateTime version) {
+  Map<String,dynamic> rowConverter(Map<String,dynamic> row, DateTime version) {
     row['Trading Date'] = formatDate(row['Trading Date']);
     row['version'] = version;
     row.remove('H');
@@ -28,8 +28,8 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
   }
 
   @override
-  Map<int,List<Map>> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+  Map<int,List<Map<String,dynamic>>> processFile(File file) {
+    var data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
     var version = report.timestamp();
     var res = data
@@ -56,13 +56,13 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
 
   @override
   insertTabData(List<Map> data, {int tab: 0}) async {
-    List<String> days = data.map((e) => e['Trading Date']).toSet().toList();
-    DateTime maxVersion = data.first['version'];
-    List<num> assetIds = data.map((e) => e['Asset ID']).toSet().toList();
+    var days = data.map((e) => e['Trading Date'] as String).toSet().toList();
+    var maxVersion = data.first['version'];
+    var assetIds = data.map((e) => e['Asset ID'] as num).toSet().toList();
     try{
       await remove(maxVersion, days, assetIds);
       await dbConfig.coll.insertAll(data);
-      print('--->  Inserted $reportName for ${data.first['Trading Date']}, version ${data.first['version']} successfully');
+      print('--->  Inserted $reportName for ${data.first['Trading Date']} tab $tab, version ${data.first['version']} successfully');
     } catch (e) {
       print('XXX ' + e.toString());
     }
