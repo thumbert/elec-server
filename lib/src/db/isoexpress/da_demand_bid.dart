@@ -2,6 +2,7 @@ library db.isoexpress.da_demand_bid;
 
 import 'dart:io';
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -32,8 +33,8 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
       new File(dir + 'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one location id
-  Map converter(List<Map> rows) {
-    Map row = {};
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
+    var row = <String,dynamic>{};
     /// daily info
     row['date'] = formatDate(rows.first['Day']);
     row['Masked Lead Participant ID'] = rows.first['Masked Lead Participant ID'];
@@ -66,8 +67,8 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
 
   List<Map<String,dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return [];
-    Map dataByBidId = _groupBy(data, (row) => row['Bid ID']);
+    if (data.isEmpty) return <Map<String,dynamic>>[];
+    var dataByBidId = groupBy(data, (row) => row['Bid ID']);
     return dataByBidId.keys.map((ptid) => converter(dataByBidId[ptid])).toList();
   }
 
