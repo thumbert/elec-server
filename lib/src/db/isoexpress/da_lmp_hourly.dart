@@ -2,6 +2,7 @@ library db.isoexpress.da_lmp_hourly;
 
 import 'dart:io';
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -32,8 +33,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) =>
       new File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
-  Map converter(List<Map> rows) {
-    Map row = {};
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
+    var row = <String,dynamic>{};
     row['date'] = formatDate(rows.first['Date']);
     row['ptid'] = int.parse(rows.first['Location ID']);
     row['hourBeginning'] = [];
@@ -50,9 +51,9 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   }
 
   List<Map<String,dynamic>> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return [];
-    Map dataByPtids = _groupBy(data, (row) => row['Location ID']);
+    var data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return <Map<String,dynamic>>[];
+    var dataByPtids = groupBy(data, (row) => row['Location ID']);
     return dataByPtids.keys.map((ptid) => converter(dataByPtids[ptid])).toList();
   }
 
@@ -96,13 +97,4 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   Future<Null> deleteDay(Date day) async {
     return await dbConfig.coll.remove(where.eq('date', day.toString()));
   }
-
-
-}
-
-
-Map _groupBy(Iterable x, Function f) {
-  Map result = new Map();
-  x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
-  return result;
 }
