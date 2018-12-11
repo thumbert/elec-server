@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:tuple/tuple.dart';
 import 'package:date/date.dart';
+import 'package:collection/collection.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
@@ -21,8 +22,8 @@ class SdRtloadArchive extends mis.MisReportArchive {
     dbConfig.collectionName = 'sd_rtload';
   }
 
-  Map rowConverter(List<Map> rows, Date reportDate, DateTime version) {
-    Map row = {};
+  Map<String,dynamic> rowConverter(List<Map> rows, Date reportDate, DateTime version) {
+    var row = <String,dynamic>{};
     row['date'] = reportDate.toString();
     row['version'] = version;
     row['Asset ID'] = rows.first['Asset ID'];
@@ -41,12 +42,12 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  Map<int,List<Map>> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
+  Map<int,List<Map<String,dynamic>>> processFile(File file) {
+    var data = mis.readReportTabAsMap(file, tab: 0);
     var report = new mis.MisReport(file);
     var reportDate = report.forDate();
     var version = report.timestamp();
-    Map dataByAssetId = _groupBy(data, (row) => row['Asset ID']);
+    var dataByAssetId = groupBy(data, (row) => row['Asset ID'] as int);
     var res = dataByAssetId.keys
         .map((assetId) =>
             rowConverter(dataByAssetId[assetId], reportDate, version))
@@ -55,10 +56,10 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> insertTabData(List<Map> data, {int tab: 0}) async {
+  Future<Null> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
     if (data.isEmpty) return new Future.value(null);
     /// split the data by Asset ID, date, version
-    Map groups = _groupBy(data, (Map e) =>
+    var groups = groupBy(data, (Map e) =>
       new Tuple3(e['Asset ID'], e['date'], e['version']));
     try {
       for (Tuple3 key in groups.keys) {
@@ -69,7 +70,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
         });
         await dbConfig.coll.insertAll(groups[key]);
       }
-      print('--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']} successfully');
+      print('--->  Inserted $reportName for ${data.first['date']} tab $tab, version ${data.first['version']} successfully');
     } catch (e) {
       print('   ' + e.toString());
     }
@@ -90,11 +91,5 @@ class SdRtloadArchive extends mis.MisReportArchive {
   @override
   Future<Null> updateDb() {
     // TODO: implement updateDb
-  }
-
-  Map _groupBy(Iterable x, Function f) {
-    Map result = new Map();
-    x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
-    return result;
   }
 }
