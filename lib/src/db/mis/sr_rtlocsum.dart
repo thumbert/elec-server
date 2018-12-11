@@ -72,9 +72,9 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
           'version': key.item4,
         });
         await dbConfig.coll.insertAll(groups[key]);
-        return 0;
       }
       print('--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 1 successfully');
+      return 0;
     } catch (e) {
       print('XXX ' + e.toString());
       return 1;
