@@ -32,8 +32,8 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) =>
       new File(dir + 'da_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
-  Map converter(List<Map> rows) {
-    Map row = {};
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
+    var row = <String,dynamic>{};
     var localDate = (rows.first['Date'] as String).substring(0, 10);
     row['date'] = formatDate(localDate);
     row['market'] = 'DA';
@@ -49,7 +49,7 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
 
   List<Map<String,dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return [];
+    if (data.isEmpty) return <String,dynamic>[];
     return [converter(data)];
   }
 
