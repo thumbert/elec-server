@@ -20,7 +20,7 @@ abstract class MisReportArchive {
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
-  Map Function(List<Map>) converter;
+  Map<String,dynamic> Function(List<Map<String,dynamic>>) converter;
 
   /// Setup the database from scratch again, including the index
   Future<Null> setupDb();
@@ -32,7 +32,7 @@ abstract class MisReportArchive {
   /// Make it ready for insertion in the database.
   /// Each tab is one element of the returned Map.  The key of the Map is the tab
   /// number. 
-  Map<int,List<Map>> processFile(File file);
+  Map<int,List<Map<String,dynamic>>> processFile(File file);
 
   /// Insert this data into the database.  Likely to be overwritten in the implementation. 
   Future insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
