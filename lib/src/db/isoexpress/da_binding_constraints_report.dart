@@ -37,8 +37,8 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) => new File(
       dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.csv');
 
-  Map converter(List<Map> rows) {
-    Map row = rows.first;
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
+    var row = rows.first;
     var localDate = (row['Local Date'] as String).substring(0, 10);
     var hourEnding = row['Hour Ending'];
     row['hourBeginning'] = parseHourEndingStamp(localDate, hourEnding);
@@ -53,7 +53,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   /// Need to take the unique rows.  On 2018-07-10, there were duplicates!
   List<Map<String,dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return [];
+    if (data.isEmpty) return <String,dynamic>[];
     data.forEach((row) => converter([row]));
     var uRows = unique(data).cast<Map<String,dynamic>>();
     return uRows;
