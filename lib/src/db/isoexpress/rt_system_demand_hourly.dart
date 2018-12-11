@@ -35,8 +35,8 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
       new File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
   /// File may be incomplete if downloaded during the day ...
-  Map converter(List<Map> rows) {
-    Map row = {};
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
+    var row = <String,dynamic>{};
     var localDate = (rows.first['Date'] as String).substring(0, 10);
     int numberOfHours = Date.parse(formatDate(localDate), location: location)
       .splitLeft((dt) => new Hour.beginning(dt)).length;
@@ -57,8 +57,8 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   }
 
   List<Map<String,dynamic>> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return [];
+    var data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return <String,dynamic>[];
     return [converter(data)];
   }
 
