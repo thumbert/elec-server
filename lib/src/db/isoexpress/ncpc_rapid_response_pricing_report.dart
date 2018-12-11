@@ -28,16 +28,16 @@ class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
   File getFilename(Date asOfDate) =>
       new File(dir + 'ncpc_rrp_' + yyyymmdd(asOfDate) + '.csv');
 
-  Map converter(List<Map> rows) {
-    Map row = rows.first;
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
+    var row = rows.first;
     row['Operating Day'] = formatDate(row['Operating Day']);
     row.remove('H');
     return row;
   }
 
   List<Map<String,dynamic>> processFile(File file) {
-    List<Map> data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return [];
+    var data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return <Map<String,dynamic>>[];
     data.forEach((row) => converter([row]));
     return data;
   }
