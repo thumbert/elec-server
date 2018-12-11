@@ -85,7 +85,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
 
   /// Download one day.  Check if the file has downloaded successfully.
   /// If [override] is true, re-download the day.
-  Future<Null> downloadDay(Date day, {bool override: true}) async {
+  Future downloadDay(Date day, {bool override: true}) async {
     return await downloadUrl(getUrl(day), getFilename(day), override: override);
   }
 
