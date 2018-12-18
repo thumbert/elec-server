@@ -31,7 +31,7 @@ class ZonalDemandArchive extends IsoExpressReport {
       new File(dir + '${year.toString()}_smd_hourly.xlsx');
 
   /// not used
-  Map converter(List<Map> rows) => rows.first;
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) => rows.first;
 
   /// need to read all tabs
   List<Map<String,dynamic>> processFile(File file) {

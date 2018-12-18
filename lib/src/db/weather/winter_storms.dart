@@ -162,7 +162,7 @@ class WinterStormsArchive extends IsoExpressReport {
     }
   }
 
-  Map converter(List<Map> rows) {}
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {}
 
   /// SNOW total accumulation, RAIN totals (inches), and wind speeds are reported.
   ///
