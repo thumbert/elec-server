@@ -1,6 +1,7 @@
 library ui.radio_group_input;
 
 import 'dart:html' as html;
+import 'dart:math' show Random;
 
 enum RadioGroupOrientation { horizontal, vertical }
 
@@ -24,18 +25,19 @@ class RadioGroupInput {
 
     var _name = labels.join(); // name of the radio group
     _buttons = List(labels.length);
+    var rand = Random();
 
     if (orientation == RadioGroupOrientation.horizontal) {
       for (var i = 0; i < labels.length; i++) {
         _buttons[i] = html.RadioButtonInputElement()
           ..name = _name
-          ..id = labels[i];
+          ..id = '__rg__${labels[i]}__${rand.nextInt(100000)}';
         if (i == 0) _buttons[0].checked = true;
         _wrapper.children.add(_buttons[i]);
         _wrapper.children.add(html.LabelElement()
           ..setAttribute('style', 'margin-left: 8px; margin-right: 8px;')
           ..text = labels[i]
-          ..htmlFor = labels[i]);
+          ..htmlFor = _buttons[i].id);
       }
     } else {
       _divs = List(labels.length);
@@ -55,11 +57,10 @@ class RadioGroupInput {
       }
     }
 
-
     wrapper.children.add(_wrapper);
   }
 
-  String get value =>_buttons.firstWhere((b) => b.checked).id;
+  String get value => labels[_buttons.indexWhere((b) => b.checked)];
 
   /// trigger a change
   onChange(Function x) {
