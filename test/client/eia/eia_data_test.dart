@@ -28,8 +28,7 @@ tests() async {
       expect(aux.containsKey('data'), true);
       expect((aux['data'] as List).length > 400, true);
       var ts = processSeries(aux);
-      var week = Interval(TZDateTime.utc(2018,12,15), TZDateTime.utc(2018,12,22));
-      expect(ts.window(week).first.value, 2725);
+      expect(ts.observationAt(Date(2018,12,21)).value, 2725);
       //ts.sublist(460).forEach(print);
     });
   });

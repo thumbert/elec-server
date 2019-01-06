@@ -61,22 +61,14 @@ class EiaApi {
 
 
 /// Create a timeseries from the EIA series data.
+/// Note that input [data] has most recent data first, so data needs
+/// to be reversed.
 TimeSeries<num> processSeries(Map<String,dynamic> data) {
   var ts = TimeSeries<num>();
   var xs = data['data'] as List;
   var n = xs.length;
-  Date start, end;
-  if (data['f'] == 'W') {
-    // frequency of data is weekly
-    for (int i=n-1; i>=0; i--) {
-      if (i == n-1) {
-        start = Date.parse(xs[n-1][0]).subtract(7);
-      } else {
-        start = end;
-      }
-      end = Date.parse(xs[i][0]);
-      ts.add(IntervalTuple(Interval(start.end, end.end), xs[i][1]));
-    }
+  for (int i=n-1; i>=0; i--) {
+    ts.add(IntervalTuple(Date.parse(xs[i][0]), xs[i][1]));
   }
   return ts;
 }
