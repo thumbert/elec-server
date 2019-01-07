@@ -1,7 +1,6 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
 
-
 class HtmlTable {
   Element tableWrapper;
   List<Map<String,dynamic>> data;
@@ -15,10 +14,15 @@ class HtmlTable {
   /// A simple html table with sorting.
   /// The [options] Map can be used to specify a format function for a
   /// given column, e.g. {'columnName': {'valueFormat': (num x) => x.round()}}
-  /// By default the table has column names.
-  /// <p>If you don't want column names, use {'makeHeader': false}, the default
+  ///
+  /// By default the table has column names taken from the first data row.
+  /// If you don't want column names, use {'makeHeader': false}, the default
   ///   is [true].
   ///
+  /// In case of incomplete data (missing cells) you can specify the table 
+  /// columns with options['columnNames'] = <String>[...].  Missing data 
+  /// is rendered as a blank. 
+  /// 
   /// To add row numbers, use {'rowNumbers': true}, the default is false;
   ///
   HtmlTable(this.tableWrapper, this.data, {this.options}) {
@@ -32,8 +36,13 @@ class HtmlTable {
       }
     }
 
-    /// Get the column names from the keys of the first element
-    _columnNames = data.first.keys.toList();
+    if (options.containsKey('columnNames')) {
+      _columnNames = options['columnNames'];
+    } else {
+      /// Get the column names from the keys of the first element
+      _columnNames = data.first.keys.toList();
+    }
+    
     _tableHeaders = List<Element>(_columnNames.length);
     _sortDirection = List<int>(_columnNames.length);
     _makeTable();
@@ -57,15 +66,19 @@ class HtmlTable {
     // make the table body
     var tBody = table.createTBody();
     for (int r=0; r<data.length; r++) {
-      List values = data[r].values.toList();
       var tRow = tBody.insertRow(r);
       for (int j=0; j<_columnNames.length; j++) {
-        if (options.containsKey(_columnNames[j]) && (options[_columnNames[j]].containsKey('valueFormat'))) {
-          var aux = options[_columnNames[j]]['valueFormat'](values[j]);
-          tRow..insertCell(j).text = aux.toString();
-        } else {
-          tRow..insertCell(j).text = values[j].toString();
+        var name = _columnNames[j];
+        String value = '';
+        if (data[r].containsKey(name)) {
+          if (options.containsKey(name) && (options[name].containsKey('valueFormat'))) {
+            value = options[name]['valueFormat'](data[r][name]);
+          } else {
+            value = data[r][name].toString();
+          }
         }
+        //print('row: $r, column: $name, value: $value');
+        tRow..insertCell(j).text = value;
       }
     }
 
@@ -90,4 +103,6 @@ class HtmlTable {
   }
 
 }
+
+
 
