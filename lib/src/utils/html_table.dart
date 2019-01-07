@@ -10,25 +10,32 @@ class HtmlTable {
   List<Element> _tableHeaders;
   List<String> _columnNames;
   List<int> _sortDirection;
+  Map<String,Function> _valueFormat = {};
 
   /// A simple html table with sorting.
-  /// The [options] Map can be used to specify a format function for a
-  /// given column, e.g. {'columnName': {'valueFormat': (num x) => x.round()}}
+  ///
+  /// The [options] Map can be used to customize the table appearance.
+  ///
+  /// Set options['format'] to specify a format function for a
+  /// given column, e.g. 
+  /// {'format': {'columnName': {'valueFormat': (num x) => x.round()}}}
   ///
   /// By default the table has column names taken from the first data row.
-  /// If you don't want column names, use {'makeHeader': false}, the default
-  ///   is [true].
+  /// If you don't want column names, use options['makeHeader'] = false,
+  /// the default value is [true].
   ///
-  /// In case of incomplete data (missing cells) you can specify the table 
-  /// columns with options['columnNames'] = <String>[...].  Missing data 
-  /// is rendered as a blank. 
-  /// 
-  /// To add row numbers, use {'rowNumbers': true}, the default is false;
+  /// In case of incomplete data (missing cells) you can specify the table
+  /// columns with options['columnNames'] = <String>[...].  Missing data
+  /// is rendered as a blank.
+  ///
+  /// To add row numbers, use options['rowNumbers'] = true, the default is
+  /// false.
   ///
   HtmlTable(this.tableWrapper, this.data, {this.options}) {
     options ??= <String,dynamic>{};
     options.putIfAbsent('makeHeader', () => true);
     options.putIfAbsent('rowNumbers', () => false);
+    options.putIfAbsent('format', () => {});
 
     if (options['rowNumbers']) {
       for (int i=0; i<data.length; i++) {
@@ -42,9 +49,21 @@ class HtmlTable {
       /// Get the column names from the keys of the first element
       _columnNames = data.first.keys.toList();
     }
-    
+
     _tableHeaders = List<Element>(_columnNames.length);
     _sortDirection = List<int>(_columnNames.length);
+
+    if (options.containsKey('format')) {
+      var aux = options['format'] as Map;
+      for (var name in _columnNames) {
+        if (aux.containsKey(name)) {
+          aux = aux[name] as Map;
+          if (aux.containsKey('valueFormat'))
+            _valueFormat[name] = aux['valueFormat'];
+        }
+      }
+    }
+
     _makeTable();
   }
 
@@ -63,6 +82,7 @@ class HtmlTable {
       _tableHeaders[i].onClick.listen((e) => _sortByColumn(i));
       headerRow.nodes.add(_tableHeaders[i]);
     }
+
     // make the table body
     var tBody = table.createTBody();
     for (int r=0; r<data.length; r++) {
@@ -71,13 +91,12 @@ class HtmlTable {
         var name = _columnNames[j];
         String value = '';
         if (data[r].containsKey(name)) {
-          if (options.containsKey(name) && (options[name].containsKey('valueFormat'))) {
-            value = options[name]['valueFormat'](data[r][name]);
+          if (_valueFormat.containsKey(name)) {
+            value = _valueFormat[name](data[r][name]);
           } else {
             value = data[r][name].toString();
           }
         }
-        //print('row: $r, column: $name, value: $value');
         tRow..insertCell(j).text = value;
       }
     }
@@ -103,6 +122,7 @@ class HtmlTable {
   }
 
 }
+
 
 
 
