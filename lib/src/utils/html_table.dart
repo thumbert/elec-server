@@ -57,9 +57,9 @@ class HtmlTable {
       var aux = options['format'] as Map;
       for (var name in _columnNames) {
         if (aux.containsKey(name)) {
-          aux = aux[name] as Map;
-          if (aux.containsKey('valueFormat'))
-            _valueFormat[name] = aux['valueFormat'];
+          var bux = aux[name] as Map;
+          if (bux.containsKey('valueFormat'))
+            _valueFormat[name] = bux['valueFormat'];
         }
       }
     }
