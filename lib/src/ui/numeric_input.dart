@@ -22,8 +22,8 @@ class NumericInput {
     var _wrapper = new html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
     _wrapper.children.add(new html.LabelElement()
-      ..text = '$name'
-      ..setAttribute('style', 'margin-left: 15px'));
+      ..text = '$name';
+      //..setAttribute('style', 'margin-left: 15px'));
     _textInput = new html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..placeholder = aux
