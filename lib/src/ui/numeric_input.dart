@@ -7,6 +7,7 @@ class NumericInput {
   html.TextInputElement _textInput;
   String name;
   num defaultValue;
+  String thousandSeparator;
 
   /// A numeric input with a label.
   ///
@@ -14,7 +15,7 @@ class NumericInput {
   ///
   /// Need to trigger an action onDataChange.
   NumericInput(this.wrapper, this.name,
-      {int size: 5, this.defaultValue}) {
+      {int size: 5, this.defaultValue, this.thousandSeparator: ','}) {
 
     String aux = '';
     if (defaultValue != null) aux = defaultValue.toString();
@@ -39,7 +40,7 @@ class NumericInput {
     if (_textInput.value.isEmpty)
       aux = defaultValue;
     else
-      aux = num.parse(_textInput.value);
+      aux = num.parse(_textInput.value.replaceAll(thousandSeparator, ''));
     return aux;
   }
 

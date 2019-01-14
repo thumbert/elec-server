@@ -29,6 +29,14 @@ main() async {
   numericInput
       .onChange((e) => messageNi.text = 'You entered ${numericInput.value}');
 
+  /// numeric input with thousand separator
+  var messageNic = querySelector('#numeric-input-message-comma');
+  var numericInputC = NumericInput(querySelector('#numeric-input-comma'),
+      'Property value', size: 9);
+  numericInputC
+      .onChange((e) => messageNic.text = 'You entered ${numericInputC.value}');
+
+
   /// numeric range
   var messageNr = querySelector('#numeric-range-message');
   var numericRange =
