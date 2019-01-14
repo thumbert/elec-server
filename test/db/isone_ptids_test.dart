@@ -20,7 +20,7 @@ downloadFile() async {
 
   var archive = new PtidArchive(config: config, dir: dir);
   String url =
-      'https://www.iso-ne.com/static-assets/documents/2017/08/pnode_table_2017_08_03.xls';
+      'https://www.iso-ne.com/static-assets/documents/2019/01/2.6.19_pnode_table_2019_01_10.xls';
   archive.downloadFile(url);
 }
 
@@ -34,7 +34,7 @@ ingestionTest() async {
   var archive = new PtidArchive(config: config);
   //await archive.setup();
 
-  File file = new File(dir + 'pnode_table_2018_09_11.xlsx');
+  File file = new File(dir + 'pnode_table_2019_01_10.xlsx');
   await archive.db.open();
   await archive.insertMongo(file);
   await archive.db.close();
@@ -97,7 +97,14 @@ apiTest() async {
       expect(me, {'ptid': 4001, 'name': '.Z.MAINE', 'spokenName': 'MAINE',
         'type': 'zone'});
     });
-
+    test('Get the list of available dates for one ptid (http)', () async {
+      var url = 'http://localhost:8080/ptids/v1/ptid/10348';
+      var res = await get(url);
+      var aux = json.decode(res.body);
+      var data = json.decode(aux['result']) as List;
+      expect(data is List, true);
+      expect(data.map((e) => e['asOfDate']).contains('2019-01-10'), false);
+    });
   });
 }
 
@@ -106,7 +113,7 @@ main() async {
 
   //await ingestionTest();
 
-//  await apiTest();
+  await apiTest();
 
 
 }

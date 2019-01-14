@@ -39,6 +39,19 @@ class ApiPtids {
     return new ApiResponse()..result = json.encode(data);
   }
 
+  @ApiMethod(path: 'ptid/{ptid}')
+  /// Show the days when this ptid is in the database.  Nodes are
+  /// retired from time to time.
+  Future<ApiResponse> apiPtid(int ptid) async {
+    SelectorBuilder query = where;
+    query = query.eq('ptid', ptid);
+    query = query.fields(['asOfDate']);
+    query = query.excludeFields(['_id']);
+    var data = await coll.find(query).toList();
+    return new ApiResponse()..result = json.encode(data);
+  }
+
+
   @ApiMethod(path: 'dates')
   Future<List<String>> getAvailableAsOfDates() async {
     Map data = await coll.distinct('asOfDate');
