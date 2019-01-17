@@ -8,7 +8,6 @@ class CategoricalDropdownCheckboxFilter {
   html.SelectElement _selector;
   html.CheckboxInputElement _checkboxInputElement;
   String name;
-  bool selected;
 
   /// A dropdown filter for a categorical variable, for example a list of
   /// bucket values, or zone names, or option types, etc.,

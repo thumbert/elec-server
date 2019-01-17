@@ -55,12 +55,6 @@ registerApis() async {
 
 
 main() async {
-//  Logger.root.level = Level.SEVERE;
-//  Logger.root.onRecord.listen(new SyncFileLoggingHandler('myLogFile.txt'));
-//  if (stdout.hasTerminal)
-//    Logger.root.onRecord.listen(new LogPrintHandler());
-
-//  initializeTimeZone( getLocationTzdb() );
   await initializeTimeZone();
 
   await registerApis();

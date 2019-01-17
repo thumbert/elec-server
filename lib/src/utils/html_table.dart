@@ -1,5 +1,8 @@
+library utils.html_table;
+
 import 'dart:html';
-import 'package:intl/intl.dart';
+
+/// See the example in web/html_table for how to set the style of the table.
 
 class HtmlTable {
   Element tableWrapper;

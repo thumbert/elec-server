@@ -6,7 +6,6 @@ class CategoricalDropdownFilter {
   html.Element wrapper;
   html.SelectElement _selector;
   String name;
-  bool selected;
 
   /// A dropdown filter for a categorical variable, for example a list of
   /// bucket values, or zone names, or option types, etc.,

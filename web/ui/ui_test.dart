@@ -5,6 +5,7 @@ import 'package:elec_server/src/ui/categorical_dropdown_filter.dart';
 import 'package:elec_server/src/ui/numeric_input.dart';
 import 'package:elec_server/src/ui/numeric_range_filter.dart';
 import 'package:elec_server/src/ui/radio_group_input.dart';
+import 'package:elec_server/src/ui/selectable_list.dart';
 
 main() async {
   var messageCdcf =
@@ -31,11 +32,11 @@ main() async {
 
   /// numeric input with thousand separator
   var messageNic = querySelector('#numeric-input-message-comma');
-  var numericInputC = NumericInput(querySelector('#numeric-input-comma'),
-      'Property value', size: 9);
+  var numericInputC = NumericInput(
+      querySelector('#numeric-input-comma'), 'Property value',
+      size: 9);
   numericInputC
       .onChange((e) => messageNic.text = 'You entered ${numericInputC.value}');
-
 
   /// numeric range
   var messageNr = querySelector('#numeric-range-message');
@@ -49,4 +50,12 @@ main() async {
   var radioGroup =
       RadioGroupInput(querySelector('#radio-group'), ['Federer', 'Nadal']);
   radioGroup.onChange((e) => message.text = 'You selected ${radioGroup.value}');
+
+  /// a selectable list
+  var messageSl = querySelector('#selectable-list-message');
+  var selectableList = SelectableList(querySelector('#selectable-list'),
+      ['Apple', 'Banana', 'Lemon', 'Orange', 'Strawberry', 'Watermelon']);
+  selectableList.onChange((e) {
+    messageSl.text = 'You selected ${selectableList.selected.join(', ')}';
+  });
 }
