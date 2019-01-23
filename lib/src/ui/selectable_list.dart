@@ -4,7 +4,8 @@ import 'dart:html';
 
 class SelectableList {
   Element wrapper;
-  List<String> values;
+  List<String> _values;
+  String highlightColor;
 
   List<bool> _onOff; // keep track of which elements are selected
   List<int> _ind;
@@ -13,25 +14,44 @@ class SelectableList {
 
   /// A simple vertical list of selectable values.  Selection is done by
   /// clicking on the element, if you click again, the element is deselected.
-  SelectableList(this.wrapper, this.values) {
+  ///
+  SelectableList(this.wrapper, List<String> values, {String style: 'width: 200px;',
+    this.highlightColor: '#e6ffe6'}) {
 
-    int n = values.length;
+    _listWrapper = DivElement()..setAttribute('style', style);
 
-    _onOff = List.filled(n, false);
-    _ind = List.generate(n, (i) => i);
+    this.values = values;
 
-    _listWrapper = DivElement();
+    wrapper.children.add(_listWrapper);
+  }
+
+  List<String> get values => _values;
+
+  /// Set the values for the list.  It allows you to rebuild the list given an
+  /// external event.
+  set values(List<String> xs) {
+    _values = List.from(xs);
+    _onOff = List.filled(xs.length, false);
+    _ind = List.generate(xs.length, (i) => i);
+    var _wId = wrapper.id;  // to create unique ids
+
+    _listWrapper.children.clear();
     _divs = <DivElement>[];
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<_values.length; i++) {
+      print('adding ${_values[i]}');
       var aux = DivElement()
-        ..text = values[i]
-        ..id = '__sl_$i'
+        ..text = _values[i]
+        ..id = '__sl_${_wId}_$i'
         ..onClick.listen((e) => _select1(i));
+      aux.onMouseOver.listen((e) {
+        if (!_onOff[i]) aux.style.backgroundColor='#f5f5f5';
+      });
+      aux.onMouseLeave.listen((e){
+        if (!_onOff[i]) aux.style.backgroundColor=null;
+      });
       _divs.add(aux);
     }
     _listWrapper.children.addAll(_divs);
-
-    wrapper.children.add(_listWrapper);
   }
 
   /// keep track of selections
@@ -39,7 +59,7 @@ class SelectableList {
     _onOff[i] = !_onOff[i];
     if (_onOff[i]) {
       // need to highlight
-      _divs[i].style.backgroundColor = 'yellow';
+      _divs[i].style.backgroundColor = highlightColor;
     } else {
       // return it to normal
       _divs[i].style.backgroundColor = null;
@@ -50,11 +70,10 @@ class SelectableList {
 
   /// Get the selected values.
   List<String> get selected =>
-      _ind.where((i) => _onOff[i]).map((i) => values[i]).toList();
+      _ind.where((i) => _onOff[i]).map((i) => _values[i]).toList();
 
   /// Listen to changes
   onChange(Function x) {
     _listWrapper.onChange.listen(x);
   }
-
 }
