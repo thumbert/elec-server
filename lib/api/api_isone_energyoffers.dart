@@ -25,7 +25,7 @@ class DaEnergyOffers {
     location = getLocation('US/Eastern');
 
     /// create an ordering by price and assetId to use when sorting the stack
-    var natural = Ordering.natural();
+    var natural = Ordering.natural<num>();
     var byPrice = natural.onResultOf<Map>((Map e) => e['price']);
     var byAssetId = natural.onResultOf<Map>((Map e) => e['assetId']);
     ordering = byPrice.compound(byAssetId);
