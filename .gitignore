@@ -8,6 +8,7 @@ doc/api/
 .settings
 .pub/
 build/
+lib/src/generated/
 packages
 pubspec.lock
 .dart_tool/

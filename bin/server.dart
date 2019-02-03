@@ -29,18 +29,18 @@ registerApis() async {
 
   Db db2 = new Db('mongodb://$host/isone');
   await db2.open();
-  _apiServer.addApi( new ApiPtids(db2) );
+  _apiServer.addApi(ApiPtids(db2));
   _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
 
   Db db3 = new Db('mongodb://$host/isoexpress');
   await db3.open();
-  _apiServer.addApi( new DaLmp(db3) );
+  _apiServer.addApi(DaLmp(db3) );
 //  _apiServer.addApi( new RtLmp(db3) );
-  _apiServer.addApi( new BindingConstraints(db3) );
-  _apiServer.addApi( new DaEnergyOffers(db3) );
-  _apiServer.addApi( new SccReport(db3) );
-  _apiServer.addApi( new DaDemandBids(db3) );
-  _apiServer.addApi( new SystemDemand(db3) );
+  _apiServer.addApi(BindingConstraints(db3) );
+  _apiServer.addApi(DaEnergyOffers(db3) );
+  _apiServer.addApi(SccReport(db3) );
+  _apiServer.addApi(DaDemandBids(db3) );
+  _apiServer.addApi(SystemDemand(db3) );
 //  _apiServer.addApi( new ZonalDemand(db3) );
 //
   Db db4 = new Db('mongodb://$host/eversource');
