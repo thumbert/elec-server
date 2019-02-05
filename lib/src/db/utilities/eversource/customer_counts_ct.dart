@@ -36,7 +36,7 @@ class EversourceCtCustomerCountsArchive {
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.length == 0) return Future.value(0);
     var month = data.first['month'];
-    await dbConfig.coll.remove({'region': 'ct', 'month': month});
+    await dbConfig.coll.remove({'region': 'CT', 'month': month});
     try {
       await dbConfig.coll.insertAll(data);
     } catch (e) {
@@ -96,7 +96,7 @@ class EversourceCtCustomerCountsArchive {
     /// add the month, region too
     var month = parseMonth(path.basename(file.path));
     res = res.map((e) {
-      return <String,dynamic>{'region': 'ct', 'month': month, 'zone': 'ct'}..addAll(e);
+      return <String,dynamic>{'region': 'CT', 'month': month, 'zone': 'ct'}..addAll(e);
     }).toList();
 
     return res;
