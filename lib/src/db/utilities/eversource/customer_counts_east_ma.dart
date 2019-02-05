@@ -79,7 +79,7 @@ class EversourceEastMaCustomerCountsArchive {
       var rows = _decoder.tables[sheet].rows;
       // 3 columns of data
       for (int i = 2; i < rows.length; i++) {
-        if (rows[i][0] != null) {
+        if (rows[i][0] != null && rows[i][2] is num) {
           if (zone == null || service == null)
             throw 'Can\'t parse the zone and service type.';
           var aux = <String, dynamic>{
