@@ -96,7 +96,7 @@ class EversourceCtCustomerCountsArchive {
     /// add the month, region too
     var month = parseMonth(path.basename(file.path));
     res = res.map((e) {
-      return <String,dynamic>{'region': 'CT', 'month': month, 'zone': 'CT'}..addAll(e);
+      return <String,dynamic>{'region': 'ct', 'month': month, 'zone': 'ct'}..addAll(e);
     }).toList();
 
     return res;
