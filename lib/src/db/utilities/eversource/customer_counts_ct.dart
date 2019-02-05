@@ -36,7 +36,7 @@ class EversourceCtCustomerCountsArchive {
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.length == 0) return Future.value(0);
     var month = data.first['month'];
-    await dbConfig.coll.remove({'region': 'CT', 'month': month});
+    await dbConfig.coll.remove({'region': 'ct', 'month': month});
     try {
       await dbConfig.coll.insertAll(data);
     } catch (e) {
