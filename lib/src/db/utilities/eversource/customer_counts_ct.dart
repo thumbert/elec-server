@@ -170,6 +170,9 @@ String getFilename(String link) {
 String parseMonth(String filename) {
   var aux = filename.replaceAll('customer-count-report-', '');
   aux = aux.replaceAll('customer-report-', '');
+  if (aux == 'october-2019.xlsx') // messed up file on the website
+    return '2018-10';
+  
   var reg = RegExp('(.*).xlsx');
   var matches = reg.allMatches(aux);
   var match = matches.elementAt(0);
