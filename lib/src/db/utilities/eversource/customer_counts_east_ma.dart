@@ -87,7 +87,7 @@ class EversourceEastMaCustomerCountsArchive {
             'month': month,
             'zone': zone,
             'service': service,
-            'rateClass': rows[i][0].toString().replaceAll(RegExp('\\s'), ''),
+            'rateClass': rows[i][0].toString().replaceAll(RegExp('\\s'), '').toLowerCase(),
             'customers': rows[i][1],
             'mwh': rows[i][2]/1000,
           };
