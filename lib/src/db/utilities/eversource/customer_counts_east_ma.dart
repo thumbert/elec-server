@@ -47,7 +47,7 @@ class EversourceEastMaCustomerCountsArchive {
       print(' XXXX ' + e.toString());
       return Future.value(1);
     }
-    print('--->  SUCCESS inserting month ${month}');
+    print('--->  SUCCESS Eversource East MA inserting month ${month}');
     return Future.value(0);
   }
 
