@@ -24,5 +24,25 @@ class Controller {
 
     ranges ??= <String,List<num>>{};
   }
+  
+  String toString() {
+    var out = '';
+    if (checkboxes.isNotEmpty)
+      out = out + 'checkboxes: ${checkboxes.join(',')}\n';
+    if (filters.isNotEmpty) {
+      out = out + 'filters:\n';
+      for (var e in filters.entries) {
+        out = out + '   ${e.key}: ${e.value}\n';
+      }
+    }
+    if (ranges.isNotEmpty) {
+      out = out + 'ranges:\n';
+      for (var e in filters.entries) {
+        out = out + '   ${e.key}: {min: ${e.value[0]}, max: ${e.value[1]}}\n';
+      }
+    }
+    return out;
+  }
+  
 }
 
