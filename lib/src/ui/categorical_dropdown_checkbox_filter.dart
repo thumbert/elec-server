@@ -48,7 +48,7 @@ class CategoricalDropdownCheckboxFilter {
 
   /// Set the values for this dropdown in case the data wasn't available at
   /// initialization
-  set values(List<String> xs) {
+  set values(Iterable<String> xs) {
     _selector.children.clear();
     xs.forEach((e) {
       _selector.children.add(html.OptionElement()
