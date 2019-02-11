@@ -34,6 +34,18 @@ class CategoricalDropdownFilter {
   }
 
   String get value => _selector.value;
+  
+  /// Set the values for this dropdown in case the data wasn't available at
+  /// initialization
+  set values(Iterable<String> xs) {
+    _selector.children.clear();
+    xs.forEach((e) {
+      _selector.children.add(html.OptionElement()
+        ..id = e
+        ..value = e
+        ..text = e);
+    });
+  }
 
   onChange(Function x) =>  _selector.onChange.listen(x);
 }
