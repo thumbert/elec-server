@@ -43,7 +43,7 @@ class EversourceCtCustomerCountsArchive {
       print(' XXXX ' + e.toString());
       return Future.value(1);
     }
-    print('--->  SUCCESS inserting month ${month}');
+    print('--->  SUCCESS Eversource CT inserting month ${month}');
     return Future.value(0);
   }
 
