@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
+import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/config.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';
@@ -14,16 +15,15 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 class DaDemandBidArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
+  Location location;
 
   DaDemandBidArchive({this.dbConfig, this.dir}) {
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
+    dbConfig ??= new ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isoexpress'
         ..collectionName = 'da_demand_bid';
-    }
-    if (dir == null)
-      dir = baseDir + 'PricingReports/DaDemandBid/Raw/';
+    dir ??= baseDir + 'PricingReports/DaDemandBid/Raw/';
+    location = getLocation('US/Eastern');
   }
   String reportName = 'Day-Ahead Energy Market Demand Historical Demand Bid Report';
   String getUrl(Date asOfDate) =>
@@ -44,26 +44,46 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     row['Bid ID'] = rows.first['Bid ID'];
 
     /// hourly info
-    row['hours'] = [];
+    row['hours'] = <Map<String,dynamic>>[];
     rows.forEach((Map hour) {
-      Map aux = {};
+      var aux = <String,dynamic>{};
       String he = stringHourEnding(hour['Hour']);
-      aux['hourBeginning'] = parseHourEndingStamp(hour['Day'], he);
+      var hb = parseHourEndingStamp(hour['Day'], he);
+      aux['hourBeginning'] = TZDateTime.fromMillisecondsSinceEpoch(location,
+          hb.millisecondsSinceEpoch).toIso8601String();
       /// add the non empty price/quantity pairs
-      var pricesHour = [];
-      var quantitiesHour = [];
+      var pricesHour = <num>[];
+      var quantitiesHour = <num>[];
       for (int i = 1; i <= 10; i++) {
         if (!(hour['Segment $i MW'] is num))
           break;
         quantitiesHour.add(hour['Segment $i MW']);
+        if (!(hour['Segment $i Price'] is num))
+          break;
         pricesHour.add(hour['Segment $i Price']);
       }
-      aux['price'] = pricesHour;
+      // fixed demand bids have no prices
+      if (pricesHour.isNotEmpty) aux['price'] = pricesHour;
       aux['quantity'] = quantitiesHour;
       row['hours'].add(aux);
     });
     return row;
   }
+
+  Future<int> insertData(List<Map<String, dynamic>> data) async {
+    if (data.length == 0) return Future.value(0);
+    var day = data.first['date'];
+    await dbConfig.coll.remove({'date': day});
+    try {
+      await dbConfig.coll.insertAll(data);
+    } catch (e) {
+      print(' XXXX ' + e.toString());
+      return Future.value(1);
+    }
+    print('--->  SUCCESS inserting masked DA Demand Bids for ${day}');
+    return Future.value(0);
+  }
+
 
   List<Map<String,dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
@@ -101,20 +121,6 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     await dbConfig.db.close();
   }
 
-  Future<Map<String,String>> lastDay() async {
-    List pipeline = [];
-    pipeline.add({'\$group': {
-      '_id': 0,
-      'lastDay': {'\$max': '\$date'}}});
-    Map res = await dbConfig.coll.aggregate(pipeline);
-    return {'lastDay': res['result'][0]['lastDay']};
-  }
-
-  /// return the last day of the fourth month before the current month.
-  Date lastDayAvailable() {
-    Month m3 = Month.current().subtract(3);
-    return new Date(m3.year, m3.month,1).previous;
-  }
   Future<Null> deleteDay(Date day) async {
     return await dbConfig.coll.remove(where.eq('date', day.toString()));
   }
@@ -123,8 +129,3 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
 }
 
 
-Map _groupBy(Iterable x, Function f) {
-  Map result = new Map();
-  x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
-  return result;
-}
