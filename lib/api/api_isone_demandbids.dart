@@ -303,6 +303,53 @@ class DaDemandBids {
   }
   
   
+  @ApiMethod(path: 'daily/incdec/mwh/byparticipant/start/{start}/end/{end}')
+  /// Get total daily MWh demand bids by participant between a start and end date.
+  Future<ApiResponse> dailyMwhIncDecByParticipant(
+      String start, String end) async {
+    List pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Location Type': {'\$eq': 'LOAD ZONE'},
+        'Bid Type': {
+          '\$in': ['INC', 'DEC']
+        }
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'participantId': '\$Masked Lead Participant ID',
+          'date': '\$date',
+          'Bid Type': '\$Bid Type',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'participantId': '\$_id.participantId',
+        'date': '\$_id.date',
+        'Bid Type': '\$_id.Bid Type',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+  
+  
 }
 
 /// the zones
