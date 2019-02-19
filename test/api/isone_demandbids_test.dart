@@ -46,6 +46,28 @@ ApiTest() async {
       var data = json.decode(aux.result);
       expect(data.length, 5);
     });
+    
+    test('get daily total inc/dec MWh', () async {
+      var start = '20170101';
+      var end = '20170102';
+      var aux = await api.dailyMwhIncDec(start, end);
+      var data = (json.decode(aux.result) as List).cast<Map>();
+      var dec1 = data.firstWhere((Map e) => e['Bid Type'] == 'DEC'
+          && e['date'] == '2017-01-01');
+      expect(dec1['MWh'], 20362.1);
+    });
+
+    test('get daily total inc/dec MWh by participant', () async {
+      var start = '20170101';
+      var end = '20170102';
+      var aux = await api.dailyMwhIncDecByParticipant(start, end);
+      var data = (json.decode(aux.result) as List).cast<Map>();
+      var dec1 = data.firstWhere((Map e) => e['Bid Type'] == 'INC'
+          && e['date'] == '2017-01-01' && e['participantId'] == 924442);
+      expect(dec1['MWh'], 19200);
+    });
+
+    
   });
 }
 
