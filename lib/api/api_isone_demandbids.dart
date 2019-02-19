@@ -258,6 +258,51 @@ class DaDemandBids {
     var res = await coll.aggregateToStream(pipeline).toList();
     return ApiResponse()..result = json.encode(res);
   }
+  
+  @ApiMethod(path: 'daily/mwh/incdec/start/{start}/end/{end}')
+  /// Get total daily MWh of inc/dec between a start and end date.
+  Future<ApiResponse> dailyMwhIncDec(
+      String start, String end) async {
+    var pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Bid Type': {
+          '\$in': ['DEC', 'INC']
+        }
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'date': '\$date',
+          'Bid Type': '\$Bid Type',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'date': '\$_id.date',
+        'Bid Type': '\$_id.Bid Type',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+  
+  
 }
 
 /// the zones
