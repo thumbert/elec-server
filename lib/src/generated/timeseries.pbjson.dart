@@ -49,16 +49,16 @@ const LmpComponent_Component$json = const {
   ],
 };
 
-const TimeInterval$json = const {
-  '1': 'TimeInterval',
+const IntervalType$json = const {
+  '1': 'IntervalType',
   '2': const [
-    const {'1': 'interval', '3': 1, '4': 1, '5': 14, '6': '.elec.TimeInterval.Interval', '10': 'interval'},
+    const {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.elec.IntervalType.Type', '10': 'type'},
   ],
-  '4': const [TimeInterval_Interval$json],
+  '4': const [IntervalType_Type$json],
 };
 
-const TimeInterval_Interval$json = const {
-  '1': 'Interval',
+const IntervalType_Type$json = const {
+  '1': 'Type',
   '2': const [
     const {'1': 'IRREGULAR', '2': 0},
     const {'1': 'HOURLY', '2': 1},
@@ -73,7 +73,7 @@ const NumericTimeSeries$json = const {
   '2': const [
     const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'tzLocation', '3': 2, '4': 1, '5': 9, '10': 'tzLocation'},
-    const {'1': 'timeInterval', '3': 3, '4': 1, '5': 11, '6': '.elec.TimeInterval', '10': 'timeInterval'},
+    const {'1': 'timeInterval', '3': 3, '4': 1, '5': 11, '6': '.elec.IntervalType', '10': 'timeInterval'},
     const {'1': 'observation', '3': 4, '4': 3, '5': 11, '6': '.elec.NumericTimeSeries.Observation', '10': 'observation'},
   ],
   '3': const [NumericTimeSeries_Observation$json],

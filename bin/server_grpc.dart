@@ -1,5 +1,4 @@
 
-
 import 'package:fixnum/fixnum.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
@@ -30,7 +29,7 @@ class LmpService extends LmpServiceBase {
     query = query.lte('date', end.toString());
     query = query.fields(['hourBeginning', component]);
     var data = collection.find(query);
-    var hourly = TimeInterval()..interval = TimeInterval_Interval.HOURLY;
+    var hourly = IntervalType()..type = IntervalType_Type.HOURLY;
     var out = NumericTimeSeries()
       ..name = 'isone_da_${component}_$ptid'
       ..tzLocation = 'US/Eastern'

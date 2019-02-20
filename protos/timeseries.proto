@@ -37,21 +37,21 @@ message LmpComponent {
     Component component = 1;
 }
 
-message TimeInterval {
-    enum Interval {
+message IntervalType {
+    enum Type {
         IRREGULAR = 0;
         HOURLY = 1;
         DAILY = 2;
         MONTHLY = 3;
         MIN15 = 4;
     }
-    Interval interval = 1;
+    Type type = 1;
 }
 
 message NumericTimeSeries {
     string name = 1;
     string tzLocation = 2;
-    TimeInterval timeInterval = 3;
+    IntervalType timeInterval = 3;
     message Observation {
         int64 start = 1;
         double value = 2;

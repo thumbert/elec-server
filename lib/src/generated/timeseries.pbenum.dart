@@ -48,14 +48,14 @@ class LmpComponent_Component extends $pb.ProtobufEnum {
   const LmpComponent_Component._(int v, String n) : super(v, n);
 }
 
-class TimeInterval_Interval extends $pb.ProtobufEnum {
-  static const TimeInterval_Interval IRREGULAR = const TimeInterval_Interval._(0, 'IRREGULAR');
-  static const TimeInterval_Interval HOURLY = const TimeInterval_Interval._(1, 'HOURLY');
-  static const TimeInterval_Interval DAILY = const TimeInterval_Interval._(2, 'DAILY');
-  static const TimeInterval_Interval MONTHLY = const TimeInterval_Interval._(3, 'MONTHLY');
-  static const TimeInterval_Interval MIN15 = const TimeInterval_Interval._(4, 'MIN15');
+class IntervalType_Type extends $pb.ProtobufEnum {
+  static const IntervalType_Type IRREGULAR = const IntervalType_Type._(0, 'IRREGULAR');
+  static const IntervalType_Type HOURLY = const IntervalType_Type._(1, 'HOURLY');
+  static const IntervalType_Type DAILY = const IntervalType_Type._(2, 'DAILY');
+  static const IntervalType_Type MONTHLY = const IntervalType_Type._(3, 'MONTHLY');
+  static const IntervalType_Type MIN15 = const IntervalType_Type._(4, 'MIN15');
 
-  static const List<TimeInterval_Interval> values = const <TimeInterval_Interval> [
+  static const List<IntervalType_Type> values = const <IntervalType_Type> [
     IRREGULAR,
     HOURLY,
     DAILY,
@@ -63,12 +63,12 @@ class TimeInterval_Interval extends $pb.ProtobufEnum {
     MIN15,
   ];
 
-  static final Map<int, TimeInterval_Interval> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static TimeInterval_Interval valueOf(int value) => _byValue[value];
-  static void $checkItem(TimeInterval_Interval v) {
-    if (v is! TimeInterval_Interval) $pb.checkItemFailed(v, 'TimeInterval_Interval');
+  static final Map<int, IntervalType_Type> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static IntervalType_Type valueOf(int value) => _byValue[value];
+  static void $checkItem(IntervalType_Type v) {
+    if (v is! IntervalType_Type) $pb.checkItemFailed(v, 'IntervalType_Type');
   }
 
-  const TimeInterval_Interval._(int v, String n) : super(v, n);
+  const IntervalType_Type._(int v, String n) : super(v, n);
 }
 

@@ -1,13 +1,16 @@
 import 'dart:html';
 
+import 'package:timezone/browser.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_checkbox_filter.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_filter.dart';
 import 'package:elec_server/src/ui/numeric_input.dart';
 import 'package:elec_server/src/ui/numeric_range_filter.dart';
 import 'package:elec_server/src/ui/radio_group_input.dart';
+import 'package:elec_server/src/ui/term_input.dart';
 import 'package:elec_server/src/ui/selectable_list.dart';
 
 main() async {
+  initializeTimeZone();
   var messageCdcf =
       querySelector('#categorical-dropdown-checkbox-filter-message');
   var cdcf = CategoricalDropdownCheckboxFilter(
@@ -50,6 +53,12 @@ main() async {
   var radioGroup =
       RadioGroupInput(querySelector('#radio-group'), ['Federer', 'Nadal']);
   radioGroup.onChange((e) => message.text = 'You selected ${radioGroup.value}');
+
+  /// a term input
+  var messageTi = querySelector('#term-input-message');
+  var termInput = TermInput(querySelector('#term-input'), defaultValue: 'Jan19');
+  termInput.onChange((e) => messageTi.text = 'You typed ${termInput.value}');
+
 
   /// a selectable list
   var messageSl = querySelector('#selectable-list-message');

@@ -119,31 +119,31 @@ class LmpComponent extends $pb.GeneratedMessage {
   void clearComponent() => clearField(1);
 }
 
-class TimeInterval extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('TimeInterval', package: const $pb.PackageName('elec'))
-    ..e<TimeInterval_Interval>(1, 'interval', $pb.PbFieldType.OE, TimeInterval_Interval.IRREGULAR, TimeInterval_Interval.valueOf, TimeInterval_Interval.values)
+class IntervalType extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('IntervalType', package: const $pb.PackageName('elec'))
+    ..e<IntervalType_Type>(1, 'type', $pb.PbFieldType.OE, IntervalType_Type.IRREGULAR, IntervalType_Type.valueOf, IntervalType_Type.values)
     ..hasRequiredFields = false
   ;
 
-  TimeInterval() : super();
-  TimeInterval.fromBuffer(List<int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  TimeInterval.fromJson(String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
-  TimeInterval clone() => new TimeInterval()..mergeFromMessage(this);
-  TimeInterval copyWith(void Function(TimeInterval) updates) => super.copyWith((message) => updates(message as TimeInterval));
+  IntervalType() : super();
+  IntervalType.fromBuffer(List<int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
+  IntervalType.fromJson(String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
+  IntervalType clone() => new IntervalType()..mergeFromMessage(this);
+  IntervalType copyWith(void Function(IntervalType) updates) => super.copyWith((message) => updates(message as IntervalType));
   $pb.BuilderInfo get info_ => _i;
-  static TimeInterval create() => new TimeInterval();
-  TimeInterval createEmptyInstance() => create();
-  static $pb.PbList<TimeInterval> createRepeated() => new $pb.PbList<TimeInterval>();
-  static TimeInterval getDefault() => _defaultInstance ??= create()..freeze();
-  static TimeInterval _defaultInstance;
-  static void $checkItem(TimeInterval v) {
-    if (v is! TimeInterval) $pb.checkItemFailed(v, _i.qualifiedMessageName);
+  static IntervalType create() => new IntervalType();
+  IntervalType createEmptyInstance() => create();
+  static $pb.PbList<IntervalType> createRepeated() => new $pb.PbList<IntervalType>();
+  static IntervalType getDefault() => _defaultInstance ??= create()..freeze();
+  static IntervalType _defaultInstance;
+  static void $checkItem(IntervalType v) {
+    if (v is! IntervalType) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
-  TimeInterval_Interval get interval => $_getN(0);
-  set interval(TimeInterval_Interval v) { setField(1, v); }
-  bool hasInterval() => $_has(0);
-  void clearInterval() => clearField(1);
+  IntervalType_Type get type => $_getN(0);
+  set type(IntervalType_Type v) { setField(1, v); }
+  bool hasType() => $_has(0);
+  void clearType() => clearField(1);
 }
 
 class NumericTimeSeries_Observation extends $pb.GeneratedMessage {
@@ -183,7 +183,7 @@ class NumericTimeSeries extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = new $pb.BuilderInfo('NumericTimeSeries', package: const $pb.PackageName('elec'))
     ..aOS(1, 'name')
     ..aOS(2, 'tzLocation')
-    ..a<TimeInterval>(3, 'timeInterval', $pb.PbFieldType.OM, TimeInterval.getDefault, TimeInterval.create)
+    ..a<IntervalType>(3, 'timeInterval', $pb.PbFieldType.OM, IntervalType.getDefault, IntervalType.create)
     ..pp<NumericTimeSeries_Observation>(4, 'observation', $pb.PbFieldType.PM, NumericTimeSeries_Observation.$checkItem, NumericTimeSeries_Observation.create)
     ..hasRequiredFields = false
   ;
@@ -213,8 +213,8 @@ class NumericTimeSeries extends $pb.GeneratedMessage {
   bool hasTzLocation() => $_has(1);
   void clearTzLocation() => clearField(2);
 
-  TimeInterval get timeInterval => $_getN(2);
-  set timeInterval(TimeInterval v) { setField(3, v); }
+  IntervalType get timeInterval => $_getN(2);
+  set timeInterval(IntervalType v) { setField(3, v); }
   bool hasTimeInterval() => $_has(2);
   void clearTimeInterval() => clearField(3);
 

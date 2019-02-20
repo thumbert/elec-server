@@ -38,7 +38,6 @@ class SelectableList {
     _listWrapper.children.clear();
     _divs = <DivElement>[];
     for (int i=0; i<_values.length; i++) {
-      print('adding ${_values[i]}');
       var aux = DivElement()
         ..text = _values[i]
         ..id = '__sl_${_wId}_$i'
