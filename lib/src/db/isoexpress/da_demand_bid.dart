@@ -1,131 +1,417 @@
-library db.isoexpress.da_demand_bid;
+library api.isone_demandbids;
 
-import 'dart:io';
 import 'dart:async';
-import 'package:collection/collection.dart';
+import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:date/date.dart';
+import 'package:rpc/rpc.dart';
 import 'package:timezone/standalone.dart';
-import 'package:elec_server/src/db/config.dart';
-import '../lib_mis_reports.dart' as mis;
-import '../lib_iso_express.dart';
-import '../converters.dart';
+import 'package:intl/intl.dart';
+import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
+import 'package:elec_server/src/utils/api_response.dart';
 
-class DaDemandBidArchive extends DailyIsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
+@ApiClass(name: 'da_demand_bids', version: 'v1')
+class DaDemandBids {
+  DbCollection coll;
   Location location;
+  final DateFormat fmt = DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
+  String collectionName = 'da_demand_bid';
 
-  DaDemandBidArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'da_demand_bid';
-    dir ??= baseDir + 'PricingReports/DaDemandBid/Raw/';
+  DaDemandBids(Db db) {
+    coll = db.collection(collectionName);
     location = getLocation('US/Eastern');
   }
-  String reportName = 'Day-Ahead Energy Market Demand Historical Demand Bid Report';
-  String getUrl(Date asOfDate) =>
-      'https://www.iso-ne.com/static-transform/csv/histRpts/da-dmd-bid/' +
-          'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.csv';
-  File getFilename(Date asOfDate) =>
-      new File(dir + 'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.csv');
 
-  /// [rows] has the data for all the hours of the day for one location id
-  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
-    var row = <String,dynamic>{};
-    /// daily info
-    row['date'] = formatDate(rows.first['Day']);
-    row['Masked Lead Participant ID'] = rows.first['Masked Lead Participant ID'];
-    row['Masked Location ID'] = rows.first['Masked Location ID'];
-    row['Location Type'] = rows.first['Location Type'];
-    row['Bid Type'] = rows.first['Bid Type'];
-    row['Bid ID'] = rows.first['Bid ID'];
+  //http://localhost:8080/da_demand_bids/v1/stack/date/20170701/hourending/16
+  @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
 
-    /// hourly info
-    row['hours'] = <Map<String,dynamic>>[];
-    rows.forEach((Map hour) {
-      var aux = <String,dynamic>{};
-      String he = stringHourEnding(hour['Hour']);
-      var hb = parseHourEndingStamp(hour['Day'], he);
-      aux['hourBeginning'] = TZDateTime.fromMillisecondsSinceEpoch(location,
-          hb.millisecondsSinceEpoch).toIso8601String();
-      /// add the non empty price/quantity pairs
-      var pricesHour = <num>[];
-      var quantitiesHour = <num>[];
-      for (int i = 1; i <= 10; i++) {
-        if (!(hour['Segment $i MW'] is num))
-          break;
-        quantitiesHour.add(hour['Segment $i MW']);
-        if (!(hour['Segment $i Price'] is num))
-          break;
-        pricesHour.add(hour['Segment $i Price']);
+  /// Return the stack (price/quantity pairs) for a given datetime.
+  Future<ApiResponse> getDemandBidsStack(String date, String hourending) async {
+    if (hourending.length == 1) hourending = hourending.padLeft(2, '0');
+    var day = Date.parse(date);
+    var _dt = parseHourEndingStamp(mmddyyyy(day), hourending);
+    var dt = TZDateTime.fromMillisecondsSinceEpoch(location, _dt.millisecondsSinceEpoch).toIso8601String();
+
+    var pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$eq': day.toString(),
+        }
       }
-      // fixed demand bids have no prices
-      if (pricesHour.isNotEmpty) aux['price'] = pricesHour;
-      aux['quantity'] = quantitiesHour;
-      row['hours'].add(aux);
     });
-    return row;
-  }
-
-  Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.length == 0) return Future.value(0);
-    var day = data.first['date'];
-    await dbConfig.coll.remove({'date': day});
-    try {
-      await dbConfig.coll.insertAll(data);
-    } catch (e) {
-      print(' XXXX ' + e.toString());
-      return Future.value(1);
-    }
-    print('--->  SUCCESS inserting masked DA Demand Bids for ${day}');
-    return Future.value(0);
-  }
-
-
-  List<Map<String,dynamic>> processFile(File file) {
-    var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return <Map<String,dynamic>>[];
-    var dataByBidId = groupBy(data, (row) => row['Bid ID']);
-    return dataByBidId.keys.map((ptid) => converter(dataByBidId[ptid])).toList();
-  }
-
-  /// Check if this date is in the db already
-  Future<bool> hasDay(Date date) async {
-    var res = await dbConfig.coll.findOne({'date': date.toString()});
-    if (res == null || res.isEmpty) return false;
-    return true;
-  }
-
-  /// Recreate the collection from scratch.
-  setupDb() async {
-    await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
-      await dbConfig.coll.drop();
-
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {
-          'date': 1,
-          'Bid ID': 1,
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'Masked Location ID': 1,
+        'Masked Lead Participant ID': 1,
+        'Bid Type': 1,
+        'hours': {
+          '\$filter': {
+            'input': '\$hours',
+            'as': 'hour',
+            'cond': {
+              '\$eq': ['\$\$hour.hourBeginning', dt]
+            }
+          }
         },
-        unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {
-          'date': 1,
-          'Masked Lead Participant ID': 1,
-          'Masked Location ID': 1,
-        });
-    await dbConfig.db.close();
+      }
+    });
+    pipeline.add({'\$unwind': '\$hours'});
+    var res = await coll.aggregateToStream(pipeline).toList();
+
+    /// flatten the map in Dart
+    List out = [];
+    List keys = ['locationId', 'participantId', 'bidType', 'price', 'quantity'];
+    for (Map e in res) {
+      List prices = e['hours']['price'];
+      var qty = e['hours']['quantity'] as List;
+      if (prices == null) prices = List.filled(qty.length, 999);
+      for (int i = 0; i < prices.length; i++) {
+        out.add(Map.fromIterables(keys, [
+          e['Masked Location ID'],
+          e['Masked Lead Participant ID'],
+          e['Bid Type'],
+          prices[i],
+          qty[i],
+        ]));
+      }
+    }
+    return ApiResponse()..result = json.encode(out);
   }
 
-  Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(where.eq('date', day.toString()));
+  //http://localhost:8080/da_demand_bids/v1/daily/mwh/participantId/206845/start/20170701/end/20171001
+  @ApiMethod(path: 'daily/mwh/demandbid/participantId/{participantId}/start/{start}/end/{end}')
+  /// Get daily total MWh zonal demand bids by participant between a start
+  /// and end date, return all available zones.
+  Future<ApiResponse> dailyMwhDemandBidByZoneForParticipant(
+      String participantId, String start, String end) async {
+    List pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Masked Lead Participant ID': {'\$eq': int.parse(participantId)},
+        'Location Type': {'\$eq': 'LOAD ZONE'}
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'locationId': '\$Masked Location ID',
+          'date': '\$date',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'locationId': '\$_id.locationId',
+        //'bidType': '\$_id.bidType',
+        'date': '\$_id.date',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+  //http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001
+  @ApiMethod(
+      path:
+          'daily/mwh/demandbid/participantId/{participantId}/ptid/{ptid}/start/{start}/end/{end}')
+  /// Get daily total MWh zonal demand bids by day for a participant and zone id
+  /// between a start and end date,
+  Future<ApiResponse> dailyMwhDemandBidForParticipantZone(
+      String participantId, String ptid, String start, String end) async {
+    List pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Masked Lead Participant ID': {'\$eq': int.parse(participantId)},
+        'Location Type': {'\$eq': 'LOAD ZONE'},
+        'Masked Location ID': {'\$eq': _unmaskedLocations[int.parse(ptid)]}
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'locationId': '\$Masked Location ID',
+          'date': '\$date',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'locationId': '\$_id.locationId',
+        //'bidType': '\$_id.bidType',
+        'date': '\$_id.date',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+  @ApiMethod(path: 'daily/mwh/demandbid/start/{start}/end/{end}')
+  /// Get the total daily MWh demand bids for all participants between a start
+  /// and end date for this zone.
+  Future<ApiResponse> dailyMWhDemandBid(String start, String end) async {
+    List pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Bid Type': {
+          '\$in': ['FIXED', 'PRICE']
+        },
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'date': '\$date',
+          'Bid Type': '\$Bid Type',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'date': '\$_id.date',
+        'Bid Type': '\$_id.Bid Type',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 
 
+  //http://localhost:8080/da_demand_bids/v1/mwh/ptid/4004/start/20170701/end/20171001
+  @ApiMethod(path: 'daily/mwh/demandbid/ptid/{ptid}/start/{start}/end/{end}')
+  /// Get the total daily MWh demand bids for all participants between a start
+  /// and end date for this zone.
+  Future<ApiResponse> dailyMWhDemandBidForLoadZone(
+      String ptid, String start, String end) async {
+    List pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Location Type': {'\$eq': 'LOAD ZONE'},
+        'Masked Location ID': {'\$eq': _unmaskedLocations[int.parse(ptid)]}
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'locationId': '\$Masked Location ID',
+          'date': '\$date',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'locationId': '\$_id.locationId',
+        'date': '\$_id.date',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+
+  //http://localhost:8080/da_demand_bids/v1/mwh/participant/start/20170701/end/20171001
+  @ApiMethod(path: 'daily/mwh/demandbid/participant/start/{start}/end/{end}')
+  /// Get total daily MWh demand bids by participant between a start and end date.
+  Future<ApiResponse> dailyMwhDemandBidByParticipant(
+      String start, String end) async {
+    List pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Location Type': {'\$eq': 'LOAD ZONE'},
+        'Bid Type': {
+          '\$in': ['FIXED', 'PRICE']
+        }
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'participantId': '\$Masked Lead Participant ID',
+          'date': '\$date',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'participantId': '\$_id.participantId',
+        'date': '\$_id.date',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+
+  @ApiMethod(path: 'daily/mwh/incdec/start/{start}/end/{end}')
+  /// Get total daily MWh of inc/dec between a start and end date.
+  Future<ApiResponse> dailyMwhIncDec(
+      String start, String end) async {
+    var pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Bid Type': {
+          '\$in': ['DEC', 'INC']
+        }
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'date': '\$date',
+          'Bid Type': '\$Bid Type',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'date': '\$_id.date',
+        'Bid Type': '\$_id.Bid Type',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+  @ApiMethod(path: 'daily/incdec/mwh/byparticipant/start/{start}/end/{end}')
+  /// Get total daily MWh demand bids by participant between a start and end date.
+  Future<ApiResponse> dailyMwhIncDecByParticipant(
+      String start, String end) async {
+    List pipeline = [];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Date.parse(start).toString(),
+          '\$lte': Date.parse(end).toString(),
+        },
+        'Location Type': {'\$eq': 'LOAD ZONE'},
+        'Bid Type': {
+          '\$in': ['INC', 'DEC']
+        }
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'participantId': '\$Masked Lead Participant ID',
+          'date': '\$date',
+          'Bid Type': '\$Bid Type',
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'participantId': '\$_id.participantId',
+        'date': '\$_id.date',
+        'Bid Type': '\$_id.Bid Type',
+        'MWh': '\$MWh',
+      }
+    });
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
 }
+
+
+
+
+/// the zones
+Map<int, int> _unmaskedLocations = {
+  4001: 67184,
+  4002: 39271,
+  4003: 80396,
+  4004: 28934,
+  4005: 89933,
+  4006: 70291,
+  4007: 41756,
+  4008: 37894,
+};
+
 
 
