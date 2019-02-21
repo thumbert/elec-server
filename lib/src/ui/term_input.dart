@@ -1,6 +1,7 @@
 library ui.term_input;
 
 import 'dart:html' as html;
+import 'package:timezone/browser.dart';
 import 'package:date/date.dart';
 
 class TermInput {
@@ -8,7 +9,7 @@ class TermInput {
   html.TextInputElement _textInput;
   String name;
   String defaultValue;
-  TermParser parser;
+  Location tzLocation;
 
 
   /// A term input (DateTime Interval) with a label.
@@ -16,10 +17,9 @@ class TermInput {
   /// Variable [name] is the text of the accompanying label.
   ///
   /// Need to trigger an action onChange.
-  TermInput(this.wrapper, {this.name: 'Term', this.defaultValue, this.parser,
+  TermInput(this.wrapper, {this.name: 'Term', this.defaultValue, this.tzLocation,
     int size}) {
 
-    parser ??= TermParser();
     size ??= 9;
 
     String aux = '';
@@ -29,7 +29,6 @@ class TermInput {
       ..setAttribute('style', 'margin-top: 8px');
     _wrapper.children.add(new html.LabelElement()
       ..text = '$name');
-    //..setAttribute('style', 'margin-left: 15px'));
     _textInput = new html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..placeholder = aux
@@ -43,7 +42,7 @@ class TermInput {
   Interval get value {
     Interval aux;
     try {
-      aux = parseTerm(_textInput.value);
+      aux = parseTerm(_textInput.value, tzLocation: tzLocation);
       _textInput.setAttribute('style', 'margin-left: 15px; border-color: initial;');
     } on ArgumentError {
       _textInput.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
