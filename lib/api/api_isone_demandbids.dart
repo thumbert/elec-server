@@ -1,6 +1,3 @@
-
-
-
 library api.isone_demandbids;
 
 import 'dart:async';
@@ -354,7 +351,7 @@ class DaDemandBids {
     return ApiResponse()..result = json.encode(res);
   }
 
-  @ApiMethod(path: 'daily/incdec/mwh/byparticipant/start/{start}/end/{end}')
+  @ApiMethod(path: 'daily/mwh/incdec/byparticipant/start/{start}/end/{end}')
   /// Get total daily MWh demand bids by participant between a start and end date.
   Future<ApiResponse> dailyMwhIncDecByParticipant(
       String start, String end) async {
