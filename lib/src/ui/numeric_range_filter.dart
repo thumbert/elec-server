@@ -13,7 +13,7 @@ class NumericRangeFilter {
   ///
   /// Variable [name] is the text of the accompanying label.
   ///
-  /// Need to trigger an action onDataChange.
+  /// Need to trigger an action onChange.
   NumericRangeFilter(this.wrapper, num minValue, num maxValue, this.name,
       {int size}) {
     _defaultMin = minValue;

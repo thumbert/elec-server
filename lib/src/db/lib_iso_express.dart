@@ -81,7 +81,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   Future<bool> hasDay(Date day);
 
   /// Delete one day from the archive.
-  Future<Null> deleteDay(Date day);
+  //Future<Null> deleteDay(Date day);
 
   /// Download one day.  Check if the file has downloaded successfully.
   Future downloadDay(Date day) async {

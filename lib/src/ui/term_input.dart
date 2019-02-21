@@ -15,7 +15,7 @@ class TermInput {
   ///
   /// Variable [name] is the text of the accompanying label.
   ///
-  /// Need to trigger an action onDataChange.
+  /// Need to trigger an action onChange.
   TermInput(this.wrapper, {this.name: 'Term', this.defaultValue, this.parser,
     int size}) {
 
