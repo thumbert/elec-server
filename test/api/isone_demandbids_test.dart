@@ -6,7 +6,7 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/api/api_isone_demandbids.dart';
 
-ApiTest() async {
+tests() async {
   group('api tests for demand bids', () {
     Db db = new Db('mongodb://localhost/isoexpress');
     var api = new DaDemandBids(db);
@@ -26,13 +26,13 @@ ApiTest() async {
       var participantId = 206845.toString();
       var start = '20170101';
       var end = '20170101';
-      var aux = await api.dailyMwhByZoneForParticipant(participantId, start, end);
+      var aux = await api.dailyMwhDemandBidByZoneForParticipant(participantId, start, end);
       var data = (json.decode(aux.result) as List).cast<Map>();
       var nema = data.firstWhere((Map e) => e['locationId'] == 37894);
       expect(nema['MWh'], 11435.3);
     });
     test('total daily MWh by participant', () async {
-      var aux = await api.dailyMwhByParticipant('20170101', '20170101');
+      var aux = await api.dailyMwhDemandBidByParticipant('20170101', '20170101');
       var data = (json.decode(aux.result) as List).cast<Map>();
       var x = data.firstWhere((Map e) => e['participantId'] == 206845);
       expect(x['MWh'], 36709.3);
@@ -42,7 +42,7 @@ ApiTest() async {
       var start = '20170101';
       var end = '20170105';
       var ptid = 4008.toString();
-      var aux = await api.dailyMwhForParticipantZone(participantId, ptid, start, end);
+      var aux = await api.dailyMwhDemandBidForParticipantZone(participantId, ptid, start, end);
       var data = json.decode(aux.result);
       expect(data.length, 5);
     });
@@ -74,7 +74,7 @@ ApiTest() async {
 main() async {
   await initializeTimeZone();
 
-  await ApiTest();
+  await tests();
 
 //  await ApiTest(db);
 //
