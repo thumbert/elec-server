@@ -118,6 +118,54 @@ class DaLmp {
     return res['values'];
   }
 
+    @ApiMethod(path: 'mean/{component}/start/{start}/end/{end}')
+  /// Average 7x24 price by ptid between the start/end dates
+  Future<ApiResponse> getMeanPrice(String component, String start, String end)
+      async {
+    Date startDate = Date.parse(start);
+    Date endDate = Date.parse(end);
+
+    var pipeline = [];
+    pipeline.addAll([{
+      '\$match': {
+        'date': {
+          '\$lte': end.toString(),
+          '\$gte': start.toString(),
+        },
+      }
+    }, {
+      '\$unwind': {
+        'path': '\$hours',
+        'includeArrayIndex': 'hours_index',
+      }
+    }, {
+      '\$unwind': {
+        'path': '\$${component}',
+        'includeArrayIndex': 'component_index',
+      }
+    }, {
+      '\$project': {
+        'hours': 1,
+        component: 1,
+        '\$compare': {
+          '\$cmp': ['\$hours_index', '\$numbers_index']
+        }
+      }
+    }, {
+      '\$match': {'compare': 0}
+    }, {
+      '\$project': {
+        '_id': 0,
+        'hours': 1,
+        component: 1,
+      }
+    }]);
+
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+  
   Future<List<Map<String, Object>>> getHourlyData(
       int ptid, Date start, Date end, String component) async {
     SelectorBuilder query = where;
