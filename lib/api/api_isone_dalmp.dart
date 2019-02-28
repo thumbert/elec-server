@@ -138,15 +138,15 @@ class DaLmp {
         '_id': {
           'date': '\$date',
           'ptid': '\$ptid',
-          component: {'\$sum': '\$${component}'},
+          component: {'\$avg': '\$${component}'},
         }
       }
     }, {
       '\$project': {
         '_id': 0,
-        'date': 1,
-        'ptid': 1,
-        component: 1,
+        'date': '\$_id.date',
+        'ptid': '\$_id.ptid',
+        component: '\$_id.$component',
       }
     }]);
 
