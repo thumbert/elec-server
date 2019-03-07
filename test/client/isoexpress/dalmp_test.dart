@@ -6,8 +6,8 @@ import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
-import 'package:ceg_base/elec/common_enums.dart';
-import 'package:ceg_base/client/isoexpress/dalmp.dart';
+import 'package:elec/src/common_enums.dart';
+import 'package:elec_server/client/isoexpress/dalmp.dart';
 
 tests(String rootUrl) async {
   group('DAM prices client tests: ', () {

@@ -17,9 +17,11 @@ main() async {
   isoTimestamp.testParseIsoTimestamp();
   apiPtids.apiTest();
 
+  var rootUrl = 'http://localhost:8080/';
+
   /// Client tests
   bc.tests();
-  dalmp.tests();
+  dalmp.tests(rootUrl);
   daoffers.tests();
   ptid.tests();
 

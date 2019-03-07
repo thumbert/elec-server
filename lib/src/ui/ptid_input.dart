@@ -28,13 +28,13 @@ class PtidInput {
     _wrapper.children.add(new html.LabelElement()
       ..text = '$name'
       ..setAttribute('style', 'margin-left: 15px'));
-    _textInput = new html.TextInputElement()
+    _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       //..placeholder = aux
       ..size = size
       ..value = aux;
     _wrapper.children.add(_textInput);
-    _nodeLabel = new html.LabelElement()
+    _nodeLabel = html.LabelElement()
       ..setAttribute('style', 'margin-left: 15px');
     _nodeLabel.text = '';
     _wrapper.children.add(_nodeLabel);

@@ -17,13 +17,13 @@ class CategoricalDropdownFilter {
     // put both the label and the select element into a div
     var _wrapper = new html.DivElement()
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
-    _wrapper.children.add(new html.LabelElement()
+    _wrapper.children.add(html.LabelElement()
       ..text = name);
 
     _selector = new html.SelectElement()
       ..setAttribute('style', 'margin-left: 15px;');
     values.forEach((String e) {
-      _selector.children.add(new html.OptionElement()
+      _selector.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
