@@ -130,8 +130,8 @@ class DaLmp {
     List<String> keys = ['hourBeginning', component];
     await for (Map e in data) {
       for (int i = 0; i < e['hourBeginning'].length; i++) {
-        out.add(new Map.fromIterables(keys, [
-          new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+        out.add(Map.fromIterables(keys, [
+          TZDateTime.from(e['hourBeginning'][i], _location).toString(),
           e[component][i]
         ]));
       }
