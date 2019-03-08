@@ -20,12 +20,11 @@ class NumericInput {
     String aux = '';
     if (defaultValue != null) aux = defaultValue.toString();
 
-    var _wrapper = new html.DivElement()
+    var _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
-    _wrapper.children.add(new html.LabelElement()
+    _wrapper.children.add(html.LabelElement()
       ..text = '$name');
-      //..setAttribute('style', 'margin-left: 15px'));
-    _textInput = new html.TextInputElement()
+    _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..placeholder = aux
       ..size = size

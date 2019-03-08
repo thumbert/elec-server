@@ -3,6 +3,7 @@ import 'dart:html';
 import 'package:timezone/browser.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_checkbox_filter.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_filter.dart';
+import 'package:elec_server/src/ui/checkbox_label.dart';
 import 'package:elec_server/src/ui/numeric_input.dart';
 import 'package:elec_server/src/ui/numeric_range_filter.dart';
 import 'package:elec_server/src/ui/radio_group_input.dart';
@@ -67,4 +68,18 @@ main() async {
   selectableList.onChange((e) {
     messageSl.text = 'You selected ${selectableList.selected.join(', ')}';
   });
+
+  /// a simple checkbox with a label
+  var messageCl = querySelector('#checkbox-label-message');
+  var checkboxLabel = CheckboxLabel(querySelector('#checkbox-label'), 'Sprinkles?');
+  checkboxLabel.onChange((e) {
+    if (checkboxLabel.checked) {
+      messageCl.text = 'You want sprinkles';
+  } else {
+      messageCl.text = 'No sprinkles for you!';
+    }
+  });
+
+
+
 }

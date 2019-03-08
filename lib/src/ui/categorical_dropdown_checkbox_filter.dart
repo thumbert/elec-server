@@ -1,7 +1,6 @@
 library ui.categorical_dropdown_checkbox_filter;
 
 import 'dart:html' as html;
-import 'dart:math' show Random;
 
 class CategoricalDropdownCheckboxFilter {
   html.Element wrapper;
@@ -22,7 +21,7 @@ class CategoricalDropdownCheckboxFilter {
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
 
     // create a random string for the checkbox id
-    var id = '__cb__${name}__${Random().nextInt(100000).toString()}';
+    var id = '${wrapper.id}__cb__${name}';
     _checkboxInputElement = html.CheckboxInputElement()..id = id;
     _wrapper.children.add(_checkboxInputElement);
 
@@ -34,7 +33,7 @@ class CategoricalDropdownCheckboxFilter {
     _selector = new html.SelectElement()
       ..setAttribute('style', 'margin-left: 15px;');
     values.forEach((String e) {
-      _selector.children.add(new html.OptionElement()
+      _selector.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
