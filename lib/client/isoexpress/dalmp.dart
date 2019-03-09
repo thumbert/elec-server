@@ -2,6 +2,7 @@ library elec_server.dalmp.v1;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 
 import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
@@ -98,6 +99,46 @@ class DaLmp {
       return ts;
     });
     return data;
+  }
+
+  /// get the daily prices for all nodes in the db as calculated by mongo
+  Future<Map<int,TimeSeries<num>>> getDailyPricesAllNodes(LmpComponent component,
+      Date start, Date end) async {
+    var _url = null;
+    var _queryParams = new Map<String, List<String>>();
+    var _uploadMedia = null;
+    var _uploadOptions = null;
+    var _downloadOptions = commons.DownloadOptions.Metadata;
+    var _body = null;
+
+    String cmp = component.toString().substring(13);
+
+    _url = 'daily/mean/$cmp' +
+        '/start/' +
+        commons.Escaper.ecapeVariable('${start.toString()}') +
+        '/end/' +
+        commons.Escaper.ecapeVariable('${end.toString()}');
+
+    var _response = _requester.request(_url, "GET",
+        body: _body,
+        queryParams: _queryParams,
+        uploadOptions: _uploadOptions,
+        uploadMedia: _uploadMedia,
+        downloadOptions: _downloadOptions);
+
+    var out = <int,TimeSeries<num>>{};
+
+    await _response.then((data) {
+      var aux = json.decode(data['result']) as List;
+      // group by ptid
+      var grp = groupBy(aux, (e) => e['ptid'] as int);
+      for (var ptid in grp.keys) {
+        out[ptid] = TimeSeries.fromIterable(grp[ptid].map((e) => IntervalTuple<double>(
+            Date.parse(e['date'], location: location), e[cmp])));
+      }
+    });
+
+    return out;
   }
 
 
