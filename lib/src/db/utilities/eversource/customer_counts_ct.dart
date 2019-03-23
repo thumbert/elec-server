@@ -104,8 +104,8 @@ class EversourceCtCustomerCountsArchive {
 
   /// Download a file
   /// https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)
-  Future downloadFile(String url) async {
-    var fileout = File(dir + getFilename(url));
+  Future downloadFile(String url, {File fileout}) async {
+    fileout ??= File(dir + getFilename(url));
     url = 'https://www.eversource.com' + url;
 
     if (!Directory(dir).existsSync())
