@@ -43,13 +43,22 @@ tests(String rootUrl) async {
           IntervalTuple(
               Hour.beginning(TZDateTime(location, 2017, 1, 1)), 35.12));
     });
+
+    test('get daily prices all nodes', () async {
+      var data = await api.getDailyPricesAllNodes(LmpComponent.lmp,
+          Date(2017, 1, 1), Date(2017, 1, 3));
+      expect(data.length, 1136);
+      var p321 = data[321];
+      expect(p321.first.value, 37.755);
+    });
+
   });
 }
 
 main() async {
   await initializeTimeZone();
 
-  String rootUrl = "http://localhost:8081/"; // testing
+  String rootUrl = "http://localhost:8080/"; // testing
   await tests(rootUrl);
 }
 

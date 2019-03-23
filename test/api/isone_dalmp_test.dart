@@ -49,15 +49,16 @@ apiTest() async {
       var res = await api.getDailyBucketPrice('lmp', 4000,
           '2017-07-01', '2017-07-07', 'flat');
       var data = json.decode(res.result);
+      expect(data[2]['lmp'], 30.2825);
       expect(data.length, 7);
     });
     
     test('get mean daily lmp prices all nodes 2017-01-01 (mongo)', () async {
-      var res = await api.dailyPriceByPtid('lmp', '2019-02-01', '2019-02-01');
+      var res = await api.dailyPriceByPtid('lmp', '2017-07-03', '2017-07-03');
       var data = (json.decode(res.result) as List).cast<Map<String,dynamic>>();
       var hub = data.firstWhere((e) => e['ptid'] == 4000);
-      expect((hub['lmp'] as num).toStringAsFixed(4), '55.0942');
-      expect(data.length, 1186);
+      expect((hub['lmp'] as num).toStringAsFixed(4), '30.2825');
+      expect(data.length, 1142);
     });
     
     test('get monthly lmp prices by flat bucket', () async {
@@ -67,6 +68,7 @@ apiTest() async {
       expect(data.length, 2);
       expect(data.first, {'month': '2017-07', 'lmp': 27.604422043010757});
     });
+
 
   });
 

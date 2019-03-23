@@ -75,9 +75,8 @@ class DaLmp {
       ..key((Map e) => (e['hourBeginning'] as String).substring(0, 10))
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
     List<Map> res = nest.entries(out);
-    var data = res
-        .map((Map e) => {'date': e['key'], component: e['values']})
-        .toList();
+    var data =
+        res.map((Map e) => {'date': e['key'], component: e['values']}).toList();
     return new ApiResponse()..result = json.encode(data);
   }
 
@@ -102,7 +101,8 @@ class DaLmp {
   }
 
   /// http://localhost:8080/dalmp/v1/hourly/congestion/ptid/4000/start/20170101/end/20170101/compact
-  @ApiMethod(path: 'hourly/{component}/ptid/{ptid}/start/{start}/end/{end}/compact')
+  @ApiMethod(
+      path: 'hourly/{component}/ptid/{ptid}/start/{start}/end/{end}/compact')
   Future<List<double>> getHourlyPricesCompact(
       String component, int ptid, String start, String end) async {
     Date startDate = Date.parse(start);
@@ -111,51 +111,58 @@ class DaLmp {
     return data.map((e) => e[component] as double).toList();
   }
 
-
   @ApiMethod(path: 'ptids')
   Future<List<int>> allPtids() async {
     Map res = await coll.distinct('ptid');
     return res['values'];
   }
 
- @ApiMethod(path: 'daily/mean/{component}/start/{start}/end/{end}')
+  @ApiMethod(path: 'daily/mean/{component}/start/{start}/end/{end}')
   /// Average 7x24 price by ptid between the start/end dates
-  Future<ApiResponse> dailyPriceByPtid(String component, String start, String end)
-  async {
-    Date startDate = Date.parse(start);
-    Date endDate = Date.parse(end);
+  Future<ApiResponse> dailyPriceByPtid(
+      String component, String start, String end) async {
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
 
     var pipeline = [];
-    pipeline.addAll([{
-      '\$match': {
-        'date': {
-          '\$lte': end.toString(),
-          '\$gte': start.toString(),
-        },
-      }
-    }, {
-      '\$group': {
-        '_id': {
-          'date': '\$date',
-          'ptid': '\$ptid',
-          component: {'\$avg': '\$${component}'},
+    pipeline.addAll([
+      {
+        '\$match': {
+          'date': {
+            '\$lte': endDate.toString(),
+            '\$gte': startDate.toString(),
+          },
+        }
+      },
+      {
+        '\$group': {
+          '_id': {
+            'date': '\$date',
+            'ptid': '\$ptid',
+            component: {'\$avg': '\$${component}'},
+          }
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'date': '\$_id.date',
+          'ptid': '\$_id.ptid',
+          component: '\$_id.$component',
+        }
+      },
+      {
+        '\$sort': {
+          'ptid': 1,
+          'date': 1,
         }
       }
-    }, {
-      '\$project': {
-        '_id': 0,
-        'date': '\$_id.date',
-        'ptid': '\$_id.ptid',
-        component: '\$_id.$component',
-      }
-    }]);
+    ]);
 
     var res = await coll.aggregateToStream(pipeline).toList();
     return ApiResponse()..result = json.encode(res);
   }
 
-
-  
   Future<List<Map<String, Object>>> getHourlyData(
       int ptid, Date start, Date end, String component) async {
     SelectorBuilder query = where;
@@ -168,8 +175,8 @@ class DaLmp {
     List<String> keys = ['hourBeginning', component];
     await for (Map e in data) {
       for (int i = 0; i < e['hourBeginning'].length; i++) {
-        out.add(new Map.fromIterables(keys, [
-          new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+        out.add(Map.fromIterables(keys, [
+          TZDateTime.from(e['hourBeginning'][i], _location).toString(),
           e[component][i]
         ]));
       }
