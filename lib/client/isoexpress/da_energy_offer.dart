@@ -190,11 +190,12 @@ class DaEnergyOffers {
 /// Take the historical energy offers of an asset as returned by
 /// [getDaEnergyOffersForAsset] and create the timeseries of price offers.
 /// First offer point for each hour forms the first TimeSeries, etc.
-/// TODO: make sure you keep only when the unit is available!
+///
 List<TimeSeries<Map<String, num>>> priceQuantityOffers(
     List<Map<String, dynamic>> energyOffers) {
   var out = <TimeSeries<Map<String, num>>>[];
   for (var row in energyOffers) {
+    if (row['Unit Status'] == 'UNAVAILABLE') continue;
     var hourlyOffers = (row['hours'] as List).cast<Map<String, dynamic>>();
     for (var hourlyOffer in hourlyOffers) {
       int n = hourlyOffer['price'].length;
