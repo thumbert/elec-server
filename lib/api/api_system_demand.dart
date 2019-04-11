@@ -38,7 +38,7 @@ class SystemDemand {
       for (int i = 0; i < e['hourBeginning'].length; i++) {
         res.add({
           'hourBeginning':
-              new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+              TZDateTime.from(e['hourBeginning'][i], _location).toString(),
           columnName: e[columnName][i]
         });
       }

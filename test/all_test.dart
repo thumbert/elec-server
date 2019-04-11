@@ -8,6 +8,7 @@ import 'db/isone_ptids_test.dart' as apiPtids;
 import 'client/isoexpress/binding_constraints_test.dart' as bc;
 import 'client/isoexpress/da_energy_offer_test.dart' as daoffers;
 import 'client/isoexpress/dalmp_test.dart' as dalmp;
+import 'client/isoexpress/system_demand_test.dart' as sysdem;
 import 'client/other/ptids_test.dart' as ptid;
 
 
@@ -23,6 +24,7 @@ main() async {
   bc.tests();
   dalmp.tests(rootUrl);
   daoffers.tests();
+  sysdem.tests(rootUrl);
   ptid.tests();
 
 }
