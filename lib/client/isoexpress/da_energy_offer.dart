@@ -165,6 +165,35 @@ class DaEnergyOffers {
         (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
   }
 
+  /// Get the daily variable between a start/end date
+  Future<List<Map<String, dynamic>>> dailyVariable(String variable, Date start, 
+      Date end) {
+    var _url = null;
+    var _queryParams = Map<String, List<String>>();
+    var _uploadMedia = null;
+    var _uploadOptions = null;
+    var _downloadOptions = commons.DownloadOptions.Metadata;
+    var _body = null;
+
+    _url = 'daily/variable/' + 
+        commons.Escaper.ecapeVariable('${variable}') +
+        '/start/' +
+        commons.Escaper.ecapeVariable('${start.toString()}') +
+        '/end/' +
+        commons.Escaper.ecapeVariable('${end.toString()}');
+
+    var _response = _requester.request(_url, "GET",
+        body: _body,
+        queryParams: _queryParams,
+        uploadOptions: _uploadOptions,
+        uploadMedia: _uploadMedia,
+        downloadOptions: _downloadOptions);
+    return _response.then((data) =>
+        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
+  }  
+    
+    
+    
   /// Get the last date inserted in the database
   Future<Date> lastDate() {
     var _url = null;
