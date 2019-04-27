@@ -14,7 +14,7 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
-  Location location = getLocation('US/Eastern');
+  var location = getLocation('US/Eastern');
 
   RtSystemDemandReportArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {
@@ -35,42 +35,44 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
       new File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
   /// File may be incomplete if downloaded during the day ...
-  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
-    var row = <String,dynamic>{};
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
+    var row = <String, dynamic>{};
     var localDate = (rows.first['Date'] as String).substring(0, 10);
     int numberOfHours = Date.parse(formatDate(localDate), location: location)
-      .splitLeft((dt) => new Hour.beginning(dt)).length;
+        .splitLeft((dt) => new Hour.beginning(dt))
+        .length;
     if (rows.length != numberOfHours)
       throw new mis.IncompleteReportException('$reportName for $localDate');
 
-    row ['date'] = formatDate(localDate);
+    row['date'] = formatDate(localDate);
     row['market'] = 'RT';
 
     row['hourBeginning'] = [];
-    row['Total Load'] = [];
+    row['Total Load'] = <num>[];
     rows.forEach((e) {
-      row['hourBeginning'].add(parseHourEndingStamp(localDate,
-          e['Hour Ending']));
+//      var hb = parseHourEndingStamp(localDate, e['Hour Ending']);
+//      row['hourBeginning'].add(TZDateTime.fromMillisecondsSinceEpoch(
+//              location, hb.millisecondsSinceEpoch)
+//          .toIso8601String());
+      row['hourBeginning'].add(parseHourEndingStamp(localDate, e['Hour Ending']));
       row['Total Load'].add(e['Total Load']);
     });
     return row;
   }
 
-  List<Map<String,dynamic>> processFile(File file) {
+  List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return <Map<String,dynamic>>[];
+    if (data.isEmpty) return <Map<String, dynamic>>[];
     return [converter(data)];
   }
 
   /// Check if this date is in the db already
   Future<bool> hasDay(Date date) async {
-    var res = await dbConfig.coll.findOne({
-      'market': 'RT',
-      'date': date.toString()});
+    var res =
+        await dbConfig.coll.findOne({'market': 'RT', 'date': date.toString()});
     if (res == null || res.isEmpty) return false;
     return true;
   }
-
 
   /// Recreate the collection from scratch.
   setupDb() async {

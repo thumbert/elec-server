@@ -11,6 +11,7 @@ import 'client/isoexpress/dalmp_test.dart' as dalmp;
 import 'client/isoexpress/system_demand_test.dart' as sysdem;
 import 'client/other/ptids_test.dart' as ptid;
 
+import 'utils/to_csv_test.dart' as toCsv;
 
 main() async {
   await initializeTimeZone();
@@ -26,5 +27,8 @@ main() async {
   daoffers.tests();
   sysdem.tests(rootUrl);
   ptid.tests();
+
+  /// utils tests
+  toCsv.tests();
 
 }

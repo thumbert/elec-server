@@ -1,11 +1,22 @@
 library utils.to_csv;
 
 import 'package:csv/csv.dart';
+import 'package:dama/basic/null_policy.dart';
+
+String _nullToEmpty(dynamic x) {
+  if (x == null) return '';
+  return x.toString();
+}
 
 /// Write a list of maps to CSV.   Usually, the keys of the map are strings.
 ///
-/// If [columnNames] are not specified, return all the available columns. 
-String listOfMapToCsv(List<Map> x, {List<String> columnNames}) {
+/// If [columnNames] are not specified, return all the available columns.
+/// The default [nullPolicy] is to convert the nulls to empty strings
+///
+String listOfMapToCsv(List<Map> x, {List<String> columnNames,
+   String Function(dynamic) nullPolicy}) {
+  nullPolicy ??= _nullToEmpty;
+
   if (columnNames == null) {
     var _cNames = Set<String>();
     for (var row in x) _cNames.addAll(row.keys.map((e) => e.toString()));
@@ -18,7 +29,9 @@ String listOfMapToCsv(List<Map> x, {List<String> columnNames}) {
     var sRow = [];
     for (var columnName in columnNames) {
       if (row.containsKey(columnName)) {
-        sRow.add(row[columnName]);
+        var value = row[columnName];
+        if (value == null) value = nullPolicy(value);
+        sRow.add(value);
       } else {
         sRow.add('');
       }
@@ -31,7 +44,8 @@ String listOfMapToCsv(List<Map> x, {List<String> columnNames}) {
 
 /// Write a map to CSV. Return a two column csv table, first column are the
 /// keys, second column are the values.
-String mapToCsv(Map x, {List<String> columnNames}) {
+String mapToCsv(Map x, {List<String> columnNames,
+    String Function(dynamic) nullPolicy}) {
   var aux = <List>[];
   if (columnNames != null) aux.add(columnNames);
   x.forEach((k,v){
