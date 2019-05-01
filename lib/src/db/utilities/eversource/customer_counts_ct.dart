@@ -111,7 +111,7 @@ class EversourceCtCustomerCountsArchive {
     if (!Directory(dir).existsSync())
       Directory(dir).createSync(recursive: true);
 
-    return new HttpClient()
+    return HttpClient()
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>

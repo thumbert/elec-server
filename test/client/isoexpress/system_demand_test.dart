@@ -9,7 +9,7 @@ import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/client/isoexpress/system_demand.dart';
 
 tests(String rootUrl) async {
-  group('DAM prices client tests: ', () {
+  group('System demand client tests: ', () {
     var location = getLocation('US/Eastern');
     var client = Client();
     var api = SystemDemand(client, rootUrl: rootUrl);
@@ -23,16 +23,25 @@ tests(String rootUrl) async {
         IntervalTuple(Hour.containing(TZDateTime(location, 2017, 1, 1, 2)), 11790.9),
       ]);
     });
-    test('get system demand between for 1 year', () async {
-      var data = await api.getSystemDemand(Market.rt, Date(2017, 1, 1), Date(2017, 12, 31));
+    test('get system demand for 1 year', () async {
+      var year = 2016;
+      var data = await api.getSystemDemand(Market.rt, Date(year, 1, 1), Date(year, 12, 31));
 
       var grp = data.splitByIndex((e) => Date.fromTZDateTime(e.start));
-      grp.entries.forEach((e){
-        if (e.value.length != 24)
-          print('${e.key}: ${e.value.length}');
-      });
+      var aux = grp.entries.map((e) => MapEntry(e.key,e.value.length));
+      var days = Interval(TZDateTime(location, year), TZDateTime(location, year+1))
+        .splitLeft((dt) => Date.fromTZDateTime(dt)).toSet();
+      var missingDays = days.difference(aux.map((e) => e.key).toSet());
+      if (missingDays.length != 0) {
+        print("missing days for rt system demand");
+        print(missingDays);
+      }
+      expect(missingDays.length, 0);
 
-
+//      var count = Map.fromEntries(aux.where((e) => e.value != 24));
+//      expect(count.length, 2);
+//      expect(count[Date(2017, 3, 12, location: location)], 23);
+//      expect(count[Date(2017, 11, 5, location: location)], 25);
 //      expect(data.length, 8760);
 //      expect(data.take(3).toList(), [
 //        IntervalTuple(Hour.containing(TZDateTime(location, 2017, 1, 1, 0)), 12268.9),

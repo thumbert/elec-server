@@ -62,7 +62,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   /// Read the report from the disk, and insert the data into the database.
   /// If the processing of the file throws an IncompleteReportException
   /// delete the file associated with this day.
-  Future insertDay(Date day) async {
+  Future<int> insertDay(Date day) async {
     File file = getFilename(day);
     var data;
     try {
@@ -75,8 +75,14 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
     await dbConfig.coll.remove({'date': day.toString()});
     return dbConfig.coll
         .insertAll(data)
-        .then((_) => print('--->  Inserted ${reportName} for day ${day}'))
-        .catchError((e) => print('xxxx ERROR xxxx ' + e.toString()));
+        .then((_) {
+          print('--->  Inserted ${reportName} for day ${day}');
+          return 0;
+        })
+        .catchError((e) {
+          print('xxxx ERROR xxxx ' + e.toString());
+          return 1;
+    });
   }
 
   /// Check if this date is in the db already

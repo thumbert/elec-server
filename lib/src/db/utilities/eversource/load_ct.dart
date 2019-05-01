@@ -2,6 +2,9 @@ library db.utilities.eversource.load_ct;
 
 import 'dart:async';
 import 'dart:io';
+import 'package:html/parser.dart';
+import 'package:http/http.dart' as http;
+import 'package:collection/collection.dart';
 import 'package:tuple/tuple.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
@@ -11,7 +14,7 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 import 'package:elec_server/src/db/config.dart';
 
-Map loadUrls = {
+var loadUrls = <int,String>{
   2018: 'actual-loads-2018.xlsx?sfvrsn=d9fdc462_8',
   2017: 'actual-loads-2017.xlsx?sfvrsn=5b44c762_10',
   2016: 'actual-load-2016.xlsx?sfvrsn=e5a7fb62_6',
@@ -26,7 +29,7 @@ class EversourceCtLoadArchive {
   Location location = getLocation('US/Eastern');
 
   EversourceCtLoadArchive({this.dbConfig, this.dir}) {
-    Map env = Platform.environment;
+    var env = Platform.environment;
 
     dbConfig ??= new ComponentConfig()
       ..host = '127.0.0.1'
@@ -35,17 +38,17 @@ class EversourceCtLoadArchive {
 
     dir ??= env['HOME'] + '/Downloads/Archive/Utility/Eversource/CT/load/Raw/';
 
-    if (!new Directory(dir).existsSync())
-      new Directory(dir).createSync(recursive: true);
+    if (!Directory(dir).existsSync())
+      Directory(dir).createSync(recursive: true);
   }
 
   /// insert data into mongo
-  Future insertData(List<Map> data) async {
-    if (data.isEmpty) return new Future.value(null);
+  Future insertData(List<Map<String,dynamic>> data) async {
+    if (data.isEmpty) return Future.value(null);
     // split the data by day and version
-    Map groups = _groupBy(data, (Map e) => new Tuple2(e['date'], e['version']));
+    var groups = groupBy(data, (Map e) => Tuple2<String,String>(e['date'], e['version']));
     try {
-      for (Tuple2 key in groups.keys) {
+      for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'date': key.item1,
           'version': key.item2,
@@ -71,7 +74,7 @@ class EversourceCtLoadArchive {
 
   /// Read the entire contents of a given spreadsheet, and prepare it for
   /// Mongo insertion.
-  List<Map> readXlsx(File file) {
+  List<Map<String,dynamic>> readXlsx(File file) {
     var bytes = file.readAsBytesSync();
     _decoder = new SpreadsheetDecoder.decodeBytes(bytes);
     var sheetNames = _decoder.tables.keys;
@@ -81,9 +84,9 @@ class EversourceCtLoadArchive {
 
     var table = _decoder.tables[sheetNames.first];
     var n = table.rows.length;
-    List<Map> res = [];
+    var res = <Map<String,dynamic>>[];
 
-    List loadKeys = [
+    var loadKeys = <String>[
       'LRS',
       'L-CI',
       'RES',
@@ -92,7 +95,7 @@ class EversourceCtLoadArchive {
       'SS Total',
       'Competitive Supply',
     ];
-    List keys = [
+    var keys = <String>[
       'date',
       'version',
       'hourBeginning',
@@ -116,7 +119,7 @@ class EversourceCtLoadArchive {
         TZDateTime hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);
 
         /// in case there are empty rows at the end of the spreadsheet
-        res.add(new Map.fromIterables(keys, [
+        res.add(Map.fromIterables(keys, [
           date.toString(),
           row[13],
           hourBeginning,
@@ -132,18 +135,17 @@ class EversourceCtLoadArchive {
     }
 
     /// group by date
-    Map<String,List<Map>> aux = _groupBy(res, (Map row) => row['date']);
-    var data = <Map>[];
+    Map<String,List<Map>> aux = groupBy(res, (Map row) => row['date']);
+    var data = <Map<String,dynamic>>[];
     aux.keys.forEach((String date) {
-      List bux = aux[date];
+      var bux = aux[date];
       var hB = [];
       var load = [];
-      for (Map row in bux) {
+      for (var row in bux) {
         hB.add(row['hourBeginning']);
-        load.add(
-            new Map.fromIterables(loadKeys, loadKeys.map((key) => row[key])));
+        load.add(Map.fromIterables(loadKeys, loadKeys.map((key) => row[key])));
       }
-      data.add({
+      data.add(<String,dynamic>{
         'date': date,
         'version': bux.first['version'],
         'hourBeginning': hB,
@@ -156,25 +158,23 @@ class EversourceCtLoadArchive {
 
   /// Get the file for this month
   File getFile(int year) {
-    return new File(dir + 'actual_load_${year.toString()}.xlsx');
+    return File(dir + 'actual_load_${year.toString()}.xlsx');
   }
 
   /// Download a file.
   /// https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)
-  Future downloadFile(int year) async {
-    File fileout = getFile(year);
-    String url =
-        'https://www.eversource.com/content/docs/default-source/doing-business/' +
-            loadUrls[year];
-    if (url == null)
-      throw new ArgumentError('Year $year is not in the url Map');
+  /// https://www.eversource.com/content/docs/default-source/doing-business/actual-load-2016.xlsx?sfvrsn=e5a7fb62_6
+  Future downloadFile(String link) async {
+    var url = 'https://www.eversource.com' + link;
 
+    var fileout = getFile(year);
     return new HttpClient()
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
             response.pipe(fileout.openWrite()));
   }
+
 
   Future<Null> setup() async {
     await dbConfig.db.open();
@@ -188,8 +188,29 @@ class EversourceCtLoadArchive {
   }
 }
 
-Map<dynamic,List<Map>> _groupBy(Iterable<Map> x, Function f) {
-  Map result = new Map();
-  x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
-  return result;
+
+/// Get all the API links from url with a given pattern
+Future<List<String>> getLinks(String url, {List<Pattern> patterns}) async {
+  var aux = await http.get(url);
+  var body = aux.body;
+  var document = parse(body);
+  var links = <String>[];
+
+  // try one of these file patterns
+  patterns ??= ['actual-load-', 'actual-loads-'];
+  for (var linkElement in document.querySelectorAll('a')) {
+    var link = linkElement.attributes['href'];
+
+    /// ignore the internal links and the applications
+    if (link != null && !link.startsWith('http')) {
+      for (var pattern in patterns) {
+        if (link.contains(pattern)) {
+          links.add(link);
+          break;
+        }
+      }
+    }
+  }
+  links.sort();
+  return links;
 }

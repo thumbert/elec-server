@@ -1,4 +1,4 @@
-library test.customer_counts;
+library test.utilities.eversource.customer_counts;
 
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
@@ -9,7 +9,7 @@ loadTest() async {
   EversourceCtLoadArchive archive;
   group('eversource ct loads', (){
     setUp(()async {
-      archive = new EversourceCtLoadArchive();
+      archive =  EversourceCtLoadArchive();
       await archive.dbConfig.db.open();
     });
     tearDown(()async {
@@ -27,40 +27,53 @@ loadTest() async {
   });
 }
 
+int _getYear(String link) {
+  var reg = RegExp('(.*)actual-load(.*).xlsx(.*)');
+}
+
+
+
+updateDb() async {
+  var archive = EversourceCtLoadArchive();
+
+  var url = 'https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)';
+  var links = await getLinks(url, patterns: ['actual-load-', 'actual-loads-']);
+  links.forEach(print);
+
+  await archive.dbConfig.db.open();
+  var futs = links.map((link) async {
+    await archive.downloadFile(link);
+    var data = archive.readXlsx(archive.);
+    return await archive.insertData(data);
+  });
+  await Future.wait(futs);
+  await archive.dbConfig.db.close();
+}
+
+
 insertYears({List<int> years}) async {
   years ??= [2014, 2015, 2016, 2017, 2018];
-  EversourceCtLoadArchive archive = new EversourceCtLoadArchive();
+  var archive = EversourceCtLoadArchive();
   await archive.dbConfig.db.open();
   for (var year in years) {
     await archive.downloadFile(year);
-    List data = archive.readXlsx(archive.getFile(year));
+    var data = archive.readXlsx(archive.getFile(year));
     await archive.insertData(data);
   }
   await archive.dbConfig.db.close();
 }
 
 
-apiTest() async {
-//  var api = new ApiCustomerCounts(config.db);
-//
-//  await config.db.open();
-//  //var res = await api.apiKwhTown('Attleboro');
-//  //var res = await api.apiKwhZoneRateClass('SEMA', 'R1');
-//  var res = await api.getAvailableTowns();
-//  res.forEach(print);
-//
-//
-//  await config.db.close();
-}
 
 
 main() async {
   await initializeTimeZone();
-  //await new EversourceCtLoadArchive(dir: dir).setup();
+  //await EversourceCtLoadArchive().setup();
 
   //await loadTest();
 
-  await insertYears();
+  await updateDb();
 
-//  await apiTest();
+  //await insertYears();
+
 }

@@ -98,22 +98,26 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// If the processing of the file throws an IncompleteReportException
   /// delete the file associated with this day.
   /// Remove the data associated with this [day] before reinserting.
-  /// Returns 0 for success.
-  Future insertDay(Date day) async {
-    File file = getFilename(day);
+  /// Returns 0 for success, 1 for error, null if there is no data to insert.
+  ///
+  Future<int> insertDay(Date day) async {
+    var file = getFilename(day);
     var data;
     try {
       data = processFile(file);
-      if (data.isEmpty) return new Future.value(null);
+      if (data.isEmpty) return Future.value(null);
     } on mis.IncompleteReportException {
       file.delete();
-      return new Future.value(null);
+      return Future.value(null);
     }
     await dbConfig.coll.remove({'date': day.toString()});
     return dbConfig.coll.insertAll(data).then((_) {
       print('--->  Inserted ${reportName} for day ${day}');
       return 0;
-    }).catchError((e) => print('  ' + e.toString()));
+    }).catchError((e) {
+      print('XXXX ' + e.toString());
+      return 1;
+    });
   }
 }
 
