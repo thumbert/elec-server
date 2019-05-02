@@ -4,7 +4,6 @@ import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/utilities/eversource/load_ct.dart';
 
-
 loadTest() async {
   EversourceCtLoadArchive archive;
   group('eversource ct loads', (){
@@ -15,10 +14,10 @@ loadTest() async {
     tearDown(()async {
       await archive.dbConfig.db.close();
     });
-    test('read year 2014', () async {
-      int year = 2014;
+    test('read year 2019', () async {
+      int year = 2019;
       var file = archive.getFile(year);
-      if (!file.existsSync()) await archive.downloadFile(year);
+      //if (!file.existsSync()) await archive.downloadFile(year);
       var data = archive.readXlsx(file);
       expect(data.length, 365);
       expect(data.first.length, 4);
@@ -26,11 +25,6 @@ loadTest() async {
     });
   });
 }
-
-int _getYear(String link) {
-  var reg = RegExp('(.*)actual-load(.*).xlsx(.*)');
-}
-
 
 
 updateDb() async {
@@ -40,30 +34,17 @@ updateDb() async {
   var links = await getLinks(url, patterns: ['actual-load-', 'actual-loads-']);
   links.forEach(print);
 
-  await archive.dbConfig.db.open();
-  var futs = links.map((link) async {
-    await archive.downloadFile(link);
-    var data = archive.readXlsx(archive.);
-    return await archive.insertData(data);
-  });
-  await Future.wait(futs);
-  await archive.dbConfig.db.close();
-}
+  var years = links.map((link) => {'year': getYear(link), 'link': link});
 
-
-insertYears({List<int> years}) async {
-  years ??= [2014, 2015, 2016, 2017, 2018];
-  var archive = EversourceCtLoadArchive();
   await archive.dbConfig.db.open();
-  for (var year in years) {
-    await archive.downloadFile(year);
-    var data = archive.readXlsx(archive.getFile(year));
+  for (var e in years) {
+    await archive.downloadFile(e['link']);
+    var data = archive.readXlsx(archive.getFile(e['year']));
     await archive.insertData(data);
   }
   await archive.dbConfig.db.close();
+
 }
-
-
 
 
 main() async {
@@ -75,5 +56,4 @@ main() async {
   await updateDb();
 
   //await insertYears();
-
 }

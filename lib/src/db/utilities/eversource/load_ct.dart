@@ -14,14 +14,6 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 import 'package:elec_server/src/db/config.dart';
 
-var loadUrls = <int,String>{
-  2018: 'actual-loads-2018.xlsx?sfvrsn=d9fdc462_8',
-  2017: 'actual-loads-2017.xlsx?sfvrsn=5b44c762_10',
-  2016: 'actual-load-2016.xlsx?sfvrsn=e5a7fb62_6',
-  2015: 'actual-load-2015.xlsx?sfvrsn=4c6bec62_26',
-  2014: 'actual-load-2014.xlsx?sfvrsn=516bec62_8',
-};
-
 class EversourceCtLoadArchive {
   ComponentConfig dbConfig;
   SpreadsheetDecoder _decoder;
@@ -31,7 +23,7 @@ class EversourceCtLoadArchive {
   EversourceCtLoadArchive({this.dbConfig, this.dir}) {
     var env = Platform.environment;
 
-    dbConfig ??= new ComponentConfig()
+    dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
       ..dbName = 'eversource'
       ..collectionName = 'load_ct';
@@ -106,17 +98,19 @@ class EversourceCtLoadArchive {
         [2, 3, 4, 5, 6, 7, 8].map((i) => table.rows[3][i]).toList();
 
     for (int i = 4; i < n; i++) {
-      List row = table.rows[i];
+      var row = table.rows[i];
       if (row[0] != null) {
-        Date date = Date.parse((row[0] as String).substring(0, 10));
+        var date = Date.parse((row[0] as String).substring(0, 10));
         String hE;
         if (row[1] is int)
           hE = row[1].toString().padLeft(2, '0');
         else if (row[1] == '2*')
           hE = '02X';
-        else
-          throw new ArgumentError('Unknown hour ending ${row[1]}');
-        TZDateTime hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);
+        else {
+          if (date == Date(2018, 3, 11) && hE == null) continue;
+          throw ArgumentError('Unknown hour ending ${row[1]}');
+        }
+        var hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);
 
         /// in case there are empty rows at the end of the spreadsheet
         res.add(Map.fromIterables(keys, [
@@ -166,9 +160,9 @@ class EversourceCtLoadArchive {
   /// https://www.eversource.com/content/docs/default-source/doing-business/actual-load-2016.xlsx?sfvrsn=e5a7fb62_6
   Future downloadFile(String link) async {
     var url = 'https://www.eversource.com' + link;
-
+    var year = getYear(link);
     var fileout = getFile(year);
-    return new HttpClient()
+    return HttpClient()
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
@@ -186,6 +180,28 @@ class EversourceCtLoadArchive {
 
     await dbConfig.db.close();
   }
+}
+
+
+/// Extract the year from the url link
+//  var links = [
+//    '/content/docs/default-source/doing-business/actual-load-2014.xlsx?sfvrsn=516bec62_8',
+//    '/content/docs/default-source/doing-business/actual-load-2015.xlsx?sfvrsn=4c6bec62_26',
+//    '/content/docs/default-source/doing-business/actual-load-2016.xlsx?sfvrsn=e5a7fb62_6',
+//    '/content/docs/default-source/doing-business/actual-loads-2017.xlsx?sfvrsn=5b44c762_10',
+//    '/content/docs/default-source/doing-business/actual-loads-2018-n.xlsx?sfvrsn=fedccc62_4',
+//    '/content/docs/default-source/doing-business/actual-loads-2019-n.xlsx?sfvrsn=18b3cb62_2'
+//  ];
+int getYear(String link) {
+  var reg = RegExp('(.*)actual-load(.*).xlsx(.*)');
+  var matches = reg.allMatches(link);
+  var match = matches.elementAt(0);
+  var aux = match.group(2);
+
+  var reg2 = RegExp(r'(\d{4})');
+  var e = reg2.allMatches(aux).elementAt(0);
+  var year = e.group(0);
+  return int.parse(year);
 }
 
 
