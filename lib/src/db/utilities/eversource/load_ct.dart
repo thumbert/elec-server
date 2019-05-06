@@ -35,10 +35,11 @@ class EversourceCtLoadArchive {
   }
 
   /// insert data into mongo
-  Future insertData(List<Map<String,dynamic>> data) async {
+  Future insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
     // split the data by day and version
-    var groups = groupBy(data, (Map e) => Tuple2<String,String>(e['date'], e['version']));
+    var groups = groupBy(
+        data, (Map e) => Tuple2<String, String>(e['date'], e['version']));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
@@ -47,12 +48,12 @@ class EversourceCtLoadArchive {
         });
         await dbConfig.coll.insertAll(groups[key]);
       }
-      print('---> Inserted Eversource CT load data from ${data.first['date']} to ${data.last['date']}');
+      print(
+          '---> Inserted Eversource CT load data from ${data.first['date']} to ${data.last['date']}');
     } catch (e) {
       print('XXX ' + e.toString());
     }
   }
-
 
   /// Check if the data has already been inserted
   Future<bool> hasDay(Date date, String version) async {
@@ -66,7 +67,7 @@ class EversourceCtLoadArchive {
 
   /// Read the entire contents of a given spreadsheet, and prepare it for
   /// Mongo insertion.
-  List<Map<String,dynamic>> readXlsx(File file) {
+  List<Map<String, dynamic>> readXlsx(File file) {
     var bytes = file.readAsBytesSync();
     _decoder = new SpreadsheetDecoder.decodeBytes(bytes);
     var sheetNames = _decoder.tables.keys;
@@ -76,7 +77,7 @@ class EversourceCtLoadArchive {
 
     var table = _decoder.tables[sheetNames.first];
     var n = table.rows.length;
-    var res = <Map<String,dynamic>>[];
+    var res = <Map<String, dynamic>>[];
 
     var loadKeys = <String>[
       'LRS',
@@ -110,7 +111,10 @@ class EversourceCtLoadArchive {
           if (date == Date(2018, 3, 11) && hE == null) continue;
           throw ArgumentError('Unknown hour ending ${row[1]}');
         }
-        var hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);
+        var _hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);
+        var hourBeginning = TZDateTime.fromMillisecondsSinceEpoch(
+                location, _hourBeginning.millisecondsSinceEpoch)
+            .toIso8601String();
 
         /// in case there are empty rows at the end of the spreadsheet
         res.add(Map.fromIterables(keys, [
@@ -129,8 +133,8 @@ class EversourceCtLoadArchive {
     }
 
     /// group by date
-    Map<String,List<Map>> aux = groupBy(res, (Map row) => row['date']);
-    var data = <Map<String,dynamic>>[];
+    Map<String, List<Map>> aux = groupBy(res, (Map row) => row['date']);
+    var data = <Map<String, dynamic>>[];
     aux.keys.forEach((String date) {
       var bux = aux[date];
       var hB = [];
@@ -139,7 +143,7 @@ class EversourceCtLoadArchive {
         hB.add(row['hourBeginning']);
         load.add(Map.fromIterables(loadKeys, loadKeys.map((key) => row[key])));
       }
-      data.add(<String,dynamic>{
+      data.add(<String, dynamic>{
         'date': date,
         'version': bux.first['version'],
         'hourBeginning': hB,
@@ -169,7 +173,6 @@ class EversourceCtLoadArchive {
             response.pipe(fileout.openWrite()));
   }
 
-
   Future<Null> setup() async {
     await dbConfig.db.open();
     List<String> collections = await dbConfig.db.getCollectionNames();
@@ -181,7 +184,6 @@ class EversourceCtLoadArchive {
     await dbConfig.db.close();
   }
 }
-
 
 /// Extract the year from the url link
 //  var links = [
@@ -203,7 +205,6 @@ int getYear(String link) {
   var year = e.group(0);
   return int.parse(year);
 }
-
 
 /// Get all the API links from url with a given pattern
 Future<List<String>> getLinks(String url, {List<Pattern> patterns}) async {

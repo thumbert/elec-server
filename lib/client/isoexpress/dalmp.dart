@@ -12,7 +12,6 @@ import 'package:timezone/standalone.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/common_enums.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 
 export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
     show ApiRequestError, DetailedApiRequestError;

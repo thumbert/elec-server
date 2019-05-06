@@ -16,6 +16,7 @@ import 'package:elec_server/api/api_isone_ptids.dart';
 import 'package:elec_server/api/api_scc_report.dart';
 import 'package:elec_server/api/utilities/api_customer_counts_ngrid.dart' as ngrid;
 import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart' as eversource;
+import 'package:elec_server/api/utilities/api_load_eversource.dart' as eversourceLoad;
 import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/api_system_demand.dart';
 import 'package:elec_server/api/api_isone_zonal_demand.dart';
@@ -43,9 +44,10 @@ registerApis() async {
   _apiServer.addApi(SystemDemand(db3) );
 //  _apiServer.addApi( new ZonalDemand(db3) );
 //
-  Db db4 = new Db('mongodb://$host/eversource');
+  Db db4 = Db('mongodb://$host/eversource');
   await db4.open();
-  _apiServer.addApi( new eversource.ApiCustomerCounts(db4) );
+  _apiServer.addApi( eversource.ApiCustomerCounts(db4) );
+  _apiServer.addApi( eversourceLoad.ApiLoadEversource(db4) );
 
 
 //  var api = new ApiTemperatureNoaa();
