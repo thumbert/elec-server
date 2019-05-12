@@ -10,8 +10,8 @@ import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
 tests() async {
   var api = EversourceLoad(Client());
   var location = getLocation('US/Eastern');
-  group('API ptid table:', () {
-    test('get current ptid table', () async {
+  group('Eveversource load test:', () {
+    test('get load for CT (CL&P)', () async {
       var start = Date(2014, 1, 1, location: location);
       var end = Date(2014, 12, 31, location: location);
       var data = await api.getCtLoad(start, end);

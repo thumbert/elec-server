@@ -54,6 +54,4 @@ main() async {
   //await loadTest();
 
   await updateDb();
-
-  //await insertYears();
 }
