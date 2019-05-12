@@ -46,22 +46,21 @@ class EversourceLoad {
         downloadOptions: _downloadOptions);
     var data = await _response.then((data) {
       var xs = json.decode(data['result']) as List;
+
       var ts = TimeSeries<Map<String,num>>.fromIterable([]);
       for (var x in xs) {
-
-      }
-
-      var ts = TimeSeries.fromIterable(aux.expand((e) {
-        // each document contains all hours, all load classes
-        var out = <IntervalTuple<Map<String, num>>>[];
-        for (int i=0; i<e['hourBeginning'].length; i++) {
-          var load = <String,num>{};
-          e['load'][i].entries.forEach((e) => load[e.key] = e.value);
-          out.add(IntervalTuple(
-              Hour.beginning(TZDateTime.parse(location, e['hourBeginning'][i])),
-              load));
+        // for all days loop over the hours
+        var hours = (x['hourBeginning'] as List).cast<String>();
+        for (int i = 0; i < hours.length; i++) {
+          var load = Map.fromEntries(
+              (x['load'][i] as Map).entries.map((e) =>
+                  MapEntry(e.key as String, e.value as num)));
+          ts.add(IntervalTuple(
+              Hour.beginning(TZDateTime.parse(location, hours[i])),
+              load
+          ));
         }
-      }));
+      }
       return ts;
     });
     return data;

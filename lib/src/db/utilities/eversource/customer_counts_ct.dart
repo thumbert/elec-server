@@ -17,7 +17,7 @@ class EversourceCtCustomerCountsArchive {
   String dir;
 
   EversourceCtCustomerCountsArchive({this.dbConfig, this.dir}) {
-    Map env = Platform.environment;
+    var env = Platform.environment;
     if (dbConfig == null) {
       dbConfig = new ComponentConfig()
         ..host = '127.0.0.1'
@@ -26,8 +26,8 @@ class EversourceCtCustomerCountsArchive {
     }
     if (dir == null)
       dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
-    if (!new Directory(dir).existsSync())
-      new Directory(dir).createSync(recursive: true);
+    if (!Directory(dir).existsSync())
+      Directory(dir).createSync(recursive: true);
   }
 
   Db get db => dbConfig.db;

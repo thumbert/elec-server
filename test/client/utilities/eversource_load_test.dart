@@ -16,12 +16,12 @@ tests() async {
       var end = Date(2014, 12, 31, location: location);
       var data = await api.getCtLoad(start, end);
       expect(data.length == 8760, true);
-//      expect(data.first['ptid'], 4000);
-//      var me = data.firstWhere((e) => e['ptid'] == 4001);
-//      expect(me, {'ptid': 4001, 'name': '.Z.MAINE', 'spokenName': 'MAINE',
-//        'type': 'zone'});
+      var first = data.first;
+      expect(first.value is Map<String,num>, true);
+      expect(first.value['LRS'], 86.304);
+      expect(first.value.keys.toList(), ['LRS', 'L-CI', 'RES', 'S-CI',
+        'S-LT', 'SS Total', 'Competitive Supply']);
     });
-
   });
 }
 
