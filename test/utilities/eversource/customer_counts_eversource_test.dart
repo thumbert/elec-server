@@ -7,9 +7,7 @@ import 'package:elec_server/src/db/utilities/eversource/customer_counts_ct.dart'
 import 'package:elec_server/src/db/config.dart';
 
 import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart';
-
-
-
+import 'package:timezone/standalone.dart';
 
 //updateDb() async {
 //
@@ -54,10 +52,30 @@ import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart';
 //  await config.db.close();
 //}
 
+updateDb() async {
+  var url = 'https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)';
+  var links = await getLinks(url);
+  links.forEach(print);
+
+  var archive = EversourceCtCompetitiveSupply();
+  await archive.setup();
+
+  await archive.dbConfig.db.open();
+  for (var link in links) {
+//    await archive.downloadFile(link);
+    var file = File(archive.dir + getFilename(link));
+    print('Working on ${file.path}');
+    var data = archive.readXlsx(file);
+    //print(data);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
 
 main() async {
+  await initializeTimeZone();
 
-  //await updateDb();
+  await updateDb();
 
   //await apiTest();
 }

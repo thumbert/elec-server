@@ -24,6 +24,7 @@
         <ul>
             <li><a href="#customer-counts-ngrid">Customer counts for NGrid</a></li>
             <li><a href="#customer-counts-eversource">Customer counts for Eversource</a></li>
+            <li><a href="#customer-counts-eversource-cs">Customer counts for Eversource competitive supply</a></li>
             <li><a href="#dam-daily-prices">DAM daily prices by bucket</a></li>
             <li><a href="#dam-hourly-prices">DAM hourly prices</a></li>
             <li><a href="#dam-monthly-prices">DAM monthly prices by bucket</a></li>
@@ -71,6 +72,17 @@
                 <li>
                     Get the historical customer counts and MWh usage by month by service class in CT.
                     <div><a href="http://localhost:8080/eversource/v1/customercounts/ct">eversource/v1/customercounts/ct</a></div>
+                </li>
+            </ul>
+        </div>
+        <div id="customer-counts-eversource-cs">
+            <h4>Customer counts for Eversource competitive supply</h4>
+            Eversource CL&P in the customer counts files provides a breakdown of customers by
+            competitive suppliers.
+            <ul>
+                <li>
+                    Get the historical customer counts and MWh usage by month by supplier CT.
+                    <div><a href="http://localhost:8080/eversource_competitive_suppliers/v1/customercounts/ct/start/2014-01-01/end/2014-03-01">eversource_competitive_suppliers/v1/customercounts/ct/start/2014-01-01/end/2014-03-01</a></div>
                 </li>
             </ul>
         </div>

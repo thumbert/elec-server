@@ -16,10 +16,12 @@ import 'package:elec_server/api/api_isone_ptids.dart';
 import 'package:elec_server/api/api_scc_report.dart';
 import 'package:elec_server/api/utilities/api_customer_counts_ngrid.dart' as ngrid;
 import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart' as eversource;
+import 'package:elec_server/api/utilities/api_competitive_suppliers_eversource.dart' as eversourcecs;
 import 'package:elec_server/api/utilities/api_load_eversource.dart' as eversourceLoad;
 import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/api_system_demand.dart';
 import 'package:elec_server/api/api_isone_zonal_demand.dart';
+
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
@@ -44,10 +46,14 @@ registerApis() async {
   _apiServer.addApi(SystemDemand(db3) );
 //  _apiServer.addApi( new ZonalDemand(db3) );
 //
-  Db db4 = Db('mongodb://$host/eversource');
+  var db4 = Db('mongodb://$host/eversource');
   await db4.open();
   _apiServer.addApi( eversource.ApiCustomerCounts(db4) );
   _apiServer.addApi( eversourceLoad.ApiLoadEversource(db4) );
+
+  var db5 = Db('mongodb://$host/utility');
+  await db5.open();
+  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
 
 
 //  var api = new ApiTemperatureNoaa();
