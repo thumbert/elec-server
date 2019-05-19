@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/common_enums.dart';
 import 'package:timeseries/timeseries.dart';

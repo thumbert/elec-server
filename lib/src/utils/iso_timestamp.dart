@@ -1,7 +1,7 @@
 library elec.iso_timestamp;
 
 import 'package:date/date.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 
 Location _eastern = getLocation('US/Eastern');
 

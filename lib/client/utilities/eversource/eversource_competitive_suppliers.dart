@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:timeseries/timeseries.dart';
 
 export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'

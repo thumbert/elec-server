@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:more/ordering.dart';
 import 'package:date/date.dart';

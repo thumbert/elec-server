@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:elec_server/src/db/config.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';

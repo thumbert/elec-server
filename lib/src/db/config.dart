@@ -1,12 +1,6 @@
 library db.config;
 
-import 'dart:io';
-import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:timezone/standalone.dart';
-
-import '../utils/timezone_utils.dart';
-
 
 class ComponentConfig {
   Db _db;
@@ -30,19 +24,19 @@ abstract class Config {
   String host;
   String tzdb;
 
-  ComponentConfig isone_binding_constraints_da;
-  ComponentConfig isone_dam_lmp_hourly;
+//  ComponentConfig isone_binding_constraints_da;
+//  ComponentConfig isone_dam_lmp_hourly;
 
-  Future open() async {
-    await initializeTimeZone(tzdb);
-    await isone_dam_lmp_hourly.db.open();
-    await isone_binding_constraints_da.db.open();
-  }
-
-  Future close() async {
-    await isone_dam_lmp_hourly.db.close();
-    await isone_binding_constraints_da.db.close();
-  }
+//  Future open() async {
+//    //await initializeTimeZone(tzdb);
+//    await isone_dam_lmp_hourly.db.open();
+//    await isone_binding_constraints_da.db.open();
+//  }
+//
+//  Future close() async {
+//    await isone_dam_lmp_hourly.db.close();
+//    await isone_binding_constraints_da.db.close();
+//  }
 
 }
 

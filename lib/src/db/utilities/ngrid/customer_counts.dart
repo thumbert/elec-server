@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
-import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
 import 'package:mongo_dart/mongo_dart.dart';
