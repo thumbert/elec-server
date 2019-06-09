@@ -43,6 +43,7 @@ abstract class IsoExpressReport {
       HttpClient client = new HttpClient();
       HttpClientRequest request = await client.getUrl(Uri.parse(url));
       HttpClientResponse response = await request.close();
+          //.timeout(const Duration(minutes: 1));
       await response.pipe(fileout.openWrite());
     }
   }
