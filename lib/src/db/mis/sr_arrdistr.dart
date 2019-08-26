@@ -22,7 +22,7 @@ class SrArrDistrArchive extends mis.MisReportArchive {
       List<Map> rows, Date reportDate, DateTime version, int tab) {
     var document = <String, dynamic>{};
     document['month'] = reportDate.toString().substring(0,7);  /// yyyy-mm
-    document['version'] = version;
+    document['version'] = version.toIso8601String();
     document['tab'] = tab;
     var columns = rows.first.keys.skip(1);
     for (var column in columns) document[column] = [];
