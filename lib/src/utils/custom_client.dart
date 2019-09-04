@@ -16,3 +16,18 @@ class CustomClient extends BrowserClient {
     return response;
   }
 }
+
+/// Allow all origin.  Please be careful when using this outside a firewall.  
+class CustomClient2 extends BrowserClient {
+  CustomClient2();
+  @override
+  Future<StreamedResponse> send(BaseRequest request) async {
+    request.headers.remove('user-agent');
+    request.headers.remove('content-length');
+    request.headers.addAll({'Access-Controll-Allow-Origin': '*'});
+    request.headers.addAll({'Access-Controll-Allow-Origin': 'POST, OPTIONS'});
+    request.headers.addAll({'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'});
+    StreamedResponse response = await super.send(request);
+    return response;
+  }
+}
