@@ -2,7 +2,7 @@ import 'dart:html';
 
 /// Port of https://www.w3schools.com/howto/howto_js_autocomplete.asp
 
-class Autocomplete {
+class TypeAhead {
 
   DivElement wrapper;
   InputElement _input;
@@ -13,7 +13,7 @@ class Autocomplete {
   DivElement _al;  // autocomplete-list
   int _currentFocus;
 
-  Autocomplete(this.wrapper, this.values, {String placeholder: ''}) {
+  TypeAhead(this.wrapper, this.values, {String placeholder: ''}) {
     _input = InputElement(type: 'text')
       ..id = '${wrapper.id}-input'
       ..placeholder = placeholder;
@@ -21,8 +21,8 @@ class Autocomplete {
 
     // a div element that will hold all the items
     _al = DivElement()
-      ..setAttribute('id', '${_input.id}-autocomplete-list')
-      ..setAttribute('class', 'autocomplete-items');
+      ..setAttribute('id', '${_input.id}-typeahead-list')
+      ..setAttribute('class', 'typeahead-items');
 
 
     _input.onInput.listen((e) {
@@ -81,12 +81,12 @@ class Autocomplete {
     _removeActive(xs);
     if (_currentFocus >= xs.length) _currentFocus = 0;
     if (_currentFocus < 0) _currentFocus = xs.length - 1;
-    xs[_currentFocus].classes.add('autocomplete-active');
+    xs[_currentFocus].classes.add('typeahead-active');
   }
 
   void _removeActive(List<DivElement> xs) {
     for (var i=0; i<xs.length; i++) {
-      xs[i].classes.remove('autocomplete-active');
+      xs[i].classes.remove('typeahead-active');
     }
   }
 

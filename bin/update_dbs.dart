@@ -10,8 +10,8 @@ import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 
 updateIsoExpressData() async {
-  Month month = new Month(2018, 7);
-  List<Date> days = month.splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+  var month = Month(2018, 7);
+  var days = month.splitLeft((dt) => Date(dt.year, dt.month, dt.day)).cast<Date>();
   days = days.where((day) => day.isBefore(Date.today().next.next)).toList();
 
   var archives = [

@@ -63,13 +63,13 @@ DaLmpHourlyTest() async {
 }
 
 Future soloTest() async {
-  var archive = new DaLmpHourlyArchive();
-  Location location = getLocation('US/Eastern');
-  List days = new Interval(new TZDateTime(location, 2018, 1, 1),
-      new TZDateTime(location, 2018, 5, 1))
-      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+  var archive = DaLmpHourlyArchive();
+  var location = getLocation('US/Eastern');
+  var days = Interval(TZDateTime(location, 2018, 5, 1),
+      TZDateTime(location, 2019, 1, 1))
+      .splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
   await archive.dbConfig.db.open();
-  await for (var day in new Stream.fromIterable(days)) {
+  for (var day in days) {
     await archive.downloadDay(day);
     await archive.insertDay(day);
   }
@@ -77,14 +77,14 @@ Future soloTest() async {
 }
 
 main() async {
-  await initializeTimeZone(getLocationTzdb());
-  // //await new DaLmpHourlyArchive().setupDb();
+  await initializeTimeZone();
+  // await DaLmpHourlyArchive().setupDb();
   // await prepareData();
 
-  await DaLmpHourlyTest();
+  //await DaLmpHourlyTest();
 
 //  Db db = new Db('mongodb://localhost/isoexpress');
 //  await new DaLmpHourlyArchive().updateDb(new DaLmp(db));
 
-//  await soloTest();
+  await soloTest();
 }

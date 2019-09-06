@@ -1,6 +1,6 @@
 import 'dart:html';
 
-import 'package:elec_server/src/ui/autocomplete.dart';
+import 'package:elec_server/src/ui/type_ahead.dart';
 
 List<String> getCountries() {
   return [
@@ -232,10 +232,10 @@ List<String> getCountries() {
 main() {
   var countries = getCountries();
 
-  var wrapper = querySelector('#wrapper-ac');
+  var wrapper = querySelector('#wrapper-ta');
   var message = querySelector('#message');
 
-  var ac = Autocomplete(wrapper, countries, placeholder: 'Country name');
+  var ac = TypeAhead(wrapper, countries, placeholder: 'Country name');
   ac.onSelect((e) => message.text = 'You selected ${ac.value}');
 
 }
