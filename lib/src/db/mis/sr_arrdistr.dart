@@ -42,8 +42,10 @@ class SrArrDistrArchive extends mis.MisReportArchive {
     var out = <int,List<Map<String, dynamic>>>{};
     for (var tab in [0,1,2]) {
       var rows = mis.readReportTabAsMap(file, tab: tab);
-      var aux = rowConverter(rows, reportDate, version, tab);
-      out[tab] = [aux];
+      if (rows.isNotEmpty) {
+        var aux = rowConverter(rows, reportDate, version, tab);
+        out[tab] = [aux];
+      }
     }
 
     return out;
