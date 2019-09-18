@@ -1,53 +1,58 @@
 ///
 //  Generated code. Do not modify.
 //  source: timeseries.proto
-///
-// ignore_for_file: non_constant_identifier_names,library_prefixes,unused_import
+//
+// @dart = 2.3
+// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
 import 'dart:async' as $async;
 
-import 'package:grpc/grpc.dart';
+import 'dart:core' as $core;
 
-import 'timeseries.pb.dart';
+import 'package:grpc/service_api.dart' as $grpc;
+import 'timeseries.pb.dart' as $0;
 export 'timeseries.pb.dart';
 
-class LmpClient extends Client {
+class LmpClient extends $grpc.Client {
   static final _$getLmp =
-      new ClientMethod<HistoricalLmpRequest, NumericTimeSeries>(
+      $grpc.ClientMethod<$0.HistoricalLmpRequest, $0.NumericTimeSeries>(
           '/elec.Lmp/GetLmp',
-          (HistoricalLmpRequest value) => value.writeToBuffer(),
-          (List<int> value) => new NumericTimeSeries.fromBuffer(value));
+          ($0.HistoricalLmpRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.NumericTimeSeries.fromBuffer(value));
 
-  LmpClient(ClientChannel channel, {CallOptions options})
+  LmpClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
       : super(channel, options: options);
 
-  ResponseFuture<NumericTimeSeries> getLmp(HistoricalLmpRequest request,
-      {CallOptions options}) {
-    final call = $createCall(
-        _$getLmp, new $async.Stream.fromIterable([request]),
+  $grpc.ResponseFuture<$0.NumericTimeSeries> getLmp(
+      $0.HistoricalLmpRequest request,
+      {$grpc.CallOptions options}) {
+    final call = $createCall(_$getLmp, $async.Stream.fromIterable([request]),
         options: options);
-    return new ResponseFuture(call);
+    return $grpc.ResponseFuture(call);
   }
 }
 
-abstract class LmpServiceBase extends Service {
-  String get $name => 'elec.Lmp';
+abstract class LmpServiceBase extends $grpc.Service {
+  $core.String get $name => 'elec.Lmp';
 
   LmpServiceBase() {
-    $addMethod(new ServiceMethod<HistoricalLmpRequest, NumericTimeSeries>(
-        'GetLmp',
-        getLmp_Pre,
-        false,
-        false,
-        (List<int> value) => new HistoricalLmpRequest.fromBuffer(value),
-        (NumericTimeSeries value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.HistoricalLmpRequest, $0.NumericTimeSeries>(
+            'GetLmp',
+            getLmp_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.HistoricalLmpRequest.fromBuffer(value),
+            ($0.NumericTimeSeries value) => value.writeToBuffer()));
   }
 
-  $async.Future<NumericTimeSeries> getLmp_Pre(
-      ServiceCall call, $async.Future request) async {
+  $async.Future<$0.NumericTimeSeries> getLmp_Pre($grpc.ServiceCall call,
+      $async.Future<$0.HistoricalLmpRequest> request) async {
     return getLmp(call, await request);
   }
 
-  $async.Future<NumericTimeSeries> getLmp(
-      ServiceCall call, HistoricalLmpRequest request);
+  $async.Future<$0.NumericTimeSeries> getLmp(
+      $grpc.ServiceCall call, $0.HistoricalLmpRequest request);
 }

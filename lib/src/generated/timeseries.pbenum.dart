@@ -1,61 +1,56 @@
 ///
 //  Generated code. Do not modify.
 //  source: timeseries.proto
-///
-// ignore_for_file: non_constant_identifier_names,library_prefixes,unused_import
+//
+// @dart = 2.3
+// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
 // ignore_for_file: UNDEFINED_SHOWN_NAME,UNUSED_SHOWN_NAME
-import 'dart:core' show int, dynamic, String, List, Map;
+import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class EnergyMarket_Value extends $pb.ProtobufEnum {
-  static const EnergyMarket_Value DA = const EnergyMarket_Value._(0, 'DA');
-  static const EnergyMarket_Value RT = const EnergyMarket_Value._(1, 'RT');
+  static const EnergyMarket_Value DA = EnergyMarket_Value._(0, 'DA');
+  static const EnergyMarket_Value RT = EnergyMarket_Value._(1, 'RT');
 
-  static const List<EnergyMarket_Value> values = const <EnergyMarket_Value> [
+  static const $core.List<EnergyMarket_Value> values = <EnergyMarket_Value> [
     DA,
     RT,
   ];
 
-  static final Map<int, EnergyMarket_Value> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static EnergyMarket_Value valueOf(int value) => _byValue[value];
-  static void $checkItem(EnergyMarket_Value v) {
-    if (v is! EnergyMarket_Value) $pb.checkItemFailed(v, 'EnergyMarket_Value');
-  }
+  static final $core.Map<$core.int, EnergyMarket_Value> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static EnergyMarket_Value valueOf($core.int value) => _byValue[value];
 
-  const EnergyMarket_Value._(int v, String n) : super(v, n);
+  const EnergyMarket_Value._($core.int v, $core.String n) : super(v, n);
 }
 
 class LmpComponent_Component extends $pb.ProtobufEnum {
-  static const LmpComponent_Component LMP = const LmpComponent_Component._(0, 'LMP');
-  static const LmpComponent_Component CONGESTION = const LmpComponent_Component._(1, 'CONGESTION');
-  static const LmpComponent_Component MARGINAL_LOSS = const LmpComponent_Component._(2, 'MARGINAL_LOSS');
-  static const LmpComponent_Component ENERGY = const LmpComponent_Component._(3, 'ENERGY');
+  static const LmpComponent_Component LMP = LmpComponent_Component._(0, 'LMP');
+  static const LmpComponent_Component CONGESTION = LmpComponent_Component._(1, 'CONGESTION');
+  static const LmpComponent_Component MARGINAL_LOSS = LmpComponent_Component._(2, 'MARGINAL_LOSS');
+  static const LmpComponent_Component ENERGY = LmpComponent_Component._(3, 'ENERGY');
 
-  static const List<LmpComponent_Component> values = const <LmpComponent_Component> [
+  static const $core.List<LmpComponent_Component> values = <LmpComponent_Component> [
     LMP,
     CONGESTION,
     MARGINAL_LOSS,
     ENERGY,
   ];
 
-  static final Map<int, LmpComponent_Component> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static LmpComponent_Component valueOf(int value) => _byValue[value];
-  static void $checkItem(LmpComponent_Component v) {
-    if (v is! LmpComponent_Component) $pb.checkItemFailed(v, 'LmpComponent_Component');
-  }
+  static final $core.Map<$core.int, LmpComponent_Component> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static LmpComponent_Component valueOf($core.int value) => _byValue[value];
 
-  const LmpComponent_Component._(int v, String n) : super(v, n);
+  const LmpComponent_Component._($core.int v, $core.String n) : super(v, n);
 }
 
 class IntervalType_Type extends $pb.ProtobufEnum {
-  static const IntervalType_Type IRREGULAR = const IntervalType_Type._(0, 'IRREGULAR');
-  static const IntervalType_Type HOURLY = const IntervalType_Type._(1, 'HOURLY');
-  static const IntervalType_Type DAILY = const IntervalType_Type._(2, 'DAILY');
-  static const IntervalType_Type MONTHLY = const IntervalType_Type._(3, 'MONTHLY');
-  static const IntervalType_Type MIN15 = const IntervalType_Type._(4, 'MIN15');
+  static const IntervalType_Type IRREGULAR = IntervalType_Type._(0, 'IRREGULAR');
+  static const IntervalType_Type HOURLY = IntervalType_Type._(1, 'HOURLY');
+  static const IntervalType_Type DAILY = IntervalType_Type._(2, 'DAILY');
+  static const IntervalType_Type MONTHLY = IntervalType_Type._(3, 'MONTHLY');
+  static const IntervalType_Type MIN15 = IntervalType_Type._(4, 'MIN15');
 
-  static const List<IntervalType_Type> values = const <IntervalType_Type> [
+  static const $core.List<IntervalType_Type> values = <IntervalType_Type> [
     IRREGULAR,
     HOURLY,
     DAILY,
@@ -63,12 +58,9 @@ class IntervalType_Type extends $pb.ProtobufEnum {
     MIN15,
   ];
 
-  static final Map<int, IntervalType_Type> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static IntervalType_Type valueOf(int value) => _byValue[value];
-  static void $checkItem(IntervalType_Type v) {
-    if (v is! IntervalType_Type) $pb.checkItemFailed(v, 'IntervalType_Type');
-  }
+  static final $core.Map<$core.int, IntervalType_Type> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static IntervalType_Type valueOf($core.int value) => _byValue[value];
 
-  const IntervalType_Type._(int v, String n) : super(v, n);
+  const IntervalType_Type._($core.int v, $core.String n) : super(v, n);
 }
 
