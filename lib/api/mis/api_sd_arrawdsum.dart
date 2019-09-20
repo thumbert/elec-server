@@ -20,17 +20,17 @@ class SdArrAwdSum {
     location = getLocation('US/Eastern');
   }
 
-  //http://10.101.10.27:8080/sd_arrawdsum/v1/accountId/000050428/start/201801/end/201802
-  @ApiMethod(path: 'accountId/000050428/start/{start}/end/{end}')
-  Future<ApiResponse> reportData(String start, String end) async {
+  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+  Future<ApiResponse> reportData(String accountId, String start, String end) async {
 
-    var startMonth = Month.parse(start).toIso8601String();
-    var endMonth = Month.parse(end).toIso8601String();
+    var startMonth = parseMonth(start).toIso8601String();
+    var endMonth = parseMonth(end).toIso8601String();
 
     var query = where;
+    query.eq('account', accountId);
     query.gte('month', startMonth);
     query.lte('month', endMonth);
-    query.excludeFields(['_id']);
+    query.excludeFields(['_id', 'account']);
 
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
