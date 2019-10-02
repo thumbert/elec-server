@@ -30,35 +30,30 @@ const String host = '127.0.0.1';
 
 registerApis() async {
 
-  Db db2 = new Db('mongodb://$host/isone');
-  await db2.open();
-  _apiServer.addApi(ApiPtids(db2));
-  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
+//  Db db2 = new Db('mongodb://$host/isone');
+//  await db2.open();
+//  _apiServer.addApi(ApiPtids(db2));
+//  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
 
   Db db3 = new Db('mongodb://$host/isoexpress');
   await db3.open();
   _apiServer.addApi(DaLmp(db3) );
-//  _apiServer.addApi( new RtLmp(db3) );
-  _apiServer.addApi(BindingConstraints(db3) );
-  _apiServer.addApi(DaEnergyOffers(db3) );
-  _apiServer.addApi(SccReport(db3) );
-  _apiServer.addApi(DaDemandBids(db3) );
-  _apiServer.addApi(SystemDemand(db3) );
-//  _apiServer.addApi( new ZonalDemand(db3) );
+//  _apiServer.addApi(BindingConstraints(db3) );
+//  _apiServer.addApi(DaEnergyOffers(db3) );
+//  _apiServer.addApi(SccReport(db3) );
+//  _apiServer.addApi(DaDemandBids(db3) );
+//  _apiServer.addApi(SystemDemand(db3) );
 //
-  var db4 = Db('mongodb://$host/eversource');
-  await db4.open();
-  _apiServer.addApi( eversource.ApiCustomerCounts(db4) );
-  _apiServer.addApi( eversourceLoad.ApiLoadEversource(db4) );
+//  var db4 = Db('mongodb://$host/eversource');
+//  await db4.open();
+//  _apiServer.addApi( eversource.ApiCustomerCounts(db4) );
+//  _apiServer.addApi( eversourceLoad.ApiLoadEversource(db4) );
+//
+//  var db5 = Db('mongodb://$host/utility');
+//  await db5.open();
+//  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
 
-  var db5 = Db('mongodb://$host/utility');
-  await db5.open();
-  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
 
-
-//  var api = new ApiTemperatureNoaa();
-//  await api.init();
-//  _apiServer.addApi(api);
 }
 
 
