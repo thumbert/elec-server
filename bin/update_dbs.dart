@@ -15,11 +15,11 @@ updateIsoExpressData() async {
   days = days.where((day) => day.isBefore(Date.today().next.next)).toList();
 
   var archives = [
-    new DaLmpHourlyArchive(),
-    new RtLmpHourlyArchive(),
-    new DaBindingConstraintsReportArchive(),
-    new DaClearedDemandReportArchive(),
-    new RtSystemDemandReportArchive(),
+    DaLmpHourlyArchive(),
+    RtLmpHourlyArchive(),
+    DaBindingConstraintsReportArchive(),
+    DaClearedDemandReportArchive(),
+    RtSystemDemandReportArchive(),
   ];
 
   for (var archive in archives) {

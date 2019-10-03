@@ -9,9 +9,10 @@ import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
 /// prepare data by downloading a few reports
+/// Missing 9/29/2018 and 9/30/2018 !!!
 prepareData() async {
-  var archive = new DaLmpHourlyArchive();
-  var days = [new Date(2017, 3, 12), new Date(2017, 11, 5)];
+  var archive = DaLmpHourlyArchive();
+  var days = [Date(2018, 9, 26), Date(2018, 9, 29), Date(2018, 9, 30),];
   await archive.downloadDays(days);
 }
 
@@ -57,17 +58,18 @@ DaLmpHourlyTest() async {
       var d2 = Date.today().next.next;
       res = await archive.hasDay(d2);
       expect(res, false);
-
     });
   });
 }
 
 Future soloTest() async {
   var archive = DaLmpHourlyArchive();
+//  await archive.setupDb();
   var location = getLocation('US/Eastern');
-  var days = Interval(TZDateTime(location, 2018, 5, 1),
-      TZDateTime(location, 2019, 1, 1))
-      .splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
+  var days = Interval(
+          TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 9, 1))
+      .splitLeft((dt) => Date.fromTZDateTime(dt))
+      .cast<Date>();
   await archive.dbConfig.db.open();
   for (var day in days) {
     await archive.downloadDay(day);
@@ -86,5 +88,5 @@ main() async {
 //  Db db = new Db('mongodb://localhost/isoexpress');
 //  await new DaLmpHourlyArchive().updateDb(new DaLmp(db));
 
-  await soloTest();
+   await soloTest();
 }

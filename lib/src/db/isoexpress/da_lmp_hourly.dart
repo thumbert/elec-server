@@ -16,25 +16,25 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   String dir;
 
   DaLmpHourlyArchive({this.dbConfig, this.dir}) {
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'da_lmp_hourly';
-    }
-    if (dir == null)
-      dir = baseDir + 'PricingReports/DaLmpHourly/Raw/';
+    dbConfig ??= ComponentConfig()
+      ..host = '127.0.0.1'
+      ..dbName = 'isoexpress'
+      ..collectionName = 'da_lmp_hourly';
 
+    dir ??= baseDir + 'PricingReports/DaLmpHourly/Raw/';
   }
+
   String reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/' +
-      'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv';
+      'WW_DALMP_ISO_' +
+      yyyymmdd(asOfDate) +
+      '.csv';
   File getFilename(Date asOfDate) =>
       new File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
-  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
-    var row = <String,dynamic>{};
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
+    var row = <String, dynamic>{};
     row['date'] = formatDate(rows.first['Date']);
     row['ptid'] = int.parse(rows.first['Location ID']);
     row['hourBeginning'] = [];
@@ -42,7 +42,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     row['lmp'] = [];
     row['marginal_loss'] = [];
     rows.forEach((e) {
-      row['hourBeginning'].add(parseHourEndingStamp(e['Date'], e['Hour Ending']));
+      row['hourBeginning']
+          .add(parseHourEndingStamp(e['Date'], e['Hour Ending']));
       row['lmp'].add(e['Locational Marginal Price']);
       row['congestion'].add(e['Congestion Component']);
       row['marginal_loss'].add(e['Marginal Loss Component']);
@@ -50,11 +51,13 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     return row;
   }
 
-  List<Map<String,dynamic>> processFile(File file) {
+  List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return <Map<String,dynamic>>[];
+    if (data.isEmpty) return <Map<String, dynamic>>[];
     var dataByPtids = groupBy(data, (row) => row['Location ID']);
-    return dataByPtids.keys.map((ptid) => converter(dataByPtids[ptid])).toList();
+    return dataByPtids.keys
+        .map((ptid) => converter(dataByPtids[ptid]))
+        .toList();
   }
 
   /// Check if this date is in the db already
@@ -64,13 +67,12 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     return true;
   }
 
-
   /// Recreate the collection from scratch.
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
-      await dbConfig.coll.drop();
+//    List<String> collections = await dbConfig.db.getCollectionNames();
+//    if (collections.contains(dbConfig.collectionName))
+//      await dbConfig.coll.drop();
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
@@ -78,17 +80,23 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
           'date': 1,
         },
         unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1});
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1});
     await dbConfig.db.close();
   }
 
-  Future<Map<String,String>> lastDay() async {
+  Future<Map<String, String>> lastDay() async {
     List pipeline = [];
-    pipeline.add({'\$match': {'ptid': {'\$eq': 4000}}});
-    pipeline.add({'\$group': {
-      '_id': 0,
-      'lastDay': {'\$max': '\$date'}}});
+    pipeline.add({
+      '\$match': {
+        'ptid': {'\$eq': 4000}
+      }
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': 0,
+        'lastDay': {'\$max': '\$date'}
+      }
+    });
     Map res = await dbConfig.coll.aggregate(pipeline);
     return {'lastDay': res['result'][0]['lastDay']};
   }
