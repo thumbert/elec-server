@@ -35,7 +35,7 @@ registerApis() async {
 //  _apiServer.addApi(ApiPtids(db2));
 //  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
 
-  Db db3 = new Db('mongodb://$host/isoexpress');
+  var db3 = Db('mongodb://$host/isoexpress');
   await db3.open();
   _apiServer.addApi(DaLmp(db3) );
 //  _apiServer.addApi(BindingConstraints(db3) );
