@@ -59,8 +59,26 @@ class MarksArchive {
   /// Basic checks on the document structure.
   void checkDocument(Map<String,dynamic> document) {
     var keys = document.keys.toSet();
-    if (!keys.containsAll(['asOfDate', 'curveId']))
-      throw ArgumentError('Document needs to contain asOfDate and curveId');
+    var mustHaveKeys = <String>{'asOfDate', 'curveId', 'months'};
+    if (!keys.containsAll(mustHaveKeys))
+      throw ArgumentError('Document must contain asOfDate, curveId, months');
+
+    // check that the months start from prompt month
+    var month0 = Month.parse((document['asOfDate'] as String).substring(0,7));
+    var month1 = Month.parse((document['months'] as List).first as String);
+    var monthN = Month.parse((document['months'] as List).last as String);
+    if (month0.next != month1)
+      throw ArgumentError('Months must start with prompt month.');
+
+    // check that the bucket names are valid
+    var bucketKeys = keys.difference(mustHaveKeys);
+    var validBuckets = {'7x24', '5x16', '2x16H', '7x8'};
+    if (!bucketKeys.difference(validBuckets).isEmpty)
+      throw ArgumentError('Invalid buckets $bucketKeys');
+
+    // check that you mark until Dec
+    if (monthN.month != 12)
+      throw ArgumentError('Need to mark until December');
   }
 
   setup() async {
