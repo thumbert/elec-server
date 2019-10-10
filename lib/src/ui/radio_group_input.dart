@@ -22,7 +22,7 @@ class RadioGroupInput {
       {orientation: RadioGroupOrientation.horizontal}) {
     var _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px');
 
-    var _name = labels.join(); // name of the radio group
+    var _name =  wrapper.id + labels.join(); // name of the radio group
     _buttons = List(labels.length);
 
     if (orientation == RadioGroupOrientation.horizontal) {
