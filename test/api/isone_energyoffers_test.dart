@@ -52,7 +52,7 @@ ApiTest() async {
       expect(data.length, 308);
     });
     test('get energy offers for one asset between a start/end date', () async {
-      var response = await api.getEnergyOffersForAssetId('41406', '20170101', '20170102');
+      var response = await api.getEnergyOffersForAssetId('41406', '20170701', '20170702');
       var data = json.decode(response.result);
       expect(data.length, 2);
     });
@@ -61,7 +61,7 @@ ApiTest() async {
 }
 
 insertDays(Month month) async {
-  var archive = new DaEnergyOfferArchive();
+  var archive = DaEnergyOfferArchive();
   await archive.dbConfig.db.open();
   for (var day in month.days()) {
     await archive.downloadDay(day);
@@ -73,13 +73,13 @@ insertDays(Month month) async {
 
 main() async {
   await initializeTimeZone();
-  await ApiTest();
+//  await ApiTest();
 
   //var months = Month.current().subtract(4).previousN(18);
-//  var months = [Month(2018,7)];
-//  months.forEach((month) async {
-//    await insertDays(month);
-//  });
+  var months = [Month(2018,4)];
+  months.forEach((month) async {
+    await insertDays(month);
+  });
 
 
 

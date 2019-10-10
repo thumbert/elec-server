@@ -10,7 +10,7 @@ import 'package:table/table.dart';
 import 'package:elec_server/client/isoexpress/da_energy_offer.dart';
 
 tests() async {
-  Location location = getLocation('US/Eastern');
+  var location = getLocation('US/Eastern');
   var api = DaEnergyOffers(Client());
   group('DA Energy Offers client:', () {
     test('get energy offers for hour 2017-07-01 16:00:00', () async {
@@ -51,8 +51,8 @@ tests() async {
       expect(date is Date, true);
     });
     test('get energy offers for asset 41406 between 2 dates', () async {
-      var data = await api.getDaEnergyOffersForAsset(
-          41406, Date(2018, 4, 1), Date(2018, 4, 2));
+      var data = await api.getDaEnergyOffersForAsset(41406, Date(2017, 7, 1),
+          Date(2017, 7, 2));
       expect(data.length, 2);
     });
     test('get energy offers price/quantity timeseries for asset 41406 ',
@@ -83,87 +83,87 @@ tests() async {
 
 
 /// Get all the units
-totalMwByParticipant() async {
-  var api = DaEnergyOffers(Client());
-  var location = getLocation('US/Eastern');
-  var hour = Hour.beginning(TZDateTime(location, 2016));
-
-  var eo = await api.getDaEnergyOffers(hour);
-  var grp = groupBy(eo, (e) => e['Masked Lead Participant ID']);
-  var out = [];
-  /// TODO: continue the implementation
-
-
-}
-
-
-identifyUnits() async {
-  var location = getLocation('US/Eastern');
-  var api = DaEnergyOffers(Client());
-
-  var start = Date(2016, 1, 1);
-  var end = Date(2018, 7, 31);
-
-  var participantId = 591975;
-
-  var assetsStart =
-      (await api.assetsForDay(start))
-          .where((e) => e['Masked Lead Participant ID'] == participantId)
-          .map((e) => e['Masked Asset ID']).toSet();
-  var assetsEnd =
-      (await api.assetsForDay(end))
-          .where((e) => e['Masked Lead Participant ID'] == participantId)
-          .map((e) => e['Masked Asset ID']).toSet();
-  var newAssets = assetsEnd.intersection(assetsStart);
-  print(newAssets);
+//totalMwByParticipant() async {
+//  var api = DaEnergyOffers(Client());
+//  var location = getLocation('US/Eastern');
+//  var hour = Hour.beginning(TZDateTime(location, 2016));
+//
+//  var eo = await api.getDaEnergyOffers(hour);
+//  var grp = groupBy(eo, (e) => e['Masked Lead Participant ID']);
+//  var out = [];
+//  /// TODO: continue the implementation
+//
+//
+//}
 
 
-
-//  var newAssets = [86083, 25645, 54465, 80076, 52323].toSet();
-//  print('new assets:');
+//identifyUnits() async {
+//  var location = getLocation('US/Eastern');
+//  var api = DaEnergyOffers(Client());
+//
+//  var start = Date(2016, 1, 1);
+//  var end = Date(2018, 7, 31);
+//
+//  var participantId = 591975;
+//
+//  var assetsStart =
+//      (await api.assetsForDay(start))
+//          .where((e) => e['Masked Lead Participant ID'] == participantId)
+//          .map((e) => e['Masked Asset ID']).toSet();
+//  var assetsEnd =
+//      (await api.assetsForDay(end))
+//          .where((e) => e['Masked Lead Participant ID'] == participantId)
+//          .map((e) => e['Masked Asset ID']).toSet();
+//  var newAssets = assetsEnd.intersection(assetsStart);
 //  print(newAssets);
-
-//  var aux = newAssets.map((assetId) async {
-//    return await api.getDaEnergyOffersForAsset(assetId, end, end);
-//  }).toList();
-//  var data = await Future.wait(aux);
-//  print(data);
-
-  /// get ecomax by assetId
-//  var stack = await api.getGenerationStack(Hour.beginning(
-//      TZDateTime(location, 2018,7,1,16)));
-//  var ecoMax = stack.map((e) => {
-//    'assetId': e['assetId'],
-//    'Economic Maximum': e['Economic Maximum'],
-//  }).toList();
-//  ecoMax.sort((a,b) => -a['Economic Maximum'].compareTo(b['Economic Maximum']));
-//  var uAssets = unique(ecoMax);
-//  uAssets.forEach(print);
-
-//  /// get Masked Lead Participant ID when you know the Masked Asset ID
-//  var info = await api.assetsForDay(end);
-//  var aux =
-//      info.where((e) => newAssets.contains(e['Masked Asset ID'])).toList();
-//  aux.forEach(print);
 //
-//  ///
-//  int maskedParticipantId = 591975;
-//  var data = await api.assetsForParticipantId(
-//      maskedParticipantId, Date(2017, 1, 1), Date(2018, 7, 1));
-//  //print(data);
-//  //data.forEach(print);
 //
-//  var nest = Nest()
-//    ..key((e) => e['date'])
-//    ..rollup((List xs) => xs.length);
-//  var count = nest.map(data);
-//  count.entries.forEach(print);
-  //print(count);
-}
+//
+////  var newAssets = [86083, 25645, 54465, 80076, 52323].toSet();
+////  print('new assets:');
+////  print(newAssets);
+//
+////  var aux = newAssets.map((assetId) async {
+////    return await api.getDaEnergyOffersForAsset(assetId, end, end);
+////  }).toList();
+////  var data = await Future.wait(aux);
+////  print(data);
+//
+//  /// get ecomax by assetId
+////  var stack = await api.getGenerationStack(Hour.beginning(
+////      TZDateTime(location, 2018,7,1,16)));
+////  var ecoMax = stack.map((e) => {
+////    'assetId': e['assetId'],
+////    'Economic Maximum': e['Economic Maximum'],
+////  }).toList();
+////  ecoMax.sort((a,b) => -a['Economic Maximum'].compareTo(b['Economic Maximum']));
+////  var uAssets = unique(ecoMax);
+////  uAssets.forEach(print);
+//
+////  /// get Masked Lead Participant ID when you know the Masked Asset ID
+////  var info = await api.assetsForDay(end);
+////  var aux =
+////      info.where((e) => newAssets.contains(e['Masked Asset ID'])).toList();
+////  aux.forEach(print);
+////
+////  ///
+////  int maskedParticipantId = 591975;
+////  var data = await api.assetsForParticipantId(
+////      maskedParticipantId, Date(2017, 1, 1), Date(2018, 7, 1));
+////  //print(data);
+////  //data.forEach(print);
+////
+////  var nest = Nest()
+////    ..key((e) => e['date'])
+////    ..rollup((List xs) => xs.length);
+////  var count = nest.map(data);
+////  count.entries.forEach(print);
+//  //print(count);
+//}
 
 main() async {
   await initializeTimeZone();
-  //await tests();
+  await tests();
 
-  await identifyUnits();
+//  await identifyUnits();
 }

@@ -19,196 +19,108 @@ export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
 const String USER_AGENT = 'dart-api-client da_energy_offer/v1';
 
 class DaEnergyOffers {
-  final commons.ApiRequester _requester;
   static final location = getLocation('US/Eastern');
+  String rootUrl;
+  String servicePath;
 
-  DaEnergyOffers(http.Client client,
-      {String rootUrl: "http://localhost:8080/",
-      String servicePath: "da_energy_offers/v1/"})
-      : _requester =
-            new commons.ApiRequester(client, rootUrl, servicePath, USER_AGENT);
+  DaEnergyOffers(http.Client client, {this.rootUrl: "http://localhost:8080/",
+      this.servicePath: "da_energy_offers/v1/"});
 
   /// Get all the energy offers for a given hour.  All assets.
-  Future<List<Map>> getDaEnergyOffers(Hour hour) {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
+  Future<List<Map<String,dynamic>>> getDaEnergyOffers(Hour hour) async {
     var aux = toIsoHourEndingStamp(hour.start);
-    String startDate = aux[0];
-    String hourEnding = aux[1];
-    _url = 'date/' +
+    var startDate = aux[0];
+    var hourEnding = aux[1];
+    var _url = rootUrl + servicePath + 'date/' +
         commons.Escaper.ecapeVariable('${startDate}') +
         '/hourending/' +
         commons.Escaper.ecapeVariable('${hourEnding}');
 
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response
-        .then((data) => (json.decode(data['result']) as List).cast<Map>());
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    var out = (json.decode(data['result']) as List).cast<Map<String,dynamic>>();
+
+    return out;
   }
 
   /// Get the energy offers of an asset between a start/end date
   Future<List<Map<String, dynamic>>> getDaEnergyOffersForAsset(
-      int maskedAssetId, Date start, Date end) {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'assetId/${maskedAssetId.toString()}' +
+      int maskedAssetId, Date start, Date end) async {
+    var _url =  rootUrl + servicePath + 'assetId/${maskedAssetId.toString()}' +
         '/start/' +
         commons.Escaper.ecapeVariable('${start.toString()}') +
         '/end/' +
         commons.Escaper.ecapeVariable('${end.toString()}');
 
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) {
-      var out =
-          (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
-      out.forEach((e) {
-        e['hours'] = json.decode(e['hours']);
-      });
-      return out;
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    var out = (json.decode(data['result']) as List).cast<Map<String,dynamic>>();
+    out.forEach((e) {
+      e['hours'] = json.decode(e['hours']);
     });
+    return out;
   }
 
   /// Get the generation stack for this hour
-  Future<List<Map<String, dynamic>>> getGenerationStack(Hour hour) {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
+  Future<List<Map<String, dynamic>>> getGenerationStack(Hour hour) async {
     var aux = toIsoHourEndingStamp(hour.start);
-    String startDate = aux[0];
-    String hourEnding = aux[1];
-    _url = 'stack/date/' +
+    var startDate = aux[0];
+    var hourEnding = aux[1];
+    var _url = rootUrl + servicePath + 'stack/date/' +
         commons.Escaper.ecapeVariable('${startDate}') +
         '/hourending/' +
         commons.Escaper.ecapeVariable('${hourEnding}');
 
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) =>
-        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    return (json.decode(data['result']) as List).cast<Map<String,dynamic>>();
   }
 
   /// Get the masked asset id and the masked participant id for this date.
-  Future<List<Map<String, dynamic>>> assetsForDay(Date date) {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'assets/day/' + commons.Escaper.ecapeVariable('${date.toString()}');
-
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) =>
-        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
+  Future<List<Map<String, dynamic>>> assetsForDay(Date date) async {
+    var _url =  rootUrl + servicePath + 'assets/day/'
+        + commons.Escaper.ecapeVariable('${date.toString()}');
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    return (json.decode(data['result']) as List).cast<Map<String,dynamic>>();
   }
 
   /// Get the masked asset ids of a masked participant id between a start and end date.
   Future<List<Map<String, dynamic>>> assetsForParticipantId(
-      int maskedParticipantId, Date start, Date end) {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'assets/participantId/${maskedParticipantId}' +
-        '/start/' +
+      int maskedParticipantId, Date start, Date end) async {
+    var _url = rootUrl + servicePath +
+        'assets/participantId/${maskedParticipantId}' + '/start/' +
         commons.Escaper.ecapeVariable('${start.toString()}') +
         '/end/' +
         commons.Escaper.ecapeVariable('${end.toString()}');
 
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) =>
-        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    return (json.decode(data['result']) as List).cast<Map<String,dynamic>>();
   }
 
   /// Get the daily variable between a start/end date
-  Future<List<Map<String, dynamic>>> dailyVariable(String variable, Date start, 
-      Date end) {
-    var _url = null;
-    var _queryParams = Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'daily/variable/' + 
+  Future<List<Map<String, dynamic>>> dailyVariable(String variable, Date start,
+      Date end) async {
+    var _url = rootUrl + servicePath + 'daily/variable/' +
         commons.Escaper.ecapeVariable('${variable}') +
         '/start/' +
         commons.Escaper.ecapeVariable('${start.toString()}') +
         '/end/' +
         commons.Escaper.ecapeVariable('${end.toString()}');
 
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) =>
-        (json.decode(data['result']) as List).cast<Map<String, dynamic>>());
-  }  
-    
-    
-    
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    return (json.decode(data['result']) as List).cast<Map<String,dynamic>>();
+  }
+
+
   /// Get the last date inserted in the database
-  Future<Date> lastDate() {
-    var _url = null;
-    var _queryParams = new Map<String, List<String>>();
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'lastday';
-
-    var _response = _requester.request(_url, "GET",
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response
-        .then((data) => Date.parse(json.decode(data['result']) as String));
+  Future<Date> lastDate() async {
+    var _url = rootUrl + servicePath + 'lastday';
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    return Date.parse(json.decode(data['result']));
   }
 }
 

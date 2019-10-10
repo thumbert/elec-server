@@ -25,14 +25,14 @@ class DaLmp {
   static final DateFormat _mthFmt = new DateFormat('yyyy-MM');
 
   DaLmp(http.Client client,
-      {this.rootUrl: "http://localhost:8080/",
-      this.servicePath: "dalmp/v1/"});
+      {this.rootUrl: "http://localhost:8080/", this.servicePath: "dalmp/v1/"});
 
   /// Get hourly prices for a ptid between a start and end date.
-  Future<TimeSeries<double>> getHourlyLmp(int ptid, LmpComponent component,
-      Date start, Date end) async {
+  Future<TimeSeries<double>> getHourlyLmp(
+      int ptid, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString().substring(13);
-    var _url = rootUrl + servicePath +
+    var _url = rootUrl +
+        servicePath +
         'hourly/$cmp/ptid/' +
         commons.Escaper.ecapeVariable('${ptid.toString()}') +
         '/start/' +
@@ -42,14 +42,12 @@ class DaLmp {
 
     var _response = await http.get(_url);
     var data = json.decode(_response.body);
-      var aux = json.decode(data['result']) as List;
-      var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
-          Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])), e[cmp])));
-      return ts;
-
-
+    var aux = json.decode(data['result']) as List;
+    var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
+        Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),
+        e[cmp])));
+    return ts;
   }
-
 
   /// Get daily prices for a ptid/bucket between a start and end date.
 //  Future<TimeSeries<double>> getDailyLmpBucket(int ptid, LmpComponent component,
@@ -127,7 +125,6 @@ class DaLmp {
 //    return out;
 //  }
 
-
   /// Get monthly prices for a ptid/bucket between a start and end date.
 //  Future<TimeSeries<double>> getMonthlyLmpBucket(int ptid, LmpComponent component,
 //      Bucket bucket, Month start, Month end) async {
@@ -164,8 +161,4 @@ class DaLmp {
 //    return data;
 //  }
 
-
 }
-
-
-

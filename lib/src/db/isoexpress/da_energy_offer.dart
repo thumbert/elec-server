@@ -20,12 +20,11 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   var location = getLocation('US/Eastern');
 
   DaEnergyOfferArchive({this.dbConfig, this.dir}) {
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'da_energy_offer';
-    }
+    dbConfig ??= ComponentConfig()
+      ..host = '127.0.0.1'
+      ..dbName = 'isoexpress'
+      ..collectionName = 'da_energy_offer';
+
     dir ??= baseDir + 'PricingReports/DaEnergyOffer/Raw/';
   }
   String reportName = 'Day-Ahead Energy Market Historical Offer Report';

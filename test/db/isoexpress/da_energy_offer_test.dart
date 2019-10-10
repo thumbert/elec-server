@@ -47,11 +47,12 @@ tests() async {
 
 
 Future insertDays() async {
-  Location location = getLocation('US/Eastern');
+  var location = getLocation('US/Eastern');
   var archive = DaEnergyOfferArchive();
-  var days = Interval(TZDateTime(location, 2016, 1, 1),
-      TZDateTime(location,2016, 1, 31))
-      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+  //await archive.setupDb();
+  var days = Interval(TZDateTime(location, 2018, 1),
+      TZDateTime(location, 2018, 2))
+      .splitLeft((dt) => Date.fromTZDateTime(dt));
   await archive.dbConfig.db.open();
   for (var day in days) {
     await archive.downloadDay(day);
