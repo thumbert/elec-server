@@ -13,8 +13,8 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 prepareData() async {
   var archive = new DaBindingConstraintsReportArchive();
   var days = [
-    new Date(2015,2,17),    // empty file
-    new Date(2017,12,13)    // plenty of constraints
+    Date(2015,2,17),    // empty file
+    Date(2017,12,13)    // plenty of constraints
   ];
   await archive.downloadDays(days);
 }
@@ -30,7 +30,7 @@ DaBindingConstraintsTest() async {
       await archive.dbConfig.db.close();
     });
     test('read binding constraints files', () async {
-      File file = archive.getFilename(new Date(2017,12,13));
+      var file = archive.getFilename(Date(2017,12,13));
       var report = new mis.MisReport(file);
       //expect(await report.forDate(), new Date(2017,12,13));
       expect(await report.filename(), 'da_binding_constraints_final_20171213.csv');
@@ -39,36 +39,32 @@ DaBindingConstraintsTest() async {
       var data2 = data.map((Map row) => archive.converter([row])).toList();
       expect(data2.first['Marginal Value'] is num, true);
     });
-
-    test('DA Binding Constraints Report - empty', () async {
-      File file = new DaBindingConstraintsReportArchive().getFilename(new Date(2015,2,17));
-      var report = new mis.MisReport(file);
+    test('empty file for 2015-02-17', () async {
+      var file = DaBindingConstraintsReportArchive().getFilename(Date(2015,2,17));
+      var report = mis.MisReport(file);
       var res = report.readTabAsMap(tab: 0);
       expect(res, []);
     });
 
     test('DA Binding Constraints Report for 2018-07-10 has duplicates', () async {
-      File file = new DaBindingConstraintsReportArchive().getFilename(new Date(2018,7,10));
-      var report = new mis.MisReport(file);
+      var file = DaBindingConstraintsReportArchive().getFilename(Date(2018,7,10));
+      var report = mis.MisReport(file);
       var res = report.readTabAsMap(tab: 0);
-      await archive.insertDay(new Date(2018, 7, 10));
+      await archive.insertDay(Date(2018, 7, 10));
       expect(res.length, 20);
     });
-
-
 
   });
 }
 
 uploadDays() async {
-  Location location = getLocation('US/Eastern');
-  var archive = new DaBindingConstraintsReportArchive();
-  List days =
-  new Interval(new TZDateTime(location, 2017, 1, 1),
-      new TZDateTime(location, 2017, 1, 5))
-      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day, location: location));
+  var location = getLocation('US/Eastern');
+  var archive = DaBindingConstraintsReportArchive();
+  var days = Interval(TZDateTime(location, 2017, 1, 1),
+      TZDateTime(location, 2018, 1, 1))
+      .splitLeft((dt) => Date(dt.year, dt.month, dt.day, location: location));
   await archive.dbConfig.db.open();
-  await for (var day in new Stream.fromIterable(days)) {
+  for (var day in days) {
     await archive.downloadDay(day);
     await archive.insertDay(day);
   }
@@ -77,13 +73,13 @@ uploadDays() async {
 
 
 main() async {
-  await initializeTimeZone(getLocationTzdb());
+  await initializeTimeZone();
 
-  //await new DaBindingConstraintsReportArchive().setupDb();
+  //await DaBindingConstraintsReportArchive().setupDb();
 
 //  await prepareData();
-  await DaBindingConstraintsTest();
+//  await DaBindingConstraintsTest();
 
-//  await uploadDays();
+  await uploadDays();
 
 }

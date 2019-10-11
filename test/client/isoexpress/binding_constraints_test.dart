@@ -7,12 +7,12 @@ import 'package:date/date.dart';
 import 'package:elec_server/client/isoexpress/binding_constraints.dart';
 
 tests() async {
-  Location location = getLocation('US/Eastern');
-  var api = BindingConstraintsApi(new Client());
+  var location = getLocation('US/Eastern');
+  var api = BindingConstraintsApi(Client());
   group('API binding constraints:', () {
     test('get da binding constraints data for 2 days', () async {
-      var interval = Interval(new TZDateTime(location, 2017, 1, 1),
-          new TZDateTime(location, 2017, 1, 3));
+      var interval = Interval(TZDateTime(location, 2017, 1, 1),
+          TZDateTime(location, 2017, 1, 3));
       var aux = await api.getDaBindingConstraints(interval);
       expect(aux.length, 44);
       var first = aux.first;
@@ -24,9 +24,10 @@ tests() async {
         'hourBeginning': '2017-01-01 00:00:00.000-0500',
       });
     });
-    test('get da binding constraints data for 2 days', () async {
-      var aux = await api.getDaBindingConstraint('PARIS   O154          A LN');
-      expect(aux.length > 100, true);
+    test('get all occurences of constraint SHFHGE', () async {
+      var aux = await api.getDaBindingConstraint('SHFHGE', Date(2017, 1, 1),
+        Date(2017, 2, 1));
+      expect(aux.length, 413);
     });
 
   });

@@ -18,12 +18,10 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   static const _rowEquality = const MapEquality<String,dynamic>();
 
   DaBindingConstraintsReportArchive({this.dbConfig, this.dir}) {
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
+    dbConfig ??= ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isoexpress'
         ..collectionName = 'binding_constraints';
-    }
     dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
   }
   String reportName =
@@ -34,7 +32,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
       yyyymmdd(asOfDate) +
       '&end=' +
       yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) => new File(
+  File getFilename(Date asOfDate) => File(
       dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.csv');
 
   Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
@@ -98,9 +96,9 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   /// Recreate the collection from scratch.
   setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
-      await dbConfig.coll.drop();
+//    List<String> collections = await dbConfig.db.getCollectionNames();
+//    if (collections.contains(dbConfig.collectionName))
+//      await dbConfig.coll.drop();
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'Constraint Name': 1, 'market': 1});

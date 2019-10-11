@@ -25,8 +25,8 @@ main() async {
   bc.tests();
   dalmp.tests(rootUrl);
   daoffers.tests();
-  sysdem.tests(rootUrl);
-  ptid.tests();
+//  sysdem.tests(rootUrl);
+//  ptid.tests();
 
   /// utils tests
   toCsv.tests();

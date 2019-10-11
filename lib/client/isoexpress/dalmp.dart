@@ -1,4 +1,4 @@
-library elec_server.dalmp.v1;
+library elec_server.client.dalmp.v1;
 
 import 'dart:async';
 import 'dart:convert';
@@ -31,9 +31,7 @@ class DaLmp {
   Future<TimeSeries<double>> getHourlyLmp(
       int ptid, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString().substring(13);
-    var _url = rootUrl +
-        servicePath +
-        'hourly/$cmp/ptid/' +
+    var _url = rootUrl + servicePath + 'hourly/$cmp/ptid/' +
         commons.Escaper.ecapeVariable('${ptid.toString()}') +
         '/start/' +
         commons.Escaper.ecapeVariable('${start.toString()}') +
@@ -50,115 +48,68 @@ class DaLmp {
   }
 
   /// Get daily prices for a ptid/bucket between a start and end date.
-//  Future<TimeSeries<double>> getDailyLmpBucket(int ptid, LmpComponent component,
-//      Bucket bucket, Date start, Date end) async {
-//    var _url = null;
-//    var _queryParams = new Map<String, List<String>>();
-//    var _uploadMedia = null;
-//    var _uploadOptions = null;
-//    var _downloadOptions = commons.DownloadOptions.Metadata;
-//    var _body = null;
-//
-//    String cmp = component.toString().substring(13);
-//
-//    _url = 'daily/$cmp/ptid/' +
-//        commons.Escaper.ecapeVariable('${ptid.toString()}') +
-//        '/start/' +
-//        commons.Escaper.ecapeVariable('${start.toString()}') +
-//        '/end/' +
-//        commons.Escaper.ecapeVariable('${end.toString()}') +
-//        '/bucket/' +
-//        commons.Escaper.ecapeVariable('${bucket.name.toString()}');
-//
-//    var _response = _requester.request(_url, "GET",
-//        body: _body,
-//        queryParams: _queryParams,
-//        uploadOptions: _uploadOptions,
-//        uploadMedia: _uploadMedia,
-//        downloadOptions: _downloadOptions);
-//    var data = _response.then((data) {
-//      var aux = json.decode(data['result']) as List;
-//      var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
-//          Date.parse(e['date'], location: location), e[cmp])));
-//      return ts;
-//    });
-//    return data;
-//  }
+  Future<TimeSeries<double>> getDailyLmpBucket(int ptid, LmpComponent component,
+      Bucket bucket, Date start, Date end) async {
+    String cmp = component.toString().substring(13);
+    var _url = rootUrl + servicePath + 'daily/$cmp/ptid/' +
+        commons.Escaper.ecapeVariable('${ptid.toString()}') +
+        '/start/' +
+        commons.Escaper.ecapeVariable('${start.toString()}') +
+        '/end/' +
+        commons.Escaper.ecapeVariable('${end.toString()}') +
+        '/bucket/' +
+        commons.Escaper.ecapeVariable('${bucket.name.toString()}');
+
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    var aux = json.decode(data['result']) as List;
+    var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
+        Date.parse(e['date'], location: location), e[cmp])));
+    return ts;
+  }
 
   /// get the daily prices for all nodes in the db as calculated by mongo
-//  Future<Map<int,TimeSeries<num>>> getDailyPricesAllNodes(LmpComponent component,
-//      Date start, Date end) async {
-//    var _url = null;
-//    var _queryParams = new Map<String, List<String>>();
-//    var _uploadMedia = null;
-//    var _uploadOptions = null;
-//    var _downloadOptions = commons.DownloadOptions.Metadata;
-//    var _body = null;
-//
-//    String cmp = component.toString().substring(13);
-//
-//    _url = 'daily/mean/$cmp' +
-//        '/start/' +
-//        commons.Escaper.ecapeVariable('${start.toString()}') +
-//        '/end/' +
-//        commons.Escaper.ecapeVariable('${end.toString()}');
-//
-//    var _response = _requester.request(_url, "GET",
-//        body: _body,
-//        queryParams: _queryParams,
-//        uploadOptions: _uploadOptions,
-//        uploadMedia: _uploadMedia,
-//        downloadOptions: _downloadOptions);
-//
-//    var out = <int,TimeSeries<num>>{};
-//
-//    await _response.then((data) {
-//      var aux = json.decode(data['result']) as List;
-//      // group by ptid
-//      var grp = groupBy(aux, (e) => e['ptid'] as int);
-//      for (var ptid in grp.keys) {
-//        out[ptid] = TimeSeries.fromIterable(grp[ptid].map((e) => IntervalTuple<double>(
-//            Date.parse(e['date'], location: location), e[cmp])));
-//      }
-//    });
-//
-//    return out;
-//  }
+  Future<Map<int,TimeSeries<num>>> getDailyPricesAllNodes(LmpComponent component,
+      Date start, Date end) async {
+    var cmp = component.toString().substring(13);
+    var _url = rootUrl + servicePath + 'daily/mean/$cmp' +
+        '/start/' +
+        commons.Escaper.ecapeVariable('${start.toString()}') +
+        '/end/' +
+        commons.Escaper.ecapeVariable('${end.toString()}');
+
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    var aux = json.decode(data['result']) as List;
+    var grp = groupBy(aux, (e) => e['ptid'] as int);
+
+    var out = <int,TimeSeries<num>>{};
+    for (var ptid in grp.keys) {
+      out[ptid] = TimeSeries.fromIterable(grp[ptid].map((e) => IntervalTuple<double>(
+          Date.parse(e['date'], location: location), e[cmp])));
+    }
+    return out;
+  }
 
   /// Get monthly prices for a ptid/bucket between a start and end date.
-//  Future<TimeSeries<double>> getMonthlyLmpBucket(int ptid, LmpComponent component,
-//      Bucket bucket, Month start, Month end) async {
-//    var _url = null;
-//    var _queryParams = new Map<String, List<String>>();
-//    var _uploadMedia = null;
-//    var _uploadOptions = null;
-//    var _downloadOptions = commons.DownloadOptions.Metadata;
-//    var _body = null;
-//
-//    String cmp = component.toString().substring(13);
-//
-//    _url = 'monthly/$cmp/ptid/' +
-//        commons.Escaper.ecapeVariable('${ptid.toString()}') +
-//        '/start/' +
-//        commons.Escaper.ecapeVariable('${start.toIso8601String()}') +
-//        '/end/' +
-//        commons.Escaper.ecapeVariable('${end.toIso8601String()}') +
-//        '/bucket/' +
-//        commons.Escaper.ecapeVariable('${bucket.name.toString()}');
-//
-//    var _response = _requester.request(_url, "GET",
-//        body: _body,
-//        queryParams: _queryParams,
-//        uploadOptions: _uploadOptions,
-//        uploadMedia: _uploadMedia,
-//        downloadOptions: _downloadOptions);
-//    var data = _response.then((data) {
-//      var aux = json.decode(data['result']) as List;
-//      var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
-//          Month.parse(e['month'], location: location, fmt: _mthFmt), e[cmp])));
-//      return ts;
-//    });
-//    return data;
-//  }
+  Future<TimeSeries<double>> getMonthlyLmpBucket(int ptid, LmpComponent component,
+      Bucket bucket, Month start, Month end) async {
+    var cmp = component.toString().substring(13);
+    var _url = rootUrl + servicePath + 'monthly/$cmp/ptid/' +
+        commons.Escaper.ecapeVariable('${ptid.toString()}') +
+        '/start/' +
+        commons.Escaper.ecapeVariable('${start.toIso8601String()}') +
+        '/end/' +
+        commons.Escaper.ecapeVariable('${end.toIso8601String()}') +
+        '/bucket/' +
+        commons.Escaper.ecapeVariable('${bucket.name.toString()}');
+
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    var aux = json.decode(data['result']) as List;
+    var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
+        Month.parse(e['month'], location: location, fmt: _mthFmt), e[cmp])));
+    return ts;
+  }
 
 }

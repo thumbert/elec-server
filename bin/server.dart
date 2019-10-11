@@ -38,7 +38,7 @@ registerApis() async {
   var db3 = Db('mongodb://$host/isoexpress');
   await db3.open();
   _apiServer.addApi(DaLmp(db3) );
-//  _apiServer.addApi(BindingConstraints(db3) );
+  _apiServer.addApi(BindingConstraints(db3) );
   _apiServer.addApi(DaEnergyOffers(db3) );
 //  _apiServer.addApi(SccReport(db3) );
 //  _apiServer.addApi(DaDemandBids(db3) );
