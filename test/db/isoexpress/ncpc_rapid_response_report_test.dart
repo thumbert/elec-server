@@ -1,57 +1,47 @@
-import 'dart:io';
-import 'dart:async';
+library test.db.isoexpress.ncpc_rapid_response_report_test;
+
 import 'package:test/test.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/db/isoexpress/ncpc_rapid_response_pricing_report.dart';
+import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 
 
-/// prepare data by downloading a few reports
-prepareData() async {
-  var archive = new NcpcRapidResponsePricingReportArchive();
-  var days = [
-    new Date(2017,3,1),
-    new Date(2017,12,13)
-  ];
-  await archive.downloadDays(days);
-}
-
-
-ncpcRapidResponseTest() async {
-  group('NCPC rapid response report', (){
-    var archive = new NcpcRapidResponsePricingReportArchive();
+tests() async {
+  var archive = NcpcRapidResponsePricingReportArchive();
+  group('NCPC rapid response report', () {
+    setUp(() async => await archive.dbConfig.db.open());
+    tearDown(() async => await archive.dbConfig.db.close());
     test('read files', () async {
-      File file = archive.getFilename(new Date(2017,12,13));
-      var report = new mis.MisReport(file);
-      expect(await report.forDate(), new Date(2017,12,13));
-      expect(await report.filename(), 'ncpc_rrp_20171213.csv');
-      var data = report.readTabAsMap(tab: 0);
-      expect(data.length, 1);
-      var data2 = data.map((Map row) => archive.converter([row])).toList();
-      expect(data2.first['RRP NCPC Charge'] is num, true);
+      var file = archive.getFilename(Date(2017,12,13));
+      var xs = archive.processFile(file);
+      expect(xs.length, 1);
+      expect(xs.first.keys.toSet(), {'date',
+        'RRP NCPC Charge', 'RRP Real-Time Load Obligation',
+        'RRP NCPC Charge Rate'});
+      expect(xs.first['RRP NCPC Charge'] is num, true);
     });
-    test('insert one day', () async {
-      await archive.dbConfig.db.open();
-      await archive.insertDay(new Date(2017,3,1));
-      await archive.dbConfig.db.close();
-    });
-    test('insert several days', () async {
-      List days = new Interval(new Date(2017,3,2).start, new Date(2017,4,1).start)
-          .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
-      await archive.dbConfig.db.open();
-      await for (var day in new Stream.fromIterable(days)) {
-        archive.downloadDay(day);
-        archive.insertDay(day);
-      }
-      archive.dbConfig.db.close();
-    });
-
   });
 }
 
-main() async {
-  await new NcpcRapidResponsePricingReportArchive().setupDb();
+insertDays() async {
+  var archive = NcpcRapidResponsePricingReportArchive();
+  await archive.dbConfig.db.open();
+  var days = Interval(TZDateTime.utc(2017,3,2), TZDateTime.utc(2017,4,1))
+      .splitLeft((dt) => Date(dt.year, dt.month, dt.day));
+  for (var day in days) {
+    await archive.downloadDay(day);
+    await archive.insertDay(day);
+  }
+  await archive.dbConfig.db.close();
+}
 
-//  await prepareData();
-  await ncpcRapidResponseTest();
+
+main() async {
+//  await NcpcRapidResponsePricingReportArchive().setupDb();
+
+  await insertDays();
+  //await tests();
+
 }

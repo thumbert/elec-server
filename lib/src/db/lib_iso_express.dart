@@ -78,8 +78,6 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// If data is not available, the reports will be empty, so no harm done.
   //Date lastDayAvailable();
 
-  /// Check if this date is in the archive already.  Return [true] if it is.
-  Future<bool> hasDay(Date day);
 
   /// Delete one day from the archive.
   //Future<Null> deleteDay(Date day);

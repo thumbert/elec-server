@@ -12,7 +12,7 @@ class ComponentConfig {
   String collectionName;
   /// get the mongo database
   Db get db {
-    if (_db == null) _db = new Db('mongodb://$host/$dbName');
+    _db ??= Db('mongodb://$host/$dbName');
     return _db;
   }
   DbCollection get coll => db.collection(collectionName);
