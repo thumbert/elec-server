@@ -25,10 +25,8 @@ updateIsoExpressData() async {
   for (var archive in archives) {
     await archive.dbConfig.db.open();
     for (var day in days) {
-      if (!await archive.hasDay(day)) {
         await archive.downloadDay(day);
         await archive.insertDay(day);
-      }
     }
     await archive.dbConfig.db.close();
   }

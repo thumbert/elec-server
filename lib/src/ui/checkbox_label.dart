@@ -34,6 +34,8 @@ class CheckboxLabel {
 
   bool get checked => _checkboxInputElement.checked;
 
+  set checked(bool x) => _checkboxInputElement.checked = x;
+  
   onChange(Function x) {
     _checkboxInputElement.onChange.listen(x);
   }
