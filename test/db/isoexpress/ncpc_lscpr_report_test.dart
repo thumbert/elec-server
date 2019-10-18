@@ -1,15 +1,14 @@
-library test.db.isoexpress.ncpc_rapid_response_report_test;
+library test.db.isoexpress.ncpc_lscpr_report_test;
 
+import 'package:elec_server/src/db/isoexpress/ncpc_lscpr_report.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
-import 'package:elec_server/src/db/isoexpress/ncpc_rapid_response_pricing_report.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
 tests() async {
-  var archive = NcpcRapidResponsePricingReportArchive();
-  group('NCPC rapid response report', () {
+  var archive = NcpcLscprReportArchive();
+  group('NCPC LSCPR report archive tests:', () {
     setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('read files', () async {
@@ -25,7 +24,7 @@ tests() async {
 }
 
 insertDays() async {
-  var archive = NcpcRapidResponsePricingReportArchive();
+  var archive = NcpcLscprReportArchive();
   await archive.dbConfig.db.open();
   var days = Interval(TZDateTime.utc(2017,3,2), TZDateTime.utc(2017,4,1))
       .splitLeft((dt) => Date(dt.year, dt.month, dt.day));

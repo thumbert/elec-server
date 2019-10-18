@@ -16,23 +16,23 @@ List<Map<String,dynamic>> _generateData(String curveId, Date start, Date end,
 
   var out = <Map<String,dynamic>>{};
   for (var day in days) {
-    var months = Month.
-    out.add({
-      'asOfDate': day.toString(),
-      'curveId': curveId,
-      'months':
-    });
+//    var months = Month.
+//    out.add({
+//      'asOfDate': day.toString(),
+//      'curveId': curveId,
+//      'months':
+//    });
   }
 
 }
 
-insertData() async {
-  var d20191011 = {
-    'asOfDate': '2019-10-11',
-    'curveId': 'iso:ISONE;ptid:4000',
-    ''
-  };
-}
+//insertData() async {
+//  var d20191011 = {
+//    'asOfDate': '2019-10-11',
+//    'curveId': 'iso:ISONE;ptid:4000',
+//    ''
+//  };
+//}
 
 tests() async {
   group('forward marks archive tests:', () {
