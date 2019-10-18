@@ -30,6 +30,8 @@ class CheckboxLabel {
     wrapper.children.add(_wrapper);
   }
 
+  set checked(bool x) => _checkboxInputElement.checked = x;
+
   bool get checked => _checkboxInputElement.checked;
 
   onChange(Function x) {

@@ -69,9 +69,11 @@ main() async {
     messageSl.text = 'You selected ${selectableList.selected.join(', ')}';
   });
 
+
   /// a simple checkbox with a label
   var messageCl = querySelector('#checkbox-label-message');
-  var checkboxLabel = CheckboxLabel(querySelector('#checkbox-label'), 'Sprinkles?');
+  var checkboxLabel = CheckboxLabel(querySelector('#checkbox-label'),
+      'Sprinkles?')..checked = true;
   checkboxLabel.onChange((e) {
     if (checkboxLabel.checked) {
       messageCl.text = 'You want sprinkles';
