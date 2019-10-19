@@ -33,6 +33,7 @@
             <li><a href="#masked-da-demand-bids">Masked DA demand bids</a></li>
             <li><a href="#masked-da-energy-offers">Masked DA energy offers</a></li>
             <li><a href="#ptid-table">Ptid table</a></li>
+            <li><a href="#ncpc-pool">NCPC costs</a></li>
             <li><a href="#rt-daily-prices">RT daily prices by bucket</a></li>
             <li><a href="#rt-hourly-prices">RT hourly prices</a></li>
             <li><a href="#scc-report">Seasonal Claimed Capability report</a></li>
@@ -254,6 +255,22 @@
                     10348 retired on 1/10/2019.
                     <div><a href="http://localhost:8080/ptids/v1/ptid/10348">ptids/v1/ptid/10348</a></div>
                 </li>
+            </ul>
+        </div>
+        <div id="ncpc-pool">
+            <h4>NCPC costs for the pool from
+                <a href="https://www.iso-ne.com/isoexpress/web/reports/pricing/-/tree/ncpc-credits-summary">ISO Express</a>></h4>
+            <ul>
+                <li>Get the NCPC types in the db.  Some of them are: Economic, LSCP, DLOC, RRP, etc.
+                    <div><a href="http://localhost:8080/ncpc/v1/types">types</a></div>
+                </li>
+                <li>Get the historical NCPC costs (for all types in the database) between a start/end date
+                    <div><a href="http://localhost:8080/ncpc/v1/start/20180101/end/20180105">start/20180101/end/20180105</a></div>
+                </li>
+                <li>Get the historical NCPC costs for one type between a start/end date
+                    <div><a href="http://localhost:8080/ncpc/v1/type/lscp/start/20180101/end/20180105">type/lscp/start/20180101/end/20180105</a></div>
+                </li>
+
             </ul>
         </div>
         <div id="rt-daily-prices">
