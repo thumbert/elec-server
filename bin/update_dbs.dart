@@ -1,4 +1,7 @@
 import 'package:date/date.dart';
+import 'package:elec_server/src/db/isoexpress/ncpc_dispatch_lost_opportunity_cost_report.dart';
+import 'package:elec_server/src/db/isoexpress/ncpc_economic_report.dart';
+import 'package:elec_server/src/db/isoexpress/ncpc_generator_performance_audit_report.dart';
 import 'package:elec_server/src/db/isoexpress/ncpc_lscpr_report.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:timezone/standalone.dart';
@@ -24,10 +27,12 @@ updateDailyArchive(DailyIsoExpressReport archive, List<Date> days) async {
 
 main() async {
   await initializeTimeZone();
+  var days = Month(2018, 1).days();
 
-  var days = Month(2018, 3).days();
-
-  await updateDailyArchive(NcpcRapidResponsePricingReportArchive(), days);
+  await updateDailyArchive(NcpcEconomicReportArchive(), days);
   await updateDailyArchive(NcpcLscprReportArchive(), days);
+  await updateDailyArchive(NcpcDlocReportArchive(), days);
+  await updateDailyArchive(NcpcGpaReportArchive(), days);
+  await updateDailyArchive(NcpcRapidResponsePricingReportArchive(), days);
 
 }
