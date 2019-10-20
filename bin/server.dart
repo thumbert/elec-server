@@ -3,6 +3,7 @@ import 'dart:io';
 
 //import 'package:logging/logging.dart';
 //import 'package:logging_handlers/server_logging_handlers.dart';
+import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:rpc/rpc.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
@@ -53,6 +54,9 @@ registerApis() async {
 //  await db5.open();
 //  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
 
+  var db6 = Db('mongodb://$host/marks');
+  await db6.open();
+  _apiServer.addApi(ForwardMarks(db6));
 
 }
 

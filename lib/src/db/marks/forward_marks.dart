@@ -1,4 +1,4 @@
-library db.other.forward_marks;
+library db.marks.forward_marks;
 
 import 'dart:async';
 import 'dart:io';
@@ -9,9 +9,11 @@ import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:tuple/tuple.dart';
+import 'package:intl/intl.dart';
 
 class ForwardMarksArchive {
   ComponentConfig dbConfig;
+  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   /// Marks are inserted into the db for a given (curveId, asOfDate) tuple.
   /// Not all curves have marks updated every day.  Queries need to be
@@ -26,8 +28,8 @@ class ForwardMarksArchive {
 
   Db get db => dbConfig.db;
 
-  /// All data is for the same date, multiple curves.  Each element of the list
-  /// is for one curveId.
+  /// Insert data into the db.  Data is upserted for each (asOfDate, curveId)
+  /// pair.
   /// <p>One document format:
   /// {
   ///   'asOfDate': 'yyyy-mm-dd',
@@ -57,16 +59,17 @@ class ForwardMarksArchive {
   }
 
   /// Basic checks on the document structure.
+  ///
   void checkDocument(Map<String,dynamic> document) {
     var keys = document.keys.toSet();
     var mustHaveKeys = <String>{'asOfDate', 'curveId', 'months'};
     if (!keys.containsAll(mustHaveKeys))
-      throw ArgumentError('Document must contain asOfDate, curveId, months');
+      throw ArgumentError('Document ${document} must contain asOfDate, curveId, months');
 
-    // check that the months start from prompt month
-    var month0 = Month.parse((document['asOfDate'] as String).substring(0,7));
-    var month1 = Month.parse((document['months'] as List).first as String);
-    var monthN = Month.parse((document['months'] as List).last as String);
+    // check that months start from prompt month
+    var month0 = Month.parse((document['asOfDate'] as String).substring(0,7), fmt: _isoFmt);
+    var month1 = Month.parse((document['months'] as List).first as String, fmt: _isoFmt);
+    var monthN = Month.parse((document['months'] as List).last as String, fmt: _isoFmt);
     if (month0.next != month1)
       throw ArgumentError('Months must start with prompt month.');
 
@@ -80,6 +83,14 @@ class ForwardMarksArchive {
     var validBuckets = {'7x24', '5x16', '2x16H', '7x8'};
     if (!bucketKeys.difference(validBuckets).isEmpty)
       throw ArgumentError('Invalid buckets $bucketKeys');
+
+    // check that all bucketKeys have matching dimensions
+    var n = (document['months'] as List).length;
+    for (var key in bucketKeys) {
+      if ((document[key] as List).length != n)
+        throw ArgumentError('Length of $key doesn\'t match length of months '
+            + 'for curveId ${document['curveId']} as of $asOfDate');
+    }
 
     // check that you mark until December
     if (monthN.month != 12)

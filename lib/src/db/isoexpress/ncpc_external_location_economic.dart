@@ -14,12 +14,19 @@ class NcpcExternalLocationEconomicArchive extends DailyIsoExpressReport {
   String dir;
   final String reportName = 'External Location Economic Net Commitment Period Compensation';
   var _setEq = const SetEquality();
+  var _columnNames = {'H', 'Operating Day',
+    'Trading Interval',	'External Node ID',	'External Node Name',
+    'NCPC Credit Type',	'DA Economic NCPC Charge',
+    'DA Load Obligation at External Node',
+    'DA Generation Obligation at External Node',
+    'DA Economic NCPC Charge Rate',
+  };
 
   NcpcExternalLocationEconomicArchive({this.dbConfig, this.dir}) {
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
       ..dbName = 'isoexpress'
-      ..collectionName = 'ncpc_external_location_economic';
+      ..collectionName = 'ncpc';
 
     dir ??= baseDir + 'NCPC/ExternalLocationEconomic/Raw/';
   }
@@ -33,15 +40,12 @@ class NcpcExternalLocationEconomicArchive extends DailyIsoExpressReport {
 
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var row = rows.first;
-    if (!_setEq.equals(row.keys.skip(1).toSet(), {'Operating Day',
-      'RRP NCPC Charge', 'RRP Real-Time Load Obligation',
-      'RRP NCPC Charge Rate'}))
-      throw ArgumentError('Report $reportName has changed format!');
-
+    if (!_setEq.equals(row.keys.toSet(), _columnNames))
+      throw ArgumentError('Report $reportName for ${row['Operating Day']} has changed format!');
     var date = formatDate(row['Operating Day']);
     row.remove('H');
     row.remove('Operating Day');
-    return {'date': date, ...row};
+    return {'date': date, 'ncpcType': 'External Location Economic', ...row};
   }
 
   List<Map<String, dynamic>> processFile(File file) {
@@ -57,7 +61,7 @@ class NcpcExternalLocationEconomicArchive extends DailyIsoExpressReport {
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1}, unique: true);
+        keys: {'date': 1, 'ncpcType': 1}, unique: true);
     await dbConfig.db.close();
   }
 }
