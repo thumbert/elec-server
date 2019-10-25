@@ -1,0 +1,123 @@
+"C","Real-Time Net Commitment Period Compensation Settlement Summary Report"
+"C","SR_RTNCPCSTLMNTSUM_000000001_2017060200_20181106115705.CSV"
+"C","VIU1"
+"C","Date: 06/02/2017 and Version: 11/06/2018 11:57:05 GMT"
+"H","Participant Real-Time Economic NCPC Charge","Participant Real-Time LSCPR NCPC Charge","Participant Real-Time SCR NCPC Charge","Participant Real-Time Generator Performance Audit NCPC Charge","Participant Real-Time Minimum Generation Emergency NCPC Charge","Participant Real-Time Posturing NCPC Charge","Participant Real-Time Non-VAR NCPC Charge","Participant Real-Time Economic NCPC Credit","Participant Real-Time LSCPR NCPC Credit","Participant Real-Time SCR NCPC Credit","Participant Real-Time Generator Performance Audit NCPC Credit","Participant Real-Time Minimum Generation Emergency NCPC Credit","Participant Real-Time Posturing NCPC Credit","Participant Real-Time Non-VAR NCPC Credit","Participant Net Real-Time Non-VAR NCPC Settlement","Participant Real-Time LV VAR NCPC Credit","Participant Real-Time HV VAR NCPC Credit","Participant Rapid Response Pricing Opportunity Cost NCPC Charge","Participant Rapid Response Pricing Opportunity Cost NCPC Credit","Participant Dispatch Lost Opportunity Cost NCPC Charge","Participant Dispatch Lost Opportunity Cost NCPC Credit"
+"H","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$"
+"D",-591068.56,-1062.02,-65498.29,-31429.5,-47167.87,-17715.74,-841524.47,1356393.42,197226.2,16519.14,72172.02,4509.29,456743.61,2408456.16,1566931.69,22420.84,65722.3,-33848.81,192186.01,-53733.68,112706.47
+"H","Pool Real-Time Economic NCPC Credits","Participant Real-Time NCPC Load Obligation Deviation","Participant Real-Time Generation Deviation","Participant Real-Time Increment Deviation","Participant Real-Time NCPC Import Deviation","Participant Real-Time Deviation","Pool Real-Time Deviation","Participant Real-Time Economic NCPC Charge","Participant Demand Reduction Deviation"
+"H","$","MWh","MWh","MWh","MWh","MWh","MWh","$","MWh"
+"D",6400664.71,2866.527316667,827.378547811,4487,510,8983.905864478,84505.209983334,-591068.56,293
+"H","Trading Interval","Participant Real-Time Load Obligation Deviation","Participant Dispatchable Asset Related Demand Deviation Adjustment MW","Participant ISO-NE Curtailed Real-Time Sale MW","Participant Real-Time NCPC Load Obligation Deviation","Participant Real-Time Import Deviation","Participant ISO-NE Curtailed Real-Time Purchase MW","Participant Real-Time NCPC Import Deviation","Participant Real-Time Export Deviation Reduction MW","Participant Real-Time Import Deviation Reduction MW"
+"H","Hour End","MWh","MWh","MWh","MWh","MWh","MWh","MWh","MWh","MWh"
+"D","01",192.394,74,,118.394,0,,0,0,0
+"D","02",197.788,74,,123.788,-10,,10,0,0
+"D","03",118.111,0,,118.111,-10,,10,0,0
+"D","04",125.443,0,,125.443,-10,,10,0,0
+"D","05",130.377516667,6.2046,,124.172916667,-10,,10,0,0
+"D","06",146.582316667,22.0484,,124.533916667,-10,,10,0,0
+"D","07",128.89655,10.3486,,118.54795,80,,80,0,0
+"D","08",137.290683333,21.3676,,115.923083333,70,,70,0,0
+"D","09",125.978033333,-1.283,,127.261033333,60,,60,0,0
+"D","10",116.512183333,1.2132,,115.298983333,50,,50,0,0
+"D","11",116.53815,-2.9438,,119.48195,40,,40,0,0
+"D","12",119.58465,5.5966,,113.98805,30,,30,0,0
+"D","13",147.0184,29.4764,,117.542,20,,20,0,0
+"D","14",99.2575,2.6324,,96.6251,10,,10,0,0
+"D","15",123.380066667,-.534,,123.914066667,-10,,10,0,0
+"D","16",121.79145,-2.1956,,123.98705,-10,,10,0,0
+"D","17",177.7233,56.0502,,121.6731,-10,,10,0,0
+"D","18",115.454816667,2.9468,,112.508016667,-10,,10,0,0
+"D","19",200.724,74,,126.724,-10,,10,0,0
+"D","20",193.735,74,,119.735,-10,,10,0,0
+"D","21",123.895,0,,123.895,-10,,10,0,0
+"D","22",118.045983333,-1.307,,119.352983333,-10,,10,0,0
+"D","23",117.282066667,.716,,116.566066667,-10,,10,0,0
+"D","24",121.11625,2.0552,,119.06105,-10,,10,0,0
+"H","Reliability Region","Pool Real-Time LSCPR NCPC Credits","Participant Real-Time Load Obligation","Participant Real-Time External Sale Load Obligation MW","Participant Real-Time Dispatchable ARD Load Obligation Reduction MW","Participant Real-Time LSCPR NCPC Load Obligation","Pool Real-Time LSCPR NCPC Load Obligation","Participant Real-Time LSCPR NCPC Charge","Participant Real-Time Load Obligation for Charge Allocation"
+"H","Number","$","MWh","MWh","MWh","MWh","MWh","$","MWh"
+"D",701,57183.85,,0,1105.6074,-746.472683333,-40193.226416666,-1062.02,-1852.080083333
+"D",702,9132.91,,0,0,0,-18613.158,0,0
+"D",705,168778.6,,0,0,0,-13451.447,0,0
+"D",706,54260.87,,0,0,0,-2936.303,0,0
+"H","Trading Interval","Asset ID","Asset Name","Subaccount ID","Subaccount Name","Participant Real-Time SCR NCPC Charge"
+"H","Hour End","Number","String","String","String","$"
+"D","12",102,"GENERATOR 102","9001","Unassigned activity",-33417.36
+"D","13",102,"GENERATOR 102","9001","Unassigned activity",-32080.93
+"H","Pool Real-Time Generator Performance Audit NCPC Credits","Participant Real-Time Load Obligation","Participant Real-Time Dispatchable ARD Load Obligation Reduction MW","Participant Real-Time Generator Performance Audit NCPC Load Obligation","Pool Real-Time Generator Performance Audit NCPC Load Obligation","Participant Real-Time Generator Performance Audit NCPC Charge","Participant Real-Time Load Obligation for Charge Allocation"
+"H","$","MWh","MWh","MWh","MWh","$","MWh"
+"D",810752.62,,1105.6074,-3146.472683333,-81166.134416666,-31429.5,-4252.080083333
+"H","Pool Minimum Generation Emergency NCPC Credits","Participant Real-Time Generation Obligation","Participant Real-Time Exempt Generation Obligation","Participant Real-Time NCPC Generation Obligation","Pool Real-Time NCPC Generation Obligation","Participant Real-Time Minimum Generation Emergency NCPC Charge","Participant Real-Time Generation Obligation for Charge Allocation","Participant Positive Real-Time Demand Reduction Obligation","Participant Real-Time Exempt Demand Reduction Obligation","Participant Real-Time NCPC Demand Reduction Obligation","Pool Real-Time NCPC Demand Reduction Obligation"
+"H","$","MWh","MWh","MWh","MWh","$","MWh","MWh","MWh","MWh","MWh"
+"H","Pool Posturing NCPC Credits","Participant Real-Time Load Obligation","Participant Dispatchable ARD MW","Participant Real-Time Postured NCPC Load Obligation","Pool Real-Time Postured NCPC Load Obligation","Participant Real-Time Posturing NCPC Charge","Participant Real-Time Load Obligation for Charge Allocation"
+"H","$","MWh","MWh","MWh","MWh","$","MWh"
+"D",456993.76,,1105.6074,-3146.472683333,-81166.134416666,-17715.74,-4252.080083333
+"H","Pool Rapid Response Pricing Opportunity Cost NCPC Credits","Participant Real-Time Load Obligation for Charge Allocation","Participant Real-Time Dispatchable ARD Load Obligation Reduction MW","Participant Rapid Response Pricing Opportunity Cost NCPC Load Obligation","Pool Rapid Response Pricing Opportunity Cost Load NCPC Obligation","Participant Rapid Response Pricing Opportunity Cost NCPC Charge"
+"H","$","MWh","MWh","MWh","MWh","$"
+"D",873161.03,-4252.080083333,1105.6074,-3146.472683333,-81166.134416666,-33848.81
+"H","Pool Dispatch Lost Opportunity Cost NCPC Credits","Participant Real-Time Load Obligation for Charge Allocation","Participant Real-Time Dispatchable ARD Load Obligation Reduction MW","Participant Dispatch Lost Opportunity Cost NCPC Load Obligation","Pool Dispatch Lost Opportunity Cost Load NCPC Obligation","Participant Dispatch Lost Opportunity Cost NCPC Charge"
+"H","$","MWh","MWh","MWh","MWh","$"
+"D",1386109.32,-4252.080083333,1105.607,-3146.472683333,-81166.134416666,-53733.68
+"H","Subaccount ID","Subaccount Name","Real-Time Economic NCPC Charge","Real-Time LSCPR NCPC Charge","Real-Time SCR NCPC Charge","Real-Time Generator Performance Audit NCPC Charge","Real-Time Minimum Generation Emergency NCPC Charge","Real-Time Posturing NCPC Charge","Real-Time Non-VAR NCPC Charge","Real-Time Economic NCPC Credit","Real-Time LSCPR NCPC Credit","Real-Time SCR NCPC Credit","Real-Time Generator Performance Audit NCPC Credit","Real-Time Minimum Generation Emergency NCPC Credit","Real-Time Posturing NCPC Credit","Real-Time Non-VAR NCPC Credit","Net Real-Time Non-VAR NCPC Settlement","Real-Time LV VAR NCPC Credit","Real-Time HV VAR NCPC Credit","Rapid Response Pricing Opportunity Cost NCPC Charge","Rapid Response Pricing Opportunity Cost NCPC Credit","Dispatch Lost Opportunity Cost NCPC Charge","Dispatch Lost Opportunity Cost NCPC Credit"
+"H","String","String","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$","$"
+"D","9001","Unassigned activity",-591068.56,-1062.02,-65498.29,-31429.5,-47167.87,-17715.74,-841524.47,1356393.42,197226.2,16519.14,72172.02,4509.29,456743.61,2408456.16,1566931.69,22420.84,65722.3,-33848.81,192186.01,-53733.68,112706.47
+"H","Subaccount ID","Subaccount Name","Pool Real-Time Economic NCPC Credits","Real-Time NCPC Load Obligation Deviation","Real-Time Generation Deviation","Real-Time Increment Deviation","Real-Time NCPC Import Deviation","Real-Time Deviation","Pool Real-Time Deviation","Real-Time Economic NCPC Deviation Charge","Demand Reduction Deviation"
+"H","String","String","$","MWh","MWh","MWh","MWh","MWh","MWh","$","MWh"
+"D","9001","Unassigned activity",6400664.71,2866.527316667,827.378547811,4487,510,8983.905864478,84505.209983334,-591068.56,293
+"H","Subaccount ID","Subaccount Name","Trading Interval","Real-Time Load Obligation Deviation","Dispatchable Asset Related Demand Deviation Adjustment MW","ISO-NE Curtailed Real-Time Sale MW","Real-Time NCPC Load Obligation Deviation","Total Subaccount Real-Time NCPC Load Obligation Deviation","Real-Time NCPC Load Obligation Deviation Pro-Rata Allocator","Participant Real-Time NCPC Load Obligation Deviation","Final Real-Time NCPC Load Obligation Deviation","Real-Time Import Deviation","ISO-NE Curtailed Real-Time Purchase MW","Real-Time NCPC Import Deviation","Total Subaccount Real-Time NCPC Import Deviation","Real-Time NCPC Import Deviation Pro-Rata Allocator","Participant Real-Time NCPC Import Deviation","Final Real-Time NCPC Import Deviation","Real-Time Export Deviation Reduction MW","Real-Time Import Deviation Reduction MW"
+"H","String","String","Hour End","MWh","MWh","MWh","MWh","MWh","%","MWh","MWh","MWh","MWh","MWh","MWh","%","MWh","MWh","MWh","MWh"
+"D","9001","Unassigned activity","01",192.394,74,,118.394,118.394,100,118.394,118.394,0,,0,0,0,0,0,0,0
+"D","9001","Unassigned activity","02",197.788,74,,123.788,123.788,100,123.788,123.788,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","03",118.111,0,,118.111,118.111,100,118.111,118.111,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","04",125.443,0,,125.443,125.443,100,125.443,125.443,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","05",130.377516667,6.2046,,124.172916667,124.172916667,100,124.172916667,124.172916667,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","06",146.582316667,22.0484,,124.533916667,124.533916667,100,124.533916667,124.533916667,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","07",128.89655,10.3486,,118.54795,118.54795,100,118.54795,118.54795,80,,80,80,100,80,80,0,0
+"D","9001","Unassigned activity","08",137.290683333,21.3676,,115.923083333,115.923083333,100,115.923083333,115.923083333,70,,70,70,100,70,70,0,0
+"D","9001","Unassigned activity","09",125.978033333,-1.283,,127.261033333,127.261033333,100,127.261033333,127.261033333,60,,60,60,100,60,60,0,0
+"D","9001","Unassigned activity","10",116.512183333,1.2132,,115.298983333,115.298983333,100,115.298983333,115.298983333,50,,50,50,100,50,50,0,0
+"D","9001","Unassigned activity","11",116.53815,-2.9438,,119.48195,119.48195,100,119.48195,119.48195,40,,40,40,100,40,40,0,0
+"D","9001","Unassigned activity","12",119.58465,5.5966,,113.98805,113.98805,100,113.98805,113.98805,30,,30,30,100,30,30,0,0
+"D","9001","Unassigned activity","13",147.0184,29.4764,,117.542,117.542,100,117.542,117.542,20,,20,20,100,20,20,0,0
+"D","9001","Unassigned activity","14",99.2575,2.6324,,96.6251,96.6251,100,96.6251,96.6251,10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","15",123.380066667,-.534,,123.914066667,123.914066667,100,123.914066667,123.914066667,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","16",121.79145,-2.1956,,123.98705,123.98705,100,123.98705,123.98705,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","17",177.7233,56.0502,,121.6731,121.6731,100,121.6731,121.6731,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","18",115.454816667,2.9468,,112.508016667,112.508016667,100,112.508016667,112.508016667,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","19",200.724,74,,126.724,126.724,100,126.724,126.724,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","20",193.735,74,,119.735,119.735,100,119.735,119.735,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","21",123.895,0,,123.895,123.895,100,123.895,123.895,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","22",118.045983333,-1.307,,119.352983333,119.352983333,100,119.352983333,119.352983333,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","23",117.282066667,.716,,116.566066667,116.566066667,100,116.566066667,116.566066667,-10,,10,10,100,10,10,0,0
+"D","9001","Unassigned activity","24",121.11625,2.0552,,119.06105,119.06105,100,119.06105,119.06105,-10,,10,10,100,10,10,0,0
+"H","Subaccount ID","Subaccount Name","Reliability Region","Pool Real-Time LSCPR NCPC Credits","Real-Time Load Obligation","Real-Time External Sale Load Obligation MW","Real-Time Dispatchable ARD Load Obligation Reduction MW","Real-Time LSCPR NCPC Load Obligation","Pool Real-Time LSCPR NCPC Load Obligation","Real-Time LSCPR NCPC Charge","Real-Time Load Obligation for Charge Allocation"
+"H","String","String","Number","$","MWh","MWh","MWh","MWh","MWh","$","MWh"
+"D","9001","Unassigned activity",701,57183.85,,0,1105.6074,-746.472683333,-40193.226416666,-1062.02,-1852.080083333
+"D","9001","Unassigned activity",702,9132.91,,0,0,0,-18613.158,0,0
+"D","9001","Unassigned activity",705,168778.6,,0,0,0,-13451.447,0,0
+"D","9001","Unassigned activity",706,54260.87,,0,0,0,-2936.303,0,0
+"H","Subaccount ID","Subaccount Name","Pool Real-Time Generator Performance Audit NCPC Credits","Real-Time Load Obligation","Real-Time Dispatchable ARD Load Obligation Reduction MW","Real-Time Generator Performance Audit NCPC Load Obligation","Pool Real-Time Generator Performance Audit NCPC Load Obligation","Real-Time Generator Performance Audit NCPC Charge","Real-Time Load Obligation for Charge Allocation"
+"H","String","String","$","MWh","MWh","MWh","MWh","$","MWh"
+"D","9001","Unassigned activity",810752.62,,1105.6074,-3146.472683333,-81166.134416666,-31429.5,-4252.080083333
+"H","Subaccount ID","Subaccount Name","Pool Minimum Generation Emergency NCPC Credits","Real-Time Generation Obligation","Real-Time Exempt Generation Obligation","Real-Time NCPC Generation Obligation","Pool Real-Time NCPC Generation Obligation","Real-Time Minimum Generation Emergency NCPC Charge","Real-Time Generation Obligation for Charge Allocation","Positive Real-Time Demand Reduction Obligation Pro-Rata Share Allocator","Positive Real-Time Demand Reduction Obligation","Real-Time Exempt Demand Reduction Obligation","Real-Time NCPC Demand Reduction Obligation","Pool Real-Time NCPC Demand Reduction Obligation"
+"H","String","String","$","MWh","MWh","MWh","MWh","$","MWh","%","MWh","MWh","MWh","MWh"
+"H","Subaccount ID","Subaccount Name","Pool Posturing NCPC Credits","Real-Time Load Obligation","Dispatchable ARD MW","Real-Time Postured NCPC Load Obligation","Pool Real-Time Postured NCPC Load Obligation","Real-Time Posturing NCPC Charge","Real-Time Load Obligation for Charge Allocation"
+"H","String","String","$","MWh","MWh","MWh","MWh","$","MWh"
+"D","9001","Unassigned activity",456993.76,,1105.6074,-3146.472683333,-81166.134416666,-17715.74,-4252.080083333
+"H","Subaccount ID","Subaccount Name","Pool Rapid Response Pricing Opportunity Cost NCPC Credits","Real-Time Load Obligation for Charge Allocation","Real-Time Dispatchable ARD Load Obligation Reduction MW","Rapid Response Pricing Opportunity Cost NCPC Load Obligation","Pool Rapid Response Pricing Opportunity Cost Load NCPC Obligation","Rapid Response Pricing Opportunity Cost NCPC Charge"
+"H","String","String","$","MWh","MWh","MWh","MWh","$"
+"D","9001","Unassigned activity",873161.03,-4252.080083333,1105.6074,-3146.472683333,-81166.134416666,-33848.81
+"H","Subaccount ID","Subaccount Name","Pool Dispatch Lost Opportunity Cost NCPC Credits","Real-Time Load Obligation for Charge Allocation","Real-Time Dispatchable ARD Load Obligation Reduction MW","Dispatch Lost Opportunity Cost NCPC Load Obligation","Pool Dispatch Lost Opportunity Cost Load NCPC Obligation","Dispatch Lost Opportunity Cost NCPC Charge"
+"H","String","String","$","MWh","MWh","MWh","MWh","$"
+"D","9001","Unassigned activity",1386109.32,-4252.080083333,1105.6074,-3146.472683333,-81166.134416666,-53733.68
+"H","Trading Interval","Pool Minimum Generation Emergency NCPC Credits","Participant Real-Time Generation Obligation for Charge Allocation","Participant Real-Time Exempt Generation Obligation","Participant Positive Real-Time Demand Reduction Obligation","Participant Real-Time Exempt Demand Reduction Obligation","Participant Minimum Generation Emergency Charge Allocation MW","Pool Minimum Generation Emergency Charge Allocation MW","Participant Real-Time Minimum Generation Emergency NCPC Charge"
+"H","Hour End","$","MWh","MWh","MWh","MWh","MWh","MWh","$"
+"D","10",38673.8,1317.5483701,1.18000059,21.604,2.454,1335.518,38673.8,-16757.22
+"D","23",25051.62,485.947422364,14.008333388,0,0,471.939,25051.62,-12770.54
+"D","24",34701.02,459.391409032,15.854,0,0,443.537,34701.02,-17640.11
+"H","Subaccount ID","Subaccount Name","Trading Interval","Pool Minimum Generation Emergency NCPC Credits","Real-Time Generation Obligation for Charge Allocation","Real-Time Exempt Generation Obligation","Positive Real-Time Demand Reduction Obligation","Real-Time Exempt Demand Reduction Obligation","Minimum Generation Emergency Charge Allocation MW","Pool Minimum Generation Emergency Charge Allocation MW","Real-Time Minimum Generation Emergency NCPC Charge"
+"H","String","String","Hour End","$","MWh","MWh","MWh","MWh","MWh","MWh","$"
+"D","9001","Unassigned activity","10",38673.8,1317.5483701,1.18000059,21.6035,2.454,1335.51786951,3082.226575,-16757.22
+"D","9001","Unassigned activity","23",25051.62,485.947422364,14.008333388,0,0,471.939088976,925.789725,-12770.54
+"D","9001","Unassigned activity","24",34701.02,459.391409032,15.854,0,0,443.537409032,872.51175,-17640.11
+"T","76 lines"
