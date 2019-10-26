@@ -161,7 +161,7 @@ List<Map<String,dynamic>> readReportTabAsMap(File file, {int tab: 0}) {
   var columnNames = allData.firstWhere((List e) => e[0] == 'H').cast<String>();
   return allData
       .where((List e) => e[0] == 'D')
-      .map((List e) => new Map.fromIterables(columnNames, e))
+      .map((List e) => Map.fromIterables(columnNames, e))
       .toList();
 }
 

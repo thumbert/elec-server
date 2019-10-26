@@ -51,25 +51,30 @@ class SdRtNcpcPymtArchive extends mis.MisReportArchive {
     var x0 = mis.readReportTabAsMap(file, tab: 0);
     var tab0 = addLabels(x0, labels, ['H']);
 
-    /// tab 1, Startup amortization summary section
+    /// tab 1, Startup amortization summary section -- hourly
 //    labels['tab'] = 1;
 //    var x1 = mis.readReportTabAsMap(file, tab: 1);
 //    var tab1 = addLabels(x1, labels, ['H']);
 
-    /// tab 2, Generator credits section
+    /// tab 2, Generator credits section -- hourly
     labels['tab'] = 2;
     var x2 = mis.readReportTabAsMap(file, tab: 2);
-    var tab2 = addLabels(x2, labels, ['H']);
+    var grp = groupBy(x2, (e) => e['Asset ID']);
+    var tab2 = <Map<String,dynamic>>[];
+    for (var entry in grp.entries) {
+      labels['Asset ID'] = entry.key;
+      tab2.addAll(addLabels([rowsToColumns(entry.value)], labels,
+          ['H', 'Asset ID', 'Asset Name']));
+    }
 
-    /// tab 3, External Node Credits section
-    labels['tab'] = 3;
-    var x3 = mis.readReportTabAsMap(file, tab: 3);
-    var tab3 = addLabels(x3, labels, ['H']);
+    /// tab 3, External Node Credits section -- hourly
+//    labels['tab'] = 3;
+//    var x3 = mis.readReportTabAsMap(file, tab: 3);
+//    var tab3 = addLabels(x3, labels, ['H']);
 
     return {
       0: tab0,
       2: tab2,
-      3: tab3,
     };
   }
 
