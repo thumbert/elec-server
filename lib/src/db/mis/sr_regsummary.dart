@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:date/date.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
-import 'package:table/src/rowsToColumns.dart';
+import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
