@@ -21,18 +21,18 @@ class SdRtNcpcPymt {
   }
 
   @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
-  Future<ApiResponse> summary(String accountId, String start, String end) async {
+  Future<ApiResponse> data0(String accountId, String start, String end) async {
     var query = where
       ..eq('account', accountId)
-      ..gte('date', start)
-      ..lte('date', end)
+      ..gte('date', Date.parse(start).toString())
+      ..lte('date', Date.parse(end).toString())
       ..excludeFields(['_id', 'account']);
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }
 
   @ApiMethod(path: 'accountId/{accountId}/assetId/{assetId}/start/{start}/end/{end}')
-  Future<ApiResponse> summaryForAsset(String accountId, int assetId,
+  Future<ApiResponse> data0ForAsset(String accountId, int assetId,
       String start, String end) async {
     var query = where
       ..eq('account', accountId)
@@ -43,6 +43,23 @@ class SdRtNcpcPymt {
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }
+
+  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/details/start/{start}/end/{end}')
+  /// Get the details for all assets, all versions
+  Future<ApiResponse> data2CreditDetails(String accountId, String subaccountId,
+      String start, String end) async {
+    var query = where
+      ..eq('account', accountId)
+      ..eq('tab', 2)
+      ..eq('Subaccount ID', subaccountId)
+      ..gte('date', Date.parse(start).toString())
+      ..lte('date', Date.parse(end).toString())
+      ..fields(['date', 'version', 'Asset ID', 'NCPC Commitment Credit Type',
+        'Participant Share of Real-Time NCPC Credit']);
+    var res = await coll.find(query).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
 
 
 }

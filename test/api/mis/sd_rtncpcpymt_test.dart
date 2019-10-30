@@ -6,13 +6,17 @@ import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sd_rtncpcpymt.dart';
 
 tests() async {
+  var archive = SdRtNcpcPymtArchive();
   group('MIS SD_RTNCPCPYMT report archive', () {
-    var archive = SdRtNcpcPymtArchive();
-    test('read report', () {
-      print(Directory.current);
+    setUp(() async => await archive.dbConfig.db.open());
+    tearDown(() async => await archive.dbConfig.db.close());
+    test('read report', () async {
       var file = File('test/_assets/sd_rtncpcpymt_000000001_2015100200_20141024155608.CSV');
       var data = archive.processFile(file);
       expect(data.keys.toSet(), {0, 2});
+      for (var tab in data.keys) {
+        await archive.insertTabData(data[tab], tab: tab);
+      }
     });
   });
 }

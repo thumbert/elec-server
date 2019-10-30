@@ -1,4 +1,4 @@
-lib utils.lib_settlements;
+library utils.lib_settlements;
 
 
 import 'package:collection/collection.dart';
