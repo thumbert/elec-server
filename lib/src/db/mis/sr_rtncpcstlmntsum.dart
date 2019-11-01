@@ -178,7 +178,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
         },
         partialFilterExpression: {
           'Subaccount ID': {'\$exists': true},
-          'tab': {'\$eq': 10},
+          //'tab': {'\$eq': 10},
         });
     await dbConfig.db.close();
   }
