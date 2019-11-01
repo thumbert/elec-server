@@ -24,6 +24,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
   /// Add the index labels, remove unneeded columns.
   List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
       Map<String,dynamic> labels, List<String> removeColumns) {
+    if (rows.length == 1 && rows.first.isEmpty) return [];
     return rows.map((e) {
       for (var column in removeColumns) e.remove(column);
       var out = <String,dynamic>{
@@ -92,17 +93,14 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
     labels['tab'] = 9;
     var x9 = mis.readReportTabAsMap(file, tab: 9);
     var tab9 = addLabels(x9, labels, ['H']);
-
-    /// Sub-account info
-    /// tab 10, NCPC daily settlement info
+    
+    /// tab 10, NCPC daily settlement info by subaccount
     var x10 = mis.readReportTabAsMap(file, tab: 10);
-    var grp = groupBy(x10, (e) => e['Subaccount ID']);
-    var tab10 = <Map<String,dynamic>>[];
-    for (var entry in grp.entries) {
-      labels['Subaccount ID'] = entry.key;
-      tab10.addAll(addLabels([rowsToColumns(entry.value)], labels,
-          ['H', 'Subaccount ID', 'Subaccount Name']));
-    }
+    var tab10 = addLabels(x10, labels, ['H']);
+
+    /// tab 10, Economic NCPC daily settlement info by subaccount
+    var x11 = mis.readReportTabAsMap(file, tab: 11);
+    var tab11 = addLabels(x11, labels, ['H']);
 
     return {
       0: tab0,
@@ -115,6 +113,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
       8: tab8,
       9: tab9,
       10: tab10,
+      11: tab11,
     };
   }
 
