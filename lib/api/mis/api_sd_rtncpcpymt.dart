@@ -12,18 +12,17 @@ import 'package:elec_server/src/utils/api_response.dart';
 @ApiClass(name: 'sd_rtncpcpymt', version: 'v1')
 class SdRtNcpcPymt {
   DbCollection coll;
-  Location location;
-  var collectionName = 'sd_rtncpcpymt';
+  final Location location = getLocation('US/Eastern');
 
   SdRtNcpcPymt(Db db) {
-    coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    coll = db.collection('sd_rtncpcpymt');
   }
 
   @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
   Future<ApiResponse> data0(String accountId, String start, String end) async {
     var query = where
       ..eq('account', accountId)
+      ..eq('tab', 0)
       ..gte('date', Date.parse(start).toString())
       ..lte('date', Date.parse(end).toString())
       ..excludeFields(['_id', 'account']);
@@ -36,6 +35,7 @@ class SdRtNcpcPymt {
       String start, String end) async {
     var query = where
       ..eq('account', accountId)
+      ..eq('tab', 0)
       ..gte('date', start)
       ..lte('date', end)
       ..eq('Asset ID', assetId)
@@ -44,14 +44,13 @@ class SdRtNcpcPymt {
     return ApiResponse()..result = json.encode(res);
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/details/start/{start}/end/{end}')
-  /// Get the details for all assets, all versions
+  @ApiMethod(path: 'accountId/{accountId}/details/start/{start}/end/{end}')
+  /// Get the ncpc credit details for all assets, all versions of the report
   Future<ApiResponse> data2CreditDetails(String accountId, String subaccountId,
       String start, String end) async {
     var query = where
       ..eq('account', accountId)
       ..eq('tab', 2)
-      ..eq('Subaccount ID', subaccountId)
       ..gte('date', Date.parse(start).toString())
       ..lte('date', Date.parse(end).toString())
       ..fields(['date', 'version', 'Asset ID', 'NCPC Commitment Credit Type',
