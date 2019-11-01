@@ -95,10 +95,12 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
     var tab9 = addLabels(x9, labels, ['H']);
     
     /// tab 10, NCPC daily settlement info by subaccount
+    labels['tab'] = 10;
     var x10 = mis.readReportTabAsMap(file, tab: 10);
     var tab10 = addLabels(x10, labels, ['H']);
 
     /// tab 10, Economic NCPC daily settlement info by subaccount
+    labels['tab'] = 11;
     var x11 = mis.readReportTabAsMap(file, tab: 11);
     var tab11 = addLabels(x11, labels, ['H']);
 
@@ -146,7 +148,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
         'version': data.first['version'],
       });
       await dbConfig.coll.insertAll(data);
-      print('--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab $tab, version ${data.first['version']} successfully');
+      print('--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab ${tabs.first}, version ${data.first['version']} successfully');
     } catch (e) {
       print('XXX ' + e.toString());
     }
