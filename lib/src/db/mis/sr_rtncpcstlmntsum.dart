@@ -100,7 +100,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
     var tab10 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
-      tab1.addAll(addLabels([rowsToColumns(entry.value)], labels,
+      tab10.addAll(addLabels([rowsToColumns(entry.value)], labels,
           ['H', 'Subaccount ID', 'Subaccount Name']));
     }
 
