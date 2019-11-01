@@ -9,11 +9,11 @@ import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
-class SrRtNcpcStlmnSumArchive extends mis.MisReportArchive {
+class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
   ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SrRtNcpcStlmnSumArchive({this.dbConfig}) {
+  SrRtNcpcStlmntSumArchive({this.dbConfig}) {
     reportName = 'SR_RTNCPCSTLMNTSUM';
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
