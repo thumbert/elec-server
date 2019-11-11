@@ -9,6 +9,9 @@ import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:tuple/tuple.dart';
 import 'package:elec_server/src/utils/api_response.dart';
+import 'package:table/table.dart';
+import 'package:dama/dama.dart';
+import 'package:elec_server/src/utils/lib_settlements.dart';
 
 @ApiClass(name: 'sr_rtlocsum', version: 'v1')
 class SrRtLocSum {
@@ -98,7 +101,69 @@ class SrRtLocSum {
       return ApiResponse()..result = json.encode(aux);
 	  }
 
-	  List<Map<String,dynamic>> _processStream(List<Map<String,dynamic>> data, {bool hasLocationId: true}) {
+
+		@ApiMethod(path: 'rtload/monthly/accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}/settlement/{settlement}')
+		/// Get monthly total load for a subaccount for a given location, one settlement.
+		Future<ApiResponse> monthlyRtLoadForSubaccountZone (String accountId,
+				String subaccountId, int locationId, String start, String end,
+				int settlement) async {
+			var startDate = parseMonth(start).startDate;
+			var endDate = parseMonth(end).endDate;
+
+			var pipeline = [
+				{
+					'\$match': {
+						'account': {'\$eq': accountId},
+						'tab': {'\$eq': 1},
+						'Subaccount ID': {'\$eq': subaccountId},
+						'date': {
+							'\$gte': startDate.toString(),
+							'\$lte': endDate.toString(),
+						},
+						'Location ID': {'\$eq': locationId},
+					},
+
+				},
+				{
+					'\$group': {
+						'_id': {
+							'date': '\$date',
+							'version': '\$version',
+							'Real Time Load Obligation': {
+								'\$sum': '\$Real Time Load Obligation'
+							},
+						}
+					},
+				},
+				{
+					'\$project': {
+						'_id': 0,
+						'date': '\$_id.date',
+						'version': '\$_id.version',
+						'Real Time Load Obligation': '\$_id.Real Time Load Obligation',
+					},
+				},
+				{
+					'\$sort': {
+						'date': 1,
+					}
+				},
+			];
+
+			var data = await coll.aggregateToStream(pipeline).toList();
+			var aux = getNthSettlement(data, n: settlement, group: 'date');
+			var nest = Nest()
+				..key((e) => e['date'].substring(0,7))
+				..rollup((List xs) => -sum(xs.map((e) => e['Real Time Load Obligation'] as num)));
+			var out = nest.map(aux);
+			return ApiResponse()..result = json.encode(out);
+		}
+
+
+
+
+
+		List<Map<String,dynamic>> _processStream(List<Map<String,dynamic>> data, {bool hasLocationId: true}) {
 	    var out = <Map<String,dynamic>>[];
 	    List<String> otherKeys;
 	    for (var e in data) {
@@ -120,8 +185,6 @@ class SrRtLocSum {
 	    }
 	    return out;
 	  }
-
-
 
   /// Extract data from the collection
   /// returns one element for each day
