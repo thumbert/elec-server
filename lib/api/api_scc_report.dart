@@ -25,7 +25,7 @@ class SccReport {
     var mon = Month(int.parse(yyyymm.substring(0,4)),
         int.parse(yyyymm.substring(4)));
 
-    SelectorBuilder query = where;
+    var query = mongo.where;
     query = query.eq('month', mon.toIso8601String());
     query = query.excludeFields(['_id', 'month']);
     var res = await coll.find(query).toList();
