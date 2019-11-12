@@ -144,7 +144,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   }
 
   Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(where.eq('date', day.toString()));
+    return await dbConfig.coll.remove(mongo.where.eq('date', day.toString()));
   }
 
   /// Check if this document is OK.  Throws otherwise.  May not catch all
