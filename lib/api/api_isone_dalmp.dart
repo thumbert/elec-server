@@ -165,7 +165,7 @@ class DaLmp {
 
   Future<List<Map<String, Object>>> getHourlyData(
       int ptid, Date start, Date end, String component) async {
-    SelectorBuilder query = where;
+    var query = mongo.where;
     query = query.eq('ptid', ptid);
     query = query.gte('date', start.toString());
     query = query.lte('date', end.toString());
