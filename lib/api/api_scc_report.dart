@@ -2,7 +2,7 @@ library api.scc_report;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
 import 'package:date/date.dart';
 import '../src/utils/api_response.dart';
@@ -10,10 +10,10 @@ import '../src/utils/api_response.dart';
 
 @ApiClass(name: 'scc_report', version: 'v1')
 class SccReport {
-  DbCollection coll;
+  mongo.DbCollection coll;
   String collectionName = 'scc_report';
 
-  SccReport(Db db) {
+  SccReport(mongo.Db db) {
     coll = db.collection(collectionName);
   }
 
@@ -34,7 +34,7 @@ class SccReport {
 
   @ApiMethod(path: 'assetId/{assetId}')
   Future<ApiResponse> getSccReportByAssetId(int assetId) async {
-    SelectorBuilder query = where;
+    var query = mongo.where;
     query = query.eq('Asset ID', assetId);
     query = query.excludeFields(['_id']);
     var res = await coll.find(query).toList();
