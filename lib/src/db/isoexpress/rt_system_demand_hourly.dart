@@ -2,7 +2,7 @@ library db.isoexpress.rt_system_demand_hourly;
 
 import 'dart:io';
 import 'dart:async';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
