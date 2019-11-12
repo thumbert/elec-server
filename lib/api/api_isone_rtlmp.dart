@@ -2,7 +2,7 @@ library api.isone_rtlmp;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
@@ -15,12 +15,12 @@ import 'package:elec_server/src/utils/api_response.dart';
 
 @ApiClass(name: 'rtlmp', version: 'v1')
 class RtLmp {
-  DbCollection coll;
+  mongo.DbCollection coll;
   Location _location;
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'rt_lmp_hourly';
 
-  RtLmp(Db db) {
+  RtLmp(mongo.Db db) {
     coll = db.collection(collectionName);
     _location = getLocation('US/Eastern');
   }
