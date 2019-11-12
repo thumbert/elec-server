@@ -100,6 +100,6 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
 
   Date lastDayAvailable() => Date.today().subtract(2);
   Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(where.eq('date', day.toString()));
+    return await dbConfig.coll.remove(mongo.where.eq('date', day.toString()));
   }
 }
