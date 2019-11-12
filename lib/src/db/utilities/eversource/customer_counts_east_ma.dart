@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
 
@@ -30,7 +30,7 @@ class EversourceEastMaCustomerCountsArchive {
       Directory(dir).createSync(recursive: true);
   }
 
-  Db get db => dbConfig.db;
+  mongo.Db get db => dbConfig.db;
 
   /// insert data from one or multiple files
   Future<int> insertData(List<Map<String, dynamic>> data) async {
