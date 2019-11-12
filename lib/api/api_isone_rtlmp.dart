@@ -112,7 +112,7 @@ class RtLmp {
 
   Future<List<Map<String, dynamic>>> getHourlyData(
       int ptid, Date start, Date end, String component) async {
-    SelectorBuilder query = where;
+    var query = mongo.where;
     query = query.eq('ptid', 4000);
     query = query.gte('date', start.toString());
     query = query.lte('date', end.toString());
