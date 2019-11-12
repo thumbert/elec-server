@@ -2,7 +2,7 @@ library api.isone_dalmp;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
@@ -13,12 +13,12 @@ import '../src/utils/api_response.dart';
 
 @ApiClass(name: 'dalmp', version: 'v1')
 class DaLmp {
-  DbCollection coll;
+  mongo.DbCollection coll;
   Location _location;
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'da_lmp_hourly';
 
-  DaLmp(Db db) {
+  DaLmp(mongo.Db db) {
     coll = db.collection(collectionName);
     _location = getLocation('US/Eastern');
   }
