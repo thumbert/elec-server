@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 import 'package:tuple/tuple.dart';
 import 'package:intl/intl.dart';
@@ -26,7 +26,7 @@ class ForwardMarksArchive {
       ..collectionName = 'forward_marks';
   }
 
-  Db get db => dbConfig.db;
+  mongo.Db get db => dbConfig.db;
 
   /// Insert data into the db.  Data is upserted for each (asOfDate, curveId)
   /// pair.

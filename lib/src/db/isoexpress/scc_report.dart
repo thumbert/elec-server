@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
 class SccReportArchive {
@@ -14,17 +14,16 @@ class SccReportArchive {
 
   SccReportArchive({this.config, this.dir}) {
     Map env = Platform.environment;
-    if (config == null) {
-      config = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'scc_report';
-    }
+    config ??= ComponentConfig()
+      ..host = '127.0.0.1'
+      ..dbName = 'isoexpress'
+      ..collectionName = 'scc_report';
+
     dir ??= env['HOME'] +
         '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
   }
 
-  Db get db => config.db;
+  mongo.Db get db => config.db;
 
   /// Insert one xlsx file into the collection.
   /// [file] points to the downloaded xlsx file.  NOTE that you have to convert
@@ -60,39 +59,38 @@ class SccReportArchive {
     }).toList();
   }
 
-  List<Map<String,dynamic>> _readXlsxVersion1(SpreadsheetDecoder decoder,
-      Month month) {
+  List<Map<String, dynamic>> _readXlsxVersion1(
+      SpreadsheetDecoder decoder, Month month) {
     var res = <Map<String, dynamic>>[];
     var table = decoder.tables['SCC_Report_Current'];
 
-    var yyyymm = convertXlsxDate(table.rows[0][8]).toString().substring(0,7);
+    var yyyymm = convertXlsxDate(table.rows[0][8]).toString().substring(0, 7);
     if (yyyymm != month.toIso8601String())
       throw StateError('Month from filename doesn\'t match internal month');
 
     // Summer and Winter SCC values have the same row names, need to distinguish
     // them.
     var rowNames = table.rows[1].cast<String>();
-    var mustHaveColumns = Set()..addAll(['Asset ID', 'Generator Name',
-      'SCC (MW)']);
+    var mustHaveColumns = Set()
+      ..addAll(['Asset ID', 'Generator Name', 'SCC (MW)']);
     if (!rowNames.toSet().containsAll(mustHaveColumns))
       throw StateError('Column names of the report have changed too much!');
 
-    var indSummer = Set()..addAll([19,20,21,22,23]);
-    var indWinter = Set()..addAll([24,25,26,27,28]);
+    var indSummer = Set()..addAll([19, 20, 21, 22, 23]);
+    var indWinter = Set()..addAll([24, 25, 26, 27, 28]);
 
     int nRows = table.rows.length;
     for (int r = 2; r < nRows; r++) {
       // sometimes the spreadsheet has empty rows
       if (table.rows[r][0] != null) {
-        var aux = <String,dynamic>{};
-        for (int i=0; i<rowNames.length; i++){
+        var aux = <String, dynamic>{};
+        for (int i = 0; i < rowNames.length; i++) {
           if (table.rows[r][i] != null) {
             var name = rowNames[i];
             if (indSummer.contains(i)) name = 'Summer $name';
             if (indWinter.contains(i)) name = 'Winter $name';
             var value = table.rows[r][i];
-            if (i == 23 || i == 28)
-              value = convertXlsxDate(value).toString();
+            if (i == 23 || i == 28) value = convertXlsxDate(value).toString();
             aux[name] = value;
           }
         }
@@ -101,7 +99,6 @@ class SccReportArchive {
     }
     return res;
   }
-
 
   /// Download an SCC report xls file from the ISO.  Save it with the same
   /// name in the xlsx format.
@@ -139,7 +136,8 @@ class SccReportArchive {
 }
 
 Date convertXlsxDate(num x) {
-  var aux = new DateTime.fromMillisecondsSinceEpoch(((x - 25569) * 86400000).round(),
+  var aux = new DateTime.fromMillisecondsSinceEpoch(
+      ((x - 25569) * 86400000).round(),
       isUtc: true);
   return new Date(aux.year, aux.month, aux.day);
 }

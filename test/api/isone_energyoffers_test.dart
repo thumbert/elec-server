@@ -2,7 +2,7 @@ library test.isone_energyoffers_test;
 
 import 'dart:convert';
 import 'package:test/test.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/api/api_isone_energyoffers.dart';
@@ -10,11 +10,11 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 
 ApiTest() async {
-  Db db;
+  mongo.Db db;
   DaEnergyOffers api;
   setUp(() async {
-    db = new Db('mongodb://localhost/isoexpress');
-    api = new DaEnergyOffers(db);
+    db = mongo.Db('mongodb://localhost/isoexpress');
+    api = DaEnergyOffers(db);
     await db.open();
   });
   tearDown(() async {

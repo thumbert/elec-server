@@ -1,7 +1,7 @@
 library api.sp_peakcontributiondly;
 
 import 'dart:async';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
@@ -9,12 +9,12 @@ import 'package:date/date.dart';
 
 @ApiClass(name: 'sp_peakcontributiondly', version: 'v1')
 class SpPeakContributionDly {
-  DbCollection coll;
+  mongo.DbCollection coll;
   Location location;
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'sp_peakcontributiondly';
 
-  SpPeakContributionDly(Db db) {
+  SpPeakContributionDly(mongo.Db db) {
     coll = db.collection(collectionName);
     location = getLocation('US/Eastern');
   }
@@ -53,7 +53,7 @@ class SpPeakContributionDly {
   Future<List<Map<String,String>>> peakByAssets(String month,
       String assetIds) async {
     month = month.replaceAll('-', '');
-    Month m = new Month(int.parse(month.substring(0,4)),
+    var m = Month(int.parse(month.substring(0,4)),
           int.parse(month.substring(4,6)));
 
     List<int> loadIds = assetIds.split(',').map((e) => int.parse(e.trim())).toList();
