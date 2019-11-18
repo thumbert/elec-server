@@ -1,5 +1,6 @@
 library test.client.forward_marks;
 
+import 'dart:convert';
 import 'dart:math';
 import 'package:date/date.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
@@ -39,7 +40,7 @@ List<Map<String,dynamic>> _generateData(String curveId, Date start, Date end,
 insertData(ForwardMarksArchive archive) async {
   var n = 10;
   var location = getLocation('US/Eastern');
-  var start = Date(2017, 1, 1, location: location);
+  var start = Date(2018, 1, 1, location: location);
   var end = Date(2018, 12, 31, location: location);
   var endMonth = Month(2025, 12, location: location);
   for (var i = 0; i < n; i++) {
@@ -51,12 +52,19 @@ insertData(ForwardMarksArchive archive) async {
 tests() async {
   group('forward marks archive tests:', () {
     var archive = ForwardMarksArchive();
+    var api = ForwardMarks(archive.db);
     setUp(() async {
       await archive.db.open();
-      await insertData(archive);
+      //await insertData(archive);
     });
     tearDown(() async => await archive.db.close());
+    test('get available asOfDates', () async {
+      var res = await api.getAsOfDates();
+      expect(res.length, 255);
+    });
     test('get one curve', () async {
+      var res = await api.getForwardCurve('2018-01-07', 'curve:1');
+      var c1 = json.decode(res.result);
       expect(1, 1);
     });
   });

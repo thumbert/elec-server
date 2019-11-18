@@ -17,14 +17,24 @@ class ForwardMarks {
   }
 
   @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}')
-  /// Return all existing buckets
+  /// Get the forward curve
   Future<ApiResponse> getForwardCurve(String asOfDate, String curveId) async {
-    var query = where
-      ..gte('date', Date.parse(asOfDate).toString())
-      ..eq('curveId', curveId)
-      ..excludeFields(['_id', 'asOfDate', 'curveId']);
-    var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    var pipeline = [
+      {
+        '\$match': {
+          'id': {'\$eq': curveId},
+          'day': {'\$lte': Date.parse(asOfDate).toString()},
+        }
+      },
+      {
+        '\$sort': {'day': -1},
+      },
+      {
+        '\$limit': 1,
+      },
+    ];
+    var aux = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(aux.first);
   }
 
   @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}/bucket/{bucket}')
@@ -37,6 +47,11 @@ class ForwardMarks {
       ..fields(['months', bucket]);
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
+  }
+
+  Future<List<String>> getAsOfDates() async {
+    var res = await coll.distinct('asOfDate');
+    return res.values.toList().cast<String>() ;
   }
 
 //  @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}/bucket/{bucket}')
