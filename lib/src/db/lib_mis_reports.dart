@@ -48,6 +48,29 @@ class MisReport {
   /// the location of where this report lives on the disk
   final File file;
 
+  /// Add labels to each data row.  Typical labels are something like
+  ///
+  ///```dart
+  ///     var labels = <String,dynamic>{
+  //      'account': account,
+  //      'tab': 0,
+  //      'date': reportDate.toString(),
+  //      'version': version,
+  //    };
+  ///```
+  ///And usually the removed columns are ['H']
+  static List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
+      Map<String,dynamic> labels, List<String> removeColumns) {
+    return rows.map((e) {
+      for (var column in removeColumns) e.remove(column);
+      var out = <String,dynamic>{
+        ...labels,
+        ...e,
+      };
+      return out;
+    }).toList();
+  }
+
   /// all the lines in the report
   List<String> _lines;
   CsvToListConverter _converter;

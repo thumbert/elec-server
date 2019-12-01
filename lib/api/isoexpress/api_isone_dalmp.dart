@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:table/table.dart';
-import '../src/utils/api_response.dart';
+import '../../src/utils/api_response.dart';
 
 @ApiClass(name: 'dalmp', version: 'v1')
 class DaLmp {

@@ -23,18 +23,18 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
 
 
 
-  /// Add the index labels, remove unneeded columns.
-  List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
-      Map<String,dynamic> labels, List<String> removeColumns) {
-    return rows.map((e) {
-      for (var column in removeColumns) e.remove(column);
-      var out = <String,dynamic>{
-        ...labels,
-        ...e,
-      };
-      return out;
-    }).toList();
-  }
+//  /// Add the index labels, remove unneeded columns.
+//  List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
+//      Map<String,dynamic> labels, List<String> removeColumns) {
+//    return rows.map((e) {
+//      for (var column in removeColumns) e.remove(column);
+//      var out = <String,dynamic>{
+//        ...labels,
+//        ...e,
+//      };
+//      return out;
+//    }).toList();
+//  }
 
   Map<int,List<Map<String,dynamic>>> _processFile_21000101(File file) {
     var report = mis.MisReport(file);
@@ -50,7 +50,7 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
     };
 
     var x0 = mis.readReportTabAsMap(file, tab: 0);
-    var tab0 = addLabels([rowsToColumns(x0)], labels, ['H']);
+    var tab0 = mis.MisReport.addLabels([rowsToColumns(x0)], labels, ['H']);
 
     labels['tab'] = 1;
     var x1 = mis.readReportTabAsMap(file, tab: 1);
@@ -58,7 +58,7 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
     var tab1 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
-      tab1.addAll(addLabels([rowsToColumns(entry.value)], labels,
+      tab1.addAll(mis.MisReport.addLabels([rowsToColumns(entry.value)], labels,
           ['H', 'Subaccount ID', 'Subaccount Name']));
     }
 

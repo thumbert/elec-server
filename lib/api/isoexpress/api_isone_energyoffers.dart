@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:more/ordering.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
-import '../src/utils/api_response.dart';
+import '../../src/utils/api_response.dart';
 
 @ApiClass(name: 'da_energy_offers', version: 'v1')
 class DaEnergyOffers {

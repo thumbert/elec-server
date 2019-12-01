@@ -7,7 +7,7 @@ import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import '../src/utils/api_response.dart';
+import '../../src/utils/api_response.dart';
 
 
 @ApiClass(name: 'bc', version: 'v1')
