@@ -71,12 +71,12 @@ class DaRegulationOffers {
   Future<List<Map<String, dynamic>>> _getRegulationOffers(
       String date, String hourending) async {
     hourending = hourending.padLeft(2, '0');
-    Date day = Date.parse(date);
-    TZDateTime dt = parseHourEndingStamp(mmddyyyy(day), hourending);
-    String hB = TZDateTime.fromMillisecondsSinceEpoch(
+    var day = Date.parse(date);
+    var dt = parseHourEndingStamp(mmddyyyy(day), hourending);
+    var hB = TZDateTime.fromMillisecondsSinceEpoch(
         location, dt.millisecondsSinceEpoch)
         .toIso8601String();
-    List pipeline = [];
+    var pipeline = [];
     pipeline.add({
       '\$match': {
         'date': {
@@ -129,40 +129,39 @@ class DaRegulationOffers {
     return out;
   }
 
-  //http://localhost:8080/da_energy_offers/v1/assetId/41406/start/20170701/end/20171001
-  @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
+  //http://localhost:8080/da_regulation_offers/v1/assetId/41406/start/20170701/end/20171001
   /// Get everything for one generator between a start and end date
-  Future<ApiResponse> getEnergyOffersForAssetId(
+  @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
+  Future<ApiResponse> getRegulationOffersForAssetId(
       String assetId, String start, String end) async {
-    List pipeline = [];
-    pipeline.add({
-      '\$match': {
-        'date': {
-          '\$gte': Date.parse(start).toString(),
-          '\$lte': Date.parse(end).toString(),
-        },
-        'Masked Asset ID': {'\$eq': int.parse(assetId)}
-      }
-    });
-    pipeline.add({
-      '\$project': {
-        '_id': 0,
-        'Masked Asset ID': 0,
-        'Masked Lead Participant ID': 0,
-      }
-    });
-    pipeline.add({
-      '\$sort': {'date': 1}
-    });
+    var pipeline = [
+      {
+        '\$match': {
+          'date': {
+            '\$gte': Date.parse(start).toString(),
+            '\$lte': Date.parse(end).toString(),
+          },
+          'Masked Asset ID': {'\$eq': int.parse(assetId)}
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'Masked Asset ID': 0,
+          'Masked Lead Participant ID': 0,
+        }
+      },
+      {
+        '\$sort': {'date': 1}
+      },
+    ];
     var aux = await coll.aggregateToStream(pipeline).toList();
-    aux.forEach((document) {
-      document['hours'] = json.encode(document['hours']);
-    });
     return ApiResponse()..result = json.encode(aux);
   }
 
 
   /// http://localhost:8080/da_regulation_offers/v1/assets/day/20170301
+  /// Get the assets that participated on this day
   @ApiMethod(path: 'assets/day/{day}')
   Future<ApiResponse> assetsByDay(String day) async {
     var query = where.eq('date', Date.parse(day).toString()).excludeFields(
@@ -172,6 +171,8 @@ class DaRegulationOffers {
   }
 
   /// http://localhost:8080/da_regulation_offers/v1/assets/participantId/355376/start/20170301/end/20170305
+  /// Get all the assets offered by a participant Id between a start and end
+  /// date.
   @ApiMethod(path: 'assets/participantId/{participantId}/start/{start}/end/{end}')
   Future<ApiResponse> assetsForParticipant(int participantId,
       String start, String end) async {
@@ -186,6 +187,7 @@ class DaRegulationOffers {
   }
 
   /// http://localhost:8080/da_energy_offers/v1/ownership/assetId/80076/start/20170501/end/20170801
+  /// Check the ownership of an assetId between a start and end date.
   @ApiMethod(path: 'ownership/assetId/{assetId}/start/{start}/end/{end}')
   Future<ApiResponse> assetOwnership(int assetId,
       String start, String end) async {

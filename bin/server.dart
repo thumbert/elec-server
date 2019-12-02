@@ -3,6 +3,7 @@ import 'dart:io';
 
 //import 'package:logging/logging.dart';
 //import 'package:logging_handlers/server_logging_handlers.dart';
+import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:rpc/rpc.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -25,7 +26,7 @@ import 'package:elec_server/api/isoexpress/api_isone_zonal_demand.dart';
 
 
 const String _API_PREFIX = '';
-final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
+final ApiServer _apiServer = ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
 const String host = '127.0.0.1';
 
 
@@ -38,9 +39,11 @@ registerApis() async {
 
   var db3 = Db('mongodb://$host/isoexpress');
   await db3.open();
-  _apiServer.addApi(DaLmp(db3) );
-  _apiServer.addApi(BindingConstraints(db3) );
-  _apiServer.addApi(DaEnergyOffers(db3) );
+  _apiServer.addApi(DaLmp(db3));
+  _apiServer.addApi(BindingConstraints(db3));
+  _apiServer.addApi(DaEnergyOffers(db3));
+  _apiServer.addApi(RegulationRequirement(db3));
+
 //  _apiServer.addApi(SccReport(db3) );
 //  _apiServer.addApi(DaDemandBids(db3) );
 //  _apiServer.addApi(SystemDemand(db3) );
@@ -54,9 +57,9 @@ registerApis() async {
 //  await db5.open();
 //  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
 
-  var db6 = Db('mongodb://$host/marks');
-  await db6.open();
-  _apiServer.addApi(ForwardMarks(db6));
+//  var db6 = Db('mongodb://$host/marks');
+//  await db6.open();
+//  _apiServer.addApi(ForwardMarks(db6));
 
 }
 
@@ -70,7 +73,7 @@ main() async {
 
   var port = 8080;  // production
   //var port = 8081;  // test
-  HttpServer server = await HttpServer.bind(InternetAddress.anyIPv4, port);
+  var server = await HttpServer.bind(InternetAddress.anyIPv4, port);
   server.listen(_apiServer.httpRequestHandler);
 }
 
