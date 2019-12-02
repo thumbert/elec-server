@@ -40,11 +40,21 @@ class RegulationRequirementArchive {
   /// Read all the files
   List<Map<String, dynamic>> readAllData() {
     var data = <Map<String,dynamic>>[
+       {
+        'from': '2014-04-01',
+        'to': '2016-02-24',
+        ..._readXlsx(Date(2014, 4, 1)),
+      },
+      {
+        'from': '2016-02-25',
+        'to': '2018-07-15',
+        ..._readXlsx(Date(2016, 2, 25)),
+      },
       {
         'from': '2018-07-16',
         'to': '2099-12-31',
         ..._readXlsx(Date(2018, 7, 16)),
-      }
+      },
     ];
     return data;
   }
