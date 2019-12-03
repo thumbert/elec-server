@@ -1,4 +1,4 @@
-library db.isoexpress.da_regulation_offer;
+library db.isoexpress.regulation_offer;
 
 import 'dart:io';
 import 'dart:async';
@@ -13,16 +13,16 @@ import '../lib_iso_express.dart';
 import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
-class DaRegulationOfferArchive extends DailyIsoExpressReport {
+class RegulationOfferArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
   final location = getLocation('US/Eastern');
 
-  DaRegulationOfferArchive({this.dbConfig, this.dir}) {
+  RegulationOfferArchive({this.dbConfig, this.dir}) {
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
       ..dbName = 'isoexpress'
-      ..collectionName = 'da_regulation_offer';
+      ..collectionName = 'regulation_offer';
 
     dir ??= baseDir + 'PricingReports/DaRegulationOffer/Raw/';
   }
