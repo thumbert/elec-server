@@ -1,5 +1,6 @@
 import 'dart:html';
 
+import 'package:elec_server/src/ui/text_input.dart';
 import 'package:timezone/browser.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_checkbox_filter.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_filter.dart';
@@ -63,8 +64,10 @@ main() async {
 
   /// a selectable list
   var messageSl = querySelector('#selectable-list-message');
+  var fruits = ['Apple', 'Banana', 'Lemon', 'Orange', 'Strawberry',
+    'Watermelon'];
   var selectableList = SelectableList(querySelector('#selectable-list'),
-      ['Apple', 'Banana', 'Lemon', 'Orange', 'Strawberry', 'Watermelon']);
+      fruits);
   selectableList.onChange((e) {
     messageSl.text = 'You selected ${selectableList.selected.join(', ')}';
   });
@@ -82,6 +85,12 @@ main() async {
     }
   });
 
-
-
+  /// text input with allowed values only
+  var messageTextInputConstrained = querySelector('#text-input-constrained-message')
+    ..text = 'Only Apple, Banana, Lemon, Orange, Strawberry, Watermelon are allowed';
+  var textInputConstrained = TextInput(querySelector('#text-input-constrained'),
+    'Fruit', initialValue: 'Banana', allowedValues: fruits);
+  textInputConstrained.onChange((e) {
+    messageTextInputConstrained.text = 'You selected ${textInputConstrained.value}';
+  });
 }

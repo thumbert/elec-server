@@ -20,22 +20,22 @@ class NumericRangeFilter {
     _defaultMax = maxValue;
     size ??= 4;
 
-    var _wrapper = new html.DivElement()
+    var _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
-    _wrapper.children.add(new html.LabelElement()
+    _wrapper.children.add(html.LabelElement()
       ..text = '$name above'
       ..setAttribute('style', 'margin-left: 15px'));
-    _min = new html.TextInputElement()
+    _min = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..placeholder = minValue.toString()
       ..size = size
       ..value = minValue.round().toString();
     _wrapper.children.add(_min);
 
-    _wrapper.children.add(new html.LabelElement()
+    _wrapper.children.add(html.LabelElement()
       ..text = 'below'
       ..setAttribute('style', 'margin-left: 15px'));
-    _max = new html.TextInputElement()
+    _max = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..placeholder = maxValue.toString()
       ..size = size

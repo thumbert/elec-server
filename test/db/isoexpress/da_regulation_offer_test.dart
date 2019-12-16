@@ -10,8 +10,8 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/isoexpress/da_regulation_offer.dart';
 
 tests() async {
-  group('DA regulation offers archive test:', () {
-    var archive = DaRegulationOfferArchive();
+  group('Regulation offers archive test:', () {
+    var archive = RegulationOfferArchive();
     setUp(() async {
       await archive.setupDb();
       await archive.dbConfig.db.open();
@@ -35,7 +35,7 @@ tests() async {
 
 Future insertDays() async {
   var location = getLocation('US/Eastern');
-  var archive = DaRegulationOfferArchive();
+  var archive = RegulationOfferArchive();
   //await archive.setupDb();
   var days = Interval(TZDateTime(location, 2019, 7),
       TZDateTime(location, 2019, 8))

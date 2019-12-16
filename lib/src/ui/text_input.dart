@@ -7,6 +7,7 @@ class TextInput {
   html.TextInputElement _textInput;
   String name;
   String initialValue;
+  List<String> allowedValues;
 
   /// A simple text input with a label.
   ///
@@ -14,7 +15,7 @@ class TextInput {
   ///
   /// Need to trigger an action onChange.
   TextInput(this.wrapper, this.name, {this.initialValue, int size,
-    String placeholder}) {
+    String placeholder, this.allowedValues}) {
 
     var aux = '';
     if (initialValue != null) aux = initialValue;
@@ -33,7 +34,16 @@ class TextInput {
     wrapper.children.add(_wrapper);
   }
 
-  String get value => _textInput.value;
+  String get value {
+    var _value = _textInput.value;
+    if (allowedValues == null || allowedValues.contains(_value)) {
+      _textInput.setAttribute('style', 'margin-left: 15px; border-color: initial;');
+      return _value;
+    } else {
+      _textInput.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
+    }
+    return _value;
+  }
 
   /// trigger a change when either one of the two inputs change
   onChange(Function x) {
