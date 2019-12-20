@@ -40,30 +40,25 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
     var reportDate = report.forDate();
     var version = report.timestamp().toIso8601String();
 
-    /// tab 1, Forward reserves section
+    /// tab 4, Asset detail RT reserves hourly
     var labels = <String,dynamic>{
       'account': account,
-      'tab': 1,
+      'tab': 4,
       'date': reportDate.toString(),
       'version': version,
     };
-    var x1 = mis.readReportTabAsMap(file, tab: 1);
-    var tab1 = addLabels(x1, labels, ['H']);
-
-    /// tab 2, RT reserves hourly
-    labels['tab'] = 2;
-    var x2 = mis.readReportTabAsMap(file, tab: 2);
-    var grp = groupBy(x2, (e) => e['Asset ID']);
-    var tab2 = <Map<String,dynamic>>[];
+    var x4 = mis.readReportTabAsMap(file, tab: 4);
+    var grp = groupBy(x4, (e) => e['Asset ID']);
+    var tab4 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Asset ID'] = entry.key;
-      tab2.addAll(addLabels([rowsToColumns(entry.value)], labels,
-          ['H', 'Asset ID', 'Asset Name']));
+      labels['Subaccount ID'] = entry.value.first['Subaccount ID'];
+      tab4.addAll(addLabels([rowsToColumns(entry.value)], labels,
+          ['H', 'Asset ID', 'Asset Name', 'Subaccount ID', 'Subaccount Name']));
     }
 
     return {
-      1: tab1,
-      2: tab2,
+      4: tab4,
     };
   }
 
