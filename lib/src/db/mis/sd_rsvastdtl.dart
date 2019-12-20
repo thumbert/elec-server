@@ -54,7 +54,8 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
       labels['Asset ID'] = entry.key;
       labels['Subaccount ID'] = entry.value.first['Subaccount ID'];
       tab4.addAll(addLabels([rowsToColumns(entry.value)], labels,
-          ['H', 'Asset ID', 'Asset Name', 'Subaccount ID', 'Subaccount Name']));
+          ['H', 'Asset ID', 'Asset Name', 'Subaccount ID', 'Subaccount Name',
+          'Reserve Zone ID', 'Reserve Zone Name', 'Asset Type']));
     }
 
     return {
