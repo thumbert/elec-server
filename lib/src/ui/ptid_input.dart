@@ -1,4 +1,4 @@
-library ui.numeric_input;
+library ui.ptid_input;
 
 import 'dart:html' as html;
 
