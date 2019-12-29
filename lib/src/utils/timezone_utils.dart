@@ -4,6 +4,7 @@ import 'dart:io';
 
 /// get the location of the timezone database, until the package figures out a
 /// a better way.
+@Deprecated('No longer needed')
 String getLocationTzdb() {
   String tzdb = 'hosted/pub.dartlang.org/timezone-0.4.3/lib/data/2015b.tzf';
   if (Platform.isWindows) {

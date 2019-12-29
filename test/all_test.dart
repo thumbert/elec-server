@@ -10,6 +10,7 @@ import 'client/isoexpress/da_energy_offer_test.dart' as daoffers;
 import 'client/isoexpress/dalmp_test.dart' as dalmp;
 import 'client/isoexpress/system_demand_test.dart' as sysdem;
 import 'client/other/ptids_test.dart' as ptid;
+import 'utils/term_cache_test.dart' as termCache;
 
 
 import 'utils/to_csv_test.dart' as toCsv;
@@ -30,6 +31,7 @@ main() async {
 //  ptid.tests();
   mis.tests();
 
+  termCache.tests();
   toCsv.tests();
 
 }
