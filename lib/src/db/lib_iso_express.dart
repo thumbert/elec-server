@@ -105,18 +105,18 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
     try {
       data = processFile(file);
       if (data.isEmpty) return Future.value(null);
+      await dbConfig.coll.remove({'date': day.toString()});
+      return dbConfig.coll.insertAll(data).then((_) {
+        print('--->  Inserted ${reportName} for day ${day}');
+        return 0;
+      }).catchError((e) {
+        print('XXXX ' + e.toString());
+        return 1;
+      }); 
     } on mis.IncompleteReportException {
       file.delete();
       return Future.value(null);
     }
-    await dbConfig.coll.remove({'date': day.toString()});
-    return dbConfig.coll.insertAll(data).then((_) {
-      print('--->  Inserted ${reportName} for day ${day}');
-      return 0;
-    }).catchError((e) {
-      print('XXXX ' + e.toString());
-      return 1;
-    });
   }
 }
 
