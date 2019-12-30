@@ -155,7 +155,7 @@ class MisReport {
   List<List> _readReport({int tab: 0}) {
     var converter = CsvToListConverter();
     _lines ??= file.readAsLinesSync();
-    if (!(_lines.last.startsWith('"T"') || _lines.last.startsWith('T')))
+    if (_lines.isEmpty || !(_lines.last.startsWith('"T"') || _lines.last.startsWith('T')))
       throw IncompleteReportException('Incomplete CSV file ${file.path}');
 
     int nHeaders = -1;
