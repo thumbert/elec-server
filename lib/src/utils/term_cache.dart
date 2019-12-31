@@ -43,7 +43,7 @@ class TermCache {
     var days = interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
     var out = <Map<String,dynamic>>[];
     for (var day in days) {
-      out.addAll(_cache[day]);
+      if (_cache.containsKey(day)) out.addAll(_cache[day]);
     }
     return out;
   }
