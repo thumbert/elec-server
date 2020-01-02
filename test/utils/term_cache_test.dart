@@ -8,7 +8,7 @@ tests() {
   group('TestCache tests:', () {
     var loader = (Interval interval) {
       var days =
-      interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
+          interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
       var out = <Map<String, dynamic>>[];
       for (var date in days) {
         out.add({
@@ -20,8 +20,10 @@ tests() {
       return Future.value(out);
     };
     var keyAssign = (Map<String, dynamic> e) => e['date'] as Date;
+    var keysFromInterval = (Interval interval) =>
+        interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
     test('domain test', () async {
-      var cache = TermCache(loader, keyAssign);
+      var cache = TermCache(loader, keyAssign, keysFromInterval);
       expect(cache.domain().isEmpty, true);
       var term1 = parseTerm('1Jan19-4Jan19');
       await cache.set(term1);
@@ -29,7 +31,7 @@ tests() {
       expect(cache.get(term1).length, 4);
     });
     test('get missing days only', () async {
-      var cache = TermCache(loader, keyAssign);
+      var cache = TermCache(loader, keyAssign, keysFromInterval);
       var term1 = parseTerm('1Jan19-4Jan19');
       await cache.set(term1);
       var term2 = parseTerm('8Jan19-12Jan19');
