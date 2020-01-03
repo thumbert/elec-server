@@ -9,7 +9,7 @@ import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
-class SrDaNcpcStlmnSumArchive extends mis.MisReportArchive {
+class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
   ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
