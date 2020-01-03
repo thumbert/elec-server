@@ -13,7 +13,7 @@ class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
   ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SrDaNcpcStlmnSumArchive({this.dbConfig}) {
+  SrDaNcpcStlmntSumArchive({this.dbConfig}) {
     reportName = 'SR_DANCPCSTLMNTSUM';
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
