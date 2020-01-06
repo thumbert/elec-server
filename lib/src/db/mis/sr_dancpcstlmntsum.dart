@@ -9,11 +9,11 @@ import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
-class SrDaNcpcStlmnSumArchive extends mis.MisReportArchive {
+class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
   ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SrDaNcpcStlmnSumArchive({this.dbConfig}) {
+  SrDaNcpcStlmntSumArchive({this.dbConfig}) {
     reportName = 'SR_DANCPCSTLMNTSUM';
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
@@ -56,43 +56,19 @@ class SrDaNcpcStlmnSumArchive extends mis.MisReportArchive {
     var x1 = mis.readReportTabAsMap(file, tab: 1);
     var tab1 = addLabels(x1, labels, ['H']);
 
-    /// tab 2, LSCPR charges for asset credits section
-    labels['tab'] = 2;
-    var x2 = mis.readReportTabAsMap(file, tab: 2);
-    var tab2 = addLabels(x2, labels, ['H']);
-
-    /// tab 3, External Node Economic Charge section
-    labels['tab'] = 3;
-    var x3 = mis.readReportTabAsMap(file, tab: 3);
-    var tab3 = addLabels(x3, labels, ['H']);
-
-    /// tab 4, Asset SCR charges section -- hourly
-    labels['tab'] = 4;
-    var x4 = mis.readReportTabAsMap(file, tab: 4);
-    var tab4 = addLabels([rowsToColumns(x4)], labels, ['H']);
-
-
     /// Sub-account info
-    /// tab 5, settlement summary
-    var x5 = mis.readReportTabAsMap(file, tab: 5);
-    var grp = groupBy(x5, (e) => e['Subaccount ID']);
-    var tab5 = <Map<String,dynamic>>[];
-    for (var entry in grp.entries) {
-      labels['Subaccount ID'] = entry.key;
-      tab1.addAll(addLabels([rowsToColumns(entry.value)], labels,
-          ['H', 'Subaccount ID', 'Subaccount Name']));
-    }
+    /// tab 7, settlement summary
+    labels['tab'] = 6;
+    var x6 = mis.readReportTabAsMap(file, tab: 6);
+    var tab6 = addLabels(x6, labels, ['H']);
 
     return {
       0: tab0,
       1: tab1,
-      2: tab2,
-      3: tab3,
-      4: tab4,
-      5: tab5,
+      6: tab6,
     };
   }
-
+  
   @override
   Map<int,List<Map<String,dynamic>>> processFile(File file) {
     var report = mis.MisReport(file);
@@ -152,7 +128,6 @@ class SrDaNcpcStlmnSumArchive extends mis.MisReportArchive {
         },
         partialFilterExpression: {
           'Subaccount ID': {'\$exists': true},
-          'tab': {'\$eq': 10},
         });
     await dbConfig.db.close();
   }
