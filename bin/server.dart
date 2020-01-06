@@ -64,7 +64,7 @@ registerApis() async {
 }
 
 
-main() async {
+void main() async {
   await initializeTimeZone();
 
   await registerApis();

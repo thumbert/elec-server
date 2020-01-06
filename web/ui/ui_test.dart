@@ -1,7 +1,7 @@
 import 'dart:html';
 
-import 'package:elec_server/src/ui/text_input.dart';
 import 'package:timezone/browser.dart';
+import 'package:elec_server/src/ui/text_input.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_checkbox_filter.dart';
 import 'package:elec_server/src/ui/categorical_dropdown_filter.dart';
 import 'package:elec_server/src/ui/checkbox_label.dart';
@@ -12,7 +12,7 @@ import 'package:elec_server/src/ui/term_input.dart';
 import 'package:elec_server/src/ui/selectable_list.dart';
 
 main() async {
-  initializeTimeZone();
+  await initializeTimeZone();
   var messageCdcf =
       querySelector('#categorical-dropdown-checkbox-filter-message');
   var cdcf = CategoricalDropdownCheckboxFilter(
