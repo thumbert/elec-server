@@ -4,6 +4,7 @@ import 'dart:html' as html;
 
 class CategoricalDropdownFilter {
   html.Element wrapper;
+  html.Element _wrapper;
   html.SelectElement _selector;
   String name;
 
@@ -15,12 +16,12 @@ class CategoricalDropdownFilter {
   /// Need to trigger an action onChange.
   CategoricalDropdownFilter(this.wrapper, List<String> values, this.name) {
     // put both the label and the select element into a div
-    var _wrapper = new html.DivElement()
+    _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
     _wrapper.children.add(html.LabelElement()
       ..text = name);
 
-    _selector = new html.SelectElement()
+    _selector = html.SelectElement()
       ..setAttribute('style', 'margin-left: 15px;');
     values.forEach((String e) {
       _selector.children.add(html.OptionElement()
@@ -34,7 +35,10 @@ class CategoricalDropdownFilter {
   }
 
   String get value => _selector.value;
-  
+
+  void setAttribute(String name, String value) =>
+      _wrapper.setAttribute(name, value);
+
   /// Set the values for this dropdown in case the data wasn't available at
   /// initialization
   set values(Iterable<String> xs) {
@@ -47,6 +51,6 @@ class CategoricalDropdownFilter {
     });
   }
 
-  onChange(Function x) =>  _selector.onChange.listen(x);
+  void onChange(Function x) =>  _selector.onChange.listen(x);
 }
 

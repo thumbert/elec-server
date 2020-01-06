@@ -4,6 +4,7 @@ import 'dart:html' as html;
 
 class CheckboxLabel {
   html.Element wrapper;
+  html.Element _wrapper;
   html.CheckboxInputElement _checkboxInputElement;
   String name;
 
@@ -14,7 +15,7 @@ class CheckboxLabel {
   /// Need to trigger an action onChange.
   CheckboxLabel(this.wrapper, this.name) {
     // put both the label and the select element into a div
-    var _wrapper = html.DivElement()
+    _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
 
     // create the string for the checkbox id
@@ -30,11 +31,15 @@ class CheckboxLabel {
     wrapper.children.add(_wrapper);
   }
 
+  void setAttribute(String name, String value) =>
+      _wrapper.setAttribute(name, value);
+
+
   set checked(bool x) => _checkboxInputElement.checked = x;
 
   bool get checked => _checkboxInputElement.checked;
 
-  onChange(Function x) {
+  void onChange(Function x) {
     _checkboxInputElement.onChange.listen(x);
   }
 }

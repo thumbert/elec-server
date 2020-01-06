@@ -6,6 +6,7 @@ enum RadioGroupOrientation { horizontal, vertical }
 
 class RadioGroupInput {
   html.Element wrapper;
+  html.Element _wrapper;
 
   List<String> labels;
   RadioGroupOrientation orientation;
@@ -20,7 +21,7 @@ class RadioGroupInput {
   /// Need to trigger an action onChange.
   RadioGroupInput(this.wrapper, this.labels,
       {orientation: RadioGroupOrientation.horizontal}) {
-    var _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px');
+    _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px');
 
     var _name =  wrapper.id + labels.join(); // name of the radio group
     _buttons = List(labels.length);
@@ -60,8 +61,11 @@ class RadioGroupInput {
 
   String get value => labels[_buttons.indexWhere((b) => b.checked)];
 
+  void setAttribute(String name, String value) =>
+      _wrapper.setAttribute(name, value);
+
   /// trigger a change
-  onChange(Function x) {
+  void onChange(Function x) {
     _buttons = _buttons.map((b) {
       b.onChange.listen(x);
       return b;

@@ -63,7 +63,7 @@ class CategoricalDropdownCheckboxFilter {
   
   bool get checked => _checkboxInputElement.checked;
 
-  onChange(Function x) {
+  void onChange(Function x) {
     _selector.onChange.listen(x);
     _checkboxInputElement.onChange.listen(x);
   }
