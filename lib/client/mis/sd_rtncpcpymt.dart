@@ -3,7 +3,7 @@ library client.mis.sd_rtncpcpymnt;
 import 'dart:convert';
 import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:collection/collection.dart';
-import 'package:elec_server/src/utils/lib_settlements.dart';
+import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';

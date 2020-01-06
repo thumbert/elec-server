@@ -15,7 +15,7 @@ import 'utils/term_cache_test.dart' as termCache;
 
 import 'utils/to_csv_test.dart' as toCsv;
 
-main() async {
+void main() async {
   await initializeTimeZone();
 
   isoTimestamp.testParseIsoTimestamp();

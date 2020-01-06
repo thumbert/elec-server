@@ -11,7 +11,7 @@ import 'package:tuple/tuple.dart';
 import 'package:elec_server/src/utils/api_response.dart';
 import 'package:table/table.dart';
 import 'package:dama/dama.dart';
-import 'package:elec_server/src/utils/lib_settlements.dart';
+import 'package:elec_server/src/db/lib_settlements.dart';
 
 @ApiClass(name: 'sr_rtlocsum', version: 'v1')
 class SrRtLocSum {

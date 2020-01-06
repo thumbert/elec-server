@@ -25,9 +25,6 @@ abstract class MisReportArchive {
   /// Setup the database from scratch again, including the index
   Future<Null> setupDb();
 
-  /// Bring the database up to date.
-  Future<Null> updateDb();
-
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.
   /// Each tab is one element of the returned Map.  The key of the Map is the tab
@@ -36,7 +33,7 @@ abstract class MisReportArchive {
 
   /// Insert this data into the database.  Likely to be overwritten in the implementation.
   Future insertTabData(List<Map<String, dynamic>> data, {int tab: 0}) async {
-    if (data.isEmpty) return new Future.value(null);
+    if (data.isEmpty) return Future.value(null);
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
@@ -52,17 +49,19 @@ class MisReport {
   ///
   ///```dart
   ///     var labels = <String,dynamic>{
-  //      'account': account,
-  //      'tab': 0,
-  //      'date': reportDate.toString(),
-  //      'version': version,
-  //    };
+  ///      'account': account,
+  ///      'tab': 0,
+  ///      'date': reportDate.toString(),
+  ///      'version': version,
+  ///    };
   ///```
   ///And usually the removed columns are ['H']
   static List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
       Map<String,dynamic> labels, List<String> removeColumns) {
     return rows.map((e) {
-      for (var column in removeColumns) e.remove(column);
+      for (var column in removeColumns) {
+        e.remove(column);
+      }
       var out = <String,dynamic>{
         ...labels,
         ...e,
