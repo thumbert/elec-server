@@ -1,17 +1,9 @@
 import 'dart:html';
 
 import 'package:timezone/browser.dart';
-import 'package:elec_server/src/ui/text_input.dart';
-import 'package:elec_server/src/ui/categorical_dropdown_checkbox_filter.dart';
-import 'package:elec_server/src/ui/categorical_dropdown_filter.dart';
-import 'package:elec_server/src/ui/checkbox_label.dart';
-import 'package:elec_server/src/ui/numeric_input.dart';
-import 'package:elec_server/src/ui/numeric_range_filter.dart';
-import 'package:elec_server/src/ui/radio_group_input.dart';
-import 'package:elec_server/src/ui/term_input.dart';
-import 'package:elec_server/src/ui/selectable_list.dart';
+import 'package:elec_server/ui.dart';
 
-main() async {
+void main() async {
   await initializeTimeZone();
   var messageCdcf =
       querySelector('#categorical-dropdown-checkbox-filter-message');
@@ -89,8 +81,11 @@ main() async {
   var messageTextInputConstrained = querySelector('#text-input-constrained-message')
     ..text = 'Only Apple, Banana, Lemon, Orange, Strawberry, Watermelon are allowed';
   var textInputConstrained = TextInput(querySelector('#text-input-constrained'),
-    'Fruit', initialValue: 'Banana', allowedValues: fruits);
+    'Fruit', initialValue: 'Banana', allow: (String x) => fruits.contains(x));
   textInputConstrained.onChange((e) {
     messageTextInputConstrained.text = 'You selected ${textInputConstrained.value}';
   });
+
+
+
 }

@@ -1,8 +1,8 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'package:elec_server/src/utils/html_table.dart';
+import 'package:elec_server/ui.dart';
 
-simpleTable() {
+void simpleTable() {
   var data = <Map<String, dynamic>>[
     {'airport': 'BOS', 'tmin': '22', 'tmax': '45'},
     {'airport': 'BWI', 'tmin': '27', 'tmax': '49'},
@@ -11,7 +11,7 @@ simpleTable() {
   HtmlTable(querySelector('#wrapper-simple-table'), data);
 }
 
-tableWithFormat() {
+void tableWithFormat() {
   var data = <Map<String, dynamic>>[
     {'date': DateTime(2018, 1), 'price': 85.24},
     {'date': DateTime(2018, 2), 'price': 73.1},
@@ -35,7 +35,19 @@ tableWithFormat() {
       options: options);
 }
 
-main() {
+void tableWithSaveIcon() {
+  var data = <Map<String, dynamic>>[
+    {'airport': 'BOS', 'tmin': '22', 'tmax': '45'},
+    {'airport': 'BWI', 'tmin': '27', 'tmax': '49'},
+    {'airport': 'LGA', 'tmin': '25', 'tmax': '47'},
+  ];
+  var options = <String,dynamic>{'export': {'format': 'xslx'}};
+  HtmlTable(querySelector('#wrapper-simple-table-export'), data,
+      options: options);
+}
+
+void main() {
   simpleTable();
   tableWithFormat();
+  tableWithSaveIcon();
 }

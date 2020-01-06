@@ -1,26 +1,27 @@
-library utils.html_table;
+library ui.html_table;
 
 import 'dart:html';
 
-/// See the example in web/html_table for how to set the style of the table.
+/// See the example in web/ui/html_table for how to set the style of the table.
 
 class HtmlTable {
-  Element tableWrapper;
-  List<Map<String,dynamic>> data;
-  Map<String,dynamic> options;
+  Element wrapper;
+  DivElement _wrapper;
+  List<Map<String, dynamic>> data;
+  Map<String, dynamic> options;
 
   TableElement table;
   List<Element> _tableHeaders;
   List<String> _columnNames;
   List<int> _sortDirection;
-  Map<String,Function> _valueFormat = {};
+  Map<String, Function> _valueFormat;
 
   /// A simple html table with sorting.
   ///
   /// The [options] Map can be used to customize the table appearance.
   ///
   /// Set options['format'] to specify a format function for a
-  /// given column, e.g. 
+  /// given column, e.g.
   /// {'format': {'columnName': {'valueFormat': (num x) => x.round()}}}
   ///
   /// By default the table has column names taken from the first data row.
@@ -34,15 +35,18 @@ class HtmlTable {
   /// To add row numbers, use options['rowNumbers'] = true, the default is
   /// false.
   ///
-  HtmlTable(this.tableWrapper, this.data, {this.options}) {
-    options ??= <String,dynamic>{};
+  /// To export table: options['export'] = {'format': 'xlsx'}
+  ///
+  HtmlTable(this.wrapper, this.data, {this.options}) {
+    options ??= <String, dynamic>{};
     options.putIfAbsent('makeHeader', () => true);
     options.putIfAbsent('rowNumbers', () => false);
     options.putIfAbsent('format', () => {});
+    options.putIfAbsent('export', () => {});
 
     if (options['rowNumbers']) {
-      for (int i=0; i<data.length; i++) {
-        data[i] = <String,dynamic>{'#':i+1}..addAll(data[i]);
+      for (var i = 0; i < data.length; i++) {
+        data[i] = <String, dynamic>{'#': i + 1}..addAll(data[i]);
       }
     }
 
@@ -56,13 +60,15 @@ class HtmlTable {
     _tableHeaders = List<Element>(_columnNames.length);
     _sortDirection = List<int>(_columnNames.length);
 
+    _valueFormat = {};
     if (options.containsKey('format')) {
       var aux = options['format'] as Map;
       for (var name in _columnNames) {
         if (aux.containsKey(name)) {
           var bux = aux[name] as Map;
-          if (bux.containsKey('valueFormat'))
+          if (bux.containsKey('valueFormat')) {
             _valueFormat[name] = bux['valueFormat'];
+          }
         }
       }
     }
@@ -70,13 +76,14 @@ class HtmlTable {
     _makeTable();
   }
 
-  _makeTable() {
-    table = new TableElement();
+  void _makeTable() {
+    _wrapper = DivElement();
+    table = TableElement();
     table.createTHead();
     // make the table header
-    TableRowElement headerRow = table.tHead.insertRow(0);
-    for (int i=0; i<_columnNames.length; i++) {
-      _tableHeaders[i] =  new Element.th();
+    var headerRow = table.tHead.insertRow(0);
+    for (var i = 0; i < _columnNames.length; i++) {
+      _tableHeaders[i] = Element.th();
       if (options['makeHeader']) {
         _tableHeaders[i].text = _columnNames[i];
       } else {
@@ -88,11 +95,11 @@ class HtmlTable {
 
     // make the table body
     var tBody = table.createTBody();
-    for (int r=0; r<data.length; r++) {
+    for (var r = 0; r < data.length; r++) {
       var tRow = tBody.insertRow(r);
-      for (int j=0; j<_columnNames.length; j++) {
+      for (var j = 0; j < _columnNames.length; j++) {
         var name = _columnNames[j];
-        String value = '';
+        var value = '';
         if (data[r].containsKey(name)) {
           if (_valueFormat.containsKey(name)) {
             value = _valueFormat[name](data[r][name]);
@@ -104,28 +111,39 @@ class HtmlTable {
       }
     }
 
-
-    if (tableWrapper != null) {
+    if (wrapper != null) {
       /// if you already have a table, remove it before you add it back to the dom
-      if (tableWrapper.children.length > 0)
-        tableWrapper.children = [];
-      tableWrapper.append(table);
+      /// not sure why do I have this? 1/6/2020.  Seems kludgy.
+      if (wrapper.children.isNotEmpty) {
+        wrapper.children = [];
+      }
+      if ((options['export'] as Map).isNotEmpty) {
+        wrapper.append(ImageElement(
+            src: 'assets/spreadsheet_icon.png', width: 20, height: 20)
+        ..onClick.listen((e) => _save()));
+      }
+      wrapper.append(table);
     }
   }
 
+  void _save() {
+    var filename = 'data.xls';
+    var downloadLink = document.createElement('a') as AnchorElement;
+    document.body.append(downloadLink);
+    downloadLink.href = 'data:application/vnd.ms-excel, ' + table.outerHtml;
+    downloadLink.download = filename;
+    downloadLink.click();
+  }
+
   /// If you click on a header, sort the data.
-  _sortByColumn(int i) {
+  void _sortByColumn(int i) {
     if (_sortDirection[i] == null) {
       _sortDirection[i] = 1;
     } else {
       _sortDirection[i] *= -1;
     }
-    data.sort((a,b) => (_sortDirection[i]*(a[_columnNames[i]].compareTo(b[_columnNames[i]]) as num).toInt()));
+    data.sort((a, b) => (_sortDirection[i] *
+        (a[_columnNames[i]].compareTo(b[_columnNames[i]]) as num).toInt()));
     _makeTable();
   }
-
 }
-
-
-
-

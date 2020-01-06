@@ -4,6 +4,7 @@ export 'src/ui/categorical_dropdown_checkbox_filter.dart';
 export 'src/ui/categorical_dropdown_filter.dart';
 export 'src/ui/checkbox_label.dart';
 export 'src/ui/controller.dart';
+export 'src/ui/html_table.dart';
 export 'src/ui/numeric_input.dart';
 export 'src/ui/numeric_range_filter.dart';
 export 'src/ui/ptid_input.dart';
