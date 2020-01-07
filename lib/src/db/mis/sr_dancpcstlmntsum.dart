@@ -55,18 +55,26 @@ class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
     labels['tab'] = 1;
     var x1 = mis.readReportTabAsMap(file, tab: 1);
     var tab1 = addLabels(x1, labels, ['H']);
-
+    
     /// Sub-account info
-    /// tab 7, settlement summary
+    /// tab 6, economic charges
     labels['tab'] = 6;
     var x6 = mis.readReportTabAsMap(file, tab: 6);
     var tab6 = addLabels(x6, labels, ['H']);
+
+    /// Sub-account info
+    /// tab 7, lscpr charges
+    labels['tab'] = 7;
+    var x7 = mis.readReportTabAsMap(file, tab: 7);
+    var tab7 = addLabels(x7, labels, ['H']);
 
     return {
       0: tab0,
       1: tab1,
       6: tab6,
+      7: tab7,
     };
+
   }
   
   @override
