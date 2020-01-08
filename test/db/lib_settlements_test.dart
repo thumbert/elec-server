@@ -5,6 +5,61 @@ import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
 
 void tests() {
+      var data = <Map<String,dynamic>>[
+      {'version': '1', 'date': '2018-01-01', 'value': 10},
+      {'version': '1', 'date': '2018-01-02', 'value': 20},
+      {'version': '1', 'date': '2018-01-03', 'value': 30},
+      {'version': '2', 'date': '2018-01-01', 'value': 11},
+      {'version': '2', 'date': '2018-01-02', 'value': 21},
+      {'version': '2', 'date': '2018-01-03', 'value': 31},
+      {'version': '3', 'date': '2018-01-01', 'value': 12},
+      {'version': '3', 'date': '2018-01-02', 'value': 22},
+      {'version': '3', 'date': '2018-01-03', 'value': 32},
+      {'version': '4', 'date': '2018-01-02', 'value': 23},
+      ];
+    test('get first settlement', () {
+      var res = getNthSettlement(data, n: 0, group: 'date');
+      expect(res.length, 3);
+      expect(res, [
+        {'version': '1', 'date': '2018-01-01', 'value': 10},
+        {'version': '1', 'date': '2018-01-02', 'value': 20},
+        {'version': '1', 'date': '2018-01-03', 'value': 30},
+      ]);
+    });
+    test('get second settlement', () {
+      var res = getNthSettlement(data, n: 1, group: 'date');
+      expect(res.length, 3);
+      expect(res, [
+        {'version': '2', 'date': '2018-01-01', 'value': 11},
+        {'version': '2', 'date': '2018-01-02', 'value': 21},
+        {'version': '2', 'date': '2018-01-03', 'value': 31},
+      ]);
+    });
+    test('get last settlement', () {
+      var res = getNthSettlement(data, group: 'date');
+      expect(res.length, 3);
+      expect(res, [
+        {'version': '3', 'date': '2018-01-01', 'value': 12},
+        {'version': '4', 'date': '2018-01-02', 'value': 23},
+        {'version': '3', 'date': '2018-01-03', 'value': 32},
+      ]);
+    });
+    test('get all settlements', () {
+      var res = getAllSettlements(data, group: 'date');
+      expect(res.length, 4);
+      expect(res[2], [
+        {'version': '3', 'date': '2018-01-01', 'value': 12},
+        {'version': '3', 'date': '2018-01-02', 'value': 22},
+        {'version': '3', 'date': '2018-01-03', 'value': 32},
+      ]);
+      expect(res[3], [
+        {'version': '3', 'date': '2018-01-01', 'value': 12},
+        {'version': '4', 'date': '2018-01-02', 'value': 23},
+        {'version': '3', 'date': '2018-01-03', 'value': 32},
+      ]);
+
+    });
+  
   test('two groups', () {
     var xs = [
       {'date': '2019-01-01', 'product': 'A', 'version': 1, 'value': 1.1},
