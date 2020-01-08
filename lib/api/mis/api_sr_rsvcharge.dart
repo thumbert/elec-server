@@ -69,7 +69,7 @@ class SrRsvCharge {
     var grp = groupBy(data, (e) => Tuple2(e['Product Type'], e['Load Zone ID']));
     var out = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
-      out.addAll(getNthSettlement(entry.value, n: settlement, group: 'date'));
+      out.addAll(getNthSettlement(entry.value, (e) => e['date'], n: settlement));
     }
     return ApiResponse()..result = json.encode(out);
   }
@@ -109,7 +109,7 @@ class SrRsvCharge {
     var grp = groupBy(data, (e) => Tuple2(e['Product Type'], e['Load Zone ID']));
     var out = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
-      out.addAll(getNthSettlement(entry.value, n: settlement, group: 'date'));
+      out.addAll(getNthSettlement(entry.value, (e) => e['date'], n: settlement));
     }
     return ApiResponse()..result = json.encode(out);
   }

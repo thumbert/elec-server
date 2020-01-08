@@ -151,7 +151,7 @@ class SrRtLocSum {
 			];
 
 			var data = await coll.aggregateToStream(pipeline).toList();
-			var aux = getNthSettlement(data, n: settlement, group: 'date');
+			var aux = getNthSettlement(data, (e) => e['date'], n: settlement);
 			var nest = Nest()
 				..key((e) => e['date'].substring(0,7))
 				..rollup((List xs) => -sum(xs.map((e) => e['Real Time Load Obligation'] as num)));

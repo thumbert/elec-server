@@ -14,8 +14,8 @@ class SdRtNcpcPymnt {
   final location = getLocation('US/Eastern');
 
   SdRtNcpcPymnt(http.Client client,
-      {this.rootUrl: "http://localhost:8080/",
-      this.servicePath: "sd_rtncpcpymt/v1/"});
+      {this.rootUrl = 'http://localhost:8080/',
+      this.servicePath: 'sd_rtncpcpymt/v1/'});
 
   /// Get details for all generators between a start/end date.
   Future<List<Map<String, dynamic>>> getPaymentsForAllGenerators(
@@ -31,9 +31,10 @@ class SdRtNcpcPymnt {
     var data = (json.decode(aux['result']) as List).cast<Map<String, dynamic>>();
 
     var grp = groupBy(data, (e) => e['Asset ID']);
+    // TODO:  use (e) => Tuple2(e['Asset ID'], e['date'])
     var out = <Map<String,dynamic>>[];
     for (var assetId in grp.keys) {
-      out.addAll(getNthSettlement(grp[assetId], n: settlement, group: 'date'));
+      out.addAll(getNthSettlement(grp[assetId], (e) => e['date'],  n: settlement));
     }
 
     return out;
