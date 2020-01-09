@@ -13,12 +13,11 @@ import 'package:tuple/tuple.dart';
 @ApiClass(name: 'sr_rsvcharge', version: 'v1')
 class SrRsvCharge {
   DbCollection coll;
-  String collectionName = 'sr_rsvcharge';
+  final collectionName = 'sr_rsvcharge';
 
   SrRsvCharge(Db db) {
     coll = db.collection(collectionName);
   }
-
 
   /// Get all data in tab 0
   @ApiMethod(path: 'accountId/tab/0/{accountId}/start/{start}/end/{end}')
@@ -35,7 +34,7 @@ class SrRsvCharge {
     return ApiResponse()..result = json.encode(data);
   }
 
-
+  /// tab 6, fwd reserve - subaccount detail section, all settlements
   @ApiMethod(
       path:
           'accountId/{accountId}/tab/6/subaccountId/{subaccountId}/start/{start}/end/{end}')
@@ -52,11 +51,12 @@ class SrRsvCharge {
     return ApiResponse()..result = json.encode(data);
   }
 
+  /// tab 6, fwd reserve - subaccount detail section
   @ApiMethod(
       path:
-      'accountId/{accountId}/tab/6/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> apiGetTab6Settlement(
-      String accountId, String subaccountId, String start, String end, int settlement) async {
+          'accountId/{accountId}/tab/6/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> apiGetTab6Settlement(String accountId,
+      String subaccountId, String start, String end, int settlement) async {
     var query = where
       ..eq('account', accountId)
       ..eq('tab', 6)
@@ -66,16 +66,13 @@ class SrRsvCharge {
       ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
     var data = await coll.find(query).toList();
 
-    var grp = groupBy(data, (e) => Tuple2(e['Product Type'], e['Load Zone ID']));
-    var out = <Map<String,dynamic>>[];
-    for (var entry in grp.entries) {
-      out.addAll(getNthSettlement(entry.value, (e) => e['date'], n: settlement));
-    }
+    var out = getNthSettlement(
+        data, (e) => Tuple3(e['Product Type'], e['Load Zone ID'], e['date']),
+        n: settlement);
     return ApiResponse()..result = json.encode(out);
   }
 
-
-  /// Get all data in tab 7
+  /// tab 7, rt reserve - subaccount detail section, all settlements
   @ApiMethod(
       path:
           'accountId/{accountId}/tab/7/subaccountId/{subaccountId}/start/{start}/end/{end}')
@@ -92,11 +89,12 @@ class SrRsvCharge {
     return ApiResponse()..result = json.encode(data);
   }
 
+  /// tab 7, rt reserve - subaccount detail section
   @ApiMethod(
       path:
-      'accountId/{accountId}/tab/7/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> apiGetTab7Settlement(
-      String accountId, String subaccountId, String start, String end, int settlement) async {
+          'accountId/{accountId}/tab/7/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> apiGetTab7Settlement(String accountId,
+      String subaccountId, String start, String end, int settlement) async {
     var query = where
       ..eq('account', accountId)
       ..eq('tab', 7)
@@ -106,11 +104,9 @@ class SrRsvCharge {
       ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
     var data = await coll.find(query).toList();
 
-    var grp = groupBy(data, (e) => Tuple2(e['Product Type'], e['Load Zone ID']));
-    var out = <Map<String,dynamic>>[];
-    for (var entry in grp.entries) {
-      out.addAll(getNthSettlement(entry.value, (e) => e['date'], n: settlement));
-    }
+    var out = getNthSettlement(
+        data, (e) => Tuple3(e['Product Type'], e['Load Zone ID'], e['date']),
+        n: settlement);
     return ApiResponse()..result = json.encode(out);
   }
 

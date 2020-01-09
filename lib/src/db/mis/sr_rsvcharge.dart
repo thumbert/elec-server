@@ -53,12 +53,11 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
     var grp6 = groupBy(
         x6,
         (e) =>
-            Tuple3(e['Subaccount ID'], e['Load Zone ID'], e['Product Type']));
+            Tuple2(e['Subaccount ID'], e['Load Zone ID']));
     var tab6 = <Map<String, dynamic>>[];
     for (var entry in grp6.entries) {
       labels['Subaccount ID'] = entry.key.item1;
       labels['Load Zone ID'] = entry.key.item2;
-      labels['Product Type'] = entry.key.item3;
       tab6.addAll(mis.MisReport.addLabels(
           [collapseListOfMap(entry.value)],
           labels,
@@ -69,7 +68,6 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
             'Trading Interval',
             'Load Zone Name',
             'Load Zone ID',
-            'Product Type',
           ]));
     }
 
