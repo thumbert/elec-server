@@ -86,7 +86,7 @@ class DateCache extends TermCache {
                 .splitLeft((dt) => Date.fromTZDateTime(dt))
                 .cast<Date>()) {
     /// check that the keyAssign return type is a Date??  Must be a better way
-    if (keyAssign.runtimeType.toString() != '(Map<String, dynamic>) => Date')
-      throw ArgumentError('Incorrect signature for keyAssign');
+    // if (keyAssign.runtimeType.toString() != '(Map<String, dynamic>) => Date')
+    //  throw ArgumentError('Incorrect signature for keyAssign');
   }
 }
