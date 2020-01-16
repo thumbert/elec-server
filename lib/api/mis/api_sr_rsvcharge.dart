@@ -34,6 +34,24 @@ class SrRsvCharge {
     return ApiResponse()..result = json.encode(data);
   }
 
+  /// Get all data in tab 4, participant section, one settlement
+  @ApiMethod(path: 'charges/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> chargesAccountSettlement(
+      String accountId, String start, String end, int settlement) async {
+    var query = where
+      ..eq('account', accountId)
+      ..eq('tab', 4)
+      ..gte('date', Date.parse(start).toString())
+      ..lte('date', Date.parse(end).toString())
+      ..excludeFields(['_id', 'account', 'tab']);
+
+    var data = await coll.find(query).toList();
+    var out = getNthSettlement(
+        data, (e) => Tuple2(e['date'], e['Load Zone ID']),
+        n: settlement);
+    return ApiResponse()..result = json.encode(out);
+  }
+
   /// tab 6, subaccount section, all settlements
   @ApiMethod(
       path:
@@ -67,7 +85,7 @@ class SrRsvCharge {
     var data = await coll.find(query).toList();
 
     var out = getNthSettlement(
-        data, (e) => Tuple3(e['Product Type'], e['Load Zone ID'], e['date']),
+        data, (e) => Tuple2(e['date'], e['Load Zone ID']),
         n: settlement);
     return ApiResponse()..result = json.encode(out);
   }
