@@ -19,13 +19,13 @@ class SrRsvCharge {
     coll = db.collection(collectionName);
   }
 
-  /// Get all data in tab 0
-  @ApiMethod(path: 'accountId/tab/0/{accountId}/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetTab0(
+/// Get all data in tab 4, participant section
+  @ApiMethod(path: 'charges/accountId/{accountId}/start/{start}/end/{end}')
+  Future<ApiResponse> chargesAccount(
       String accountId, String start, String end) async {
     var query = where
       ..eq('account', accountId)
-      ..eq('tab', 0)
+      ..eq('tab', 4)
       ..gte('date', Date.parse(start).toString())
       ..lte('date', Date.parse(end).toString())
       ..excludeFields(['_id', 'account', 'tab']);
@@ -34,11 +34,11 @@ class SrRsvCharge {
     return ApiResponse()..result = json.encode(data);
   }
 
-  /// tab 6, fwd reserve - subaccount detail section, all settlements
+  /// tab 6, subaccount section, all settlements
   @ApiMethod(
       path:
-          'accountId/{accountId}/tab/6/subaccountId/{subaccountId}/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetTab6(
+          'charges/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
+  Future<ApiResponse> chargesSubaccount(
       String accountId, String subaccountId, String start, String end) async {
     var query = where
       ..eq('account', accountId)
@@ -51,11 +51,11 @@ class SrRsvCharge {
     return ApiResponse()..result = json.encode(data);
   }
 
-  /// tab 6, fwd reserve - subaccount detail section
+  /// tab 6, subaccount section
   @ApiMethod(
       path:
-          'accountId/{accountId}/tab/6/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> apiGetTab6Settlement(String accountId,
+          'charges/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> chargesSubaccountSettlement(String accountId,
       String subaccountId, String start, String end, int settlement) async {
     var query = where
       ..eq('account', accountId)
@@ -71,44 +71,5 @@ class SrRsvCharge {
         n: settlement);
     return ApiResponse()..result = json.encode(out);
   }
-
-  /// tab 7, rt reserve - subaccount detail section, all settlements
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/tab/7/subaccountId/{subaccountId}/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetTab7(
-      String accountId, String subaccountId, String start, String end) async {
-    var query = where
-      ..eq('account', accountId)
-      ..eq('tab', 7)
-      ..eq('Subaccount ID', subaccountId)
-      ..gte('date', Date.parse(start).toString())
-      ..lte('date', Date.parse(end).toString())
-      ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
-    var data = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(data);
-  }
-
-  /// tab 7, rt reserve - subaccount detail section
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/tab/7/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> apiGetTab7Settlement(String accountId,
-      String subaccountId, String start, String end, int settlement) async {
-    var query = where
-      ..eq('account', accountId)
-      ..eq('tab', 7)
-      ..eq('Subaccount ID', subaccountId)
-      ..gte('date', Date.parse(start).toString())
-      ..lte('date', Date.parse(end).toString())
-      ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
-    var data = await coll.find(query).toList();
-
-    var out = getNthSettlement(
-        data, (e) => Tuple3(e['Product Type'], e['Load Zone ID'], e['date']),
-        n: settlement);
-    return ApiResponse()..result = json.encode(out);
-  }
-
 
 }
