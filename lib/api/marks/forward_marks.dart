@@ -16,8 +16,35 @@ class ForwardMarks {
     coll = db.collection('forward_marks');
   }
 
+  /// Get all the existing curve ids in the database, sorted
+  @ApiMethod(path: 'curveIds')
+  Future<List<String>> getCurveIds() async {
+    var aux = await coll.distinct('curveId');
+    return (aux['values'] as List).cast<String>();
+  }
+
+  /// Get all the curveIds that match a given pattern.
+  @ApiMethod(path: 'curveIds/pattern/{pattern}')
+  Future<List<String>> getCurveIdsContaining(String pattern) async {
+    var aux = await coll.distinct('curveId');
+    var res = (aux['values'] as List).where((e) => e.contains(pattern));
+    return res.toList().cast<String>();
+  }
+
+  /// TODO:
+
+  /// Get all the curves that were marked on a given asOfDate
+//  @ApiMethod(path: 'curveIds/asOfDate/{asOfDate}')
+
+  /// Get all the days marked for one curveId
+  /// Get the last entry for a given curveId
+  /// Get the last two entries for a given curveId
+  /// Get the forward prices for one curveId for two asOfDates
+
+  /// Deal with spreads to hubs or composite curves (addition and multiplication).
+
+  /// Get the forward curve as of a given date.
   @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}')
-  /// Get the forward curve
   Future<ApiResponse> getForwardCurve(String asOfDate, String curveId) async {
     var pipeline = [
       {
@@ -37,10 +64,10 @@ class ForwardMarks {
     return ApiResponse()..result = json.encode(aux.first);
   }
 
-  @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}/bucket/{bucket}')
   /// Return only this bucket
-  Future<ApiResponse> getForwardCurveForBucket(String asOfDate, String curveId,
-      String bucket) async {
+  @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}/bucket/{bucket}')
+  Future<ApiResponse> getForwardCurveForBucket(
+      String asOfDate, String curveId, String bucket) async {
     var query = where
       ..gte('date', Date.parse(asOfDate).toString())
       ..eq('curveId', curveId)
@@ -51,7 +78,7 @@ class ForwardMarks {
 
   Future<List<String>> getAsOfDates() async {
     var res = await coll.distinct('asOfDate');
-    return res.values.toList().cast<String>() ;
+    return (res['values'] as List).cast<String>();
   }
 
 //  @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}/bucket/{bucket}')
@@ -66,12 +93,6 @@ class ForwardMarks {
 //    return ApiResponse()..result = json.encode(res);
 //  }
 
-
-
   // TODO: return only one bucket, & return only a month,bucket historically
 
-
-
 }
-
-

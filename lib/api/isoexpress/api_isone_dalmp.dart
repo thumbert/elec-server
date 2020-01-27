@@ -15,7 +15,7 @@ import '../../src/utils/api_response.dart';
 class DaLmp {
   mongo.DbCollection coll;
   Location _location;
-  final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
+  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'da_lmp_hourly';
 
   DaLmp(mongo.Db db) {
@@ -31,17 +31,17 @@ class DaLmp {
       String start, String end, String bucket) async {
     var startDate = Date.parse(start.replaceAll('-', '') + '01');
     var aux = Date.parse(end.replaceAll('-', '') + '01');
-    var endDate = new Month(aux.year, aux.month).endDate;
-    Bucket bucketO = Bucket.parse(bucket);
+    var endDate = Month(aux.year, aux.month).endDate;
+    var bucketO = Bucket.parse(bucket);
 
     var data = await getHourlyData(ptid, startDate, endDate, component);
     var out = data.where((e) {
-      TZDateTime hb = TZDateTime.parse(_location, e['hourBeginning']);
-      return bucketO.containsHour(new Hour.beginning(hb));
+      var hb = TZDateTime.parse(_location, e['hourBeginning']);
+      return bucketO.containsHour(Hour.beginning(hb));
     }).toList();
 
     // do the monthly aggregation
-    Nest _monthlyNest = new Nest()
+    var _monthlyNest = Nest()
       ..key((Map e) {
         String hb = e['hourBeginning'];
         return hb.substring(0, 7);
@@ -51,7 +51,7 @@ class DaLmp {
     var res2 = res
         .map((Map e) => {'month': e['key'], component: e['values']})
         .toList();
-    return new ApiResponse()..result = json.encode(res2);
+    return ApiResponse()..result = json.encode(res2);
   }
 
   /// http://localhost:8080/dalmp/v1/daily/lmp/ptid/4000/start/20170101/end/20170101/bucket/5x16
