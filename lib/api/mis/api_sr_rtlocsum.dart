@@ -124,6 +124,105 @@ class SrRtLocSum {
       startDate, endDate, settlement, column: 'Real Time Load Obligation',);
   }
 
+ @ApiMethod(
+      path:
+      'rtenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> dailyRtSettlementForAccount(
+      String accountId, String start, String end, int settlement) async {
+    var startDate = Date.parse(start).toString();
+    var endDate = Date.parse(end).toString();
+    var data = await _getDailyData(
+        accountId, null, startDate, endDate, settlement,
+        columns: [
+          'Real Time Energy Charge/Credit',
+          'Real Time Congestion Charge/Credit',
+          'Real Time Loss Charge/Credit',
+          'Real Time Demand Reduction Credit',
+          'Real Time Demand Reduction Charge',
+          'Real Time Marginal Loss Revenue Allocation',
+          'External Inadvertent Cost Distribution',
+        ]);
+    return ApiResponse()..result = json.encode(data..forEach((e) => e.remove('version')));
+  }
+
+
+  @ApiMethod(
+      path:
+      'rtenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> dailyRtSettlementForSubaccount(
+      String accountId,
+      String subaccountId,
+      String start,
+      String end,
+      int settlement) async {
+    var startDate = Date.parse(start).toString();
+    var endDate = Date.parse(end).toString();
+    var data = await _getDailyData(
+        accountId, subaccountId, startDate, endDate, settlement,
+        columns: [
+          'Real Time Energy Charge/Credit',
+          'Real Time Congestion Charge/Credit',
+          'Real Time Loss Charge/Credit',
+          'Real Time Demand Reduction Credit',
+          'Real Time Demand Reduction Charge',
+          'Real Time Marginal Loss Revenue Allocation',
+          'External Inadvertent Cost Distribution',
+        ]);
+    return ApiResponse()..result = json.encode(data..forEach((e) => e.remove('version')));
+  }
+
+
+
+  /// Get daily total for a subaccount for a given location, one settlement.
+  Future<List<Map<String, dynamic>>> _getDailyData(String accountId,
+      String subaccountId, String startDate, String endDate, int settlement,
+      {List<String> columns}) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'account': {'\$eq': accountId},
+          'tab': {'\$eq': subaccountId == null ? 0 : 1},
+          if (subaccountId != null) 'Subaccount ID': {'\$eq': subaccountId},
+          'date': {
+            '\$gte': startDate,
+            '\$lte': endDate,
+          },
+        },
+      },
+      {
+        '\$group': {
+          '_id': {
+            'date': '\$date',
+            'version': '\$version',
+            'Location ID': '\$Location ID',
+            ...{
+              for (var column in columns) column: {'\$sum': '\$$column'}
+            },
+          }
+        },
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'date': '\$_id.date',
+          'version': '\$_id.version',
+          'Location ID': '\$_id.Location ID',
+          ...{for (var column in columns) column: '\$_id.$column'},
+        },
+      },
+      {
+        '\$sort': {
+          'date': 1,
+        }
+      },
+    ];
+    var data = await coll.aggregateToStream(pipeline).toList();
+    var aux = getNthSettlement(data, (e) => Tuple2(e['date'], e['Location ID']), n: settlement);
+    return aux;
+  }
+ 	
+	
+	
   /// Get monthly total for a subaccount for a given zone, one settlement.
   Future<ApiResponse> _getMonthlyData (String accountId,
       String subaccountId, int locationId, String startDate, String endDate,
