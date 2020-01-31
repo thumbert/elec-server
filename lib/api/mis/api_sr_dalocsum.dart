@@ -8,6 +8,8 @@ import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/api_response.dart';
+import 'package:elec_server/src/db/lib_settlements.dart';
+import 'package:tuple/tuple.dart';
 
 
 @ApiClass(name: 'sr_dalocsum', version: 'v1')
@@ -21,7 +23,99 @@ class SrDaLocSum {
     coll = db.collection(collectionName);
     _location = getLocation('US/Eastern');
   }
-  
+
+  @ApiMethod(
+      path:
+      'daenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> dailyDaSettlementForAccount(
+      String accountId, String start, String end, int settlement) async {
+    var startDate = Date.parse(start).toString();
+    var endDate = Date.parse(end).toString();
+    var data = await _getDailyData(
+        accountId, null, startDate, endDate, settlement,
+        columns: [
+          'Day Ahead Energy Charge / Credit',
+          'Day Ahead Congestion Charge / Credit',
+          'Day Ahead Loss Charge / Credit',
+        ]);
+    return ApiResponse()..result = json.encode(data..forEach((e) => e.remove('version')));
+  }
+
+
+  @ApiMethod(
+      path:
+      'rtenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> dailyDaSettlementForSubaccount(
+      String accountId,
+      String subaccountId,
+      String start,
+      String end,
+      int settlement) async {
+    var startDate = Date.parse(start).toString();
+    var endDate = Date.parse(end).toString();
+    var data = await _getDailyData(
+        accountId, subaccountId, startDate, endDate, settlement,
+        columns: [
+          'Day Ahead Energy Charge / Credit',
+          'Day Ahead Congestion Charge / Credit',
+          'Day Ahead Loss Charge / Credit',
+        ]);
+    return ApiResponse()..result = json.encode(data..forEach((e) => e.remove('version')));
+  }
+
+
+
+  /// Get daily total for a subaccount for a given location, one settlement.
+  Future<List<Map<String, dynamic>>> _getDailyData(String accountId,
+      String subaccountId, String startDate, String endDate, int settlement,
+      {List<String> columns}) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'account': {'\$eq': accountId},
+          'tab': {'\$eq': subaccountId == null ? 0 : 1},
+          if (subaccountId != null) 'Subaccount ID': {'\$eq': subaccountId},
+          'date': {
+            '\$gte': startDate,
+            '\$lte': endDate,
+          },
+        },
+      },
+      {
+        '\$group': {
+          '_id': {
+            'date': '\$date',
+            'version': '\$version',
+            'Location ID': '\$Location ID',
+            ...{
+              for (var column in columns) column: {'\$sum': '\$$column'}
+            },
+          }
+        },
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'date': '\$_id.date',
+          'version': '\$_id.version',
+          'Location ID': '\$_id.Location ID',
+          ...{for (var column in columns) column: '\$_id.$column'},
+        },
+      },
+      {
+        '\$sort': {
+          'date': 1,
+        }
+      },
+    ];
+    var data = await coll.aggregateToStream(pipeline).toList();
+    var aux = getNthSettlement(data, (e) => Tuple2(e['date'], e['Location ID']), n: settlement);
+    return aux;
+  }
+
+
+
+
   /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/start/20170101/end/20170101
   @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
   /// Get all data in tab 0 for a given location.
@@ -60,8 +154,6 @@ class SrDaLocSum {
     return ApiResponse()..result = json.encode(aux);
   }
 
-
-  
   
   @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for all locations.
@@ -82,7 +174,7 @@ class SrDaLocSum {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
     var data = await getData(accountId, subaccountId, locationId, null, startDate, endDate);
-    var aux = _processStream(data);
+    var aux = _processStream(data, hasLocationId: false);
     return ApiResponse()..result = json.encode(aux);
   }
 
@@ -94,10 +186,9 @@ class SrDaLocSum {
     Date startDate = Date.parse(start);
     Date endDate = Date.parse(end);
     var data = await getData(accountId, subaccountId, locationId, columnName, startDate, endDate);
-    var aux = _processStream(data);
+    var aux = _processStream(data, hasLocationId: false);
     return ApiResponse()..result = json.encode(aux);
   }
-
 
 
   List<Map<String,dynamic>> _processStream(List<Map<String,dynamic>> data, {bool hasLocationId: true}) {
@@ -110,8 +201,8 @@ class SrDaLocSum {
         ..remove('Location ID');
       for (int i=0; i<e['hourBeginning'].length; i++) {
         var aux = <String,dynamic>{
-          'hourBeginning': new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
-          'version': new TZDateTime.from(e['version'], _location).toString(),
+          'hourBeginning': TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+          'version': TZDateTime.from(e['version'], _location).toString(),
         };
         if (hasLocationId) aux['Location ID'] = e['Location ID'];
         for (String key in otherKeys) {
@@ -201,4 +292,6 @@ class SrDaLocSum {
 
   
 }
+
+
 
