@@ -2,18 +2,38 @@ library api.other.forward_marks;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:collection/collection.dart';
+import 'package:elec/elec.dart';
+import 'package:intl/intl.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
 import 'package:date/date.dart';
+import 'package:dama/dama.dart';
+import 'package:timezone/timezone.dart';
 import '../../src/utils/api_response.dart';
 
 @ApiClass(name: 'forward_marks', version: 'v1')
 class ForwardMarks {
-  Db db;
-  DbCollection coll;
+  mongo.Db db;
+  mongo.DbCollection coll;
+  Map<String, Map<String, dynamic>> curveDefinitions;
+
+  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   ForwardMarks(this.db) {
     coll = db.collection('forward_marks');
+
+    /// should be in a database
+    curveDefinitions = {
+      /// default definition
+      '_': {
+        'location': 'US/Eastern',
+        'bucketDefs': {
+          'offpeak': ['2x16H', '7x8'],
+          '7x24': ['5x16', '2x16H', '7x8'],
+        },
+      }
+    };
   }
 
   /// Get all the existing curve ids in the database, sorted
@@ -31,57 +51,140 @@ class ForwardMarks {
     return res.toList().cast<String>();
   }
 
+  /// Get the dates when a given curve was marked
+  @ApiMethod(path: 'curveId/{curveId}/fromDates')
+  Future<List<String>> getFromDatesForCurveId(String curveId) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'curveId': {'\$eq': curveId},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'fromDate': 1,
+        }
+      },
+      {
+        '\$sort': {'fromDate': -1},
+      },
+    ];
+    return await coll
+        .aggregateToStream(pipeline)
+        .map((e) => e['fromDate'] as String)
+        .toList();
+  }
+
+  /// Get all the curves that were marked on this date
+  @ApiMethod(path: 'fromDate/{fromDate}/curveIds')
+  Future<List<String>> getCurveIdsForFromDate(String fromDate) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'fromDate': {'\$eq': Date.parse(fromDate).toString()},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'curveId': 1,
+        }
+      },
+      {
+        '\$sort': {'curveId': 1},
+      },
+    ];
+    return await coll
+        .aggregateToStream(pipeline)
+        .map((e) => e['curveId'] as String)
+        .toList();
+  }
+
+  /// Get the buckets marked for one curve.
+  /// TODO: Maybe I should have this cached ...
+  Future<Set<String>> getBucketsMarked(String curveId) async {
+    var query = mongo.where
+      ..eq('curveId', curveId)
+      ..excludeFields(['_id']);
+    var res = await coll.findOne(query);
+    if (res.containsKey('buckets')) {
+      return res['buckets'].keys.toSet();
+    } else if (res.containsKey('children')) {
+      return getBucketsMarked(res['children'].first);
+    }
+
+    return <String>{};
+  }
+
   /// TODO:
 
   /// Get all the curves that were marked on a given asOfDate
 //  @ApiMethod(path: 'curveIds/asOfDate/{asOfDate}')
 
-  /// Get all the days marked for one curveId
-  /// Get the last entry for a given curveId
-  /// Get the last two entries for a given curveId
   /// Get the forward prices for one curveId for two asOfDates
-
   /// Deal with spreads to hubs or composite curves (addition and multiplication).
 
-  /// Get the forward curve as of a given date.
-  @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}')
+  /// Get the forward curve as of a given date.  Return all marked buckets.
+  @ApiMethod(path: 'curveId/{curveId}/asOfDate/{asOfDate}')
   Future<ApiResponse> getForwardCurve(String asOfDate, String curveId) async {
-    var pipeline = [
-      {
-        '\$match': {
-          'id': {'\$eq': curveId},
-          'day': {'\$lte': Date.parse(asOfDate).toString()},
-        }
-      },
-      {
-        '\$sort': {'day': -1},
-      },
-      {
-        '\$limit': 1,
-      },
-    ];
-    var aux = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(aux.first);
+    var aux = await _getForwardCurve(asOfDate, curveId);
+    return ApiResponse()..result = json.encode(aux);
   }
 
-  /// Return only this bucket
-  @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}/bucket/{bucket}')
+  /// Return one of the buckets for this curveId.
+  /// Return a map {'2019-01': 87.13, '2019-02': 78.37, ...}
+  /// If the bucket doesn't exist in the database, calculate it
+  /// based on the curveDefinitions, for example calculate the offpeak and
+  /// 7x24 bucket.
+  @ApiMethod(path: 'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}')
   Future<ApiResponse> getForwardCurveForBucket(
       String asOfDate, String curveId, String bucket) async {
-    var query = where
-      ..gte('date', Date.parse(asOfDate).toString())
-      ..eq('curveId', curveId)
-      ..fields(['months', bucket]);
-    var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    var data = await _getForwardCurveBucket(asOfDate, curveId, bucket);
+    return ApiResponse()..result = json.encode(data);
   }
 
-  Future<List<String>> getAsOfDates() async {
-    var res = await coll.distinct('asOfDate');
-    return (res['values'] as List).cast<String>();
+  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19;Q1,2020'
+  /// Strips should be a list of semicolon separated terms.  If the curve
+  /// is not defined for some months in the strip, ignore that strip in the
+  /// response.
+  @ApiMethod(
+      path:
+          'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}/strips/{strips}')
+  Future<ApiResponse> getForwardCurveForBucketStrips(
+      String asOfDate, String curveId, String bucket, String strips) async {
+    var data = await _getForwardCurveBucket(asOfDate, curveId, bucket);
+    var out = <String,num>{};
+    var terms = strips.split(';');
+    var curveDef = curveDefinitions[curveId] ?? curveDefinitions['_'];
+    var location = getLocation(curveDef['location']);
+    var bucketObj = Bucket.parse(bucket);
+    for (var term in terms) {
+      try {
+        var months = parseTerm(term.trim(), tzLocation: location)
+            .splitLeft((dt) => Month.fromTZDateTime(dt));
+        var values = months.map((month) => data[month.toIso8601String()]);
+        var hours = months.map((month) => bucketObj.countHours(month));
+        if (values.any((e) => e == null)) continue;
+        out[term] = weightedMean(values,hours);
+      } catch (e) {
+        print(e);
+      }
+    }
+    return ApiResponse()..result = json.encode(out);
   }
 
-//  @ApiMethod(path: 'asOfDate/{asOfDate}/curveId/{curveId}/bucket/{bucket}')
+  /// Get a strip price (e.g. Jan20-Feb20) between a start and end date.
+  /// If the bucket is not primary, then what?
+  @ApiMethod(
+      path:
+      'curveId/{curveId}/bucket/{bucket}/strip/{strip}/start/{startDate}/end/{endDate}')
+  Future<ApiResponse> getStripValueForDateRange(
+      String curveId, String bucket, String strip, String startDate, String endDate) async {
+    /// need to get the strip from the db for a series of dates
+  }
+
+
 //  /// TODO:
 //  Future<ApiResponse> getHistoricalValueForTermBucket(String asOfDate,
 //      String curveId, String term, String bucket) async {
@@ -94,5 +197,69 @@ class ForwardMarks {
 //  }
 
   // TODO: return only one bucket, & return only a month,bucket historically
+
+  Future<Map<String, dynamic>> _getForwardCurve(
+      String asOfDate, String curveId) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'curveId': {'\$eq': curveId},
+          'fromDate': {'\$lte': Date.parse(asOfDate).toString()},
+        }
+      },
+      {
+        '\$sort': {'fromDate': -1},
+      },
+      {
+        '\$limit': 1,
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'fromDate': 0,
+          'curveId': 0,
+        }
+      },
+    ];
+    var aux = await coll.aggregateToStream(pipeline).toList();
+    return aux.first;
+  }
+
+  /// Return a Map, each entry is in the form {'yyyy-mm': num}
+  Future<Map<String, num>> _getForwardCurveBucket(
+      String asOfDate, String curveId, String bucket) async {
+    var data = await _getForwardCurve(asOfDate, curveId);
+    var out = <String, num>{};
+    var months = data['months'] as List;
+    var buckets = (data['buckets'] as Map).keys;
+    if (buckets.contains(bucket)) {
+      /// the bucket is stored in the db
+      var values = data['buckets'][bucket] as List;
+      for (var i = 0; i < months.length; i++) {
+        out[months[i]] = values[i];
+      }
+    } else {
+      /// the bucket must exist in the [curveDefinitions]
+      var curveDefs = curveDefinitions[curveId] ?? curveDefinitions['_'];
+      if (curveDefs.containsKey(bucket)) {
+        var location = getLocation(curveDefs['location']);
+        var bucketNames = (curveDefs[bucket] as List).cast<String>();
+        var buckets = bucketNames.map((name) => Bucket.parse(name));
+        for (var i = 0; i < months.length; i++) {
+          var month = Month.parse(months[i], fmt: _isoFmt, location: location);
+          var hours = buckets.map((b) => b.countHours(month)).toList();
+          var value = 0.0;
+          for (var b = 0; b < bucketNames.length; b++) {
+            value += data['buckets'][b][i] * hours[i];
+          }
+          out[months[i]] = value / sum(hours);
+        }
+      }
+    }
+
+    return out;
+  }
+
+
 
 }
