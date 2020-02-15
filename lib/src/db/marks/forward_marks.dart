@@ -8,18 +8,17 @@ import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
-import 'package:tuple/tuple.dart';
 import 'package:intl/intl.dart';
 
 class ForwardMarksArchive {
   ComponentConfig dbConfig;
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
+  final _equality = const ListEquality();
 
   /// Marks are inserted into the db for a given (curveId, fromDate) tuple.
-  /// Not all curves have marks updated every day.  The design does not support
-  /// intra-day curves, e.g. only the most recent submission for a
-  /// (curveId, fromDate) pair is persisted.
+  /// Not all curves have marks updated every day.
   ///
+  /// TODO: Support intra-day curves (in another collection)
   ///
   ForwardMarksArchive({this.dbConfig}) {
     dbConfig ??= ComponentConfig()
@@ -30,11 +29,14 @@ class ForwardMarksArchive {
 
   mongo.Db get db => dbConfig.db;
 
-  /// Insert data into the db.  Data is upserted for each (asOfDate, curveId)
-  /// pair.
-  /// <p>One document format:
+  /// Insert a list of documents into the db.  Each document is sanity checked
+  /// prior to insertion.  Also, a document is inserted only if needed (values
+  /// change or curve extended.)
+  ///
+  /// <p>Document format:
   /// {
-  ///   'asOfDate': 'yyyy-mm-dd',
+  ///   'fromDate': '2018-12-14',
+  ///   'version': '2018-12-14T10:12:47.000-0500',
   ///   'curveId': 'elec|iso:ne|ptid:4011|lmp|da',
   ///   'months': ['2019-01', '2019-02', ...],
   ///   'buckets': {
@@ -44,16 +46,19 @@ class ForwardMarksArchive {
   ///   }
   /// }
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(0);
     try {
-      for (var document in data) {
-        checkDocument(document);
-        await dbConfig.coll.update({
-          'fromDate': document['fromDate'],
-          'curveId': document['curveId'],
-        }, document, upsert: true);
-        print(
-            '--->  Inserted forward marks for ${document['curveId']} as of ${document['asOfDate']} successfully');
+      for (var newDocument in data) {
+        checkDocument(newDocument);
+        var fromDate = newDocument['fromDate'];
+        var curveId = newDocument['curveId'];
+        // get the existing document
+        var document = await _getForwardCurve(fromDate, curveId);
+        if (needToInsert(document, newDocument)) {
+          await dbConfig.coll.insert(newDocument);
+          print(
+              '--->  Inserted forward marks for ${curveId} as of ${fromDate} successfully');
+        }
       }
       return Future.value(0);
     } catch (e) {
@@ -62,8 +67,34 @@ class ForwardMarksArchive {
     }
   }
 
+  /// Check if you need to insert the document or not.  You need to insert if
+  /// values are different or if it's a curve extension.  Return [true] if an
+  /// update is needed.
+  bool needToInsert(
+      Map<String, dynamic> document, Map<String, dynamic> newDocument) {
+    // The new document may have different start/end months.
+    // If the end month is different, need to update as it's a curve extension.
+    var months0 = document['months'] as List;
+    var months1 = newDocument['months'] as List;
+    if (months0.last != months1.last) return true;
+
+    var i = 0;
+    while (months0[i] != months1.first) {
+      i++;
+    }
+
+    var values0 = document['buckets'] as Map<String, List<num>>;
+    var values1 = newDocument['buckets'] as Map<String, List<num>>;
+    for (var bucket in values0.keys) {
+      var x0 = values0[bucket].sublist(i);
+      var x1 = values1[bucket];
+      if (!_equality.equals(x0, x1)) return true;
+    }
+
+    return false;
+  }
+
   /// Basic checks on the document structure.
-  ///
   void checkDocument(Map<String, dynamic> document) {
     var keys = document.keys.toSet();
     var mustHaveKeys = <String>{'fromDate', 'curveId', 'months', 'buckets'};
@@ -86,7 +117,8 @@ class ForwardMarksArchive {
     // check that month1 is after fromDate
     var fromDate = Date.parse(document['fromDate']);
     if (!fromDate.start.isBefore(month1.start)) {
-      throw ArgumentError('asOfDate ');
+      throw ArgumentError(
+          'first marked month needs to be after fromDate: $document');
     }
 
     // check that the bucket names are valid
@@ -110,6 +142,35 @@ class ForwardMarksArchive {
       throw ArgumentError('Need to mark until December ${monthN.year}.');
     }
   }
+
+  /// Get the document for this [curveId] and [fromDate].
+  Future<Map<String, dynamic>> _getForwardCurve(
+      String asOfDate, String curveId) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'curveId': {'\$eq': curveId},
+          'fromDate': {'\$lte': Date.parse(asOfDate).toString()},
+        }
+      },
+      {
+        '\$sort': {'fromDate': -1},
+      },
+      {
+        '\$limit': 1,
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'fromDate': 0,
+          'curveId': 0,
+        }
+      },
+    ];
+    var aux = await dbConfig.coll.aggregateToStream(pipeline).toList();
+    return aux.first;
+  }
+
 
   void setup() async {
     await dbConfig.db.createIndex(dbConfig.collectionName,

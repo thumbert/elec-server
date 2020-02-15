@@ -11,6 +11,7 @@ import 'package:date/date.dart';
 import 'package:dama/dama.dart';
 import 'package:timezone/timezone.dart';
 import '../../src/utils/api_response.dart';
+import 'package:elec_server/src/db/marks/curve_attributes.dart' as ca;
 
 @ApiClass(name: 'forward_marks', version: 'v1')
 class ForwardMarks {
@@ -102,8 +103,11 @@ class ForwardMarks {
   }
 
   /// Get the buckets marked for one curve.
-  /// TODO: Maybe I should have this cached ...
   Future<Set<String>> getBucketsMarked(String curveId) async {
+    var buckets = ca.getBucketsMarked(curveId);
+    if (ca.getBucketsMarked(curveId).isNotEmpty) return buckets;
+
+    // fall back procedure
     var query = mongo.where
       ..eq('curveId', curveId)
       ..excludeFields(['_id']);
@@ -240,19 +244,17 @@ class ForwardMarks {
       }
     } else {
       /// the bucket must exist in the [curveDefinitions]
+      /// if it doesn't exist, return empty {}
       var curveDefs = curveDefinitions[curveId] ?? curveDefinitions['_'];
-      if (curveDefs.containsKey(bucket)) {
+      if (curveDefs['bucketDefs'].containsKey(bucket)) {
         var location = getLocation(curveDefs['location']);
-        var bucketNames = (curveDefs[bucket] as List).cast<String>();
+        var bucketNames = (curveDefs['bucketDefs'][bucket] as List).cast<String>();
         var buckets = bucketNames.map((name) => Bucket.parse(name));
         for (var i = 0; i < months.length; i++) {
           var month = Month.parse(months[i], fmt: _isoFmt, location: location);
-          var hours = buckets.map((b) => b.countHours(month)).toList();
-          var value = 0.0;
-          for (var b = 0; b < bucketNames.length; b++) {
-            value += data['buckets'][b][i] * hours[i];
-          }
-          out[months[i]] = value / sum(hours);
+          var hours = buckets.map((b) => b.countHours(month)).toList().cast<num>();
+          var values = bucketNames.map((b) => data['buckets'][b][i] as num);
+          out[months[i]] = weightedMean(values, hours);
         }
       }
     }
