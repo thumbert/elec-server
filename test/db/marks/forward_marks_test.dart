@@ -14,17 +14,17 @@ import 'package:timezone/standalone.dart';
 /// Get the curves that are directly marked
 List<String> getMarkedCurveIds() {
   return [
-    'elec|iso:ne|hub|lmp|da',
-    'elec|iso:ne|zone:maine|spread|da',
-    'elec|iso:ne|zone:nh|spread|da',
-    'elec|iso:ne|zone:ct|spread|da',
-    'elec|iso:ne|zone:ri|spread|da',
-    'elec|iso:ne|zone:sema|spread|da',
-    'elec|iso:ne|zone:wcma|spread|da',
-    'elec|iso:ne|zone:nema|spread|da',
-    'elec|iso:ne|ptid:4011|spread|da',
-    'elec|iso:pjm|hub:western hub|lmp|da',
-    ...['ng|henryhub', 'ng|algcg|gdm', 'ng|tetcom3|gdm'],
+    'elec_isone_hub_lmp_da',
+    'elec_isone_maine_lmpspread_da',
+    'elec_isone_nh_lmpspread_da',
+    'elec_isone_ct_lmpspread_da',
+    'elec_isone_ri_lmpspread_da',
+    'elec_isone_sema_lmpspread_da',
+    'elec_isone_wcma_lmpspread_da',
+    'elec_isone_nema_lmpspread_da',
+    'elec_isone_4011_lmpspread_da',
+    'elec_pjm_westernhub_lmp_da',
+    ...['ng_henryhub', 'ng_algcg_gdm', 'ng_tetcom3_gdm'],
   ]..sort();
 }
 
@@ -111,16 +111,16 @@ void tests() async {
   group('forward marks archive tests:', () {
     setUp(() async {
       await archive.db.open();
-//      await archive.db.dropCollection(archive.dbConfig.collectionName);
-//      await insertData(archive);
-//      await archive.setup();
+      await archive.db.dropCollection(archive.dbConfig.collectionName);
+      await insertData(archive);
+      await archive.setup();
     });
     tearDown(() async => await archive.db.close());
     test('document equality', () {
       var document = <String, dynamic>{
         'fromDate': '2018-12-14',
         'version': '2018-12-14T10:12:47.000-0500',
-        'curveId': 'elec|iso:ne|ptid:4011|lmp|da',
+        'curveId': 'elec_isone_4011_lmp_da',
         'months': ['2019-01', '2019-02', '2019-12'],
         'buckets': {
           '5x16': [89.10, 86.25, 71.05],
@@ -131,7 +131,7 @@ void tests() async {
       var newDocument = <String, dynamic>{
         'fromDate': '2018-12-15',
         'version': '2018-12-15T11:15:47.000-0500',
-        'curveId': 'elec|iso:ne|ptid:4011|lmp|da',
+        'curveId': 'elec_isone_4011_lmp_da',
         'months': ['2019-01', '2019-02', '2019-12'],
         'buckets': {
           '5x16': [89.10, 86.25, 71.05],
@@ -143,96 +143,111 @@ void tests() async {
     });
   });
 
-  group('forward marks api tests:', () {
-    var api = ForwardMarks(archive.db);
-    var allCurveIds = [
-      ...getMarkedCurveIds(),
-      ...getCompositeCurves().map((e) => e['curveId'])
-    ]..sort();
-    test('api get all curveIds', () async {
-      var res = await api.getCurveIds();
-      expect(res, allCurveIds);
-    });
-    test('api get all curveIds with pattern', () async {
-      var res = await api.getCurveIdsContaining('iso:ne');
-      expect(res, allCurveIds.where((e) => e.contains('iso:ne')).toList());
-    });
-    test('api get all available fromDates for a curveId', () async {
-      var res = await api.getFromDatesForCurveId('elec|iso:ne|hub|lmp|da');
-      expect(res.length, 255);
-    });
-    test('api get all available fromDates for a spread curve', () async {
-      var res =
-          await api.getFromDatesForCurveId('elec|iso:ne|zone:ct|spread|da');
-      expect(res.length, 12);
-    });
-    test('get one forward curve, all marked buckets', () async {
-      var res =
-          await api.getForwardCurve('2018-03-03', 'elec|iso:ne|hub|lmp|da');
-      var data = json.decode(res.result) as Map<String, dynamic>;
-      expect(data.keys.toSet(), {'months', 'buckets'});
-      expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
-    });
-    test('get one marked forward curve, one bucket (marked)', () async {
-      var res = await api.getForwardCurveForBucket(
-          '2018-03-03', 'elec|iso:ne|hub|lmp|da', '5x16');
-      var data = <String, num>{...json.decode(res.result)};
-      expect(data.keys.first, '2018-04');
-      expect(data.values.first, 45.58681342997034);
-    });
-    test('a marked forward curve with wrong bucket returns empty', () async {
-      var res = await api.getForwardCurveForBucket(
-          '2018-03-03', 'ng;henryhub', '5x16');
-      var data = <String, num>{...json.decode(res.result)};
-      expect(data.isEmpty, true);
-    });
-    test('get one marked forward curve, one bucket (computed)', () async {
-      var res = await api.getForwardCurveForBucket(
-          '2018-03-03', 'elec|iso:ne|hub|lmp|da', 'offpeak');
-      var data = <String, num>{...json.decode(res.result)};
-      expect(data.keys.first, '2018-04');
-      expect(data.values.first, 25.833346167446194);
-    });
-    test('get values of different strips for one curve/bucket', () async {
-      var res = await api.getForwardCurveForBucketStrips(
-          '2018-03-03',
-          'elec|iso:ne|hub|lmp|da',
-          '5x16',
-          'Jan19-Feb19;Jul19-Aug19;Jan20-Jun20');
-      var data = <String, num>{...json.decode(res.result)};
-      expect(data.keys.length, 3);
-      expect(data.keys.first, 'Jan19-Feb19');
-      expect(data.values.first, 46.62231110069041);
-    });
-    test('get the buckets marked for one curve', () async {
-      // marked curve
-      var b0 = await api.getBucketsMarked('elec|iso:ne|hub|lmp|da');
-      expect(b0, {'5x16', '2x16H', '7x8'});
-      // composite curve
-      var b1 = await api.getBucketsMarked('elec|iso:ne|zone:ct|lmp|da');
-      expect(b1, {'5x16', '2x16H', '7x8'});
-      // fuel curve
-      var b2 = await api.getBucketsMarked('ng|henryhub');
-      expect(b2, {'7x24'});
-    });
-
-//    test('check for a spread curve the price for a day inside the month', () async {
-//      var res305 = await api.getForwardCurveForBucket('2018-03-03',
-//          'elec|iso:ne|zone:ct|spread|da', '5x16');
-//      var res301 = await api.getForwardCurveForBucket('2018-03-01',
-//          'elec|iso:ne|zone:ct|spread|da', '5x16');
-//      expect(res301.length, 12);
+//  group('forward marks api tests:', () {
+//    setUp(() async => await archive.db.open());
+//    tearDown(() async => await archive.db.close());
+//    var api = ForwardMarks(archive.db);
+//    var allCurveIds = [
+//      ...getMarkedCurveIds(),
+//      ...getCompositeCurves().map((e) => e['curveId'])
+//    ]..sort();
+//    test('api get all curveIds', () async {
+//      var res = await api.getCurveIds();
+//      expect(res, allCurveIds);
 //    });
-
-//    test('api get one curve', () async {
-//      var res = await api.forwardCurve('2018-01-07', '');
-//      var c1 = json.decode(res.result);
-//      expect(1, 1);
+//    test('api get all curveIds with pattern', () async {
+//      var res = await api.getCurveIdsContaining('isone');
+//      expect(res, allCurveIds.where((e) => e.contains('isone')).toList());
 //    });
-  });
+//    test('api get all available fromDates for a curveId', () async {
+//      var res = await api.getFromDatesForCurveId('elec_isone_hub_lmp_da');
+//      expect(res.length, 255);
+//    });
+//    test('api get all available fromDates for a spread curve', () async {
+//      var res =
+//          await api.getFromDatesForCurveId('elec_isone_zone:ct_spread_da');
+//      expect(res.length, 12);
+//    });
+//    test('get one forward curve, all marked buckets', () async {
+//      var res =
+//          await api.getForwardCurve('elec_isone_hub_lmp_da', '2018-03-03');
+//      var data = json.decode(res.result) as Map<String, dynamic>;
+//      expect(data.keys.toSet(), {'months', 'buckets'});
+//      expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
+//    });
+//    test('get one marked forward curve, one bucket (marked)', () async {
+//      var res = await api.getForwardCurveForBucket(
+//          'elec_isone_hub_lmp_da', '5x16', '2018-03-03');
+//      var data = <String, num>{...json.decode(res.result)};
+//      expect(data.keys.first, '2018-04');
+//      expect(data.values.first, 45.58681342997034);
+//    });
+//    test('a marked forward curve with wrong bucket returns empty', () async {
+//      var res = await api.getForwardCurveForBucket(
+//          'ng_henryhub', '5x16', '2018-03-03');
+//      var data = <String, num>{...json.decode(res.result)};
+//      expect(data.isEmpty, true);
+//    });
+//    test('get one marked forward curve, one bucket (computed)', () async {
+//      var res = await api.getForwardCurveForBucket(
+//          'elec_isone_hub_lmp_da', 'offpeak', '2018-03-03');
+//      var data = <String, num>{...json.decode(res.result)};
+//      expect(data.keys.first, '2018-04');
+//      expect(data.values.first, 25.833346167446194);
+//    });
+//    test('get values of different strips for one curve/bucket', () async {
+//      var res = await api.getForwardCurveForBucketStrips(
+//          'elec_isone_hub_lmp_da',
+//          '5x16',
+//          '2018-03-03',
+//          'Jan19-Feb19;Jul19-Aug19;Jan20-Jun20');
+//      var data = <String, num>{...json.decode(res.result)};
+//      expect(data.keys.length, 3);
+//      expect(data.keys.first, 'Jan19-Feb19');
+//      expect(data.values.first, 46.62231110069041);
+//    });
+//    test('get the buckets marked for one curve', () async {
+//      // marked curve
+//      var b0 = await api.getBucketsMarked('elec_isone_hub_lmp_da');
+//      expect(b0, {'5x16', '2x16H', '7x8'});
+//      // composite curve
+//      var b1 = await api.getBucketsMarked('elec_isone_zone:ct_lmp_da');
+//      expect(b1, {'5x16', '2x16H', '7x8'});
+//      // fuel curve
+//      var b2 = await api.getBucketsMarked('ng_henryhub');
+//      expect(b2, {'7x24'});
+//    });
+//
+////    test('check for a spread curve the price for a day inside the month', () async {
+////      var res305 = await api.getForwardCurveForBucket('2018-03-03',
+////          'elec_isone_zone:ct_spread_da', '5x16');
+////      var res301 = await api.getForwardCurveForBucket('2018-03-01',
+////          'elec_isone_zone:ct_spread_da', '5x16');
+////      expect(res301.length, 12);
+////    });
+//
+////    test('api get one curve', () async {
+////      var res = await api.forwardCurve('2018-01-07', '');
+////      var c1 = json.decode(res.result);
+////      expect(1, 1);
+////    });
+//  });
 }
+
+void repopulateDb() async {
+  var archive = ForwardMarksArchive();
+  await archive.db.open();
+  await archive.db.dropCollection(archive.dbConfig.collectionName);
+  await insertData(archive);
+  await archive.setup();
+  await archive.db.close();
+}
+
 
 void main() async {
   await initializeTimeZone();
-  await tests();
+//  await tests();
+
+  await repopulateDb();
+
 }

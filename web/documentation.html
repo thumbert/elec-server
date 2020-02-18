@@ -30,6 +30,7 @@
             <li><a href="#dam-monthly-prices">DAM monthly prices by bucket</a></li>
             <li><a href="#dam-binding-constraints">DAM binding constraints</a></li>
             <li><a href="#epa-emission-data">EPA emission data</a></li>
+            <li><a href="#forward-marks">Forward marks</a></li>
             <li><a href="#masked-da-demand-bids">Masked DA demand bids</a></li>
             <li><a href="#masked-da-energy-offers">Masked DA energy offers</a></li>
             <li><a href="#ptid-table">Ptid table</a></li>
@@ -169,8 +170,21 @@
                         epa_emissions/v1/ma_compliance/start/20170101/end/20171231</a></div>
                 </li>
             </ul>
-
         </div>
+        <div id="forward-marks">
+            <h4>Forward marks</h4>
+            <ul>
+                <li>
+                    Get one curve as of a given date (all buckets.)
+                    <div><a href="http://localhost:8080/forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/asOfDate/20180301">forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/fromDate/20180301</a></div>
+                </li>
+                <li>
+                    Get one curve as of a given date, one bucket.
+                    <div><a href="http://localhost:8080/forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/asOfDate/20180301">forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/fromDate/20180301</a></div>
+                </li>
+            </ul>
+        </div>
+
         <div id="masked-da-demand-bids">
             <h4>Masked DA demand bids</h4>
             <ul>

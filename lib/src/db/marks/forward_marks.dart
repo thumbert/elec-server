@@ -60,11 +60,11 @@ class ForwardMarksArchive {
               '--->  Inserted forward marks for ${curveId} as of ${fromDate} successfully');
         }
       }
-      return Future.value(0);
     } catch (e) {
       print('XXX ' + e.toString());
       return Future.value(1);
     }
+    return Future.value(0);
   }
 
   /// Check if you need to insert the document or not.  You need to insert if
@@ -72,6 +72,7 @@ class ForwardMarksArchive {
   /// update is needed.
   bool needToInsert(
       Map<String, dynamic> document, Map<String, dynamic> newDocument) {
+    if (document.isEmpty) return true;
     // The new document may have different start/end months.
     // If the end month is different, need to update as it's a curve extension.
     var months0 = document['months'] as List;
@@ -83,8 +84,8 @@ class ForwardMarksArchive {
       i++;
     }
 
-    var values0 = document['buckets'] as Map<String, List<num>>;
-    var values1 = newDocument['buckets'] as Map<String, List<num>>;
+    var values0 = document['buckets'];
+    var values1 = newDocument['buckets'];
     for (var bucket in values0.keys) {
       var x0 = values0[bucket].sublist(i);
       var x1 = values1[bucket];
@@ -168,7 +169,8 @@ class ForwardMarksArchive {
       },
     ];
     var aux = await dbConfig.coll.aggregateToStream(pipeline).toList();
-    return aux.first;
+    if (aux.isEmpty) return <String,dynamic>{};
+    return <String,dynamic>{...aux.first};
   }
 
 

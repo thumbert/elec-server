@@ -6,46 +6,46 @@ library db.marks.composite_curves;
 List<Map<String,dynamic>> getCompositeCurves() {
   var entries = <Map<String,dynamic>>[
     {
-      'curveId': 'elec|iso:ne|zone:maine|lmp|da',
+      'curveId': 'elec_isone_maine_lmp_da',
       'fromDate': '1999-12-31',
       'rule': 'add all',
-      'children': ['elec|iso:ne|hub|lmp|da', 'elec|iso:ne|zone:maine|spread|da'],
+      'children': ['elec_isone_hub_lmp_da', 'elec_isone_maine_spread_da'],
     },
     {
-      'curveId': 'elec|iso:ne|zone:nh|lmp|da',
+      'curveId': 'elec_isone_nh_lmp_da',
       'fromDate': '1999-12-31',
       'rule': 'add all',
-      'children': ['elec|iso:ne|hub|lmp|da', 'elec|iso:ne|zone:nh|spread|da'],
+      'children': ['elec_isone_hub_lmp_da', 'elec_isone_nh_spread_da'],
     },
     {
-      'curveId': 'elec|iso:ne|zone:ct|lmp|da',
+      'curveId': 'elec_isone_ct_lmp_da',
       'fromDate': '1999-12-31',
       'rule': 'add all',
-      'children': ['elec|iso:ne|hub|lmp|da', 'elec|iso:ne|zone:ct|spread|da'],
+      'children': ['elec_isone_hub_lmp_da', 'elec_isone_ct_spread_da'],
     },
     {
-      'curveId': 'elec|iso:ne|zone:ri|lmp|da',
+      'curveId': 'elec_isone_ri_lmp_da',
       'fromDate': '1999-12-31',
       'rule': 'add all',
-      'children': ['elec|iso:ne|hub|lmp|da', 'elec|iso:ne|zone:ri|spread|da'],
+      'children': ['elec_isone_hub_lmp_da', 'elec_isone_ri_spread_da'],
     },
     {
-      'curveId': 'elec|iso:ne|zone:sema|lmp|da',
+      'curveId': 'elec_isone_sema_lmp_da',
       'fromDate': '1999-12-31',
       'rule': 'add all',
-      'children': ['elec|iso:ne|hub|lmp|da', 'elec|iso:ne|zone:sema|spread|da'],
+      'children': ['elec_isone_hub_lmp_da', 'elec_isone_sema_spread_da'],
     },
     {
-      'curveId': 'elec|iso:ne|zone:nema|lmp|da',
+      'curveId': 'elec_isone_nema_lmp_da',
       'fromDate': '1999-12-31',
       'rule': 'add all',
-      'children': ['elec|iso:ne|hub|lmp|da', 'elec|iso:ne|zone:nema|spread|da'],
+      'children': ['elec_isone_hub_lmp_da', 'elec_isone_nema_spread_da'],
     },
     {
-      'curveId': 'elec|iso:ne|ptid:4011|lmp|da',
+      'curveId': 'elec_isone_ptid:4011_lmp_da',
       'fromDate': '1999-12-31',
       'rule': 'add all',
-      'children': ['elec|iso:ne|hub|lmp|da', 'elec|iso:ne|ptid:4011|spread|da'],
+      'children': ['elec_isone_hub_lmp_da', 'elec_isone_ptid:4011_spread_da'],
     },
   ];
   return entries;

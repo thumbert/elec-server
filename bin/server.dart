@@ -30,7 +30,7 @@ final ApiServer _apiServer = ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true
 const String host = '127.0.0.1';
 
 
-registerApis() async {
+void registerApis() async {
 
 //  Db db2 = new Db('mongodb://$host/isone');
 //  await db2.open();
@@ -57,9 +57,9 @@ registerApis() async {
 //  await db5.open();
 //  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
 
-//  var db6 = Db('mongodb://$host/marks');
-//  await db6.open();
-//  _apiServer.addApi(ForwardMarks(db6));
+  var db6 = Db('mongodb://$host/marks');
+  await db6.open();
+  _apiServer.addApi(ForwardMarks(db6));
 
 }
 

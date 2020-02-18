@@ -131,7 +131,7 @@ class ForwardMarks {
 
   /// Get the forward curve as of a given date.  Return all marked buckets.
   @ApiMethod(path: 'curveId/{curveId}/asOfDate/{asOfDate}')
-  Future<ApiResponse> getForwardCurve(String asOfDate, String curveId) async {
+  Future<ApiResponse> getForwardCurve(String curveId, String asOfDate) async {
     var aux = await _getForwardCurve(asOfDate, curveId);
     return ApiResponse()..result = json.encode(aux);
   }
@@ -143,8 +143,10 @@ class ForwardMarks {
   /// 7x24 bucket.
   @ApiMethod(path: 'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}')
   Future<ApiResponse> getForwardCurveForBucket(
-      String asOfDate, String curveId, String bucket) async {
+      String curveId, String bucket, String asOfDate) async {
     var data = await _getForwardCurveBucket(asOfDate, curveId, bucket);
+    // make it a 2D List
+//    var out = [for (var e in data.entries) [e.key, e.value]];
     return ApiResponse()..result = json.encode(data);
   }
 
@@ -156,7 +158,7 @@ class ForwardMarks {
       path:
           'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}/strips/{strips}')
   Future<ApiResponse> getForwardCurveForBucketStrips(
-      String asOfDate, String curveId, String bucket, String strips) async {
+      String curveId, String bucket, String asOfDate, String strips) async {
     var data = await _getForwardCurveBucket(asOfDate, curveId, bucket);
     var out = <String,num>{};
     var terms = strips.split(';');
@@ -180,13 +182,13 @@ class ForwardMarks {
 
   /// Get a strip price (e.g. Jan20-Feb20) between a start and end date.
   /// If the bucket is not primary, then what?
-  @ApiMethod(
-      path:
-      'curveId/{curveId}/bucket/{bucket}/strip/{strip}/start/{startDate}/end/{endDate}')
-  Future<ApiResponse> getStripValueForDateRange(
-      String curveId, String bucket, String strip, String startDate, String endDate) async {
-    /// need to get the strip from the db for a series of dates
-  }
+//  @ApiMethod(
+//      path:
+//      'curveId/{curveId}/bucket/{bucket}/strip/{strip}/start/{startDate}/end/{endDate}')
+//  Future<ApiResponse> getStripValueForDateRange(
+//      String curveId, String bucket, String strip, String startDate, String endDate) async {
+//    /// need to get the strip from the db for a series of dates
+//  }
 
 
 //  /// TODO:
@@ -202,7 +204,7 @@ class ForwardMarks {
 
   // TODO: return only one bucket, & return only a month,bucket historically
 
-  Future<Map<String, dynamic>> _getForwardCurve(
+  Future<Map<String,dynamic>> _getForwardCurve(
       String asOfDate, String curveId) async {
     var pipeline = [
       {
@@ -230,10 +232,10 @@ class ForwardMarks {
   }
 
   /// Return a Map, each entry is in the form {'yyyy-mm': num}
-  Future<Map<String, num>> _getForwardCurveBucket(
+  Future<Map<String,num>> _getForwardCurveBucket(
       String asOfDate, String curveId, String bucket) async {
     var data = await _getForwardCurve(asOfDate, curveId);
-    var out = <String, num>{};
+    var out = <String,num>{};
     var months = data['months'] as List;
     var buckets = (data['buckets'] as Map).keys;
     if (buckets.contains(bucket)) {
