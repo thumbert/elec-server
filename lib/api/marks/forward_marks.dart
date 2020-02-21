@@ -144,13 +144,26 @@ class ForwardMarks {
   @ApiMethod(path: 'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}')
   Future<ApiResponse> getForwardCurveForBucket(
       String curveId, String bucket, String asOfDate) async {
-    var data = await _getForwardCurveBucket(asOfDate, curveId, bucket);
-    // make it a 2D List
-//    var out = [for (var e in data.entries) [e.key, e.value]];
+    var data = await _getForwardCurveBuckets(asOfDate, curveId, [bucket]);
+    return ApiResponse()..result = json.encode(data[bucket]);
+  }
+
+  /// Return the prices for this curveId for the buckets requested.
+  /// [buckets] need to be separated by '_', e.g. '5x16_7x24_offpeak'
+  /// Return a map of {bucket: {'yyyy-mm': value, ...}
+  /// If the bucket doesn't exist in the database, calculate it
+  /// based on the curveDefinitions, for example calculate the offpeak and
+  /// 7x24 bucket.
+  @ApiMethod(path: 'curveId/{curveId}/buckets/{buckets}/asOfDate/{asOfDate}')
+  Future<ApiResponse> getForwardCurveForBuckets(
+      String curveId, String buckets, String asOfDate) async {
+    var _buckets = buckets.split('_');
+    var data = await _getForwardCurveBuckets(asOfDate, curveId, _buckets);
     return ApiResponse()..result = json.encode(data);
   }
 
-  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19;Q1,2020'
+
+  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'
   /// Strips should be a list of semicolon separated terms.  If the curve
   /// is not defined for some months in the strip, ignore that strip in the
   /// response.
@@ -159,24 +172,27 @@ class ForwardMarks {
           'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}/strips/{strips}')
   Future<ApiResponse> getForwardCurveForBucketStrips(
       String curveId, String bucket, String asOfDate, String strips) async {
-    var data = await _getForwardCurveBucket(asOfDate, curveId, bucket);
-    var out = <String,num>{};
-    var terms = strips.split(';');
-    var curveDef = curveDefinitions[curveId] ?? curveDefinitions['_'];
-    var location = getLocation(curveDef['location']);
-    var bucketObj = Bucket.parse(bucket);
-    for (var term in terms) {
-      try {
-        var months = parseTerm(term.trim(), tzLocation: location)
-            .splitLeft((dt) => Month.fromTZDateTime(dt));
-        var values = months.map((month) => data[month.toIso8601String()]);
-        var hours = months.map((month) => bucketObj.countHours(month));
-        if (values.any((e) => e == null)) continue;
-        out[term] = weightedMean(values,hours);
-      } catch (e) {
-        print(e);
-      }
-    }
+    var data = await _getForwardCurveBuckets(asOfDate, curveId, [bucket]);
+    var _strips = strips.split('_');
+    var out = _calculateBucketsStrips(curveId, data, _strips);
+    return ApiResponse()..result = json.encode(out);
+  }
+
+  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'
+  /// Strips should be a list of semicolon separated terms.  If the curve
+  /// is not defined for some months in the strip, ignore that strip in the
+  /// response.
+  /// [buckets] is a list of '_' separated bucket names, e.g. '7x24_Offpeak_7x8'
+  ///
+  @ApiMethod(
+      path:
+      'curveId/{curveId}/buckets/{buckets}/asOfDate/{asOfDate}/strips/{strips}')
+  Future<ApiResponse> getForwardCurveForBucketsStrips(
+      String curveId, String buckets, String asOfDate, String strips) async {
+    var _strips = strips.split('_');
+    var _buckets = buckets.split('_');
+    var data = await _getForwardCurveBuckets(asOfDate, curveId, _buckets);
+    var out = _calculateBucketsStrips(curveId, data, _strips);
     return ApiResponse()..result = json.encode(out);
   }
 
@@ -231,39 +247,73 @@ class ForwardMarks {
     return aux.first;
   }
 
-  /// Return a Map, each entry is in the form {'yyyy-mm': num}
-  Future<Map<String,num>> _getForwardCurveBucket(
-      String asOfDate, String curveId, String bucket) async {
+  /// Return a Map of maps, each entry is in the form {bucket: {'yyyy-mm': num}}
+  Future<Map<String,Map<String,num>>> _getForwardCurveBuckets(
+      String asOfDate, String curveId, List<String> buckets) async {
     var data = await _getForwardCurve(asOfDate, curveId);
-    var out = <String,num>{};
+    var out = <String,Map<String,num>>{};
     var months = data['months'] as List;
-    var buckets = (data['buckets'] as Map).keys;
-    if (buckets.contains(bucket)) {
-      /// the bucket is stored in the db
-      var values = data['buckets'][bucket] as List;
-      for (var i = 0; i < months.length; i++) {
-        out[months[i]] = values[i];
-      }
-    } else {
-      /// the bucket must exist in the [curveDefinitions]
-      /// if it doesn't exist, return empty {}
-      var curveDefs = curveDefinitions[curveId] ?? curveDefinitions['_'];
-      if (curveDefs['bucketDefs'].containsKey(bucket)) {
-        var location = getLocation(curveDefs['location']);
-        var bucketNames = (curveDefs['bucketDefs'][bucket] as List).cast<String>();
-        var buckets = bucketNames.map((name) => Bucket.parse(name));
+    var _buckets = (data['buckets'] as Map).keys;
+
+    for (var bucket in buckets) {
+      var one = <String,num>{};
+      if (_buckets.contains(bucket)) {
+        /// the bucket is stored in the db
+        var values = data['buckets'][bucket] as List;
         for (var i = 0; i < months.length; i++) {
-          var month = Month.parse(months[i], fmt: _isoFmt, location: location);
-          var hours = buckets.map((b) => b.countHours(month)).toList().cast<num>();
-          var values = bucketNames.map((b) => data['buckets'][b][i] as num);
-          out[months[i]] = weightedMean(values, hours);
+          one[months[i]] = values[i];
+        }
+      } else {
+        /// the bucket must exist in the [curveDefinitions]
+        /// if it doesn't exist, return empty {}
+        var curveDefs = curveDefinitions[curveId] ?? curveDefinitions['_'];
+        if (curveDefs['bucketDefs'].containsKey(bucket)) {
+          var location = getLocation(curveDefs['location']);
+          var bucketNames = (curveDefs['bucketDefs'][bucket] as List).cast<String>();
+          var buckets = bucketNames.map((name) => Bucket.parse(name));
+          for (var i = 0; i < months.length; i++) {
+            var month = Month.parse(months[i], fmt: _isoFmt, location: location);
+            var hours = buckets.map((b) => b.countHours(month)).toList().cast<num>();
+            var values = bucketNames.map((b) => data['buckets'][b][i] as num);
+            one[months[i]] = weightedMean(values, hours);
+          }
         }
       }
+      out[bucket] = one;
     }
 
     return out;
   }
 
+  /// Calculate the bucket prices for individual strips.  Return a Map of
+  /// {bucket: {strip: value}} elements.
+  /// [data] is the result of the _getForwardCurveBuckets
+  /// If any of the strips aren't marked, don't return them.
+  Future<Map<String,Map<String,num>>> _calculateBucketsStrips(String curveId,
+      Map<String, Map<String,num>> data, List<String> strips) async {
+    var out = <String,Map<String,num>>{};
+    for (var bucket in data.keys) {
+      var one = <String,num>{};
+      var curveDef = curveDefinitions[curveId] ?? curveDefinitions['_'];
+      var location = getLocation(curveDef['location']);
+      var bucketObj = Bucket.parse(bucket);
+      for (var term in strips) {
+        try {
+          var months = parseTerm(term.trim(), tzLocation: location)
+              .splitLeft((dt) => Month.fromTZDateTime(dt));
+          var values = months.map((month) => data[bucket][month.toIso8601String()]);
+          var hours = months.map((month) => bucketObj.countHours(month));
+          if (values.any((e) => e == null)) continue;
+          one[term] = weightedMean(values, hours);
+        } catch (e) {
+          print(e);
+        }
+      }
+      out[bucket] = one;
+    }
+
+    return out;
+  }
 
 
 }
