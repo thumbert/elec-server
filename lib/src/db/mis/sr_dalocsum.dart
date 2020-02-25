@@ -8,9 +8,11 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
+import 'package:timezone/timezone.dart';
 
 class SrDaLocSumArchive extends mis.MisReportArchive {
   ComponentConfig dbConfig;
+  Location location;
 
   SrDaLocSumArchive({this.dbConfig}) {
     reportName = 'SR_DALOCSUM';
@@ -20,6 +22,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
         ..dbName = 'mis';
     }
     dbConfig.collectionName = 'sr_dalocsum';
+    location = getLocation('US/Eastern');
   }
 
   /// Override the implementation.
@@ -86,7 +89,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     row['account'] = account;
     row['tab'] = 0;
     row['date'] = reportDate.toString();
-    row['version'] = version;
+    row['version'] = version.toIso8601String();
     row['Location ID'] = rows.first['Location ID'];
     row['hourBeginning'] = [];
     List excludeColumns = [
@@ -106,8 +109,10 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
       row[name] = [];
     });
     rows.forEach((e) {
-      row['hourBeginning'].add(parseHourEndingStamp(
-          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])));
+      var hB = parseHourEndingStamp(
+          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval']));
+      hB = TZDateTime.fromMillisecondsSinceEpoch(location, hB.millisecondsSinceEpoch);
+      row['hourBeginning'].add(hB.toIso8601String());
       keepColumns.forEach((column) {
         var name = mis.removeParanthesesEnd(column);
         if (name.endsWith(' D=')) name = name.replaceAll(' D=', '');
@@ -125,7 +130,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     row['Subaccount ID'] = rows.first['Subaccount ID'];
     row['tab'] = 1;
     row['date'] = reportDate.toString();
-    row['version'] = version;
+    row['version'] = version.toIso8601String();
     row['Location ID'] = rows.first['Location ID'];
     row['hourBeginning'] = [];
     List excludeColumns = [
@@ -144,8 +149,10 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
       row[mis.removeParanthesesEnd(column)] = [];
     });
     rows.forEach((e) {
-      row['hourBeginning'].add(parseHourEndingStamp(
-          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])));
+      var hB = parseHourEndingStamp(
+          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval']));
+      hB = TZDateTime.fromMillisecondsSinceEpoch(location, hB.millisecondsSinceEpoch);
+      row['hourBeginning'].add(hB.toIso8601String());
       keepColumns.forEach((column) {
         row[mis.removeParanthesesEnd(column)].add(e[column]);
       });
@@ -157,7 +164,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
   Map<int,List<Map<String,dynamic>>> processFile(File file) {
     /// tab 0: company data
     var data = mis.readReportTabAsMap(file, tab: 0);
-    var report = new mis.MisReport(file);
+    var report = mis.MisReport(file);
     var account = report.accountNumber();
     var reportDate = report.forDate();
     var version = report.timestamp();
@@ -222,3 +229,4 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     // TODO: implement updateDb
   }
 }
+
