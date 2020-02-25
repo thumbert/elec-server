@@ -10,16 +10,16 @@ import 'package:intl/intl.dart';
 import 'config.dart';
 
 List<Map<String,dynamic>> expandDocument(List<Map<String,dynamic>> xs,
-    Set<String> scalarKeys, Set<String> columnKeys) {
+    Set<String> scalarKeys, Set<String> vectorKeys) {
   var out = <Map<String,dynamic>>[];
   for (var x in xs) {
     var one = <String,dynamic>{};
-    var n = (x[columnKeys.first] as List).length;
+    var n = (x[vectorKeys.first] as List).length;
     for (var i=0; i < n; i++) {
       for (var scalar in scalarKeys) {
         one[scalar] = x[scalar];
       }
-      for (var column in columnKeys) {
+      for (var column in vectorKeys) {
         one[column] = x[column][i];
       }
       out.add(one);
@@ -27,7 +27,6 @@ List<Map<String,dynamic>> expandDocument(List<Map<String,dynamic>> xs,
   }
   return out;
 }
-
 
 /// How to convert a set of rows in the csv report to a document in MongoDb.
 abstract class DbDataConverter {
