@@ -13,9 +13,9 @@ List<Map<String,dynamic>> expandDocument(List<Map<String,dynamic>> xs,
     Set<String> scalarKeys, Set<String> vectorKeys) {
   var out = <Map<String,dynamic>>[];
   for (var x in xs) {
-    var one = <String,dynamic>{};
     var n = (x[vectorKeys.first] as List).length;
     for (var i=0; i < n; i++) {
+      var one = <String,dynamic>{};  
       for (var scalar in scalarKeys) {
         one[scalar] = x[scalar];
       }
