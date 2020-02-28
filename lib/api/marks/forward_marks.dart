@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:elec/elec.dart';
+import 'package:elec_server/src/db/marks/composite_curves.dart';
 import 'package:intl/intl.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
@@ -18,6 +19,7 @@ class ForwardMarks {
   mongo.Db db;
   mongo.DbCollection coll;
   Map<String, Map<String, dynamic>> curveDefinitions;
+  List<Map<String, dynamic>> compositeCurves;
 
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
@@ -35,21 +37,29 @@ class ForwardMarks {
         },
       }
     };
+    
+    compositeCurves = getCompositeCurves();
   }
 
   /// Get all the existing curve ids in the database, sorted
   @ApiMethod(path: 'curveIds')
   Future<List<String>> getCurveIds() async {
     var aux = await coll.distinct('curveId');
-    return (aux['values'] as List).cast<String>();
+    var res = <String>[...(aux['values'] as List),
+      ...compositeCurves.map((e) => e['curveId'])];
+    return res..sort();
   }
 
   /// Get all the curveIds that match a given pattern.
   @ApiMethod(path: 'curveIds/pattern/{pattern}')
   Future<List<String>> getCurveIdsContaining(String pattern) async {
     var aux = await coll.distinct('curveId');
-    var res = (aux['values'] as List).where((e) => e.contains(pattern));
-    return res.toList().cast<String>();
+    var res = <String>[
+      ...(aux['values'] as List).where((e) => e.contains(pattern)),
+      ...compositeCurves.map((e) => e['curveId'] as String)
+          .where((e) => e.contains(pattern))
+    ];
+    return res..sort();
   }
 
   /// Get the dates when a given curve was marked
@@ -163,8 +173,8 @@ class ForwardMarks {
   }
 
 
-  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'
-  /// Strips should be a list of semicolon separated terms.  If the curve
+  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'.
+  /// Strips should be a list of underscore separated terms.  If the curve
   /// is not defined for some months in the strip, ignore that strip in the
   /// response.
   @ApiMethod(
@@ -177,6 +187,7 @@ class ForwardMarks {
     var out = _calculateBucketsStrips(curveId, data, _strips);
     return ApiResponse()..result = json.encode(out);
   }
+
 
   /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'
   /// Strips should be a list of semicolon separated terms.  If the curve
@@ -195,6 +206,7 @@ class ForwardMarks {
     var out = _calculateBucketsStrips(curveId, data, _strips);
     return ApiResponse()..result = json.encode(out);
   }
+
 
   /// Get a strip price (e.g. Jan20-Feb20) between a start and end date.
   /// If the bucket is not primary, then what?
