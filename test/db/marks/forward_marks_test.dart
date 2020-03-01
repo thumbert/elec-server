@@ -200,7 +200,7 @@ void tests() async {
           'elec_isone_hub_lmp_da',
           '5x16',
           '2018-03-03',
-          'Jan19-Feb19;Jul19-Aug19;Jan20-Jun20');
+          'Jan19-Feb19_Jul19-Aug19_Jan20-Jun20');
       var data = <String, num>{...json.decode(res.result)};
       expect(data.keys.length, 3);
       expect(data.keys.first, 'Jan19-Feb19');
@@ -211,7 +211,7 @@ void tests() async {
       var b0 = await api.getBucketsMarked('elec_isone_hub_lmp_da');
       expect(b0, {'5x16', '2x16H', '7x8'});
       // composite curve
-      var b1 = await api.getBucketsMarked('elec_isone_zone:ct_lmp_da');
+      var b1 = await api.getBucketsMarked('elec_isone_ct_lmp_da');
       expect(b1, {'5x16', '2x16H', '7x8'});
       // fuel curve
       var b2 = await api.getBucketsMarked('ng_henryhub');

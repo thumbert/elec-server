@@ -33,7 +33,10 @@ class ForwardMarks {
         'location': 'US/Eastern',
         'bucketDefs': {
           'offpeak': ['2x16H', '7x8'],
+          'wrap': ['2x16H', '7x8'],
+          'atc': ['5x16', '2x16H', '7x8'],
           '7x24': ['5x16', '2x16H', '7x8'],
+          'flat': ['5x16', '2x16H', '7x8'],
         },
       }
     };
