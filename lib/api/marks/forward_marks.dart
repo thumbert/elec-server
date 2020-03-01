@@ -313,7 +313,7 @@ class ForwardMarks {
         try {
           var months = parseTerm(term.trim(), tzLocation: location)
               .splitLeft((dt) => Month.fromTZDateTime(dt));
-          var values = months.map((month) => data[bucket][month.toIso8601String()]);
+          var values = months.map((month) => data[bucket][(month as Month).toIso8601String()]);
           var hours = months.map((month) => bucketObj.countHours(month));
           if (values.any((e) => e == null)) continue;
           one[term] = weightedMean(values, hours);
