@@ -193,19 +193,37 @@ void tests() async {
           'elec_isone_hub_lmp_da', 'offpeak', '2018-03-03');
       var data = <String, num>{...json.decode(res.result)};
       expect(data.keys.first, '2018-04');
-      expect(data.values.first, 25.24325);
+      expect(data.values.first.toStringAsFixed(5), '25.24325');
     });
-    test('get values of different strips for one curve/bucket', () async {
-      var res = await api.getForwardCurveForBucketStrips(
+    test('get values of different strips/buckets for one curve', () async {
+      var res = await api.getForwardCurveForBucketsStrips(
           'elec_isone_hub_lmp_da',
-          '5x16',
+          '5x16_offpeak',
           '2018-03-03',
           'Jan19-Feb19_Jul19-Aug19_Jan20-Jun20');
-      var data = <String, num>{...json.decode(res.result)};
+      var aux = json.decode(res.result) as Map;
+      expect(aux.keys.toSet(), {'5x16', 'offpeak'});
+      var data = aux['5x16'];
       expect(data.keys.length, 3);
       expect(data.keys.first, 'Jan19-Feb19');
-      expect(data.values.first, 46.62231110069041);
+      expect(data.values.first, 46.13419709530633);
     });
+
+//    test('get values of different strips/buckets for one curve, one wrong term', () async {
+//      var res = await api.getForwardCurveForBucketsStrips(
+//          'elec_isone_hub_lmp_da',
+//          '5x16',
+//          '2018-03-03',
+//          'Jan19_Jub19-Aug19_2020-01');
+//      var aux = json.decode(res.result) as Map;
+//      expect(aux.keys.toSet(), {'5x16'});
+//      var data = aux['5x16'];
+//      expect(data.keys.length, 1);
+//      expect(data.keys.first, 'Jan19');
+//      expect(data.values.first, 46.18917009397204);
+//    });
+
+
     test('get the buckets marked for one curve', () async {
       // marked curve
       var b0 = await api.getBucketsMarked('elec_isone_hub_lmp_da');
@@ -219,19 +237,6 @@ void tests() async {
     });
   });
 
-////    test('check for a spread curve the price for a day inside the month', () async {
-////      var res305 = await api.getForwardCurveForBucket('2018-03-03',
-////          'elec_isone_zone:ct_spread_da', '5x16');
-////      var res301 = await api.getForwardCurveForBucket('2018-03-01',
-////          'elec_isone_zone:ct_spread_da', '5x16');
-////      expect(res301.length, 12);
-////    });
-//
-////    test('api get one curve', () async {
-////      var res = await api.forwardCurve('2018-01-07', '');
-////      var c1 = json.decode(res.result);
-////      expect(1, 1);
-////    });
 }
 
 void repopulateDb() async {

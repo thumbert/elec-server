@@ -125,9 +125,11 @@ class ForwardMarks {
       ..eq('curveId', curveId)
       ..excludeFields(['_id']);
     var res = await coll.findOne(query);
+    if (res == null) return <String>{};
     if (res.containsKey('buckets')) {
       return res['buckets'].keys.toSet();
     } else if (res.containsKey('children')) {
+      // if it's a composite curve, look at the first child
       return getBucketsMarked(res['children'].first);
     }
 
@@ -176,20 +178,20 @@ class ForwardMarks {
   }
 
 
-  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'.
-  /// Strips should be a list of underscore separated terms.  If the curve
-  /// is not defined for some months in the strip, ignore that strip in the
-  /// response.
-  @ApiMethod(
-      path:
-          'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}/strips/{strips}')
-  Future<ApiResponse> getForwardCurveForBucketStrips(
-      String curveId, String bucket, String asOfDate, String strips) async {
-    var data = await _getForwardCurveBuckets(asOfDate, curveId, [bucket]);
-    var _strips = strips.split('_');
-    var out = _calculateBucketsStrips(curveId, data, _strips);
-    return ApiResponse()..result = json.encode(out);
-  }
+//  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'.
+//  /// Strips should be a list of underscore separated terms.  If the curve
+//  /// is not defined for some months in the strip, ignore that strip in the
+//  /// response.
+//  @ApiMethod(
+//      path:
+//          'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}/strips/{strips}')
+//  Future<ApiResponse> getForwardCurveForBucketStrips(
+//      String curveId, String bucket, String asOfDate, String strips) async {
+//    var data = await _getForwardCurveBuckets(asOfDate, curveId, [bucket]);
+//    var _strips = strips.split('_');
+//    var out = await _calculateBucketsStrips(curveId, data, _strips);
+//    return ApiResponse()..result = json.encode(out);
+//  }
 
 
   /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'
@@ -206,7 +208,7 @@ class ForwardMarks {
     var _strips = strips.split('_');
     var _buckets = buckets.split('_');
     var data = await _getForwardCurveBuckets(asOfDate, curveId, _buckets);
-    var out = _calculateBucketsStrips(curveId, data, _strips);
+    var out = await _calculateBucketsStrips(curveId, data, _strips);
     return ApiResponse()..result = json.encode(out);
   }
 
