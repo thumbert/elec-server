@@ -284,9 +284,9 @@ class ForwardMarks {
         /// the bucket must exist in the [curveDefinitions]
         /// if it doesn't exist, return empty {}
         var curveDefs = curveDefinitions[curveId] ?? curveDefinitions['_'];
-        if (curveDefs['bucketDefs'].containsKey(bucket)) {
+        if (curveDefs['bucketDefs'].containsKey(bucket.toLowerCase())) {
           var location = getLocation(curveDefs['location']);
-          var bucketNames = (curveDefs['bucketDefs'][bucket] as List).cast<String>();
+          var bucketNames = (curveDefs['bucketDefs'][bucket.toLowerCase()] as List).cast<String>();
           var buckets = bucketNames.map((name) => Bucket.parse(name));
           for (var i = 0; i < months.length; i++) {
             var month = Month.parse(months[i], fmt: _isoFmt, location: location);
