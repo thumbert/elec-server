@@ -108,40 +108,40 @@ List<Map<String, dynamic>> _generateDataNgCurve(
 
 void tests() async {
   var archive = ForwardMarksArchive();
-//  group('forward marks archive tests:', () {
-//    setUp(() async {
-//      await archive.db.open();
-////      await archive.db.dropCollection(archive.dbConfig.collectionName);
-////      await insertData(archive);
-////      await archive.setup();
-//    });
-//    tearDown(() async => await archive.db.close());
-//    test('document equality', () {
-//      var document = <String, dynamic>{
-//        'fromDate': '2018-12-14',
-//        'version': '2018-12-14T10:12:47.000-0500',
-//        'curveId': 'elec_isone_4011_lmp_da',
-//        'months': ['2019-01', '2019-02', '2019-12'],
-//        'buckets': {
-//          '5x16': [89.10, 86.25, 71.05],
-//          '2x16H': [72.19, 67.12, 42.67],
-//          '7x8': [44.18, 39.73, 38.56],
-//        }
-//      };
-//      var newDocument = <String, dynamic>{
-//        'fromDate': '2018-12-15',
-//        'version': '2018-12-15T11:15:47.000-0500',
-//        'curveId': 'elec_isone_4011_lmp_da',
-//        'months': ['2019-01', '2019-02', '2019-12'],
-//        'buckets': {
-//          '5x16': [89.10, 86.25, 71.05],
-//          '2x16H': [72.19, 67.12, 42.67],
-//          '7x8': [44.18, 39.73, 38.56],
-//        }
-//      };
-//      expect(archive.needToInsert(document, newDocument), false);
-//    });
-//  });
+  group('forward marks archive tests:', () {
+    setUp(() async {
+      await archive.db.open();
+//      await archive.db.dropCollection(archive.dbConfig.collectionName);
+//      await insertData(archive);
+//      await archive.setup();
+    });
+    tearDown(() async => await archive.db.close());
+    test('document equality', () {
+      var document = <String, dynamic>{
+        'fromDate': '2018-12-14',
+        'version': '2018-12-14T10:12:47.000-0500',
+        'curveId': 'elec_isone_4011_lmp_da',
+        'months': ['2019-01', '2019-02', '2019-12'],
+        'buckets': {
+          '5x16': [89.10, 86.25, 71.05],
+          '2x16H': [72.19, 67.12, 42.67],
+          '7x8': [44.18, 39.73, 38.56],
+        }
+      };
+      var newDocument = <String, dynamic>{
+        'fromDate': '2018-12-15',
+        'version': '2018-12-15T11:15:47.000-0500',
+        'curveId': 'elec_isone_4011_lmp_da',
+        'months': ['2019-01', '2019-02', '2019-12'],
+        'buckets': {
+          '5x16': [89.10, 86.25, 71.05],
+          '2x16H': [72.19, 67.12, 42.67],
+          '7x8': [44.18, 39.73, 38.56],
+        }
+      };
+      expect(archive.needToInsert(document, newDocument), false);
+    });
+  });
 
   group('forward marks api tests:', () {
     setUp(() async => await archive.db.open());
@@ -208,21 +208,6 @@ void tests() async {
       expect(data.keys.first, 'Jan19-Feb19');
       expect(data.values.first, 46.13419709530633);
     });
-
-//    test('get values of different strips/buckets for one curve, one wrong term', () async {
-//      var res = await api.getForwardCurveForBucketsStrips(
-//          'elec_isone_hub_lmp_da',
-//          '5x16',
-//          '2018-03-03',
-//          'Jan19_Jub19-Aug19_2020-01');
-//      var aux = json.decode(res.result) as Map;
-//      expect(aux.keys.toSet(), {'5x16'});
-//      var data = aux['5x16'];
-//      expect(data.keys.length, 1);
-//      expect(data.keys.first, 'Jan19');
-//      expect(data.values.first, 46.18917009397204);
-//    });
-
 
     test('get the buckets marked for one curve', () async {
       // marked curve
