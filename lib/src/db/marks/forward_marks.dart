@@ -37,7 +37,7 @@ class ForwardMarksArchive {
   /// {
   ///   'fromDate': '2018-12-14',
   ///   'version': '2018-12-14T10:12:47.000-0500',
-  ///   'curveId': 'elec|iso:ne|ptid:4011|lmp|da',
+  ///   'curveId': 'elec_isone_4011_lmp_da',
   ///   'months': ['2019-01', '2019-02', ...],
   ///   'buckets': {
   ///     '5x16': [89.10, 86.25, ...],
@@ -57,7 +57,7 @@ class ForwardMarksArchive {
         if (needToInsert(document, newDocument)) {
           await dbConfig.coll.insert(newDocument);
           print(
-              '--->  Inserted forward marks for ${curveId} as of ${fromDate} successfully');
+              '--->  Inserted forward marks for ${curveId} from ${fromDate} successfully');
         }
       }
     } catch (e) {
