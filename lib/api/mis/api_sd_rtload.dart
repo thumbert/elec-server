@@ -30,6 +30,42 @@ class SdRtload {
     return ApiResponse()..result = json.encode(out);
   }
 
+  //http://127.0.0.1:8080/sd_rtload/v1/daily/assetId/2481/start/20171201/end/20171201
+  /// Return the daily MWh for this assetId, all versions.
+  @ApiMethod(path: 'daily/assetId/{assetId}/start/{start}/end/{end}')
+  Future<ApiResponse> dailyRtLoad(
+      String assetId, String start, String end) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'date': {
+            '\$gte': Date.parse(start).toString(),
+            '\$lte': Date.parse(end).toString(),
+          },
+          'Asset ID': {'\$eq': int.parse(assetId)},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'date': '\$date',
+          'version': {'\$toString': '\$version'},
+          'Load Reading': {'\$sum': '\$Load Reading'},
+          'Ownership Share': {'\$arrayElemAt': ['\$Ownership Share', 0]},
+          'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
+        }
+      },
+      {
+        '\$sort': {
+          'date': 1,
+        }
+      }
+    ];
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+
   //http://127.0.0.1:8080/sd_rtload/v1/start/20171201/end/20171201
   @ApiMethod(path: 'start/{start}/end/{end}')
   Future<ApiResponse> rtloadAll(
@@ -52,6 +88,43 @@ class SdRtload {
     var out = await _format2(res);
     return ApiResponse()..result = json.encode(out);
   }
+
+  //http://127.0.0.1:8080/sd_rtload/v1/daily/start/20171201/end/20171201
+  /// Return the daily MWh for all assetId, all versions.
+  @ApiMethod(path: 'daily/start/{start}/end/{end}')
+  Future<ApiResponse> dailyRtLoadAll(String start, String end) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'date': {
+            '\$gte': Date.parse(start).toString(),
+            '\$lte': Date.parse(end).toString(),
+          },
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'date': '\$date',
+          'version': {'\$toString': '\$version'},
+          'Asset ID': '\$Asset ID',
+          'Load Reading': {'\$sum': '\$Load Reading'},
+          'Ownership Share': {'\$arrayElemAt': ['\$Ownership Share', 0]},
+          'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
+        }
+      },
+      {
+        '\$sort': {
+          'date': 1,
+        }
+      }
+    ];
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+
+
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/1485/start/20171201/end/20171201/csv
   @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}/csv')
