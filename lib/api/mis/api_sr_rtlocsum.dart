@@ -373,6 +373,7 @@ class SrRtLocSum {
           'account': {'\$eq': account},
           'tab': {'\$eq': (subaccountId == null) ? 0 : 1},
           if (subaccountId != null) 'Subaccount ID': {'\$eq': subaccountId},
+          if (locationId != null) 'Location ID':  {'\$eq': locationId},
         }
       },
       {
@@ -380,7 +381,7 @@ class SrRtLocSum {
           '_id': 0,
           'date': '\$date',
           'version': {'\$toString': '\$version'},
-          if (locationId != null) 'Location ID': '\$Location ID',
+          if (locationId == null) 'Location ID': '\$Location ID',
           column: {'\$sum': '\$$column'},
         }
       },
