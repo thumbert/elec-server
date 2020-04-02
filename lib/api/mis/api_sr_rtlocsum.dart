@@ -34,7 +34,7 @@ class SrRtLocSum {
       String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, null, null, null, startDate, endDate);
+    var data = await getHourlyData(accountId, null, null, null, startDate, endDate);
     var aux = _processStream(data);
     return ApiResponse()..result = json.encode(aux);
   }
@@ -47,7 +47,7 @@ class SrRtLocSum {
       int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, null, locationId, null, startDate, endDate);
+    var data = await getHourlyData(accountId, null, locationId, null, startDate, endDate);
     var aux = _processStream(data, hasLocationId: false);
     return ApiResponse()..result = json.encode(aux);
   }
@@ -60,11 +60,22 @@ class SrRtLocSum {
       int locationId, String columnName, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, null, locationId, columnName, startDate, endDate);
+    var data = await getHourlyData(accountId, null, locationId, columnName, startDate, endDate);
     var aux = _processStream(data, hasLocationId: false);
     return ApiResponse()..result = json.encode(aux);
   }
 
+
+  @ApiMethod(
+      path: 'daily/accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
+  /// Get one location, one column for the account.
+  Future<ApiResponse> apiGetTab0ByLocationColumnDaily (String accountId,
+      int locationId, String columnName, String start, String end) async {
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
+    var data = await getDailyDataColumn(accountId, null, locationId, columnName, startDate, endDate);
+    return ApiResponse()..result = json.encode(data);
+  }
 
   @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for all locations.
@@ -72,7 +83,7 @@ class SrRtLocSum {
       String subaccountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, subaccountId, null, null, startDate, endDate);
+    var data = await getHourlyData(accountId, subaccountId, null, null, startDate, endDate);
     var aux = _processStream(data);
     return ApiResponse()..result = json.encode(aux);
   }
@@ -84,7 +95,7 @@ class SrRtLocSum {
       String subaccountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, subaccountId, locationId, null, startDate, endDate);
+    var data = await getHourlyData(accountId, subaccountId, locationId, null, startDate, endDate);
     var aux = _processStream(data, hasLocationId: false);
     return ApiResponse()..result = json.encode(aux);
   }
@@ -96,9 +107,19 @@ class SrRtLocSum {
       String subaccountId, int locationId, String columnName, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, subaccountId, locationId, columnName, startDate, endDate);
+    var data = await getHourlyData(accountId, subaccountId, locationId, columnName, startDate, endDate);
     var aux = _processStream(data, hasLocationId: false);
     return ApiResponse()..result = json.encode(aux);
+  }
+
+  @ApiMethod(path: 'daily/accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
+  /// Get all data for a subaccount for a given location, one column.
+  Future<ApiResponse> apiGetTab1ByLocationColumnDaily (String accountId,
+      String subaccountId, int locationId, String columnName, String start, String end) async {
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
+    var data = await getDailyDataColumn(accountId, subaccountId, locationId, columnName, startDate, endDate);
+    return ApiResponse()..result = json.encode(data);
   }
 
   @ApiMethod(path: 'rtload/monthly/accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}/settlement/{settlement}')
@@ -306,7 +327,7 @@ class SrRtLocSum {
   /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
   /// If [locationId] is [null] return all locations
   /// If [column] is [null] return all columns
-  Future<List<Map<String,dynamic>>> getData(String account, String subaccountId,
+  Future<List<Map<String,dynamic>>> getHourlyData(String account, String subaccountId,
       int locationId, String column, Date startDate, Date endDate) async {
     var excludeFields = <String>['_id', 'account', 'tab', 'date'];
 
@@ -333,6 +354,46 @@ class SrRtLocSum {
     }
     return coll.find(query).toList();
   }
+
+
+  /// Extract data from the collection
+  /// returns one element for each day
+  /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
+  /// If [locationId] is [null] return all locations
+  /// If [column] is [null] return all columns
+  Future<List<Map<String,dynamic>>> getDailyDataColumn(String account, String subaccountId,
+      int locationId, String column, Date startDate, Date endDate) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'date': {
+            '\$gte': startDate.toString(),
+            '\$lte': endDate.toString(),
+          },
+          'account': {'\$eq': account},
+          'tab': {'\$eq': (subaccountId == null) ? 0 : 1},
+          if (subaccountId != null) 'Subaccount ID': {'\$eq': subaccountId},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'date': '\$date',
+          'version': {'\$toString': '\$version'},
+          if (locationId != null) 'Location ID': '\$Location ID',
+          column: {'\$sum': '\$$column'},
+        }
+      },
+      {
+        '\$sort': {
+          'date': 1,
+        }
+      }
+    ];
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return res;
+  }
+
 
 }
 
