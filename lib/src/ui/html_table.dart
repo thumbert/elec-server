@@ -36,6 +36,7 @@ class HtmlTable {
   /// false.
   ///
   /// To export table: options['export'] = {'format': 'xlsx'}
+  /// To copy table to clipboard: options['copy'] = {'separator': '|'}
   ///
   HtmlTable(this.wrapper, this.data, {this.options}) {
     options ??= <String, dynamic>{};
@@ -43,6 +44,7 @@ class HtmlTable {
     options.putIfAbsent('rowNumbers', () => false);
     options.putIfAbsent('format', () => {});
     options.putIfAbsent('export', () => {});
+//    options.putIfAbsent('copy', () => {});
 
     if (options['rowNumbers']) {
       for (var i = 0; i < data.length; i++) {
@@ -77,7 +79,6 @@ class HtmlTable {
   }
 
   void _makeTable() {
-    _wrapper = DivElement();
     table = TableElement();
     table.createTHead();
     // make the table header
@@ -112,8 +113,8 @@ class HtmlTable {
     }
 
     if (wrapper != null) {
-      /// if you already have a table, remove it before you add it back to the dom
-      /// not sure why do I have this? 1/6/2020.  Seems kludgy.
+      /// if you already have a table, remove it before you add it back to
+      /// the dom not sure why do I have this? 1/6/2020.
       if (wrapper.children.isNotEmpty) {
         wrapper.children = [];
       }
@@ -122,18 +123,27 @@ class HtmlTable {
             src: 'assets/spreadsheet_icon.png', width: 20, height: 20)
         ..onClick.listen((e) => _save()));
       }
+//      if ((options['copy'] as Map).isNotEmpty) {
+//        wrapper.append(ImageElement(
+//            src: 'assets/copy_icon.png', width: 20, height: 20)
+//          ..onClick.listen((e) => _copy()));
+//      }
       wrapper.append(table);
     }
   }
 
   void _save() {
-    var filename = 'data.xls';
     var downloadLink = document.createElement('a') as AnchorElement;
     document.body.append(downloadLink);
     downloadLink.href = 'data:application/vnd.ms-excel, ' + table.outerHtml;
-    downloadLink.download = filename;
+    downloadLink.download = 'data.xlsx';
     downloadLink.click();
   }
+
+//  void _copy() {
+//    table.onSelect.listen((e) => document.execCommand('copy'));
+//  }
+
 
   /// If you click on a header, sort the data.
   void _sortByColumn(int i) {

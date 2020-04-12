@@ -18,12 +18,14 @@ class TermCache {
   /// keysFromInterval = (interval) => interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
   List<Interval> Function(Interval) keysFromInterval;
 
-  var _cache = <Interval, List<Map<String, dynamic>>>{};
+  Map<Interval, List<Map<String, dynamic>>> _cache;
 
   /// A cache in the style of pacakage:more/cache.dart that stores data
   /// associated with an interval.
   ///
-  TermCache(this.loader, this.keyAssign, this.keysFromInterval) {}
+  TermCache(this.loader, this.keyAssign, this.keysFromInterval) {
+    _cache = <Interval, List<Map<String, dynamic>>>{};
+  }
 
   /// Domain of the cache (where the cache has values.)
   List<Interval> domain() {
@@ -44,10 +46,11 @@ class TermCache {
       var grp = groupBy(data, keyAssign);
       var keys = keysFromInterval(missingInterval);
       for (var key in keys) {
-        if (grp.containsKey(key))
+        if (grp.containsKey(key)) {
           _cache[key] = grp[key];
-        else
+        } else {
           _cache[key] = <Map<String, dynamic>>[];
+        }
       }
     }
   }
@@ -70,11 +73,13 @@ class DateCache extends TermCache {
   /// Loader function that gets the (expensive) data associated with an
   /// interval.  Data is further split using the [keyAssign] function and
   /// stored into the cache.
+  @override
   Future<List<Map<String, dynamic>>> Function(Interval) loader;
 
   /// Function to partition the data returned by the [loader] into keys for
   /// storing into the cache.  Usually this function returns a Date or a Month
   /// object. e.g. keyAssign = (e) => e['date'] as Date;
+  @override
   Interval Function(Map<String, dynamic>) keyAssign;
 
   /// A [TermCache] using [Date]s as keys.
@@ -89,4 +94,27 @@ class DateCache extends TermCache {
     // if (keyAssign.runtimeType.toString() != '(Map<String, dynamic>) => Date')
     //  throw ArgumentError('Incorrect signature for keyAssign');
   }
+}
+
+
+class MonthCache extends TermCache {
+  /// Loader function that gets the (expensive) data associated with an
+  /// interval.  Data is further split using the [keyAssign] function and
+  /// stored into the cache.
+  @override
+  Future<List<Map<String, dynamic>>> Function(Interval) loader;
+
+  /// Function to partition the data returned by the [loader] into keys for
+  /// storing into the cache.  Usually this function returns a Date or a Month
+  /// object. e.g. keyAssign = (e) => e['date'] as Date;
+  @override
+  Interval Function(Map<String, dynamic>) keyAssign;
+
+  /// A [TermCache] using [Month]s as keys.
+  MonthCache(this.loader, this.keyAssign)
+      : super(
+            loader,
+            keyAssign,
+            (Interval interval) =>
+                interval.splitLeft((dt) => Month.fromTZDateTime(dt)));
 }
