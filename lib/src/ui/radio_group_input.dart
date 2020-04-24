@@ -20,7 +20,7 @@ class RadioGroupInput {
   ///
   /// Need to trigger an action onChange.
   RadioGroupInput(this.wrapper, this.labels,
-      {orientation: RadioGroupOrientation.horizontal}) {
+      {orientation = RadioGroupOrientation.horizontal}) {
     _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px');
 
     var _name =  wrapper.id + labels.join(); // name of the radio group

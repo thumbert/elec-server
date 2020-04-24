@@ -2,6 +2,7 @@ library test.utils.term_cache_test;
 
 import 'package:date/date.dart';
 import 'package:elec_server/utils.dart';
+import 'package:intl/intl.dart';
 import 'package:test/test.dart';
 
 void tests() {
