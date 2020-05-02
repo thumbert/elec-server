@@ -47,14 +47,16 @@ class NumericRangeFilter {
 
   num get minValue {
     var minV, maxV;
-    if (_min.value.isEmpty)
+    if (_min.value.isEmpty) {
       minV = _defaultMin;
-    else
+    } else {
       minV = num.parse(_min.value);
-    if (_max.value == '')
+    }
+    if (_max.value == '') {
       maxV = _defaultMax;
-    else
+    } else {
       maxV = num.parse(_max.value);
+    }
     if (minV > maxV) {
       _min.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
     } else {
@@ -65,14 +67,16 @@ class NumericRangeFilter {
 
   num get maxValue {
     var minV, maxV;
-    if (_min.value.isEmpty)
+    if (_min.value.isEmpty) {
       minV = _defaultMin;
-    else
+    } else {
       minV = num.parse(_min.value);
-    if (_max.value == '')
+    }
+    if (_max.value == '') {
       maxV = _defaultMax;
-    else
+    } else {
       maxV = num.parse(_max.value);
+    }
     if (minV > maxV) {
       _max.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
     } else {

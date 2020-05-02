@@ -1,5 +1,6 @@
 import 'dart:html';
 
+import 'package:elec_server/src/ui/checkbox_group.dart';
 import 'package:timezone/browser.dart';
 import 'package:elec_server/ui.dart';
 
@@ -23,7 +24,8 @@ void main() async {
 
   /// numeric input
   var messageNi = querySelector('#numeric-input-message');
-  var numericInput = NumericInput(querySelector('#numeric-input'), 'Asset Id');
+  var numericInput = NumericInput(querySelector('#numeric-input'), 'Asset Id',
+    placeholder: 2481, rightLabel: 'Right label name');
   numericInput
       .onChange((e) => messageNi.text = 'You entered ${numericInput.value}');
 
@@ -86,6 +88,13 @@ void main() async {
     messageTextInputConstrained.text = 'You selected ${textInputConstrained.value}';
   });
 
-
+  /// checkbox group
+  var messageCheckboxGroup = querySelector('#checkbox-group-message')
+    ..text = 'Select several';
+  var checkboxGroup = CheckboxGroup(querySelector('#checkbox-group'),
+      ['Roger', 'Rafa', 'Novak', 'Sacha']);
+  checkboxGroup.onChange((e) {
+    messageCheckboxGroup.text = 'You selected ${checkboxGroup.selected}';
+  });
 
 }

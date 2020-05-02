@@ -5,47 +5,54 @@ import 'dart:html' as html;
 class NumericInput {
   html.Element wrapper;
   html.TextInputElement _textInput;
-  String name;
-  num defaultValue;
+  String leftLabel, rightLabel;
+  num initialValue;
   String thousandSeparator;
+  num placeholder;
 
   /// A numeric input with a label.
   ///
-  /// Variable [name] is the text of the accompanying label.
+  /// Variable [leftLabel] is the text of the accompanying label.
   ///
   /// Need to trigger an action onDataChange.
-  NumericInput(this.wrapper, this.name,
-      {int size: 5, this.defaultValue, this.thousandSeparator: ','}) {
+  NumericInput(this.wrapper, this.leftLabel,
+      {int size = 5, this.initialValue, this.placeholder, this.rightLabel = '',
+        this.thousandSeparator = ','}) {
 
-    String aux = '';
-    if (defaultValue != null) aux = defaultValue.toString();
+    var aux = (initialValue != null) ? initialValue.toString() : '';
 
     var _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
-    _wrapper.children.add(html.LabelElement()
-      ..text = '$name');
+    _wrapper.children.add(html.LabelElement()..text = leftLabel);
     _textInput = html.TextInputElement()
-      ..setAttribute('style', 'margin-left: 15px')
-      ..placeholder = aux
+      ..setAttribute('style', 'margin-left: 15px;margin-right: 15px')
+      ..placeholder = placeholder.toString()
       ..size = size
       ..value = aux;
     _wrapper.children.add(_textInput);
+    _wrapper.children.add(html.LabelElement()..text = rightLabel);
 
     wrapper.children.add(_wrapper);
   }
 
   num get value {
     num aux;
-    if (_textInput.value.isEmpty)
-      aux = defaultValue;
-    else
-      aux = num.parse(_textInput.value.replaceAll(thousandSeparator, ''));
+    if (_textInput.value.isEmpty) {
+      aux = initialValue;
+    } else {
+      try {
+        aux = num.parse(_textInput.value.replaceAll(thousandSeparator, ''));
+        _textInput.setAttribute('style', 'margin-left: 15px; margin-right: 15px; border-color: initial;');
+      } catch (e) {
+        _textInput.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
+      }
+    }
     return aux;
   }
 
 
   /// trigger a change when either one of the two inputs change
-  onChange(Function x) {
+  void onChange(Function x) {
     _textInput.onChange.listen(x);
   }
 }

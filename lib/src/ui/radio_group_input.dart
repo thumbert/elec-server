@@ -16,7 +16,7 @@ class RadioGroupInput {
 
   /// A group of radio buttons.
   ///
-  /// Variable [name] is the text of the accompanying label.
+  /// Variable [leftLabel] is the text of the accompanying label.
   ///
   /// Need to trigger an action onChange.
   RadioGroupInput(this.wrapper, this.labels,
