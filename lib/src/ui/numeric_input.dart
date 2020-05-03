@@ -19,16 +19,15 @@ class NumericInput {
       {int size = 5, this.initialValue, this.placeholder, this.rightLabel = '',
         this.thousandSeparator = ','}) {
 
-    var aux = (initialValue != null) ? initialValue.toString() : '';
 
     var _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
     _wrapper.children.add(html.LabelElement()..text = leftLabel);
     _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px;margin-right: 15px')
-      ..placeholder = placeholder.toString()
+      ..placeholder = (placeholder == null) ? '' : placeholder.toString()
       ..size = size
-      ..value = aux;
+      ..value = (initialValue == null) ? '' : initialValue.toString();
     _wrapper.children.add(_textInput);
     _wrapper.children.add(html.LabelElement()..text = rightLabel);
 
