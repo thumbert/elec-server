@@ -3,7 +3,7 @@ library ui.numeric_input;
 import 'dart:html' as html;
 
 class NumericInput {
-  html.Element wrapper;
+  html.Element wrapper, _wrapper;
   html.TextInputElement _textInput;
   String leftLabel, rightLabel;
   num initialValue;
@@ -19,8 +19,7 @@ class NumericInput {
       {int size = 5, this.initialValue, this.placeholder, this.rightLabel = '',
         this.thousandSeparator = ','}) {
 
-
-    var _wrapper = html.DivElement()
+    _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
     _wrapper.children.add(html.LabelElement()..text = leftLabel);
     _textInput = html.TextInputElement()
@@ -48,6 +47,9 @@ class NumericInput {
     }
     return aux;
   }
+
+  void setAttribute(String name, String value) =>
+      _wrapper.setAttribute(name, value);
 
 
   /// trigger a change when either one of the two inputs change
