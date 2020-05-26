@@ -1,19 +1,21 @@
 import 'dart:html';
 
-import 'package:elec_server/src/ui/checkbox_group.dart';
+
+import 'package:elec_server/src/ui2/selector_checkbox.dart';
+import 'package:elec_server/src/ui2/selector_load_spec.dart';
 import 'package:timezone/browser.dart';
 import 'package:elec_server/ui.dart';
+import 'package:elec_server/src/ui2/selector.dart';
 
-void main() async {
-  await initializeTimeZone();
+void testsUi1() {
   var messageCdcf =
-      querySelector('#categorical-dropdown-checkbox-filter-message');
+  querySelector('#categorical-dropdown-checkbox-filter-message');
   var cdcf = CategoricalDropdownCheckboxFilter(
       querySelector('#categorical-dropdown-checkbox-filter'),
       ['Federer', 'Nadal'],
       'Tennis players');
   cdcf.onChange((e) => messageCdcf.text =
-      'You selected ${cdcf.value}, checked: ${cdcf.checked}');
+  'You selected ${cdcf.value}, checked: ${cdcf.checked}');
 
   var messageCdf = querySelector('#categorical-dropdown-filter-message');
   var cdf = CategoricalDropdownFilter(
@@ -25,7 +27,7 @@ void main() async {
   /// numeric input
   var messageNi = querySelector('#numeric-input-message');
   var numericInput = NumericInput(querySelector('#numeric-input'), 'Asset Id',
-    placeholder: 2481, rightLabel: 'Right label name');
+      placeholder: 2481, rightLabel: 'Right label name');
   numericInput
       .onChange((e) => messageNi.text = 'You entered ${numericInput.value}');
 
@@ -40,14 +42,14 @@ void main() async {
   /// numeric range
   var messageNr = querySelector('#numeric-range-message');
   var numericRange =
-      NumericRangeFilter(querySelector('#numeric-range'), 0, 100, 'Percent');
+  NumericRangeFilter(querySelector('#numeric-range'), 0, 100, 'Percent');
   numericRange.onChange((e) => messageNr.text =
-      'The range is ${numericRange.minValue} - ${numericRange.maxValue}');
+  'The range is ${numericRange.minValue} - ${numericRange.maxValue}');
 
   /// a radio group
   var message = querySelector('#radio-group-message');
   var radioGroup =
-      RadioGroupInput(querySelector('#radio-group'), ['Federer', 'Nadal']);
+  RadioGroupInput(querySelector('#radio-group'), ['Federer', 'Nadal']);
   radioGroup.onChange((e) => message.text = 'You selected ${radioGroup.value}');
 
   /// a term input
@@ -74,7 +76,7 @@ void main() async {
   checkboxLabel.onChange((e) {
     if (checkboxLabel.checked) {
       messageCl.text = 'You want sprinkles';
-  } else {
+    } else {
       messageCl.text = 'No sprinkles for you!';
     }
   });
@@ -83,7 +85,7 @@ void main() async {
   var messageTextInputConstrained = querySelector('#text-input-constrained-message')
     ..text = 'Only Apple, Banana, Lemon, Orange, Strawberry, Watermelon are allowed';
   var textInputConstrained = TextInput(querySelector('#text-input-constrained'),
-    'Fruit', initialValue: 'Banana', allow: (String x) => fruits.contains(x));
+      'Fruit', initialValue: 'Banana', allow: (String x) => fruits.contains(x));
   textInputConstrained.onChange((e) {
     messageTextInputConstrained.text = 'You selected ${textInputConstrained.value}';
   });
@@ -96,5 +98,34 @@ void main() async {
   checkboxGroup.onChange((e) {
     messageCheckboxGroup.text = 'You selected ${checkboxGroup.selected}';
   });
+
+}
+
+
+void testsUi2() {
+  var zones = ['ALL', 'MAINE', 'NH', 'VT', 'CT', 'RI', 'SEMA', 'WCMA', 'NEMA'];
+  var message1 = querySelector('#ui2-zone-selector-message');
+  var zoneSelector = Selector(querySelector('#ui2-zone-selector'),
+      zones, 'Load Zone');
+  zoneSelector.onChange((e) =>
+    message1.text = 'You selected ${zoneSelector.value}');
+
+  var zoneSelectorCheckbox = SelectorCheckbox(querySelector('#ui2-zone-selector-checkbox'), zones, 'Load Zone');
+  print(zoneSelectorCheckbox.value);
+
+//  var loadSpecSelector = LoadSpecSelector(
+//      querySelector('#ui2-load-spec-selector'));
+
+}
+
+
+void main() async {
+  await initializeTimeZone();
+
+//  testsUi2();
+//
+//  testsUi1();
+
+
 
 }

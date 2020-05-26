@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>UI Components</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script defer src="ui_test.dart.js"></script>
 </head>
 <style>
@@ -10,81 +12,196 @@
 </style>
 <body>
 
-<div>
-    <div>A categorical dropdown checkbox filter</div>
-    <div id="categorical-dropdown-checkbox-filter"></div>
-    <div id="categorical-dropdown-checkbox-filter-message"></div>
+<ul class="pagination">
+    <li class="page-item active"><a class="page-link rounded-0" href="#by-entity-zone">By Entity/Zone</a></li>
+    <li class="page-item"><a class="page-link rounded-0" href="#by-assetid">By Asset Id</a></li>
+</ul>
+<div class="container-fluid" id="by-entity-zone">
+    <div class="row md-3 mt-3">
+        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
+            <label>
+                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Entity
+            </label>
+        </div>
+        <div class="col-sm-2 mb-3">
+            <select class="form-control">
+                <option>ACME All</option>
+                <option>ACME Wholesale</option>
+                <option>ACME Retail</option>
+                <option>ACME Municipal</option>
+            </select>
+        </div>
+    </div>
+    <div class="row md-1">
+        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
+            <label>
+                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Zone
+            </label>
+        </div>
+        <div class="col-sm-2 mb-3">
+            <select class="form-control">
+                <option>All</option>
+                <option>MAINE</option>
+                <option>NH</option>
+                <option>VT</option>
+                <option>CT</option>
+                <option>RI</option>
+            </select>
+        </div>
+    </div>
 </div>
-
-<div style="margin-top: 25px">
-    <div>A categorical dropdown filter</div>
-    <div id="categorical-dropdown-filter"></div>
-    <div id="categorical-dropdown-filter-message"></div>
-</div>
-
-
-<div style="margin-top: 25px">
-    <div>A numeric input</div>
-    <div id="numeric-input"></div>
-    <div id="numeric-input-message"></div>
-</div>
-
-
-<div style="margin-top: 25px">
-    <div>Enter a numeric input with thousand separator, say 1,000,000</div>
-    <div id="numeric-input-comma"></div>
-    <div id="numeric-input-message-comma"></div>
-</div>
-
-
-<div style="margin-top: 25px">
-    <div>A numeric range test</div>
-    <div id="numeric-range"></div>
-    <div id="numeric-range-message"></div>
-</div>
-
-
-<div style="margin-top: 25px">
-    <div>A radio group</div>
-    <div id="radio-group"></div>
-    <div id="radio-group-message"></div>
-</div>
-
-
-<div style="margin-top: 25px">
-    <div>A term input</div>
-    <div id="term-input"></div>
-    <div id="term-input-message"></div>
-</div>
-
-
-
-<div style="margin-top: 25px">
-    <div>A selectable list, click to select/deselect: </div>
-    <div id="selectable-list"></div>
-    <div id="selectable-list-message"></div>
+<div class="container-fluid" id="by-assetid">
+    <div class="row md-3 mt-3">
+        <div class="col-md-1 mb-3 mt-2">
+            <label class="form-check-label">Asset Id</label>
+        </div>
+        <div class="col-sm-2 mb-3">
+            <input type="text" class="form-control">
+        </div>
+    </div>
 </div>
 
 
-<div style="margin-top: 25px">
-    <div>A checkbox with a label: </div>
-    <div id="checkbox-label"></div>
-    <div id="checkbox-label-message"></div>
+
+
+<h3> Simple form</h3>
+<div class="container-fluid">
+    <div class="row md-3 mt-3">
+        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
+            <label>
+                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Entity
+            </label>
+        </div>
+        <div class="col-sm-2 mb-3">
+            <select class="form-control">
+                <option>ACME All</option>
+                <option>ACME Wholesale</option>
+                <option>ACME Retail</option>
+                <option>ACME Municipal</option>
+            </select>
+        </div>
+    </div>
+    <div class="row md-1">
+        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
+            <label>
+                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Zone
+            </label>
+        </div>
+        <div class="col-sm-2 mb-3">
+            <select class="form-control">
+                <option>All</option>
+                <option>MAINE</option>
+                <option>NH</option>
+                <option>VT</option>
+                <option>CT</option>
+                <option>RI</option>
+            </select>
+        </div>
+    </div>
 </div>
 
-<div style="margin-top: 25px">
-    <div>A text input with constrained values
-        (Only Apple, Banana, Lemon, Orange, Strawberry, Watermelon are allowed): </div>
-    <div id="text-input-constrained"></div>
-    <div id="text-input-constrained-message"></div>
-</div>
-
-<div style="margin-top: 25px">
-    <div>A checkbox group which allows multiple selection: </div>
-    <div id="checkbox-group"></div>
-    <div id="checkbox-group-message"></div>
-</div>
 
 
+
+
+
+<!--<h2>UI2 examples </h2>-->
+<!--<div>-->
+<!--    <div> Zone selector:</div>-->
+<!--    <div id="ui2-zone-selector"></div>-->
+<!--    <div id="ui2-zone-selector-message"></div>-->
+<!--</div>-->
+<!--<div>-->
+<!--    <div> Zone selector with checkbox:</div>-->
+<!--    <div id="ui2-zone-selector-checkbox"></div>-->
+<!--    <div id="ui2-zone-selector-checkbox-message"></div>-->
+<!--</div>-->
+
+<!--<div>-->
+<!--    <div> Load Spec selector:</div>-->
+<!--    <div id="ui2-load-spec-selector"></div>-->
+<!--    <div id="ui2-load-spec-selector-message"></div>-->
+<!--</div>-->
+
+
+<!--<h2>UI1 examples </h2>-->
+<!--<div>-->
+<!--    <div>A categorical dropdown checkbox filter</div>-->
+<!--    <div id="categorical-dropdown-checkbox-filter"></div>-->
+<!--    <div id="categorical-dropdown-checkbox-filter-message"></div>-->
+<!--</div>-->
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A categorical dropdown filter</div>-->
+<!--    <div id="categorical-dropdown-filter"></div>-->
+<!--    <div id="categorical-dropdown-filter-message"></div>-->
+<!--</div>-->
+
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A numeric input</div>-->
+<!--    <div id="numeric-input"></div>-->
+<!--    <div id="numeric-input-message"></div>-->
+<!--</div>-->
+
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>Enter a numeric input with thousand separator, say 1,000,000</div>-->
+<!--    <div id="numeric-input-comma"></div>-->
+<!--    <div id="numeric-input-message-comma"></div>-->
+<!--</div>-->
+
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A numeric range test</div>-->
+<!--    <div id="numeric-range"></div>-->
+<!--    <div id="numeric-range-message"></div>-->
+<!--</div>-->
+
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A radio group</div>-->
+<!--    <div id="radio-group"></div>-->
+<!--    <div id="radio-group-message"></div>-->
+<!--</div>-->
+
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A term input</div>-->
+<!--    <div id="term-input"></div>-->
+<!--    <div id="term-input-message"></div>-->
+<!--</div>-->
+
+
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A selectable list, click to select/deselect: </div>-->
+<!--    <div id="selectable-list"></div>-->
+<!--    <div id="selectable-list-message"></div>-->
+<!--</div>-->
+
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A checkbox with a label: </div>-->
+<!--    <div id="checkbox-label"></div>-->
+<!--    <div id="checkbox-label-message"></div>-->
+<!--</div>-->
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A text input with constrained values-->
+<!--        (Only Apple, Banana, Lemon, Orange, Strawberry, Watermelon are allowed): </div>-->
+<!--    <div id="text-input-constrained"></div>-->
+<!--    <div id="text-input-constrained-message"></div>-->
+<!--</div>-->
+
+<!--<div style="margin-top: 25px">-->
+<!--    <div>A checkbox group which allows multiple selection: </div>-->
+<!--    <div id="checkbox-group"></div>-->
+<!--    <div id="checkbox-group-message"></div>-->
+<!--</div>-->
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
