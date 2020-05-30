@@ -17,38 +17,38 @@ class ApiPtids {
 
   @ApiMethod(path: 'current')
   Future<ApiResponse> apiPtidTableCurrent() async {
-    SelectorBuilder query = where;
-    String last = await getAvailableAsOfDates().then((List days) => days.last);
-    query = query.eq('asOfDate', last);
-    query = query.excludeFields(['_id', 'asOfDate']);
+    var last = await getAvailableAsOfDates().then((List days) => days.last);
+    var query = where
+      ..eq('asOfDate', last)
+      ..excludeFields(['_id', 'asOfDate']);
     var data = await coll.find(query).toList();
-    return new ApiResponse()..result = json.encode(data);
+    return ApiResponse()..result = json.encode(data);
   }
 
   @ApiMethod(path: 'asofdate/{asOfDate}')
   Future<ApiResponse> apiPtidTableAsOfDate(String asOfDate) async {
-    Date asOf = Date.parse(asOfDate);
+    var asOf = Date.parse(asOfDate);
     var days = await getAvailableAsOfDates()
         .then((List days) => days.map((e) => Date.parse(e)));
-    Date last =
+    var last =
         days.firstWhere((e) => !e.isBefore(asOf), orElse: () => days.last);
-    SelectorBuilder query = where;
-    query = query.eq('asOfDate', last.toString());
-    query = query.excludeFields(['_id', 'asOfDate']);
+    var query = where
+      ..eq('asOfDate', last.toString())
+      ..excludeFields(['_id', 'asOfDate']);
     var data = await coll.find(query).toList();
-    return new ApiResponse()..result = json.encode(data);
+    return ApiResponse()..result = json.encode(data);
   }
 
   @ApiMethod(path: 'ptid/{ptid}')
   /// Show the days when this ptid is in the database.  Nodes are
   /// retired from time to time.
   Future<ApiResponse> apiPtid(int ptid) async {
-    SelectorBuilder query = where;
-    query = query.eq('ptid', ptid);
-    query = query.fields(['asOfDate']);
-    query = query.excludeFields(['_id']);
+    var query = where
+      ..eq('ptid', ptid)
+      ..fields(['asOfDate'])
+      ..excludeFields(['_id']);
     var data = await coll.find(query).toList();
-    return new ApiResponse()..result = json.encode(data);
+    return ApiResponse()..result = json.encode(data);
   }
 
 

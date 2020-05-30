@@ -32,9 +32,9 @@ const String host = '127.0.0.1';
 
 void registerApis() async {
 
-//  Db db2 = new Db('mongodb://$host/isone');
-//  await db2.open();
-//  _apiServer.addApi(ApiPtids(db2));
+  var db2 = Db('mongodb://$host/isone');
+  await db2.open();
+  _apiServer.addApi(ApiPtids(db2));
 //  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
 
   var db3 = Db('mongodb://$host/isoexpress');

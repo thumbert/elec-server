@@ -13,7 +13,7 @@ class TypeAhead {
   DivElement _al;  // autocomplete-list
   int _currentFocus;
 
-  TypeAhead(this.wrapper, this.values, {String placeholder: ''}) {
+  TypeAhead(this.wrapper, this.values, {String placeholder = ''}) {
     _input = InputElement(type: 'text')
       ..id = '${wrapper.id}-input'
       ..placeholder = placeholder;
@@ -44,7 +44,7 @@ class TypeAhead {
     _input.onKeyDown.listen((e) {
       //if (_al == null) return;
       var _xs = _al.children.cast<DivElement>();
-      if (_xs.length == 0) return;
+      if (_xs.isEmpty) return;
       if (e.keyCode == 40) {
         // if arrow DOWN is pressed
         _currentFocus++;
@@ -73,7 +73,7 @@ class TypeAhead {
 
   String get value => _input.value;
 
-  onSelect(Function x) {
+  void onSelect(Function x) {
     _input.onSelect.listen(x);
   }
 

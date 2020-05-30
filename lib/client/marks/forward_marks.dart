@@ -13,7 +13,7 @@ class ForwardMarks {
   final location = getLocation('US/Eastern');
 
   ForwardMarks(http.Client client,
-      {this.rootUrl: "http://localhost:8080/", this.servicePath: "forward_marks/v1/"});
+      {this.rootUrl = 'http://localhost:8080/', this.servicePath = 'forward_marks/v1/'});
 
   /// Get marks for one curve, one asOfDate, all buckets.
   Future<List<Map<String,dynamic>>> getForwardCurve(String curveId, Date asOfDate) async {

@@ -14,7 +14,7 @@ import 'package:elec_server/src/db/isoexpress/rt_system_demand_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 
-updateDailyArchive(DailyIsoExpressReport archive, List<Date> days) async {
+void updateDailyArchive(DailyIsoExpressReport archive, List<Date> days) async {
     print('Updating archive ${archive.reportName}');
     // await archive.setupDb();
     await archive.dbConfig.db.open();
@@ -25,7 +25,7 @@ updateDailyArchive(DailyIsoExpressReport archive, List<Date> days) async {
     await archive.dbConfig.db.close();
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   var days = Month(2018, 1).days();
 

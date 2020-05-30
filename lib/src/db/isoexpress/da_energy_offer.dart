@@ -16,7 +16,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
 
-  static List<String> _unitStates = ['UNAVAILABLE', 'MUST_RUN', 'ECONOMIC'];
+  static final List<String> _unitStates = ['UNAVAILABLE', 'MUST_RUN', 'ECONOMIC'];
   var location = getLocation('US/Eastern');
 
   DaEnergyOfferArchive({this.dbConfig, this.dir}) {
@@ -27,16 +27,20 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
 
     dir ??= baseDir + 'PricingReports/DaEnergyOffer/Raw/';
   }
-  String reportName = 'Day-Ahead Energy Market Historical Offer Report';
+  @override
+  final reportName = 'Day-Ahead Energy Market Historical Offer Report';
+  @override
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/' +
       'hbdayaheadenergyoffer_' +
       yyyymmdd(asOfDate) +
       '.csv';
+  @override
   File getFilename(Date asOfDate) =>
-      new File(dir + 'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv');
+      File(dir + 'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
+  @override
   Map<String, dynamic> converter(List<Map> rows) {
     var row = <String, dynamic>{};
 
@@ -70,7 +74,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       /// add the non empty price/quantity pairs
       var pricesHour = <num>[];
       var quantitiesHour = <num>[];
-      for (int i = 1; i <= 10; i++) {
+      for (var i = 1; i <= 10; i++) {
         if (!(hour['Segment $i Price'] is num)) break;
         pricesHour.add(hour['Segment $i Price']);
         quantitiesHour.add(hour['Segment $i MW']);
@@ -90,6 +94,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
         .catchError((e) => print('   ' + e.toString()));
   }
 
+  @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
@@ -108,11 +113,13 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   }
 
   /// Recreate the collection from scratch.
+  @override
   setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    var collections = await dbConfig.db.getCollectionNames();
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.drop();
+    }
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
@@ -126,7 +133,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   }
 
   Future<Map<String, String>> lastDay() async {
-    List pipeline = [];
+    var pipeline = [];
     pipeline.add({
       '\$group': {
         '_id': 0,
@@ -139,8 +146,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
 
   /// return the last day of the fourth month before the current month.
   Date lastDayAvailable() {
-    Month m3 = Month.current().subtract(3);
-    return new Date(m3.year, m3.month, 1).previous;
+    var m3 = Month.current().subtract(3);
+    return Date(m3.year, m3.month, 1).previous;
   }
 
   Future<Null> deleteDay(Date day) async {
@@ -151,7 +158,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   /// issues.
   void validateDocument(Map row) {
     if (row.containsKey('Unit Status') &&
-        !_unitStates.contains(row['Unit Status']))
-      throw new StateError('Invalid unit state: ${row['Unit State']}.');
+        !_unitStates.contains(row['Unit Status'])) {
+      throw StateError('Invalid unit state: ${row['Unit State']}.');
+    }
   }
 }
