@@ -229,7 +229,7 @@ List<String> getCountries() {
   ];
 }
 
-main() {
+void main() {
   var countries = getCountries();
 
   var wrapper = querySelector('#wrapper-ta');

@@ -7,6 +7,7 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SdArrAwdSumArchive extends mis.MisReportArchive {
+  @override
   ComponentConfig dbConfig;
 
   SdArrAwdSumArchive({this.dbConfig}) {
@@ -25,10 +26,14 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
     document['month'] = reportDate.toString().substring(0,7);  /// yyyy-mm
     document['version'] = version;
     var columns = rows.first.keys.skip(1);
-    for (var column in columns) document[column] = [];
+    for (var column in columns) {
+      document[column] = [];
+    }
 
     rows.forEach((e) {
-      for (var column in columns) document[column].add(e[column]);
+      for (var column in columns) {
+        document[column].add(e[column]);
+      }
     });
     return document;
   }
@@ -46,7 +51,8 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
     };
   }
 
-  Future<int> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
+  @override
+  Future<int> insertTabData(List<Map<String,dynamic>> data, {int tab = 0}) async {
     if (data.isEmpty) return Future.value(null);
     var account = data.first['account'];
     var date = data.first['month'];
