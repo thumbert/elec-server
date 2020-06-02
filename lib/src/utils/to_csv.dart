@@ -18,8 +18,10 @@ String listOfMapToCsv(List<Map> x, {List<String> columnNames,
   nullPolicy ??= _nullToEmpty;
 
   if (columnNames == null) {
-    var _cNames = Set<String>();
-    for (var row in x) _cNames.addAll(row.keys.map((e) => e.toString()));
+    var _cNames = <String>{};
+    for (var row in x) {
+      _cNames.addAll(row.keys.map((e) => e.toString()));
+    }
     columnNames = _cNames.toList();
   }
 
@@ -30,7 +32,7 @@ String listOfMapToCsv(List<Map> x, {List<String> columnNames,
     for (var columnName in columnNames) {
       if (row.containsKey(columnName)) {
         var value = row[columnName];
-        if (value == null) value = nullPolicy(value);
+        value ??= nullPolicy(value);
         sRow.add(value);
       } else {
         sRow.add('');
@@ -50,7 +52,7 @@ String mapToCsv(Map x, {List<String> columnNames,
   if (columnNames != null) aux.add(columnNames);
   x.forEach((k,v){
     if (v is Iterable) {
-      aux.add([k]..addAll(v));
+      aux.add([k, ...v]);
     } else {
       aux.add([k]..add(v));
     }

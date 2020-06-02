@@ -10,15 +10,15 @@ import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
 /// prepare data by downloading a few reports
-prepareData() async {
-  var archive = new DaEnergyOfferArchive();
-  var days = [new Date(2017, 3, 12), new Date(2017, 11, 5)];
+void prepareData() async {
+  var archive = DaEnergyOfferArchive();
+  var days = [Date(2017, 3, 12), Date(2017, 11, 5)];
   await archive.downloadDays(days);
 }
 
-tests() async {
+void tests() async {
   group('DA energy offers report', () {
-    var archive = new DaEnergyOfferArchive();
+    var archive = DaEnergyOfferArchive();
     setUp(() async {
       //await archive.setupDb();
       await archive.dbConfig.db.open();
@@ -33,12 +33,12 @@ tests() async {
       expect(res, 0);
     });
     test('DA energy offers report, DST day spring', () async {
-      File file = archive.getFilename(new Date(2017, 3, 12));
+      var file = archive.getFilename(Date(2017, 3, 12));
       var res = await archive.processFile(file);
       expect(res.first['hours'].length, 23);
     });
     test('DA hourly lmp report, DST day fall', () async {
-      File file = archive.getFilename(new Date(2017, 11, 5));
+      var file = archive.getFilename(Date(2017, 11, 5));
       var res = await archive.processFile(file);
       expect(res.first['hours'].length, 25);
     });
@@ -58,17 +58,17 @@ Future insertDays() async {
     await archive.downloadDay(day);
     await archive.insertDay(day);
   }
-  archive.dbConfig.db.close();
+  await archive.dbConfig.db.close();
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   //await new DaEnergyOfferArchive().setupDb();
   //await prepareData();
 
-  //await tests();
+  await tests();
 
   //await soloTest();
 
-  await insertDays();
+  //await insertDays();
 }

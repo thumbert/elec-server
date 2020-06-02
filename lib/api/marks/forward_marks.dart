@@ -40,7 +40,6 @@ class ForwardMarks {
         },
       }
     };
-    
     compositeCurves = getCompositeCurves();
   }
 
@@ -152,7 +151,7 @@ class ForwardMarks {
   }
 
   /// Return one of the buckets for this curveId.
-  /// Return a map {'2019-01': 87.13, '2019-02': 78.37, ...}
+  /// Return a map with sorted keys {'2019-01': 87.13, '2019-02': 78.37, ...}
   /// If the bucket doesn't exist in the database, calculate it
   /// based on the curveDefinitions, for example calculate the offpeak and
   /// 7x24 bucket.

@@ -11,56 +11,56 @@ import 'package:elec_server/api/api_isone_ptids.dart';
 
 Map env = Platform.environment;
 
-downloadFile() async {
-  ComponentConfig config = new ComponentConfig()
+void downloadFile() async {
+  var config = ComponentConfig()
     ..host = '127.0.0.1'
     ..dbName = 'isone'
     ..collectionName = 'pnode_table';
   String dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
 
-  var archive = new PtidArchive(config: config, dir: dir);
-  String url =
+  var archive = PtidArchive(config: config, dir: dir);
+  var url =
       'https://www.iso-ne.com/static-assets/documents/2019/01/2.6.19_pnode_table_2019_01_10.xls';
-  archive.downloadFile(url);
+  await archive.downloadFile(url);
 }
 
-ingestionTest() async {
-  ComponentConfig config = new ComponentConfig()
+void ingestionTest() async {
+  var config = ComponentConfig()
     ..host = '127.0.0.1'
     ..dbName = 'isone'
     ..collectionName = 'pnode_table';
   String dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
 
-  var archive = new PtidArchive(config: config);
+  var archive = PtidArchive(config: config);
   //await archive.setup();
 
-  File file = new File(dir + 'pnode_table_2019_01_10.xlsx');
+  var file = File(dir + 'pnode_table_2019_01_10.xlsx');
   await archive.db.open();
   await archive.insertMongo(file);
   await archive.db.close();
 }
 
-apiTest() async {
+void apiTest() async {
   group('Ptid table tests:', () {
     ComponentConfig config;
     PtidArchive archive;
     ApiPtids api;
     setUp(() async {
-      config = new ComponentConfig()
+      config = ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isone'
         ..collectionName = 'pnode_table';
-      String dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
-      archive = new PtidArchive(config: config, dir: dir);
+      var dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+      archive = PtidArchive(config: config, dir: dir);
 
-      api = new ApiPtids(config.db);
+      api = ApiPtids(config.db);
       await config.db.open();
     });
     tearDown(() async {
       await config.db.close();
     });
     test('read file for 2017-09-19', () {
-      File file = new File(archive.dir + 'pnode_table_2017_09_19.xlsx');
+      var file = File(archive.dir + 'pnode_table_2017_09_19.xlsx');
       var data = archive.readXlsx(file);
       expect(data.length, 1120);
       expect(data.first, {'ptid': 4000, 'name': '.H.INTERNAL_HUB',
@@ -68,7 +68,7 @@ apiTest() async {
       expect(data[9]['type'], 'reserve zone');
     });
     test('read file for 2018-09-19', () {
-      File file = new File(archive.dir + 'pnode_table_2018_09_11.xlsx');
+      var file = File(archive.dir + 'pnode_table_2018_09_11.xlsx');
       var data = archive.readXlsx(file);
       expect(data.length, 1161);
       expect(data.first, {'ptid': 4000, 'name': '.H.INTERNAL_HUB',
@@ -108,10 +108,10 @@ apiTest() async {
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
 
-  //await ingestionTest();
+//  await ingestionTest();
 
   await apiTest();
 

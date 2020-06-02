@@ -9,7 +9,7 @@ import 'package:timeseries/timeseries.dart';
 import 'package:table/table.dart';
 import 'package:elec_server/client/isoexpress/da_energy_offer.dart';
 
-tests() async {
+void tests() async {
   var location = getLocation('US/Eastern');
   var api = DaEnergyOffers(Client());
   group('DA Energy Offers client:', () {
@@ -41,6 +41,7 @@ tests() async {
     test('get asset ids and participant ids for 2017-07-01', () async {
       var aux = await api.assetsForDay(Date(2017, 7, 1));
       expect(aux.length, 308);
+      aux.sort((a,b) => (a['Masked Asset ID'] as int).compareTo(b['Masked Asset ID']));
       expect(aux.first, {
         'Masked Asset ID': 10393,
         'Masked Lead Participant ID': 698953,
@@ -161,7 +162,7 @@ tests() async {
 //  //print(count);
 //}
 
-main() async {
+void main() async {
   await initializeTimeZone();
   await tests();
 
