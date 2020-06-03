@@ -10,7 +10,7 @@ Location _eastern = getLocation('US/Eastern');
 /// [hourEnding] is of the form '01', '02', '02X', '03', ... '24'
 /// Return an hour beginning UTC TZDateTime
 TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
-  TZDateTime res = new TZDateTime(
+  var res = TZDateTime(
           _eastern,
           int.parse(localDate.substring(6, 10)),
           int.parse(localDate.substring(0, 2)),
@@ -20,7 +20,7 @@ TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
 
   if (hourEnding == '02X') {
     // you are at a transition point
-    res = res.add(new Duration(hours: 1));
+    res = res.add(Duration(hours: 1));
   }
 
   return res;
@@ -31,20 +31,25 @@ TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
 /// Return a two element list with the date and hour ending.
 /// E.g. ['2018-02-01', '03'], ['2018-02-11', '24'].
 List<String> toIsoHourEndingStamp(TZDateTime hourBeginning) {
-  Hour hour = new Hour.beginning(hourBeginning);
-  int offsetStart = hour.start.timeZoneOffset.inHours;
-  bool isFallBack = isFallBackDate(new Date(
+  var hour = Hour.beginning(hourBeginning);
+  var offsetStart = hour.start.timeZoneOffset.inHours;
+  var isFallBack = isFallBackDate(Date(
       hourBeginning.year, hourBeginning.month, hourBeginning.day));
-  List<String> res = [hour.start.toString().substring(0,10)];
+  var res = [hour.start.toString().substring(0,10)];
 
-  if (hourBeginning.hour == 23)
+  if (hourBeginning.hour == 23) {
     res.add('24');
-  else {
+  } else {
     if (isFallBack) {
-      if (hour.start.hour == 0) res.add('01');
-      else if (hour.start.hour == 1 && offsetStart == -4) res.add('02');
-      else if (hour.start.hour == 1 && offsetStart == -5) res.add('02X');
-      else res.add(hour.end.hour.toString().padLeft(2, '0'));
+      if (hour.start.hour == 0) {
+        res.add('01');
+      } else if (hour.start.hour == 1 && offsetStart == -4) {
+        res.add('02');
+      } else if (hour.start.hour == 1 && offsetStart == -5) {
+        res.add('02X');
+      } else {
+        res.add(hour.end.hour.toString().padLeft(2, '0'));
+      }
     } else {
       res.add(hour.end.hour.toString().padLeft(2, '0'));
     }
@@ -55,13 +60,13 @@ List<String> toIsoHourEndingStamp(TZDateTime hourBeginning) {
 
 /// Check if this date is a fall back date.  Return true if it is.
 bool isFallBackDate(Date date) {
-  int offsetStart = new TZDateTime(_eastern, date.year, date.month, date.day)
+  var offsetStart = TZDateTime(_eastern, date.year, date.month, date.day)
       .timeZoneOffset
       .inHours;
-  int offsetEnd = new TZDateTime(_eastern, date.year, date.month, date.day, 23)
+  var offsetEnd = TZDateTime(_eastern, date.year, date.month, date.day, 23)
       .timeZoneOffset
       .inHours;
-  bool res = false;
+  var res = false;
   if (offsetStart == -4 && offsetEnd == -5) res = true;
   return res;
 }
@@ -77,7 +82,7 @@ String stringHourEnding(dynamic hourEnding) {
 
 /// Convert this date to the ISONE preferred date format, e.g. 11/26/2016.
 String mmddyyyy(Date date) {
-  String mm = date.month.toString().padLeft(2, '0');
-  String dd = date.day.toString().padLeft(2, '0');
+  var mm = date.month.toString().padLeft(2, '0');
+  var dd = date.day.toString().padLeft(2, '0');
   return '$mm/$dd/${date.year}';
 }

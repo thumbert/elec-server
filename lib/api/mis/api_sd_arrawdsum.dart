@@ -26,11 +26,11 @@ class SdArrAwdSum {
     var startMonth = parseMonth(start).toIso8601String();
     var endMonth = parseMonth(end).toIso8601String();
 
-    var query = where;
-    query.eq('account', accountId);
-    query.gte('month', startMonth);
-    query.lte('month', endMonth);
-    query.excludeFields(['_id', 'account']);
+    var query = where
+      ..eq('account', accountId)
+      ..gte('month', startMonth)
+      ..lte('month', endMonth)
+      ..excludeFields(['_id', 'account']);
 
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);

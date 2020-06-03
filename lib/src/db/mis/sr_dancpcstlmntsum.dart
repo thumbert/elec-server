@@ -25,7 +25,9 @@ class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
   List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
       Map<String,dynamic> labels, List<String> removeColumns) {
     return rows.map((e) {
-      for (var column in removeColumns) e.remove(column);
+      for (var column in removeColumns) {
+        e.remove(column);
+      }
       var out = <String,dynamic>{
         ...labels,
         ...e,
@@ -93,11 +95,13 @@ class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
 
 
   /// Only one tab at a time only!
+  @override
   Future<Null> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
     if (data.isEmpty) return Future.value(null);
     var tabs = data.map((e) => e['tab']).toSet();
-    if (tabs.length != 1)
+    if (tabs.length != 1) {
       throw ArgumentError('Input data can\'t be for multiple tabs: $tabs');
+    }
     try {
       await dbConfig.coll.remove({
         'account': data.first['account'],
@@ -116,9 +120,10 @@ class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    var collections = await dbConfig.db.getCollectionNames();
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.drop();
+    }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
           'account': 1,

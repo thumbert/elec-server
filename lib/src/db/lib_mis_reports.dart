@@ -9,6 +9,7 @@ import 'package:date/date.dart';
 import 'package:intl/intl.dart';
 import 'config.dart';
 
+///
 List<Map<String,dynamic>> expandDocument(List<Map<String,dynamic>> xs,
     Set<String> scalarKeys, Set<String> vectorKeys) {
   var out = <Map<String,dynamic>>[];
@@ -208,7 +209,7 @@ List<Map<String, dynamic>> readReportTabAsMap(File file, {int tab: 0}) {
 /// Colnames in MIS reports sometimes have unnecessary parantheses.
 /// For example: 'Internal Bilateral For Load (F)'.  Remove them.
 String removeParanthesesEnd(String x) {
-  int ind = x.indexOf(new RegExp('\\(.*\\)'));
+  var ind = x.indexOf(RegExp('\\(.*\\)'));
   if (ind != -1) {
     x = x.substring(0, ind);
   }
@@ -218,5 +219,6 @@ String removeParanthesesEnd(String x) {
 class IncompleteReportException implements Exception {
   String message;
   IncompleteReportException(this.message);
+  @override
   String toString() => message;
 }

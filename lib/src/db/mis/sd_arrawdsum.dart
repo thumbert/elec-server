@@ -2,9 +2,11 @@ library db.mis.sd_arrawdsum;
 
 import 'dart:async';
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
+import 'package:table/table.dart';
 
 class SdArrAwdSumArchive extends mis.MisReportArchive {
   @override
@@ -18,25 +20,21 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
     dbConfig.collectionName = reportName.toLowerCase();
   }
 
-  /// the entire tab is one document
-  Map<String, dynamic> rowConverter(
-      List<Map> rows, String account, Date reportDate, String version) {
-    var document = <String, dynamic>{};
-    document['account'] = account;
-    document['month'] = reportDate.toString().substring(0,7);  /// yyyy-mm
-    document['version'] = version;
-    var columns = rows.first.keys.skip(1);
-    for (var column in columns) {
-      document[column] = [];
-    }
-
-    rows.forEach((e) {
-      for (var column in columns) {
-        document[column].add(e[column]);
+  /// Add the index labels, remove unneeded columns.
+  List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
+      Map<String,dynamic> labels, List<String> removeColumns) {
+    return rows.map((e) {
+      for (var column in removeColumns) {
+        e.remove(column);
       }
-    });
-    return document;
+      var out = <String,dynamic>{
+        ...labels,
+        ...e,
+      };
+      return out;
+    }).toList();
   }
+
 
   @override
   Map<int, List<Map<String, dynamic>>> processFile(File file) {
@@ -45,9 +43,28 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
     var reportDate = report.forDate();
     var version = report.timestamp().toIso8601String();
     var rows = mis.readReportTabAsMap(file, tab: 0);
-    var data0 = rowConverter(rows, account, reportDate, version);
+    var labels = <String,dynamic>{
+      'account': account,
+      'tab': 0,
+      'month': reportDate.toString().substring(0,7),
+      'version': version,
+    };
+    var tab0 = addLabels([collapseListOfMap(rows)], labels,
+        ['H', 'Location Name']);
+
+    /// tab 1, data by subaccount
+    labels['tab'] = 1;
+    rows = mis.readReportTabAsMap(file, tab: 1);
+    var grp = groupBy(rows, (e) => e['Subaccount ID']);
+    var tab1 = <Map<String,dynamic>>[];
+    for (var entry in grp.entries) {
+      labels['Subaccount ID'] = entry.value.first['Subaccount ID'];
+      tab1.addAll(addLabels([collapseListOfMap(entry.value)], labels,
+          ['H', 'Subaccount ID', 'Subaccount Name', 'Location Name']));
+    }
     return {
-      0: [data0]
+      0: tab0,
+      1: tab1,
     };
   }
 
@@ -57,11 +74,13 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
     var account = data.first['account'];
     var date = data.first['month'];
     var version = data.first['version'];
+    var tab = data.first['tab'];
     try {
       await dbConfig.coll.remove({
         'account': account,
         'month': date,
         'version': version,
+        'tab': tab,
       });
       await dbConfig.coll.insertAll(data);
       print('--->  Inserted $reportName for account $account, month $date, version $version, tab $tab successfully');
@@ -77,8 +96,23 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
   Future<Null> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'account': 1,
-      'month': 1, 'Location ID': 1, 'version': 1});
+        keys: {
+          'account': 1,
+          'tab': 1,
+          'date': 1,
+          'version': 1
+        });
+    await dbConfig.db.createIndex(dbConfig.collectionName,
+        keys: {
+          'account': 1,
+          'tab': 1,
+          'date': 1,
+          'version': 1,
+          'Subaccount ID': 1,
+        },
+        partialFilterExpression: {
+          'Subaccount ID': {'\$exists': true},
+        });
     await dbConfig.db.close();
   }
 

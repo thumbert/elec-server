@@ -1,0 +1,57 @@
+C,ARR Award Summary Report ,,,,,,,,,,,,,,,,,,,,,,,,,
+C,SD_ARRAWDSUM_000000001_2017060100_20190718143719.CSV,,,,,,,,,,,,,,,,,,,,,,,,,
+C,Customer Name: VIU1,,,,,,,,,,,,,,,,,,,,,,,,,
+C,Date: 06/01/2017 and Version: 07/18/2019 14:37:19 GMT,,,,,,,,,,,,,,,,,,,,,,,,,
+H,Market Name,Class Type,Location ID,Location Name,Peak Hour Load,Excepted Transaction MW,NEMA Contract MW,Adjusted Peak Hour Load,Load Share,Excepted Transaction Dollars,NEMA Contract Dollars,Load Share Dollars,Long-Term Firm Transmission Service Dollars,Zonal Peak Hour Load,Zonal Excepted Transaction MW,Zonal NEMA Contract MW,Zonal Adjusted Peak Hour Load,Zonal Excepted Transaction Dollars,Zonal NEMA Contract Dollars,Zonal Load Share Dollars,Total Long-Term Firm Transmission Service Dollars,Locational ARR Scaled Dollars,Asset Related Demand MWs,Asset Related Demand Dollars,Zonal Asset Related Demand MWs,Zonal Asset Related Demand Dollars
+H,String,String,Number,String,MW,MW,MW,MW,%,$,$,$,$,MW,MW,MW,MW,$,$,$,$,$,MW,$,MW,$
+D,2017 Annual Round 1,ON,601,Nepool Load Zone 601,-95.31021667,,0,0,0,,0,0,,-2244.479583,,0,-1881.08,,0,5676.35,,5676.35,-95.31021667,0,-363.3995833,0
+D,2017 Annual Round 1,ON,602,Nepool Load Zone 602,0,,0,0,0,,0,0,,-69.12,,0,62.992,,0,15355.24,,15453.87,0,0,-132.112,98.63
+D,2017 Annual Round 1,ON,605,Nepool Load Zone 605,0,,0,0,0,,0,0,,-607.12,,0,-577.12,,0,0,,,0,0,-30,0
+D,2017 Annual Round 1,ON,606,Nepool Load Zone 606,0,,0,0,0,,0,0,,130,,0,160,,0,0,,,0,0,-30,0
+D,2017 Annual Round 1,OFF,601,Nepool Load Zone 601,-95.31021667,,0,0,0,,0,0,,-2244.479583,,0,-1881.08,,0,2270.61,,2241.45,-95.31021667,0,-363.3995833,0
+D,2017 Annual Round 1,OFF,602,Nepool Load Zone 602,0,,0,0,0,,0,0,,-69.12,,0,62.992,,0,6133.65,,6249.61,0,0,-132.112,197.26
+D,2017 Annual Round 1,OFF,605,Nepool Load Zone 605,0,,0,0,0,,0,0,,-607.12,,0,-577.12,,0,0,,,0,0,-30,0
+D,2017 Annual Round 1,OFF,606,Nepool Load Zone 606,0,,0,0,0,,0,0,,130,,0,160,,0,0,,,0,0,-30,0
+D,2017 Annual Round 2,ON,601,Nepool Load Zone 601,-95.31021667,,0,0,0,,0,0,,-2244.479583,,0,-1881.08,,0,5706.29,,5676.35,-95.31021667,0,-363.3995833,0
+D,2017 Annual Round 2,ON,602,Nepool Load Zone 602,0,,50,50,44.2509,,2148.32,5792.96,,-69.12,,50,112.992,,2148.32,13091.18,,15453.88,0,0,-132.112,295.89
+D,2017 Annual Round 2,ON,605,Nepool Load Zone 605,0,,0,0,0,,0,0,,-607.12,,0,-577.12,,0,0,,,0,0,-30,0
+D,2017 Annual Round 2,ON,606,Nepool Load Zone 606,0,,0,0,0,,0,0,,130,,0,160,,0,0,,,0,0,-30,0
+D,2017 Annual Round 2,OFF,601,Nepool Load Zone 601,-95.31021667,,0,0,0,,0,0,,-2244.479583,,0,-1881.08,,0,2241.44,,2241.44,-95.31021667,0,-363.3995833,0
+D,2017 Annual Round 2,OFF,602,Nepool Load Zone 602,0,,50,50,44.2509,,884.12,2199.69,,-69.12,,50,112.992,,884.12,4970.97,,6249.61,0,0,-132.112,394.52
+D,2017 Annual Round 2,OFF,605,Nepool Load Zone 605,0,,0,0,0,,0,0,,-607.12,,0,-577.12,,0,0,,,0,0,-30,0
+D,2017 Annual Round 2,OFF,606,Nepool Load Zone 606,0,,0,0,0,,0,0,,130,,0,160,,0,0,,,0,0,-30,0
+D,JUN 2017 JUN,ON,601,Nepool Load Zone 601,-95.31021667,,0,0,0,,0,0,,-2244.479583,,0,-1881.08,,0,5655.19,,5755.19,-95.31021667,20,-363.3995833,100
+D,JUN 2017 JUN,ON,602,Nepool Load Zone 602,0,,50,50,44.2509,,2178.16,5969.6,,-69.12,,50,112.992,,2178.16,13490.35,,15668.51,0,0,-132.112,0
+D,JUN 2017 JUN,ON,605,Nepool Load Zone 605,0,,0,0,0,,0,0,,-607.12,,0,-577.12,,0,0,,0,0,0,-30,0
+D,JUN 2017 JUN,ON,606,Nepool Load Zone 606,0,,0,0,0,,0,0,,130,,0,160,,0,0,,0,0,0,-30,0
+D,JUN 2017 JUN,OFF,601,Nepool Load Zone 601,-95.31021667,,0,0,0,,0,0,,-2244.479583,,0,-1881.08,,0,2072.58,,2272.58,-95.31021667,40,-363.3995833,200
+D,JUN 2017 JUN,OFF,602,Nepool Load Zone 602,0,,0,0,0,,0,0,,-69.12,,0,62.992,,0,6336.42,,6336.42,0,0,-132.112,0
+D,JUN 2017 JUN,OFF,605,Nepool Load Zone 605,0,,0,0,0,,0,0,,-607.12,,0,-577.12,,0,0,,0,0,0,-30,0
+D,JUN 2017 JUN,OFF,606,Nepool Load Zone 606,0,,0,0,0,,0,0,,130,,0,160,,0,0,,0,0,0,-30,0
+H,Subaccount ID,Subaccount Name,Market Name,Class Type,Location ID,Location Name,Peak Hour Load,NEMA Contract MW,Subaccount Adjusted Peak Hour Load,Customer Adjusted Peak Hour Load,NEMA Contract Dollars,Load Share Dollars,Asset Related Demand MWs,Asset Related Demand Dollars,,,,,,,,,,,,
+H,String,String,String,String,Number,String,MW,MW,MW,MW,$,$,MW,$,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,ON,601,Nepool Load Zone 601,-95.31021667,0,0,0,0,0,-95.31021667,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,ON,602,Nepool Load Zone 602,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,ON,605,Nepool Load Zone 605,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,ON,606,Nepool Load Zone 606,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,OFF,601,Nepool Load Zone 601,-95.31021667,0,0,0,0,0,-95.31021667,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,OFF,602,Nepool Load Zone 602,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,OFF,605,Nepool Load Zone 605,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 1,OFF,606,Nepool Load Zone 606,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,ON,601,Nepool Load Zone 601,-95.31021667,0,0,0,0,0,-95.31021667,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,ON,602,Nepool Load Zone 602,0,50,50,50,2148.32,5792.96,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,ON,605,Nepool Load Zone 605,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,ON,606,Nepool Load Zone 606,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,OFF,601,Nepool Load Zone 601,-95.31021667,0,0,0,0,0,-95.31021667,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,OFF,602,Nepool Load Zone 602,0,50,50,50,884.12,2199.69,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,OFF,605,Nepool Load Zone 605,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,2017 Annual Round 2,OFF,606,Nepool Load Zone 606,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,ON,601,Nepool Load Zone 601,-95.31021667,0,0,0,0,0,-95.31021667,20,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,ON,602,Nepool Load Zone 602,0,50,50,50,2178.16,5969.6,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,ON,605,Nepool Load Zone 605,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,ON,606,Nepool Load Zone 606,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,OFF,601,Nepool Load Zone 601,-95.31021667,0,0,0,0,0,-95.31021667,40,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,OFF,602,Nepool Load Zone 602,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,OFF,605,Nepool Load Zone 605,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+D,9001,Unassigned activity,JUN 2017 JUN,OFF,606,Nepool Load Zone 606,0,0,0,0,0,0,0,0,,,,,,,,,,,,
+T,48 lines,,,,,,,,,,,,,,,,,,,,,,,,,
