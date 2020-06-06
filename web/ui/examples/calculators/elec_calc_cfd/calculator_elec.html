@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Elec calculator</title>
+    <link rel="stylesheet" href="elec_calc_cfd.css">
+</head>
+
+<body>
+
+<div class="elec-calculator">
+    <div class="row-1">
+        <div id="term-container">
+            <div class="grid-container">
+                <div class="cell-header">Term</div>
+                <div id="term" class="cell-string cell-editable">F20-G20</div>
+            </div>
+        </div>
+        <div id="asofdate-container">
+            <div class="grid-container">
+                <div class="cell-header">As of Date</div>
+                <div id="asofdate" class="cell-string cell-editable" style="width: 4em;">21May20</div>
+            </div>
+        </div>
+        <div id="hascustom-container">
+            <div class="grid-container">
+                <div class="cell-header">Has Custom?</div>
+                <div id="hascustom" class="cell-string cell-editable">no</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="row-2">
+        <div class="grid-container">
+            <div class="cell-header">Hourly<br>Quantity</div>
+            <div class="cell-header">Region</div>
+            <div class="cell-header">Service</div>
+            <div class="cell-header">Curve</div>
+            <div class="cell-header">Bucket</div>
+            <div class="cell-header">Fix Price</div>
+            <div class="cell-header">Price</div>
+
+            <div class="cell-num cell-editable">50</div>
+            <div class="cell-string cell-editable">ISONE</div>
+            <div class="cell-string cell-editable">Energy</div>
+            <div class="cell-string cell-editable">HUB_DA_LMP</div>
+            <div class="cell-string cell-editable">Peak</div>
+            <div class="cell-num cell-editable">58.00</div>
+            <div class="cell-num cell-calculated">58.25</div>
+
+            <div class="cell-num cell-editable">-50</div>
+            <div class="cell-string cell-editable">ISONE</div>
+            <div class="cell-string cell-editable">Energy</div>
+            <div class="cell-string cell-editable">CT_DA_LMP</div>
+            <div class="cell-string cell-editable">Peak</div>
+            <div class="cell-num cell-editable">56.85</div>
+            <div class="cell-num cell-calculated">57.25</div>
+
+            <div class="net">Net</div>
+            <div id="net" class="cell-num cell-calculated">1.00</div>
+        </div>
+    </div>
+
+    <div id="row-3">
+        <div class="grid-results">
+            <div class="cell-header">Dollar Price</div>
+            <div id="dollarprice" class="cell-num cell-calculated">5811.15</div>
+            <div></div>
+
+            <div class="cell-header">Buy/Sell</div>
+            <div id="buysell" class="cell-string cell-editable">Buy</div>
+            <div></div>
+
+            <div class="cell-header" style="align-self: start;">Comments</div>
+            <div id="comments" class="cell-editable cell-comments">Bla bla bla bla</div>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

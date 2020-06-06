@@ -14,14 +14,12 @@ class PtidArchive {
 
   PtidArchive({this.config, this.dir}) {
     Map env = Platform.environment;
-    if (config == null) {
-      config = new ComponentConfig()
+    config ??= ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'isone'
         ..collectionName = 'pnode_table';
-    }
-    if (dir == null)
-      dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+
+    dir ??= env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
   }
 
   Db get db => config.db;
@@ -41,17 +39,18 @@ class PtidArchive {
   /// convert it by hand for now.
   /// filename should look like this: 'pnode_table_2017_08_03.xlsx'
   List<Map<String,dynamic>> readXlsx(File file, {String asOfDate}) {
-    String filename = path.basename(file.path);
-    if (path.extension(filename).toLowerCase() != '.xlsx')
+    var filename = path.basename(file.path);
+    if (path.extension(filename).toLowerCase() != '.xlsx') {
       throw 'Filename needs to be in the xlsx format';
+    }
 
     asOfDate ??= _getAsOfDate(filename);
 
     var bytes = file.readAsBytesSync();
-    var decoder = new SpreadsheetDecoder.decodeBytes(bytes);
+    var decoder = SpreadsheetDecoder.decodeBytes(bytes);
     List<Map<String,Object>> res;
 
-    if (Date.parse(asOfDate).isBefore(new Date(2018, 6, 7))) {
+    if (Date.parse(asOfDate).isBefore(Date(2018, 6, 7))) {
       res = _readXlsxVersion1(decoder);
     } else {
       /// current format
@@ -79,7 +78,7 @@ class PtidArchive {
     });
 
     /// rows 4:11 are the Zones
-    for (int r=4; r<12; r++) {
+    for (var r=4; r<12; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -89,7 +88,7 @@ class PtidArchive {
     }
 
     /// rows 13:16 are Reserve Zones
-    for (int r=13; r<17; r++) {
+    for (var r=13; r<17; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][0],
@@ -98,7 +97,7 @@ class PtidArchive {
     }
 
     /// rows 18:23 are Interfaces
-    for (int r=18; r<24; r++) {
+    for (var r=18; r<24; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -107,8 +106,8 @@ class PtidArchive {
     }
 
     /// rows 26:end are simple nodes
-    int nRows = table.rows.length;
-    for (int r=26; r<nRows; r++) {
+    var nRows = table.rows.length;
+    for (var r=26; r<nRows; r++) {
       // sometimes the spreadsheet has empty rows
       if (table.rows[r][5] != null) {
         var aux = {
@@ -143,7 +142,7 @@ class PtidArchive {
     });
 
     /// rows 5:12 are the Zones
-    for (int r=5; r<13; r++) {
+    for (var r=5; r<13; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -153,7 +152,7 @@ class PtidArchive {
     }
 
     /// rows 15:18 are Reserve Zones
-    for (int r=15; r<19; r++) {
+    for (var r=15; r<19; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][0],
@@ -162,7 +161,7 @@ class PtidArchive {
     }
 
     /// rows 21:26 are Interfaces
-    for (int r=21; r<27; r++) {
+    for (var r=21; r<27; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -171,7 +170,7 @@ class PtidArchive {
     }
 
     /// rows 8:26 are the DRR aggregation zones
-    for (int r=7; r<27; r++) {
+    for (var r=7; r<27; r++) {
       res.add({
         'ptid': table.rows[r][7],
         'name': table.rows[r][6],
@@ -184,8 +183,8 @@ class PtidArchive {
     /// Second tab
     /// rows 26:end are simple nodes
     table = decoder.tables['New England'];
-    int nRows = table.rows.length;
-    for (int r=2; r<nRows; r++) {
+    var nRows = table.rows.length;
+    for (var r=2; r<nRows; r++) {
       // sometimes the spreadsheet has empty rows
       if (table.rows[r][5] != null) {
         var aux = {
@@ -210,24 +209,25 @@ class PtidArchive {
   /// Return the asOfDate in the yyyy-mm-dd format from the filename.
   /// Filename is usually just the basename, and in the form: 'pnode_table_2017_08_03.xlsx'
   String _getAsOfDate(String filename) {
-    RegExp regExp = new RegExp(r'pnode_table_(\d{4})_(\d{2})_(\d{2})\.xlsx');
+    var regExp = RegExp(r'pnode_table_(\d{4})_(\d{2})_(\d{2})\.xlsx');
     var matches = regExp.allMatches(filename);
     var match = matches.elementAt(0);
-    if (match.groupCount != 3)
+    if (match.groupCount != 3) {
       throw 'Can\'t parse the date from filename: $filename';
+    }
     return '${match.group(1)}-${match.group(2)}-${match.group(3)}';
   }
 
   /// Download a ptid file from the ISO.  Save it with the same name.
   Future downloadFile(String url) async {
-    String filename = path.basename(url);
-    File fileout = new File(dir + filename);
+    var filename = path.basename(url);
+    var fileout = File(dir + filename);
 
     if (fileout.existsSync()) {
-      print("File $filename is already downloaded.");
+      print('File $filename is already downloaded.');
     }
 
-    return new HttpClient()
+    return HttpClient()
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
@@ -237,15 +237,17 @@ class PtidArchive {
 
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
-  setup() async {
-    if (!new Directory(dir).existsSync()) new Directory(dir)
+  void setup() async {
+    if (!Directory(dir).existsSync()) {
+      Directory(dir)
         .createSync(recursive: true);
-    String fname = 'pnode_table_2017_08_03.xls';
-    String url = 'https://www.iso-ne.com/static-assets/documents/2017/08/$fname';
+    }
+    var fname = 'pnode_table_2017_08_03.xls';
+    var url = 'https://www.iso-ne.com/static-assets/documents/2017/08/$fname';
     //await downloadFile(url);
 
     await config.db.open();
-    List<String> collections = await config.db.getCollectionNames();
+    var collections = await config.db.getCollectionNames();
     print('Collections in db:');
     print(collections);
     if (collections.contains(config.collectionName)) await config.coll.drop();

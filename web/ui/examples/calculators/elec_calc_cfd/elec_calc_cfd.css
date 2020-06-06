@@ -1,0 +1,94 @@
+
+.elec-calculator {
+  font-size: 18px;
+  border: 1px solid silver;
+  padding: 5px;
+  width: 730px;
+}
+
+.elec-calculator > .row-1 {
+  display: grid;
+  grid-template-columns: 200px 200px 200px;
+  column-gap: 30px;
+  padding: 1px;
+  margin-bottom: 18px;
+}
+
+#term-container > .grid-container {
+  display: grid;
+  grid-template-columns: 50px 80px;
+  grid-gap: 3px;
+  column-gap: 10px;
+  padding: 1px;
+}
+
+#asofdate-container > .grid-container {
+  display: grid;
+  grid-template-columns: 80px 80px;
+  grid-gap: 3px;
+  column-gap: 10px;
+  padding: 1px;
+}
+
+#hascustom-container > .grid-container {
+  display: grid;
+  grid-template-columns: 100px 50px;
+  grid-gap: 3px;
+  column-gap: 10px;
+  padding: 1px;
+}
+
+#row-2 > .grid-container {
+  display: grid;
+  grid-template-columns: 70px 70px 70px 220px 70px 60px 60px;
+  grid-gap: 5px;
+  row-gap: 0px;
+  column-gap: 10px;
+  padding: 1px;
+}
+
+.cell-header {
+  color: blue;
+  border: 0px solid white;
+  align-self: end;
+  text-align: left;
+}
+.cell-num {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid white;
+  text-align: right;
+}
+.cell-string {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid white;
+  text-align: left;
+}
+.cell-editable {
+  background-color: black;
+  color: #7CFC00;
+}
+.cell-calculated {
+  background-color: blue;
+  color: white;
+}
+
+.grid-container > .net {
+  text-align: right;
+  grid-column: 1 / 7;
+}
+
+.grid-results {
+  display: grid;
+  grid-template-columns: 100px 100px 400px;
+  grid-template-rows: auto auto 3em;
+  grid-gap: 0px;
+  row-gap: 10px;
+  column-gap: 10px;
+  padding: 1px;
+}
+
+.cell-comments {
+  text-align: left;
+  grid-column: 2 / 4;
+  border: 1px solid silver;
+}
