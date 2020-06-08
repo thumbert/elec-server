@@ -7,6 +7,7 @@ import 'package:timezone/timezone.dart';
 /// if you update the MongoDb installation and all the data is erased.
 ///
 
+
 void insertDays(archive, List<Date> days) async {
   await archive.dbConfig.db.open();
   for (var day in days) {
@@ -17,17 +18,19 @@ void insertDays(archive, List<Date> days) async {
   await archive.dbConfig.db.close();
 }
 
-void main() async {
-  await initializeTimeZones();
+void insertIsoExpress() async {
   var location = getLocation('US/Eastern');
 
   var archive = DaEnergyOfferArchive();
-  /// Currently there is a bug in mongo_dart driver that doesn't allow to
-  /// set the index!
-//  await archive.setupDb();
   await insertDays(archive, Term.parse('Jul17', location).days());
-//  await insertDays(archive, Term.parse('Apr18', location).days());
 
+}
+
+
+void main() async {
+  await initializeTimeZones();
+
+  await insertIsoExpress();
 
 
 }
