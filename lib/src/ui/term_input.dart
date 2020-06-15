@@ -18,11 +18,11 @@ class TermInput {
   ///
   /// Need to trigger an action onChange.
   TermInput(this.wrapper,
-      {this.name: 'Term',
+      {this.name = 'Term',
       this.defaultValue,
       this.tzLocation,
       String placeholder,
-      int size: 9}) {
+      int size = 9}) {
     var aux = '';
     placeholder = '';
     if (defaultValue != null) {
@@ -61,7 +61,7 @@ class TermInput {
   }
 
   /// trigger a change when either one of the two inputs change
-  onChange(Function x) {
+  void onChange(Function x) {
     _textInput.onChange.listen(x);
   }
 }

@@ -29,10 +29,17 @@ class TypeAhead {
       _value = _input.value;
       _closeAllLists();
       _currentFocus = -1;
-      if (_value == '') return;
 
-      for (var value in values
-          .where((e) => e.toUpperCase().startsWith(_value.toUpperCase()))) {
+      Iterable<String> candidates;
+      if (_value == '') {
+        // show the first 5 values
+        candidates = values.take(5);
+      } else {
+        candidates = values
+            .where((e) => e.toUpperCase().startsWith(_value.toUpperCase()));
+      }
+
+      for (var value in candidates) {
         var _b = DivElement();
         _b.innerHtml = '<strong>${value.substring(0, _value.length)}</strong>';
         _b.innerHtml += value.substring(_value.length);
@@ -72,6 +79,10 @@ class TypeAhead {
   }
 
   String get value => _input.value;
+
+  void setAttribute(String name, String value) => _input.setAttribute(name, value);
+
+  set value(String x) => _input.value = x;
 
   void onSelect(Function x) {
     _input.onSelect.listen(x);

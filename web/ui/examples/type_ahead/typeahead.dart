@@ -238,6 +238,10 @@ void main() {
   var ac = TypeAhead(wrapper, countries, placeholder: 'Country name');
   ac.onSelect((e) => message.text = 'You selected ${ac.value}');
 
+  var bs = TypeAhead(querySelector('#wrapper-ta2'),
+    ['Buy', 'Sell'], placeholder: 'Buy/Sell');
+
+
 }
 
 

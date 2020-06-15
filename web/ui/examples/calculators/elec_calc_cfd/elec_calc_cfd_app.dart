@@ -2,11 +2,14 @@ library ui.examples.calculators.elec_calc_cfd.elec_calc_cfd_app;
 
 import 'dart:html' as html;
 import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec_server/src/ui/type_ahead.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
+import 'package:timezone/timezone.dart';
 
 class ElecCalcCfdApp {
   html.DivElement wrapper;
@@ -16,19 +19,38 @@ class ElecCalcCfdApp {
   ElecCalculatorCfd _calculator;
 
   html.DivElement _calculatorDiv,
-      _termDiv,
-      _asOfDateDiv,
       _hasCustomDiv,
       _netDiv,
       _dollarPriceDiv,
-      _buySellDiv,
       _commentsDiv;
+  html.TextInputElement _termInput, _asOfDateInput;
   List<_Row2> _row2s;
+  List<html.ButtonInputElement> _buttons;
+  TypeAhead _buySell;
+
 
   static final DateFormat _dateFmt = DateFormat('ddMMMyy');
 
   ElecCalcCfdApp(this.wrapper,
       {this.client, this.rootUrl = 'http://localhost:8080/'});
+
+  void _f2Refresh() {
+    print(_calculator.term);
+    print(_calculator.asOfDate);
+    print(_calculator.buySell);
+    for (var leg in _calculator.legs) {
+      print(leg.bucket);
+      print(leg.quantity);
+    }
+  }
+  void _f3Details() {
+
+  }
+  void _f7Reports() {
+    print('Wanna report?');
+  }
+
+
 
   /// Initialize the calculator from a json template.  In a live app, this
   /// template comes from the database.
@@ -41,8 +63,10 @@ class ElecCalcCfdApp {
         _initializeRow2(),
         _initializeRow3(),
       ];
-    
+
     wrapper.children.add(_calculatorDiv);
+    wrapper.children.add(_makeHotKeys());
+
   }
 
   void makeHtml() {
@@ -51,20 +75,48 @@ class ElecCalcCfdApp {
 
   /// Set the row1 elements from the [_calculator] info.
   html.DivElement _initializeRow1() {
-    _termDiv = html.DivElement()
+    _termInput = html.TextInputElement()
       ..className = 'cell-string cell-editable'
       ..id = 'term'
-      ..text = _calculator.term.toString();
+      ..spellcheck = false
+      ..value = _calculator.term.toString()
+      ..onChange.listen((event) {
+        Interval aux;
+        try {
+          aux = parseTerm(_termInput.value, tzLocation: UTC);
+          _termInput.setAttribute(
+              'style', 'margin-left: 15px; border-color: none;');
+        } on ArgumentError {
+          _termInput.setAttribute(
+              'style', 'margin-left: 15px; border: 2px solid red;');
+        } catch (e) {
+          print(e.toString());
+        }
+        _calculator.term = Term.fromInterval(aux);
+      });
 
-    _asOfDateDiv = html.DivElement()
+    _asOfDateInput = html.TextInputElement()
       ..className = 'cell-string cell-editable'
-      ..setAttribute('style', 'width: 4em;')
       ..id = 'asofdate'
-      ..text = _calculator.asOfDate.toString(_dateFmt);
+      ..spellcheck = false
+      ..value = _calculator.asOfDate.toString(_dateFmt)
+      ..onChange.listen((event) {
+        Date aux;
+        try {
+          aux = Date.parse(_asOfDateInput.value, fmt: _dateFmt);
+          _asOfDateInput.setAttribute(
+              'style', 'margin-left: 15px; border-color: none;');
+        } on ArgumentError {
+          _asOfDateInput.setAttribute(
+              'style', 'margin-left: 15px; border: 2px solid red;');
+        } catch (e) {
+          print(e.toString());
+        }
+        _calculator.asOfDate = aux;
+      });
 
     _hasCustomDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..setAttribute('style', 'width: 4em;')
       ..id = 'hascustom'
       ..text = _calculator.hasCustom() ? 'yes' : 'no';
 
@@ -78,9 +130,9 @@ class ElecCalcCfdApp {
               ..className = 'grid-container'
               ..children = [
                 html.DivElement()
-                  ..className = 'cell-header'
+                  ..className = 'left-label'
                   ..text = 'Term',
-                _termDiv,
+                _termInput,
               ],
           ],
         html.DivElement()
@@ -90,9 +142,9 @@ class ElecCalcCfdApp {
               ..className = 'grid-container'
               ..children = [
                 html.DivElement()
-                  ..className = 'cell-header'
+                  ..className = 'left-label'
                   ..text = 'As of Date',
-                _asOfDateDiv,
+                _asOfDateInput,
               ],
           ],
         html.DivElement()
@@ -102,7 +154,7 @@ class ElecCalcCfdApp {
               ..className = 'grid-container'
               ..children = [
                 html.DivElement()
-                  ..className = 'cell-header'
+                  ..className = 'left-label'
                   ..text = 'Has Custom?',
                 _hasCustomDiv,
               ]
@@ -112,15 +164,15 @@ class ElecCalcCfdApp {
 
   html.DivElement _initializeRow2() {
     _row2s = [
-      for (var leg in _calculator.legs) _Row2.fromLeg(leg),
-      _Row2.empty(),  // add another empty row
+      for (var i=0; i<_calculator.legs.length; i++) _Row2.fromLeg(_calculator, i),
+      _Row2.empty(_calculator),
     ];
-    print(_row2s.length);
+
     _netDiv = html.DivElement()
       ..className = 'cell-num cell-calculated'
       ..id = 'net';
     return html.DivElement()
-      ..id = 'row-2'
+      ..className = 'row-2'
       ..children = [
         html.DivElement()
           ..className = 'grid-container'
@@ -140,10 +192,11 @@ class ElecCalcCfdApp {
       ..className = 'cell-num cell-calculated'
       ..id = 'dollarprice';
 
-    _buySellDiv = html.DivElement()
-      ..className = 'cell-string cell-editable'
-      ..id = 'buysell'
-      ..text = _calculator.buySell.toString();
+    var _buySellDiv = html.DivElement()
+      ..className = 'typeahead cell-string cell-editable';
+    _buySell = TypeAhead(_buySellDiv, ['Buy', 'Sell'])
+      ..value = _calculator.buySell.toString()
+      ..onSelect((e) => _calculator.buySell = BuySell.parse(_buySell.value));
 
     _commentsDiv = html.DivElement()
       ..className = 'cell-comments cell-editable'
@@ -151,31 +204,65 @@ class ElecCalcCfdApp {
       ..text = _calculator.comments;
 
     return html.DivElement()
-      ..id = 'row-3'
+      ..className = 'row-3'
       ..children = [
         html.DivElement()
           ..className = 'grid-results'
           ..children = [
             html.DivElement()
-              ..className = 'cell-header'
+              ..className = 'left-label'
               ..text = 'Dollar Price',
             _dollarPriceDiv,
             html.DivElement(),
             //
             html.DivElement()
-              ..className = 'cell-header'
+              ..className = 'left-label'
               ..text = 'Buy/Sell',
             _buySellDiv,
             html.DivElement(),
             //
             html.DivElement()
-              ..className = 'cell-header'
+              ..className = 'left-label'
               ..setAttribute('style', 'align-self: start;')
               ..text = 'Comments',
             _commentsDiv,
           ],
       ];
   }
+
+  void setListeners() {
+    var _row2 = _row2s.first;
+
+    _row2.bucketInput.onSelect((e) {
+      print('Hi');
+      var leg = _calculator.legs.first;
+      leg.bucket = Bucket.parse(_row2.bucketInput.value);
+      _calculator.legs.first = leg;
+      print(leg.bucket);
+    });
+
+  }
+
+  /// add the buttons at the bottom of the calculators
+  html.DivElement _makeHotKeys() {
+    _buttons = <html.ButtonInputElement>[];
+    _buttons.add(html.ButtonInputElement()
+      ..className = 'btn btn-primary my-button'
+      ..value = 'F2 Refresh'
+      ..onClick.listen((event) => _f2Refresh()));
+    _buttons.add(html.ButtonInputElement()
+      ..className = 'btn btn-primary my-button'
+      ..value = 'F3 Details'
+      ..onClick.listen((event) => _f3Details()));
+    _buttons.add(html.ButtonInputElement()
+      ..className = 'btn btn-primary my-button'
+      ..value = 'F7 Report'
+      ..onClick.listen((event) => _f7Reports()));
+    return html.DivElement()
+      ..className = 'hot-keys'
+      ..children = _buttons;
+  }
+
 }
 
 List<html.DivElement> _makeRow2Header() {
@@ -205,6 +292,8 @@ List<html.DivElement> _makeRow2Header() {
 }
 
 class _Row2 {
+  ElecCalculatorCfd calculator;
+  int indexLeg;
   CommodityLeg _leg;
   bool _empty;
   html.DivElement _hourlyQuantityDiv,
@@ -214,14 +303,16 @@ class _Row2 {
       _bucketDiv,
       _fixPriceDiv,
       _floatingPriceDiv;
+  TypeAhead _regionInput, _serviceInput, _curveInput, bucketInput;
 
   /// An empty commodity row
-  _Row2.empty() {
+  _Row2.empty(this.calculator) {
     _empty = true;
   }
 
   /// A commodity row from a calculator leg
-  _Row2.fromLeg(this._leg) {
+  _Row2.fromLeg(this.calculator, this.indexLeg) {
+    _leg = calculator.legs[indexLeg];
     _empty = false;
   }
 
@@ -229,6 +320,12 @@ class _Row2 {
   List<html.Element> initialize() {
     _hourlyQuantityDiv = html.DivElement()
       ..className = 'cell-num cell-editable';
+    if (_empty) {
+      // if this is not set, the empty row doesn't get displayed
+      _hourlyQuantityDiv..innerHtml = '&nbsp';
+    } else {
+      _hourlyQuantityDiv..text = _leg.showQuantity.toString();
+    }
     _regionDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
       ..text = _empty ? '' : (_leg.curveId.components['iso'] as Iso).name;
@@ -239,20 +336,21 @@ class _Row2 {
       ..className = 'cell-string cell-editable'
       ..text = _empty ? '' : _leg.curveId.curve;
     _bucketDiv = html.DivElement()
-      ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.bucket.toString();
+      ..id = 'bucket-leg-$indexLeg'
+      ..setAttribute('style', 'overflow-y: visible !important;')
+      ..className = 'cell-string cell-editable type-ahead';
+    bucketInput = TypeAhead(_bucketDiv, ['5x16', '2x16H', '7x8', 'Peak',
+      'Offpeak', 'Flat'])
+      ..value = _empty ? '' : _leg.bucket.toString();
+    /// the options don't show in the dropdown but are there and can be
+    /// selected!
+
     _fixPriceDiv = html.DivElement()
       ..className = 'cell-num cell-editable'
       ..text = _empty ? '' : _leg.showFixPrice.toString();
     _floatingPriceDiv = html.DivElement()
       ..className = 'cell-num cell-calculated'
       ..text = '';
-    if (_empty) {
-      // if this is not set, the empty row doesn't get displayed
-      _hourlyQuantityDiv..innerHtml = '&nbsp';
-    } else {
-      _hourlyQuantityDiv..text = _leg.showQuantity.toString();
-    }
 
 
     return [
