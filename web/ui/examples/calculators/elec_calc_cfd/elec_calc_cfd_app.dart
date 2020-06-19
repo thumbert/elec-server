@@ -265,31 +265,6 @@ class ElecCalcCfdApp {
 
 }
 
-List<html.DivElement> _makeRow2Header() {
-  return <html.DivElement>[
-    html.DivElement()
-      ..className = 'cell-header'
-      ..innerHtml = 'Hourly<br>Quantity',
-    html.DivElement()
-      ..className = 'cell-header'
-      ..text = 'Region',
-    html.DivElement()
-      ..className = 'cell-header'
-      ..text = 'Service',
-    html.DivElement()
-      ..className = 'cell-header'
-      ..text = 'Curve',
-    html.DivElement()
-      ..className = 'cell-header'
-      ..text = 'Bucket',
-    html.DivElement()
-      ..className = 'cell-header'
-      ..text = 'Fix Price',
-    html.DivElement()
-      ..className = 'cell-header'
-      ..text = 'Price',
-  ];
-}
 
 class _Row2 {
   ElecCalculatorCfd calculator;
@@ -337,10 +312,10 @@ class _Row2 {
       ..text = _empty ? '' : _leg.curveId.curve;
     _bucketDiv = html.DivElement()
       ..id = 'bucket-leg-$indexLeg'
-      ..setAttribute('style', 'overflow-y: visible !important;')
-      ..className = 'cell-string cell-editable type-ahead';
-    bucketInput = TypeAhead(_bucketDiv, ['5x16', '2x16H', '7x8', 'Peak',
-      'Offpeak', 'Flat'])
+      ..className = 'cell-string cell-editable typeahead';
+    bucketInput = TypeAhead(_bucketDiv, ['Peak', 'Offpeak', 'Flat', 'Custom',
+      '5x16', '2x16H', '7x8', '7x24', '7x16'])
+      ..spellcheck = false
       ..value = _empty ? '' : _leg.bucket.toString();
     /// the options don't show in the dropdown but are there and can be
     /// selected!
@@ -363,4 +338,31 @@ class _Row2 {
       _floatingPriceDiv,
     ];
   }
+}
+
+
+List<html.DivElement> _makeRow2Header() {
+  return <html.DivElement>[
+    html.DivElement()
+      ..className = 'cell-header'
+      ..innerHtml = 'Hourly<br>Quantity',
+    html.DivElement()
+      ..className = 'cell-header'
+      ..text = 'Region',
+    html.DivElement()
+      ..className = 'cell-header'
+      ..text = 'Service',
+    html.DivElement()
+      ..className = 'cell-header'
+      ..text = 'Curve',
+    html.DivElement()
+      ..className = 'cell-header'
+      ..text = 'Bucket',
+    html.DivElement()
+      ..className = 'cell-header'
+      ..text = 'Fix Price',
+    html.DivElement()
+      ..className = 'cell-header'
+      ..text = 'Price',
+  ];
 }

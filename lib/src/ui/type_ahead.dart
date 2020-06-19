@@ -7,13 +7,16 @@ class TypeAhead {
   DivElement wrapper;
   InputElement _input;
   List<String> values;
+  /// how many choices to show when the input is empty.
+  int showOnEmpty;
 
   String _value;
 
   DivElement _al;  // autocomplete-list
   int _currentFocus;
 
-  TypeAhead(this.wrapper, this.values, {String placeholder = ''}) {
+  TypeAhead(this.wrapper, this.values, {String placeholder = '',
+    this.showOnEmpty = 5}) {
     _input = InputElement(type: 'text')
       ..id = '${wrapper.id}-input'
       ..placeholder = placeholder;
@@ -32,8 +35,11 @@ class TypeAhead {
 
       Iterable<String> candidates;
       if (_value == '') {
-        // show the first 5 values
-        candidates = values.take(5);
+        if (values.length > showOnEmpty) {
+          candidates = values.take(showOnEmpty);
+        } else {
+          candidates = values;
+        }
       } else {
         candidates = values
             .where((e) => e.toUpperCase().startsWith(_value.toUpperCase()));
@@ -83,6 +89,8 @@ class TypeAhead {
   void setAttribute(String name, String value) => _input.setAttribute(name, value);
 
   set value(String x) => _input.value = x;
+
+  set spellcheck(bool value) => _input.spellcheck = value;
 
   void onSelect(Function x) {
     _input.onSelect.listen(x);
