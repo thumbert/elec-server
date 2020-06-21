@@ -16,16 +16,17 @@ import 'marks_2020-05-29.dart';
 /// Get the curves that are directly marked
 List<String> getMarkedCurveIds() {
   return [
-    'isone_elec_4000_da_lmp',
-    'isone_elec_maine_lmpspread_da',
-    'isone_elec_nh_lmpspread_da',
-    'isone_elec_ct_lmpspread_da',
-    'isone_elec_ri_lmpspread_da',
-    'isone_elec_sema_lmpspread_da',
-    'isone_elec_wcma_lmpspread_da',
-    'isone_elec_nema_lmpspread_da',
-    'isone_elec_4011_lmpspread_da',
-    'pjm_elec_westernhub_da_lmp',
+    'isone_energy_4000_da_lmp',
+    'isone_energy_4001_da_basis',
+    'isone_energy_4002_da_basis',
+    'isone_energy_4003_da_basis',
+    'isone_energy_4004_da_basis',
+    'isone_energy_4005_da_basis',
+    'isone_energy_4006_da_basis',
+    'isone_energy_4007_da_basis',
+    'isone_energy_4008_da_basis',
+    'isone_energy_4011_da_basis',
+    'pjm_energy_westernhub_da_lmp',
     ...['ng_henryhub', 'ng_algcg_gdm', 'ng_tetcom3_gdm'],
   ]..sort();
 }
@@ -47,7 +48,7 @@ void insertData(ForwardMarksArchive archive) async {
   for (var curveId in curveIds) {
     print(curveId);
     var data;
-    if (curveId.contains('_elec_')) {
+    if (curveId.contains('_energy_')) {
       data = _generateDataElecCurve(curveId, days, endMonth, rand);
     } else if (curveId.startsWith('ng')) {
       data = _generateDataNgCurve(curveId, days, endMonth, rand);
@@ -69,7 +70,7 @@ List<Map<String, dynamic>> _generateDataElecCurve(
     var month0 = Month(day.year, day.month, location: day.location);
     var months = month0.next.upTo(endMonth);
     var n = months.length;
-    if (curveId.contains('spread') &&
+    if (curveId.contains('basis') &&
         day != calendar.firstBusinessDate(month0)) {
       continue;
     }
@@ -122,7 +123,7 @@ void tests() async {
       var document = <String, dynamic>{
         'fromDate': '2018-12-14',
         'version': '2018-12-14T10:12:47.000-0500',
-        'curveId': 'isone_elec_4011_da_lmp',
+        'curveId': 'isone_energy_4011_da_lmp',
         'months': ['2019-01', '2019-02', '2019-12'],
         'buckets': {
           '5x16': [89.10, 86.25, 71.05],
@@ -133,7 +134,7 @@ void tests() async {
       var newDocument = <String, dynamic>{
         'fromDate': '2018-12-15',
         'version': '2018-12-15T11:15:47.000-0500',
-        'curveId': 'isone_elec_4011_da_lmp',
+        'curveId': 'isone_energy_4011_da_lmp',
         'months': ['2019-01', '2019-02', '2019-12'],
         'buckets': {
           '5x16': [89.10, 86.25, 71.05],
@@ -162,27 +163,27 @@ void tests() async {
       expect(res, allCurveIds.where((e) => e.contains('isone')).toList());
     });
     test('api get all available fromDates for a curveId', () async {
-      var res = await api.getFromDatesForCurveId('isone_elec_4000_da_lmp');
-      expect(res.length, 255);
+      var res = await api.getFromDatesForCurveId('isone_energy_4000_da_lmp');
+      expect(res.length >= 255, true);
     });
     test('api get all available fromDates for a spread curve', () async {
       var res =
-          await api.getFromDatesForCurveId('isone_elec_4004_lmpspread_da');
-      expect(res.length, 12);
+          await api.getFromDatesForCurveId('isone_energy_4004_da_basis');
+      expect(res.length >= 12, true);
     });
     test('get one forward curve, all marked buckets', () async {
       var res =
-          await api.getForwardCurve('isone_elec_4000_da_lmp', '2018-03-03');
+          await api.getForwardCurve('isone_energy_4000_da_lmp', '2018-03-03');
       var data = json.decode(res.result) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'months', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
     });
     test('get one marked forward curve, one bucket (marked)', () async {
       var res = await api.getForwardCurveForBucket(
-          'isone_elec_4000_da_lmp', '5x16', '2018-03-03');
+          'isone_energy_4000_da_lmp', '5x16', '2018-03-03');
       var data = <String, num>{...json.decode(res.result)};
       expect(data.keys.first, '2018-04');
-      expect(data.values.first, 45.99158496771074);
+      expect(data.values.first, 45.58681342997034);
     });
     test('a marked forward curve with wrong bucket returns empty', () async {
       var res = await api.getForwardCurveForBucket(
@@ -192,14 +193,14 @@ void tests() async {
     });
     test('get one marked forward curve, one bucket (computed)', () async {
       var res = await api.getForwardCurveForBucket(
-          'isone_elec_4000_da_lmp', 'offpeak', '2018-03-03');
+          'isone_energy_4000_da_lmp', 'offpeak', '2018-03-03');
       var data = <String, num>{...json.decode(res.result)};
       expect(data.keys.first, '2018-04');
-      expect(data.values.first.toStringAsFixed(5), '25.24325');
+      expect(data.values.first.toStringAsFixed(5), '25.83335');
     });
     test('get values of different strips/buckets for one curve', () async {
       var res = await api.getForwardCurveForBucketsStrips(
-          'isone_elec_4000_da_lmp',
+          'isone_energy_4000_da_lmp',
           '5x16_offpeak',
           '2018-03-03',
           'Jan19-Feb19_Jul19-Aug19_Jan20-Jun20');
@@ -208,15 +209,15 @@ void tests() async {
       var data = aux['5x16'];
       expect(data.keys.length, 3);
       expect(data.keys.first, 'Jan19-Feb19');
-      expect(data.values.first, 46.13419709530633);
+      expect(data.values.first, 46.62231110069041);
     });
 
     test('get the buckets marked for one curve', () async {
       // marked curve
-      var b0 = await api.getBucketsMarked('isone_elec_4000_da_lmp');
+      var b0 = await api.getBucketsMarked('isone_energy_4000_da_lmp');
       expect(b0, {'5x16', '2x16H', '7x8'});
       // composite curve
-      var b1 = await api.getBucketsMarked('isone_elec_4004_da_lmp');
+      var b1 = await api.getBucketsMarked('isone_energy_4004_da_lmp');
       expect(b1, {'5x16', '2x16H', '7x8'});
       // fuel curve
       var b2 = await api.getBucketsMarked('ng_henryhub');
@@ -250,10 +251,11 @@ void insertMarks() async {
 
 void main() async {
   await initializeTimeZone();
-//  await tests();
-
-  await insertMarks();
-
 //  await repopulateDb();
+
+    await tests();
+
+//  await insertMarks();
+
 
 }

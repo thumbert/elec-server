@@ -1,15 +1,11 @@
 library db.curves.curveid;
 
 import 'dart:async';
-import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
-import 'package:intl/intl.dart';
 
 class CurveIdArchive {
   ComponentConfig dbConfig;
-  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
-  final _equality = const ListEquality();
 
   /// Keep track of curve details, e.g. region, serviceType, location, children,
   /// and the rule for composing it
