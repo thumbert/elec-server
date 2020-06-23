@@ -34,6 +34,8 @@ class CategoricalDropdownFilter {
     wrapper.children.add(_wrapper);
   }
 
+  set value(String x) => _selector.value = x;
+
   String get value => _selector.value;
 
   void setAttribute(String name, String value) =>
