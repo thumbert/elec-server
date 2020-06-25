@@ -1,7 +1,7 @@
 library test.db.curves.curve_id_test;
 
-import 'package:elec_server/src/db/curves/curve_id.dart';
-import 'package:elec_server/src/db/curves/json/curve_id_isone.dart' as isone;
+import 'package:elec_server/src/db/marks/curves/curve_id.dart';
+import 'package:elec_server/src/db/marks/curves/json/curve_id_isone.dart' as isone;
 
 
 void tests() async {

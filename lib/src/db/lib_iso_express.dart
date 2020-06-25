@@ -34,16 +34,15 @@ abstract class IsoExpressReport {
   Future downloadUrl(String url, File fileout, {bool override: true}) async {
     if (fileout.existsSync() && !override) {
       print('File ${fileout.path} was already downloaded.  Skipping.');
-      return new Future.value(1);
+      return Future.value(1);
     } else {
-      if (!new Directory(dirname(fileout.path)).existsSync()) {
-        new Directory(dirname(fileout.path)).createSync(recursive: true);
+      if (!Directory(dirname(fileout.path)).existsSync()) {
+        Directory(dirname(fileout.path)).createSync(recursive: true);
         print('Created directory ${dirname(fileout.path)}');
       }
-      HttpClient client = new HttpClient();
-      HttpClientRequest request = await client.getUrl(Uri.parse(url));
-      HttpClientResponse response = await request.close();
-          //.timeout(const Duration(minutes: 1));
+      var client = HttpClient();
+      var request = await client.getUrl(Uri.parse(url));
+      var response = await request.close();
       await response.pipe(fileout.openWrite());
     }
   }
@@ -114,7 +113,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
         return 1;
       }); 
     } on mis.IncompleteReportException {
-      file.delete();
+      await file.delete();
       return Future.value(null);
     }
   }

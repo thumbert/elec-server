@@ -3,6 +3,7 @@ library iso.isone.db.converters;
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
+import 'package:timezone/browser.dart';
 
 DateFormat _fmt = DateFormat('MM/dd/yyyy');
 

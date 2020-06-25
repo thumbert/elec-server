@@ -6,6 +6,10 @@ import 'package:elec/risk_system.dart';
 
 List<Map<String, dynamic>> getCurves() {
   var out = <Map<String, dynamic>>[];
+
+  /// LMP and congestion curves for all the zones, DA and RT
+  /// isone_energy_4000_da_lmp, isone_energy_4000_rt_lmp,
+  /// isone_energy_4000_da_congestion, isone_energy_4000_rt_congestion
   var components = [LmpComponent.lmp, LmpComponent.congestion];
   var markets = [Market.da, Market.rt];
   var ptids = List.generate(9, (i) => 4000 + i);
@@ -52,7 +56,7 @@ List<Map<String, dynamic>> getCurves() {
   }
 
   /// load ancillaries, capacity curves, etc.
-  var xs = jsonDecode(File('lib/src/db/curves/json/curve_id_isone.json').readAsStringSync()) as List;
+  var xs = jsonDecode(File('lib/src/db/marks/curves/json/curve_id_isone.json').readAsStringSync()) as List;
   out.addAll([for (Map<String, dynamic> x in xs) x]);
 
   return out;

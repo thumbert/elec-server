@@ -232,7 +232,7 @@ void repopulateDb() async {
   await archive.db.open();
   await archive.db.dropCollection(archive.dbConfig.collectionName);
   await insertData(archive);
-  await archive.setup();
+//  await archive.setup();
   await archive.db.close();
 }
 
@@ -252,10 +252,8 @@ void insertMarks() async {
 void main() async {
   await initializeTimeZone();
 //  await repopulateDb();
-
-    await tests();
-
 //  await insertMarks();
 
+  await tests();
 
 }

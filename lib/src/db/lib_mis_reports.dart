@@ -52,7 +52,7 @@ abstract class MisReportArchive {
   Map<int, List<Map<String, dynamic>>> processFile(File file);
 
   /// Insert this data into the database.  Likely to be overwritten in the implementation.
-  Future insertTabData(List<Map<String, dynamic>> data, {int tab: 0}) async {
+  Future insertTabData(List<Map<String, dynamic>> data, {int tab = 0}) async {
     if (data.isEmpty) return Future.value(null);
     return dbConfig.coll
         .insertAll(data)
@@ -137,8 +137,8 @@ class MisReport {
   }
 
   Future<String> filename() async {
-    List<String> _comments = await comments();
-    var regex = new RegExp(r'Filename: (.*)(")');
+    var _comments = await comments();
+    var regex = RegExp(r'Filename: (.*)(")');
     var matches = regex.firstMatch(_comments[1]);
     return matches.group(1);
   }
@@ -146,12 +146,12 @@ class MisReport {
   /// Read an MIS report and keep only the data rows, each row becoming a map,
   /// with keys taken from the header.
   /// If there are no data rows (empty report tab), return an empty List.
-  List<Map> readTabAsMap({int tab: 0}) {
+  List<Map> readTabAsMap({int tab = 0}) {
     var allData = _readReport(tab: tab);
     var columnNames = allData.firstWhere((List e) => e[0] == 'H');
     return allData
         .where((List e) => e[0] == 'D')
-        .map((List e) => new Map.fromIterables(columnNames, e))
+        .map((List e) => Map.fromIterables(columnNames, e))
         .toList();
   }
 
@@ -171,20 +171,22 @@ class MisReport {
   /// Sometimes the ISO doesn't quote the report.  Really frustrating!
   /// [tab] the tab number to parse.  If the report changes and the tab
   /// doesn't exist return an empty list.
-  List<List> _readReport({int tab: 0}) {
+  List<List> _readReport({int tab = 0}) {
     var converter = CsvToListConverter();
     _lines ??= file.readAsLinesSync();
-    if (_lines.isEmpty || !(_lines.last.startsWith('"T"') || _lines.last.startsWith('T')))
+    if (_lines.isEmpty || !(_lines.last.startsWith('"T"') || _lines.last.startsWith('T'))) {
       throw IncompleteReportException('Incomplete CSV file ${file.path}');
+    }
 
-    int nHeaders = -1;
+    var nHeaders = -1;
     return _lines
         .where((e) {
           if (e[0] == 'H' || e.startsWith('"H"')) nHeaders++;
-          if (nHeaders == 2 * tab || nHeaders == (2 * tab + 1))
+          if (nHeaders == 2 * tab || nHeaders == (2 * tab + 1)) {
             return true;
-          else
+          } else {
             return false;
+          }
         })
         .map((String row) => converter.convert(row).first)
         .toList();
@@ -194,7 +196,7 @@ class MisReport {
 /// Read an MIS report and keep only the data rows, each row becoming a map,
 /// with keys taken from the header.
 /// If there are no data rows (empty report), return an empty List.
-List<Map<String, dynamic>> readReportTabAsMap(File file, {int tab: 0}) {
+List<Map<String, dynamic>> readReportTabAsMap(File file, {int tab = 0}) {
   if (!file.existsSync()) throw 'File ${file.path} doesn\'t exist.';
   var allData = MisReport(file)._readReport(tab: tab);
   if (allData.isEmpty) return [];

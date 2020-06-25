@@ -172,9 +172,9 @@ class DaLmp {
     query = query.fields(['hourBeginning', component]);
     var data = coll.find(query);
     var out = <Map<String, Object>>[];
-    List<String> keys = ['hourBeginning', component];
+    var keys = ['hourBeginning', component];
     await for (Map e in data) {
-      for (int i = 0; i < e['hourBeginning'].length; i++) {
+      for (var i = 0; i < e['hourBeginning'].length; i++) {
         out.add(Map.fromIterables(keys, [
           TZDateTime.from(e['hourBeginning'][i], _location).toString(),
           e[component][i]
