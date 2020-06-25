@@ -4,7 +4,7 @@ import 'dart:html' as html;
 
 class CategoricalDropdownFilter {
   html.Element wrapper;
-  html.Element _wrapper;
+  html.Element inner;
   html.SelectElement _selector;
   String name;
 
@@ -16,9 +16,9 @@ class CategoricalDropdownFilter {
   /// Need to trigger an action onChange.
   CategoricalDropdownFilter(this.wrapper, List<String> values, this.name) {
     // put both the label and the select element into a div
-    _wrapper = html.DivElement()
+    inner = html.DivElement()
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
-    _wrapper.children.add(html.LabelElement()
+    inner.children.add(html.LabelElement()
       ..text = name);
 
     _selector = html.SelectElement()
@@ -29,9 +29,9 @@ class CategoricalDropdownFilter {
         ..value = e
         ..text = e);
     });
-    _wrapper.children.add(_selector);
+    inner.children.add(_selector);
 
-    wrapper.children.add(_wrapper);
+    wrapper.children.add(inner);
   }
 
   set value(String x) => _selector.value = x;
@@ -39,7 +39,7 @@ class CategoricalDropdownFilter {
   String get value => _selector.value;
 
   void setAttribute(String name, String value) =>
-      _wrapper.setAttribute(name, value);
+      inner.setAttribute(name, value);
 
   /// Set the values for this dropdown in case the data wasn't available at
   /// initialization

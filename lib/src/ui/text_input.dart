@@ -4,6 +4,7 @@ import 'dart:html' as html;
 
 class TextInput {
   html.Element wrapper;
+  html.DivElement inner;
   html.TextInputElement _textInput;
   String name;
   String initialValue;
@@ -21,18 +22,18 @@ class TextInput {
     if (initialValue != null) aux = initialValue;
     allow ??= (String x) => true;
 
-    var _wrapper = html.DivElement()
+    inner = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
-    _wrapper.children.add(html.LabelElement()
+    inner.children.add(html.LabelElement()
       ..text = '$name');
     _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..value = aux;
     if (placeholder != null) _textInput.placeholder = placeholder;
     if (size != null) _textInput.size = size;
-    _wrapper.children.add(_textInput);
+    inner.children.add(_textInput);
 
-    wrapper.children.add(_wrapper);
+    wrapper.children.add(inner);
   }
 
   String get value {

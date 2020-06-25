@@ -66,7 +66,6 @@ class ElecCalcCfdApp {
 
     wrapper.children.add(_calculatorDiv);
     wrapper.children.add(_makeHotKeys());
-
   }
 
   void makeHtml() {

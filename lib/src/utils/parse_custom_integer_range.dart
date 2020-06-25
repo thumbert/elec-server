@@ -2,6 +2,7 @@ library utils.parse_custom_integer_range;
 
 /// Parse a custom positive integer range, similar to Chrome's custom pages
 /// print format e.g. '1-5, 8, 11-13', etc.
+/// Useful for UI's
 List<int> parseCustomIntegerRange(String x) {
   var rs = x.split(',').map((e) => e.trim());
   var out = <int>[];
