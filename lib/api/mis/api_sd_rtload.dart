@@ -2,7 +2,7 @@ library api.sd_rtload;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
@@ -11,12 +11,12 @@ import 'package:elec_server/src/utils/api_response.dart';
 
 @ApiClass(name: 'sd_rtload', version: 'v1')
 class SdRtload {
-  DbCollection coll;
+  mongo.DbCollection coll;
   Location location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sd_rtload';
 
-  SdRtload(Db db) {
+  SdRtload(mongo.Db db) {
     coll = db.collection(collectionName);
     location = getLocation('US/Eastern');
   }
@@ -123,6 +123,69 @@ class SdRtload {
     return ApiResponse()..result = json.encode(res);
   }
 
+  /// Return the monthly MWh for all assetId, all versions.
+  /// Start and end are months in yyyy-mm format.
+  @ApiMethod(path: 'monthly/start/{start}/end/{end}')
+  Future<ApiResponse> monthlyRtLoadAll(String start, String end) async {
+    start =  start.replaceAll('-', '');
+    end =  end.replaceAll('-', '');
+    var startM = Month(int.parse(start.substring(0,4)), int.parse(start.substring(4)));
+    var endM = Month(int.parse(end.substring(0,4)), int.parse(end.substring(4)));
+    var pipeline = [
+      {
+        '\$match': {
+          'date': {
+            '\$gte': startM.startDate.toString(),
+            '\$lte': endM.endDate.toString(),
+          },
+        }
+      },
+      // sum the hourly values
+      {
+        '\$project': {
+          '_id': 0,
+          'month': {'\$substr': ['\$date', 0, 7]},
+          'version': {'\$toString': '\$version'},
+          'Asset ID': '\$Asset ID',
+          'Load Reading': {'\$sum': '\$Load Reading'},
+          'Ownership Share': {'\$arrayElemAt': ['\$Ownership Share', 0]},
+          'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
+        }
+      },
+      // sum the daily values inside the month
+      {
+        '\$group': {
+          '_id': {
+            'month': '\$month',
+            'version': '\$version',
+            'Asset ID': '\$Asset ID',
+          },
+          'Load Reading': {'\$sum': '\$Load Reading'},
+          'Ownership Share': {'\$avg': '\$Ownership Share'},
+          'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'month': '\$_id.month',
+          'version': '\$_id.version',
+          'Asset ID': '\$_id.Asset ID',
+          'Load Reading': 1,
+          'Ownership Share': 1,
+          'Share of Load Reading': 1,
+        },
+      },
+      {
+        '\$sort': {
+          'month': 1,
+          'Asset ID': 1,
+        }
+      }
+    ];
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
 
 
 
