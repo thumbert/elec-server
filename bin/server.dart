@@ -4,6 +4,7 @@ import 'dart:io';
 //import 'package:logging/logging.dart';
 //import 'package:logging_handlers/server_logging_handlers.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
+import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:rpc/rpc.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -59,6 +60,7 @@ void registerApis() async {
 
   var db6 = Db('mongodb://$host/marks');
   await db6.open();
+  _apiServer.addApi(CurveIds(db6));
   _apiServer.addApi(ForwardMarks(db6));
 
 }

@@ -32,7 +32,9 @@ class ElecCalcCfdApp {
   static final DateFormat _dateFmt = DateFormat('ddMMMyy');
 
   ElecCalcCfdApp(this.wrapper,
-      {this.client, this.rootUrl = 'http://localhost:8080/'});
+      {this.client, this.rootUrl = 'http://localhost:8080/'}) {
+
+  }
 
   void _f2Refresh() {
     print(_calculator.term);
@@ -230,14 +232,16 @@ class ElecCalcCfdApp {
   }
 
   void setListeners() {
-    var _row2 = _row2s.first;
+    var row = _row2s.first;
 
-    _row2.bucketInput.onSelect((e) {
-      print('Hi');
+    row._regionInput.onSelect((e) {
+
+    });
+
+    row.bucketInput.onSelect((e) {
       var leg = _calculator.legs.first;
-      leg.bucket = Bucket.parse(_row2.bucketInput.value);
+      leg.bucket = Bucket.parse(row.bucketInput.value);
       _calculator.legs.first = leg;
-      print(leg.bucket);
     });
 
   }

@@ -6,11 +6,15 @@ enum CheckboxGroupOrientation { horizontal, vertical }
 
 class CheckboxGroup {
   html.Element wrapper;
-  html.Element _wrapper;
+  html.Element inner;
   List<html.CheckboxInputElement> _checkboxes;
   List<String> labels;
   List<bool> state;
-
+  /// If you want a label to the left of the checkboxes
+  String leftLabel;
+  /// space between the elements, in px
+  int marginRight;
+  
   CheckboxGroupOrientation orientation;
 
   /// A List of checkboxes with a text labels.
@@ -19,7 +23,8 @@ class CheckboxGroup {
   /// By default [state] is set to all elements [true] i.e. checked.
   /// Need to trigger an action onChange.
   CheckboxGroup(this.wrapper, this.labels,
-      {this.state, this.orientation = CheckboxGroupOrientation.horizontal}) {
+      {this.state, this.orientation = CheckboxGroupOrientation.horizontal, 
+      this.leftLabel = '', this.marginRight = 8}) {
     /// set all checkboxes to checked
     state ??= List.filled(labels.length, true);
 
@@ -30,16 +35,21 @@ class CheckboxGroup {
 
     _checkboxes = List<html.InputElement>(labels.length);
 
-    _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px;');
+    inner = html.DivElement()
+      ..setAttribute('style', 'margin-top: 8px;')
+      ..children.add(html.DivElement()
+        ..setAttribute('style', 'float: left; margin-right: 16px;')
+        ..text = leftLabel);
 
     if (orientation == CheckboxGroupOrientation.horizontal) {
       for (var i = 0; i < labels.length; i++) {
         _checkboxes[i] = html.CheckboxInputElement()
           ..id = '${wrapper.id}__cgl__${labels[i]}'
           ..checked = state[i];
-        _wrapper.children.add(_checkboxes[i]);
-        _wrapper.children.add(html.LabelElement()
-          ..setAttribute('style', 'margin-left: 8px; margin-right: 8px;')
+        inner.children.add(_checkboxes[i]);
+        inner.children.add(html.LabelElement()
+          ..setAttribute('style',
+              'margin-left: 8px; margin-right: ${marginRight}px;')
           ..text = labels[i]
           ..htmlFor = _checkboxes[i].id);
       }
@@ -48,11 +58,11 @@ class CheckboxGroup {
       // see radio_group_input
     }
 
-    wrapper.children.add(_wrapper);
+    wrapper.children.add(inner);
   }
 
   void setAttribute(String name, String value) =>
-      _wrapper.setAttribute(name, value);
+      inner.setAttribute(name, value);
 
   set checked(List<bool> x) {
     for (var i = 0; i < x.length; i++) {

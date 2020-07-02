@@ -94,7 +94,7 @@ void testsUi1() {
   var messageCheckboxGroup = querySelector('#checkbox-group-message')
     ..text = 'Select several';
   var checkboxGroup = CheckboxGroup(querySelector('#checkbox-group'),
-      ['Roger', 'Rafa', 'Novak', 'Sacha']);
+      ['Roger', 'Rafa', 'Novak', 'Sacha'], leftLabel: 'Player', marginRight: 40);
   checkboxGroup.onChange((e) {
     messageCheckboxGroup.text = 'You selected ${checkboxGroup.selected}';
   });

@@ -2,12 +2,16 @@ library api.sd_rtload;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:rpc/rpc.dart';
+import 'package:table/table.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/api_response.dart';
+import 'package:tuple/tuple.dart';
+import 'package:dama/dama.dart';
 
 @ApiClass(name: 'sd_rtload', version: 'v1')
 class SdRtload {
@@ -23,8 +27,7 @@ class SdRtload {
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201
   @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
-  Future<ApiResponse> rtload(
-      String assetId, String start, String end) async {
+  Future<ApiResponse> rtload(String assetId, String start, String end) async {
     var res = _rtloadQuery(assetId, start, end);
     var out = await _format(res);
     return ApiResponse()..result = json.encode(out);
@@ -51,7 +54,9 @@ class SdRtload {
           'date': '\$date',
           'version': {'\$toString': '\$version'},
           'Load Reading': {'\$sum': '\$Load Reading'},
-          'Ownership Share': {'\$arrayElemAt': ['\$Ownership Share', 0]},
+          'Ownership Share': {
+            '\$arrayElemAt': ['\$Ownership Share', 0]
+          },
           'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
         }
       },
@@ -65,11 +70,9 @@ class SdRtload {
     return ApiResponse()..result = json.encode(res);
   }
 
-
   //http://127.0.0.1:8080/sd_rtload/v1/start/20171201/end/20171201
   @ApiMethod(path: 'start/{start}/end/{end}')
-  Future<ApiResponse> rtloadAll(
-      String start, String end) async {
+  Future<ApiResponse> rtloadAll(String start, String end) async {
     var pipeline = [];
     pipeline.add({
       '\$match': {
@@ -93,12 +96,20 @@ class SdRtload {
   /// Return the daily MWh for all assetId, all versions.
   @ApiMethod(path: 'daily/start/{start}/end/{end}')
   Future<ApiResponse> dailyRtLoadAll(String start, String end) async {
-    var pipeline = [
+    var pipeline =
+        _pipelineAllAssetsVersionsDaily(Date.parse(start), Date.parse(end));
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
+  }
+
+  List<Map<String, dynamic>> _pipelineAllAssetsVersionsDaily(
+      Date start, Date end) {
+    return [
       {
         '\$match': {
           'date': {
-            '\$gte': Date.parse(start).toString(),
-            '\$lte': Date.parse(end).toString(),
+            '\$gte': start.toString(),
+            '\$lte': end.toString(),
           },
         }
       },
@@ -109,7 +120,9 @@ class SdRtload {
           'version': {'\$toString': '\$version'},
           'Asset ID': '\$Asset ID',
           'Load Reading': {'\$sum': '\$Load Reading'},
-          'Ownership Share': {'\$arrayElemAt': ['\$Ownership Share', 0]},
+          'Ownership Share': {
+            '\$arrayElemAt': ['\$Ownership Share', 0]
+          },
           'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
         }
       },
@@ -119,75 +132,43 @@ class SdRtload {
         }
       }
     ];
-    var res = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(res);
   }
 
   /// Return the monthly MWh for all assetId, all versions.
   /// Start and end are months in yyyy-mm format.
-  @ApiMethod(path: 'monthly/start/{start}/end/{end}')
-  Future<ApiResponse> monthlyRtLoadAll(String start, String end) async {
-    start =  start.replaceAll('-', '');
-    end =  end.replaceAll('-', '');
-    var startM = Month(int.parse(start.substring(0,4)), int.parse(start.substring(4)));
-    var endM = Month(int.parse(end.substring(0,4)), int.parse(end.substring(4)));
-    var pipeline = [
-      {
-        '\$match': {
-          'date': {
-            '\$gte': startM.startDate.toString(),
-            '\$lte': endM.endDate.toString(),
-          },
-        }
-      },
-      // sum the hourly values
-      {
-        '\$project': {
-          '_id': 0,
-          'month': {'\$substr': ['\$date', 0, 7]},
-          'version': {'\$toString': '\$version'},
-          'Asset ID': '\$Asset ID',
-          'Load Reading': {'\$sum': '\$Load Reading'},
-          'Ownership Share': {'\$arrayElemAt': ['\$Ownership Share', 0]},
-          'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
-        }
-      },
-      // sum the daily values inside the month
-      {
-        '\$group': {
-          '_id': {
-            'month': '\$month',
-            'version': '\$version',
-            'Asset ID': '\$Asset ID',
-          },
-          'Load Reading': {'\$sum': '\$Load Reading'},
-          'Ownership Share': {'\$avg': '\$Ownership Share'},
-          'Share of Load Reading': {'\$sum': '\$Share of Load Reading'},
-        }
-      },
-      {
-        '\$project': {
-          '_id': 0,
-          'month': '\$_id.month',
-          'version': '\$_id.version',
-          'Asset ID': '\$_id.Asset ID',
-          'Load Reading': 1,
-          'Ownership Share': 1,
-          'Share of Load Reading': 1,
-        },
-      },
-      {
-        '\$sort': {
-          'month': 1,
-          'Asset ID': 1,
-        }
-      }
-    ];
-    var res = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(res);
+  @ApiMethod(path: 'monthly/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> monthlyRtLoadSettlement(
+      String start, String end, int settlement) async {
+    // Note that you can't do the monthly aggregation on the Mongo side, because
+    // the version is different between days and doesn't match the settlement #.
+    // Have to use the daily query and aggregate it in dart.
+    start = start.replaceAll('-', '');
+    end = end.replaceAll('-', '');
+    var startM =
+        Month(int.parse(start.substring(0, 4)), int.parse(start.substring(4)));
+    var endM =
+        Month(int.parse(end.substring(0, 4)), int.parse(end.substring(4)));
+
+    var pipeline =
+        _pipelineAllAssetsVersionsDaily(startM.startDate, endM.endDate);
+    var data = await coll.aggregateToStream(pipeline).toList();
+    var res = getNthSettlement(data, (e) => Tuple2(e['date'], e['Asset ID']),
+        n: settlement);
+
+    var nest = Nest()
+      ..key((e) => (e['date'] as String).substring(0, 7))
+      ..key((e) => e['Asset ID'])
+      ..rollup((List xs) => {
+            'Load Reading': sum(xs.map((e) => e['Load Reading'])),
+            'Ownership Share': xs.first['Ownership Share'],
+            'Share of Load Reading':
+                sum(xs.map((e) => e['Share of Load Reading'])),
+          });
+
+    var aux = nest.map(res);
+    var out = flattenMap(aux, ['month', 'Asset ID']);
+    return ApiResponse()..result = json.encode(out);
   }
-
-
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/1485/start/20171201/end/20171201/csv
   @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}/csv')
@@ -219,8 +200,8 @@ class SdRtload {
     return out;
   }
 
-
-  Stream<Map<String,dynamic>> _rtloadQuery(String assetId, String start, String end) {
+  Stream<Map<String, dynamic>> _rtloadQuery(
+      String assetId, String start, String end) {
     var pipeline = [];
     pipeline.add({
       '\$match': {
@@ -239,8 +220,9 @@ class SdRtload {
     return coll.aggregateToStream(pipeline);
   }
 
-  Future<List<Map<String,dynamic>>> _format(Stream<Map<String,dynamic>> data) async {
-    var out = <Map<String,dynamic>>[];
+  Future<List<Map<String, dynamic>>> _format(
+      Stream<Map<String, dynamic>> data) async {
+    var out = <Map<String, dynamic>>[];
     var keys = <String>[
       'version',
       'hourBeginning',
@@ -263,8 +245,8 @@ class SdRtload {
     return out;
   }
 
-  Future<List<Map<String,dynamic>>> _format2(Stream<Map> data) async {
-    var out = <Map<String,dynamic>>[];
+  Future<List<Map<String, dynamic>>> _format2(Stream<Map> data) async {
+    var out = <Map<String, dynamic>>[];
     var keys = <String>[
       'version',
       'hourBeginning',
@@ -288,5 +270,4 @@ class SdRtload {
     }
     return out;
   }
-
 }
