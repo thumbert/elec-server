@@ -177,22 +177,6 @@ class ForwardMarks {
   }
 
 
-//  /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'.
-//  /// Strips should be a list of underscore separated terms.  If the curve
-//  /// is not defined for some months in the strip, ignore that strip in the
-//  /// response.
-//  @ApiMethod(
-//      path:
-//          'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}/strips/{strips}')
-//  Future<ApiResponse> getForwardCurveForBucketStrips(
-//      String curveId, String bucket, String asOfDate, String strips) async {
-//    var data = await _getForwardCurveBuckets(asOfDate, curveId, [bucket]);
-//    var _strips = strips.split('_');
-//    var out = await _calculateBucketsStrips(curveId, data, _strips);
-//    return ApiResponse()..result = json.encode(out);
-//  }
-
-
   /// Calculate the curve value for a list of strips, e.g. 'Jan19-Feb19_Q1,2020'
   /// Strips should be a list of semicolon separated terms.  If the curve
   /// is not defined for some months in the strip, ignore that strip in the
@@ -317,7 +301,7 @@ class ForwardMarks {
         try {
           var months = parseTerm(term.trim(), tzLocation: location)
               .splitLeft((dt) => Month.fromTZDateTime(dt));
-          var values = months.map((month) => data[bucket][(month as Month).toIso8601String()]);
+          var values = months.map((month) => data[bucket][month.toIso8601String()]);
           var hours = months.map((month) => bucketObj.countHours(month));
           if (values.any((e) => e == null)) continue;
           one[term] = weightedMean(values, hours);

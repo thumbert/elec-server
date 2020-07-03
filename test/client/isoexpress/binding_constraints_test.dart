@@ -6,7 +6,7 @@ import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/client/isoexpress/binding_constraints.dart';
 
-tests() async {
+void tests() async {
   var location = getLocation('US/Eastern');
   var api = BindingConstraintsApi(Client());
   group('API binding constraints:', () {
@@ -33,7 +33,7 @@ tests() async {
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   await tests();
 }

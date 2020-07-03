@@ -36,6 +36,7 @@ void main() async {
   var client = Client();
   var rootUrl = 'http://localhost:8080/';
 
+
   var wrapper = querySelector('#wrapper-elec-calc-cfd');
   var app = ElecCalcCfdApp(wrapper, client: client, rootUrl: rootUrl)
     ..template = _template1();

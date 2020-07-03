@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:rpc/rpc.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
@@ -33,17 +34,16 @@ const String host = '127.0.0.1';
 
 void registerApis() async {
 
-  var db2 = Db('mongodb://$host/isone');
-  await db2.open();
-  _apiServer.addApi(ApiPtids(db2));
+  DbProd();
+  await DbProd.isone.open();
+  _apiServer.addApi(ApiPtids(DbProd.isone));
 //  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
 
-  var db3 = Db('mongodb://$host/isoexpress');
-  await db3.open();
-  _apiServer.addApi(DaLmp(db3));
-  _apiServer.addApi(BindingConstraints(db3));
-  _apiServer.addApi(DaEnergyOffers(db3));
-  _apiServer.addApi(RegulationRequirement(db3));
+  await DbProd.isoexpress.open();
+  _apiServer.addApi(DaLmp(DbProd.isoexpress));
+  _apiServer.addApi(BindingConstraints(DbProd.isoexpress));
+  _apiServer.addApi(DaEnergyOffers(DbProd.isoexpress));
+  _apiServer.addApi(RegulationRequirement(DbProd.isoexpress));
 
 //  _apiServer.addApi(SccReport(db3) );
 //  _apiServer.addApi(DaDemandBids(db3) );
@@ -58,10 +58,9 @@ void registerApis() async {
 //  await db5.open();
 //  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
 
-  var db6 = Db('mongodb://$host/marks');
-  await db6.open();
-  _apiServer.addApi(CurveIds(db6));
-  _apiServer.addApi(ForwardMarks(db6));
+  await DbProd.marks.open();
+  _apiServer.addApi(CurveIds(DbProd.marks));
+  _apiServer.addApi(ForwardMarks(DbProd.marks));
 
 }
 

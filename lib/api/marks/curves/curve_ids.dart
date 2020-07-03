@@ -20,34 +20,70 @@ class CurveIds {
   }
 
   /// Get all the existing curve ids in the database, sorted
-  @ApiMethod(path: 'all')
+  @ApiMethod(path: 'curveIds')
   Future<List<String>> getCurveIds() async {
     var aux = await coll.distinct('curveId');
     var res = <String>[...aux['values']];
     return res..sort();
   }
 
-  /// Get all the unique regions, sorted
-  @ApiMethod(path: 'regions')
-  Future<List<String>> getRegions() async {
-    var aux = await coll.distinct('region');
+  /// Get all the unique commodities, sorted
+  @ApiMethod(path: 'commodities')
+  Future<List<String>> getCommodities() async {
+    var aux = await coll.distinct('commodity');
     var res = <String>[...aux['values']];
     return res..sort();
   }
 
-  /// Get all the serviceTypes for one region, sorted
-  @ApiMethod(path: 'region/{region}/serviceTypes')
-  Future<List<String>> getServiceTypesForRegion(String region) async {
+  /// For a given commodity, get all the unique regions, sorted
+  @ApiMethod(path: 'commodity/{commodity}/regions')
+  Future<List<String>> getRegions(String commodity) async {
     var pipeline = [
       {
         '\$match': {
-          'region': {'\$eq': region},
+          'commodity': {'\$eq': commodity},
+        }
+      },
+      {
+        '\$group': {
+          '_id': {'region': '\$region'},
         }
       },
       {
         '\$project': {
           '_id': 0,
-          'serviceType': 1,
+          'region': '\$_id.region',
+        }
+      },
+      {
+        '\$sort': {'region': 1},
+      },
+    ];
+    return await coll
+        .aggregateToStream(pipeline)
+        .map((e) => e['region'] as String)
+        .toList();
+  }
+
+  /// For a given commodity and region, get all the serviceTypes, sorted
+  @ApiMethod(path: 'commodity/{commodity}/region/{region}/serviceTypes')
+  Future<List<String>> getServiceTypes(String commodity, String region) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'commodity': {'\$eq': commodity},
+          'region': {'\$eq': region},
+        }
+      },
+      {
+        '\$group': {
+          '_id': {'serviceType': '\$serviceType'},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'serviceType': '\$_id.serviceType',
         }
       },
       {
@@ -60,12 +96,13 @@ class CurveIds {
         .toList();
   }
 
-  @ApiMethod(path: 'region/{region}/serviceType/{serviceType}')
-  Future<ApiResponse> getCurveIdsForRegionServiceType(String region,
-      String serviceType) async {
+  /// Get all the electricity documents for a given region and serviceType
+  @ApiMethod(path: 'commodity/electricity/region/{region}/serviceType/{serviceType}')
+  Future<ApiResponse> getElectricityDocuments(String region, String serviceType) async {
     var pipeline = [
       {
         '\$match': {
+          'commodity': {'\$eq': 'electricity'},
           'region': {'\$eq': region},
           'serviceType': {'\$eq': serviceType},
         }
@@ -75,54 +112,16 @@ class CurveIds {
           '_id': 0,
         }
       },
-    ];
-    var aux = await coll.aggregateToStream(pipeline);
-//        .toList();
-    return ApiResponse()..result = json.encode(aux);
-  }
-
-
-
-  /// Get all the curveIds that match a given string pattern.
-  /// For example all curves that have 'da' or 'lmp' in the curveId.
-  @ApiMethod(path: 'curveIds/pattern/{pattern}')
-  Future<List<String>> getCurveIdsContaining(String pattern) async {
-    var aux = await coll.distinct('curveId');
-    var res = <String>[
-      ...(aux['values'] as List).where((e) => e.contains(pattern)),
-    ];
-    return res..sort();
-  }
-
-
-
-
-  Future<Map<String,dynamic>> _getForwardCurve(
-      String asOfDate, String curveId) async {
-    var pipeline = [
       {
-        '\$match': {
-          'curveId': {'\$eq': curveId},
-          'fromDate': {'\$lte': Date.parse(asOfDate).toString()},
-        }
-      },
-      {
-        '\$sort': {'fromDate': -1},
-      },
-      {
-        '\$limit': 1,
-      },
-      {
-        '\$project': {
-          '_id': 0,
-          'fromDate': 0,
-          'curveId': 0,
-        }
+        '\$sort': {'curve': 1},
       },
     ];
-    var aux = await coll.aggregateToStream(pipeline).toList();
-    return aux.first;
+    var out = await coll
+        .aggregateToStream(pipeline)
+        .toList();
+    return ApiResponse()..result = json.encode(out);
   }
+
 
 
 

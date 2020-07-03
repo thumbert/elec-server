@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
-import 'package:elec_server/src/db/marks/forward_marks.dart';
+import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:elec_server/src/db/marks/composite_curves.dart';
 import 'package:test/test.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';

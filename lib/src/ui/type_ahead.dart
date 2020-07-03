@@ -3,30 +3,28 @@ import 'dart:html';
 /// Port of https://www.w3schools.com/howto/howto_js_autocomplete.asp
 
 class TypeAhead {
-
   DivElement wrapper;
   InputElement _input;
   List<String> values;
-  /// how many choices to show when the input is empty.
-  int showOnEmpty;
 
+  /// the max height of the dropdown in px
+  int maxHeight;
   String _value;
 
-  DivElement _al;  // autocomplete-list
+  DivElement _al; // the autocomplete-list
   int _currentFocus;
 
-  TypeAhead(this.wrapper, this.values, {String placeholder = '',
-    this.showOnEmpty = 5}) {
+  TypeAhead(this.wrapper, this.values,
+      {String placeholder = '', this.maxHeight = 300}) {
     _input = InputElement(type: 'text')
       ..id = '${wrapper.id}-input'
       ..placeholder = placeholder;
 
-
     // a div element that will hold all the items
     _al = DivElement()
       ..setAttribute('id', '${_input.id}-typeahead-list')
-      ..setAttribute('class', 'typeahead-items');
-
+      ..setAttribute('class', 'typeahead-items')
+      ..setAttribute('style', 'max-height: ${maxHeight}px; overflow-y: auto;');
 
     _input.onInput.listen((e) {
       _value = _input.value;
@@ -35,21 +33,32 @@ class TypeAhead {
 
       Iterable<String> candidates;
       if (_value == '') {
-        if (values.length > showOnEmpty) {
-          candidates = values.take(showOnEmpty);
-        } else {
-          candidates = values;
-        }
+        candidates = values;
       } else {
         candidates = values
-            .where((e) => e.toUpperCase().startsWith(_value.toUpperCase()));
+//            .where((e) => e.toUpperCase().startsWith(_value.toUpperCase()));
+            .where((e) => e.toUpperCase().contains(_value.toUpperCase()));
       }
 
       for (var value in candidates) {
-        var _b = DivElement();
-        _b.innerHtml = '<strong>${value.substring(0, _value.length)}</strong>';
-        _b.innerHtml += value.substring(_value.length);
+        // highlight the match with <strong>
+        var regex = RegExp(_value, caseSensitive: false);
+        var matches = regex.allMatches(value);
+        var splits = value.split(regex);
+        var innerHtml = '';
+        for (var s=0; s<splits.length-1; s++) {
+          innerHtml += '${splits[s]}<strong>${matches.elementAt(s).group(0)}</strong>';
+        }
+        innerHtml += '${splits.last}';
+        var _b = DivElement()..innerHtml = innerHtml;
+//        _b.innerHtml = '<strong>${value.substring(0, _value.length)}</strong>';
+//        _b.innerHtml += value.substring(_value.length);
         _b.innerHtml += '<input type="hidden" value="${value}">';
+        _b.onClick.listen((e) {
+          _input.value = value;
+          _closeAllLists();
+          _input.select();
+        });
         _al.children.add(_b);
       }
     });
@@ -86,7 +95,8 @@ class TypeAhead {
 
   String get value => _input.value;
 
-  void setAttribute(String name, String value) => _input.setAttribute(name, value);
+  void setAttribute(String name, String value) =>
+      _input.setAttribute(name, value);
 
   set value(String x) => _input.value = x;
 
@@ -104,7 +114,7 @@ class TypeAhead {
   }
 
   void _removeActive(List<DivElement> xs) {
-    for (var i=0; i<xs.length; i++) {
+    for (var i = 0; i < xs.length; i++) {
       xs[i].classes.remove('typeahead-active');
     }
   }

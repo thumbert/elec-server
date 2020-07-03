@@ -1,84 +1,40 @@
 [
   {
-    "curveId": "isone_arr_maine",
-    "iso": "isone",
-    "serviceType": "arr",
-    "curve": "maine",
-    "description": "Credit to load"
-  },
-  {
-    "curveId": "isone_arr_nh",
-    "iso": "isone",
-    "serviceType": "arr",
-    "curve": "nh",
-    "description": "Credit to load"
-  },
-  {
-    "curveId": "isone_arr_ct",
-    "iso": "isone",
-    "serviceType": "arr",
-    "curve": "ct",
-    "description": "Credit to load"
-  },
-  {
-    "curveId": "isone_arr_ri",
-    "iso": "isone",
-    "serviceType": "arr",
-    "curve": "ri",
-    "description": "Credit to load"
-  },
-  {
-    "curveId": "isone_arr_sema",
-    "iso": "isone",
-    "serviceType": "arr",
-    "curve": "sema",
-    "description": "Credit to load"
-  },
-  {
-    "curveId": "isone_arr_wcma",
-    "iso": "isone",
-    "serviceType": "arr",
-    "curve": "wcma",
-    "description": "Credit to load"
-  },
-  {
-    "curveId": "isone_arr_nema",
-    "iso": "isone",
-    "serviceType": "arr",
-    "curve": "nema",
-    "description": "Credit to load"
-  },
-  {
     "curveId": "isone_fwdres_ct",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "fwdres",
     "curve": "ct",
     "description": "Charges to load"
   },
   {
     "curveId": "isone_fwdres_nema",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "fwdres",
     "curve": "nema",
     "description": "Charges to load"
   },
   {
     "curveId": "isone_fwdres_rop",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "fwdres",
     "curve": "rop",
     "description": "Charges to load"
   },
   {
     "curveId": "isone_marginalloss",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "marginalloss",
     "curve": "pool",
     "description": "Credit to load"
   },
   {
     "curveId": "isone_opres_da_pool",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "opres",
     "market": "da",
     "curve": "pool",
@@ -86,7 +42,8 @@
   },
   {
     "curveId": "isone_opres_rt_ct",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "opres",
     "market": "rt",
     "curve": "ct",
@@ -94,7 +51,8 @@
   },
   {
     "curveId": "isone_opres_rt_nema",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "opres",
     "market": "nema",
     "curve": "rop",
@@ -102,7 +60,8 @@
   },
   {
     "curveId": "isone_opres_rt_rop",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "opres",
     "market": "rt",
     "curve": "rop",
@@ -110,7 +69,8 @@
   },
   {
     "curveId": "isone_regulation",
-    "iso": "isone",
+    "commodity": "electricity",
+    "region": "isone",
     "serviceType": "regulation",
     "curve": "pool",
     "description": "Charges to RT load"

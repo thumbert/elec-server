@@ -7,8 +7,10 @@
 
 //use marks
 //db.curve_ids.dropIndexes()
-//db.curve_ids.createIndex({'curveId': 1})
+//db.curve_ids.createIndex({'curveId': 1}, {'unique': true})
+//db.curve_ids.createIndex({'commodity': 1})
 //db.curve_ids.createIndex({
+//    'commodity': 1,
 //    'region': 1,
 //    'serviceType': 1})
 

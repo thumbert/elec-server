@@ -37,7 +37,7 @@ class CheckboxGroup {
 
     inner = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px;')
-      ..children.add(html.DivElement()
+      ..children.add(html.LabelElement()
         ..setAttribute('style', 'float: left; margin-right: 16px;')
         ..text = leftLabel);
 

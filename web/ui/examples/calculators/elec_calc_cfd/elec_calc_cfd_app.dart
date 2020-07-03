@@ -33,7 +33,6 @@ class ElecCalcCfdApp {
 
   ElecCalcCfdApp(this.wrapper,
       {this.client, this.rootUrl = 'http://localhost:8080/'}) {
-
   }
 
   void _f2Refresh() {
