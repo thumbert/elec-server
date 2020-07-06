@@ -5,8 +5,8 @@ import 'package:http/http.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/client/other/ptids.dart';
 
-tests() async {
-  var api = PtidsApi(new Client());
+void tests() async {
+  var api = PtidsApi(Client());
   group('API ptid table:', () {
     test('get current ptid table', () async {
       var data = await api.getPtidTable();
@@ -20,7 +20,7 @@ tests() async {
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   await tests();
 }

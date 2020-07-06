@@ -46,7 +46,7 @@ void insertData() async {
 
 void main() async {
 
-//  await insertData();
+  await insertData();
 
-  await tests();
+//  await tests();
 }

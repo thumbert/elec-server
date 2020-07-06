@@ -19,6 +19,7 @@ List<Map<String, dynamic>> getCurves() {
   for (var x in xs) {
     x['commodity'] = 'electricity';
     x['region'] = 'isone';
+    x['tzLocation'] = 'America/New_York';
   }
 
   return xs;

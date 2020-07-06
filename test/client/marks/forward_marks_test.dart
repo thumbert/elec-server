@@ -11,7 +11,7 @@ import 'package:timezone/standalone.dart';
 void tests(String rootUrl) async {
   group('ForwardMarks client tests:', () {
     var client = ForwardMarks(Client(), rootUrl: rootUrl);
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('get mh 5x16 as of 5/29/2020', () async {
       var curveId = 'isone_energy_4000_da_lmp';
       var mh5x16 = await client.getForwardCurveForBucket(
@@ -23,6 +23,6 @@ void tests(String rootUrl) async {
 }
 
 void main() async {
-  initializeTimeZones();
+  await initializeTimeZones();
   await tests('http://localhost:8080/');
 }

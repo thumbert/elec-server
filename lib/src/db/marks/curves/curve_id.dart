@@ -7,6 +7,14 @@ import 'package:elec_server/src/db/config.dart';
 class CurveIdArchive {
   ComponentConfig dbConfig;
 
+  final _mustHaveKeys = <String>{
+    'curveId',
+    'commodity',  // electricity, ng, etc.
+    'unit',       // $/MWh, etc.
+    'tzLocation', // America/New_York, etc.
+    'buckets'     // ['7x24'], ['5x16', '2x16H', '7x8'], etc.
+  };
+
   /// Keep track of curve details, e.g. region, serviceType, location, children,
   /// and the rule for composing it
   CurveIdArchive({this.dbConfig}) {
@@ -18,12 +26,16 @@ class CurveIdArchive {
 
   mongo.Db get db => dbConfig.db;
 
-  /// Insert a list of documents into the db.
+  /// Insert/Update a list of documents into the db.
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(0);
     try {
-          await dbConfig.coll.insertAll(data);
-          print('--->  Inserted curveIds successfully');
+      for (var x in data) {
+        checkDocument(x);
+        await dbConfig.coll.remove({'curveId': x['curveId']});
+        await dbConfig.coll.insert(x);
+        print('--->  Inserted curveId ${x['curveId']} successfully');
+      }
     } catch (e) {
       print('XXX ' + e.toString());
       return Future.value(1);
@@ -31,13 +43,20 @@ class CurveIdArchive {
     return Future.value(0);
   }
 
+  /// Check if a document is valid.
+  void checkDocument(Map<String, dynamic> xs) {
+    var keys = xs.keys.toSet();
+    if (!keys.containsAll(_mustHaveKeys)) {
+      throw 'Missing one of must have keys: $_mustHaveKeys';
+    }
+  }
+
   void setup() async {
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'curveId': 1}, unique: true);
-    await dbConfig.db
-        .createIndex(dbConfig.collectionName, keys: {
-          'region': 1,
-          'serviceType': 1,
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {
+      'region': 1,
+      'serviceType': 1,
     });
   }
 }

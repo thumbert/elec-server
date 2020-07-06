@@ -27,6 +27,41 @@ class CurveIds {
     return res..sort();
   }
 
+  /// Get all the existing curve ids in the database that match the pattern,
+  /// sorted
+  @ApiMethod(path: 'curveIds/pattern/{pattern}')
+  Future<List<String>> getCurveIdsWithPattern(String pattern) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'curveId': {'\$regex': pattern},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'curveId': '\$curveId',
+        }
+      },
+      {
+        '\$sort': {'curveId': 1},
+      },
+    ];
+    return await coll
+        .aggregateToStream(pipeline)
+        .map((e) => e['curveId'] as String)
+        .toList();
+  }
+
+
+  /// Get the document associated with this curveId
+  @ApiMethod(path: 'curveId/{curveId}')
+  Future<ApiResponse> getCurveId(String curveId) async {
+    var aux = await coll.findOne({'curveId': curveId});
+    return ApiResponse()..result = json.encode(aux);
+  }
+
+
   /// Get all the unique commodities, sorted
   @ApiMethod(path: 'commodities')
   Future<List<String>> getCommodities() async {
