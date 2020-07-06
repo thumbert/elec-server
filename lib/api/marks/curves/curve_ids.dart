@@ -21,7 +21,7 @@ class CurveIds {
 
   /// Get all the existing curve ids in the database, sorted
   @ApiMethod(path: 'curveIds')
-  Future<List<String>> getCurveIds() async {
+  Future<List<String>> curveIds() async {
     var aux = await coll.distinct('curveId');
     var res = <String>[...aux['values']];
     return res..sort();
@@ -30,7 +30,7 @@ class CurveIds {
   /// Get all the existing curve ids in the database that match the pattern,
   /// sorted
   @ApiMethod(path: 'curveIds/pattern/{pattern}')
-  Future<List<String>> getCurveIdsWithPattern(String pattern) async {
+  Future<List<String>> curveIdsWithPattern(String pattern) async {
     var pipeline = [
       {
         '\$match': {
@@ -55,12 +55,23 @@ class CurveIds {
 
 
   /// Get the document associated with this curveId
-  @ApiMethod(path: 'curveId/{curveId}')
+  @ApiMethod(path: 'data/curveId/{curveId}')
   Future<ApiResponse> getCurveId(String curveId) async {
     var aux = await coll.findOne({'curveId': curveId});
     return ApiResponse()..result = json.encode(aux);
   }
 
+  /// Get the documents associated with these curveIds.  Multiple curveIds are
+  /// separated by |.
+  @ApiMethod(path: 'data/curveIds/{curveIds}')
+  Future<ApiResponse> getCurveIds(String curveIds) async {
+    var _ids = curveIds.split('|');
+    var query = mongo.where
+      ..oneFrom('curveId', _ids)
+      ..excludeFields(['_id']);
+    var aux = await coll.find(query).toList();
+    return ApiResponse()..result = json.encode(aux);
+  }
 
   /// Get all the unique commodities, sorted
   @ApiMethod(path: 'commodities')
@@ -132,7 +143,7 @@ class CurveIds {
   }
 
   /// Get all the electricity documents for a given region and serviceType
-  @ApiMethod(path: 'commodity/electricity/region/{region}/serviceType/{serviceType}')
+  @ApiMethod(path: 'data/commodity/electricity/region/{region}/serviceType/{serviceType}')
   Future<ApiResponse> getElectricityDocuments(String region, String serviceType) async {
     var pipeline = [
       {

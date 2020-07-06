@@ -2,7 +2,6 @@ library client.marks.curves.curve_id;
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:timezone/timezone.dart';
 
 class CurveIdClient {
   String rootUrl;
@@ -52,7 +51,7 @@ class CurveIdClient {
   /// Get all electricity documents for a region, serviceType.
   Future<List<Map<String, dynamic>>> electricityDocuments(
       String region, String serviceType) async {
-    var _url = rootUrl + servicePath + 'commodity/electricity/region'
+    var _url = rootUrl + servicePath + 'data/commodity/electricity/region'
       '/$region/serviceType/$serviceType';
     var _response = await http.get(_url);
     var data = json.decode(_response.body);
@@ -61,11 +60,19 @@ class CurveIdClient {
 
   /// Get one curveId document
   Future<Map<String, dynamic>> getCurveId(String curveId) async {
-    var _url = rootUrl + servicePath + 'curveId/$curveId';
+    var _url = rootUrl + servicePath + 'data/curveId/$curveId';
     var _response = await http.get(_url);
     var data = json.decode(_response.body);
     return json.decode(data['result']) as Map<String, dynamic>;
   }
 
+  /// Get several curveId documents
+  Future<List<Map<String, dynamic>>> getCurveIds(List<String> curveIds) async {
+    var _ids = curveIds.join('|');
+    var _url = rootUrl + servicePath + 'data/curveIds/$_ids';
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    return (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
+  }
 
 }

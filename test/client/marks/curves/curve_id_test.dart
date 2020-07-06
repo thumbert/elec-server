@@ -18,9 +18,16 @@ void tests(String rootUrl) async {
       var ids = await client.curveIds(pattern: 'opres_rt');
       expect(ids.length, 8);
     });
-    test('get all curveId: isone_energy_4000_da_lmp', () async {
+    test('get data for one curveId', () async {
       var xs = await client.getCurveId('isone_energy_4000_da_lmp');
       expect(xs.keys.length > 11, true);
+    });
+    test('get data for several curveIds', () async {
+      var xs = await client.getCurveIds([
+        'isone_energy_4000_da_lmp',
+        'isone_energy_4001_da_lmp',
+      ]);
+      expect(xs.length, 2);
     });
     test('get all commodities', () async {
       var commods = await client.commodities();
