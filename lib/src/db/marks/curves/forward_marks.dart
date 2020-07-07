@@ -36,7 +36,7 @@ class ForwardMarksArchive {
   /// <p>Document format:
   /// {
   ///   'fromDate': '2018-12-14',
-  ///   'version': '2018-12-14T10:12:47.000-0500',
+  ///   'version': '2018-12-14T10:12:47.000-0500',  -- not supported yet
   ///   'curveId': 'elec_isone_4011_lmp_da',
   ///   'months': ['2019-01', '2019-02', ...],
   ///   'buckets': {
@@ -52,12 +52,16 @@ class ForwardMarksArchive {
         checkDocument(newDocument);
         var fromDate = newDocument['fromDate'];
         var curveId = newDocument['curveId'];
-        // get the existing document
+        // get the last document with the curve
         var document = await _getForwardCurve(fromDate, curveId);
         if (needToInsert(document, newDocument)) {
+          if (document['fromDate'] == fromDate) {
+            // fromDate is already in the database, so remove the old document
+            await dbConfig.coll.remove({'fromDate': fromDate, 'curveId': curveId});
+          }
           await dbConfig.coll.insert(newDocument);
           print(
-              '--->  Inserted forward marks for ${curveId} from ${fromDate} successfully');
+              '--->  Inserted forward marks for ${curveId} for ${fromDate} successfully');
         }
       }
     } catch (e) {

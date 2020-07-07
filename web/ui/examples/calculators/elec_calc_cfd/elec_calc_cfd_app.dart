@@ -3,6 +3,7 @@ library ui.examples.calculators.elec_calc_cfd.elec_calc_cfd_app;
 import 'dart:html' as html;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
+import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:elec_server/src/ui/type_ahead.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
@@ -15,8 +16,8 @@ class ElecCalcCfdApp {
   html.DivElement wrapper;
   Client client;
   String rootUrl;
-
   ElecCalculatorCfd _calculator;
+  CurveIdClient _curveIdClient;
 
   html.DivElement _calculatorDiv,
       _hasCustomDiv,
@@ -33,6 +34,7 @@ class ElecCalcCfdApp {
 
   ElecCalcCfdApp(this.wrapper,
       {this.client, this.rootUrl = 'http://localhost:8080/'}) {
+    _curveIdClient = CurveIdClient(client, rootUrl: rootUrl);
   }
 
   void _f2Refresh() {

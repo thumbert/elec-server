@@ -3,7 +3,7 @@ import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
-import '../test/db/marks/marks_2020-05-29.dart';
+import '../test/db/marks/marks_special_days.dart';
 
 /// Create the MongoDb from scratch to pass all tests.  This script is useful
 /// if you update the MongoDb installation and all the data is erased.

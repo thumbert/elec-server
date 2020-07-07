@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:timezone/standalone.dart';
 
-import 'marks_2020-05-29.dart';
+import 'marks_special_days.dart';
 
 /// Get the curves that are directly marked
 List<String> getMarkedCurveIds() {
@@ -230,7 +230,7 @@ void tests() async {
 void repopulateDb() async {
   var archive = ForwardMarksArchive();
   await archive.db.open();
-  await archive.db.dropCollection(archive.dbConfig.collectionName);
+  //await archive.db.dropCollection(archive.dbConfig.collectionName);
   await insertData(archive);
 //  await archive.setup();
   await archive.db.close();
@@ -243,8 +243,8 @@ void repopulateDb() async {
 void insertMarks() async {
   var archive = ForwardMarksArchive();
   await archive.db.open();
-  var data = marks20200529();
-  await archive.insertData(data);
+  await archive.insertData(marks20200529());
+  await archive.insertData(marks20200706());
   await archive.db.close();
 }
 
@@ -252,8 +252,8 @@ void insertMarks() async {
 void main() async {
   await initializeTimeZone();
 //  await repopulateDb();
-//  await insertMarks();
+  await insertMarks();
 
-  await tests();
+//  await tests();
 
 }
