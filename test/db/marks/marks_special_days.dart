@@ -17,8 +17,8 @@ List<Map<String, dynamic>> marks20200529() {
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4000_da_lmp',
-      'months': months,
-      'buckets': {
+      'monthly': {
+        'term': months,
         '5x16': [
           22.2,
           25.4,
@@ -164,13 +164,20 @@ List<Map<String, dynamic>> marks20200706() {
       .splitLeft((dt) => Month.fromTZDateTime(dt))
       .map((e) => e.toIso8601String())
       .toList();
+  var days = Term.parse('7Jul20-31Jul20', location).days();
 
   return <Map<String, dynamic>>[
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4000_da_lmp',
-      'months': months,
-      'buckets': {
+      'daily': {
+        'term': days,
+        '5x16': {},
+        '2x16H': {},
+        '7x8': {},
+      },
+      'monthly': {
+        'term': months,
         '5x16': [
           26.8,
           25.3,

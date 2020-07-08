@@ -21,10 +21,30 @@ class ForwardMarks {
   ForwardMarks(http.Client client,
       {this.rootUrl = 'http://localhost:8080/', this.servicePath = 'forward_marks/v1/'});
 
+//  /// Get forward marks for one curve all buckets.
+//  Future<TimeSeries<Map<Bucket,num>>> getForwardCurve(String curveId,
+//      Date asOfDate, {Location tzLocation}) async {
+//
+//    var _url = rootUrl + servicePath +
+//        'curveId/' +
+//        commons.Escaper.ecapeVariable('${curveId}') +
+//        '/asOfDate/${asOfDate.toString()}';
+//
+//    var _response = await http.get(_url);
+//    var data = json.decode(_response.body);
+//    var aux = json.decode(data['result']);
+//    var out = TimeSeries<Map<Bucket,num>>();
+//    for (var e in aux.entries) {
+//      out.add(IntervalTuple(Month.parse(e.key, location: tzLocation, fmt: _isoFmt), e.value));
+//    }
+//    return out;
+//  }
+
+
   /// Get forward marks for one curve, one bucket.
   Future<MonthlyCurve> getForwardCurveForBucket(String curveId,
       Bucket bucket, Date asOfDate, {Location tzLocation}) async {
-
+    tzLocation ??= asOfDate.location;
     var _url = rootUrl + servicePath +
         'curveId/' +
         commons.Escaper.ecapeVariable('${curveId}') +
@@ -41,17 +61,20 @@ class ForwardMarks {
     return MonthlyCurve(bucket, out);
   }
 
-
-
   /// Get marks for one curve, one asOfDate, all buckets.
-  Future<List<Map<String,dynamic>>> getForwardCurve(String curveId, Date asOfDate) async {
-    var _url = rootUrl + servicePath + 'asOfDate/${asOfDate.toString()}' +
-        '/curveId/' +
-        commons.Escaper.ecapeVariable('${curveId.toString()}');
-
+  Future<TimeSeries<Map<Bucket,num>>> getForwardCurve(String curveId,
+      Date asOfDate, {Location tzLocation}) async {
+    tzLocation ??= asOfDate.location;
+    var _url = rootUrl + servicePath +
+        'curveId/' +
+        commons.Escaper.ecapeVariable('${curveId.toString()}') +
+      '/asOfDate/${asOfDate.toString()}';
     var _response = await http.get(_url);
     var data = json.decode(_response.body);
-    return (json.decode(data['result']) as List).cast<Map<String,dynamic>>();
+    var aux = (json.decode(data['result']) as Map);
+
+
+    return [];
   }
 
 

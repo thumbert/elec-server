@@ -19,6 +19,14 @@ void tests(String rootUrl) async {
           tzLocation: location);
       expect(mh5x16.domain, Term.parse('Jun20-Dec21', location).interval);
     });
+    test('get mh curve as of 5/29/2020', () async {
+      var curveId = 'isone_energy_4000_da_lmp';
+      var res = await client.getForwardCurve(
+          curveId, Date(2020, 5, 29), tzLocation: location);
+      expect(true, true);
+    });
+
+
   });
 }
 
