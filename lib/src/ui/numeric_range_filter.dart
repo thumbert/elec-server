@@ -86,7 +86,7 @@ class NumericRangeFilter {
   }
 
   /// trigger a change when either one of the two inputs change
-  onChange(Function x) {
+  void onChange(Function x) {
     _min.onChange.listen(x);
     _max.onChange.listen(x);
   }

@@ -144,9 +144,10 @@ class ForwardMarks {
   /// Deal with spreads to hubs or composite curves (addition and multiplication).
 
   /// Get the forward curve as of a given date.  Return all marked buckets.
-  @ApiMethod(path: 'curveId/{curveId}/asOfDate/{asOfDate}')
-  Future<ApiResponse> getForwardCurve(String curveId, String asOfDate) async {
-    var aux = await _getForwardCurve(asOfDate, curveId);
+  @ApiMethod(path: 'curveId/{curveId}/asOfDate/{asOfDate}/markType/{markType}')
+  Future<ApiResponse> getForwardCurve(String curveId, String asOfDate,
+      String markType) async {
+    var aux = await _getForwardCurveForMarkType(asOfDate, curveId, markType);
     return ApiResponse()..result = json.encode(aux);
   }
 
@@ -155,10 +156,10 @@ class ForwardMarks {
   /// If the bucket doesn't exist in the database, calculate it
   /// based on the curveDefinitions, for example calculate the offpeak and
   /// 7x24 bucket.
-  @ApiMethod(path: 'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}')
+  @ApiMethod(path: 'curveId/{curveId}/bucket/{bucket}/asOfDate/{asOfDate}/markType/{markType}')
   Future<ApiResponse> getForwardCurveForBucket(
-      String curveId, String bucket, String asOfDate) async {
-    var data = await _getForwardCurveBuckets(asOfDate, curveId, [bucket]);
+      String curveId, String bucket, String asOfDate, String markType) async {
+    var data = await _getForwardCurveBuckets(asOfDate, curveId, [bucket], markType);
     return ApiResponse()..result = json.encode(data[bucket]);
   }
 
@@ -168,11 +169,11 @@ class ForwardMarks {
   /// If the bucket doesn't exist in the database, calculate it
   /// based on the curveDefinitions, for example calculate the offpeak and
   /// 7x24 bucket.
-  @ApiMethod(path: 'curveId/{curveId}/buckets/{buckets}/asOfDate/{asOfDate}')
+  @ApiMethod(path: 'curveId/{curveId}/buckets/{buckets}/asOfDate/{asOfDate}/markType/{markType}')
   Future<ApiResponse> getForwardCurveForBuckets(
-      String curveId, String buckets, String asOfDate) async {
+      String curveId, String buckets, String asOfDate, String markType) async {
     var _buckets = buckets.split('_');
-    var data = await _getForwardCurveBuckets(asOfDate, curveId, _buckets);
+    var data = await _getForwardCurveBuckets(asOfDate, curveId, _buckets, markType);
     return ApiResponse()..result = json.encode(data);
   }
 
@@ -185,12 +186,12 @@ class ForwardMarks {
   ///
   @ApiMethod(
       path:
-      'curveId/{curveId}/buckets/{buckets}/asOfDate/{asOfDate}/strips/{strips}')
+      'curveId/{curveId}/buckets/{buckets}/asOfDate/{asOfDate}/strips/{strips}/markType/{markType}')
   Future<ApiResponse> getForwardCurveForBucketsStrips(
-      String curveId, String buckets, String asOfDate, String strips) async {
+      String curveId, String buckets, String asOfDate, String strips, String markType) async {
     var _strips = strips.split('_');
     var _buckets = buckets.split('_');
-    var data = await _getForwardCurveBuckets(asOfDate, curveId, _buckets);
+    var data = await _getForwardCurveBuckets(asOfDate, curveId, _buckets, markType);
     var out = await _calculateBucketsStrips(curveId, data, _strips);
     return ApiResponse()..result = json.encode(out);
   }
@@ -220,12 +221,13 @@ class ForwardMarks {
 
   // TODO: return only one bucket, & return only a month,bucket historically
 
-  Future<Map<String,dynamic>> _getForwardCurve(
-      String asOfDate, String curveId) async {
+  Future<Map<String,dynamic>> _getForwardCurveForMarkType(
+      String asOfDate, String curveId, String markType) async {
     var pipeline = [
       {
         '\$match': {
           'curveId': {'\$eq': curveId},
+          'markType': {'\$eq': markType},
           'fromDate': {'\$lte': Date.parse(asOfDate).toString()},
         }
       },
@@ -240,6 +242,7 @@ class ForwardMarks {
           '_id': 0,
           'fromDate': 0,
           'curveId': 0,
+          'markType': 0,
         }
       },
     ];
@@ -249,10 +252,10 @@ class ForwardMarks {
 
   /// Return a Map of maps, each entry is in the form {bucket: {'yyyy-mm': num}}
   Future<Map<String,Map<String,num>>> _getForwardCurveBuckets(
-      String asOfDate, String curveId, List<String> buckets) async {
-    var data = await _getForwardCurve(asOfDate, curveId);
+      String asOfDate, String curveId, List<String> buckets, String markType) async {
+    var data = await _getForwardCurveForMarkType(asOfDate, curveId, markType);
     var out = <String,Map<String,num>>{};
-    var months = data['months'] as List;
+    var terms = data['terms'] as List;
     var _buckets = (data['buckets'] as Map).keys;
 
     for (var bucket in buckets) {
@@ -260,8 +263,8 @@ class ForwardMarks {
       if (_buckets.contains(bucket)) {
         /// the bucket is stored in the db
         var values = data['buckets'][bucket] as List;
-        for (var i = 0; i < months.length; i++) {
-          one[months[i]] = values[i];
+        for (var i = 0; i < terms.length; i++) {
+          one[terms[i]] = values[i];
         }
       } else {
         /// the bucket must exist in the [curveDefinitions]
@@ -271,11 +274,11 @@ class ForwardMarks {
           var location = getLocation(curveDefs['location']);
           var bucketNames = (curveDefs['bucketDefs'][bucket.toLowerCase()] as List).cast<String>();
           var buckets = bucketNames.map((name) => Bucket.parse(name));
-          for (var i = 0; i < months.length; i++) {
-            var month = Month.parse(months[i], fmt: _isoFmt, location: location);
+          for (var i = 0; i < terms.length; i++) {
+            var month = Month.parse(terms[i], fmt: _isoFmt, location: location);
             var hours = buckets.map((b) => b.countHours(month)).toList().cast<num>();
             var values = bucketNames.map((b) => data['buckets'][b][i] as num);
-            one[months[i]] = weightedMean(values, hours);
+            one[terms[i]] = weightedMean(values, hours);
           }
         }
       }

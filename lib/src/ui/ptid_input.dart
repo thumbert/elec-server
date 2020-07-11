@@ -46,8 +46,9 @@ class PtidInput {
     int aux;
     if (_textInput.value.isEmpty) {
       aux = null;
-      if (!canBeEmpty)
+      if (!canBeEmpty) {
         _textInput.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
+      }
     } else {
       aux = int.parse(_textInput.value);
       _textInput.setAttribute('style', 'margin-left: 15px; border-color: initial;');

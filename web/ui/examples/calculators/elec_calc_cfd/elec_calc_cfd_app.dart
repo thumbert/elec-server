@@ -307,13 +307,13 @@ class _Row2 {
     }
     _regionDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : (_leg.curveId.components['iso'] as Iso).name;
+      ..text = _empty ? '' : (_leg.curveDetails['iso'] as Iso).name;
     _serviceDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.curveId.components['serviceType'];
+      ..text = _empty ? '' : _leg.curveDetails['serviceType'];
     _curveDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.curveId.curve;
+      ..text = _empty ? '' : _leg.curveDetails['name'];
     _bucketDiv = html.DivElement()
       ..id = 'bucket-leg-$indexLeg'
       ..className = 'cell-string cell-editable typeahead';

@@ -17,8 +17,9 @@ List<Map<String, dynamic>> marks20200529() {
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4000_da_lmp',
-      'monthly': {
-        'term': months,
+      'markType': 'monthly',
+      'terms': months,
+      'buckets': {
         '5x16': [
           22.2,
           25.4,
@@ -87,7 +88,8 @@ List<Map<String, dynamic>> marks20200529() {
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4004_da_basis',
-      'months': months,
+      'markType': 'monthly',
+      'terms': months,
       'buckets': {
         '5x16': [
           -0.05,
@@ -164,20 +166,38 @@ List<Map<String, dynamic>> marks20200706() {
       .splitLeft((dt) => Month.fromTZDateTime(dt))
       .map((e) => e.toIso8601String())
       .toList();
-  var days = Term.parse('7Jul20-31Jul20', location).days();
+  var days = Term.parse('7Jul20-31Jul20', location).days()
+      .map((e) => e.toString())
+      .toList();
 
   return <Map<String, dynamic>>[
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4000_da_lmp',
-      'daily': {
-        'term': days,
-        '5x16': {},
-        '2x16H': {},
-        '7x8': {},
-      },
-      'monthly': {
-        'term': months,
+      'markType': 'daily',
+      'terms': days,
+      'buckets': {
+        '5x16': [
+          23.48, 23.48, 23.48, 23.48, null, null,
+          25.1, 25.1, 25.1, 25.1, 25.1, null, null,
+          27.5, 27.5, 27.5, 27.5, 27.5, null, null,
+          30, 30, 30, 30, 30,
+        ],
+        '2x16H': [
+          null, null, null, null, 21.25, 21.25,
+          null, null, null, null, null, 23.4, 23.4,
+          null, null, null, null, null, 25.25, 25.25,
+          null, null, null, null, null,
+        ],
+        '7x8': List.filled(25, 15.5),
+      }
+    },
+    {
+      'fromDate': fromDate,
+      'curveId': 'isone_energy_4000_da_lmp',
+      'markType': 'monthly',
+      'terms': months,
+      'buckets': {
         '5x16': [
           26.8,
           25.3,
@@ -237,69 +257,5 @@ List<Map<String, dynamic>> marks20200706() {
         ]
       }
     },
-    {
-      'fromDate': fromDate,
-      'curveId': 'isone_energy_4004_da_basis',
-      'months': months,
-      'buckets': {
-        '5x16': [
-          0,
-          -0.05,
-          -0.2,
-          -0.2,
-          -0.25,
-          -0.65,
-          -0.65,
-          -0.15,
-          -0.05,
-          0,
-          0.05,
-          0.1,
-          0.1,
-          0.05,
-          -0.1,
-          -0.1,
-          -0.15,
-        ],
-        '2x16H': [
-          -0.2,
-          -0.2,
-          -0.2,
-          -0.2,
-          -0.25,
-          -0.55,
-          -0.55,
-          -0.17,
-          -0.1,
-          -0.1,
-          -0.1,
-          -0.05,
-          -0.05,
-          -0.1,
-          -0.1,
-          -0.1,
-          -0.15,
-        ],
-        '7x8': [
-          -0.2,
-          -0.2,
-          -0.2,
-          -0.2,
-          -0.25,
-          -0.55,
-          -0.55,
-          -0.17,
-          -0.1,
-          -0.1,
-          -0.1,
-          -0.05,
-          -0.05,
-          -0.1,
-          -0.1,
-          -0.1,
-          -0.15,
-        ],
-      }
-    }
   ];
 }

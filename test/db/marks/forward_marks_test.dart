@@ -77,7 +77,8 @@ List<Map<String, dynamic>> _generateDataElecCurve(
     out.add({
       'fromDate': day.toString(),
       'curveId': curveId,
-      'months': months.map((e) => e.toIso8601String()).toList(),
+      'markType': 'monthly',
+      'terms': months.map((e) => e.toIso8601String()).toList(),
       'buckets': {
         '5x16':
             List.generate(n, (i) => 45 * multiplier + 2 * rand.nextDouble()),
@@ -100,7 +101,8 @@ List<Map<String, dynamic>> _generateDataNgCurve(
     out.add({
       'fromDate': day.toString(),
       'curveId': curveId,
-      'months': months.map((e) => e.toIso8601String()).toList(),
+      'markType': 'monthly',
+      'terms': months.map((e) => e.toIso8601String()).toList(),
       'buckets': {
         '7x24': List.generate(n, (i) => 2 + rand.nextDouble()),
       },
@@ -112,19 +114,15 @@ List<Map<String, dynamic>> _generateDataNgCurve(
 void tests() async {
   var archive = ForwardMarksArchive();
   group('forward marks archive tests:', () {
-    setUp(() async {
-      await archive.db.open();
-//      await archive.db.dropCollection(archive.dbConfig.collectionName);
-//      await insertData(archive);
-//      await archive.setup();
-    });
+    setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     test('document equality', () {
       var document = <String, dynamic>{
         'fromDate': '2018-12-14',
         'version': '2018-12-14T10:12:47.000-0500',
         'curveId': 'isone_energy_4011_da_lmp',
-        'months': ['2019-01', '2019-02', '2019-12'],
+        'markType': 'monthly',
+        'terms': ['2019-01', '2019-02', '2019-12'],
         'buckets': {
           '5x16': [89.10, 86.25, 71.05],
           '2x16H': [72.19, 67.12, 42.67],
@@ -135,7 +133,8 @@ void tests() async {
         'fromDate': '2018-12-15',
         'version': '2018-12-15T11:15:47.000-0500',
         'curveId': 'isone_energy_4011_da_lmp',
-        'months': ['2019-01', '2019-02', '2019-12'],
+        'markType': 'monthly',
+        'terms': ['2019-01', '2019-02', '2019-12'],
         'buckets': {
           '5x16': [89.10, 86.25, 71.05],
           '2x16H': [72.19, 67.12, 42.67],
@@ -173,27 +172,27 @@ void tests() async {
     });
     test('get one forward curve, all marked buckets', () async {
       var res =
-          await api.getForwardCurve('isone_energy_4000_da_lmp', '2018-03-03');
+          await api.getForwardCurve('isone_energy_4000_da_lmp', '2018-03-03', 'monthly');
       var data = json.decode(res.result) as Map<String, dynamic>;
-      expect(data.keys.toSet(), {'months', 'buckets'});
+      expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
     });
     test('get one marked forward curve, one bucket (marked)', () async {
       var res = await api.getForwardCurveForBucket(
-          'isone_energy_4000_da_lmp', '5x16', '2018-03-03');
+          'isone_energy_4000_da_lmp', '5x16', '2018-03-03', 'monthly');
       var data = <String, num>{...json.decode(res.result)};
       expect(data.keys.first, '2018-04');
       expect(data.values.first, 45.58681342997034);
     });
     test('a marked forward curve with wrong bucket returns empty', () async {
       var res = await api.getForwardCurveForBucket(
-          'ng_henryhub', '5x16', '2018-03-03');
+          'ng_henryhub', '5x16', '2018-03-03', 'monthly');
       var data = <String, num>{...json.decode(res.result)};
       expect(data.isEmpty, true);
     });
     test('get one marked forward curve, one bucket (computed)', () async {
       var res = await api.getForwardCurveForBucket(
-          'isone_energy_4000_da_lmp', 'offpeak', '2018-03-03');
+          'isone_energy_4000_da_lmp', 'offpeak', '2018-03-03', 'monthly');
       var data = <String, num>{...json.decode(res.result)};
       expect(data.keys.first, '2018-04');
       expect(data.values.first.toStringAsFixed(5), '25.83335');
@@ -203,7 +202,7 @@ void tests() async {
           'isone_energy_4000_da_lmp',
           '5x16_offpeak',
           '2018-03-03',
-          'Jan19-Feb19_Jul19-Aug19_Jan20-Jun20');
+          'Jan19-Feb19_Jul19-Aug19_Jan20-Jun20', 'monthly');
       var aux = json.decode(res.result) as Map;
       expect(aux.keys.toSet(), {'5x16', 'offpeak'});
       var data = aux['5x16'];
@@ -230,7 +229,7 @@ void tests() async {
 void repopulateDb() async {
   var archive = ForwardMarksArchive();
   await archive.db.open();
-  //await archive.db.dropCollection(archive.dbConfig.collectionName);
+  await archive.dbConfig.coll.remove(<String,dynamic>{});
   await insertData(archive);
 //  await archive.setup();
   await archive.db.close();
@@ -252,8 +251,8 @@ void insertMarks() async {
 void main() async {
   await initializeTimeZone();
 //  await repopulateDb();
-  await insertMarks();
+//  await insertMarks();
 
-//  await tests();
+  await tests();
 
 }

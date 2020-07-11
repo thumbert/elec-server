@@ -16,12 +16,14 @@
 
 
 
-//use marks
-//db.forward_marks.dropIndexes()
-//db.forward_marks.createIndex({'fromDate': 1})
-//db.forward_marks.createIndex({
-//    'curveId': 1,
-//    'fromDate': 1}, {'unique': true})
+use marks
+db.forward_marks.dropIndexes()
+db.forward_marks.createIndex({'fromDate': 1})
+db.forward_marks.createIndex({
+    'curveId': 1,
+    'markType': 1,
+    'fromDate': 1
+    }, {'unique': true})
 
 
 

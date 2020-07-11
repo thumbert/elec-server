@@ -38,13 +38,9 @@ class ForwardMarksArchive {
   ///   'fromDate': '2020-06-15',
   ///   'version': '2020-06-15T10:12:47.000-0500',  -- not supported yet
   ///   'curveId': 'elec_isone_4011_lmp_da',
-  ///   'daily': {
-  ///     'term': ['2020-06-15', '2020-06-16', ..., '2020-06-31'],
-  ///     '5x16': [89.10, 86.25, ...],
-  ///     '2x16H': [...],
-  ///     '7x8': [...],
-  ///   'monthly': {
-  ///     'term': ['2020-07', '2020-08', ..., '2026-12-01'],
+  ///   'markType': 'monthly' or 'daily'
+  ///   'terms': ['2020-07', '2020-08', ..., '2026-12-01'],
+  ///   'buckets': {
   ///     '5x16': [27.10, 26.25, ...],
   ///     '2x16H': [...],
   ///     '7x8': [...],
@@ -57,8 +53,9 @@ class ForwardMarksArchive {
         checkDocument(newDocument);
         var fromDate = newDocument['fromDate'];
         var curveId = newDocument['curveId'];
+        var markType = newDocument['markType'] as String;
         // get the last document with the curve
-        var document = await _getForwardCurve(fromDate, curveId);
+        var document = await _getForwardCurve(fromDate, curveId, markType);
         if (needToInsert(document, newDocument)) {
           if (document['fromDate'] == fromDate) {
             // fromDate is already in the database, so remove the old document
@@ -76,6 +73,8 @@ class ForwardMarksArchive {
     return Future.value(0);
   }
 
+  /// Curves may be submitted every day for completeness, but they don't need
+  /// to be stored as they have the same values as the day before.
   /// Check if you need to insert the document or not.  You need to insert if
   /// values are different or if it's a curve extension.  Return [true] if an
   /// update is needed.
@@ -83,13 +82,13 @@ class ForwardMarksArchive {
       Map<String, dynamic> document, Map<String, dynamic> newDocument) {
     if (document.isEmpty) return true;
     // The new document may have different start/end months.
-    // If the end month is different, need to update as it's a curve extension.
-    var months0 = document['months'] as List;
-    var months1 = newDocument['months'] as List;
-    if (months0.last != months1.last) return true;
+    // If the end term is different, need to update as it's a curve extension.
+    var term0 = document['terms'] as List;
+    var term1 = newDocument['terms'] as List;
+    if (term0.last != term1.last) return true;
 
     var i = 0;
-    while (months0[i] != months1.first) {
+    while (term0[i] != term1.first) {
       i++;
     }
 
@@ -107,28 +106,37 @@ class ForwardMarksArchive {
   /// Basic checks on the document structure.
   void checkDocument(Map<String, dynamic> document) {
     var keys = document.keys.toSet();
-    var mustHaveKeys = <String>{'fromDate', 'curveId', 'months', 'buckets'};
+    var mustHaveKeys = <String>{'fromDate', 'curveId', 'markType', 'buckets',
+      'terms'};
     if (!keys.containsAll(mustHaveKeys)) {
       throw ArgumentError(
-          'Document ${document} must contain fromDate, curveId, months');
+          'Document ${document} must contain fromDate, curveId, markType');
     }
-
-    // check that months start from prompt month
-    var month0 = Month.parse((document['fromDate'] as String).substring(0, 7),
-        fmt: _isoFmt);
-    var month1 =
-        Month.parse((document['months'] as List).first as String, fmt: _isoFmt);
-    var monthN =
-        Month.parse((document['months'] as List).last as String, fmt: _isoFmt);
-    if (month0.next != month1) {
-      throw ArgumentError('Months must start with prompt month.');
-    }
-
-    // check that month1 is after fromDate
     var fromDate = Date.parse(document['fromDate']);
-    if (!fromDate.start.isBefore(month1.start)) {
-      throw ArgumentError(
-          'first marked month needs to be after fromDate: $document');
+
+
+    if (document['markType'] == 'monthly') {
+      // check that months start from prompt month
+      var month0 = Month.parse((document['fromDate'] as String).substring(0, 7),
+          fmt: _isoFmt);
+      var month1 =
+      Month.parse((document['terms'] as List).first as String, fmt: _isoFmt);
+      var monthN =
+      Month.parse((document['terms'] as List).last as String, fmt: _isoFmt);
+      if (month0.next != month1) {
+        throw ArgumentError('Months must start with prompt month.');
+      }
+
+      // check that month1 is after fromDate
+      if (!fromDate.start.isBefore(month1.start)) {
+        throw ArgumentError(
+            'first marked month needs to be after fromDate: $document');
+      }
+
+      // A bit arbitrary, but check that you always mark until December
+      if (monthN.month != 12) {
+        throw ArgumentError('Need to mark until December ${monthN.year}.');
+      }
     }
 
     // check that the bucket names are valid
@@ -139,27 +147,24 @@ class ForwardMarksArchive {
     }
 
     // check that all bucketKeys have matching dimensions
-    var n = (document['months'] as List).length;
+    var n = (document['terms'] as List).length;
     for (var key in bucketKeys) {
       if ((document['buckets'][key] as List).length != n) {
-        throw ArgumentError('Length of $key doesn\'t match length of months '
-            'for curveId ${document['curveId']} as of $fromDate');
+        throw ArgumentError('Length of $key doesn\'t match length of terms '
+            'for curveId ${document['curveId']} as of $fromDate, '
+            'markType ${document['markType']}');
       }
-    }
-
-    // A bit arbitrary, but check that you always mark until December
-    if (monthN.month != 12) {
-      throw ArgumentError('Need to mark until December ${monthN.year}.');
     }
   }
 
   /// Get the document for this [curveId] and [fromDate].
   Future<Map<String, dynamic>> _getForwardCurve(
-      String asOfDate, String curveId) async {
+      String asOfDate, String curveId, String markType) async {
     var pipeline = [
       {
         '\$match': {
           'curveId': {'\$eq': curveId},
+          'markType': {'\$eq': markType},
           'fromDate': {'\$lte': Date.parse(asOfDate).toString()},
         }
       },
@@ -174,6 +179,7 @@ class ForwardMarksArchive {
           '_id': 0,
           'fromDate': 0,
           'curveId': 0,
+          'markType': 0,
         }
       },
     ];
