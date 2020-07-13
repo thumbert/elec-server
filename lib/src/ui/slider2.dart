@@ -4,6 +4,8 @@ import 'dart:html' as html;
 
 import 'dart:math' as math;
 
+/// Simple slider
+/// https://www.w3schools.com/howto/howto_js_rangeslider.asp
 /// Multi-range sliders
 /// https://bashooka.com/coding/25-amazing-css-range-slider-designs/
 

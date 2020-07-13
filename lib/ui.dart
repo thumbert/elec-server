@@ -11,6 +11,7 @@ export 'src/ui/numeric_range_filter.dart';
 export 'src/ui/ptid_input.dart';
 export 'src/ui/radio_group_input.dart';
 export 'src/ui/selectable_list.dart';
+export 'src/ui/slider2.dart';
 export 'src/ui/spinner.dart';
 export 'src/ui/term_input.dart';
 export 'src/ui/text_input.dart';
