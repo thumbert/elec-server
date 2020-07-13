@@ -58,7 +58,7 @@ class ElecCalcCfdApp {
   /// Initialize the calculator from a json template.  In a live app, this
   /// template comes from the database.
   set template(Map<String, dynamic> x) {
-    _calculator = ElecCalculatorCfd.fromJson(x);
+    _calculator = ElecCalculatorCfd()..fromJson(x);
     _calculatorDiv = html.DivElement()
       ..className = 'elec-calculator'
       ..children = [

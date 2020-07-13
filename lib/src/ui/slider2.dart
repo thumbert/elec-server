@@ -161,9 +161,12 @@ class Slider2 {
       ]);
   }
 
-  num get leftValue => num.parse(_inputL.value);
+  num get leftValue =>
+    num.parse(format(scaleInverse(num.parse(_inputL.value))));
 
-  num get rightValue => num.parse(_inputR.value);
+  num get rightValue =>
+      num.parse(format(scaleInverse(num.parse(_inputR.value))));
+
 
   /// trigger a change when either one of the two inputs change
   void onChange(Function x) {
