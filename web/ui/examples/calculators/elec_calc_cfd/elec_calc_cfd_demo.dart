@@ -1,5 +1,6 @@
 
 import 'dart:html';
+import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:http/http.dart';
 import 'package:timezone/data/latest.dart';
 
@@ -35,6 +36,8 @@ void main() async {
   await initializeTimeZones();
   var client = Client();
   var rootUrl = 'http://localhost:8080/';
+
+  var curveIdClient = CurveIdClient(client);
 
 
   var wrapper = querySelector('#wrapper-elec-calc-cfd');

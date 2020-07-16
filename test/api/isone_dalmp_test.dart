@@ -11,7 +11,7 @@ import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
 apiTest() async {
   Db db;
   DaLmp api;
-  Location location = getLocation('US/Eastern');
+  Location location = getLocation('America/New_York');
   setUp(() async {
     db = new Db('mongodb://localhost/isoexpress');
     api = new DaLmp(db);

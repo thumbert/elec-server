@@ -149,7 +149,7 @@ List<String> winterStorms() {
 class WinterStormsArchive extends IsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
-  Location location = getLocation('US/Eastern');
+  Location location = getLocation('America/New_York');
   var _fmt = new DateFormat('M/dd/yyyy h:mm a');
 
   WinterStormsArchive({this.dbConfig, this.dir}) {

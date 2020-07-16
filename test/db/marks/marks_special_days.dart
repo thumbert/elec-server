@@ -6,7 +6,7 @@ import 'package:timezone/timezone.dart';
 ///
 List<Map<String, dynamic>> marks20200529() {
   var fromDate = '2020-05-29';
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var months = Term.parse('Jun20-Dec21', location)
       .interval
       .splitLeft((dt) => Month.fromTZDateTime(dt))
@@ -160,7 +160,7 @@ List<Map<String, dynamic>> marks20200529() {
 }
 List<Map<String, dynamic>> marks20200706() {
   var fromDate = '2020-07-06';
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var months = Term.parse('Aug20-Dec21', location)
       .interval
       .splitLeft((dt) => Month.fromTZDateTime(dt))

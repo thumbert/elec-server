@@ -15,7 +15,7 @@ const String USER_AGENT = 'dart-api-client utilities/eversource/load/v1';
 
 class EversourceLoad {
   final commons.ApiRequester _requester;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
 
   EversourceLoad(http.Client client,
       {String rootUrl: "http://localhost:8080/",

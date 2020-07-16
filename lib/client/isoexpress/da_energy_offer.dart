@@ -19,7 +19,7 @@ export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
 const String USER_AGENT = 'dart-api-client da_energy_offer/v1';
 
 class DaEnergyOffers {
-  static final location = getLocation('US/Eastern');
+  static final location = getLocation('America/New_York');
   String rootUrl;
   String servicePath;
 

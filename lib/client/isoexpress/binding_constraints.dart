@@ -13,7 +13,7 @@ const String USER_AGENT = 'dart-api-client binding_constraints/v1';
 class BindingConstraintsApi {
   String rootUrl;
   String servicePath;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
 
   BindingConstraintsApi(http.Client client,
       {this.rootUrl: "http://localhost:8080/", this.servicePath: "bc/v1/"});

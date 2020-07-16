@@ -18,7 +18,7 @@ class EversourceCtLoadArchive {
   ComponentConfig dbConfig;
   SpreadsheetDecoder _decoder;
   String dir;
-  Location location = getLocation('US/Eastern');
+  Location location = getLocation('America/New_York');
 
   EversourceCtLoadArchive({this.dbConfig, this.dir}) {
     var env = Platform.environment;

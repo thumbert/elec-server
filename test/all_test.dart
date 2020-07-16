@@ -7,7 +7,7 @@ import 'client/isoexpress/da_energy_offer_test.dart' as daoffers;
 import 'client/isoexpress/dalmp_test.dart' as dalmp;
 import 'client/isoexpress/system_demand_test.dart' as sysdem;
 import 'client/marks/curves/curve_id_test.dart' as curve_id;
-import 'client/marks/forward_marks_test.dart' as forward_marks;
+import 'client/marks/curves/forward_marks_test.dart' as forward_marks;
 import 'client/other/ptids_test.dart' as ptid;
 import 'utils/iso_timestamp_test.dart' as iso_timestamp;
 import 'utils/parse_custom_integer_range_test.dart' as parse_int_range;
@@ -18,7 +18,7 @@ void main() async {
   await initializeTimeZones();
   var rootUrl = 'http://localhost:8080/';
 
-  api_ptids.apiTest();
+  api_ptids.tests();
 
 
   /// Client tests
@@ -28,7 +28,7 @@ void main() async {
   curve_id.tests(rootUrl);
   forward_marks.tests(rootUrl);
 //  sysdem.tests(rootUrl);
-//  ptid.tests();
+  ptid.tests();
   mis.tests();
 
   /// Utils tests

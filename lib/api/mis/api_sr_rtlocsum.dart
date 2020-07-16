@@ -23,7 +23,7 @@ class SrRtLocSum {
 
   SrRtLocSum(Db db) {
     coll = db.collection(collectionName);
-    _location = getLocation('US/Eastern');
+    _location = getLocation('America/New_York');
   }
 
 

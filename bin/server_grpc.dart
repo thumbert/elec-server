@@ -8,7 +8,7 @@ import 'package:elec_server/src/generated/timeseries.pbgrpc.dart';
 
 class LmpService extends LmpServiceBase {
   DbCollection collection;
-  final _location = getLocation('US/Eastern');
+  final _location = getLocation('America/New_York');
 
   LmpService(Db db) {
     collection = db.collection('da_lmp_hourly');
@@ -32,7 +32,7 @@ class LmpService extends LmpServiceBase {
     var hourly = IntervalType()..type = IntervalType_Type.HOURLY;
     var out = NumericTimeSeries()
       ..name = 'isone_da_${component}_$ptid'
-      ..tzLocation = 'US/Eastern'
+      ..tzLocation = 'America/New_York'
       ..timeInterval = hourly;
     await for (Map e in data) {
       for (int i = 0; i < e['hourBeginning'].length; i++) {

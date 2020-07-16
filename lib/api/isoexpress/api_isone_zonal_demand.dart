@@ -28,7 +28,7 @@ class ZonalDemand {
 
   ZonalDemand(Db db) {
     coll = db.collection(collectionName);
-    _location = getLocation('US/Eastern');
+    _location = getLocation('America/New_York');
   }
 
   /// http://localhost:8080/zonal_demand/v1/zone/isone/start/20170101/end/20170101

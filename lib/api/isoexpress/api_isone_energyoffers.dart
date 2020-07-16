@@ -22,7 +22,7 @@ class DaEnergyOffers {
 
   DaEnergyOffers(Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
 
     /// create an ordering by price and assetId to use when sorting the stack
     var natural = Ordering.natural<num>();

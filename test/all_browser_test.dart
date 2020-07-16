@@ -13,17 +13,17 @@ import 'package:elec/src/common_enums.dart';
 import 'package:elec_server/client/isoexpress/dalmp.dart';
 
 
-tests(String rootUrl) async {
+void tests(String rootUrl) async {
   test('Add 2 numbers', () {
     expect(1+2, 3);
   });
 //  test('LMP speed tests', () async {
-//    var location = getLocation('US/Eastern');
+//    var location = getLocation('America/New_York');
 //    var client = BrowserClient();
 //    var api = DaLmp(client, rootUrl: rootUrl);
 //    var data = await api.getHourlyLmp(
 //        4000, LmpComponent.lmp, Date(2018, 1, 1), Date(2019, 1, 1));
-//    expect(location.name, 'US/Eastern');
+//    expect(location.name, 'America/New_York');
 //    var sw = Stopwatch()..start();
 //    for (int i=0; i<10; i++) {
 //      var mTs = toMonthly(data, mean);

@@ -14,7 +14,7 @@ import '../lib_iso_express.dart';
 class ZonalDemandArchive extends IsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
-  Location location = getLocation('US/Eastern');
+  Location location = getLocation('America/New_York');
 
   ZonalDemandArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {

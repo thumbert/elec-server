@@ -22,7 +22,7 @@ class SdRtload {
 
   SdRtload(mongo.Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201

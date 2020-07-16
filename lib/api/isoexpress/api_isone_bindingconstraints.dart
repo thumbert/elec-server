@@ -13,7 +13,7 @@ import '../../src/utils/api_response.dart';
 @ApiClass(name: 'bc', version: 'v1')
 class BindingConstraints {
   DbCollection coll;
-  Location _location = getLocation('US/Eastern');
+  Location _location = getLocation('America/New_York');
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'binding_constraints';
 

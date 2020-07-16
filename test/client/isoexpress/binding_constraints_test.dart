@@ -7,7 +7,7 @@ import 'package:date/date.dart';
 import 'package:elec_server/client/isoexpress/binding_constraints.dart';
 
 void tests() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var api = BindingConstraintsApi(Client());
   group('API binding constraints:', () {
     test('get da binding constraints data for 2 days', () async {

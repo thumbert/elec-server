@@ -9,7 +9,7 @@ import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
 
 tests() async {
   var api = EversourceLoad(Client());
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   group('Eveversource load test:', () {
     test('get load for CT (CL&P)', () async {
       var start = Date(2014, 1, 1, location: location);

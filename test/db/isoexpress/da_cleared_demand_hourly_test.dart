@@ -9,7 +9,7 @@ import 'package:elec_server/src/db/isoexpress/da_cleared_demand_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_demand_hourly.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
-Location location = getLocation('US/Eastern');
+Location location = getLocation('America/New_York');
 
 /// prepare data by downloading a few reports
 prepareData() async {

@@ -15,7 +15,7 @@ const String USER_AGENT = 'dart-api-client eversource_competitive_suppliers/v1';
 
 class EversourceCompetitiveSuppliers {
   final commons.ApiRequester _requester;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
 
   EversourceCompetitiveSuppliers(http.Client client,
       {String rootUrl: "http://localhost:8080/",

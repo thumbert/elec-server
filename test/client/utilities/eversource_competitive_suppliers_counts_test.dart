@@ -9,7 +9,7 @@ import 'package:elec_server/client/utilities/eversource/eversource_competitive_s
 
 tests() async {
   var api = EversourceCompetitiveSuppliers(Client());
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   group('Eveversource competitive suppliers test:', () {
     test('get suppliers for CT (CL&P)', () async {
       var start = Date(2014, 1, 1, location: location);

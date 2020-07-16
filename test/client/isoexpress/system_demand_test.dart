@@ -10,7 +10,7 @@ import 'package:elec_server/client/isoexpress/system_demand.dart';
 
 tests(String rootUrl) async {
   group('System demand client tests: ', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     var client = Client();
     var api = SystemDemand(client, rootUrl: rootUrl);
 

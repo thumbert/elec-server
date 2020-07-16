@@ -16,7 +16,7 @@ class DaRegulationOffers {
 
   DaRegulationOffers(Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   //http://localhost:8080/da_energy_offers/v1/start/20170701/end/20170731

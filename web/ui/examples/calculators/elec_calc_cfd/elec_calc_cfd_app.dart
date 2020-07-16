@@ -4,6 +4,7 @@ import 'dart:html' as html;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/client/marks/curves/curve_id.dart';
+import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:elec_server/src/ui/type_ahead.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,7 @@ class ElecCalcCfdApp {
   String rootUrl;
   ElecCalculatorCfd _calculator;
   CurveIdClient _curveIdClient;
+  ForwardMarks _forwardMarksClient;
 
   html.DivElement _calculatorDiv,
       _hasCustomDiv,
@@ -29,12 +31,12 @@ class ElecCalcCfdApp {
   List<html.ButtonInputElement> _buttons;
   TypeAhead _buySell;
 
-
   static final DateFormat _dateFmt = DateFormat('ddMMMyy');
 
   ElecCalcCfdApp(this.wrapper,
       {this.client, this.rootUrl = 'http://localhost:8080/'}) {
     _curveIdClient = CurveIdClient(client, rootUrl: rootUrl);
+    _forwardMarksClient = ForwardMarks(client, rootUrl: rootUrl);
   }
 
   void _f2Refresh() {
@@ -46,19 +48,18 @@ class ElecCalcCfdApp {
       print(leg.quantity);
     }
   }
-  void _f3Details() {
 
-  }
+  void _f3Details() {}
   void _f7Reports() {
     print('Wanna report?');
   }
 
-
-
   /// Initialize the calculator from a json template.  In a live app, this
   /// template comes from the database.
   set template(Map<String, dynamic> x) {
-    _calculator = ElecCalculatorCfd()..fromJson(x);
+    _calculator = ElecCalculatorCfd(
+        curveIdClient: _curveIdClient, forwardMarksClient: _forwardMarksClient)
+      ..fromJson(x);
     _calculatorDiv = html.DivElement()
       ..className = 'elec-calculator'
       ..children = [
@@ -166,7 +167,8 @@ class ElecCalcCfdApp {
 
   html.DivElement _initializeRow2() {
     _row2s = [
-      for (var i=0; i<_calculator.legs.length; i++) _Row2.fromLeg(_calculator, i),
+      for (var i = 0; i < _calculator.legs.length; i++)
+        _Row2.fromLeg(_calculator, i),
       _Row2.empty(_calculator),
     ];
 
@@ -235,16 +237,13 @@ class ElecCalcCfdApp {
   void setListeners() {
     var row = _row2s.first;
 
-    row._regionInput.onSelect((e) {
-
-    });
+    row._regionInput.onSelect((e) {});
 
     row.bucketInput.onSelect((e) {
       var leg = _calculator.legs.first;
       leg.bucket = Bucket.parse(row.bucketInput.value);
       _calculator.legs.first = leg;
     });
-
   }
 
   /// add the buttons at the bottom of the calculators
@@ -266,9 +265,7 @@ class ElecCalcCfdApp {
       ..className = 'hot-keys'
       ..children = _buttons;
   }
-
 }
-
 
 class _Row2 {
   ElecCalculatorCfd calculator;
@@ -317,10 +314,20 @@ class _Row2 {
     _bucketDiv = html.DivElement()
       ..id = 'bucket-leg-$indexLeg'
       ..className = 'cell-string cell-editable typeahead';
-    bucketInput = TypeAhead(_bucketDiv, ['Peak', 'Offpeak', 'Flat', 'Custom',
-      '5x16', '2x16H', '7x8', '7x24', '7x16'])
+    bucketInput = TypeAhead(_bucketDiv, [
+      'Peak',
+      'Offpeak',
+      'Flat',
+      'Custom',
+      '5x16',
+      '2x16H',
+      '7x8',
+      '7x24',
+      '7x16'
+    ])
       ..spellcheck = false
       ..value = _empty ? '' : _leg.bucket.toString();
+
     /// the options don't show in the dropdown but are there and can be
     /// selected!
 
@@ -330,7 +337,6 @@ class _Row2 {
     _floatingPriceDiv = html.DivElement()
       ..className = 'cell-num cell-calculated'
       ..text = '';
-
 
     return [
       _hourlyQuantityDiv,
@@ -343,7 +349,6 @@ class _Row2 {
     ];
   }
 }
-
 
 List<html.DivElement> _makeRow2Header() {
   return <html.DivElement>[

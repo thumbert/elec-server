@@ -18,7 +18,7 @@ class SdDaTransact {
 
   SdDaTransact(Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   //http://localhost:8080/sd_datransact/v1/accountId/000050428/tab/0/start/20190101/end/20190101

@@ -15,7 +15,7 @@ prepareData() async {
 }
 
 uploadDays() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var archive = RtSystemDemandReportArchive();
 //  var days = Interval(TZDateTime(location, 2016), TZDateTime(location, 2017))
 //      .splitLeft((dt) => Date(dt.year, dt.month, dt.day, location: location));

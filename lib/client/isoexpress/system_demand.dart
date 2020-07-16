@@ -17,7 +17,7 @@ const String USER_AGENT = 'dart-api-client system-demand/v1';
 
 class SystemDemand {
   final commons.ApiRequester _requester;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
 
   SystemDemand(http.Client client,
       {String rootUrl: "http://localhost:8080/",

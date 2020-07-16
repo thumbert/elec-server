@@ -22,7 +22,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
         ..dbName = 'mis';
     }
     dbConfig.collectionName = 'sr_dalocsum';
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   /// Override the implementation.

@@ -58,7 +58,7 @@ DaBindingConstraintsTest() async {
 }
 
 uploadDays() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var archive = DaBindingConstraintsReportArchive();
   var days = Interval(TZDateTime(location, 2017, 1, 1),
       TZDateTime(location, 2018, 1, 1))

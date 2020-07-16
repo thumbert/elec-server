@@ -18,7 +18,7 @@ class SystemDemand {
 
   SystemDemand(Db db) {
     coll = db.collection(collectionName);
-    _location = getLocation('US/Eastern');
+    _location = getLocation('America/New_York');
   }
 
   /// http://localhost:8080/system_demand/v1/market/da/start/20170101/end/20170101

@@ -16,7 +16,7 @@ class ApiLoadEversource {
 
   ApiLoadEversource(Db db) {
     coll1 = db.collection('load_ct');
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   /// return the hourly historical load for ct by load class, including competitive

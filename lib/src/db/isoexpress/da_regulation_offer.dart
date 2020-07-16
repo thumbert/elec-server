@@ -16,7 +16,7 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 class RegulationOfferArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
 
   RegulationOfferArchive({this.dbConfig, this.dir}) {
     dbConfig ??= ComponentConfig()

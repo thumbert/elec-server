@@ -82,7 +82,8 @@ class DateCache extends TermCache {
   @override
   Interval Function(Map<String, dynamic>) keyAssign;
 
-  /// A [TermCache] using [Date]s as keys.
+  /// A [TermCache] using [Date]s as keys.  Each key contains data as a
+  /// [List<Map<String,dynamic>>]
   DateCache(this.loader, this.keyAssign)
       : super(
             loader,

@@ -21,11 +21,11 @@ const String USER_AGENT = 'dart-api-client dalmp/v1';
 class DaLmp {
   String rootUrl;
   String servicePath;
-  final location = getLocation('US/Eastern');
-  static final DateFormat _mthFmt = new DateFormat('yyyy-MM');
+  final location = getLocation('America/New_York');
+  static final DateFormat _mthFmt = DateFormat('yyyy-MM');
 
   DaLmp(http.Client client,
-      {this.rootUrl: "http://localhost:8080/", this.servicePath: "dalmp/v1/"});
+      {this.rootUrl = 'http://localhost:8080/', this.servicePath = 'dalmp/v1/'});
 
   /// Get hourly prices for a ptid between a start and end date.
   Future<TimeSeries<double>> getHourlyLmp(
@@ -50,7 +50,7 @@ class DaLmp {
   /// Get daily prices for a ptid/bucket between a start and end date.
   Future<TimeSeries<double>> getDailyLmpBucket(int ptid, LmpComponent component,
       Bucket bucket, Date start, Date end) async {
-    String cmp = component.toString().substring(13);
+    var cmp = component.toString().substring(13);
     var _url = rootUrl + servicePath + 'daily/$cmp/ptid/' +
         commons.Escaper.ecapeVariable('${ptid.toString()}') +
         '/start/' +

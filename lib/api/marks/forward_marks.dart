@@ -30,7 +30,7 @@ class ForwardMarks {
     curveDefinitions = {
       /// default definition
       '_': {
-        'location': 'US/Eastern',
+        'location': 'America/New_York',
         'bucketDefs': {
           'offpeak': ['2x16H', '7x8'],
           'wrap': ['2x16H', '7x8'],

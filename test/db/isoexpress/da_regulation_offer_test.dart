@@ -34,7 +34,7 @@ tests() async {
 
 
 Future insertDays() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var archive = RegulationOfferArchive();
   //await archive.setupDb();
   var days = Interval(TZDateTime(location, 2019, 7),

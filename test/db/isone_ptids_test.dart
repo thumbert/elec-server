@@ -40,7 +40,7 @@ void ingestionTest() async {
   await archive.db.close();
 }
 
-void apiTest() async {
+void tests() async {
   group('Ptid table tests:', () {
     ComponentConfig config;
     PtidArchive archive;
@@ -113,7 +113,7 @@ void main() async {
 
 //  await ingestionTest();
 
-  await apiTest();
+  await tests();
 
 
 }

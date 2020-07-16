@@ -13,7 +13,7 @@ import 'package:elec/src/risk_system/marks/monthly_curve.dart';
 class ForwardMarks {
   final String rootUrl;
   final String servicePath;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   ForwardMarks(http.Client client,

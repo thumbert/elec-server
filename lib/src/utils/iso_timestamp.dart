@@ -3,7 +3,7 @@ library elec.iso_timestamp;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
-Location _eastern = getLocation('US/Eastern');
+Location _eastern = getLocation('America/New_York');
 
 /// Convert from an ISONE string tuple.
 /// [localDate] is a String in format 'mm/dd/yyyy'

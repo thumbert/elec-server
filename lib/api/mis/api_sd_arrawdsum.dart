@@ -17,7 +17,7 @@ class SdArrAwdSum {
 
   SdArrAwdSum(Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')

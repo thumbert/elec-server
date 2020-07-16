@@ -16,7 +16,7 @@ class SpPeakContributionDly {
 
   SpPeakContributionDly(mongo.Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   //http://localhost:8080/sp_peakcontributiondly/v1/assetId/2481/start/20180101/end/20180201

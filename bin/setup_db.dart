@@ -30,7 +30,7 @@ void insertForwardMarks() async {
 
 
 void insertIsoExpress() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var archive = DaEnergyOfferArchive();
   await insertDays(archive, Term.parse('Jul17', location).days());
 }

@@ -10,7 +10,7 @@ import 'package:table/table.dart';
 import 'package:elec_server/client/isoexpress/da_energy_offer.dart';
 
 void tests() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var api = DaEnergyOffers(Client());
   group('DA Energy Offers client:', () {
     test('get energy offers for hour 2017-07-01 16:00:00', () async {
@@ -86,7 +86,7 @@ void tests() async {
 /// Get all the units
 //totalMwByParticipant() async {
 //  var api = DaEnergyOffers(Client());
-//  var location = getLocation('US/Eastern');
+//  var location = getLocation('America/New_York');
 //  var hour = Hour.beginning(TZDateTime(location, 2016));
 //
 //  var eo = await api.getDaEnergyOffers(hour);
@@ -99,7 +99,7 @@ void tests() async {
 
 
 //identifyUnits() async {
-//  var location = getLocation('US/Eastern');
+//  var location = getLocation('America/New_York');
 //  var api = DaEnergyOffers(Client());
 //
 //  var start = Date(2016, 1, 1);

@@ -20,7 +20,7 @@ class DaLmp {
 
   DaLmp(mongo.Db db) {
     coll = db.collection(collectionName);
-    _location = getLocation('US/Eastern');
+    _location = getLocation('America/New_York');
   }
 
   /// http://localhost:8080/dalmp/v1/monthly/lmp/ptid/4000/start/201701/end/201701/bucket/5x16

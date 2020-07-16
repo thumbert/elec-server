@@ -22,7 +22,7 @@ class SrDaLocSum {
 
   SrDaLocSum(Db db) {
     coll = db.collection(collectionName);
-    _location = getLocation('US/Eastern');
+    _location = getLocation('America/New_York');
   }
 
   @ApiMethod(

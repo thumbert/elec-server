@@ -12,7 +12,7 @@ import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
 tests() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   group('Regulation requirements archive test:', () {
     var archive = RegulationRequirementArchive();
     setUp(() async {

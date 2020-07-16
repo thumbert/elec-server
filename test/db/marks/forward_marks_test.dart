@@ -32,7 +32,7 @@ List<String> getMarkedCurveIds() {
 }
 
 void insertData(ForwardMarksArchive archive) async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var start = Date(2018, 1, 1, location: location);
   var end = Date(2018, 12, 31, location: location);
   var calendar = NercCalendar();

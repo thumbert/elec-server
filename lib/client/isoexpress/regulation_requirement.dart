@@ -11,7 +11,7 @@ import 'package:timeseries/timeseries.dart';
 class RegulationRequirement {
   String rootUrl;
   String servicePath;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
 
   List<Map<String, dynamic>> cache;
   num Function(Hour) fCapacity;

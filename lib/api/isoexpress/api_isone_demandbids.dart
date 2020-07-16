@@ -19,7 +19,7 @@ class DaDemandBids {
 
   DaDemandBids(Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   //http://localhost:8080/da_demand_bids/v1/stack/date/20170701/hourending/16

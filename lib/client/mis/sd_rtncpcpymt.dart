@@ -11,7 +11,7 @@ import 'package:timezone/timezone.dart';
 class SdRtNcpcPymnt {
   String rootUrl;
   String servicePath;
-  final location = getLocation('US/Eastern');
+  final location = getLocation('America/New_York');
 
   SdRtNcpcPymnt(http.Client client,
       {this.rootUrl = 'http://localhost:8080/',

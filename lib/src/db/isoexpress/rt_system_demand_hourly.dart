@@ -14,7 +14,7 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   ComponentConfig dbConfig;
   String dir;
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
 
   RtSystemDemandReportArchive({this.dbConfig, this.dir}) {
     if (dbConfig == null) {

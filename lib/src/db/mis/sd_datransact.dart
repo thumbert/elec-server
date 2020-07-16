@@ -18,7 +18,7 @@ class SdDaTransactArchive extends mis.MisReportArchive {
       ..host = '127.0.0.1'
       ..dbName = 'mis';
     dbConfig.collectionName = 'sd_datransact';
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   Future<int> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {

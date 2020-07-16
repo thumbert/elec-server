@@ -14,7 +14,7 @@ class RegulationRequirement {
 
   RegulationRequirement(Db db) {
     coll = db.collection(collectionName);
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
 
   /// http://localhost:8080/regulation_requirement/v1/values

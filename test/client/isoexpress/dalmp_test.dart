@@ -12,10 +12,10 @@ import 'package:dama/dama.dart';
 import 'package:elec/src/common_enums.dart';
 import 'package:elec_server/client/isoexpress/dalmp.dart';
 
-tests(String rootUrl) async {
+void tests(String rootUrl) async {
   group('DAM prices client tests: ', () {
-    var location = getLocation('US/Eastern');
-    Client client = Client();
+    var location = getLocation('America/New_York');
+    var client = Client();
     var api = DaLmp(client, rootUrl: rootUrl);
 
     test('get daily peak price between two dates', () async {
@@ -58,8 +58,8 @@ tests(String rootUrl) async {
   });
 }
 
-speedTest(String rootUrl) async {
-  var location = getLocation('US/Eastern');
+void speedTest(String rootUrl) async {
+  var location = getLocation('America/New_York');
   var client = Client();
   var api = DaLmp(client, rootUrl: rootUrl);
 
@@ -72,7 +72,7 @@ speedTest(String rootUrl) async {
   print(allDays.difference(days));
 
   var sw = Stopwatch()..start();
-  for (int i=0; i<10; i++) {
+  for (var i=0; i<10; i++) {
     var mTs = toMonthly(data, mean);
   }
   sw.stop();
@@ -80,12 +80,9 @@ speedTest(String rootUrl) async {
 }
 
 
-main() async {
+void main() async {
   await initializeTimeZone();
-
-  String rootUrl = "http://localhost:8080/"; // testing
+  var rootUrl = 'http://localhost:8080/'; // testing
   await tests(rootUrl);
-
-
 }
 

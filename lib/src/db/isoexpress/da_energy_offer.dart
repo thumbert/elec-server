@@ -13,11 +13,13 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaEnergyOfferArchive extends DailyIsoExpressReport {
+  @override
   ComponentConfig dbConfig;
+  @override
   String dir;
 
   static final List<String> _unitStates = ['UNAVAILABLE', 'MUST_RUN', 'ECONOMIC'];
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
 
   DaEnergyOfferArchive({this.dbConfig, this.dir}) {
     dbConfig ??= ComponentConfig()

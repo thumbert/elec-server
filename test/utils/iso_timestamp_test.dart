@@ -6,7 +6,7 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 testParseIsoTimestamp() {
-  Location location = getLocation('US/Eastern');
+  Location location = getLocation('America/New_York');
 
   List<List> dts = [
     ['03/08/2015', '01', new TZDateTime.utc(2015, 3, 8, 6)],

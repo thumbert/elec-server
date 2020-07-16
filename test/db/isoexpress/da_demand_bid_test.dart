@@ -50,7 +50,7 @@ DaEnergyOffersTest() async {
 
 
 Future insertDays() async {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var archive = DaDemandBidArchive();
   var days = Interval(TZDateTime(location, 2019, 2, 1),
       TZDateTime(location, 2019, 2, 28))

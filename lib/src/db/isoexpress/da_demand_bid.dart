@@ -23,7 +23,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
         ..dbName = 'isoexpress'
         ..collectionName = 'da_demand_bid';
     dir ??= baseDir + 'PricingReports/DaDemandBid/Raw/';
-    location = getLocation('US/Eastern');
+    location = getLocation('America/New_York');
   }
   String reportName = 'Day-Ahead Energy Market Demand Historical Demand Bid Report';
   String getUrl(Date asOfDate) =>

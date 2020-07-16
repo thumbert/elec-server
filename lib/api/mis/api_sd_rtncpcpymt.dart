@@ -12,7 +12,7 @@ import 'package:elec_server/src/utils/api_response.dart';
 @ApiClass(name: 'sd_rtncpcpymt', version: 'v1')
 class SdRtNcpcPymt {
   DbCollection coll;
-  final Location location = getLocation('US/Eastern');
+  final Location location = getLocation('America/New_York');
 
   SdRtNcpcPymt(Db db) {
     coll = db.collection('sd_rtncpcpymt');
