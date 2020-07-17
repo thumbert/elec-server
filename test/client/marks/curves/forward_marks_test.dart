@@ -27,6 +27,13 @@ void tests(String rootUrl) async {
       var jan21 = res.observationAt(Month(2021, 1, location: location));
       expect(jan21.value[IsoNewEngland.bucket5x16], 58.25);
     });
+    test('get mh hourly shape as of 5/29/2020 for all buckets', () async {
+      var curveId = 'isone_energy_4000_hourlyshape';
+      var res = await client.getHourlyShape(
+          curveId, Date(2020, 5, 29), tzLocation: location);
+      expect(res.buckets.length, 3);
+    });
+
 
 
   });

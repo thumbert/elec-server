@@ -4,15 +4,13 @@ import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:http/http.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 
 void tests(String rootUrl) async {
   group('CurveIds client tests:', () {
     var client = CurveIdClient(Client(), rootUrl: rootUrl);
-    var location = getLocation('America/New_York');
     test('get all curveIds', () async {
       var ids = await client.curveIds();
-      expect(ids.length > 70, true);
+      expect(ids.length > 65, true);
     });
     test('get all curveIds, with a given pattern', () async {
       var ids = await client.curveIds(pattern: 'opres_rt');

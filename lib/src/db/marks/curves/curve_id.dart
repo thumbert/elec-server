@@ -12,7 +12,7 @@ class CurveIdArchive {
     'commodity',  // electricity, ng, etc.
     'unit',       // $/MWh, etc.
     'tzLocation', // America/New_York, etc.
-    'buckets'     // ['7x24'], ['5x16', '2x16H', '7x8'], etc.
+    'buckets',     // ['7x24'], ['5x16', '2x16H', '7x8'], etc.
   };
 
   /// Keep track of curve details, e.g. region, serviceType, location, children,

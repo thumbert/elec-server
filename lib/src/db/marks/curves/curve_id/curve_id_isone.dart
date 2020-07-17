@@ -47,9 +47,10 @@ List<Map<String, dynamic>> getEnergyCurves() {
           'curve': '${_zoneMap[ptid]}_${aux}', // 'hub_da_lmp'
           'unit': '\$/MWh',
           'buckets': ['5x16', '2x16H', '7x8'],
+          'hourlyShapeCurveId': 'isone_energy_4000_hourlyshape',
         };
 
-        /// add the zonal da lmp curves
+        /// for the zonal da lmp curves, add the marking rule (experimental)
         if (ptid != 4000 &&
             market == Market.da &&
             component == LmpComponent.lmp) {
@@ -77,6 +78,13 @@ List<Map<String, dynamic>> getEnergyCurves() {
         'buckets': ['5x16', '2x16H', '7x8'],
       });
     }
+
+    /// add hourly shape curve
+    out.add({
+      'curveId': 'isone_energy_4000_hourlyshape',
+      'unit': 'dimensionless',
+      'buckets': ['5x16', '2x16H', '7x8'],
+    });
   }
 
   return out;
@@ -84,7 +92,7 @@ List<Map<String, dynamic>> getEnergyCurves() {
 
 List<Map<String, dynamic>> getArrCurves() {
   return [
-    for (var ptid in _zoneMap.keys)
+    for (var ptid in _zoneMap.keys.where((e) => e != 4000))
       <String, dynamic>{
         'curveId': 'isone_arr_${_zoneMap[ptid]}', // isone_arr_ri
         'serviceType': 'arr',
@@ -97,7 +105,7 @@ List<Map<String, dynamic>> getArrCurves() {
 
 List<Map<String, dynamic>> getFwdResCurves() {
   return [
-    for (var ptid in _zoneMap.keys)
+    for (var ptid in _zoneMap.keys.where((e) => e != 4000))
       <String, dynamic>{
         'curveId': 'isone_fwdres_${_zoneMap[ptid]}', // isone_fwdres_ri
         'serviceType': 'fwdres',
@@ -123,7 +131,7 @@ List<Map<String, dynamic>> getOpResDaCurves() {
 
 List<Map<String, dynamic>> getOpResRtCurves() {
   return [
-    for (var ptid in _zoneMap.keys)
+    for (var ptid in _zoneMap.keys.where((e) => e != 4000))
       <String, dynamic>{
         'curveId': 'isone_opres_rt_${_zoneMap[ptid]}', // isone_opres_rt_ri
         'serviceType': 'opres',

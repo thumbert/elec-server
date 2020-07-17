@@ -1,5 +1,8 @@
 library test.db.marks.marks_20200529;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
@@ -158,6 +161,7 @@ List<Map<String, dynamic>> marks20200529() {
     }
   ];
 }
+
 List<Map<String, dynamic>> marks20200706() {
   var fromDate = '2020-07-06';
   var location = getLocation('America/New_York');
@@ -166,7 +170,8 @@ List<Map<String, dynamic>> marks20200706() {
       .splitLeft((dt) => Month.fromTZDateTime(dt))
       .map((e) => e.toIso8601String())
       .toList();
-  var days = Term.parse('7Jul20-31Jul20', location).days()
+  var days = Term.parse('7Jul20-31Jul20', location)
+      .days()
       .map((e) => e.toString())
       .toList();
 
@@ -178,16 +183,58 @@ List<Map<String, dynamic>> marks20200706() {
       'terms': days,
       'buckets': {
         '5x16': [
-          23.48, 23.48, 23.48, 23.48, null, null,
-          25.1, 25.1, 25.1, 25.1, 25.1, null, null,
-          27.5, 27.5, 27.5, 27.5, 27.5, null, null,
-          30, 30, 30, 30, 30,
+          23.48,
+          23.48,
+          23.48,
+          23.48,
+          null,
+          null,
+          25.1,
+          25.1,
+          25.1,
+          25.1,
+          25.1,
+          null,
+          null,
+          27.5,
+          27.5,
+          27.5,
+          27.5,
+          27.5,
+          null,
+          null,
+          30,
+          30,
+          30,
+          30,
+          30,
         ],
         '2x16H': [
-          null, null, null, null, 21.25, 21.25,
-          null, null, null, null, null, 23.4, 23.4,
-          null, null, null, null, null, 25.25, 25.25,
-          null, null, null, null, null,
+          null,
+          null,
+          null,
+          null,
+          21.25,
+          21.25,
+          null,
+          null,
+          null,
+          null,
+          null,
+          23.4,
+          23.4,
+          null,
+          null,
+          null,
+          null,
+          null,
+          25.25,
+          25.25,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         '7x8': List.filled(25, 15.5),
       }
@@ -257,5 +304,17 @@ List<Map<String, dynamic>> marks20200706() {
         ]
       }
     },
+  ];
+}
+
+List<Map<String, dynamic>> hourlyShape20191231() {
+  var x = File('test/db/marks/hourly_shape.json').readAsStringSync();
+  return <Map<String, dynamic>>[
+    {
+      'fromDate': '2019-12-31',
+      'curveId': 'isone_energy_4000_hourlyshape',
+      'markType': 'hourlyShape',
+      ...json.decode(x),
+    }
   ];
 }

@@ -18,7 +18,7 @@ class ForwardMarksArchive {
   /// Marks are inserted into the db for a given (curveId, fromDate) tuple.
   /// Not all curves have marks updated every day.
   ///
-  /// TODO: Support intra-day curves (in another collection)
+  ///
   ///
   ForwardMarksArchive({this.dbConfig}) {
     dbConfig ??= ComponentConfig()
@@ -38,7 +38,7 @@ class ForwardMarksArchive {
   ///   'fromDate': '2020-06-15',
   ///   'version': '2020-06-15T10:12:47.000-0500',  -- not supported yet
   ///   'curveId': 'elec_isone_4011_lmp_da',
-  ///   'markType': 'monthly' or 'daily'
+  ///   'markType': 'monthly', 'daily', 'hourlyShape'
   ///   'terms': ['2020-07', '2020-08', ..., '2026-12-01'],
   ///   'buckets': {
   ///     '5x16': [27.10, 26.25, ...],
@@ -46,6 +46,7 @@ class ForwardMarksArchive {
   ///     '7x8': [...],
   ///   }
   /// }
+  /// hourlyShape document has a slightly different format.
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(0);
     try {

@@ -74,5 +74,4 @@ class CurveIdClient {
     var data = json.decode(_response.body);
     return (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
   }
-
 }

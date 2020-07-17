@@ -9,6 +9,7 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/src/risk_system/marks/monthly_curve.dart';
+import 'package:elec/src/time/shape/hourly_shape.dart';
 
 class ForwardMarks {
   final String rootUrl;
@@ -72,4 +73,22 @@ class ForwardMarks {
 
     return out;
   }
+
+  /// Get hourly shape curve
+  Future<HourlyShape> getHourlyShape(
+      String curveId, Date asOfDate,
+      {Location tzLocation}) async {
+    tzLocation ??= asOfDate.location;
+    var _url = rootUrl +
+        servicePath +
+        'curveId/' +
+        commons.Escaper.ecapeVariable('${curveId.toString()}') +
+        '/asOfDate/${asOfDate.toString()}/markType/hourlyShape';
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    var aux = (json.decode(data['result']) as Map<String,dynamic>);
+
+    return HourlyShape.fromJson(aux, tzLocation);
+  }
+
 }

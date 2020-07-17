@@ -1,5 +1,6 @@
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
+import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
@@ -31,14 +32,20 @@ void insertForwardMarks() async {
 
 void insertIsoExpress() async {
   var location = getLocation('America/New_York');
-  var archive = DaEnergyOfferArchive();
-  await insertDays(archive, Term.parse('Jul17', location).days());
+//  await insertDays(DaEnergyOfferArchive(),
+//      Term.parse('Jul17', location).days());
+
+  // to calculate hourly shaping for Hub
+  await insertDays(DaLmpHourlyArchive(),
+      Term.parse('Jan19-Dec19', location).days());
 }
 
 
 void main() async {
   await initializeTimeZones();
 
-//  await insertIsoExpress();
-  await insertForwardMarks();
+  await insertIsoExpress();
+
+  //  await insertForwardMarks();
+
 }
