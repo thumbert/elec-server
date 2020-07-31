@@ -29,9 +29,11 @@ void tests(String rootUrl) async {
     });
     test('get mh hourly shape as of 5/29/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_hourlyshape';
-      var res = await client.getHourlyShape(
+      var hs = await client.getHourlyShape(
           curveId, Date(2020, 5, 29), tzLocation: location);
-      expect(res.buckets.length, 3);
+      expect(hs.buckets.length, 3);
+      expect(hs.data.first.interval.start.location.toString(),
+          'America/New_York');
     });
 
 

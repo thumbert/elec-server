@@ -5,9 +5,12 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
+import 'package:elec_server/src/ui/hourly_schedule_input.dart';
 import 'package:elec_server/src/ui/type_ahead.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
@@ -30,8 +33,11 @@ class ElecCalcCfdApp {
   List<_Row2> _row2s;
   List<html.ButtonInputElement> _buttons;
   TypeAhead _buySell;
+  HourlyScheduleInput hourlyScheduleInput;
 
   static final DateFormat _dateFmt = DateFormat('ddMMMyy');
+  static final NumberFormat _dollarPriceFmt =
+      NumberFormat.simpleCurrency(decimalDigits: 0, name: '');
 
   ElecCalcCfdApp(this.wrapper,
       {this.client, this.rootUrl = 'http://localhost:8080/'}) {
@@ -56,10 +62,10 @@ class ElecCalcCfdApp {
 
   /// Initialize the calculator from a json template.  In a live app, this
   /// template comes from the database.
-  set template(Map<String, dynamic> x) {
+  void fromJson(Map<String, dynamic> x) async {
     _calculator = ElecCalculatorCfd(
-        curveIdClient: _curveIdClient, forwardMarksClient: _forwardMarksClient)
-      ..fromJson(x);
+        curveIdClient: _curveIdClient, forwardMarksClient: _forwardMarksClient);
+    await _calculator.fromJson(x);
     _calculatorDiv = html.DivElement()
       ..className = 'elec-calculator'
       ..children = [
@@ -67,13 +73,100 @@ class ElecCalcCfdApp {
         _initializeRow2(),
         _initializeRow3(),
       ];
+    setListenersRow1();
+    setListenersRow2();
+    setListenersRow3();
 
     wrapper.children.add(_calculatorDiv);
     wrapper.children.add(_makeHotKeys());
   }
 
-  void makeHtml() {
-    _calculator.legs;
+  void setListenersRow1() {
+    /// term changes
+    _termInput.onChange.listen((e) async {
+      _calculator.term = Term.parse(_termInput.value, UTC);
+      await _calculator.build();
+      for (var i = 0; i < _row2s.length - 1; i++) {
+        _row2s[i]._floatingPriceDiv.text =
+            _calculator.legs[i].price().toStringAsFixed(2);
+      }
+      _dollarPriceDiv.text = _dollarPriceFmt.format(_calculator.dollarPrice());
+    });
+
+    /// asOfDate changes
+
+  }
+
+  void setListenersRow2() {
+    for (var i = 0; i < _row2s.length - 1; i++) {
+      var row = _row2s[i];
+
+      /// when quantity changes
+      row.quantityInput.onChange.listen((event) async {
+        var value = num.tryParse(row.quantityInput.value) ?? 0;
+        _calculator.legs[i].quantitySchedule = HourlySchedule.filled(value);
+        await _calculator.build();
+        _dollarPriceDiv.text =
+            _dollarPriceFmt.format(_calculator.dollarPrice());
+      });
+
+      row.quantityInput.onKeyDown.listen((e) async {
+        /// on Alt + 1, show the quantity editor
+        if (e.altKey == true && e.keyCode == 49) {
+          e.preventDefault();
+          var term = Term.fromInterval(
+              _calculator.term.interval.withTimeZone(row._leg.tzLocation));
+          hourlyScheduleInput =
+              HourlyScheduleInput(term, header: 'Quantity for leg $i')
+                ..visibility = true;
+          _calculatorDiv.children.add(hourlyScheduleInput.inner);
+          hourlyScheduleInput.onClose((e) async {
+            if (hourlyScheduleInput.timeseries.isNotEmpty) {
+              /// the save button was pressed
+              var aux = hourlyScheduleInput.timeseries;
+              _calculator.legs[i].quantitySchedule =
+                  HourlySchedule.fromTimeSeries(aux);
+              row.quantityInput.value = _calculator.legs[i].showQuantity().round().toString();
+              await _calculator.build();
+              _dollarPriceDiv.text =
+                  _dollarPriceFmt.format(_calculator.dollarPrice());
+            }
+          });
+        }
+      });
+
+      /// when bucket changes
+      row.bucketInput.onSelect((e) async {
+        _calculator.legs[i].bucket = Bucket.parse(_row2s[i].bucketInput.value);
+        await _calculator.build();
+        _row2s[i]._floatingPriceDiv.text =
+            _calculator.legs[i].price().toStringAsFixed(2);
+        _dollarPriceDiv.text =
+            _dollarPriceFmt.format(_calculator.dollarPrice());
+      });
+
+      /// when fixPrice changes
+      row.fixPriceInput.onChange.listen((event) async {
+        var value = num.tryParse(row.fixPriceInput.value);
+        if (value != null) {
+          _calculator.legs[i].fixPriceSchedule = HourlySchedule.filled(value);
+          await _calculator.build();
+          _dollarPriceDiv.text =
+              _dollarPriceFmt.format(_calculator.dollarPrice());
+        } else {
+          _dollarPriceDiv.text = 'Error';
+        }
+      });
+    }
+  }
+
+  void setListenersRow3() {
+    /// buy/sell changes
+    _buySell.onSelect((e) async {
+      _calculator.buySell = BuySell.parse(_buySell.value);
+      await _calculator.build();
+      _dollarPriceDiv.text = _dollarPriceFmt.format(_calculator.dollarPrice());
+    });
   }
 
   /// Set the row1 elements from the [_calculator] info.
@@ -174,7 +267,8 @@ class ElecCalcCfdApp {
 
     _netDiv = html.DivElement()
       ..className = 'cell-num cell-calculated'
-      ..id = 'net';
+      ..id = 'net'
+      ..innerHtml = '&nbsp';
     return html.DivElement()
       ..className = 'row-2'
       ..children = [
@@ -194,7 +288,8 @@ class ElecCalcCfdApp {
   html.DivElement _initializeRow3() {
     _dollarPriceDiv = html.DivElement()
       ..className = 'cell-num cell-calculated'
-      ..id = 'dollarprice';
+      ..id = 'dollarprice'
+      ..text = _dollarPriceFmt.format(_calculator.dollarPrice());
 
     var _buySellDiv = html.DivElement()
       ..className = 'typeahead cell-string cell-editable';
@@ -234,18 +329,6 @@ class ElecCalcCfdApp {
       ];
   }
 
-  void setListeners() {
-    var row = _row2s.first;
-
-    row._regionInput.onSelect((e) {});
-
-    row.bucketInput.onSelect((e) {
-      var leg = _calculator.legs.first;
-      leg.bucket = Bucket.parse(row.bucketInput.value);
-      _calculator.legs.first = leg;
-    });
-  }
-
   /// add the buttons at the bottom of the calculators
   html.DivElement _makeHotKeys() {
     _buttons = <html.ButtonInputElement>[];
@@ -272,13 +355,12 @@ class _Row2 {
   int indexLeg;
   CommodityLeg _leg;
   bool _empty;
-  html.DivElement _hourlyQuantityDiv,
-      _regionDiv,
+  html.DivElement _regionDiv,
       _serviceDiv,
       _curveDiv,
       _bucketDiv,
-      _fixPriceDiv,
       _floatingPriceDiv;
+  html.TextInputElement quantityInput, fixPriceInput;
   TypeAhead _regionInput, _serviceInput, _curveInput, bucketInput;
 
   /// An empty commodity row
@@ -292,59 +374,53 @@ class _Row2 {
     _empty = false;
   }
 
-  ///
+  /// Make one commodity row
   List<html.Element> initialize() {
-    _hourlyQuantityDiv = html.DivElement()
+    quantityInput = html.TextInputElement()
       ..className = 'cell-num cell-editable';
     if (_empty) {
       // if this is not set, the empty row doesn't get displayed
-      _hourlyQuantityDiv..innerHtml = '&nbsp';
+      quantityInput..innerHtml = '&nbsp';
     } else {
-      _hourlyQuantityDiv..text = _leg.showQuantity.toString();
+      quantityInput.value = _leg.showQuantity().toString();
     }
+
+//    _quantityDiv = html.DivElement()
+//      ..children = [quantityInput];
+//    hourlyScheduleInput = HourlyScheduleInput(_quantityDiv, calculator.term)
+//      ..visibility = false;
+
     _regionDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : (_leg.curveDetails['iso'] as Iso).name;
+      ..text = _empty ? '' : _leg.region;
     _serviceDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.curveDetails['serviceType'];
+      ..text = _empty ? '' : _leg.serviceType;
     _curveDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.curveDetails['name'];
+      ..text = _empty ? '' : _leg.curveName;
     _bucketDiv = html.DivElement()
       ..id = 'bucket-leg-$indexLeg'
       ..className = 'cell-string cell-editable typeahead';
-    bucketInput = TypeAhead(_bucketDiv, [
-      'Peak',
-      'Offpeak',
-      'Flat',
-      'Custom',
-      '5x16',
-      '2x16H',
-      '7x8',
-      '7x24',
-      '7x16'
-    ])
+    bucketInput = TypeAhead(
+        _bucketDiv, Bucket.buckets.keys.map((e) => e.toLowerCase()).toList())
       ..spellcheck = false
       ..value = _empty ? '' : _leg.bucket.toString();
 
-    /// the options don't show in the dropdown but are there and can be
-    /// selected!
-
-    _fixPriceDiv = html.DivElement()
+    fixPriceInput = html.TextInputElement()
       ..className = 'cell-num cell-editable'
-      ..text = _empty ? '' : _leg.showFixPrice.toString();
+      ..value = _empty ? '' : _leg.showFixPrice().toString();
     _floatingPriceDiv = html.DivElement()
       ..className = 'cell-num cell-calculated'
-      ..text = '';
+      ..text = _empty ? '' : _leg.price().toStringAsFixed(2);
 
     return [
-      _hourlyQuantityDiv,
+      quantityInput,
       _regionDiv,
       _serviceDiv,
       _curveDiv,
       _bucketDiv,
-      _fixPriceDiv,
+      fixPriceInput,
       _floatingPriceDiv,
     ];
   }

@@ -32,7 +32,7 @@ void main() async {
   mis.tests();
 
   /// Utils tests
-  iso_timestamp.testParseIsoTimestamp();
+  iso_timestamp.tests();
   parse_int_range.tests();
   term_cache.tests();
   to_csv.tests();

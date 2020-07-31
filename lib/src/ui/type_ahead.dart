@@ -64,7 +64,6 @@ class TypeAhead {
     });
 
     _input.onKeyDown.listen((e) {
-      //if (_al == null) return;
       var _xs = _al.children.cast<DivElement>();
       if (_xs.isEmpty) return;
       if (e.keyCode == 40) {

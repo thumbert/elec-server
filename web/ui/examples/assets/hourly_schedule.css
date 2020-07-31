@@ -1,0 +1,14 @@
+
+.hourly-schedule {
+  display: grid;
+  grid-template-columns: auto 30px;
+  column-gap: 5px;
+  padding: 10px;
+  align-items: center;
+}
+
+.hourly-schedule .save {
+  margin-top: 20px;
+  width: 100px;
+}
+

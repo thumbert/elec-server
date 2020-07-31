@@ -67,9 +67,11 @@ bool isFallBackDate(Date date) {
       .timeZoneOffset
       .inHours;
   var res = false;
-  if (offsetStart == -4 && offsetEnd == -5) res = true;
+//  if (offsetStart == -4 && offsetEnd == -5) res = true; // for US/Eastern
+  if (offsetStart > offsetEnd) res = true;
   return res;
 }
+
 
 /// When you read the MIS reports with csv, the hour ending is an integer.
 /// Fix it with this function.

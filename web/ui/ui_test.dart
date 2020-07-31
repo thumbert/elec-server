@@ -122,9 +122,9 @@ void testsUi2() {
 void main() async {
   await initializeTimeZone();
 
-//  testsUi2();
+  testsUi2();
 
-  testsUi1();
+//  testsUi1();
 
 
 

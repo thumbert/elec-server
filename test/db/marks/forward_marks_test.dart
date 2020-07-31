@@ -242,9 +242,9 @@ void repopulateDb() async {
 void insertMarks() async {
   var archive = ForwardMarksArchive();
   await archive.db.open();
+  await archive.insertData(hourlyShape20191231());
   await archive.insertData(marks20200529());
   await archive.insertData(marks20200706());
-  await archive.insertData(hourlyShape20191231());
   await archive.db.close();
 }
 

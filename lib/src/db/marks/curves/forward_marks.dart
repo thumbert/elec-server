@@ -76,9 +76,10 @@ class ForwardMarksArchive {
 
   /// Curves may be submitted every day for completeness, but they don't need
   /// to be stored as they have the same values as the day before.
-  /// Check if you need to insert the document or not.  You need to insert if
-  /// values are different or if it's a curve extension.  Return [true] if an
-  /// update is needed.
+  /// Check if you need to insert the document or not.
+  ///
+  /// You need to insert if values are different or if it's a curve extension.
+  /// Return [true] if an update is needed.
   bool needToInsert(
       Map<String, dynamic> document, Map<String, dynamic> newDocument) {
     if (document.isEmpty) return true;
@@ -178,7 +179,6 @@ class ForwardMarksArchive {
       {
         '\$project': {
           '_id': 0,
-          'fromDate': 0,
           'curveId': 0,
           'markType': 0,
         }

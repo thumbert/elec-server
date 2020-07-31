@@ -7,7 +7,7 @@
   border: 2px solid silver;
   padding: 1em;
   margin: 5px;
-  width: 680px;
+  width: 705px;
 }
 .hot-keys {
   margin: 5px;
@@ -48,7 +48,7 @@
 
 .elec-calculator .row-2 > .grid-container {
   display: grid;
-  grid-template-columns: 70px 70px 70px 220px 70px 60px 60px;
+  grid-template-columns: 70px 70px 70px 220px 100px 60px 60px;
   grid-gap: 5px;
   row-gap: 2px;
   column-gap: 2px;
