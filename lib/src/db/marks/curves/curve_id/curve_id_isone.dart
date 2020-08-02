@@ -1,7 +1,5 @@
 library db.curves.curve_id.curve_id_isone;
 
-import 'dart:convert';
-import 'dart:io';
 import 'package:elec/risk_system.dart';
 
 var _zoneMap = Map.fromIterables(List.generate(9, (i) => 4000 + i),
