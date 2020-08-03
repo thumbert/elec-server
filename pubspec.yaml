@@ -28,7 +28,7 @@ dependencies:
   more: '>=1.10.1 <2.0.0'
   protobuf: '>=0.14.3 <1.0.0'
   rpc: '>=0.6.0 <1.0.0'
-  spreadsheet_decoder: 1.0.0
+  spreadsheet_decoder: '>=1.2.0 <2.0.0'
   table:
     git:
       url: git://github.com/thumbert/table.git
