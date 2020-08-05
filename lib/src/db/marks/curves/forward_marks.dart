@@ -55,6 +55,15 @@ class ForwardMarksArchive {
         var fromDate = newDocument['fromDate'];
         var curveId = newDocument['curveId'];
         var markType = newDocument['markType'] as String;
+
+        if (markType == 'daily' || markType == 'monthly') {
+          /// keep only a certain number of digits for the daily and monthly marks
+          for (var bucket in (newDocument['buckets'] as Map).keys) {
+            var _x = newDocument['buckets'][bucket] as List;
+            newDocument['buckets'][bucket] =
+                _x.map((e) => num.parse(e.toStringAsFixed(4))).toList();
+          }
+        }
         // get the last document with the curve
         var document = await _getForwardCurve(fromDate, curveId, markType);
         if (needToInsert(document, newDocument)) {

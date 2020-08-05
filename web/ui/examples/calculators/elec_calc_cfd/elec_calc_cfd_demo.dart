@@ -3,7 +3,7 @@ import 'dart:html';
 import 'package:http/http.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
-import 'elec_calc_cfd_app.dart';
+import 'package:elec_server/src/ui/maya/elec_calc_cdf/elec_calc_cfd_app.dart';
 
 Map<String,dynamic> _template1() =>  <String,dynamic>{
   'term': 'Jan21-Mar21',
