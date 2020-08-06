@@ -134,9 +134,9 @@ class ForwardMarksArchive {
       Month.parse((document['terms'] as List).first as String, fmt: _isoFmt);
       var monthN =
       Month.parse((document['terms'] as List).last as String, fmt: _isoFmt);
-      if (month0.next != month1) {
-        throw ArgumentError('Months must start with prompt month.');
-      }
+//      if (month0.next != month1) {
+//        throw ArgumentError('Months must start with prompt month.');
+//      }
 
       // check that month1 is after fromDate
       if (!fromDate.start.isBefore(month1.start)) {

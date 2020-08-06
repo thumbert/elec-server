@@ -10,20 +10,20 @@
   background-color: black;
 }
 
-input {
+.typeahead input {
   background-color: black;
   color: #7CFC00;
   border: 1px solid transparent;
   /*padding: 1px;*/
 }
 
-input[type=text] {
+.typeahead input[type=text] {
   background-color: black;
   color: #7CFC00;
   width: 100%;
 }
 
-input[type=submit] {
+.typeahead input[type=submit] {
   background-color: DodgerBlue;
   color: #fff;
   cursor: pointer;
