@@ -10,7 +10,7 @@ void tests(String rootUrl) async {
     var client = CurveIdClient(Client(), rootUrl: rootUrl);
     test('get all curveIds', () async {
       var ids = await client.curveIds();
-      expect(ids.length > 65, true);
+      expect(ids.length > 5, true);
     });
     test('get all curveIds, with a given pattern', () async {
       var ids = await client.curveIds(pattern: 'opres_rt');

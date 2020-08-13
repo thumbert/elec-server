@@ -3,15 +3,12 @@ library ui.examples.calculators.elec_calc_cfd.elec_calc_cfd_app;
 import 'dart:html' as html;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec_server/client/marks/curves/curve_id.dart';
-import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:elec_server/src/ui/hourly_schedule_input.dart';
 import 'package:elec_server/src/ui/type_ahead.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:timezone/data/latest.dart';
+import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
 import 'package:timezone/timezone.dart';
@@ -21,8 +18,7 @@ class ElecCalcCfdApp {
   Client client;
   String rootUrl;
   ElecCalculatorCfd _calculator;
-  CurveIdClient _curveIdClient;
-  ForwardMarks _forwardMarksClient;
+  CacheProvider cacheProvider;
 
   html.DivElement _calculatorDiv,
       _hasCustomDiv,
@@ -39,11 +35,7 @@ class ElecCalcCfdApp {
   static final NumberFormat _dollarPriceFmt =
       NumberFormat.simpleCurrency(decimalDigits: 0, name: '');
 
-  ElecCalcCfdApp(this.wrapper,
-      {this.client, this.rootUrl = 'http://localhost:8080/'}) {
-    _curveIdClient = CurveIdClient(client, rootUrl: rootUrl);
-    _forwardMarksClient = ForwardMarks(client, rootUrl: rootUrl);
-  }
+  ElecCalcCfdApp(this.wrapper, this.cacheProvider);
 
   void _f2Refresh() {
     print(_calculator.term);
@@ -63,8 +55,7 @@ class ElecCalcCfdApp {
   /// Initialize the calculator from a json template.  In a live app, this
   /// template comes from the database.
   void fromJson(Map<String, dynamic> x) async {
-    _calculator = ElecCalculatorCfd(
-        curveIdClient: _curveIdClient, forwardMarksClient: _forwardMarksClient);
+    _calculator = ElecCalculatorCfd(cacheProvider);
     await _calculator.fromJson(x);
     _calculatorDiv = html.DivElement()
       ..className = 'elec-calculator'

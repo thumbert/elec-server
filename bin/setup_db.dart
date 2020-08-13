@@ -37,12 +37,16 @@ void insertForwardMarks() async {
 
 void insertIsoExpress() async {
   var location = getLocation('America/New_York');
+  // to pass tests
 //  await insertDays(DaEnergyOfferArchive(),
 //      Term.parse('Jul17', location).days());
 
-  // to calculate hourly shaping for Hub
+  // to calculate hourly shaping for Hub, need Jan19-Dec19
+//  await insertDays(DaLmpHourlyArchive(),
+//      Term.parse('Jan19-Dec19', location).days());
+  // to calculate settlement prices for calculators, Jan20-Aug20
   await insertDays(DaLmpHourlyArchive(),
-      Term.parse('Jan19-Dec19', location).days());
+      Term.parse('Jan20-Aug20', location).days());
 }
 
 void insertPtidTable() async {
