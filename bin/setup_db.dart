@@ -1,7 +1,12 @@
+
+import 'dart:io';
+
+import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
+import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import '../test/db/marks/marks_special_days.dart';
@@ -40,12 +45,31 @@ void insertIsoExpress() async {
       Term.parse('Jan19-Dec19', location).days());
 }
 
+void insertPtidTable() async {
+  var archive = PtidArchive();
+  var baseUrl = 'https://www.iso-ne.com/static-assets/documents/';
+  var urls = [
+    '2019/02/2.6.20_pnode_table_2019_02_05.xlsx',
+    '2020/06/pnode_table_2020_06_11.xlsx',
+  ];
+  if (!Directory(archive.dir).existsSync()) {
+    Directory(archive.dir).createSync(recursive: true);
+  }
+  await archive.db.open();
+  for (var url in urls) {
+    await archive.downloadFile(baseUrl + url);
+    var file = path.join(archive.dir, path.basename(url));
+    await archive.insertMongo(File(file));
+  }
+  await archive.db.close();
+}
+
 
 void main() async {
   await initializeTimeZones();
 
-  await insertIsoExpress();
-
-  //  await insertForwardMarks();
+//  await insertForwardMarks();
+//  await insertIsoExpress();
+  await insertPtidTable();
 
 }

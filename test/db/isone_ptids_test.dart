@@ -20,7 +20,7 @@ void downloadFile() async {
 
   var archive = PtidArchive(config: config, dir: dir);
   var url =
-      'https://www.iso-ne.com/static-assets/documents/2019/01/2.6.19_pnode_table_2019_01_10.xls';
+      'https://www.iso-ne.com/static-assets/documents/2019/02/2.6.20_pnode_table_2019_02_05.xlsx';
   await archive.downloadFile(url);
 }
 
@@ -59,20 +59,20 @@ void tests() async {
     tearDown(() async {
       await config.db.close();
     });
-    test('read file for 2017-09-19', () {
-      var file = File(archive.dir + 'pnode_table_2017_09_19.xlsx');
+    test('read file for 2019-02-05', () {
+      var file = File(archive.dir + '2.6.20_pnode_table_2019_02_05.xlsx');
       var data = archive.readXlsx(file);
-      expect(data.length, 1120);
+      expect(data.length, 1158);
       expect(data.first, {'ptid': 4000, 'name': '.H.INTERNAL_HUB',
-        'spokenName': 'HUB', 'type': 'hub', 'asOfDate': '2017-09-19'});
+        'spokenName': 'HUB', 'type': 'hub', 'asOfDate': '2019-02-05'});
       expect(data[9]['type'], 'reserve zone');
     });
-    test('read file for 2018-09-19', () {
-      var file = File(archive.dir + 'pnode_table_2018_09_11.xlsx');
+    test('read file for 2020-06-11', () {
+      var file = File(archive.dir + 'pnode_table_2020_06_11.xlsx');
       var data = archive.readXlsx(file);
-      expect(data.length, 1161);
+      expect(data.length, 1179);
       expect(data.first, {'ptid': 4000, 'name': '.H.INTERNAL_HUB',
-        'spokenName': 'HUB', 'type': 'hub', 'asOfDate': '2018-09-11'});
+        'spokenName': 'HUB', 'type': 'hub', 'asOfDate': '2020-06-11'});
       expect(data[9]['type'], 'reserve zone');
       expect(data[19]['type'], 'demand response zone');
     });
