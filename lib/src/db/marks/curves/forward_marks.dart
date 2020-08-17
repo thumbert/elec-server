@@ -61,7 +61,13 @@ class ForwardMarksArchive {
           for (var bucket in (newDocument['buckets'] as Map).keys) {
             var _x = newDocument['buckets'][bucket] as List;
             newDocument['buckets'][bucket] =
-                _x.map((e) => num.parse(e.toStringAsFixed(4))).toList();
+                _x.map((e) {
+                  if (e != null) {
+                    return num.parse(e.toStringAsFixed(4));
+                  } else {
+                    return null;
+                  }
+                }).toList();
           }
         }
         // get the last document with the curve

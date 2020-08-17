@@ -9,7 +9,7 @@ Map<String,dynamic> _template1() =>  <String,dynamic>{
   'term': 'Jan21-Mar21',
   'asOfDate': '2020-05-29',
   'buy/sell': 'Buy',
-  'comments': 'a simple calculator for winter times',
+  'comments': 'a simple calculator',
   'legs': [
     {
       'curveId': 'isone_energy_4000_da_lmp',

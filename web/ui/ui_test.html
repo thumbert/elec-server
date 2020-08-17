@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>UI Components</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Material+Icons" />
     <script defer src="ui_test.dart.js"></script>
 </head>
 <style>
@@ -12,94 +13,91 @@
 </style>
 <body>
 
-<ul class="pagination">
-    <li class="page-item active"><a class="page-link rounded-0" href="#by-entity-zone">By Entity/Zone</a></li>
-    <li class="page-item"><a class="page-link rounded-0" href="#by-assetid">By Asset Id</a></li>
-</ul>
-<div class="container-fluid" id="by-entity-zone">
-    <div class="row md-3 mt-3">
-        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
-            <label>
-                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Entity
-            </label>
-        </div>
-        <div class="col-sm-2 mb-3">
-            <select class="form-control">
-                <option>ACME All</option>
-                <option>ACME Wholesale</option>
-                <option>ACME Retail</option>
-                <option>ACME Municipal</option>
-            </select>
-        </div>
-    </div>
-    <div class="row md-1">
-        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
-            <label>
-                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Zone
-            </label>
-        </div>
-        <div class="col-sm-2 mb-3">
-            <select class="form-control">
-                <option>All</option>
-                <option>MAINE</option>
-                <option>NH</option>
-                <option>VT</option>
-                <option>CT</option>
-                <option>RI</option>
-            </select>
-        </div>
-    </div>
-</div>
+<!--<ul class="pagination">-->
+<!--    <li class="page-item active"><a class="page-link rounded-0" href="#by-entity-zone">By Entity/Zone</a></li>-->
+<!--    <li class="page-item"><a class="page-link rounded-0" href="#by-assetid">By Asset Id</a></li>-->
+<!--</ul>-->
+<!--<div class="container-fluid" id="by-entity-zone">-->
+<!--    <div class="row md-3 mt-3">-->
+<!--        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">-->
+<!--            <label>-->
+<!--                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Entity-->
+<!--            </label>-->
+<!--        </div>-->
+<!--        <div class="col-sm-2 mb-3">-->
+<!--            <select class="form-control">-->
+<!--                <option>ACME All</option>-->
+<!--                <option>ACME Wholesale</option>-->
+<!--                <option>ACME Retail</option>-->
+<!--                <option>ACME Municipal</option>-->
+<!--            </select>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="row md-1">-->
+<!--        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">-->
+<!--            <label>-->
+<!--                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Zone-->
+<!--            </label>-->
+<!--        </div>-->
+<!--        <div class="col-sm-2 mb-3">-->
+<!--            <select class="form-control">-->
+<!--                <option>All</option>-->
+<!--                <option>MAINE</option>-->
+<!--                <option>NH</option>-->
+<!--                <option>VT</option>-->
+<!--                <option>CT</option>-->
+<!--                <option>RI</option>-->
+<!--            </select>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 
-<div class="container-fluid" id="by-assetid">
-    <div class="row md-3 mt-3">
-        <div class="col-md-1 mb-3 mt-2">
-            <label class="form-check-label">Asset Id</label>
-        </div>
-        <div class="col-sm-2 mb-3">
-            <input type="text" class="form-control">
-        </div>
-    </div>
-</div>
+<!--<div class="container-fluid" id="by-assetid">-->
+<!--    <div class="row md-3 mt-3">-->
+<!--        <div class="col-md-1 mb-3 mt-2">-->
+<!--            <label class="form-check-label">Asset Id</label>-->
+<!--        </div>-->
+<!--        <div class="col-sm-2 mb-3">-->
+<!--            <input type="text" class="form-control">-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 
-
-
-
-<h3> Simple form</h3>
-<div class="container-fluid">
-    <div class="row md-3 mt-3">
-        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
-            <label>
-                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Entity
-            </label>
-        </div>
-        <div class="col-sm-2 mb-3">
-            <select class="form-control">
-                <option>ACME All</option>
-                <option>ACME Wholesale</option>
-                <option>ACME Retail</option>
-                <option>ACME Municipal</option>
-            </select>
-        </div>
-    </div>
-    <div class="row md-1">
-        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">
-            <label>
-                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Zone
-            </label>
-        </div>
-        <div class="col-sm-2 mb-3">
-            <select class="form-control">
-                <option>All</option>
-                <option>MAINE</option>
-                <option>NH</option>
-                <option>VT</option>
-                <option>CT</option>
-                <option>RI</option>
-            </select>
-        </div>
-    </div>
-</div>
+<!--<h3> Simple form</h3>-->
+<!--<div class="container-fluid">-->
+<!--    <div class="row md-3 mt-3">-->
+<!--        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">-->
+<!--            <label>-->
+<!--                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Entity-->
+<!--            </label>-->
+<!--        </div>-->
+<!--        <div class="col-sm-2 mb-3">-->
+<!--            <select class="form-control">-->
+<!--                <option>ACME All</option>-->
+<!--                <option>ACME Wholesale</option>-->
+<!--                <option>ACME Retail</option>-->
+<!--                <option>ACME Municipal</option>-->
+<!--            </select>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="row md-1">-->
+<!--        <div class="col-md-2 mb-3 mt-2" style="margin-left:-95px;">-->
+<!--            <label>-->
+<!--                <input type="checkbox" style="margin-left:95px;margin-right:8px;"> Zone-->
+<!--            </label>-->
+<!--        </div>-->
+<!--        <div class="col-sm-2 mb-3">-->
+<!--            <select class="form-control">-->
+<!--                <option>All</option>-->
+<!--                <option>MAINE</option>-->
+<!--                <option>NH</option>-->
+<!--                <option>VT</option>-->
+<!--                <option>CT</option>-->
+<!--                <option>RI</option>-->
+<!--            </select>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 
 
 
@@ -200,6 +198,14 @@
     <div id="checkbox-group"></div>
     <div id="checkbox-group-message"></div>
 </div>
+
+<div style="margin-top: 25px">
+    <div>A disposable window.  Press Escape on the window content to dispose of it.</div>
+    <div id="disposable-window-wrapper"></div>
+</div>
+
+
+
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>

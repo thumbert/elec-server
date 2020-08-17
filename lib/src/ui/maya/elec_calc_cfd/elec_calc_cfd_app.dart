@@ -3,6 +3,7 @@ library ui.examples.calculators.elec_calc_cfd.elec_calc_cfd_app;
 import 'dart:html' as html;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
+import 'package:elec_server/src/ui/disposable_window.dart';
 import 'package:elec_server/src/ui/hourly_schedule_input.dart';
 import 'package:elec_server/src/ui/type_ahead.dart';
 import 'package:http/http.dart';
@@ -24,7 +25,8 @@ class ElecCalcCfdApp {
       _hasCustomDiv,
       _netDiv,
       _dollarPriceDiv,
-      _commentsDiv;
+      _commentsDiv,
+      _reportOutputDiv;
   html.TextInputElement _termInput, _asOfDateInput;
   List<_Row2> _row2s;
   List<html.ButtonInputElement> _buttons;
@@ -35,7 +37,9 @@ class ElecCalcCfdApp {
   static final NumberFormat _dollarPriceFmt =
       NumberFormat.simpleCurrency(decimalDigits: 0, name: '');
 
-  ElecCalcCfdApp(this.wrapper, this.cacheProvider);
+  ElecCalcCfdApp(this.wrapper, this.cacheProvider) {
+    wrapper.style.margin = '8px';
+  }
 
   void _f2Refresh() {
     print(_calculator.term);
@@ -46,10 +50,17 @@ class ElecCalcCfdApp {
       print(leg.quantity);
     }
   }
-
   void _f3Details() {}
   void _f7Reports() {
-    print('Wanna report?');
+    var content = html.DivElement()
+      ..setAttribute('style',
+          'font-family: monospace; white-space: pre-wrap; '
+              'background-color: dodgerblue; color: white;')
+      ..text = _calculator.flatReport().toString();
+    _reportOutputDiv.children = [DisposableWindow(content).inner];
+  }
+  void _help() {
+    print('Need help');
   }
 
   /// Initialize the calculator from a json template.  In a live app, this
@@ -68,8 +79,11 @@ class ElecCalcCfdApp {
     setListenersRow2();
     setListenersRow3();
 
+    _reportOutputDiv = html.DivElement();
+
     wrapper.children.add(_calculatorDiv);
     wrapper.children.add(_makeHotKeys());
+    wrapper.children.add(_reportOutputDiv);
   }
 
   void setListenersRow1() {
@@ -335,6 +349,10 @@ class ElecCalcCfdApp {
       ..className = 'btn btn-primary my-button'
       ..value = 'F7 Report'
       ..onClick.listen((event) => _f7Reports()));
+    _buttons.add(html.ButtonInputElement()
+      ..className = 'btn btn-primary my-button'
+      ..value = 'Help'
+      ..onClick.listen((event) => _help()));
     return html.DivElement()
       ..className = 'hot-keys'
       ..children = _buttons;

@@ -1,6 +1,6 @@
 import 'dart:html';
 
-
+import 'package:elec_server/src/ui/disposable_window.dart';
 import 'package:elec_server/src/ui2/selector_checkbox.dart';
 import 'package:elec_server/src/ui2/selector_load_spec.dart';
 import 'package:timezone/browser.dart';
@@ -9,13 +9,13 @@ import 'package:elec_server/src/ui2/selector.dart';
 
 void testsUi1() {
   var messageCdcf =
-  querySelector('#categorical-dropdown-checkbox-filter-message');
+      querySelector('#categorical-dropdown-checkbox-filter-message');
   var cdcf = CategoricalDropdownCheckboxFilter(
       querySelector('#categorical-dropdown-checkbox-filter'),
       ['Federer', 'Nadal'],
       'Tennis players');
   cdcf.onChange((e) => messageCdcf.text =
-  'You selected ${cdcf.value}, checked: ${cdcf.checked}');
+      'You selected ${cdcf.value}, checked: ${cdcf.checked}');
 
   var messageCdf = querySelector('#categorical-dropdown-filter-message');
   var cdf = CategoricalDropdownFilter(
@@ -42,37 +42,43 @@ void testsUi1() {
   /// numeric range
   var messageNr = querySelector('#numeric-range-message');
   var numericRange =
-  NumericRangeFilter(querySelector('#numeric-range'), 0, 100, 'Percent');
+      NumericRangeFilter(querySelector('#numeric-range'), 0, 100, 'Percent');
   numericRange.onChange((e) => messageNr.text =
-  'The range is ${numericRange.minValue} - ${numericRange.maxValue}');
+      'The range is ${numericRange.minValue} - ${numericRange.maxValue}');
 
   /// a radio group
   var message = querySelector('#radio-group-message');
   var radioGroup =
-  RadioGroupInput(querySelector('#radio-group'), ['Federer', 'Nadal']);
+      RadioGroupInput(querySelector('#radio-group'), ['Federer', 'Nadal']);
   radioGroup.onChange((e) => message.text = 'You selected ${radioGroup.value}');
 
   /// a term input
   var messageTi = querySelector('#term-input-message');
-  var termInput = TermInput(querySelector('#term-input'), defaultValue: 'Jan19');
+  var termInput =
+      TermInput(querySelector('#term-input'), defaultValue: 'Jan19');
   termInput.onChange((e) => messageTi.text = 'You typed ${termInput.value}');
-
 
   /// a selectable list
   var messageSl = querySelector('#selectable-list-message');
-  var fruits = ['Apple', 'Banana', 'Lemon', 'Orange', 'Strawberry',
-    'Watermelon'];
-  var selectableList = SelectableList(querySelector('#selectable-list'),
-      fruits);
+  var fruits = [
+    'Apple',
+    'Banana',
+    'Lemon',
+    'Orange',
+    'Strawberry',
+    'Watermelon'
+  ];
+  var selectableList =
+      SelectableList(querySelector('#selectable-list'), fruits);
   selectableList.onChange((e) {
     messageSl.text = 'You selected ${selectableList.selected.join(', ')}';
   });
 
-
   /// a simple checkbox with a label
   var messageCl = querySelector('#checkbox-label-message');
-  var checkboxLabel = CheckboxLabel(querySelector('#checkbox-label'),
-      'Sprinkles?')..checked = true;
+  var checkboxLabel =
+      CheckboxLabel(querySelector('#checkbox-label'), 'Sprinkles?')
+        ..checked = true;
   checkboxLabel.onChange((e) {
     if (checkboxLabel.checked) {
       messageCl.text = 'You want sprinkles';
@@ -82,50 +88,57 @@ void testsUi1() {
   });
 
   /// text input with allowed values only
-  var messageTextInputConstrained = querySelector('#text-input-constrained-message')
-    ..text = 'Only Apple, Banana, Lemon, Orange, Strawberry, Watermelon are allowed';
-  var textInputConstrained = TextInput(querySelector('#text-input-constrained'),
-      'Fruit', initialValue: 'Banana', allow: (String x) => fruits.contains(x));
+  var messageTextInputConstrained = querySelector(
+      '#text-input-constrained-message')
+    ..text =
+        'Only Apple, Banana, Lemon, Orange, Strawberry, Watermelon are allowed';
+  var textInputConstrained = TextInput(
+      querySelector('#text-input-constrained'), 'Fruit',
+      initialValue: 'Banana', allow: (String x) => fruits.contains(x));
   textInputConstrained.onChange((e) {
-    messageTextInputConstrained.text = 'You selected ${textInputConstrained.value}';
+    messageTextInputConstrained.text =
+        'You selected ${textInputConstrained.value}';
   });
 
   /// checkbox group
   var messageCheckboxGroup = querySelector('#checkbox-group-message')
     ..text = 'Select several';
-  var checkboxGroup = CheckboxGroup(querySelector('#checkbox-group'),
-      ['Roger', 'Rafa', 'Novak', 'Sacha'], leftLabel: 'Player', marginRight: 40);
+  var checkboxGroup = CheckboxGroup(
+      querySelector('#checkbox-group'), ['Roger', 'Rafa', 'Novak', 'Sacha'],
+      leftLabel: 'Player', marginRight: 40);
   checkboxGroup.onChange((e) {
     messageCheckboxGroup.text = 'You selected ${checkboxGroup.selected}';
   });
 
+  /// a disposable window
+  var li =
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+  var disposableWindow =
+      DisposableWindow(DivElement()..text = li);
+  var disposableWindowWrapper = querySelector('#disposable-window-wrapper')
+    ..children = [disposableWindow.inner];
 }
-
 
 void testsUi2() {
   var zones = ['ALL', 'MAINE', 'NH', 'VT', 'CT', 'RI', 'SEMA', 'WCMA', 'NEMA'];
   var message1 = querySelector('#ui2-zone-selector-message');
-  var zoneSelector = Selector(querySelector('#ui2-zone-selector'),
-      zones, 'Load Zone');
-  zoneSelector.onChange((e) =>
-    message1.text = 'You selected ${zoneSelector.value}');
+  var zoneSelector =
+      Selector(querySelector('#ui2-zone-selector'), zones, 'Load Zone');
+  zoneSelector
+      .onChange((e) => message1.text = 'You selected ${zoneSelector.value}');
 
-  var zoneSelectorCheckbox = SelectorCheckbox(querySelector('#ui2-zone-selector-checkbox'), zones, 'Load Zone');
+  var zoneSelectorCheckbox = SelectorCheckbox(
+      querySelector('#ui2-zone-selector-checkbox'), zones, 'Load Zone');
   print(zoneSelectorCheckbox.value);
 
 //  var loadSpecSelector = LoadSpecSelector(
 //      querySelector('#ui2-load-spec-selector'));
-
 }
-
 
 void main() async {
   await initializeTimeZone();
 
-  testsUi2();
+//  testsUi2();
 
-//  testsUi1();
-
-
-
+  testsUi1();
 }
