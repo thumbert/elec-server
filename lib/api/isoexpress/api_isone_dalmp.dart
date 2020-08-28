@@ -81,7 +81,7 @@ class DaLmp {
   }
 
   num _mean(Iterable<num> x) {
-    int i = 0;
+    var i = 0;
     num res = 0;
     x.forEach((e) {
       res += e;
@@ -94,10 +94,10 @@ class DaLmp {
   @ApiMethod(path: 'hourly/{component}/ptid/{ptid}/start/{start}/end/{end}')
   Future<ApiResponse> getHourlyPrices(
       String component, int ptid, String start, String end) async {
-    Date startDate = Date.parse(start);
-    Date endDate = Date.parse(end);
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
     var data = await getHourlyData(ptid, startDate, endDate, component);
-    return new ApiResponse()..result = json.encode(data);
+    return ApiResponse()..result = json.encode(data);
   }
 
   /// http://localhost:8080/dalmp/v1/hourly/congestion/ptid/4000/start/20170101/end/20170101/compact
@@ -105,8 +105,8 @@ class DaLmp {
       path: 'hourly/{component}/ptid/{ptid}/start/{start}/end/{end}/compact')
   Future<List<double>> getHourlyPricesCompact(
       String component, int ptid, String start, String end) async {
-    Date startDate = Date.parse(start);
-    Date endDate = Date.parse(end);
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
     var data = await getHourlyData(ptid, startDate, endDate, component);
     return data.map((e) => e[component] as double).toList();
   }

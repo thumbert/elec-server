@@ -39,7 +39,7 @@ class ForwardMarksArchive {
   ///   'version': '2020-06-15T10:12:47.000-0500',  -- not supported yet
   ///   'curveId': 'elec_isone_4011_lmp_da',
   ///   'markType': 'monthly', 'daily', 'hourlyShape'
-  ///   'terms': ['2020-07', '2020-08', ..., '2026-12-01'],
+  ///   'terms': ['2020-07', '2020-08', ..., '2026-12'],
   ///   'buckets': {
   ///     '5x16': [27.10, 26.25, ...],
   ///     '2x16H': [...],
