@@ -11,37 +11,40 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:timezone/timezone.dart';
 
 class SrDaLocSumArchive extends mis.MisReportArchive {
+  @override
   ComponentConfig dbConfig;
   Location location;
 
   SrDaLocSumArchive({this.dbConfig}) {
     reportName = 'SR_DALOCSUM';
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
+    dbConfig ??= ComponentConfig()
         ..host = '127.0.0.1'
         ..dbName = 'mis';
-    }
     dbConfig.collectionName = 'sr_dalocsum';
     location = getLocation('America/New_York');
   }
 
   /// Override the implementation.
-  Future insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
-    if (data.isEmpty) return new Future.value(null);
-    if (tab == 0) await insertTabData0(data);
-    else if (tab == 1) await insertTabData1(data);
-    else
-      throw new ArgumentError('Unsupported tab $tab for report ${reportName}');
+  @override
+  Future insertTabData(List<Map<String,dynamic>> data, {int tab = 0}) async {
+    if (data.isEmpty) return Future.value(null);
+    if (tab == 0) {
+      await insertTabData0(data);
+    } else if (tab == 1) {
+      await insertTabData1(data);
+    } else {
+      throw ArgumentError('Unsupported tab $tab for report ${reportName}');
+    }
   }
 
   Future<Null> insertTabData0(List<Map<String,dynamic>> data) async {
-    if (data.isEmpty) return new Future.value(null);
+    if (data.isEmpty) return Future.value(null);
     String account = data.first['account'];
     /// split the data by Location ID, date, version
     var groups = groupBy(data, (e) =>
-    new Tuple3(e['Location ID'], e['date'], e['version']));
+    Tuple3(e['Location ID'], e['date'], e['version']));
     try {
-      for (Tuple3 key in groups.keys) {
+      for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'account': account,
           'tab': 0,
@@ -58,7 +61,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
   }
 
   Future<Null> insertTabData1(List<Map<String,dynamic>> data) async {
-    if (data.isEmpty) return new Future.value(null);
+    if (data.isEmpty) return Future.value(null);
     String account = data.first['account'];
     /// split the data by Asset ID, date, version
     var groups = groupBy(data, (e) =>

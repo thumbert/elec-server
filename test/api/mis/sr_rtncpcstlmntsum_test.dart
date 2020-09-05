@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sr_rtncpcstlmntsum.dart';
 
-tests() async {
+void tests() async {
   group('MIS SR_RTNCPCSTLMNTSUM report archive', () {
     var archive = SrRtNcpcStlmntSumArchive();
     test('read report', (){
@@ -18,7 +18,7 @@ tests() async {
 
 
 
-main() async {
+void main() async {
   await initializeTimeZone();
   await tests();
 }

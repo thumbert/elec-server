@@ -1,6 +1,7 @@
 
 import 'dart:io';
 
+import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
@@ -47,7 +48,25 @@ void insertIsoExpress() async {
   // to calculate settlement prices for calculators, Jan20-Aug20
   await insertDays(DaLmpHourlyArchive(),
       Term.parse('Jan20-Aug20', location).days());
+
+  await insertWholesaleLoadReports();
 }
+
+void insertWholesaleLoadReports() async {
+  /// minimal setup to pass the tests
+  var archive = WholesaleLoadCostReportArchive();
+  await archive.dbConfig.db.open();
+  await archive.dbConfig.coll.remove(<String,dynamic>{});
+  var file = archive.getFilename(Month(2019,1), 4004);
+  if (!file.existsSync()) {
+    await archive.downloadFile(Month(2019,1), 4004);
+  }
+  var data = archive.processFile(file);
+  await archive.insertData(data);
+  await archive.dbConfig.db.close();
+  // await archive.setupDb();
+}
+
 
 void insertPtidTable() async {
   var archive = PtidArchive();
@@ -74,6 +93,9 @@ void main() async {
 
 //  await insertForwardMarks();
 //  await insertIsoExpress();
-  await insertPtidTable();
+ await insertPtidTable();
+
+  // await insertWholesaleLoadReports();
+
 
 }

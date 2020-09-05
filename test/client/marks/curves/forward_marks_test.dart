@@ -17,13 +17,13 @@ void tests(String rootUrl) async {
       var mh5x16 = await client.getMonthlyForwardCurveForBucket(
           curveId, IsoNewEngland.bucket5x16, Date(2020, 5, 29),
           tzLocation: location);
-      expect(mh5x16.domain, Term.parse('Jun20-Dec21', location).interval);
+      expect(mh5x16.domain, Term.parse('Jun20-Dec26', location).interval);
     });
     test('get mh curve as of 5/29/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_da_lmp';
       var res = await client.getMonthlyForwardCurve(
           curveId, Date(2020, 5, 29), tzLocation: location);
-      expect(res.length, 19);
+      expect(res.length, 79);
       var jan21 = res.observationAt(Month(2021, 1, location: location));
       expect(jan21.value[IsoNewEngland.bucket5x16], 58.25);
     });

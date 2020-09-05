@@ -31,8 +31,8 @@ abstract class IsoExpressReport {
   List<Map<String, dynamic>> processFile(File file);
 
   /// Download this url to a file.
-  Future downloadUrl(String url, File fileout, {bool override: true}) async {
-    if (fileout.existsSync() && !override) {
+  Future downloadUrl(String url, File fileout, {bool overwrite = true}) async {
+    if (fileout.existsSync() && !overwrite) {
       print('File ${fileout.path} was already downloaded.  Skipping.');
       return Future.value(1);
     } else {
@@ -83,7 +83,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
 
   /// Download one day.  Check if the file has downloaded successfully.
   Future downloadDay(Date day) async {
-    return await downloadUrl(getUrl(day), getFilename(day), override: true);
+    return await downloadUrl(getUrl(day), getFilename(day), overwrite: true);
   }
 
   /// Download a list of days from the website.

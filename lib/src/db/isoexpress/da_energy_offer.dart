@@ -89,7 +89,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     return row;
   }
 
-  insertData(List<Map<String, dynamic>> data) async {
+  @override
+  Future insertData(List<Map<String, dynamic>> data) async {
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))

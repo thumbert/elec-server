@@ -4,6 +4,7 @@ import 'dart:io';
 //import 'package:logging/logging.dart';
 //import 'package:logging_handlers/server_logging_handlers.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
+import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -44,6 +45,7 @@ void registerApis() async {
   _apiServer.addApi(BindingConstraints(DbProd.isoexpress));
   _apiServer.addApi(DaEnergyOffers(DbProd.isoexpress));
   _apiServer.addApi(RegulationRequirement(DbProd.isoexpress));
+  _apiServer.addApi(WholesaleLoadCost(DbProd.isoexpress));
 
 //  _apiServer.addApi(SccReport(db3) );
 //  _apiServer.addApi(DaDemandBids(db3) );

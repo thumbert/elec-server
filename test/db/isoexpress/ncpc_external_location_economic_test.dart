@@ -8,7 +8,7 @@ import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
 
-tests() async {
+void tests() async {
   var archive = NcpcRapidResponsePricingReportArchive();
   group('NCPC rapid response report', () {
     setUp(() async => await archive.dbConfig.db.open());
@@ -25,7 +25,7 @@ tests() async {
   });
 }
 
-insertDays() async {
+void insertDays() async {
   var archive = NcpcRapidResponsePricingReportArchive();
   await archive.dbConfig.db.open();
   var days = Interval(TZDateTime.utc(2017,3,2), TZDateTime.utc(2017,4,1))
@@ -38,7 +38,7 @@ insertDays() async {
 }
 
 
-main() async {
+void main() async {
 //  await NcpcRapidResponsePricingReportArchive().setupDb();
 
   await insertDays();

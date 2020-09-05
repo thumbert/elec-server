@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sd_rtncpcpymt.dart';
 
-tests() async {
+void tests() async {
   var archive = SdRsvAstDtlArchive();
   group('MIS SD_RSVASTDTL report archive', () {
     setUp(() async => await archive.dbConfig.db.open());
@@ -24,7 +24,7 @@ tests() async {
 
 
 
-main() async {
+void main() async {
   await initializeTimeZone();
   //await SdRsvAstDtlArchive().setupDb();
   await tests();

@@ -12,7 +12,9 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaLmpHourlyArchive extends DailyIsoExpressReport {
+  @override
   ComponentConfig dbConfig;
+  @override
   String dir;
 
   DaLmpHourlyArchive({this.dbConfig, this.dir}) {
@@ -24,15 +26,18 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     dir ??= baseDir + 'PricingReports/DaLmpHourly/Raw/';
   }
 
+  @override
   String reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/' +
       'WW_DALMP_ISO_' +
       yyyymmdd(asOfDate) +
       '.csv';
+  @override
   File getFilename(Date asOfDate) =>
-      new File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
+      File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
+  @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var row = <String, dynamic>{};
     row['date'] = formatDate(rows.first['Date']);
@@ -51,6 +56,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     return row;
   }
 
+  @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String, dynamic>>[];
@@ -68,6 +74,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   }
 
   /// Recreate the collection from scratch.
+  @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
 //    List<String> collections = await dbConfig.db.getCollectionNames();
@@ -85,7 +92,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   }
 
   Future<Map<String, String>> lastDay() async {
-    List pipeline = [];
+    var pipeline = [];
     pipeline.add({
       '\$match': {
         'ptid': {'\$eq': 4000}
