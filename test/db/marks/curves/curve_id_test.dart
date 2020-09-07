@@ -31,6 +31,14 @@ void tests() async {
       var xs = json.decode(aux.result) as List;
       expect(xs.length >= 30, true);
     });
+    test('get curve details for one curveId', () async {
+      var aux = await api.getCurveId('isone_energy_4004_da_lmp');
+      var xs = json.decode(aux.result);
+      expect(xs['children'].toSet(), {
+        'isone_energy_4000_da_lmp',
+        'isone_energy_4004_da_basis',
+      });
+    });
 
   });
 }
@@ -46,7 +54,7 @@ void insertData() async {
 
 void main() async {
 
-  await insertData();
+//  await insertData();
 
-//  await tests();
+  await tests();
 }

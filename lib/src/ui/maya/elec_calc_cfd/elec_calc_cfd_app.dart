@@ -52,6 +52,7 @@ class ElecCalcCfdApp {
   }
   void _f3Details() {}
   void _f7Reports() {
+    _reportOutputDiv.children.clear();
     var content = html.DivElement()
       ..setAttribute('style',
           'font-family: monospace; white-space: pre-wrap; '

@@ -57,7 +57,11 @@ class CurveIds {
   /// Get the document associated with this curveId
   @ApiMethod(path: 'data/curveId/{curveId}')
   Future<ApiResponse> getCurveId(String curveId) async {
-    var aux = await coll.findOne({'curveId': curveId});
+    var query = mongo.where
+      ..eq('curveId', curveId)
+      ..excludeFields(['_id']);
+//    var aux = await coll.findOne({'curveId': curveId});
+    var aux = await coll.findOne(query);
     return ApiResponse()..result = json.encode(aux);
   }
 

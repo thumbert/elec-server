@@ -1,5 +1,6 @@
 
 import 'package:timezone/data/latest.dart';
+import 'db/isoexpress/wholesale_load_cost_report_test.dart' as wholesale_load_cost_report;
 import 'db/isone_ptids_test.dart' as api_ptids;
 import 'db/lib_mis_reports_test.dart' as mis;
 import 'client/isoexpress/binding_constraints_test.dart' as bc;
@@ -30,11 +31,11 @@ void main() async {
 //  sysdem.tests(rootUrl);
   ptid.tests();
   mis.tests();
+  wholesale_load_cost_report.tests();
 
   /// Utils tests
   iso_timestamp.tests();
   parse_int_range.tests();
   term_cache.tests();
   to_csv.tests();
-
 }

@@ -35,8 +35,7 @@ class WholesaleLoadCost {
 
   /// http://localhost:8080/rt_load/v1/pool/start/20190101/end/20190131
   @ApiMethod(path: 'isone/pool/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetPoolRtLoad(
-      int ptid, String start, String end) async {
+  Future<ApiResponse> apiGetPoolRtLoad(String start, String end) async {
     var query = where
       .eq('ptid', 4000)
       .gte('date', Date.parse(start).toString())

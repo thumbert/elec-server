@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
@@ -15,7 +14,6 @@ import '../test/db/marks/marks_special_days.dart';
 /// Create the MongoDb from scratch to pass all tests.  This script is useful
 /// if you update the MongoDb installation and all the data is erased.
 ///
-
 
 void insertDays(archive, List<Date> days) async {
   await archive.dbConfig.db.open();
@@ -35,7 +33,6 @@ void insertForwardMarks() async {
   await archive.db.close();
 }
 
-
 void insertIsoExpress() async {
   var location = getLocation('America/New_York');
   // to pass tests
@@ -46,8 +43,8 @@ void insertIsoExpress() async {
 //  await insertDays(DaLmpHourlyArchive(),
 //      Term.parse('Jan19-Dec19', location).days());
   // to calculate settlement prices for calculators, Jan20-Aug20
-  await insertDays(DaLmpHourlyArchive(),
-      Term.parse('Jan20-Aug20', location).days());
+  await insertDays(
+      DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
 
   await insertWholesaleLoadReports();
 }
@@ -56,17 +53,16 @@ void insertWholesaleLoadReports() async {
   /// minimal setup to pass the tests
   var archive = WholesaleLoadCostReportArchive();
   await archive.dbConfig.db.open();
-  await archive.dbConfig.coll.remove(<String,dynamic>{});
-  var file = archive.getFilename(Month(2019,1), 4004);
+  await archive.dbConfig.coll.remove(<String, dynamic>{});
+  var file = archive.getFilename(Month(2019, 1), 4004);
   if (!file.existsSync()) {
-    await archive.downloadFile(Month(2019,1), 4004);
+    await archive.downloadFile(Month(2019, 1), 4004);
   }
   var data = archive.processFile(file);
   await archive.insertData(data);
   await archive.dbConfig.db.close();
-  // await archive.setupDb();
+  await archive.setupDb();
 }
-
 
 void insertPtidTable() async {
   var archive = PtidArchive();
@@ -87,15 +83,12 @@ void insertPtidTable() async {
   await archive.db.close();
 }
 
-
 void main() async {
   await initializeTimeZones();
 
 //  await insertForwardMarks();
 //  await insertIsoExpress();
- await insertPtidTable();
+//  await insertPtidTable();
 
-  // await insertWholesaleLoadReports();
-
-
+  await insertWholesaleLoadReports();
 }
