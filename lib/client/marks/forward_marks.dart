@@ -83,7 +83,7 @@ class ForwardMarks {
         servicePath +
         'curveId/' +
         commons.Escaper.ecapeVariable('${curveId.toString()}') +
-        '/asOfDate/${asOfDate.toString()}/markType/hourlyshape';
+        '/asOfDate/${asOfDate.toString()}/markType/hourlyShape';
     var _response = await http.get(_url);
     var data = json.decode(_response.body);
     var aux = (json.decode(data['result']) as Map<String,dynamic>);
