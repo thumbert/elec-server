@@ -173,31 +173,6 @@ class ForwardMarks {
   @ApiMethod(path: 'curveId/{curveId}/asOfDate/{asOfDate}/markType/{markType}')
   Future<ApiResponse> getForwardCurveForMarkType(String curveId, String asOfDate,
       String markType) async {
-//    var curveDetails = await curveIdCache.get(curveId);
-//    Map<String,dynamic> aux;
-//    if (curveDetails.containsKey('children')) {
-//      var children = curveDetails['children'] as List;
-//      // need to follow the children and apply the rules
-//      var x0 = await marksCache.get(Tuple3(Date.parse(asOfDate),
-//          children[0] as String, markType));
-//      var x1 = await marksCache.get(Tuple3(Date.parse(asOfDate),
-//          children[1] as String, markType));
-//      var n = (x0['terms'] as List).length;
-//      var buckets = (x0['buckets'] as Map).keys;
-//      aux = {'terms': []};
-//      aux['buckets'] = { for (String bucket in buckets) bucket : <num>[] };
-//      for (var i=0; i<n; i++) {
-//        if (x0['terms'][i] == x1['terms'][i]) {
-//          aux['terms'].add(x0['terms'][i]);
-//        }
-//        for (var bucket in buckets) {
-//          var value = x0['buckets'][bucket][i] + x1['buckets'][bucket][i];
-//          aux['buckets'][bucket].add(value as num);
-//        }
-//      }
-//    } else {
-//      // simple curve, just return the data
-//    }
     var aux = await marksCache.get(Tuple3(Date.parse(asOfDate), curveId, markType));
     return ApiResponse()..result = json.encode(aux);
   }
@@ -293,7 +268,7 @@ class ForwardMarks {
       {
         '\$match': {
           'curveId': {'\$eq': curveId},
-          'markType': {'\$eq': markType},
+          'markType': {'\$eq': markType.toLowerCase()},
           'fromDate': {'\$lte': asOfDate.toString()},
         }
       },
