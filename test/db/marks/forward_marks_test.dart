@@ -115,7 +115,7 @@ List<Map<String, dynamic>> _generateDataNgCurve(
 
 void tests(String rootUrl) async {
   var archive = ForwardMarksArchive();
-  group('forward marks archive tests:', () {
+  group('ForwardMarks archive tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     test('document equality', () {
@@ -147,7 +147,7 @@ void tests(String rootUrl) async {
     });
   });
 
-  group('forward marks api tests:', () {
+  group('ForwardMarks api tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     var api = ForwardMarks(archive.db);
@@ -218,6 +218,17 @@ void tests(String rootUrl) async {
       // daily curve was last marked on 2020-07-06, data will be from 2020-07-11
       expect((data['terms'] as List).length, 21);
       expect((data['buckets']['5x16'] as List).length, 21);
+    });
+    test('get one hourlyshape curve, isone_energy_4000_hourlyshape', () async {
+      var res = await api.getForwardCurveForMarkType(
+          'isone_energy_4000_hourlyshape', '2020-07-10', 'hourlyShape');
+      var data = json.decode(res.result) as Map<String, dynamic>;
+      expect(data.keys.toSet(), {'terms', 'buckets'});
+      expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
+      expect((data['terms'] as List).length, 78);
+      var v5x16 = data['buckets']['5x16'] as List;
+      expect(v5x16.length, 78);
+      expect((v5x16.first as List).length, 16);  // shape for the 16 hours
     });
     test('get one forward curve, all marked buckets, daily + monthly', () async {
       var res = await api.getForwardCurve('isone_energy_4000_da_lmp',

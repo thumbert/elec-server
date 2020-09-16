@@ -69,7 +69,8 @@ void testsUi1() {
     'Watermelon'
   ];
   var selectableList =
-      SelectableList(querySelector('#selectable-list'), fruits);
+      SelectableList(querySelector('#selectable-list'), fruits,
+          highlightColor: '#007bff');
   selectableList.onChange((e) {
     messageSl.text = 'You selected ${selectableList.selected.join(', ')}';
   });

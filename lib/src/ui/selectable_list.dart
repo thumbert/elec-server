@@ -2,10 +2,18 @@ library ui.selectable_list;
 
 import 'dart:html';
 
+import 'package:elec_server/ui.dart';
+
+enum SelectionType {
+  multiple,
+  single,
+}
+
 class SelectableList {
   Element wrapper;
   List<String> _values;
   String highlightColor;
+  SelectionType selectionType;
 
   List<bool> _onOff; // keep track of which elements are selected
   List<int> _ind;
@@ -15,8 +23,12 @@ class SelectableList {
   /// A simple vertical list of selectable values.  Selection is done by
   /// clicking on the element, if you click again, the element is deselected.
   ///
-  SelectableList(this.wrapper, List<String> values, {String style: 'width: 200px;',
-    this.highlightColor: '#e6ffe6'}) {
+  ///
+  SelectableList(this.wrapper, List<String> values, {
+    String style = 'width: 200px;',
+    this.highlightColor = '#e6ffe6',
+    this.selectionType = SelectionType.multiple,
+  }) {
 
     _listWrapper = DivElement()..setAttribute('style', style);
 
@@ -37,7 +49,7 @@ class SelectableList {
 
     _listWrapper.children.clear();
     _divs = <DivElement>[];
-    for (int i=0; i<_values.length; i++) {
+    for (var i=0; i<_values.length; i++) {
       var aux = DivElement()
         ..text = _values[i]
         ..id = '__sl_${_wId}_$i'

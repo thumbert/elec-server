@@ -170,6 +170,7 @@ class ForwardMarks {
   }
 
   /// Get the forward curve as of a given date.  Return all marked buckets.
+  /// [markType] can be one of ['daily', 'monthly', 'hourlyShape']
   @ApiMethod(path: 'curveId/{curveId}/asOfDate/{asOfDate}/markType/{markType}')
   Future<ApiResponse> getForwardCurveForMarkType(String curveId, String asOfDate,
       String markType) async {
@@ -268,7 +269,7 @@ class ForwardMarks {
       {
         '\$match': {
           'curveId': {'\$eq': curveId},
-          'markType': {'\$eq': markType.toLowerCase()},
+          'markType': {'\$eq': markType},
           'fromDate': {'\$lte': asOfDate.toString()},
         }
       },
@@ -295,17 +296,17 @@ class ForwardMarks {
     /// make sure the return value only returns terms after asOfDate
     int ind;
     var _asOfDate = asOfDate.toString();
+    var currentMonth = _asOfDate.substring(0,7);
     if (markType == 'monthly') {
       // start with the first month after asOfDate (some curves get marked very
       // rarely, sometimes only once a year.)
-      var currentMonth = _asOfDate.substring(0,7);
       ind = (x['terms'] as List).indexWhere((e) => e.compareTo(currentMonth) == 1);
     } else if (markType == 'daily') {
       // start with the first day after asOfDate
       ind = (x['terms'] as List).indexWhere((e) => e.compareTo(_asOfDate) == 1);
-    } else if (markType == 'hourlyshape') {
+    } else if (markType == 'hourlyShape') {
       // start with the current month
-      ind = (x['terms'] as List).indexWhere((e) => e.compareTo(_asOfDate) == 0);
+      ind = (x['terms'] as List).indexWhere((e) => e.compareTo(currentMonth) == 0);
     } else {
       throw ArgumentError('Not supported markType = $markType');
     }
