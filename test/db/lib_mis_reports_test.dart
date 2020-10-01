@@ -6,7 +6,7 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart';
 import 'package:test/test.dart';
 
-tests() {
+void tests() {
   group('MIS reports processing: ', () {
     test('read report', () {
       var file = File('test/_assets/sd_rtncpcpymt_000000001_2015100200_20141024155608.CSV');
@@ -20,6 +20,6 @@ tests() {
   });
 }
 
-main() {
+void main() {
   tests();
 }

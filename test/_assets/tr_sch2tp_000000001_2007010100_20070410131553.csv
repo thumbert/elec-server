@@ -1,0 +1,15 @@
+C,ISO Schedule 2 Top Level,,,,,,,,,,,,,,,,,,,,,
+C,TR_SCH2TP_000000001_2014100100_20160408150851.CSV,,,,,,,,,,,,,,,,,,,,,
+C,VIU1,,,,,,,,,,,,,,,,,,,,,
+C,Date: 10/01/2014 and Version: 04/08/2016 15:08:51 GMT,,,,,,,,,,,,,,,,,,,,,
+H,Block,Energy Transaction Units,Energy Transaction Units Rate,Energy Transaction Units Dollars,Volumetric Measures,Volumetric Measures Rate,Volumetric Measures Dollars,Total ISO Schedule 2 Charges,Submitted Increment Offers and Decrement Bids,Submitted Increment Offers and Decrement Bids Rate,Submitted Increment Offers and Decrement Bids Dollars,Cleared Increment Offers and Decrement Bids,Cleared Increment Offers and Decrement Bids Rate,Cleared Increment Offers and Decrement Bids Dollars,Submitted FTR Auction Bids,Submitted FTR Auction Bids Rate,Submitted FTR Auction Bids Dollars,Cleared FTR Auction Bids,Cleared FTR Auction Bids Rate,Cleared FTR Auction Bids Dollars,,
+H,String,Number,$/TU,$,MWh,$/VM,$,$,Number,$/TU,$,Number,$/TU,$,Number,$/TU,$,Number,$/TU,$,,
+D,1,12500,0.49784,6223,250000,0.18127,45317.5,51792.38,3875,0.005,19.38,3875,0.06,232.5,0,0.4809,0,0,0.74663,0,,
+D,2,27000,0.45258,12219.66,903994.871,0.16479,148969.31,161188.97,0,0,0,0,0,0,0,0,0,0,0,0,,
+D,3,0,0.40732,0,0,0.14831,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,
+H,Subaccount ID,Subaccount Name,Block,Energy Transaction Units,Energy Transaction Units Rate,Energy Transaction Units Dollars,Volumetric Measures,Volumetric Measures Rate,Volumetric Measures Dollars,Total ISO Schedule 2 Charges,Submitted Increment Offers and Decrement Bids,Submitted Increment Offers and Decrement Bids Rate,Submitted Increment Offers and Decrement Bids Dollars,Cleared Increment Offers and Decrement Bids,Cleared Increment Offers and Decrement Bids Rate,Cleared Increment Offers and Decrement Bids Dollars,Submitted FTR Auction Bids,Submitted FTR Auction Bids Rate,Submitted FTR Auction Bids Dollars,Cleared FTR Auction Bids,Cleared FTR Auction Bids Rate,Cleared FTR Auction Bids Dollars
+H,String,String,String,Number,$/TU,$,MWh,$/VM,$,$,Number,$/TU,$,Number,$/TU,$,Number,$/TU,$,Number,$/TU,$
+D,Default,Default,1,12500,0.49784,6223,250000,0.18127,45317.5,51792.38,3875,0.005,19.38,3875,0.06,232.5,0,0.4809,0,0,0.74663,0
+D,Default,Default,2,23460,0.45258,10617.53,903994.871,0.16479,148969.31,159586.84,0,0,0,0,0,0,0,0,0,0,0,0
+D,Default,Default,3,0,0.40732,0,0,0.14831,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+T,6 lines,,,,,,,,,,,,,,,,,,,,,

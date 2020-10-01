@@ -1,0 +1,13 @@
+C,ISO Schedule 3 Part 2,,,,,,
+C,TR_SCH3P2_000000001_2014100100_20160408150851.CSV,,,,,,
+C,VIU1,,,,,,
+C,Date: 10/01/2014 and Version: 04/08/2016 15:08:51 GMT,,,,,,
+H,Description,Day/Hour,Rate,Amount,Charges,,
+H,String,Date,$/kWh,kWh,$,,
+D,Exports,,0.00037,74400000,27528,,
+D,RT NCP Load Obligation,10/1/2014 0:00,0.17366,114000,19797.24,,
+H,Subaccount ID,Subaccount Name,Description,Day/Hour,Rate,Amount,Charges
+H,String,String,String,Date,$/kWh,kWh,$
+D,Default,Default,Exports,,0.00037,74400000,27528
+D,Default,Default,RT NCP Load Obligation,10/1/2014 0:00,0.17366,114000,19797.24
+T,4 lines,,,,,,

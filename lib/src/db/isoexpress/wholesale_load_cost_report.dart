@@ -29,6 +29,9 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
     dir ??= baseDir + 'WholesaleLoadCost/Raw/';
   }
 
+  /// Data is also available as webservices, for example
+  /// https://webservices.iso-ne.com/api/v1.1/whlsecost/hourly/month/202007/location/4004
+
 
   String getUrl(Month month, int ptid) =>
       'https://www.iso-ne.com/transform/csv/whlsecost/hourly?month='

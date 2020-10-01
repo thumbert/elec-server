@@ -17,5 +17,6 @@ class DbProd extends DbEnv {
   static final isoexpress = Db('mongodb://${DbProd.connection}/isoexpress');
   static final isone = Db('mongodb://${DbProd.connection}/isone');
   static final marks = Db('mongodb://${DbProd.connection}/marks');
+  static final mis = Db('mongodb://${DbProd.connection}/mis');
 
 }
