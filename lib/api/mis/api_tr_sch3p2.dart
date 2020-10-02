@@ -2,12 +2,12 @@ library api.tr_sch3p2;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:elec_server/src/db/lib_settlements.dart';
+
+import 'package:date/date.dart';
+import 'package:elec_server/src/utils/api_response.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
-import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 
 @ApiClass(name: 'tr_sch3p2', version: 'v1')
 class TrSch3p2 {
@@ -21,10 +21,11 @@ class TrSch3p2 {
   }
 
   @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+
   /// [start], [end] are months in yyyy-mm format.  Return all account,
   /// subaccount data for all settlements.
-  Future<ApiResponse> dataForAccount(String accountId, String start,
-      String end) async {
+  Future<ApiResponse> dataForAccount(
+      String accountId, String start, String end) async {
     var startMonth = parseMonth(start).toIso8601String();
     var endMonth = parseMonth(end).toIso8601String();
     var query = where
@@ -37,11 +38,14 @@ class TrSch3p2 {
     return ApiResponse()..result = json.encode(res);
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
+  @ApiMethod(
+      path:
+          'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
+
   /// [start], [end] are months in yyyy-mm format.  Return all
   /// subaccount data for all settlements.
-  Future<ApiResponse> dataForSubaccount(String accountId, String subaccountId,
-      String start, String end) async {
+  Future<ApiResponse> dataForSubaccount(
+      String accountId, String subaccountId, String start, String end) async {
     var startMonth = parseMonth(start).toIso8601String();
     var endMonth = parseMonth(end).toIso8601String();
     var query = where
@@ -49,11 +53,8 @@ class TrSch3p2 {
       ..eq('tab', 1)
       ..gte('month', startMonth)
       ..lte('month', endMonth)
-      ..excludeFields(['_id', 'account']);
+      ..excludeFields(['_id', 'account', 'Subaccount ID']);
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }
-
-
-
 }
