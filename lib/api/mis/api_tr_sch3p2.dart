@@ -20,10 +20,9 @@ class TrSch3p2 {
     location = getLocation('America/New_York');
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
-
   /// [start], [end] are months in yyyy-mm format.  Return all account,
   /// subaccount data for all settlements.
+  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
   Future<ApiResponse> dataForAccount(
       String accountId, String start, String end) async {
     var startMonth = parseMonth(start).toIso8601String();
@@ -33,17 +32,16 @@ class TrSch3p2 {
       ..eq('tab', 0)
       ..gte('month', startMonth)
       ..lte('month', endMonth)
-      ..excludeFields(['_id', 'account']);
+      ..excludeFields(['_id', 'account', 'tab']);
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }
 
+  /// [start], [end] are months in yyyy-mm format.  Return all
+  /// subaccount data for all settlements.
   @ApiMethod(
       path:
           'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
-
-  /// [start], [end] are months in yyyy-mm format.  Return all
-  /// subaccount data for all settlements.
   Future<ApiResponse> dataForSubaccount(
       String accountId, String subaccountId, String start, String end) async {
     var startMonth = parseMonth(start).toIso8601String();
@@ -53,7 +51,7 @@ class TrSch3p2 {
       ..eq('tab', 1)
       ..gte('month', startMonth)
       ..lte('month', endMonth)
-      ..excludeFields(['_id', 'account', 'Subaccount ID']);
+      ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
     var res = await coll.find(query).toList();
     return ApiResponse()..result = json.encode(res);
   }
