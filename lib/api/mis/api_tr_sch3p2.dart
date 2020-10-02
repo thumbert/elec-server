@@ -48,6 +48,7 @@ class TrSch3p2 {
     var endMonth = parseMonth(end).toIso8601String();
     var query = where
       ..eq('account', accountId)
+      ..eq('Subaccount ID', subaccountId)
       ..eq('tab', 1)
       ..gte('month', startMonth)
       ..lte('month', endMonth)
