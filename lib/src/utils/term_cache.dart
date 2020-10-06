@@ -88,15 +88,13 @@ class DateCache extends TermCache {
       : super(
             loader,
             keyAssign,
-            (Interval interval) => interval
-                .splitLeft((dt) => Date.fromTZDateTime(dt))
-                .cast<Date>()) {
+            (Interval interval) =>
+                interval.splitLeft((dt) => Date.fromTZDateTime(dt))) {
     /// check that the keyAssign return type is a Date??  Must be a better way
     // if (keyAssign.runtimeType.toString() != '(Map<String, dynamic>) => Date')
     //  throw ArgumentError('Incorrect signature for keyAssign');
   }
 }
-
 
 class MonthCache extends TermCache {
   /// Loader function that gets the (expensive) data associated with an

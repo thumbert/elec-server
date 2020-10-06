@@ -12,7 +12,6 @@ import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart';
 import 'package:tuple/tuple.dart';
 
-
 @ApiClass(name: 'sr_dalocsum', version: 'v1')
 class SrDaLocSum {
   DbCollection coll;
@@ -27,7 +26,7 @@ class SrDaLocSum {
 
   @ApiMethod(
       path:
-      'daenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
+          'daenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
   Future<ApiResponse> dailyDaSettlementForAccount(
       String accountId, String start, String end, int settlement) async {
     var startDate = Date.parse(start).toString();
@@ -39,19 +38,15 @@ class SrDaLocSum {
           'Day Ahead Congestion Charge / Credit',
           'Day Ahead Loss Charge / Credit',
         ]);
-    return ApiResponse()..result = json.encode(data..forEach((e) => e.remove('version')));
+    return ApiResponse()
+      ..result = json.encode(data..forEach((e) => e.remove('version')));
   }
-
 
   @ApiMethod(
       path:
-      'rtenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> dailyDaSettlementForSubaccount(
-      String accountId,
-      String subaccountId,
-      String start,
-      String end,
-      int settlement) async {
+          'daenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
+  Future<ApiResponse> dailyDaSettlementForSubaccount(String accountId,
+      String subaccountId, String start, String end, int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
     var data = await _getDailyData(
@@ -61,10 +56,9 @@ class SrDaLocSum {
           'Day Ahead Congestion Charge / Credit',
           'Day Ahead Loss Charge / Credit',
         ]);
-    return ApiResponse()..result = json.encode(data..forEach((e) => e.remove('version')));
+    return ApiResponse()
+      ..result = json.encode(data..forEach((e) => e.remove('version')));
   }
-
-
 
   /// Get daily total for a subaccount for a given location, one settlement.
   Future<List<Map<String, dynamic>>> _getDailyData(String accountId,
@@ -110,16 +104,17 @@ class SrDaLocSum {
       },
     ];
     var data = await coll.aggregateToStream(pipeline).toList();
-    var aux = getNthSettlement(data, (e) => Tuple2(e['date'], e['Location ID']), n: settlement);
+    var aux = getNthSettlement(data, (e) => Tuple2(e['date'], e['Location ID']),
+        n: settlement);
     return aux;
   }
 
-
   /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/start/20170101/end/20170101
   @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+
   /// Get all data in tab 0 for a given location.
-  Future<ApiResponse> apiGetTab0 (String accountId,
-      String start, String end) async {
+  Future<ApiResponse> apiGetTab0(
+      String accountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getData(accountId, null, null, null, startDate, endDate);
@@ -129,15 +124,17 @@ class SrDaLocSum {
     return ApiResponse()..result = json.encode(aux);
   }
 
-
   @ApiMethod(
-      path: 'accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}')
+      path:
+          'accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}')
+
   /// Get all data (all locations) for the account.
-  Future<ApiResponse> apiGetTab0ByLocation (String accountId,
-      int locationId, String start, String end) async {
+  Future<ApiResponse> apiGetTab0ByLocation(
+      String accountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, null, locationId, null, startDate, endDate);
+    var data =
+        await getData(accountId, null, locationId, null, startDate, endDate);
     var scalarKeys = {'version'};
     var vectorKeys = data.first.keys.toSet()
       ..removeAll({...scalarKeys, 'Location ID'});
@@ -145,30 +142,39 @@ class SrDaLocSum {
     return ApiResponse()..result = json.encode(aux);
   }
 
-
   @ApiMethod(
-      path: 'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
+      path:
+          'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
+
   /// Get one location, one column for the account.
-  Future<ApiResponse> apiGetTab0ByLocationColumn (String accountId,
+  Future<ApiResponse> apiGetTab0ByLocationColumn(String accountId,
       int locationId, String columnName, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, null, locationId, columnName, startDate, endDate);
+    var data = await getData(
+        accountId, null, locationId, columnName, startDate, endDate);
     var scalarKeys = {'version'};
     var vectorKeys = {'hourBeginning', columnName};
     var aux = expandDocument(data, scalarKeys, vectorKeys);
     return ApiResponse()..result = json.encode(aux);
   }
 
-
   @ApiMethod(
-      path: 'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}/settlement/{settlement}')
+      path:
+          'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}/settlement/{settlement}')
+
   /// Get one location, one column for the account.
-  Future<ApiResponse> apiGetTab0ByLocationColumnSettlement (String accountId,
-      int locationId, String columnName, String start, String end, int settlement) async {
+  Future<ApiResponse> apiGetTab0ByLocationColumnSettlement(
+      String accountId,
+      int locationId,
+      String columnName,
+      String start,
+      String end,
+      int settlement) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var aux = await getData(accountId, null, locationId, columnName, startDate, endDate);
+    var aux = await getData(
+        accountId, null, locationId, columnName, startDate, endDate);
     var data = getNthSettlement(aux, (e) => e['date'], n: settlement);
     var scalarKeys = <String>{};
     var vectorKeys = {'hourBeginning', columnName};
@@ -176,29 +182,34 @@ class SrDaLocSum {
     return ApiResponse()..result = json.encode(out);
   }
 
+  @ApiMethod(
+      path:
+          'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for all locations.
-  Future<ApiResponse> apiGetTab1 (String accountId,
-      String subaccountId, String start, String end) async {
+  Future<ApiResponse> apiGetTab1(
+      String accountId, String subaccountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, subaccountId, null, null, startDate, endDate);
+    var data =
+        await getData(accountId, subaccountId, null, null, startDate, endDate);
     var scalarKeys = {'version', 'Location ID'};
-    var vectorKeys = data.first.keys.toSet()
-      ..removeAll({...scalarKeys});
+    var vectorKeys = data.first.keys.toSet()..removeAll({...scalarKeys});
     var aux = expandDocument(data, scalarKeys, vectorKeys);
     return ApiResponse()..result = json.encode(aux);
   }
 
+  @ApiMethod(
+      path:
+          'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}')
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for a given location.
-  Future<ApiResponse> apiGetTab1ByLocation (String accountId,
+  Future<ApiResponse> apiGetTab1ByLocation(String accountId,
       String subaccountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, subaccountId, locationId, null, startDate, endDate);
+    var data = await getData(
+        accountId, subaccountId, locationId, null, startDate, endDate);
     var scalarKeys = {'version'};
     var vectorKeys = data.first.keys.toSet()
       ..removeAll({...scalarKeys, 'Location ID'});
@@ -206,28 +217,40 @@ class SrDaLocSum {
     return ApiResponse()..result = json.encode(aux);
   }
 
+  @ApiMethod(
+      path:
+          'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
   /// Get all data for a subaccount for a given location, one column.
-  Future<ApiResponse> apiGetTab1ByLocationColumn (String accountId,
-      String subaccountId, int locationId, String columnName, String start, String end) async {
+  Future<ApiResponse> apiGetTab1ByLocationColumn(
+      String accountId,
+      String subaccountId,
+      int locationId,
+      String columnName,
+      String start,
+      String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getData(accountId, subaccountId, locationId, columnName, startDate, endDate);
+    var data = await getData(
+        accountId, subaccountId, locationId, columnName, startDate, endDate);
     var scalarKeys = {'version'};
     var vectorKeys = {'hourBeginning', columnName};
     var aux = expandDocument(data, scalarKeys, vectorKeys);
     return ApiResponse()..result = json.encode(aux);
   }
 
-
   /// Extract data from the collection
   /// returns one element for each day
   /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
   /// If [locationId] is [null] return all locations
   /// If [column] is [null] return all columns
-  Future<List<Map<String,dynamic>>> getData(String account, String subaccountId,
-      int locationId, String column, Date startDate, Date endDate) async {
+  Future<List<Map<String, dynamic>>> getData(
+      String account,
+      String subaccountId,
+      int locationId,
+      String column,
+      Date startDate,
+      Date endDate) async {
     var excludeFields = <String>['_id', 'account', 'tab', 'date'];
 
     var query = where;
@@ -253,8 +276,4 @@ class SrDaLocSum {
     }
     return coll.find(query).toList();
   }
-
 }
-
-
-

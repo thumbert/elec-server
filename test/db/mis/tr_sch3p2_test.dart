@@ -12,7 +12,6 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
-
 void tests() async {
   var dir = Directory('test/_assets');
   var file = dir
@@ -49,20 +48,16 @@ void tests() async {
       expect(data.first['Charges'], 27528);
     });
     test('get summary for subaccount', () async {
-      var aux = await api.dataForSubaccount('000000001', 'Default',
-          '2006-01', '2006-01');
+      var aux = await api.dataForSubaccount(
+          '000000001', 'Default', '2006-01', '2006-01');
       var data = json.decode(aux.result) as List;
       expect(data.length, 2);
       expect(data.first['Charges'], 27528);
     });
-
   });
-
 }
 
-void insertMonths(List<Month> months) async {
-
-}
+void insertMonths(List<Month> months) async {}
 
 void main() async {
   await initializeTimeZones();
