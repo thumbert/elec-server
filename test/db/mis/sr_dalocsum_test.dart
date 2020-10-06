@@ -46,11 +46,23 @@ void tests() async {
       var data = json.decode(aux.result) as List;
       expect(data.length, 20);
     });
+    test('get daily da energy settlement, some locations', () async {
+      var aux = await api.dailyDaSettlementForAccountLocations(
+          '000000003', '2013-06-03', '2013-06-03', '401,402', 0);
+      var data = json.decode(aux.result) as List;
+      expect(data.length, 2);
+    });
     test('get daily da energy for subaccount, all locations', () async {
       var aux = await api.dailyDaSettlementForSubaccount(
           '000000003', '9001', '2013-06-03', '2013-06-03', 0);
       var data = json.decode(aux.result) as List;
       expect(data.length, 20);
+    });
+    test('get daily da energy for subaccount, some locations', () async {
+      var aux = await api.dailyDaSettlementForSubaccountLocations(
+          '000000003', '9001', '2013-06-03', '2013-06-03', '401,402', 0);
+      var data = json.decode(aux.result) as List;
+      expect(data.length, 2);
     });
   });
 }

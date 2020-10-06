@@ -32,7 +32,26 @@ class SrDaLocSum {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
     var data = await _getDailyData(
-        accountId, null, startDate, endDate, settlement,
+        accountId, null, startDate, endDate, null, settlement,
+        columns: [
+          'Day Ahead Energy Charge / Credit',
+          'Day Ahead Congestion Charge / Credit',
+          'Day Ahead Loss Charge / Credit',
+        ]);
+    return ApiResponse()
+      ..result = json.encode(data..forEach((e) => e.remove('version')));
+  }
+
+  /// Locations should be comma separated, e.g. '503,4001,4004'
+  @ApiMethod(
+      path:
+          'daenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/locations/{locations}/settlement/{settlement}')
+  Future<ApiResponse> dailyDaSettlementForAccountLocations(String accountId,
+      String start, String end, String locations, int settlement) async {
+    var startDate = Date.parse(start).toString();
+    var endDate = Date.parse(end).toString();
+    var data = await _getDailyData(
+        accountId, null, startDate, endDate, locations, settlement,
         columns: [
           'Day Ahead Energy Charge / Credit',
           'Day Ahead Congestion Charge / Credit',
@@ -50,7 +69,31 @@ class SrDaLocSum {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
     var data = await _getDailyData(
-        accountId, subaccountId, startDate, endDate, settlement,
+        accountId, subaccountId, startDate, endDate, null, settlement,
+        columns: [
+          'Day Ahead Energy Charge / Credit',
+          'Day Ahead Congestion Charge / Credit',
+          'Day Ahead Loss Charge / Credit',
+        ]);
+    return ApiResponse()
+      ..result = json.encode(data..forEach((e) => e.remove('version')));
+  }
+
+  /// Location is a comma separated string, e.g. '503,4001'
+  @ApiMethod(
+      path:
+          'daenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/loactions/{locations}/settlement/{settlement}')
+  Future<ApiResponse> dailyDaSettlementForSubaccountLocations(
+      String accountId,
+      String subaccountId,
+      String start,
+      String end,
+      String locations,
+      int settlement) async {
+    var startDate = Date.parse(start).toString();
+    var endDate = Date.parse(end).toString();
+    var data = await _getDailyData(
+        accountId, subaccountId, startDate, endDate, locations, settlement,
         columns: [
           'Day Ahead Energy Charge / Credit',
           'Day Ahead Congestion Charge / Credit',
@@ -61,9 +104,18 @@ class SrDaLocSum {
   }
 
   /// Get daily total for a subaccount for a given location, one settlement.
-  Future<List<Map<String, dynamic>>> _getDailyData(String accountId,
-      String subaccountId, String startDate, String endDate, int settlement,
+  Future<List<Map<String, dynamic>>> _getDailyData(
+      String accountId,
+      String subaccountId,
+      String startDate,
+      String endDate,
+      String locations,
+      int settlement,
       {List<String> columns}) async {
+    var _locations = <int>[];
+    if (locations != null) {
+      _locations = locations.split(',').map((e) => int.parse(e)).toList();
+    }
     var pipeline = [
       {
         '\$match': {
@@ -74,6 +126,7 @@ class SrDaLocSum {
             '\$gte': startDate,
             '\$lte': endDate,
           },
+          if (_locations.isNotEmpty) 'Location ID': {'\$in': _locations},
         },
       },
       {
