@@ -82,7 +82,7 @@ class SrDaLocSum {
   /// Location is a comma separated string, e.g. '503,4001'
   @ApiMethod(
       path:
-          'daenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/loactions/{locations}/settlement/{settlement}')
+          'daenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/locations/{locations}/settlement/{settlement}')
   Future<ApiResponse> dailyDaSettlementForSubaccountLocations(
       String accountId,
       String subaccountId,
