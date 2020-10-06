@@ -1,16 +1,21 @@
 library test.mis.sr_rtlocsum_test;
 
+import 'dart:convert';
 import 'dart:io';
+import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 
-void srRtLocSumTest() async{
+void tests() async {
   var dir = Directory(
       Platform.environment['HOME'] + '/Downloads/Archive/mis/all_samples');
-  var file =
-      dir.listSync().where((e) => basename(e.path).startsWith('sr_rtlocsum_')).first;
+  var file = dir
+      .listSync()
+      .where((e) => basename(e.path).startsWith('sr_rtlocsum_'))
+      .first;
   var archive = SrRtLocSumArchive();
 
   setUp(() async {
@@ -24,15 +29,46 @@ void srRtLocSumTest() async{
   group('MIS report sr_rtlocsum', () {
     test('read report', () async {
       var data = archive.processFile(file);
-      expect(data.length, 17);
-      await archive.insertTabData(data[0]);
+      expect(data.length, 2);
+      // await archive.insertTabData(data[0], tab: 0);
+      // await archive.insertTabData(data[1], tab: 1);
     });
+  });
 
+  group('MIS report sr_rtlocsum api tests:', () {
+    var db = DbProd.mis;
+    var api = SrRtLocSum(db);
+    setUp(() async => await db.open());
+    tearDown(() async => await db.close());
+    test('get daily rt energy settlement, all locations', () async {
+      var aux = await api.dailyRtSettlementForAccount(
+          '000000001', '2015-06-01', '2015-06-01', 0);
+      var data = json.decode(aux.result) as List;
+      expect(data.length, 17);
+    });
+    test('get daily rt energy settlement, some locations', () async {
+      var aux = await api.dailyRtSettlementForAccountLocations(
+          '000000001', '2015-06-01', '2015-06-01', '401,402', 0);
+      var data = json.decode(aux.result) as List;
+      expect(data.length, 2);
+    });
+    test('get daily rt energy for subaccount, all locations', () async {
+      var aux = await api.dailyRtSettlementForSubaccount(
+          '000000001', '9001', '2015-06-01', '2015-06-01', 0);
+      var data = json.decode(aux.result) as List;
+      expect(data.length, 17);
+    });
+    test('get daily rt energy for subaccount, some locations', () async {
+      var aux = await api.dailyRtSettlementForSubaccountLocations(
+          '000000001', '9001', '2015-06-01', '2015-06-01', '401,402', 0);
+      var data = json.decode(aux.result) as List;
+      expect(data.length, 2);
+    });
   });
 }
 
 void main() async {
   await initializeTimeZone();
-
-  await srRtLocSumTest();
+  DbProd();
+  await tests();
 }

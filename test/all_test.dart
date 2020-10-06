@@ -12,6 +12,7 @@ import 'db/isone_ptids_test.dart' as api_ptids;
 import 'db/lib_mis_reports_test.dart' as mis;
 import 'db/marks/forward_marks_test.dart' as forward_marks;
 import 'db/mis/sr_dalocsum_test.dart' as sr_dalocsum;
+import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
 import 'db/mis/tr_sch2tp_test.dart' as trsch2;
 import 'db/mis/tr_sch3p2_test.dart' as trsch3;
 import 'utils/iso_timestamp_test.dart' as iso_timestamp;
@@ -28,6 +29,7 @@ void main() async {
 
   /// db tests
   sr_dalocsum.tests();
+  sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();
 
