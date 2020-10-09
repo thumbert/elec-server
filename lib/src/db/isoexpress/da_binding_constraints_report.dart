@@ -1,126 +1,107 @@
 library db.isoexpress.da_binding_constraints_report;
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:timezone/timezone.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';
 import '../converters.dart';
-import 'package:elec_server/src/utils/iso_timestamp.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
-class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
+class DaBindingConstraintsReportArchive {
   ComponentConfig dbConfig;
   String dir;
-  static const _rowEquality = const MapEquality<String,dynamic>();
+  final Location location = getLocation('America/New_York');
 
   DaBindingConstraintsReportArchive({this.dbConfig, this.dir}) {
     dbConfig ??= ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'binding_constraints';
+      ..host = '127.0.0.1'
+      ..dbName = 'isoexpress'
+      ..collectionName = 'binding_constraints';
     dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
   }
-  String reportName =
-      'Day-Ahead Energy Market Hourly Final Binding Constraints Report';
 
   String getUrl(Date asOfDate) =>
-      'https://www.iso-ne.com/transform/csv/hourlydayaheadconstraints?start=' +
-      yyyymmdd(asOfDate) +
-      '&end=' +
+      'https://webservices.iso-ne.com/api/v1.1/dayaheadconstraints/day/' +
       yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) => File(
-      dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.csv');
 
-  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
-    var row = rows.first;
-    var localDate = (row['Local Date'] as String).substring(0, 10);
-    var hourEnding = row['Hour Ending'];
-    row['hourBeginning'] = parseHourEndingStamp(localDate, hourEnding);
-    row['market'] = 'DA';
-    row['date'] = formatDate(localDate);
-    row.remove('Local Date');
-    row.remove('Hour Ending');
-    row.remove('H');
-    return row;
+  File getFilename(Date asOfDate) => File(
+      dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.json');
+
+  Future downloadDay(Date asOfDate) async {
+    var _user = dotenv.env['isone_ws_user'];
+    var _pwd = dotenv.env['isone_ws_password'];
+
+    var client = HttpClient()
+      ..addCredentials(Uri.parse(getUrl(asOfDate)), '',
+          HttpClientBasicCredentials(_user, _pwd))
+      ..userAgent = 'Mozilla/4.0'
+      ..badCertificateCallback = (cert, host, port) {
+        print('Bad certificate connecting to $host:$port:');
+        return true;
+      };
+    var request = await client.getUrl(Uri.parse(getUrl(asOfDate)));
+    request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+    var response = await request.close();
+    await response.pipe(getFilename(asOfDate).openWrite());
   }
 
   /// Need to take the unique rows.  On 2018-07-10, there were duplicates!
-  List<Map<String,dynamic>> processFile(File file) {
-    var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return <Map<String,dynamic>>[];
-    data.forEach((row) => converter([row]));
-    var uRows = unique(data).cast<Map<String,dynamic>>();
-    return uRows;
-  }
-
-  /// Read the report from the disk, and insert the data into the database.
-  /// If the processing of the file throws an IncompleteReportException
-  /// delete the file associated with this day.
-  Future<int> insertDay(Date day) async {
-    File file = getFilename(day);
-    var data;
-    try {
-      data = processFile(file);
-      if (data.isEmpty) return new Future.value(null);
-    } on mis.IncompleteReportException {
-      file.delete();
-      return new Future.value(null);
+  List<Map<String, dynamic>> processFile(File file) {
+    var aux = json.decode(file.readAsStringSync());
+    var xs;
+    if ((aux as Map).containsKey('DayAheadConstraints')) {
+      if (aux['DayAheadConstraints'] == '') return <Map<String, dynamic>>[];
+      xs = aux['DayAheadConstraints']['DayAheadConstraint'] as List;
     }
-    await dbConfig.coll.remove({'date': day.toString()});
-    return dbConfig.coll
-        .insertAll(data)
-        .then((_) {
-          print('--->  Inserted ${reportName} for day ${day}');
-          return 0;
-        })
-        .catchError((e) {
-          print('xxxx ERROR xxxx ' + e.toString());
-          return 1;
-    });
+
+    var out = <Map<String, dynamic>>[];
+    for (Map<String, dynamic> x in xs) {
+      // print(x);
+      var one = <String, dynamic>{
+        'Constraint Name': x['ConstraintName'],
+        'Contingency Name': x['ContingencyName'],
+        'Interface Flag': x['InterfaceFlag'],
+        'Marginal Value': x['MarginalValue'],
+        'hourBeginning': TZDateTime.parse(location, x['BeginDate']).toUtc(),
+        'market': 'DA',
+        'date': (x['BeginDate'] as String).substring(0, 10),
+      };
+      out.add(one);
+    }
+
+    return unique(out).cast<Map<String, dynamic>>();
   }
 
-  /// Check if this date is in the db already
-  Future<bool> hasDay(Date date) async {
-    var res = await dbConfig.coll.findOne({
-      'date': date.toString(), 
-      'market': 'DA'
-    });
-    if (res == null || res.isEmpty) return false;
-    return true;
+  /// Insert data into db
+  Future<int> insertData(List<Map<String, dynamic>> data) async {
+    if (data.isEmpty) return Future.value(null);
+    var groups = groupBy(data, (e) => e['date']);
+    try {
+      for (var date in groups.keys) {
+        await dbConfig.coll.remove({'date': date});
+        await dbConfig.coll.insertAll(groups[date]);
+        print('--->  Inserted DA binding constraints for day ${date}');
+      }
+      return 0;
+    } catch (e) {
+      print('xxxx ERROR xxxx ' + e.toString());
+      return 1;
+    }
+    ;
   }
 
-  /// Recreate the collection from scratch.
-  setupDb() async {
+  Future<Null> setupDb() async {
     await dbConfig.db.open();
-//    List<String> collections = await dbConfig.db.getCollectionNames();
-//    if (collections.contains(dbConfig.collectionName))
-//      await dbConfig.coll.drop();
-
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'Constraint Name': 1, 'market': 1});
     await dbConfig.db
         .createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
     await dbConfig.db.close();
-  }
-
-  Future<Map<String, String>> lastDay() async {
-    List pipeline = [];
-    pipeline.add({
-      '\$group': {
-        '_id': 0,
-        'lastDay': {'\$max': '\$date'}
-      }
-    });
-    Map res = await dbConfig.coll.aggregate(pipeline);
-    return {'lastDay': res['result'][0]['lastDay']};
-  }
-
-  Date lastDayAvailable() => Date.today();
-  Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(where.eq('date', day.toString()));
   }
 }

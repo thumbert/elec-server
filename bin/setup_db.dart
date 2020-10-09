@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -10,10 +11,23 @@ import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import '../test/db/marks/marks_special_days.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 /// Create the MongoDb from scratch to pass all tests.  This script is useful
 /// if you update the MongoDb installation and all the data is erased.
 ///
+
+void insertDaBindingConstraints() async {
+  var archive = DaBindingConstraintsReportArchive();
+  var days = [
+    Date(2015, 2, 17), // empty file
+    Date(2017, 12, 31), // plenty of constraints
+    Date(2018, 7, 10), // has duplicates
+  ];
+  for (var date in days) {
+    await archive.downloadDay(date);
+  }
+}
 
 void insertDays(archive, List<Date> days) async {
   await archive.dbConfig.db.open();
@@ -40,8 +54,8 @@ void insertIsoExpress() async {
 //      Term.parse('Jul17', location).days());
 
   // to calculate hourly shaping for Hub, need Jan19-Dec19
-  await insertDays(DaLmpHourlyArchive(),
-      Term.parse('Jan19-Dec19', location).days());
+  await insertDays(
+      DaLmpHourlyArchive(), Term.parse('Jan19-Dec19', location).days());
   // to calculate settlement prices for calculators, Jan20-Aug20
   await insertDays(
       DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
@@ -83,9 +97,12 @@ void insertPtidTable() async {
 
 void main() async {
   await initializeTimeZones();
+  dotenv.load('${Platform.environment['HOME']}/.env/isone.env');
+
+  await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
-  await insertIsoExpress();
+//   await insertIsoExpress();
 //  await insertPtidTable();
 
 //  await insertWholesaleLoadReports();

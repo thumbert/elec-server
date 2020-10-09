@@ -121,7 +121,7 @@ class HtmlTable {
       if ((options['export'] as Map).isNotEmpty) {
         wrapper.append(ImageElement(
             src: 'assets/spreadsheet_icon.png', width: 20, height: 20)
-        ..onClick.listen((e) => _save()));
+          ..onClick.listen((e) => _save()));
       }
 //      if ((options['copy'] as Map).isNotEmpty) {
 //        wrapper.append(ImageElement(
@@ -132,6 +132,8 @@ class HtmlTable {
     }
   }
 
+  /// See this example for saving to CSV, maybe works on Windows.
+  /// Current function just saves the html table.
   void _save() {
     var downloadLink = document.createElement('a') as AnchorElement;
     document.body.append(downloadLink);
@@ -143,7 +145,6 @@ class HtmlTable {
 //  void _copy() {
 //    table.onSelect.listen((e) => document.execCommand('copy'));
 //  }
-
 
   /// If you click on a header, sort the data.
   void _sortByColumn(int i) {

@@ -10,13 +10,13 @@ import 'package:intl/intl.dart';
 import 'config.dart';
 
 ///
-List<Map<String,dynamic>> expandDocument(List<Map<String,dynamic>> xs,
+List<Map<String, dynamic>> expandDocument(List<Map<String, dynamic>> xs,
     Set<String> scalarKeys, Set<String> vectorKeys) {
-  var out = <Map<String,dynamic>>[];
+  var out = <Map<String, dynamic>>[];
   for (var x in xs) {
     var n = (x[vectorKeys.first] as List).length;
-    for (var i=0; i < n; i++) {
-      var one = <String,dynamic>{};  
+    for (var i = 0; i < n; i++) {
+      var one = <String, dynamic>{};
       for (var scalar in scalarKeys) {
         one[scalar] = x[scalar];
       }
@@ -76,13 +76,15 @@ class MisReport {
   ///    };
   ///```
   ///And usually the removed columns are ['H']
-  static List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
-      Map<String,dynamic> labels, List<String> removeColumns) {
+  static List<Map<String, dynamic>> addLabels(
+      Iterable<Map<String, dynamic>> rows,
+      Map<String, dynamic> labels,
+      List<String> removeColumns) {
     return rows.map((e) {
       for (var column in removeColumns) {
         e.remove(column);
       }
-      var out = <String,dynamic>{
+      var out = <String, dynamic>{
         ...labels,
         ...e,
       };
@@ -146,9 +148,10 @@ class MisReport {
   /// Read an MIS report and keep only the data rows, each row becoming a map,
   /// with keys taken from the header.
   /// If there are no data rows (empty report tab), return an empty List.
-  List<Map> readTabAsMap({int tab = 0}) {
+  List<Map<String, dynamic>> readTabAsMap({int tab = 0}) {
     var allData = _readReport(tab: tab);
-    var columnNames = allData.firstWhere((List e) => e[0] == 'H');
+    var columnNames =
+        allData.firstWhere((List e) => e[0] == 'H').cast<String>();
     return allData
         .where((List e) => e[0] == 'D')
         .map((List e) => Map.fromIterables(columnNames, e))
@@ -174,7 +177,8 @@ class MisReport {
   List<List> _readReport({int tab = 0}) {
     var converter = CsvToListConverter();
     _lines ??= file.readAsLinesSync();
-    if (_lines.isEmpty || !(_lines.last.startsWith('"T"') || _lines.last.startsWith('T'))) {
+    if (_lines.isEmpty ||
+        !(_lines.last.startsWith('"T"') || _lines.last.startsWith('T'))) {
       throw IncompleteReportException('Incomplete CSV file ${file.path}');
     }
 
@@ -206,7 +210,6 @@ List<Map<String, dynamic>> readReportTabAsMap(File file, {int tab = 0}) {
       .map((List e) => Map.fromIterables(columnNames, e))
       .toList();
 }
-
 
 /// Colnames in MIS reports sometimes have unnecessary parantheses.
 /// For example: 'Internal Bilateral For Load (F)'.  Remove them.

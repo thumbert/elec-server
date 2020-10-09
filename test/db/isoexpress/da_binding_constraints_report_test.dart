@@ -1,85 +1,75 @@
-
 import 'dart:io';
-import 'dart:async';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:timezone/timezone.dart';
 
-
-/// prepare data by downloading a few reports
-prepareData() async {
-  var archive = new DaBindingConstraintsReportArchive();
-  var days = [
-    Date(2015,2,17),    // empty file
-    Date(2017,12,13)    // plenty of constraints
-  ];
-  await archive.downloadDays(days);
-}
-
-
-DaBindingConstraintsTest() async {
+/// See bin/setup_db.dart for setting the archive up to pass the tests
+void tests() async {
   group('DA binding constraints report', () {
-    var archive = new DaBindingConstraintsReportArchive();
+    var archive = DaBindingConstraintsReportArchive();
     setUp(() async {
       await archive.dbConfig.db.open();
     });
     tearDown(() async {
       await archive.dbConfig.db.close();
     });
-    test('read binding constraints files', () async {
-      var file = archive.getFilename(Date(2017,12,13));
-      var report = new mis.MisReport(file);
-      //expect(await report.forDate(), new Date(2017,12,13));
-      expect(await report.filename(), 'da_binding_constraints_final_20171213.csv');
-      var data = report.readTabAsMap(tab: 0);
-      expect(data.length, 38);
-      var data2 = data.map((Map row) => archive.converter([row])).toList();
-      expect(data2.first['Marginal Value'] is num, true);
+    test('read binding constraints file for 2017-12-31', () async {
+      var file = archive.getFilename(Date(2017, 12, 31));
+      var data = archive.processFile(file);
+      expect(data.first, {
+        'Constraint Name': 'BNGW',
+        'Contingency Name': 'Interface',
+        'Interface Flag': 'Y',
+        'Marginal Value': -69.34,
+        'hourBeginning': TZDateTime(UTC, 2017, 12, 31, 5),
+        'market': 'DA',
+        'date': '2017-12-31',
+      });
     });
     test('empty file for 2015-02-17', () async {
-      var file = DaBindingConstraintsReportArchive().getFilename(Date(2015,2,17));
-      var report = mis.MisReport(file);
-      var res = report.readTabAsMap(tab: 0);
-      expect(res, []);
+      var file = archive.getFilename(Date(2015, 2, 17));
+      var data = archive.processFile(file);
+      expect(data.isEmpty, true);
     });
-
-    test('DA Binding Constraints Report for 2018-07-10 has duplicates', () async {
-      var file = DaBindingConstraintsReportArchive().getFilename(Date(2018,7,10));
-      var report = mis.MisReport(file);
-      var res = report.readTabAsMap(tab: 0);
-      await archive.insertDay(Date(2018, 7, 10));
-      expect(res.length, 20);
+    test('DA Binding Constraints Report for 2018-07-10 has duplicates',
+        () async {
+      var file = archive.getFilename(Date(2018, 7, 10));
+      var data = archive.processFile(file);
+      // 20 entries, only 10 unique
+      expect(data.length, 10);
+      // await archive.insertData(data);
     });
-
   });
 }
 
-uploadDays() async {
-  var location = getLocation('America/New_York');
-  var archive = DaBindingConstraintsReportArchive();
-  var days = Interval(TZDateTime(location, 2017, 1, 1),
-      TZDateTime(location, 2018, 1, 1))
-      .splitLeft((dt) => Date(dt.year, dt.month, dt.day, location: location));
-  await archive.dbConfig.db.open();
-  for (var day in days) {
-    await archive.downloadDay(day);
-    await archive.insertDay(day);
-  }
-  archive.dbConfig.db.close();
-}
+// void uploadDays() async {
+//   var location = getLocation('America/New_York');
+//   var archive = DaBindingConstraintsReportArchive();
+//   var days = Interval(
+//           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2018, 1, 1))
+//       .splitLeft((dt) => Date(dt.year, dt.month, dt.day, location: location));
+//   await archive.dbConfig.db.open();
+//   for (var day in days) {
+//     await archive.downloadDay(day);
+//     await archive.insertDay(day);
+//   }
+//   await archive.dbConfig.db.close();
+// }
 
-
-main() async {
+void main() async {
   await initializeTimeZone();
 
-  //await DaBindingConstraintsReportArchive().setupDb();
+  // print(Platform.environment['HOME']);
+  dotenv.load('${Platform.environment['HOME']}/.env/isone.env');
 
-//  await prepareData();
-//  await DaBindingConstraintsTest();
+  // await DaBindingConstraintsReportArchive().setupDb();
 
-  await uploadDays();
+  // await prepareData();
 
+  await tests();
+
+  // await uploadDays();
 }
