@@ -11,14 +11,14 @@ import 'package:intl/intl.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
 import 'package:date/date.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
+import 'package:elec/calculators/elec_swap.dart';
 import 'package:timezone/timezone.dart';
 
 class ElecCalcCfdApp {
   html.DivElement wrapper;
   Client client;
   String rootUrl;
-  ElecCalculatorCfd _calculator;
+  ElecSwapCalculator _calculator;
   CacheProvider cacheProvider;
 
   html.DivElement _calculatorDiv,
@@ -50,16 +50,19 @@ class ElecCalcCfdApp {
       print(leg.quantity);
     }
   }
+
   void _f3Details() {}
   void _f7Reports() {
     _reportOutputDiv.children.clear();
     var content = html.DivElement()
-      ..setAttribute('style',
+      ..setAttribute(
+          'style',
           'font-family: monospace; white-space: pre-wrap; '
               'background-color: dodgerblue; color: white;')
       ..text = _calculator.flatReport().toString();
     _reportOutputDiv.children = [DisposableWindow(content).inner];
   }
+
   void _help() {
     print('Need help');
   }
@@ -67,8 +70,8 @@ class ElecCalcCfdApp {
   /// Initialize the calculator from a json template.  In a live app, this
   /// template comes from the database.
   void fromJson(Map<String, dynamic> x) async {
-    _calculator = ElecCalculatorCfd(cacheProvider);
-    await _calculator.fromJson(x);
+    _calculator = ElecSwapCalculator.fromJson(x)..cacheProvider = cacheProvider;
+    await _calculator.build();
     _calculatorDiv = html.DivElement()
       ..className = 'elec-calculator'
       ..children = [
@@ -100,7 +103,6 @@ class ElecCalcCfdApp {
     });
 
     /// asOfDate changes
-
   }
 
   void setListenersRow2() {
@@ -132,7 +134,8 @@ class ElecCalcCfdApp {
               var aux = hourlyScheduleInput.timeseries;
               _calculator.legs[i].quantitySchedule =
                   HourlySchedule.fromTimeSeries(aux);
-              row.quantityInput.value = _calculator.legs[i].showQuantity().round().toString();
+              row.quantityInput.value =
+                  _calculator.legs[i].showQuantity().round().toString();
               await _calculator.build();
               _dollarPriceDiv.text =
                   _dollarPriceFmt.format(_calculator.dollarPrice());
@@ -361,7 +364,7 @@ class ElecCalcCfdApp {
 }
 
 class _Row2 {
-  ElecCalculatorCfd calculator;
+  ElecSwapCalculator calculator;
   int indexLeg;
   CommodityLeg _leg;
   bool _empty;
@@ -402,13 +405,13 @@ class _Row2 {
 
     _regionDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.region;
+      ..text = _empty ? '' : 'isone'; //_leg.region;
     _serviceDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.serviceType;
+      ..text = _empty ? '' : 'energy'; //_leg.serviceType;
     _curveDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
-      ..text = _empty ? '' : _leg.curveName;
+      ..text = _empty ? '' : 'hub_da_lmp'; //_leg.curveName;
     _bucketDiv = html.DivElement()
       ..id = 'bucket-leg-$indexLeg'
       ..className = 'cell-string cell-editable typeahead';
