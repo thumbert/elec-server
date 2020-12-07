@@ -5,7 +5,6 @@ import 'package:mongo_dart/mongo_dart.dart';
 abstract class DbEnv {}
 
 class DbProd extends DbEnv {
-
   static String connection;
 
   DbProd({String connection}) {
@@ -18,5 +17,5 @@ class DbProd extends DbEnv {
   static final isone = Db('mongodb://${DbProd.connection}/isone');
   static final marks = Db('mongodb://${DbProd.connection}/marks');
   static final mis = Db('mongodb://${DbProd.connection}/mis');
-
+  static final riskSystem = Db('mongodb://${DbProd.connection}/risk_system');
 }

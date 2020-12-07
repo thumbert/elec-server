@@ -1,0 +1,66 @@
+library db.risk_system.calculator_archive;
+
+import 'dart:async';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
+import 'package:elec_server/src/db/config.dart';
+
+class CalculatorArchive {
+  ComponentConfig dbConfig;
+
+  final _mustHaveKeys = <String>{
+    'userId',
+    'calculatorName', //
+    'calculatorType', // elec_swap, elec_daily_option, etc.
+    'asOfDate',
+    'buy/sell',
+    'term',
+    'comments',
+    'legs',
+  };
+
+  CalculatorArchive({this.dbConfig}) {
+    dbConfig ??= ComponentConfig()
+      ..host = '127.0.0.1'
+      ..dbName = 'risk_system'
+      ..collectionName = 'calculators';
+  }
+
+  mongo.Db get db => dbConfig.db;
+
+  /// Insert a calculator in the collection
+  Future<int> insertData(Map<String, dynamic> data) async {
+    try {
+      checkDocument(data);
+      await dbConfig.coll.remove({
+        'userId': data['userId'],
+        'calculatorName': data['calculatorName'],
+        'calculatorType': data['calculatorType'],
+      });
+      await dbConfig.coll.insert(data);
+      print('--->  Inserted calculator ${data['calculatorName']} successfully');
+    } catch (e) {
+      print('XXX ' + e.toString());
+      return Future.value(1);
+    }
+    return Future.value(0);
+  }
+
+  /// Check if a document is valid.
+  void checkDocument(Map<String, dynamic> xs) {
+    var keys = xs.keys.toSet();
+    if (!keys.containsAll(_mustHaveKeys)) {
+      throw 'Missing one of must have keys: $_mustHaveKeys';
+    }
+  }
+
+  void setup() async {
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'userId': 1});
+    await dbConfig.db.createIndex(dbConfig.collectionName,
+        keys: {
+          'userId': 1,
+          'calculatorName': 1,
+          'calculatorType': 1,
+        },
+        unique: true);
+  }
+}
