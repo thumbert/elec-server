@@ -1,6 +1,7 @@
 library db.risk_system.calculator_archive;
 
 import 'dart:async';
+import 'package:logging/logging.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
@@ -11,12 +12,13 @@ class CalculatorArchive {
     'userId',
     'calculatorName', //
     'calculatorType', // elec_swap, elec_daily_option, etc.
-    'asOfDate',
     'buy/sell',
     'term',
     'comments',
     'legs',
   };
+
+  final log = Logger('CalculatorArchive');
 
   CalculatorArchive({this.dbConfig}) {
     dbConfig ??= ComponentConfig()
@@ -27,9 +29,10 @@ class CalculatorArchive {
 
   mongo.Db get db => dbConfig.db;
 
-  /// Insert a calculator in the collection
+  /// Insert one calculator at a time in the collection
   Future<int> insertData(Map<String, dynamic> data) async {
     try {
+      data.remove('asOfDate'); // don't save that to the db
       checkDocument(data);
       await dbConfig.coll.remove({
         'userId': data['userId'],
@@ -37,9 +40,10 @@ class CalculatorArchive {
         'calculatorType': data['calculatorType'],
       });
       await dbConfig.coll.insert(data);
-      print('--->  Inserted calculator ${data['calculatorName']} successfully');
+      log.info(
+          '--->  Inserted calculator ${data['calculatorName']} successfully');
     } catch (e) {
-      print('XXX ' + e.toString());
+      log.severe('XXX ' + e.toString());
       return Future.value(1);
     }
     return Future.value(0);
@@ -59,7 +63,6 @@ class CalculatorArchive {
         keys: {
           'userId': 1,
           'calculatorName': 1,
-          'calculatorType': 1,
         },
         unique: true);
   }

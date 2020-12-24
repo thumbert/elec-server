@@ -15,13 +15,29 @@ class ApiCalculators {
     coll = db.collection(collectionName);
   }
 
-  @ApiMethod(path: 'userId/{userId}')
-  Future<ApiResponse> calculatorsForUserId(String userId) async {
-    var query = where
-      ..eq('userId', userId)
-      ..excludeFields(['_id']);
-    var data = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(data);
+  @ApiMethod(path: 'users')
+  Future<List<String>> getUsers() async {
+    var data = await coll.distinct('userId');
+    var types = (data['values'] as List).cast<String>();
+    types.sort((a, b) => a.compareTo(b));
+    return types;
+  }
+
+  @ApiMethod(path: 'userId/{userId}/names')
+  Future<List<String>> calculatorsForUserId(String userId) async {
+    var data =
+        await coll.distinct('calculatorName', where.eq('userId', userId));
+    var names = (data['values'] as List).cast<String>();
+    names.sort((a, b) => a.compareTo(b));
+    return names;
+  }
+
+  @ApiMethod(path: 'userId/{userId}/calculatorName/{calculatorName}/remove')
+  Future<ApiResponse> calculatorRemove(
+      String userId, String calculatorName) async {
+    var res =
+        await coll.remove({'userId': userId, 'calculatorName': calculatorName});
+    return ApiResponse()..result = json.encode(res);
   }
 
   @ApiMethod(path: 'calculatorTypes')

@@ -223,7 +223,7 @@ class ElecCalcCfdApp {
     _hasCustomDiv = html.DivElement()
       ..className = 'cell-string cell-editable'
       ..id = 'hascustom'
-      ..text = _calculator.hasCustom() ? 'yes' : 'no';
+      ..text = 'no';
 
     return html.DivElement()
       ..className = 'row-1'

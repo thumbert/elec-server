@@ -1,4 +1,5 @@
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
+import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
 
 import 'client/isoexpress/binding_constraints_test.dart' as bc;
@@ -25,6 +26,11 @@ void main() async {
   await initializeTimeZones();
   var rootUrl = 'http://localhost:8080/';
   DbProd();
+
+  Logger.root.level = Level.WARNING; // defaults to Level.INFO
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
 
   api_ptids.tests();
 

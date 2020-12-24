@@ -6,7 +6,6 @@ Map<String, dynamic> calc1() => <String, dynamic>{
       'calculatorName': 'isone Q1, 2021 5x16',
       'calculatorType': 'elec_swap',
       'term': 'Jan21-Mar21',
-      'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
       'comments': 'a simple calculator for winter times',
       'legs': [
@@ -31,7 +30,6 @@ Map<String, dynamic> calc2() => <String, dynamic>{
       'calculatorName': 'custom monthly quantities, 1 leg',
       'calculatorType': 'elec_swap',
       'term': 'Jan21-Mar21',
-      'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
       'comments': 'a simple calculator for winter times',
       'legs': [
@@ -48,9 +46,9 @@ Map<String, dynamic> calc2() => <String, dynamic>{
           },
           'fixPrice': {
             'value': [
-              {'month': '2021-01', 'value': 50.5},
-              {'month': '2021-02', 'value': 50.5},
-              {'month': '2021-03', 'value': 50.5},
+              {'month': '2021-01', 'value': 70.5},
+              {'month': '2021-02', 'value': 68.0},
+              {'month': '2021-03', 'value': 47.5},
             ]
           },
         }
@@ -70,7 +68,7 @@ Map<String, dynamic> calc3() => <String, dynamic>{
         {
           'curveId': 'isone_energy_4000_da_lmp',
           'tzLocation': 'America/New_York',
-          'bucket': '5x16',
+          'bucket': 'peak',
           'quantity': {
             'value': 50,
           },
