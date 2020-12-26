@@ -3,8 +3,7 @@ library db.marks.forward_marks;
 import 'dart:async';
 import 'dart:io';
 import 'package:collection/collection.dart';
-import 'package:path/path.dart' as path;
-import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
+import 'package:elec/risk_system.dart';
 import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
@@ -18,8 +17,6 @@ class ForwardMarksArchive {
   /// Marks are inserted into the db for a given (curveId, fromDate) tuple.
   /// Not all curves have marks updated every day.
   ///
-  ///
-  ///
   ForwardMarksArchive({this.dbConfig}) {
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
@@ -31,22 +28,54 @@ class ForwardMarksArchive {
 
   /// Insert a list of documents into the db.  Each document is sanity checked
   /// prior to insertion.  Also, a document is inserted only if needed (values
-  /// change or curve extended.)
+  /// change or curve extended.)  Values for the same [fromDate] and term are
+  /// overwritten, no versioning exists.
   ///
   /// <p>Document format:
+  /// ```
   /// {
   ///   'fromDate': '2020-06-15',
-  ///   'version': '2020-06-15T10:12:47.000-0500',  -- not supported yet
   ///   'curveId': 'elec_isone_4011_lmp_da',
-  ///   'markType': 'monthly', 'daily', 'hourlyShape'
-  ///   'terms': ['2020-07', '2020-08', ..., '2026-12'],
+  ///   'markType': 'scalar' || 'hourlyShape' || 'volatilitySurface',
+  ///   'terms': ['2020-06-16', ..., '2020-07', '2020-08', ..., '2026-12'],
   ///   'buckets': {
   ///     '5x16': [27.10, 26.25, ...],
   ///     '2x16H': [...],
   ///     '7x8': [...],
   ///   }
   /// }
-  /// hourlyShape document has a slightly different format.
+  ///```
+  ///
+  /// Note that the elements of the 'terms' field can be either a date
+  /// (yyyy-mm-dd) or a month (yyyy-mm).  They should be always ordered.
+  /// In general, every term form that can be parsed by [Term] is supported.
+  /// Marks should exist from prompt day forward.  You can mark the cash
+  /// month as one term with the understanding that it will be expanded to
+  /// a list of daily marks as needed.
+  ///
+  /// For an 'hourlyShape' document, each entry in the buckets List is a List with
+  /// the shape factors for corresponding (term,bucket) tuple.
+  ///
+  /// For a 'volatilitySurface' document, each element of the bucket List is a
+  /// List corresponding to the 'strikeRatio' field.  For example:
+  /// ```
+  /// {
+  ///   'fromDate': '2020-06-15',
+  ///   'curveId': 'elec_isone_4000_volatility_daily',
+  ///   'markType': 'volatilitySurface',
+  ///   'terms': ['2020-07', '2020-08', ..., '2026-12'],
+  ///   'strikeRatio': [0.5, 1, 2]
+  ///   'buckets': {
+  ///     '5x16': [
+  ///        [48.5, 51.2, 54.7],  // for 2020-07, strikeRatio: 0.5, 1, 2
+  ///        ...],
+  ///     '2x16H': [...],
+  ///     '7x8': [...],
+  ///   }
+  /// }
+  ///```
+  ///
+  ///
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(0);
     try {
@@ -60,14 +89,13 @@ class ForwardMarksArchive {
           /// keep only a certain number of digits for the daily and monthly marks
           for (var bucket in (newDocument['buckets'] as Map).keys) {
             var _x = newDocument['buckets'][bucket] as List;
-            newDocument['buckets'][bucket] =
-                _x.map((e) {
-                  if (e != null) {
-                    return num.parse(e.toStringAsFixed(4));
-                  } else {
-                    return null;
-                  }
-                }).toList();
+            newDocument['buckets'][bucket] = _x.map((e) {
+              if (e != null) {
+                return num.parse(e.toStringAsFixed(4));
+              } else {
+                return null;
+              }
+            }).toList();
           }
         }
         // get the last document with the curve
@@ -75,7 +103,8 @@ class ForwardMarksArchive {
         if (needToInsert(document, newDocument)) {
           if (document['fromDate'] == fromDate) {
             // fromDate is already in the database, so remove the old document
-            await dbConfig.coll.remove({'fromDate': fromDate, 'curveId': curveId});
+            await dbConfig.coll
+                .remove({'fromDate': fromDate, 'curveId': curveId});
           }
           await dbConfig.coll.insert(newDocument);
           print(
@@ -87,6 +116,29 @@ class ForwardMarksArchive {
       return Future.value(1);
     }
     return Future.value(0);
+  }
+
+  /// Construct a document
+  Map<String, dynamic> makeDocumentFromForwardCurve(
+      Date fromDate, String curveId, ForwardCurve forwardCurve) {
+    var _buckets =
+        forwardCurve.values.map((e) => e.keys).expand((e) => e).toSet();
+    var terms = <String>[];
+    var buckets = Map.fromIterables(
+        _buckets, List.generate(_buckets.length, (index) => <num>[]));
+    for (var obs in forwardCurve.observations) {
+      terms.add(obs.interval.toString());
+      for (var bucket in _buckets) {
+        buckets[bucket].add(obs.value[bucket]);
+      }
+    }
+    return {
+      'fromDate': fromDate.toString(),
+      'curveId': curveId,
+      'markType': 'scalar',
+      'terms': terms,
+      'buckets': buckets,
+    };
   }
 
   /// Curves may be submitted every day for completeness, but they don't need
@@ -123,23 +175,32 @@ class ForwardMarksArchive {
   /// Basic checks on the document structure.
   void checkDocument(Map<String, dynamic> document) {
     var keys = document.keys.toSet();
-    var mustHaveKeys = <String>{'fromDate', 'curveId', 'markType', 'buckets',
-      'terms'};
+    var mustHaveKeys = <String>{
+      'fromDate',
+      'curveId',
+      'markType',
+      'buckets',
+      'terms'
+    };
     if (!keys.containsAll(mustHaveKeys)) {
       throw ArgumentError(
           'Document ${document} must contain fromDate, curveId, markType');
     }
     var fromDate = Date.parse(document['fromDate']);
-
+    if (!{'scalar', 'hourlyShape', 'volatilitySurface'}
+        .contains(document['markType'])) {
+      throw ArgumentError(
+          'Document ${document} has unsupported markType: ${document['markType']}');
+    }
 
     if (document['markType'] == 'monthly') {
       // check that months start from prompt month
       var month0 = Month.parse((document['fromDate'] as String).substring(0, 7),
           fmt: _isoFmt);
-      var month1 =
-      Month.parse((document['terms'] as List).first as String, fmt: _isoFmt);
+      var month1 = Month.parse((document['terms'] as List).first as String,
+          fmt: _isoFmt);
       var monthN =
-      Month.parse((document['terms'] as List).last as String, fmt: _isoFmt);
+          Month.parse((document['terms'] as List).last as String, fmt: _isoFmt);
 //      if (month0.next != month1) {
 //        throw ArgumentError('Months must start with prompt month.');
 //      }
@@ -200,10 +261,9 @@ class ForwardMarksArchive {
       },
     ];
     var aux = await dbConfig.coll.aggregateToStream(pipeline).toList();
-    if (aux.isEmpty) return <String,dynamic>{};
-    return <String,dynamic>{...aux.first};
+    if (aux.isEmpty) return <String, dynamic>{};
+    return <String, dynamic>{...aux.first};
   }
-
 
   void setup() async {
     await dbConfig.db.createIndex(dbConfig.collectionName,

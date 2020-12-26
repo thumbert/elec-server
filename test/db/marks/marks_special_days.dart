@@ -714,9 +714,9 @@ List<Map<String, dynamic>> hourlyShape20191231() {
       .toList();
   x0['terms'] = months;
   for (var bucket in ['7x8', '2x16H', '5x16']) {
-    x0['buckets'][bucket] =
-        List.generate(7, (i) => x0['buckets'][bucket]).expand((e) => e)
-            .toList();
+    x0['buckets'][bucket] = List.generate(7, (i) => x0['buckets'][bucket])
+        .expand((e) => e)
+        .toList();
   }
   return <Map<String, dynamic>>[
     {
@@ -725,5 +725,29 @@ List<Map<String, dynamic>> hourlyShape20191231() {
       'markType': 'hourlyShape',
       ...x0,
     }
+  ];
+}
+
+List<Map<String, dynamic>> volatilitySurface() {
+  var aux = File('test/db/marks/volatility_surface.json').readAsStringSync();
+  var x0 =
+      (json.decode(aux) as List).first as Map<String, dynamic>; // daily isone
+  // extend it to Dec26 and add the '2x16H' and '7x8' bucket
+  var _terms =
+      (x0['terms'] as List).map((e) => Term.parse(e, UTC) as Month).toList();
+  var i = 0;
+  while (_terms.last != Month(2026, 12)) {
+    var month = _terms.last.next;
+    (x0['terms'] as List).add(month.toIso8601String());
+    // (x0['buckets']['5x16'])
+  }
+
+  x0['buckets']['2x16H'] = [
+    for (var v in x0['buckets']['5x16'] as List)
+      List.from((v as List).map((e) => 0.8 * e))
+  ];
+  x0['buckets']['7x8'] = [
+    for (var v in x0['buckets']['5x16'] as List)
+      List.from((v as List).map((e) => 0.5 * e))
   ];
 }

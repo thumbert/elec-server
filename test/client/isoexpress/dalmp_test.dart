@@ -9,7 +9,7 @@ import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
 import 'package:dama/dama.dart';
-import 'package:elec/src/common_enums.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec_server/client/isoexpress/dalmp.dart';
 
 void tests(String rootUrl) async {
@@ -48,13 +48,12 @@ void tests(String rootUrl) async {
     });
 
     test('get daily prices all nodes', () async {
-      var data = await api.getDailyPricesAllNodes(LmpComponent.lmp,
-          Date(2017, 1, 1), Date(2017, 1, 3));
+      var data = await api.getDailyPricesAllNodes(
+          LmpComponent.lmp, Date(2017, 1, 1), Date(2017, 1, 3));
       expect(data.length, 1136);
       var p321 = data[321];
       expect(p321.first.value, 37.755);
     });
-
   });
 }
 
@@ -65,24 +64,23 @@ void speedTest(String rootUrl) async {
 
   var data = await api.getHourlyLmp(
       4000, LmpComponent.lmp, Date(2018, 1, 1), Date(2019, 1, 1));
-  var days = data.intervals.map((ival) => Date.fromTZDateTime(ival.start))
-      .toSet();
+  var days =
+      data.intervals.map((ival) => Date.fromTZDateTime(ival.start)).toSet();
   var allDays = Interval(TZDateTime(location, 2018), TZDateTime(location, 2019))
-      .splitLeft((dt) => Date.fromTZDateTime(dt)).toSet();
+      .splitLeft((dt) => Date.fromTZDateTime(dt))
+      .toSet();
   print(allDays.difference(days));
 
   var sw = Stopwatch()..start();
-  for (var i=0; i<10; i++) {
+  for (var i = 0; i < 10; i++) {
     var mTs = toMonthly(data, mean);
   }
   sw.stop();
   print('Milliseconds: ${sw.elapsedMilliseconds}');
 }
 
-
 void main() async {
   await initializeTimeZone();
   var rootUrl = 'http://localhost:8080/'; // testing
   await tests(rootUrl);
 }
-
