@@ -8,6 +8,7 @@ import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
+import 'package:logging/logging.dart';
 import 'package:rpc/rpc.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
@@ -72,6 +73,10 @@ void registerApis() async {
 
 void main() async {
   await initializeTimeZone();
+  Logger.root.level = Level.WARNING;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
 
   await registerApis();
 

@@ -2,15 +2,17 @@ library test.db.marks.marks_20200529;
 
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
-///
+/// Mark all remaining days in May20 the same value, and then monthly values.
 List<Map<String, dynamic>> marks20200529() {
   var fromDate = '2020-05-29';
   var location = getLocation('America/New_York');
-  var months = Term.parse('Jun20-Dec26', location)
+  var months = Term.parse('May20-Dec26', location)
       .interval
       .splitLeft((dt) => Month.fromTZDateTime(dt))
       .map((e) => e.toIso8601String())
@@ -20,10 +22,10 @@ List<Map<String, dynamic>> marks20200529() {
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4000_da_lmp',
-      'markType': 'monthly',
       'terms': months,
       'buckets': {
         '5x16': [
+          27.25,
           22.2,
           25.4,
           25.3,
@@ -111,6 +113,7 @@ List<Map<String, dynamic>> marks20200529() {
           51,
         ],
         '2x16H': [
+          19.25,
           18.35,
           22.86,
           22.77,
@@ -198,6 +201,7 @@ List<Map<String, dynamic>> marks20200529() {
           46,
         ],
         '7x8': [
+          14.151,
           12.928,
           16.325,
           15.827,
@@ -289,10 +293,10 @@ List<Map<String, dynamic>> marks20200529() {
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4004_da_basis',
-      'markType': 'monthly',
       'terms': months,
       'buckets': {
         '5x16': [
+          -0.10,
           -0.05,
           0,
           0,
@@ -380,6 +384,7 @@ List<Map<String, dynamic>> marks20200529() {
           -0.15,
         ],
         '2x16H': [
+          -0.15,
           -0.2,
           -0.2,
           -0.2,
@@ -467,6 +472,7 @@ List<Map<String, dynamic>> marks20200529() {
           -0.15,
         ],
         '7x8': [
+          -0.15,
           -0.2,
           -0.2,
           -0.2,
@@ -558,6 +564,7 @@ List<Map<String, dynamic>> marks20200529() {
   ];
 }
 
+/// Mark both daily and monthly terms.
 List<Map<String, dynamic>> marks20200706() {
   var fromDate = '2020-07-06';
   var location = getLocation('America/New_York');
@@ -575,8 +582,10 @@ List<Map<String, dynamic>> marks20200706() {
     {
       'fromDate': fromDate,
       'curveId': 'isone_energy_4000_da_lmp',
-      'markType': 'daily',
-      'terms': days,
+      'terms': [
+        ...days,
+        ...months,
+      ],
       'buckets': {
         '5x16': [
           23.48,
@@ -604,44 +613,6 @@ List<Map<String, dynamic>> marks20200706() {
           30,
           30,
           30,
-        ],
-        '2x16H': [
-          null,
-          null,
-          null,
-          null,
-          21.25,
-          21.25,
-          null,
-          null,
-          null,
-          null,
-          null,
-          23.4,
-          23.4,
-          null,
-          null,
-          null,
-          null,
-          null,
-          25.25,
-          25.25,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
-        '7x8': List.filled(25, 15.5),
-      }
-    },
-    {
-      'fromDate': fromDate,
-      'curveId': 'isone_energy_4000_da_lmp',
-      'markType': 'monthly',
-      'terms': months,
-      'buckets': {
-        '5x16': [
           26.8,
           25.3,
           23.75,
@@ -661,6 +632,31 @@ List<Map<String, dynamic>> marks20200706() {
           51,
         ],
         '2x16H': [
+          null,
+          null,
+          null,
+          null,
+          21.25,
+          21.25,
+          null,
+          null,
+          null,
+          null,
+          null,
+          23.4,
+          23.4,
+          null,
+          null,
+          null,
+          null,
+          null,
+          25.25,
+          25.25,
+          null,
+          null,
+          null,
+          null,
+          null,
           24.12,
           22.77,
           21.38,
@@ -680,6 +676,7 @@ List<Map<String, dynamic>> marks20200706() {
           45.9,
         ],
         '7x8': [
+          ...List.filled(25, 15.5),
           16.35,
           15.30,
           15.65,
@@ -703,6 +700,7 @@ List<Map<String, dynamic>> marks20200706() {
   ];
 }
 
+/// A generic historical hourly shape to be applied to all future years.
 List<Map<String, dynamic>> hourlyShape20191231() {
   var aux = File('test/db/marks/hourly_shape.json').readAsStringSync();
   var x0 = json.decode(aux);
@@ -722,32 +720,35 @@ List<Map<String, dynamic>> hourlyShape20191231() {
     {
       'fromDate': '2019-12-31',
       'curveId': 'isone_energy_4000_hourlyshape',
-      'markType': 'hourlyShape',
       ...x0,
     }
   ];
 }
 
+/// A made up volatility surface
 List<Map<String, dynamic>> volatilitySurface() {
   var aux = File('test/db/marks/volatility_surface.json').readAsStringSync();
   var x0 =
       (json.decode(aux) as List).first as Map<String, dynamic>; // daily isone
-  // extend it to Dec26 and add the '2x16H' and '7x8' bucket
-  var _terms =
-      (x0['terms'] as List).map((e) => Term.parse(e, UTC) as Month).toList();
-  var i = 0;
-  while (_terms.last != Month(2026, 12)) {
-    var month = _terms.last.next;
-    (x0['terms'] as List).add(month.toIso8601String());
-    // (x0['buckets']['5x16'])
+  // add the '2x16H' and '7x8' bucket
+  var _terms = (x0['terms'] as List).map((e) => Month.parse(e)).toList();
+  x0['buckets']['2x16H'] = <List<num>>[];
+  x0['buckets']['7x8'] = <List<num>>[];
+  for (var i = 0; i < _terms.length; i++) {
+    x0['buckets']['2x16H'].add((x0['buckets']['5x16'][i] as List)
+        .map((e) => (e as num) * 0.85)
+        .toList());
+    x0['buckets']['7x8'].add((x0['buckets']['5x16'][i] as List)
+        .map((e) => (e as num) * 0.5)
+        .toList());
   }
+  // extend it to Dec26, decaying yoy by 90%
+  var location = getLocation('America/New_York');
+  var vs = VolatilitySurface.fromJson(x0, location: location);
+  var vsX = vs.extendPeriodicallyByYear(Month(2026, 12, location: location),
+      f: (x) => 0.9 * x);
 
-  x0['buckets']['2x16H'] = [
-    for (var v in x0['buckets']['5x16'] as List)
-      List.from((v as List).map((e) => 0.8 * e))
-  ];
-  x0['buckets']['7x8'] = [
-    for (var v in x0['buckets']['5x16'] as List)
-      List.from((v as List).map((e) => 0.5 * e))
-  ];
+  var fromDate = Date.parse(x0['fromDate']);
+  var out = vsX.toMongoDocument(fromDate, x0['curveId']);
+  return [out];
 }

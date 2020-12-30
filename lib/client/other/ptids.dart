@@ -12,7 +12,6 @@ import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/api_response.dart';
 
-
 export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
     show ApiRequestError, DetailedApiRequestError;
 
@@ -22,10 +21,10 @@ class PtidsApi {
   final commons.ApiRequester _requester;
 
   PtidsApi(http.Client client,
-      {String rootUrl: "http://localhost:8080/",
-      String servicePath: "ptids/v1/"})
+      {String rootUrl = 'http://localhost:8080/',
+      String servicePath = 'ptids/v1/'})
       : _requester =
-            new commons.ApiRequester(client, rootUrl, servicePath, USER_AGENT);
+            commons.ApiRequester(client, rootUrl, servicePath, USER_AGENT);
 
   /// Request parameters:
   ///
@@ -39,9 +38,9 @@ class PtidsApi {
   ///
   /// If the used [http.Client] completes with an error when making a REST call,
   /// this method will complete with the same error.
-  Future<List<Map<String,Object>>> getPtidTable({Date asOfDate}) async {
+  Future<List<Map<String, Object>>> getPtidTable({Date asOfDate}) async {
     var _url = null;
-    var _queryParams = new Map<String, List<String>>();
+    var _queryParams = <String, List<String>>{};
     var _uploadMedia = null;
     var _uploadOptions = null;
     var _downloadOptions = commons.DownloadOptions.Metadata;
@@ -53,19 +52,17 @@ class PtidsApi {
       _url = 'asofdate/' + commons.Escaper.ecapeVariable('$asOfDate');
     }
 
-    var _response = _requester.request(_url, "GET",
+    var _response = _requester.request(_url, 'GET',
         body: _body,
         queryParams: _queryParams,
         uploadOptions: _uploadOptions,
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
     return _response.then((data) {
-      var aux = new ApiResponse.fromJson(data);
-      return (json.decode(aux.result) as List).cast<Map<String,Object>>();
+      var aux = ApiResponse.fromJson(data);
+      return (json.decode(aux.result) as List).cast<Map<String, Object>>();
     });
-
   }
-
 
   /// Request parameters:
   ///
@@ -78,7 +75,7 @@ class PtidsApi {
   /// this method will complete with the same error.
   Future<ListOfString> getAvailableAsOfDates() {
     var _url = null;
-    var _queryParams = new Map<String, List<String>>();
+    var _queryParams = <String, List<String>>{};
     var _uploadMedia = null;
     var _uploadOptions = null;
     var _downloadOptions = commons.DownloadOptions.Metadata;
@@ -86,14 +83,12 @@ class PtidsApi {
 
     _url = 'dates';
 
-    var _response = _requester.request(_url, "GET",
+    var _response = _requester.request(_url, 'GET',
         body: _body,
         queryParams: _queryParams,
         uploadOptions: _uploadOptions,
         uploadMedia: _uploadMedia,
         downloadOptions: _downloadOptions);
-    return _response.then((data) => new ListOfString.fromJson(data));
+    return _response.then((data) => ListOfString.fromJson(data));
   }
 }
-
-

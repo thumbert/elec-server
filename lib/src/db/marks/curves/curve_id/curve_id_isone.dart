@@ -46,6 +46,7 @@ List<Map<String, dynamic>> getEnergyCurves() {
           'unit': '\$/MWh',
           'buckets': ['5x16', '2x16H', '7x8'],
           'hourlyShapeCurveId': 'isone_energy_4000_hourlyshape',
+          'markType': 'scalar',
         };
 
         /// for the zonal da lmp curves, add the marking rule (experimental)
@@ -74,16 +75,34 @@ List<Map<String, dynamic>> getEnergyCurves() {
         'curve': '${_zoneMap[ptid]}_da_basis', // 'hub_da_basis'
         'unit': '\$/MWh',
         'buckets': ['5x16', '2x16H', '7x8'],
+        'markType': 'scalar',
       });
     }
-
-    /// add hourly shape curve
-    out.add({
-      'curveId': 'isone_energy_4000_hourlyshape',
-      'unit': 'dimensionless',
-      'buckets': ['5x16', '2x16H', '7x8'],
-    });
   }
+
+  /// add hourly shape curve
+  out.add({
+    'curveId': 'isone_energy_4000_hourlyshape',
+    'unit': 'dimensionless',
+    'buckets': ['5x16', '2x16H', '7x8'],
+    'markType': 'hourlyShape',
+  });
+
+  /// add daily volatility surface
+  out.add({
+    'curveId': 'isone_volatility_4000_daily',
+    'unit': 'dimensionless',
+    'buckets': ['5x16', '2x16H', '7x8'],
+    'markType': 'volatilitySurface',
+  });
+
+  /// add daily volatility surface
+  out.add({
+    'curveId': 'isone_volatility_4000_monthly',
+    'unit': 'dimensionless',
+    'buckets': ['5x16', '2x16H', '7x8'],
+    'markType': 'volatilitySurface',
+  });
 
   return out;
 }
@@ -97,6 +116,7 @@ List<Map<String, dynamic>> getArrCurves() {
         'curve': '${_zoneMap[ptid]}',
         'unit': '\$/MW-month',
         'buckets': ['7x24'],
+        'markType': 'scalar',
       }
   ];
 }
@@ -110,20 +130,22 @@ List<Map<String, dynamic>> getFwdResCurves() {
         'curve': '${_zoneMap[ptid]}',
         'unit': '\$/MW-month',
         'buckets': ['5x16'],
+        'markType': 'scalar',
       }
   ];
 }
 
 List<Map<String, dynamic>> getOpResDaCurves() {
   return [
-      <String, dynamic>{
-        'curveId': 'isone_opres_da_pool',
-        'serviceType': 'opres',
-        'market': 'da',
-        'curve': 'pool_da',
-        'unit': '\$/MWh',
-        'buckets': ['7x24'],
-      }
+    <String, dynamic>{
+      'curveId': 'isone_opres_da_pool',
+      'serviceType': 'opres',
+      'market': 'da',
+      'curve': 'pool_da',
+      'unit': '\$/MWh',
+      'buckets': ['7x24'],
+      'markType': 'scalar',
+    }
   ];
 }
 
@@ -137,6 +159,7 @@ List<Map<String, dynamic>> getOpResRtCurves() {
         'curve': '${_zoneMap[ptid]}_rt',
         'unit': '\$/MWh',
         'buckets': ['7x24'],
+        'markType': 'scalar',
       }
   ];
 }

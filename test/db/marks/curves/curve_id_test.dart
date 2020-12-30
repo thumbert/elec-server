@@ -4,9 +4,9 @@ import 'dart:convert';
 
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id.dart';
-import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart' as isone;
+import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
+    as isone;
 import 'package:test/test.dart';
-
 
 void tests() async {
   group('CurveIds API', () {
@@ -24,7 +24,11 @@ void tests() async {
     });
     test('get serviceTypes', () async {
       var serviceTypes = await api.getServiceTypes('electricity', 'isone');
-      expect(serviceTypes.toSet().containsAll({'arr', 'energy', 'fwdres', 'opres'}), true);
+      expect(
+          serviceTypes
+              .toSet()
+              .containsAll({'arr', 'energy', 'fwdres', 'opres'}),
+          true);
     });
     test('get electricity documents', () async {
       var aux = await api.getElectricityDocuments('isone', 'energy');
@@ -39,7 +43,6 @@ void tests() async {
         'isone_energy_4004_da_basis',
       });
     });
-
   });
 }
 
@@ -51,10 +54,8 @@ void insertData() async {
   await archive.db.close();
 }
 
-
 void main() async {
+  await insertData();
 
-//  await insertData();
-
-  await tests();
+  // await tests();
 }

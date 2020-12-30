@@ -9,10 +9,11 @@ class CurveIdArchive {
 
   final _mustHaveKeys = <String>{
     'curveId',
-    'commodity',  // electricity, ng, etc.
-    'unit',       // $/MWh, etc.
-    'tzLocation', // America/New_York, etc.
-    'buckets',     // ['7x24'], ['5x16', '2x16H', '7x8'], etc.
+    'commodity', // 'electricity', 'ng', etc.
+    'unit', // '$/MWh', 'dimensionless', etc.
+    'tzLocation', // 'America/New_York', etc.
+    'buckets', // ['7x24'], ['5x16', '2x16H', '7x8'], etc.
+    'markType', // 'scalar' || 'hourlyShape' || 'volatilitySurface'
   };
 
   /// Keep track of curve details, e.g. region, serviceType, location, children,
@@ -27,6 +28,7 @@ class CurveIdArchive {
   mongo.Db get db => dbConfig.db;
 
   /// Insert/Update a list of documents into the db.
+  ///
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(0);
     try {
@@ -48,6 +50,28 @@ class CurveIdArchive {
     var keys = xs.keys.toSet();
     if (!keys.containsAll(_mustHaveKeys)) {
       throw 'Missing one of must have keys: $_mustHaveKeys';
+    }
+
+    if (xs['curveId'] != (xs['curveId'] as String).toLowerCase()) {
+      throw ArgumentError('The curveId needs to be in lower '
+          'case: ${xs['curveId']}');
+    }
+
+    String curveId = xs['curveId'];
+    var ok = false;
+    if (curveId.contains('volatility')) {
+      if (xs['markType'] == 'volatilitySurface') {
+        ok = true;
+      }
+    } else if (curveId.contains('hourlyshape')) {
+      if (xs['markType'] == 'hourlyShape') {
+        ok = true;
+      }
+    } else if (xs['markType'] == 'scalar') {
+      ok = true;
+    }
+    if (!ok) {
+      throw ArgumentError('CurveId and markType don\'t match');
     }
   }
 
