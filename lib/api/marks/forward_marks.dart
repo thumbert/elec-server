@@ -289,7 +289,11 @@ class ForwardMarks {
   }
 
   /// Take a Mongo document for a price curve and convert it to a [PriceCurve].
-  /// Keep only terms after [asOfDate].
+  /// Keep only terms after [asOfDate].  If the cash month is marked with a
+  /// monthly value, break it into dailies and return only the days after
+  /// [asOfDate].
+  ///
+  /// [asOfDate] is localized.
   PriceCurve toPriceCurve(
       Map<String, dynamic> document, Date asOfDate, Location location) {
     var buckets = {for (var b in document['buckets'].keys) b: Bucket.parse(b)};
@@ -317,7 +321,16 @@ class ForwardMarks {
         throw ArgumentError('Unsupported term ${terms[i]}');
       }
     }
-    return PriceCurve.fromIterable(xs);
+    var out = PriceCurve.fromIterable(xs);
+
+    if (xs.first.interval is Month) {
+      /// Always break the cash month into days, to ensure the returned
+      /// PriceCurve is from [asOfDate] forwards.
+      out = out.expandToDaily(xs.first.interval);
+      var interval = Interval(asOfDate.end, out.last.interval.end);
+      out = PriceCurve.fromIterable(out.window(interval));
+    }
+    return out;
   }
 
   /// Convert a document to a [VolatilitySurface].
