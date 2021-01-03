@@ -53,14 +53,12 @@ class CurveIds {
         .toList();
   }
 
-
   /// Get the document associated with this curveId
   @ApiMethod(path: 'data/curveId/{curveId}')
   Future<ApiResponse> getCurveId(String curveId) async {
     var query = mongo.where
       ..eq('curveId', curveId)
       ..excludeFields(['_id']);
-//    var aux = await coll.findOne({'curveId': curveId});
     var aux = await coll.findOne(query);
     return ApiResponse()..result = json.encode(aux);
   }
@@ -147,8 +145,11 @@ class CurveIds {
   }
 
   /// Get all the electricity documents for a given region and serviceType
-  @ApiMethod(path: 'data/commodity/electricity/region/{region}/serviceType/{serviceType}')
-  Future<ApiResponse> getElectricityDocuments(String region, String serviceType) async {
+  @ApiMethod(
+      path:
+          'data/commodity/electricity/region/{region}/serviceType/{serviceType}')
+  Future<ApiResponse> getElectricityDocuments(
+      String region, String serviceType) async {
     var pipeline = [
       {
         '\$match': {
@@ -166,13 +167,7 @@ class CurveIds {
         '\$sort': {'curve': 1},
       },
     ];
-    var out = await coll
-        .aggregateToStream(pipeline)
-        .toList();
+    var out = await coll.aggregateToStream(pipeline).toList();
     return ApiResponse()..result = json.encode(out);
   }
-
-
-
-
 }

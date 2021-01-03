@@ -13,7 +13,6 @@ class ForwardMarks {
   final String rootUrl;
   final String servicePath;
   final location = getLocation('America/New_York');
-  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   ForwardMarks(http.Client client,
       {this.rootUrl = 'http://localhost:8080/',
@@ -32,6 +31,21 @@ class ForwardMarks {
     var data = json.decode(_response.body);
     var aux = json.decode(data['result']) as Map<String, dynamic>;
     return PriceCurve.fromMongoDocument(aux, tzLocation);
+  }
+
+  /// Get the volatility surface.
+  Future<VolatilitySurface> getVolatilitySurface(String curveId, Date asOfDate,
+      {Location tzLocation}) async {
+    tzLocation ??= asOfDate.location;
+    var _url = rootUrl +
+        servicePath +
+        'curveId/' +
+        commons.Escaper.ecapeVariable('${curveId.toString()}') +
+        '/asOfDate/${asOfDate.toString()}';
+    var _response = await http.get(_url);
+    var data = json.decode(_response.body);
+    var aux = json.decode(data['result']) as Map<String, dynamic>;
+    return VolatilitySurface.fromJson(aux, location: tzLocation);
   }
 
   /// Get hourly shape curve

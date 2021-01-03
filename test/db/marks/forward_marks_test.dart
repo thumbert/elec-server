@@ -401,7 +401,6 @@ void tests(String rootUrl) async {
       var jan21 = res.observationAt(Month(2021, 1, location: location));
       expect(jan21.value[IsoNewEngland.bucket5x16], 60.7);
     });
-
     test('get mh hourly shape as of 5/29/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_hourlyshape';
       var hs = await clientFm.getHourlyShape(curveId, Date(2020, 5, 29),
@@ -409,6 +408,12 @@ void tests(String rootUrl) async {
       expect(hs.buckets.length, 3);
       expect(
           hs.data.first.interval.start.location.toString(), 'America/New_York');
+    });
+    test('get mh volatility surface as of 7/6/2020', () async {
+      var curveId = 'isone_volatility_4000_daily';
+      var vs = await clientFm.getVolatilitySurface(
+          curveId, Date(2020, 7, 6, location: location));
+      expect(vs.strikeRatios, [0.5, 1, 2]);
     });
   });
 }
@@ -432,6 +437,7 @@ void insertMarks() async {
   await archive.insertData(marks20200529());
   await archive.insertData(marks20200706());
   await archive.insertData(volatilitySurface());
+  await archive.setup();
   await archive.db.close();
 }
 

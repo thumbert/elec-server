@@ -20,6 +20,8 @@ List<Map<String, dynamic>> getCurves() {
     x['tzLocation'] = 'America/New_York';
   }
 
+  xs.addAll(getVolatilityCurves());
+
   return xs;
 }
 
@@ -49,7 +51,7 @@ List<Map<String, dynamic>> getEnergyCurves() {
           'markType': 'scalar',
         };
 
-        /// for the zonal da lmp curves, add the marking rule (experimental)
+        /// For the zonal da lmp curves, add the marking rule (experimental)
         if (ptid != 4000 &&
             market == Market.da &&
             component == LmpComponent.lmp) {
@@ -61,11 +63,23 @@ List<Map<String, dynamic>> getEnergyCurves() {
             ],
           });
         }
+
+        /// For the hub da lmp curves, add the volatility curves
+        if (ptid == 4000 &&
+            market == Market.da &&
+            component == LmpComponent.lmp) {
+          one.addAll({
+            'volatilityCurveId': {
+              'daily': 'isone_volatility_4000_daily',
+              'monthly': 'isone_volatility_4000_monthly',
+            },
+          });
+        }
         out.add(one);
       }
     }
 
-    /// add the basis curves, isone_energy_4001_da_basis
+    /// Add the basis curves, isone_energy_4001_da_basis
     if (ptid != 4000) {
       out.add({
         'curveId': 'isone_energy_${ptid}_da_basis',
@@ -86,22 +100,6 @@ List<Map<String, dynamic>> getEnergyCurves() {
     'unit': 'dimensionless',
     'buckets': ['5x16', '2x16H', '7x8'],
     'markType': 'hourlyShape',
-  });
-
-  /// add daily volatility surface
-  out.add({
-    'curveId': 'isone_volatility_4000_daily',
-    'unit': 'dimensionless',
-    'buckets': ['5x16', '2x16H', '7x8'],
-    'markType': 'volatilitySurface',
-  });
-
-  /// add daily volatility surface
-  out.add({
-    'curveId': 'isone_volatility_4000_monthly',
-    'unit': 'dimensionless',
-    'buckets': ['5x16', '2x16H', '7x8'],
-    'markType': 'volatilitySurface',
   });
 
   return out;
@@ -161,5 +159,28 @@ List<Map<String, dynamic>> getOpResRtCurves() {
         'buckets': ['7x24'],
         'markType': 'scalar',
       }
+  ];
+}
+
+List<Map<String, dynamic>> getVolatilityCurves() {
+  return [
+    {
+      'curveId': 'isone_volatility_4000_daily',
+      'unit': 'dimensionless',
+      'buckets': ['5x16', '2x16H', '7x8'],
+      'markType': 'volatilitySurface',
+      'commodity': 'volatility',
+      'region': 'isone',
+      'tzLocation': 'America/New_York',
+    },
+    {
+      'curveId': 'isone_volatility_4000_monthly',
+      'unit': 'dimensionless',
+      'buckets': ['5x16', '2x16H', '7x8'],
+      'markType': 'volatilitySurface',
+      'commodity': 'volatility',
+      'region': 'isone',
+      'tzLocation': 'America/New_York',
+    },
   ];
 }

@@ -9,7 +9,7 @@ import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
 import 'package:test/test.dart';
 
 void tests() async {
-  group('CurveIds API', () {
+  group('CurveIds API:', () {
     var archive = CurveIdArchive();
     var api = CurveIds(archive.db);
     setUp(() async => await archive.db.open());
@@ -35,7 +35,7 @@ void tests() async {
       var xs = json.decode(aux.result) as List;
       expect(xs.length >= 30, true);
     });
-    test('get curve details for one curveId', () async {
+    test('get curve details for curveId isone_energy_4004_da_lmp', () async {
       var aux = await api.getCurveId('isone_energy_4004_da_lmp');
       var xs = json.decode(aux.result);
       expect(xs['children'].toSet(), {
@@ -43,19 +43,35 @@ void tests() async {
         'isone_energy_4004_da_basis',
       });
     });
+    test('get curve details for curveId isone_energy_4000_da_lmp', () async {
+      var aux = await api.getCurveId('isone_energy_4000_da_lmp');
+      var xs = json.decode(aux.result);
+      expect(xs['volatilityCurveId'], {
+        'daily': 'isone_volatility_4000_daily',
+        'monthly': 'isone_volatility_4000_monthly',
+      });
+    });
+    test('get mass hub daily volatility', () async {
+      var aux = await api.getCurveId('isone_volatility_4000_daily');
+      var xs = json.decode(aux.result);
+      expect(xs['commodity'], 'volatility');
+      expect(xs['unit'], 'dimensionless');
+      expect(xs['markType'], 'volatilitySurface');
+    });
   });
 }
 
 void insertData() async {
   var archive = CurveIdArchive();
   await archive.db.open();
-//  await archive.dbConfig.coll.remove(<String,dynamic>{});
+  await archive.dbConfig.coll.remove(<String, dynamic>{});
   await archive.insertData(isone.getCurves());
+  await archive.setup();
   await archive.db.close();
 }
 
 void main() async {
-  await insertData();
+  // await insertData();
 
-  // await tests();
+  await tests();
 }

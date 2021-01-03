@@ -9,7 +9,7 @@ class CurveIdArchive {
 
   final _mustHaveKeys = <String>{
     'curveId',
-    'commodity', // 'electricity', 'ng', etc.
+    'commodity', // 'electricity', 'ng', 'volatility', 'interestRate', etc.
     'unit', // '$/MWh', 'dimensionless', etc.
     'tzLocation', // 'America/New_York', etc.
     'buckets', // ['7x24'], ['5x16', '2x16H', '7x8'], etc.
