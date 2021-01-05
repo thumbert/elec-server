@@ -25,12 +25,89 @@ class SdRtload {
     location = getLocation('America/New_York');
   }
 
-  //http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201
+  /// Hourly data, all settlements for one assset id.  Return a list with
+  /// elements like this:
+  /// ```
+  ///{
+  ///  'version': '2020-05-06T02:52:38.000Z',
+  ///  'hourBeginning': '2020-05-01 00:00:00.000-0400',
+  ///  'Load Reading': -588.668,
+  ///  'Ownership Share': 80,
+  ///  'Share of Load Reading': -470.9344
+  ///}
+  /// ```
+  ///http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201
   @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
   Future<ApiResponse> rtload(String assetId, String start, String end) async {
     var res = _rtloadQuery(assetId, start, end);
     var out = await _format(res);
     return ApiResponse()..result = json.encode(out);
+  }
+
+  /// Hourly data last settlement for several assset ids aggregated.
+  /// Return
+  /// ```
+  /// {
+  ///   "date" : "2013-06-01",
+  ///   "Asset ID" : 201,
+  ///   "Load Reading" : [ -150, ..., -150 ] }
+  ///   "Ownership Share" : [ 10, ..., 10 ] }
+  ///   "Share of Load Reading" : [ -15, ..., -15 ] }
+  /// ```
+  //http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201
+  @ApiMethod(path: 'start/{start}/end/{end}/assetIds/{assetIds}/lastSettlement')
+  Future<ApiResponse> hourlyRtLoadForAssetIdsLastSettlement(
+      String start, String end, String assetIds) async {
+    var ids = assetIds.split(',').map((e) => int.parse(e.trim())).toList();
+    var pipeline = [
+      {
+        '\$match': {
+          'date': {
+            '\$gte': start.toString(),
+            '\$lte': end.toString(),
+          },
+          'Asset ID': {
+            '\$in': ids,
+          }
+        }
+      },
+      // sort decreasingly by version
+      {
+        '\$sort': {
+          'date': 1,
+          'Asset ID': 1,
+          'version': -1,
+        }
+      },
+      // group by date, assetId, then get the last version
+      {
+        '\$group': {
+          '_id': {'date': '\$date', 'Asset ID': '\$Asset ID'},
+          'version': {'\$first': '\$version'},
+          'Load Reading': {'\$first': '\$Load Reading'},
+          'Ownership Share': {'\$first': '\$Ownership Share'},
+          'Share of Load Reading': {'\$first': '\$Share of Load Reading'},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'Asset ID': '\$_id.Asset ID',
+          'date': '\$_id.date',
+          'Load Reading': '\$Load Reading',
+          'Ownership Share': '\$Ownership Share',
+          'Share of Load Reading': '\$Share of Load Reading',
+        }
+      },
+      {
+        '\$sort': {
+          'date': 1,
+          'Asset ID': 1,
+        }
+      }
+    ];
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return ApiResponse()..result = json.encode(res);
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/daily/assetId/2481/start/20171201/end/20171201

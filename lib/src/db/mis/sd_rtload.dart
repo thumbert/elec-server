@@ -10,20 +10,20 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class SdRtloadArchive extends mis.MisReportArchive {
+  @override
   ComponentConfig dbConfig;
 
   SdRtloadArchive({this.dbConfig}) {
     reportName = 'SD_RTLOAD';
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'mis';
-    }
+    dbConfig ??= ComponentConfig()
+      ..host = '127.0.0.1'
+      ..dbName = 'mis';
     dbConfig.collectionName = 'sd_rtload';
   }
 
-  Map<String,dynamic> rowConverter(List<Map> rows, Date reportDate, DateTime version) {
-    var row = <String,dynamic>{};
+  Map<String, dynamic> rowConverter(
+      List<Map> rows, Date reportDate, DateTime version) {
+    var row = <String, dynamic>{};
     row['date'] = reportDate.toString();
     row['version'] = version;
     row['Asset ID'] = rows.first['Asset ID'];
@@ -32,6 +32,10 @@ class SdRtloadArchive extends mis.MisReportArchive {
     row['Ownership Share'] = [];
     row['Share of Load Reading'] = [];
     rows.forEach((e) {
+      if (e['Trading interval'] is num) {
+        e['Trading interval'] =
+            e['Trading interval'].toString().padLeft(2, '0');
+      }
       row['hourBeginning'].add(
           parseHourEndingStamp(mmddyyyy(reportDate), e['Trading interval']));
       row['Load Reading'].add(e['Load Reading']);
@@ -42,9 +46,9 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  Map<int,List<Map<String,dynamic>>> processFile(File file) {
+  Map<int, List<Map<String, dynamic>>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
-    var report = new mis.MisReport(file);
+    var report = mis.MisReport(file);
     var reportDate = report.forDate();
     var version = report.timestamp();
     var dataByAssetId = groupBy(data, (row) => row['Asset ID'] as int);
@@ -56,13 +60,15 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
-    if (data.isEmpty) return new Future.value(null);
+  Future<Null> insertTabData(List<Map<String, dynamic>> data,
+      {int tab = 0}) async {
+    if (data.isEmpty) return Future.value(null);
+
     /// split the data by Asset ID, date, version
-    var groups = groupBy(data, (Map e) =>
-      new Tuple3(e['Asset ID'], e['date'], e['version']));
+    var groups = groupBy(
+        data, (Map e) => Tuple3(e['Asset ID'], e['date'], e['version']));
     try {
-      for (Tuple3 key in groups.keys) {
+      for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'Asset ID': key.item1,
           'date': key.item2,
@@ -70,26 +76,18 @@ class SdRtloadArchive extends mis.MisReportArchive {
         });
         await dbConfig.coll.insertAll(groups[key]);
       }
-      print('--->  Inserted $reportName for ${data.first['date']} tab $tab, version ${data.first['version']} successfully');
+      print(
+          '--->  Inserted $reportName for ${data.first['date']} tab $tab, version ${data.first['version']} successfully');
     } catch (e) {
       print('   ' + e.toString());
     }
   }
-  
+
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
-      await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'Asset ID': 1, 'date': 1,  'version': 1},
-        unique: true);
+        keys: {'Asset ID': 1, 'date': 1, 'version': 1}, unique: true);
     await dbConfig.db.close();
-  }
-
-  @override
-  Future<Null> updateDb() {
-    // TODO: implement updateDb
   }
 }

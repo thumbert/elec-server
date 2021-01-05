@@ -12,6 +12,7 @@ import 'db/isoexpress/wholesale_load_cost_report_test.dart'
 import 'db/isone_ptids_test.dart' as api_ptids;
 import 'db/lib_mis_reports_test.dart' as mis;
 import 'db/marks/forward_marks_test.dart' as forward_marks;
+import 'db/mis/sd_rtload_test.dart' as sd_rtload;
 import 'db/mis/sr_dalocsum_test.dart' as sr_dalocsum;
 import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
 import 'db/mis/tr_sch2tp_test.dart' as trsch2;
@@ -35,6 +36,7 @@ void main() async {
   api_ptids.tests();
 
   /// db tests
+  sd_rtload.tests();
   sr_dalocsum.tests();
   sr_rtlocsum.tests();
   trsch2.tests();

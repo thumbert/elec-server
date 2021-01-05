@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
+import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
@@ -12,6 +13,7 @@ import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import '../test/db/marks/marks_special_days.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:path/path.dart';
 
 /// Create the MongoDb from scratch to pass all tests.  This script is useful
 /// if you update the MongoDb installation and all the data is erased.
@@ -42,8 +44,12 @@ void insertDays(archive, List<Date> days) async {
 void insertForwardMarks() async {
   var archive = ForwardMarksArchive();
   await archive.db.open();
-  var data = marks20200529();
-  await archive.insertData(data);
+  await archive.dbConfig.coll.remove(<String, dynamic>{});
+  await archive.insertData(hourlyShape20191231());
+  await archive.insertData(marks20200529());
+  await archive.insertData(marks20200706());
+  await archive.insertData(volatilitySurface());
+  await archive.setup();
   await archive.db.close();
 }
 
@@ -59,6 +65,29 @@ void insertIsoExpress() async {
   // to calculate settlement prices for calculators, Jan20-Aug20
   await insertDays(
       DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
+}
+
+void insertMisReports() async {
+  var archive = SdRtloadArchive();
+  await archive.dbConfig.db.open();
+  await archive.dbConfig.coll.remove(<String, dynamic>{});
+  var file = Directory('test/_assets')
+      .listSync()
+      .where((e) => basename(e.path).startsWith('sd_rtload_'))
+      .first;
+  var data = archive.processFile(file);
+  await archive.insertTabData(data[0], tab: 0);
+  await archive.dbConfig.db.close();
+  await archive.setupDb();
+
+  /// change the version and reinsert, so that you have two versions in the
+  /// database
+  for (var x in data[0]) {
+    x['version'] = TZDateTime.utc(2014, 3, 15);
+  }
+  await archive.dbConfig.db.open();
+  await archive.insertTabData(data[0], tab: 0);
+  await archive.dbConfig.db.close();
 }
 
 void insertWholesaleLoadReports() async {
@@ -99,10 +128,13 @@ void main() async {
   await initializeTimeZones();
   dotenv.load('${Platform.environment['HOME']}/.env/isone.env');
 
-  await insertDaBindingConstraints();
+  // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();
+
+  await insertMisReports();
+
 //  await insertPtidTable();
 
 //  await insertWholesaleLoadReports();

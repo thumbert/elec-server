@@ -3,7 +3,8 @@ library test.client.forward_marks;
 import 'dart:convert';
 import 'dart:math';
 import 'package:elec/elec.dart';
-import 'package:elec/risk_system.dart';
+
+import '../../../bin/setup_db.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
@@ -428,23 +429,12 @@ void tests(String rootUrl) async {
 // }
 
 /// Some data for testing.
-///
-void insertMarks() async {
-  var archive = ForwardMarksArchive();
-  await archive.db.open();
-  await archive.dbConfig.coll.remove(<String, dynamic>{});
-  await archive.insertData(hourlyShape20191231());
-  await archive.insertData(marks20200529());
-  await archive.insertData(marks20200706());
-  await archive.insertData(volatilitySurface());
-  await archive.setup();
-  await archive.db.close();
-}
+void insertMarks() => insertForwardMarks();
 
 void main() async {
   await initializeTimeZone();
 
-  // await insertMarks();
+  await insertMarks();
 
-  await tests('http://localhost:8080/');
+  // await tests('http://localhost:8080/');
 }

@@ -60,24 +60,24 @@ class DaLmp {
           'daily/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
   Future<ApiResponse> getDailyBucketPrice(String component, int ptid,
       String start, String end, String bucket) async {
-    Date startDate = Date.parse(start);
-    Date endDate = Date.parse(end);
-    Bucket bucketO = Bucket.parse(bucket);
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
+    var bucketO = Bucket.parse(bucket);
 
     var aux = await getHourlyData(ptid, startDate, endDate, component);
     var out = aux.where((e) {
-      TZDateTime hb = TZDateTime.parse(_location, e['hourBeginning']);
-      return bucketO.containsHour(new Hour.beginning(hb));
+      var hb = TZDateTime.parse(_location, e['hourBeginning']);
+      return bucketO.containsHour(Hour.beginning(hb));
     }).toList();
 
     // do the daily aggregation
-    Nest nest = new Nest()
+    var nest = Nest()
       ..key((Map e) => (e['hourBeginning'] as String).substring(0, 10))
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
     List<Map> res = nest.entries(out);
     var data =
         res.map((Map e) => {'date': e['key'], component: e['values']}).toList();
-    return new ApiResponse()..result = json.encode(data);
+    return ApiResponse()..result = json.encode(data);
   }
 
   num _mean(Iterable<num> x) {
@@ -118,6 +118,7 @@ class DaLmp {
   }
 
   @ApiMethod(path: 'daily/mean/{component}/start/{start}/end/{end}')
+
   /// Average 7x24 price by ptid between the start/end dates
   Future<ApiResponse> dailyPriceByPtid(
       String component, String start, String end) async {
