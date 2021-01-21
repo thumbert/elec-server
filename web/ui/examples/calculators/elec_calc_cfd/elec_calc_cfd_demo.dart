@@ -23,7 +23,7 @@ void main() async {
   await initializeTimeZones();
   var rootUrl = 'http://localhost:8080/';
   var wrapper = querySelector('#wrapper-elec-calc-cfd');
-  var cacheProvider = CacheProvider.test(client: Client(), rootUrl: rootUrl);
+  // var cacheProvider = CacheProvider.test(client: Client(), rootUrl: rootUrl);
   // var app = ElecCalcCfdApp(wrapper, cacheProvider);
   // await app.fromJson(_template1());
 

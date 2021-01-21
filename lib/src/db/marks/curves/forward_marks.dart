@@ -3,10 +3,13 @@ library db.marks.forward_marks;
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 import 'package:intl/intl.dart';
 import 'package:dama/dama.dart';
+import 'package:timezone/timezone.dart';
 
 class ForwardMarksArchive {
   ComponentConfig dbConfig;
@@ -14,7 +17,7 @@ class ForwardMarksArchive {
   /// Marks are inserted into the db for a given (curveId, fromDate) tuple.
   /// Not all curves have marks updated every day.
   ///
-  ForwardMarksArchive({this.dbConfig}) {
+  ForwardMarksArchive({this.dbConfig, this.marksAbsTolerance = 1E-6}) {
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
       ..dbName = 'marks'
@@ -22,6 +25,9 @@ class ForwardMarksArchive {
   }
 
   mongo.Db get db => dbConfig.db;
+  num marksAbsTolerance;
+
+  final _setEq = const SetEquality();
 
   /// Insert a list of documents into the db.  Each document is sanity checked
   /// prior to insertion.  Also, a document is inserted only if needed (values
@@ -75,30 +81,24 @@ class ForwardMarksArchive {
   /// This may be relaxed in the future, but is not yet enabled.
   ///
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) return Future.value(0);
-    try {
-      for (var newDocument in data) {
-        checkDocument(newDocument);
-        var fromDate = newDocument['fromDate'];
-        var curveId = newDocument['curveId'];
+    for (var newDocument in data) {
+      checkDocument(newDocument);
+      var fromDate = newDocument['fromDate'];
+      var curveId = newDocument['curveId'];
 
-        /// Get the last document with the curve, and check if you need to
-        /// reinsert it.
-        var document = await getDocument(fromDate, curveId, dbConfig.coll);
-        if (needToInsert(document, newDocument)) {
-          if (document['fromDate'] == fromDate) {
-            // fromDate is already in the database, so remove the old document
-            await dbConfig.coll
-                .remove({'fromDate': fromDate, 'curveId': curveId});
-          }
-          await dbConfig.coll.insert(newDocument);
-          print(
-              '--->  Inserted forward marks for ${curveId} for ${fromDate} successfully');
+      /// Get the last document with the curve, and check if you need to
+      /// reinsert it.
+      var document = await getDocument(fromDate, curveId, dbConfig.coll);
+      if (needToInsert(document, newDocument)) {
+        if (document['fromDate'] == fromDate) {
+          // fromDate is already in the database, so remove the old document
+          await dbConfig.coll
+              .remove({'fromDate': fromDate, 'curveId': curveId});
         }
+        await dbConfig.coll.insert(newDocument);
+        print(
+            '--->  Inserted forward marks for ${curveId} for ${fromDate} successfully');
       }
-    } catch (e) {
-      print('XXX ' + e.toString());
-      return Future.value(1);
     }
     return Future.value(0);
   }
@@ -116,11 +116,23 @@ class ForwardMarksArchive {
       Map<String, dynamic> document, Map<String, dynamic> newDocument) {
     if (document.isEmpty) return true;
     // The new document may have different start/end months.
-    // If the end term is different, need to update as it's a curve extension.
+    // If the end term is different, need to update because it's a curve
+    // extension.
     var term0 = document['terms'] as List;
     var term1 = newDocument['terms'] as List;
     if (term0.last != term1.last) return true;
 
+    if (isPriceCurve(newDocument['curveId'])) {
+      /// Price curves need to be treated specially because of
+      /// daily vs. monthly marks.  The old document may have monthly values
+      /// where a new document has daily values.  That doesn't make them
+      /// different.
+      return _needToInsertPriceCurve(document, newDocument);
+    }
+
+    /// For non-price curves (e.g. hourlyshape, volatility surfaces)
+    /// which only have monthly terms, the following block will never fail.
+    /// It will also terminate because the last terms are equal.
     var i = 0;
     while (term0[i] != term1.first) {
       i++;
@@ -133,9 +145,8 @@ class ForwardMarksArchive {
       List x1 = values1[bucket];
       if (isPriceCurve(newDocument['curveId'])) {
         for (var i = 0; i < x0.length; i++) {
-          // very strange that I have to do the 'as num' below.  It won't work
-          // otherwise.
-          if (!((x0[i] as num).isCloseTo(x1[i], absoluteTolerance: 1E-6))) {
+          if (!((x0[i] as num)
+              .isCloseTo(x1[i], absoluteTolerance: marksAbsTolerance))) {
             return true;
           }
         }
@@ -145,16 +156,40 @@ class ForwardMarksArchive {
         for (var i = 0; i < x0.length; i++) {
           for (var j = 0; j < x1.length; j++) {
             if (!((x0[i][j] as num)
-                .isCloseTo(x1[i][j], absoluteTolerance: 1E-6))) {
+                .isCloseTo(x1[i][j], absoluteTolerance: marksAbsTolerance))) {
               return true;
             }
-            // if (!_equality.equals(x0[i][j], x1[i][j])) return true;
           }
         }
       }
     }
+    return false;
+  }
 
-    return false; // false = don't need to insert, no changes
+  /// For curves that have daily and monthly granularity, i.e. price curves.
+  bool _needToInsertPriceCurve(
+      Map<String, dynamic> document, Map<String, dynamic> newDocument) {
+    // convert to a price curve (expensive), but simplest to do the
+    // checking.
+    var pc0 = PriceCurve.fromMongoDocument(document, UTC);
+    var pc1 = PriceCurve.fromMongoDocument(newDocument, UTC);
+    var aux = pc0.align(pc1);
+
+    for (var x in aux) {
+      var a = x.value.item1;
+      var b = x.value.item2;
+      if (!_setEq.equals(a.keys.toSet(), b.keys.toSet())) {
+        return true;
+      }
+      for (var bucket in a.keys) {
+        if (!a[bucket]
+            .isCloseTo(b[bucket], absoluteTolerance: marksAbsTolerance)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /// Basic checks on the document structure.
@@ -220,6 +255,16 @@ class ForwardMarksArchive {
       return false;
     }
     return true;
+  }
+
+  Interval _parseTerm(String x) {
+    if (x.length == 7) {
+      return Month.parse(x);
+    } else if (x.length == 10) {
+      return Date.parse(x);
+    } else {
+      throw ArgumentError('Unknown interval $x');
+    }
   }
 
   void setup() async {

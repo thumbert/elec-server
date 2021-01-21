@@ -83,3 +83,57 @@ Map<String, dynamic> calc3() => <String, dynamic>{
         },
       ],
     };
+
+/// Daily call option FG21 one leg
+Map<String, dynamic> calcDo1() => <String, dynamic>{
+      'userId': 'e42111',
+      'calculatorName': 'isone FG21 daily option',
+      'calculatorType': 'elec_daily_option',
+      'term': 'Jan21-Feb21',
+      'buy/sell': 'Buy',
+      'comments': 'a daily option calculator, one leg',
+      'legs': [
+        {
+          'curveId': 'isone_energy_4000_da_lmp',
+          'tzLocation': 'America/New_York',
+          'bucket': '5x16',
+          'quantity': {
+            'value': 50.0,
+          },
+          'call/put': 'call',
+          'strike': {'value': 100},
+        }
+      ],
+    };
+
+/// Daily call option FG21 two legs
+Map<String, dynamic> calcDo2() => <String, dynamic>{
+      'userId': 'e42111',
+      'calculatorName': 'isone FG21 daily option, two legs',
+      'calculatorType': 'elec_daily_option',
+      'term': 'Jan21-Feb21',
+      'buy/sell': 'Buy',
+      'comments': 'a daily option calculator',
+      'legs': [
+        {
+          'curveId': 'isone_energy_4000_da_lmp',
+          'tzLocation': 'America/New_York',
+          'bucket': '5x16',
+          'quantity': {
+            'value': 50.0,
+          },
+          'call/put': 'call',
+          'strike': {'value': 100},
+        },
+        {
+          'curveId': 'isone_energy_4000_da_lmp',
+          'tzLocation': 'America/New_York',
+          'bucket': '5x16',
+          'quantity': {
+            'value': 50.0,
+          },
+          'call/put': 'put',
+          'strike': {'value': 50},
+        }
+      ],
+    };

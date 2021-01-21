@@ -14,9 +14,6 @@ import 'package:test/test.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:timezone/standalone.dart';
 
-import 'marks_special_days.dart';
-import 'package:elec/src/time/shape/hourly_shape.dart';
-
 /// Get the curves that are directly marked
 List<String> getMarkedCurveIds() {
   return [
@@ -35,86 +32,6 @@ List<String> getMarkedCurveIds() {
     'pjm_energy_westernhub_da_lmp',
     ...['ng_henryhub', 'ng_algcg_gdm', 'ng_tetcom3_gdm'],
   ]..sort();
-}
-
-void insertData(ForwardMarksArchive archive) async {
-  var location = getLocation('America/New_York');
-  var start = Date(2018, 1, 1, location: location);
-  var end = Date(2018, 12, 31, location: location);
-  var calendar = NercCalendar();
-  var days = Interval(start.start, end.end)
-      .splitLeft((dt) => Date.fromTZDateTime(dt))
-      .where((date) => !date.isWeekend())
-      .where((date) => !calendar.isHoliday(date))
-      .toList();
-  var endMonth = Month(2025, 12, location: location);
-  var rand = Random(0);
-
-  var curveIds = getMarkedCurveIds();
-  for (var curveId in curveIds) {
-    print(curveId);
-    var data;
-    if (curveId.contains('_energy_')) {
-      data = _generateDataElecCurve(curveId, days, endMonth, rand);
-    } else if (curveId.startsWith('ng')) {
-      data = _generateDataNgCurve(curveId, days, endMonth, rand);
-    } else {
-      throw StateError('unimplemented curve $curveId');
-    }
-    await archive.insertData(data);
-  }
-}
-
-/// Generate forward curve data for one curve for a list of days.  Random data.
-/// Spread curves only get marked on the first day of the month.
-List<Map<String, dynamic>> _generateDataElecCurve(
-    String curveId, List<Date> days, Month endMonth, Random rand) {
-  var out = <Map<String, dynamic>>[];
-  var multiplier = curveId.contains('spread') ? 0.05 : 1.0;
-  var calendar = NercCalendar();
-  for (var day in days) {
-    var month0 = Month(day.year, day.month, location: day.location);
-    var months = month0.next.upTo(endMonth);
-    var n = months.length;
-    if (curveId.contains('basis') &&
-        day != calendar.firstBusinessDate(month0)) {
-      continue;
-    }
-    out.add({
-      'fromDate': day.toString(),
-      'curveId': curveId,
-      'markType': 'monthly',
-      'terms': months.map((e) => e.toIso8601String()).toList(),
-      'buckets': {
-        '5x16':
-            List.generate(n, (i) => 45 * multiplier + 2 * rand.nextDouble()),
-        '2x16H':
-            List.generate(n, (i) => 33 * multiplier + 2 * rand.nextDouble()),
-        '7x8': List.generate(n, (i) => 20 * multiplier + 2 * rand.nextDouble()),
-      }
-    });
-  }
-  return out;
-}
-
-List<Map<String, dynamic>> _generateDataNgCurve(
-    String curveId, List<Date> days, Month endMonth, Random rand) {
-  var out = <Map<String, dynamic>>[];
-  for (var day in days) {
-    var month0 = Month(day.year, day.month, location: day.location);
-    var months = month0.next.upTo(endMonth);
-    var n = months.length;
-    out.add({
-      'fromDate': day.toString(),
-      'curveId': curveId,
-      'markType': 'monthly',
-      'terms': months.map((e) => e.toIso8601String()).toList(),
-      'buckets': {
-        '7x24': List.generate(n, (i) => 2 + rand.nextDouble()),
-      },
-    });
-  }
-  return out;
 }
 
 void tests(String rootUrl) async {
@@ -223,6 +140,44 @@ void tests(String rootUrl) async {
         }
       };
       expect(archive.needToInsert(document, newDocument), false);
+    });
+    test('need to insert, different terms', () {
+      var xOld = {
+        'fromDate': '2020-08-17',
+        'curveId': '1',
+        'terms': ['2020-10', '2020-11', '2020-12', '2021-01', '2021-02'],
+        'buckets': {
+          '5x16': [5, 6, 7, 8, 9],
+        }
+      };
+      var xNew = {
+        'fromDate': '2020-08-17',
+        'curveId': '1',
+        'terms': ['2020-11-01', '2020-11-02', '2020-12', '2021-01', '2021-02'],
+        'buckets': {
+          '5x16': [6, 7, 8, 9, 10],
+        }
+      };
+      expect(archive.needToInsert(xOld, xNew), true);
+    });
+    test('need to insert, different terms 2', () {
+      var xOld = {
+        'fromDate': '2020-08-17',
+        'curveId': '1',
+        'terms': ['2020-10', '2020-11', '2020-12', '2021-01', '2021-02'],
+        'buckets': {
+          '5x16': [5, 6, 7, 8, 9],
+        }
+      };
+      var xNew = {
+        'fromDate': '2020-08-17',
+        'curveId': '1',
+        'terms': ['2020-11-01', '2020-11-02', '2020-12', '2021-01', '2021-02'],
+        'buckets': {
+          '5x16': [6, 6, 7, 8, 9],
+        }
+      };
+      expect(archive.needToInsert(xOld, xNew), false);
     });
     test('getMarks', () async {
       var hub = await ForwardMarksArchive.getDocument(
@@ -419,6 +374,17 @@ void tests(String rootUrl) async {
   });
 }
 
+/// Some data for testing.
+void insertMarks() => insertForwardMarks();
+
+void main() async {
+  await initializeTimeZone();
+
+  // await insertMarks();
+
+  await tests('http://localhost:8080/');
+}
+
 // void repopulateDb() async {
 //   var archive = ForwardMarksArchive();
 //   await archive.db.open();
@@ -428,13 +394,82 @@ void tests(String rootUrl) async {
 //   await archive.db.close();
 // }
 
-/// Some data for testing.
-void insertMarks() => insertForwardMarks();
-
-void main() async {
-  await initializeTimeZone();
-
-  await insertMarks();
-
-  // await tests('http://localhost:8080/');
-}
+// void insertData(ForwardMarksArchive archive) async {
+//   var location = getLocation('America/New_York');
+//   var start = Date(2018, 1, 1, location: location);
+//   var end = Date(2018, 12, 31, location: location);
+//   var calendar = NercCalendar();
+//   var days = Interval(start.start, end.end)
+//       .splitLeft((dt) => Date.fromTZDateTime(dt))
+//       .where((date) => !date.isWeekend())
+//       .where((date) => !calendar.isHoliday(date))
+//       .toList();
+//   var endMonth = Month(2025, 12, location: location);
+//   var rand = Random(0);
+//
+//   var curveIds = getMarkedCurveIds();
+//   for (var curveId in curveIds) {
+//     print(curveId);
+//     var data;
+//     if (curveId.contains('_energy_')) {
+//       data = _generateDataElecCurve(curveId, days, endMonth, rand);
+//     } else if (curveId.startsWith('ng')) {
+//       data = _generateDataNgCurve(curveId, days, endMonth, rand);
+//     } else {
+//       throw StateError('unimplemented curve $curveId');
+//     }
+//     await archive.insertData(data);
+//   }
+// }
+//
+// /// Generate forward curve data for one curve for a list of days.  Random data.
+// /// Spread curves only get marked on the first day of the month.
+// List<Map<String, dynamic>> _generateDataElecCurve(
+//     String curveId, List<Date> days, Month endMonth, Random rand) {
+//   var out = <Map<String, dynamic>>[];
+//   var multiplier = curveId.contains('spread') ? 0.05 : 1.0;
+//   var calendar = NercCalendar();
+//   for (var day in days) {
+//     var month0 = Month(day.year, day.month, location: day.location);
+//     var months = month0.next.upTo(endMonth);
+//     var n = months.length;
+//     if (curveId.contains('basis') &&
+//         day != calendar.firstBusinessDate(month0)) {
+//       continue;
+//     }
+//     out.add({
+//       'fromDate': day.toString(),
+//       'curveId': curveId,
+//       'markType': 'monthly',
+//       'terms': months.map((e) => e.toIso8601String()).toList(),
+//       'buckets': {
+//         '5x16':
+//             List.generate(n, (i) => 45 * multiplier + 2 * rand.nextDouble()),
+//         '2x16H':
+//             List.generate(n, (i) => 33 * multiplier + 2 * rand.nextDouble()),
+//         '7x8': List.generate(n, (i) => 20 * multiplier + 2 * rand.nextDouble()),
+//       }
+//     });
+//   }
+//   return out;
+// }
+//
+// List<Map<String, dynamic>> _generateDataNgCurve(
+//     String curveId, List<Date> days, Month endMonth, Random rand) {
+//   var out = <Map<String, dynamic>>[];
+//   for (var day in days) {
+//     var month0 = Month(day.year, day.month, location: day.location);
+//     var months = month0.next.upTo(endMonth);
+//     var n = months.length;
+//     out.add({
+//       'fromDate': day.toString(),
+//       'curveId': curveId,
+//       'markType': 'monthly',
+//       'terms': months.map((e) => e.toIso8601String()).toList(),
+//       'buckets': {
+//         '7x24': List.generate(n, (i) => 2 + rand.nextDouble()),
+//       },
+//     });
+//   }
+//   return out;
+// }

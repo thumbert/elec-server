@@ -12,6 +12,8 @@ void insertData(CalculatorArchive archive) async {
     calc1(),
     calc2(),
     calc3(),
+    calcDo1(),
+    calcDo2(),
   ];
   for (var x in xs) {
     await archive.insertData(x);
@@ -31,7 +33,7 @@ void tests(String rootUrl) async {
     });
     test('get all calculator types', () async {
       var res = await api.getCalculatorTypes();
-      expect(res, ['elec_swap']);
+      expect(res.toSet(), {'elec_swap', 'elec_daily_option'});
     });
     test('get calculators, remove calculator, then add it back', () async {
       var _calcs = await api.calculatorsForUserId('e11111');
@@ -61,7 +63,7 @@ void repopulateDb() async {
 
 void main() async {
   await initializeTimeZones();
-  // await repopulateDb();
+  await repopulateDb();
 
-  await tests('http://localhost:8080/');
+  // await tests('http://localhost:8080/');
 }
