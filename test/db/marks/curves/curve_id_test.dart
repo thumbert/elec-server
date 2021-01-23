@@ -47,12 +47,12 @@ void tests() async {
       var aux = await api.getCurveId('isone_energy_4000_da_lmp');
       var xs = json.decode(aux.result);
       expect(xs['volatilityCurveId'], {
-        'daily': 'isone_volatility_4000_daily',
-        'monthly': 'isone_volatility_4000_monthly',
+        'daily': 'isone_volatility_4000_da_daily',
+        'monthly': 'isone_volatility_4000_da_monthly',
       });
     });
     test('get mass hub daily volatility', () async {
-      var aux = await api.getCurveId('isone_volatility_4000_daily');
+      var aux = await api.getCurveId('isone_volatility_4000_da_daily');
       var xs = json.decode(aux.result);
       expect(xs['commodity'], 'volatility');
       expect(xs['unit'], 'dimensionless');

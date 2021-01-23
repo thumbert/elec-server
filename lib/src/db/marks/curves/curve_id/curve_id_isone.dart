@@ -70,8 +70,8 @@ List<Map<String, dynamic>> getEnergyCurves() {
             component == LmpComponent.lmp) {
           one.addAll({
             'volatilityCurveId': {
-              'daily': 'isone_volatility_4000_daily',
-              'monthly': 'isone_volatility_4000_monthly',
+              'daily': 'isone_volatility_4000_da_daily',
+              'monthly': 'isone_volatility_4000_da_monthly',
             },
           });
         }
@@ -165,7 +165,7 @@ List<Map<String, dynamic>> getOpResRtCurves() {
 List<Map<String, dynamic>> getVolatilityCurves() {
   return [
     {
-      'curveId': 'isone_volatility_4000_daily',
+      'curveId': 'isone_volatility_4000_da_daily',
       'unit': 'dimensionless',
       'buckets': ['5x16', '2x16H', '7x8'],
       'markType': 'volatilitySurface',
@@ -174,7 +174,7 @@ List<Map<String, dynamic>> getVolatilityCurves() {
       'tzLocation': 'America/New_York',
     },
     {
-      'curveId': 'isone_volatility_4000_monthly',
+      'curveId': 'isone_volatility_4000_da_monthly',
       'unit': 'dimensionless',
       'buckets': ['5x16', '2x16H', '7x8'],
       'markType': 'volatilitySurface',

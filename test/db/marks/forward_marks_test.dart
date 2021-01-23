@@ -28,7 +28,7 @@ List<String> getMarkedCurveIds() {
     'isone_energy_4007_da_basis',
     'isone_energy_4008_da_basis',
     'isone_energy_4011_da_basis',
-    'isone_volatility_4000_daily',
+    'isone_volatility_4000_da_daily',
     'pjm_energy_westernhub_da_lmp',
     ...['ng_henryhub', 'ng_algcg_gdm', 'ng_tetcom3_gdm'],
   ]..sort();
@@ -190,8 +190,8 @@ void tests(String rootUrl) async {
       var hs = await ForwardMarksArchive.getDocument(
           '2020-07-06', 'isone_energy_4000_hourlyshape', archive.dbConfig.coll);
       expect(hs['terms'].first, '2020-01');
-      var vs = await ForwardMarksArchive.getDocument(
-          '2020-07-06', 'isone_volatility_4000_daily', archive.dbConfig.coll);
+      var vs = await ForwardMarksArchive.getDocument('2020-07-06',
+          'isone_volatility_4000_da_daily', archive.dbConfig.coll);
       expect(vs['terms'].first, '2020-08');
     });
   });
@@ -370,7 +370,7 @@ void tests(String rootUrl) async {
           hs.data.first.interval.start.location.toString(), 'America/New_York');
     });
     test('get mh volatility surface as of 7/6/2020', () async {
-      var curveId = 'isone_volatility_4000_daily';
+      var curveId = 'isone_volatility_4000_da_daily';
       var vs = await clientFm.getVolatilitySurface(
           curveId, Date(2020, 7, 6, location: location));
       expect(vs.strikeRatios, [0.5, 1, 2]);

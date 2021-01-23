@@ -1,8 +1,7 @@
 [
   {
     "fromDate": "2020-07-06",
-    "curveId": "isone_volatility_4000_daily",
-    "markType": "volatilitySurface",
+    "curveId": "isone_volatility_4000_da_daily",
     "terms": [
       "2020-08",
       "2020-09",
