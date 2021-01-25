@@ -143,26 +143,18 @@ class ForwardMarksArchive {
     for (var bucket in values0.keys) {
       List x0 = values0[bucket].sublist(i);
       List x1 = values1[bucket];
-      if (isPriceCurve(newDocument['curveId'])) {
-        for (var i = 0; i < x0.length; i++) {
-          if (!((x0[i] as num)
-              .isCloseTo(x1[i], absoluteTolerance: marksAbsTolerance))) {
+      // It's either a volatilitySurface, or hourlyShape document.
+      // Need to compare individual elements which are themselves lists.
+      for (var i = 0; i < x0.length; i++) {
+        for (var j = 0; j < x0[i].length; j++) {
+          if (!((x0[i][j] as num)
+              .isCloseTo(x1[i][j], absoluteTolerance: marksAbsTolerance))) {
             return true;
-          }
-        }
-      } else {
-        // it's either a volatilitySurface, or hourlyShape document,
-        // need to compare individual elements which are themselves lists.
-        for (var i = 0; i < x0.length; i++) {
-          for (var j = 0; j < x1.length; j++) {
-            if (!((x0[i][j] as num)
-                .isCloseTo(x1[i][j], absoluteTolerance: marksAbsTolerance))) {
-              return true;
-            }
           }
         }
       }
     }
+
     return false;
   }
 
