@@ -8,7 +8,7 @@ import 'package:elec_server/src/db/config.dart';
 class CalculatorArchive {
   ComponentConfig dbConfig;
 
-  final _mustHaveKeys = <String>{
+  static final _mustHaveKeys = <String>{
     'userId',
     'calculatorName', //
     'calculatorType', // elec_swap, elec_daily_option, etc.
@@ -33,7 +33,7 @@ class CalculatorArchive {
   Future<int> insertData(Map<String, dynamic> data) async {
     try {
       data.remove('asOfDate'); // don't save that to the db
-      checkDocument(data);
+      isValidDocument(data);
       await dbConfig.coll.remove({
         'userId': data['userId'],
         'calculatorName': data['calculatorName'],
@@ -50,11 +50,13 @@ class CalculatorArchive {
   }
 
   /// Check if a document is valid.
-  void checkDocument(Map<String, dynamic> xs) {
+  static bool isValidDocument(Map<String, dynamic> xs) {
     var keys = xs.keys.toSet();
     if (!keys.containsAll(_mustHaveKeys)) {
-      throw 'Missing one of must have keys: $_mustHaveKeys';
+      print('Missing one of must have keys: $_mustHaveKeys');
+      return false;
     }
+    return true;
   }
 
   void setup() async {

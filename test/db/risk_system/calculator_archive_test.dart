@@ -1,7 +1,9 @@
 library test.db.risk_system.calculator_archive_test;
 
+import 'package:elec/calculators.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:elec_server/api/risk_system/api_calculator.dart';
+import 'package:elec_server/client/risk_system/calculator.dart';
 import 'package:elec_server/src/db/risk_system/calculator_archive.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
@@ -22,31 +24,69 @@ void insertData(CalculatorArchive archive) async {
 
 void tests(String rootUrl) async {
   var archive = CalculatorArchive();
-
   group('CalculatorArchive api tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
-    var api = ApiCalculators(archive.db);
-    test('get users', () async {
-      var res = await api.getUsers();
+    test('get all users', () async {
+      var aux = await http.get('$rootUrl/calculators/v1/users',
+          headers: {'Content-Type': 'application/json'});
+      var res = json.decode(aux.body);
       expect(res, ['e11111', 'e42111']);
     });
+    test('get calculator names for one user', () async {
+      var aux = await http.get('$rootUrl/calculators/v1/user/e11111/names',
+          headers: {'Content-Type': 'application/json'});
+      var res = json.decode(aux.body) as List;
+      expect(res.contains('custom monthly quantities, 1 leg'), true);
+    });
     test('get all calculator types', () async {
-      var res = await api.getCalculatorTypes();
+      var aux = await http.get('$rootUrl/calculators/v1/calculator-types',
+          headers: {'Content-Type': 'application/json'});
+      var res = json.decode(aux.body) as List;
       expect(res.toSet(), {'elec_swap', 'elec_daily_option'});
     });
-    test('get calculators, remove calculator, then add it back', () async {
-      var _calcs = await api.calculatorsForUserId('e11111');
-      expect(_calcs.length, 2);
+    test('get one calculator', () async {
+      var url = '$rootUrl/calculators/v1/user/e11111/'
+          'calculator-name/custom monthly quantities, 1 leg';
+      var aux =
+          await http.get(url, headers: {'Content-Type': 'application/json'});
+      var res = json.decode(aux.body);
+      var calc = json.decode(res['result']);
+      expect(calc['userId'], 'e11111');
+    });
+    test('save a calculator, then delete it', () async {
       var calc = calc3();
-      var res =
-          await api.calculatorRemove(calc['userId'], calc['calculatorName']);
-      var out = json.decode(res.result);
-      expect(out['ok'], 1.0);
-      var calcs = await api.calculatorsForUserId(calc['userId']);
-      expect(calcs.length, 1);
-      // add it back
-      await archive.insertData(calc);
+      calc['calculatorName'] = 'test';
+      var aux = await http.post(
+        '$rootUrl/calculators/v1/save-calculator',
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(calc),
+      );
+      var res = json.decode(aux.body);
+      expect(res['ok'], 1.0);
+      // now delete it
+      var url = '$rootUrl/calculators/v1/user/e11111/calculator-name/test';
+      var aux2 =
+          await http.delete(url, headers: {'Content-Type': 'application/json'});
+      var res2 = json.decode(aux2.body);
+      expect(res2['ok'], 1.0);
+    });
+  });
+  group('CalculatorArchive client tests:', () {
+    var client = CalculatorClient(http.Client(), rootUrl: rootUrl);
+    test('save a calculator, then delete it', () async {
+      var calc = calc3();
+      calc['calculatorName'] = 'test2';
+      var res = await client.saveCalculator(calc);
+      expect(res['ok'], 1.0);
+      var res2 =
+          await client.deleteCalculator(calc['userId'], calc['calculatorName']);
+      expect(res2['ok'], 1.0);
+    });
+    test('get a calculator', () async {
+      var calc = await client.getCalculator(
+          'e11111', 'custom monthly quantities, 1 leg');
+      expect(calc is ElecSwapCalculator, true);
     });
   });
 }
@@ -63,7 +103,7 @@ void repopulateDb() async {
 
 void main() async {
   await initializeTimeZones();
-  await repopulateDb();
+  // await repopulateDb();
 
-  // await tests('http://localhost:8080/');
+  await tests('http://localhost:9080');
 }
