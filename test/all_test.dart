@@ -26,6 +26,7 @@ import 'utils/to_csv_test.dart' as to_csv;
 void main() async {
   await initializeTimeZones();
   var rootUrl = 'http://localhost:8080/';
+  var rootUrl2 = 'http://localhost:9080'; // note the missing / at the end
   DbProd();
 
   Logger.root.level = Level.WARNING; // defaults to Level.INFO
@@ -41,7 +42,7 @@ void main() async {
   sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();
-  calculators.tests(rootUrl);
+  calculators.tests(rootUrl2);
 
   /// Client tests
   bc.tests();

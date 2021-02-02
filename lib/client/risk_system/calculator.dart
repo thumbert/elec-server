@@ -2,6 +2,7 @@ library client.risk_system.calculator;
 
 import 'dart:convert';
 import 'package:elec/calculators.dart';
+import 'package:elec/calculators/elec_swap.dart';
 import 'package:elec/calculators/elec_daily_option.dart';
 import 'package:http/http.dart' as http;
 
