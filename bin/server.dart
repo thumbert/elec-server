@@ -32,6 +32,7 @@ import 'package:elec_server/api/utilities/api_load_eversource.dart'
 import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/isoexpress/api_system_demand.dart';
 import 'package:elec_server/api/isoexpress/api_isone_zonal_demand.dart';
+import 'package:elec_server/src/utils/cors_middleware.dart';
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer =
@@ -105,5 +106,6 @@ void main() async {
   app.get('/', (Request request) {
     return Response.ok('Hello!  This is a Dart server.');
   });
-  await io.serve(app, host, port + 1000);
+  final handler = Pipeline().addMiddleware(cors()).addHandler(app);
+  await io.serve(handler, host, port + 1000);
 }
