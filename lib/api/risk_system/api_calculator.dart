@@ -50,7 +50,8 @@ class ApiCalculators {
         return Response.forbidden('Invalid calculator data: $payload');
       }
       var res = await coll.insert(data);
-      return Response.ok(json.encode(res), headers: headers);
+      var out = {'err': res['err'], 'ok': res['ok']};
+      return Response.ok(json.encode(out), headers: headers);
     });
 
     router.get('/calculator-types', (Request request) async {
