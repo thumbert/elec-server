@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
+import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -31,7 +33,7 @@ void insertDaBindingConstraints() async {
   }
 }
 
-void insertDays(archive, List<Date> days) async {
+void insertDays(DailyIsoExpressReport archive, List<Date> days) async {
   await archive.dbConfig.db.open();
   for (var day in days) {
     print('Working on $day');
@@ -73,6 +75,7 @@ void insertMisReports() async {
   await archive.dbConfig.coll.remove(<String, dynamic>{});
   var file = Directory('test/_assets')
       .listSync()
+      .whereType<File>()
       .where((e) => basename(e.path).startsWith('sd_rtload_'))
       .first;
   var data = archive.processFile(file);

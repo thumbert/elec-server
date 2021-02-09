@@ -17,7 +17,8 @@ class ApiPtids {
 
   @ApiMethod(path: 'current')
   Future<ApiResponse> apiPtidTableCurrent() async {
-    var last = await getAvailableAsOfDates().then((List days) => days.last);
+    var last =
+        await getAvailableAsOfDates().then((List days) => days.last as String);
     var query = where
       ..eq('asOfDate', last)
       ..excludeFields(['_id', 'asOfDate']);
@@ -29,7 +30,7 @@ class ApiPtids {
   Future<ApiResponse> apiPtidTableAsOfDate(String asOfDate) async {
     var asOf = Date.parse(asOfDate);
     var days = await getAvailableAsOfDates()
-        .then((List days) => days.map((e) => Date.parse(e)));
+        .then((days) => days.map((e) => Date.parse(e)));
     var last =
         days.firstWhere((e) => !e.isBefore(asOf), orElse: () => days.last);
     var query = where
@@ -40,6 +41,7 @@ class ApiPtids {
   }
 
   @ApiMethod(path: 'ptid/{ptid}')
+
   /// Show the days when this ptid is in the database.  Nodes are
   /// retired from time to time.
   Future<ApiResponse> apiPtid(int ptid) async {
@@ -51,7 +53,6 @@ class ApiPtids {
     return ApiResponse()..result = json.encode(data);
   }
 
-
   @ApiMethod(path: 'dates')
   Future<List<String>> getAvailableAsOfDates() async {
     Map data = await coll.distinct('asOfDate');
@@ -60,4 +61,3 @@ class ApiPtids {
     return days;
   }
 }
-

@@ -192,9 +192,6 @@ class ForwardMarks {
     return <String>{};
   }
 
-  /// Get all the curves that were marked on a given asOfDate
-  //  @ApiMethod(path: 'curveIds/asOfDate/{asOfDate}')
-
   /// For composite curves (curves with children), it retrieves each children
   /// and then combines them.
   /// Takes ~ 20 ms for a simple curve and ~ 95 ms for a composite curve.

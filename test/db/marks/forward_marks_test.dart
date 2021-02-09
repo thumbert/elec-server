@@ -277,9 +277,9 @@ void tests(String rootUrl) async {
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
       expect((data['terms'] as List)[0], '2020-07-11');
-      expect((data['terms'] as List).last, '2021-12');
-      expect((data['terms'] as List).length, 38);
-      expect((data['buckets']['5x16'] as List).length, 38);
+      expect((data['terms'] as List).last, '2025-12');
+      expect((data['terms'] as List).length, 86);
+      expect((data['buckets']['5x16'] as List).length, 86);
     });
     test('get one hourlyshape curve, isone_energy_4000_hourlyshape', () async {
       var res = await api.getForwardCurve(
@@ -300,9 +300,9 @@ void tests(String rootUrl) async {
       var data = json.decode(res.result) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
-      expect((data['terms'] as List).length, 38);
+      expect((data['terms'] as List).length, 86);
       expect((data['terms'] as List).first, '2020-07-11');
-      expect((data['buckets']['5x16'] as List).length, 38);
+      expect((data['buckets']['5x16'] as List).length, 86);
       expect((data['buckets']['5x16'] as List).first, null); // weekend
     });
     test('get one marked forward curve, one bucket (marked)', () async {
@@ -357,7 +357,7 @@ void tests(String rootUrl) async {
       var res = await clientFm.getForwardCurve(curveId, Date(2020, 7, 6),
           tzLocation: location);
       expect(res[0].interval, Date(2020, 7, 7, location: location));
-      expect(res.length, 42);
+      expect(res.length, 90);
       var jan21 = res.observationAt(Month(2021, 1, location: location));
       expect(jan21.value[IsoNewEngland.bucket5x16], 60.7);
     });
@@ -388,92 +388,3 @@ void main() async {
 
   await tests('http://localhost:8080/');
 }
-
-// void repopulateDb() async {
-//   var archive = ForwardMarksArchive();
-//   await archive.db.open();
-//   await archive.dbConfig.coll.remove(<String, dynamic>{});
-//   await insertData(archive);
-// //  await archive.setup();
-//   await archive.db.close();
-// }
-
-// void insertData(ForwardMarksArchive archive) async {
-//   var location = getLocation('America/New_York');
-//   var start = Date(2018, 1, 1, location: location);
-//   var end = Date(2018, 12, 31, location: location);
-//   var calendar = NercCalendar();
-//   var days = Interval(start.start, end.end)
-//       .splitLeft((dt) => Date.fromTZDateTime(dt))
-//       .where((date) => !date.isWeekend())
-//       .where((date) => !calendar.isHoliday(date))
-//       .toList();
-//   var endMonth = Month(2025, 12, location: location);
-//   var rand = Random(0);
-//
-//   var curveIds = getMarkedCurveIds();
-//   for (var curveId in curveIds) {
-//     print(curveId);
-//     var data;
-//     if (curveId.contains('_energy_')) {
-//       data = _generateDataElecCurve(curveId, days, endMonth, rand);
-//     } else if (curveId.startsWith('ng')) {
-//       data = _generateDataNgCurve(curveId, days, endMonth, rand);
-//     } else {
-//       throw StateError('unimplemented curve $curveId');
-//     }
-//     await archive.insertData(data);
-//   }
-// }
-//
-// /// Generate forward curve data for one curve for a list of days.  Random data.
-// /// Spread curves only get marked on the first day of the month.
-// List<Map<String, dynamic>> _generateDataElecCurve(
-//     String curveId, List<Date> days, Month endMonth, Random rand) {
-//   var out = <Map<String, dynamic>>[];
-//   var multiplier = curveId.contains('spread') ? 0.05 : 1.0;
-//   var calendar = NercCalendar();
-//   for (var day in days) {
-//     var month0 = Month(day.year, day.month, location: day.location);
-//     var months = month0.next.upTo(endMonth);
-//     var n = months.length;
-//     if (curveId.contains('basis') &&
-//         day != calendar.firstBusinessDate(month0)) {
-//       continue;
-//     }
-//     out.add({
-//       'fromDate': day.toString(),
-//       'curveId': curveId,
-//       'markType': 'monthly',
-//       'terms': months.map((e) => e.toIso8601String()).toList(),
-//       'buckets': {
-//         '5x16':
-//             List.generate(n, (i) => 45 * multiplier + 2 * rand.nextDouble()),
-//         '2x16H':
-//             List.generate(n, (i) => 33 * multiplier + 2 * rand.nextDouble()),
-//         '7x8': List.generate(n, (i) => 20 * multiplier + 2 * rand.nextDouble()),
-//       }
-//     });
-//   }
-//   return out;
-// }
-//
-// List<Map<String, dynamic>> _generateDataNgCurve(
-//     String curveId, List<Date> days, Month endMonth, Random rand) {
-//   var out = <Map<String, dynamic>>[];
-//   for (var day in days) {
-//     var month0 = Month(day.year, day.month, location: day.location);
-//     var months = month0.next.upTo(endMonth);
-//     var n = months.length;
-//     out.add({
-//       'fromDate': day.toString(),
-//       'curveId': curveId,
-//       'markType': 'monthly',
-//       'terms': months.map((e) => e.toIso8601String()).toList(),
-//       'buckets': {
-//         '7x24': List.generate(n, (i) => 2 + rand.nextDouble()),
-//       },
-//     });
-//   }
-//   return out;
-// }

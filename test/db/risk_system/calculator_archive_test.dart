@@ -1,6 +1,6 @@
 library test.db.risk_system.calculator_archive_test;
 
-import 'package:elec/calculators.dart';
+import 'package:elec/calculators/elec_swap.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:elec_server/client/risk_system/calculator.dart';
@@ -83,11 +83,15 @@ void tests(String rootUrl) async {
           await client.deleteCalculator(calc['userId'], calc['calculatorName']);
       expect(res2['ok'], 1.0);
     });
-    test('get a calculator', () async {
+    test('get a calculator one leg', () async {
       var calc = await client.getCalculator(
           'e11111', 'custom monthly quantities, 1 leg');
       expect(calc is ElecSwapCalculator, true);
     });
+    // test('get a calculator 2 legs, saved from UI', () async {
+    //   var calc = await client.getCalculator('e11111', 'test 1 2 3');
+    //   expect(calc is ElecSwapCalculator, true);
+    // });
   });
 }
 

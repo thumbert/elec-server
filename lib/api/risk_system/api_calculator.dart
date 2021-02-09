@@ -95,7 +95,8 @@ class ApiCalculators {
       String userId, String calculatorName) async {
     var res =
         await coll.remove({'userId': userId, 'calculatorName': calculatorName});
-    return ApiResponse()..result = json.encode(res);
+    var out = {'err': res['err'], 'ok': res['ok']};
+    return ApiResponse()..result = json.encode(out);
   }
 
   Future<List<String>> getCalculatorTypes() async {
