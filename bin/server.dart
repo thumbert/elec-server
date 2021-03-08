@@ -40,7 +40,6 @@ final ApiServer _apiServer =
 const String host = '127.0.0.1';
 
 void registerApis() async {
-  DbProd();
   await DbProd.isone.open();
   _apiServer.addApi(ApiPtids(DbProd.isone));
 //  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
@@ -64,23 +63,18 @@ void registerApis() async {
 //  var db5 = Db('mongodb://$host/utility');
 //  await db5.open();
 //  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
-
-  await DbProd.marks.open();
-  _apiServer.addApi(CurveIds(DbProd.marks));
-  _apiServer.addApi(ForwardMarks(DbProd.marks));
-
-  // await DbProd.riskSystem.open();
-  // _apiServer.addApi(ApiCalculators(DbProd.riskSystem));
 }
 
 Future<Router> buildRouter() async {
-  final app = Router();
-  DbProd();
+  final router = Router();
+  await DbProd.marks.open();
   await DbProd.riskSystem.open();
 
-  app.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
+  router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
+  router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
+  router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);
 
-  return app;
+  return router;
 }
 
 void main() async {
@@ -90,6 +84,7 @@ void main() async {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 
+  DbProd();
   await registerApis();
   _apiServer.enableDiscoveryApi();
 
@@ -107,5 +102,6 @@ void main() async {
     return Response.ok('Hello!  This is a Dart server.');
   });
   final handler = Pipeline().addMiddleware(cors()).addHandler(app);
-  await io.serve(handler, host, port + 1000);
+  await io.serve(handler, host, port - 80);
+  print('Shelf server started on port ${port - 80}');
 }

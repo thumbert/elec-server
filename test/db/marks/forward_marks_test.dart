@@ -1,8 +1,9 @@
 library test.client.forward_marks;
 
 import 'dart:convert';
-import 'dart:math';
 import 'package:elec/elec.dart';
+import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 import '../../../bin/setup_db.dart';
 import 'package:http/http.dart';
@@ -11,7 +12,6 @@ import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/client/marks/forward_marks.dart' as client;
 import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:test/test.dart';
-import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:timezone/standalone.dart';
 
 /// Get the curves that are directly marked
@@ -27,16 +27,19 @@ List<String> getMarkedCurveIds() {
     'isone_energy_4006_da_basis',
     'isone_energy_4007_da_basis',
     'isone_energy_4008_da_basis',
+    'isone_energy_4011_da_lmp',
     'isone_energy_4011_da_basis',
+    'isone_energy_4011_da_congestion',
+    'isone_energy_4011_da_lossfactor',
     'isone_volatility_4000_da_daily',
     'pjm_energy_westernhub_da_lmp',
     ...['ng_henryhub', 'ng_algcg_gdm', 'ng_tetcom3_gdm'],
   ]..sort();
 }
 
-void tests(String rootUrl) async {
+void tests() async {
+  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = ForwardMarksArchive();
-  var location = getLocation('America/New_York');
   group('ForwardMarks archive tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
@@ -204,7 +207,9 @@ void tests(String rootUrl) async {
       ...getMarkedCurveIds(),
     };
     test('api get all curveIds', () async {
-      var res = await api.getCurveIds();
+      var aux = await http.get('$shelfRootUrl/forward_marks/v1/curveIds',
+          headers: {'Content-Type': 'application/json'});
+      var res = json.decode(aux.body) as List;
       expect(allCurveIds.containsAll(res), true);
     });
     test('api get all curveIds with pattern', () async {
@@ -226,54 +231,90 @@ void tests(String rootUrl) async {
     });
     test('curve details cache speed', () async {
       var sw = Stopwatch()..start();
-      await api.curveIdCache.get('isone_energy_4000_da_lmp');
+      await ForwardMarks.curveIdCache.get('isone_energy_4000_da_lmp');
       sw.stop();
       expect(sw.elapsedMilliseconds < 10, true); // 2 ms on the laptop
     });
     test(
-        'get mh forward curve as of 5/29/2020, May20 mark gets expanded '
+        'get mh forward curve as of 5/29/2020, May20 mark gets expanded'
         'to daily', () async {
-      var res =
-          await api.getForwardCurve('isone_energy_4000_da_lmp', '2020-05-29');
-      var data = json.decode(res.result) as Map<String, dynamic>;
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4000_da_lmp/'
+          'asOfDate/2020-05-29',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect(data['terms'].first, '2020-05-30');
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
       expect(data['buckets']['5x16'][0], null); // it's a Saturday
     });
     test('get mh forward curve as of 7/6/2020', () async {
-      var res =
-          await api.getForwardCurve('isone_energy_4000_da_lmp', '2020-07-06');
-      var data = json.decode(res.result) as Map<String, dynamic>;
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4000_da_lmp/'
+          'asOfDate/2020-07-06',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
     });
     test('cache of curveDetails', () async {
-      var res = await api.curveIdCache.get('isone_energy_4004_da_lmp');
+      var res = await ForwardMarks.curveIdCache.get('isone_energy_4004_da_lmp');
       expect(res['children'].toSet(),
           {'isone_energy_4000_da_lmp', 'isone_energy_4004_da_basis'});
     });
-    test('get one composite forward curve, all marked buckets, monthly',
-        () async {
-      expect(
-          await api.marksCache.size(), 2); // only the hub, monthly is in cache
-      var res =
-          await api.getForwardCurve('isone_energy_4004_da_lmp', '2020-07-06');
-      var data = json.decode(res.result) as Map<String, dynamic>;
-      expect(await api.curveIdCache.size(), 3);
-
-      /// now there are 4 curves in the cache: 2 x hub, ct basis, ct lmp
-      expect(await api.marksCache.size(), 4);
+    test('get one composite forward curve, add 2', () async {
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4004_da_lmp/'
+          'asOfDate/2020-07-06',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
       expect(data['terms'][0], '2020-07-07');
       expect(data['terms'][30], '2021-01');
       expect((data['buckets']['5x16'][30] as num).toStringAsFixed(2), '60.05');
     });
+    test('get one composite forward curve, nodal mark', () async {
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4011_da_lmp/'
+          'asOfDate/2020-07-06',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
+
+      expect(data.keys.toSet(), {'terms', 'buckets'});
+      expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
+      expect(data['terms'][0], '2020-07-07');
+      expect(data['terms'][30], '2021-01');
+      var lmpJan21 = 60.7 + 0.57 + 60.7 * 0.031;
+      expect((data['buckets']['5x16'][30] as num).toStringAsFixed(4),
+          lmpJan21.toStringAsFixed(4));
+    });
+    test('get one composite forward curve, subtract two curves', () async {
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4011_da_basis/'
+          'asOfDate/2020-07-06',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
+      expect(data.keys.toSet(), {'terms', 'buckets'});
+      expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
+      expect(data['terms'][0], '2020-07-07');
+      expect(data['terms'][30], '2021-01');
+      var lmpJan21 = 0.57 + 60.7 * 0.031;
+      expect((data['buckets']['5x16'][30] as num).toStringAsFixed(4),
+          lmpJan21.toStringAsFixed(4));
+    });
     test('get one forward curve, all marked buckets', () async {
-      var res =
-          await api.getForwardCurve('isone_energy_4000_da_lmp', '2020-07-10');
-      var data = json.decode(res.result) as Map<String, dynamic>;
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4000_da_lmp/'
+          'asOfDate/2020-07-10',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
       expect((data['terms'] as List)[0], '2020-07-11');
@@ -282,9 +323,12 @@ void tests(String rootUrl) async {
       expect((data['buckets']['5x16'] as List).length, 86);
     });
     test('get one hourlyshape curve, isone_energy_4000_hourlyshape', () async {
-      var res = await api.getForwardCurve(
-          'isone_energy_4000_hourlyshape', '2020-07-10');
-      var data = json.decode(res.result) as Map<String, dynamic>;
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4000_hourlyshape/'
+          'asOfDate/2020-07-10',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
       expect((data['terms'] as List).first, '2020-07');
@@ -295,37 +339,18 @@ void tests(String rootUrl) async {
     });
     test('get one forward curve, all marked buckets, daily + monthly',
         () async {
-      var res =
-          await api.getForwardCurve('isone_energy_4000_da_lmp', '2020-07-10');
-      var data = json.decode(res.result) as Map<String, dynamic>;
+      var aux = await http.get(
+          '$shelfRootUrl/forward_marks/v1/'
+          'curveId/isone_energy_4000_da_lmp/'
+          'asOfDate/2020-07-10',
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
       expect((data['terms'] as List).length, 86);
       expect((data['terms'] as List).first, '2020-07-11');
       expect((data['buckets']['5x16'] as List).length, 86);
       expect((data['buckets']['5x16'] as List).first, null); // weekend
-    });
-    test('get one marked forward curve, one bucket (marked)', () async {
-      var res = await api.getForwardCurveForBucket(
-          'isone_energy_4000_da_lmp', '5x16', '2020-07-06');
-      var data = json.decode(res.result);
-      expect(data['terms'].first, '2020-07-07');
-      expect(data['buckets']['5x16'].first, 23.48);
-    });
-    test('a marked forward curve with wrong bucket returns empty', () async {
-      var res = await api.getForwardCurveForBucket(
-          'ng_henryhub', '5x16', '2018-03-03');
-      var data = json.decode(res.result);
-      expect(data.isEmpty, true);
-    });
-    test('get one marked forward curve, one bucket (computed)', () async {
-      var res = await api.getForwardCurveForBucket(
-          'isone_energy_4000_da_lmp', 'offpeak', '2020-07-06');
-      var data = json.decode(res.result) as Map;
-      expect(data['terms'].first, '2020-07-07'); // Tue
-      expect(data['buckets']['Offpeak'].first.toStringAsFixed(2), '15.50');
-      expect(data['terms'][25], '2020-08');
-      expect(data['buckets']['Offpeak'][25].toStringAsFixed(5), '19.39706');
     });
     test('get the buckets marked for one curve', () async {
       // marked curve
@@ -341,7 +366,7 @@ void tests(String rootUrl) async {
   });
 
   group('ForwardMarks client tests:', () {
-    var clientFm = client.ForwardMarks(Client(), rootUrl: rootUrl);
+    var clientFm = client.ForwardMarks(Client(), rootUrl: shelfRootUrl);
     var location = getLocation('America/New_York');
     test('get mh curve as of 5/29/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_da_lmp';
@@ -386,5 +411,6 @@ void main() async {
 
   // await insertMarks();
 
-  await tests('http://localhost:8080/');
+  dotenv.load('.env/prod.env');
+  tests();
 }

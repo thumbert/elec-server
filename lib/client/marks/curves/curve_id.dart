@@ -8,8 +8,8 @@ class CurveIdClient {
   String servicePath;
 
   CurveIdClient(http.Client client,
-      {this.rootUrl = 'http://localhost:8080/',
-      this.servicePath = 'curve_ids/v1/'});
+      {this.rootUrl = 'http://localhost:8000',
+      this.servicePath = '/curve_ids/v1/'});
 
   /// Get all curveIds in the database.
   Future<List<String>> curveIds({String pattern}) async {
@@ -51,19 +51,19 @@ class CurveIdClient {
   /// Get all electricity documents for a region, serviceType.
   Future<List<Map<String, dynamic>>> electricityDocuments(
       String region, String serviceType) async {
-    var _url = rootUrl + servicePath + 'data/commodity/electricity/region'
-      '/$region/serviceType/$serviceType';
+    var _url = rootUrl +
+        servicePath +
+        'data/commodity/electricity/region'
+            '/$region/serviceType/$serviceType';
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    return (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
+    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get one curveId document
   Future<Map<String, dynamic>> getCurveId(String curveId) async {
     var _url = rootUrl + servicePath + 'data/curveId/$curveId';
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    return json.decode(data['result']) as Map<String, dynamic>;
+    return json.decode(_response.body) as Map<String, dynamic>;
   }
 
   /// Get several curveId documents
@@ -71,7 +71,6 @@ class CurveIdClient {
     var _ids = curveIds.join('|');
     var _url = rootUrl + servicePath + 'data/curveIds/$_ids';
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    return (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
+    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 }

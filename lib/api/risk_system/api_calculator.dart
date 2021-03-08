@@ -44,13 +44,13 @@ class ApiCalculators {
     /// If the calculator already exists in the collection, it will fail.
     router.post('/save-calculator', (Request request) async {
       final payload = await request.readAsString();
-      var data = json.decode(payload);
+      var data = json.decode(payload) as Map<String, dynamic>;
       // check that is a valid document before attempting to insert
       if (!CalculatorArchive.isValidDocument(data)) {
         return Response.forbidden('Invalid calculator data: $payload');
       }
       var res = await coll.insert(data);
-      var out = {'err': res['err'], 'ok': res['ok']};
+      var out = <String, dynamic>{'err': res['err'], 'ok': res['ok']};
       return Response.ok(json.encode(out), headers: headers);
     });
 
@@ -95,7 +95,7 @@ class ApiCalculators {
       String userId, String calculatorName) async {
     var res =
         await coll.remove({'userId': userId, 'calculatorName': calculatorName});
-    var out = {'err': res['err'], 'ok': res['ok']};
+    var out = <String, dynamic>{'err': res['err'], 'ok': res['ok']};
     return ApiResponse()..result = json.encode(out);
   }
 

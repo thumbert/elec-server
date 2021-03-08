@@ -51,7 +51,7 @@ void tests(String rootUrl) async {
       var aux =
           await http.get(url, headers: {'Content-Type': 'application/json'});
       var res = json.decode(aux.body);
-      var calc = json.decode(res['result']);
+      var calc = json.decode(res['result'] as String);
       expect(calc['userId'], 'e11111');
     });
     test('save a calculator, then delete it', () async {

@@ -1,4 +1,3 @@
-
 import 'package:fixnum/fixnum.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
@@ -35,11 +34,11 @@ class LmpService extends LmpServiceBase {
       ..tzLocation = 'America/New_York'
       ..timeInterval = hourly;
     await for (Map e in data) {
-      for (int i = 0; i < e['hourBeginning'].length; i++) {
+      var hours = e['hourBeginning'] as List;
+      for (var i = 0; i < hours.length; i++) {
         out.observation.add(NumericTimeSeries_Observation()
-          ..start =
-          Int64((e['hourBeginning'][i] as DateTime).millisecondsSinceEpoch)
-          ..value = e[component][i]);
+          ..start = Int64((hours[i] as DateTime).millisecondsSinceEpoch)
+          ..value = e[component][i] as double);
       }
     }
 
@@ -47,8 +46,8 @@ class LmpService extends LmpServiceBase {
   }
 }
 
-main() async {
-  const String host = '127.0.0.1';
+void main() async {
+  const host = '127.0.0.1';
   var db = Db('mongodb://$host/isoexpress');
   await db.open();
   await initializeTimeZone();

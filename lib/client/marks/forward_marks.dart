@@ -1,7 +1,6 @@
 library client.marks.forward_marks;
 
 import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
@@ -15,8 +14,8 @@ class ForwardMarks {
   final location = getLocation('America/New_York');
 
   ForwardMarks(http.Client client,
-      {this.rootUrl = 'http://localhost:8080/',
-      this.servicePath = 'forward_marks/v1/'});
+      {this.rootUrl = 'http://localhost:8000',
+      this.servicePath = '/forward_marks/v1/'});
 
   /// Get marks for one curve, for one asOfDate, all available buckets.
   Future<PriceCurve> getForwardCurve(String curveId, Date asOfDate,
@@ -28,9 +27,8 @@ class ForwardMarks {
         commons.Escaper.ecapeVariable('${curveId.toString()}') +
         '/asOfDate/${asOfDate.toString()}';
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    var aux = json.decode(data['result']) as Map<String, dynamic>;
-    return PriceCurve.fromMongoDocument(aux, tzLocation);
+    var data = json.decode(_response.body) as Map<String, dynamic>;
+    return PriceCurve.fromMongoDocument(data, tzLocation);
   }
 
   /// Get the volatility surface.
@@ -43,9 +41,8 @@ class ForwardMarks {
         commons.Escaper.ecapeVariable('${curveId.toString()}') +
         '/asOfDate/${asOfDate.toString()}';
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    var aux = json.decode(data['result']) as Map<String, dynamic>;
-    return VolatilitySurface.fromJson(aux, location: tzLocation);
+    var data = json.decode(_response.body) as Map<String, dynamic>;
+    return VolatilitySurface.fromJson(data, location: tzLocation);
   }
 
   /// Get hourly shape curve
@@ -58,32 +55,7 @@ class ForwardMarks {
         commons.Escaper.ecapeVariable('${curveId.toString()}') +
         '/asOfDate/${asOfDate.toString()}';
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    var aux = (json.decode(data['result']) as Map<String, dynamic>);
-    return HourlyShape.fromJson(aux, tzLocation);
+    var data = json.decode(_response.body) as Map<String, dynamic>;
+    return HourlyShape.fromJson(data, tzLocation);
   }
 }
-
-// /// Get forward marks for one curve, one bucket.
-// Future<MonthlyCurve> getForwardCurveForBucket(
-//     String curveId, Bucket bucket, Date asOfDate,
-//     {Location tzLocation}) async {
-//   tzLocation ??= asOfDate.location;
-//   var _url = rootUrl +
-//       servicePath +
-//       'curveId/' +
-//       commons.Escaper.ecapeVariable('${curveId}') +
-//       '/bucket/' +
-//       bucket.toString() +
-//       '/asOfDate/${asOfDate.toString()}';
-//
-//   var _response = await http.get(_url);
-//   var data = json.decode(_response.body);
-//   var aux = json.decode(data['result']);
-//   var out = TimeSeries<num>();
-//   for (var e in aux.entries) {
-//     out.add(IntervalTuple(
-//         Month.parse(e.key, location: tzLocation, fmt: _isoFmt), e.value));
-//   }
-//   return MonthlyCurve(bucket, out);
-// }

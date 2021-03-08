@@ -3,12 +3,9 @@ library api.other.curve_ids;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
-import 'package:rpc/rpc.dart';
-import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
-import 'package:elec_server/src/db/marks/curve_attributes.dart' as ca;
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'curve_ids', version: 'v1')
 class CurveIds {
   mongo.Db db;
   mongo.DbCollection coll;
@@ -19,17 +16,84 @@ class CurveIds {
     coll = db.collection('curve_ids');
   }
 
-  /// Get all the existing curve ids in the database, sorted
-  @ApiMethod(path: 'curveIds')
-  Future<List<String>> curveIds() async {
-    var aux = await coll.distinct('curveId');
-    var res = <String>[...aux['values']];
-    return res..sort();
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    /// Get all the existing curve ids in the database, sorted
+    router.get('/curveIds', (Request request) async {
+      var aux = await coll.distinct('curveId');
+      var res = <String>[...aux['values']];
+      res.sort();
+      return Response.ok(json.encode(res), headers: headers);
+    });
+
+    /// Get all the existing curve ids in the database that match the pattern,
+    /// sorted
+    router.get('/curveIds/pattern/<pattern>',
+        (Request request, String pattern) async {
+      var aux = await curveIdsWithPattern(pattern);
+      aux.sort();
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get all the unique commodities, sorted
+    router.get('/commodities', (Request request) async {
+      var aux = await coll.distinct('commodity');
+      var res = <String>[...aux['values']];
+      res.sort();
+      return Response.ok(json.encode(res), headers: headers);
+    });
+
+    /// Get all the unique regions for a given commodity (e.g. electricity),
+    /// sorted
+    router.get('/commodity/<commodity>/regions',
+        (Request request, String commodity) async {
+      var aux = await getRegions(commodity);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get all the unique regions for a given commodity and region, sorted
+    /// For example (electricity, isone)
+    router.get('/commodity/<commodity>/region/<region>/serviceTypes',
+        (Request request, String commodity, String region) async {
+      var aux = await getServiceTypes(commodity, region);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get the unique document associated with this curveId
+    router.get('/data/curveId/<curveId>',
+        (Request request, String curveId) async {
+      var aux = await getCurveId(curveId);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get the documents associated with these curveIds.  Multiple curveIds are
+    /// separated by |.
+    router.get('/data/curveIds/<curveIds>',
+        (Request request, String curveIds) async {
+      curveIds = Uri.decodeFull(curveIds);
+      var aux = await getCurveIds(curveIds);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get all the documents for a given commodity, region and serviceType
+    router.get(
+        '/data/commodity/<commodity>/region/<region>/serviceType/<serviceType>',
+        (Request request, String commodity, String region,
+            String serviceType) async {
+      var aux = await getDocuments(commodity, region, serviceType);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
   }
 
   /// Get all the existing curve ids in the database that match the pattern,
   /// sorted
-  @ApiMethod(path: 'curveIds/pattern/{pattern}')
   Future<List<String>> curveIdsWithPattern(String pattern) async {
     var pipeline = [
       {
@@ -54,37 +118,24 @@ class CurveIds {
   }
 
   /// Get the document associated with this curveId
-  @ApiMethod(path: 'data/curveId/{curveId}')
-  Future<ApiResponse> getCurveId(String curveId) async {
+  Future<Map<String, dynamic>> getCurveId(String curveId) async {
     var query = mongo.where
       ..eq('curveId', curveId)
       ..excludeFields(['_id']);
-    var aux = await coll.findOne(query);
-    return ApiResponse()..result = json.encode(aux);
+    return await coll.findOne(query);
   }
 
   /// Get the documents associated with these curveIds.  Multiple curveIds are
   /// separated by |.
-  @ApiMethod(path: 'data/curveIds/{curveIds}')
-  Future<ApiResponse> getCurveIds(String curveIds) async {
+  Future<List<Map<String, dynamic>>> getCurveIds(String curveIds) async {
     var _ids = curveIds.split('|');
     var query = mongo.where
       ..oneFrom('curveId', _ids)
       ..excludeFields(['_id']);
-    var aux = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(aux);
-  }
-
-  /// Get all the unique commodities, sorted
-  @ApiMethod(path: 'commodities')
-  Future<List<String>> getCommodities() async {
-    var aux = await coll.distinct('commodity');
-    var res = <String>[...aux['values']];
-    return res..sort();
+    return await coll.find(query).toList();
   }
 
   /// For a given commodity, get all the unique regions, sorted
-  @ApiMethod(path: 'commodity/{commodity}/regions')
   Future<List<String>> getRegions(String commodity) async {
     var pipeline = [
       {
@@ -114,7 +165,6 @@ class CurveIds {
   }
 
   /// For a given commodity and region, get all the serviceTypes, sorted
-  @ApiMethod(path: 'commodity/{commodity}/region/{region}/serviceTypes')
   Future<List<String>> getServiceTypes(String commodity, String region) async {
     var pipeline = [
       {
@@ -145,15 +195,12 @@ class CurveIds {
   }
 
   /// Get all the electricity documents for a given region and serviceType
-  @ApiMethod(
-      path:
-          'data/commodity/electricity/region/{region}/serviceType/{serviceType}')
-  Future<ApiResponse> getElectricityDocuments(
-      String region, String serviceType) async {
+  Future<List<Map<String, dynamic>>> getDocuments(
+      String commodity, String region, String serviceType) async {
     var pipeline = [
       {
         '\$match': {
-          'commodity': {'\$eq': 'electricity'},
+          'commodity': {'\$eq': commodity},
           'region': {'\$eq': region},
           'serviceType': {'\$eq': serviceType},
         }
@@ -168,6 +215,6 @@ class CurveIds {
       },
     ];
     var out = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(out);
+    return out;
   }
 }

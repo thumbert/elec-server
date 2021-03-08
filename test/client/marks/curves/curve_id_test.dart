@@ -1,13 +1,15 @@
 library test.client.marks.curves.curve_id_test;
 
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:http/http.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
-void tests(String rootUrl) async {
+void tests() async {
+  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   group('CurveIds client tests:', () {
-    var client = CurveIdClient(Client(), rootUrl: rootUrl);
+    var client = CurveIdClient(Client(), rootUrl: shelfRootUrl);
     test('get all curveIds', () async {
       var ids = await client.curveIds();
       expect(ids.length > 5, true);
@@ -48,6 +50,8 @@ void tests(String rootUrl) async {
 }
 
 void main() async {
-  await initializeTimeZones();
-  await tests('http://localhost:8080/');
+  initializeTimeZones();
+
+  dotenv.load('.env/prod.env');
+  tests();
 }

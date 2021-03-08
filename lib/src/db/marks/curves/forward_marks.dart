@@ -81,8 +81,8 @@ class ForwardMarksArchive {
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     for (var newDocument in data) {
       checkDocument(newDocument);
-      var fromDate = newDocument['fromDate'];
-      var curveId = newDocument['curveId'];
+      var fromDate = newDocument['fromDate'] as String;
+      var curveId = newDocument['curveId'] as String;
 
       /// Get the last document with the curve, and check if you need to
       /// reinsert it.
@@ -120,7 +120,7 @@ class ForwardMarksArchive {
     var term1 = newDocument['terms'] as List;
     if (term0.last != term1.last) return true;
 
-    if (isPriceCurve(newDocument['curveId'])) {
+    if (isPriceCurve(newDocument['curveId'] as String)) {
       /// Price curves need to be treated specially because of
       /// daily vs. monthly marks.  The old document may have monthly values
       /// where a new document has daily values.  That doesn't make them
@@ -139,14 +139,15 @@ class ForwardMarksArchive {
     var values0 = document['buckets'];
     var values1 = newDocument['buckets'];
     for (var bucket in values0.keys) {
-      List x0 = values0[bucket].sublist(i);
-      List x1 = values1[bucket];
+      var x0 = values0[bucket].sublist(i) as List;
+      var x1 = values1[bucket] as List;
       // It's either a volatilitySurface, or hourlyShape document.
       // Need to compare individual elements which are themselves lists.
       for (var i = 0; i < x0.length; i++) {
-        for (var j = 0; j < x0[i].length; j++) {
-          if (!((x0[i][j] as num)
-              .isCloseTo(x1[i][j], absoluteTolerance: marksAbsTolerance))) {
+        var x0i = x0[i] as List;
+        for (var j = 0; j < x0i.length; j++) {
+          if (!((x0i[j] as num).isCloseTo(x1[i][j] as num,
+              absoluteTolerance: marksAbsTolerance))) {
             return true;
           }
         }
@@ -194,7 +195,7 @@ class ForwardMarksArchive {
     if (!keys.containsAll(mustHaveKeys)) {
       throw ArgumentError('Document ${document} is missing required fields.');
     }
-    var fromDate = Date.parse(document['fromDate']);
+    var fromDate = Date.parse(document['fromDate'] as String);
 
     var bucketKeys = (document['buckets'] as Map).keys.toSet();
 
@@ -247,15 +248,15 @@ class ForwardMarksArchive {
     return true;
   }
 
-  Interval _parseTerm(String x) {
-    if (x.length == 7) {
-      return Month.parse(x);
-    } else if (x.length == 10) {
-      return Date.parse(x);
-    } else {
-      throw ArgumentError('Unknown interval $x');
-    }
-  }
+  // Interval _parseTerm(String x) {
+  //   if (x.length == 7) {
+  //     return Month.parse(x);
+  //   } else if (x.length == 10) {
+  //     return Date.parse(x);
+  //   } else {
+  //     throw ArgumentError('Unknown interval $x');
+  //   }
+  // }
 
   void setup() async {
     await dbConfig.db.createIndex(dbConfig.collectionName,

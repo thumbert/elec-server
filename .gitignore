@@ -15,5 +15,7 @@ pubspec.lock
 out
 docs
 
+.env/
+
 *.iml
 *.js_

@@ -57,7 +57,7 @@ class CurveIdArchive {
           'case: ${xs['curveId']}');
     }
 
-    String curveId = xs['curveId'];
+    var curveId = xs['curveId'] as String;
     var ok = false;
     if (curveId.contains('volatility')) {
       if (xs['markType'] == 'volatilitySurface') {
@@ -75,7 +75,7 @@ class CurveIdArchive {
     }
   }
 
-  void setup() async {
+  Future<void> setup() async {
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'curveId': 1}, unique: true);
     await dbConfig.db.createIndex(dbConfig.collectionName, keys: {

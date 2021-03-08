@@ -857,8 +857,42 @@ List<Map<String, dynamic>> marks20200706() {
   ];
 }
 
+/// Mark both daily and monthly terms.
+List<Map<String, dynamic>> nodalMarks20200706() {
+  var months = Term.parse('Jul20-Dec26', UTC)
+      .interval
+      .splitLeft((dt) => Month.fromTZDateTime(dt))
+      .map((e) => e.toIso8601String())
+      .toList();
+  var n = months.length;
+  var out = <Map<String, dynamic>>[
+    {
+      'fromDate': '2020-07-06',
+      'curveId': 'isone_energy_4011_da_congestion',
+      'terms': months,
+      'buckets': {
+        '5x16': List.filled(n, 0.57),
+        '2x16H': List.filled(n, 0.37),
+        '7x8': List.filled(n, 0.24),
+      }
+    },
+    {
+      'fromDate': '2020-07-06',
+      'curveId': 'isone_energy_4011_da_lossfactor',
+      'terms': months,
+      'buckets': {
+        '5x16': List.filled(n, 0.031),
+        '2x16H': List.filled(n, 0.022),
+        '7x8': List.filled(n, 0.01),
+      }
+    },
+  ];
+  return out;
+}
+
 /// A generic historical hourly shape to be applied to all future years.
 List<Map<String, dynamic>> hourlyShape20191231() {
+  // hourly shape for 12 months
   var aux = File('test/db/marks/hourly_shape.json').readAsStringSync();
   var x0 = json.decode(aux);
   // extend it to Dec26
@@ -869,8 +903,9 @@ List<Map<String, dynamic>> hourlyShape20191231() {
       .toList();
   x0['terms'] = months;
   for (var bucket in ['7x8', '2x16H', '5x16']) {
+    // there are 7 years to mark, copy the first year 7 times
     x0['buckets'][bucket] = List.generate(7, (i) => x0['buckets'][bucket])
-        .expand((e) => e)
+        .expand((e) => e as List)
         .toList();
   }
   return <Map<String, dynamic>>[
@@ -888,7 +923,8 @@ List<Map<String, dynamic>> volatilitySurface() {
   var x0 =
       (json.decode(aux) as List).first as Map<String, dynamic>; // daily isone
   // add the '2x16H' and '7x8' bucket
-  var _terms = (x0['terms'] as List).map((e) => Month.parse(e)).toList();
+  var _terms =
+      (x0['terms'] as List).map((e) => Month.parse(e as String)).toList();
   x0['buckets']['2x16H'] = <List<num>>[];
   x0['buckets']['7x8'] = <List<num>>[];
   for (var i = 0; i < _terms.length; i++) {
@@ -905,7 +941,7 @@ List<Map<String, dynamic>> volatilitySurface() {
   var vsX = vs.extendPeriodicallyByYear(Month(2026, 12, location: location),
       f: (x) => 0.9 * x);
 
-  var fromDate = Date.parse(x0['fromDate']);
-  var out = vsX.toMongoDocument(fromDate, x0['curveId']);
+  var fromDate = Date.parse(x0['fromDate'] as String);
+  var out = vsX.toMongoDocument(fromDate, x0['curveId'] as String);
   return [out];
 }

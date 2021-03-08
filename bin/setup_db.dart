@@ -4,6 +4,7 @@ import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
+import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -50,6 +51,7 @@ void insertForwardMarks() async {
   await archive.insertData(hourlyShape20191231());
   await archive.insertData(marks20200529());
   await archive.insertData(marks20200706());
+  await archive.insertData(nodalMarks20200706());
   await archive.insertData(volatilitySurface());
   await archive.setup();
   await archive.db.close();

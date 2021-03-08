@@ -1,6 +1,7 @@
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'client/isoexpress/binding_constraints_test.dart' as bc;
 import 'client/isoexpress/da_energy_offer_test.dart' as daoffers;
@@ -24,10 +25,12 @@ import 'utils/term_cache_test.dart' as term_cache;
 import 'utils/to_csv_test.dart' as to_csv;
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
   var rootUrl = 'http://localhost:8080/';
-  var rootUrl2 = 'http://localhost:9080'; // note the missing / at the end
+  var rootUrl2 = 'http://localhost:8000'; // note the missing / at the end
   DbProd();
+
+  dotenv.load('.env/prod.env');
 
   Logger.root.level = Level.WARNING; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
@@ -48,8 +51,8 @@ void main() async {
   bc.tests();
   dalmp.tests(rootUrl);
   daoffers.tests();
-  curve_id.tests(rootUrl);
-  forward_marks.tests(rootUrl);
+  curve_id.tests();
+  forward_marks.tests();
 //  sysdem.tests(rootUrl);
   ptid.tests();
   mis.tests();
