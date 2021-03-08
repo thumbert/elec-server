@@ -3,15 +3,14 @@ library api.isone_dalmp;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:table/table.dart';
-import '../../src/utils/api_response.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'dalmp', version: 'v1')
 class DaLmp {
   mongo.DbCollection coll;
   Location _location;
@@ -23,12 +22,71 @@ class DaLmp {
     _location = getLocation('America/New_York');
   }
 
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    /// get monthly price for bucket for one ptid
+    router.get(
+        '/monthly/<component>/ptid/<ptid>/start/<start>/end/<end>/bucket/<bucket>',
+        (Request request, String component, String ptid, String start,
+            String end, String bucket) async {
+      var aux = await getMonthlyBucketPrice(
+          component, int.parse(ptid), start, end, bucket);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// get daily price for bucket for one ptid
+    router.get(
+        '/daily/<component>/ptid/<ptid>/start/<start>/end/<end>/bucket/<bucket>',
+        (Request request, String component, String ptid, String start,
+            String end, String bucket) async {
+      var aux = await getDailyBucketPrice(
+          component, int.parse(ptid), start, end, bucket);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// get daily 7x24 price for all ptids between a start and end date
+    router.get('/daily/mean/<component>/start/<start>/end/<end>',
+        (Request request, String component, String start, String end) async {
+      var aux = await dailyPriceByPtid(component, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// get hourly prices for one ptid
+    router.get('/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>',
+        (Request request, String component, String ptid, String start,
+            String end) async {
+      var aux = await getHourlyPrices(component, int.parse(ptid), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// get hourly prices for one ptid in compact form (?? what is that)
+    router
+        .get('/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>/compact',
+            (Request request, String component, String ptid, String start,
+                String end) async {
+      var aux =
+          await getHourlyPricesCompact(component, int.parse(ptid), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get all the existing ptids in the collection, sorted
+    router.get('/ptids', (Request request) async {
+      var res = await allPtids();
+      res.sort();
+      return Response.ok(json.encode(res), headers: headers);
+    });
+
+    return router;
+  }
+
   /// http://localhost:8080/dalmp/v1/monthly/lmp/ptid/4000/start/201701/end/201701/bucket/5x16
-  @ApiMethod(
-      path:
-          'monthly/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
-  Future<ApiResponse> getMonthlyBucketPrice(String component, int ptid,
-      String start, String end, String bucket) async {
+  Future<List<Map<String, dynamic>>> getMonthlyBucketPrice(String component,
+      int ptid, String start, String end, String bucket) async {
     var startDate = Date.parse(start.replaceAll('-', '') + '01');
     var aux = Date.parse(end.replaceAll('-', '') + '01');
     var endDate = Month(aux.year, aux.month).endDate;
@@ -36,73 +94,54 @@ class DaLmp {
 
     var data = await getHourlyData(ptid, startDate, endDate, component);
     var out = data.where((e) {
-      var hb = TZDateTime.parse(_location, e['hourBeginning']);
+      var hb = TZDateTime.parse(_location, e['hourBeginning'] as String);
       return bucketO.containsHour(Hour.beginning(hb));
     }).toList();
 
     // do the monthly aggregation
     var _monthlyNest = Nest()
-      ..key((Map e) {
-        String hb = e['hourBeginning'];
-        return hb.substring(0, 7);
-      })
-      ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
-    List<Map> res = _monthlyNest.entries(out);
-    var res2 = res
+      ..key((Map e) => (e['hourBeginning'] as String).substring(0, 7))
+      ..rollup((Iterable x) => _mean(x.map((e) => e[component] as num)));
+    var res = _monthlyNest.entries(out) as List<Map>;
+    return res
         .map((Map e) => {'month': e['key'], component: e['values']})
         .toList();
-    return ApiResponse()..result = json.encode(res2);
   }
 
   /// http://localhost:8080/dalmp/v1/daily/lmp/ptid/4000/start/20170101/end/20170101/bucket/5x16
-  @ApiMethod(
-      path:
-          'daily/{component}/ptid/{ptid}/start/{start}/end/{end}/bucket/{bucket}')
-  Future<ApiResponse> getDailyBucketPrice(String component, int ptid,
-      String start, String end, String bucket) async {
+  Future<List<Map<String, dynamic>>> getDailyBucketPrice(String component,
+      int ptid, String start, String end, String bucket) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var bucketO = Bucket.parse(bucket);
 
     var aux = await getHourlyData(ptid, startDate, endDate, component);
     var out = aux.where((e) {
-      var hb = TZDateTime.parse(_location, e['hourBeginning']);
+      var hb = TZDateTime.parse(_location, e['hourBeginning'] as String);
       return bucketO.containsHour(Hour.beginning(hb));
     }).toList();
 
     // do the daily aggregation
     var nest = Nest()
       ..key((Map e) => (e['hourBeginning'] as String).substring(0, 10))
-      ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
-    List<Map> res = nest.entries(out);
-    var data =
-        res.map((Map e) => {'date': e['key'], component: e['values']}).toList();
-    return ApiResponse()..result = json.encode(data);
+      ..rollup((Iterable x) => _mean(x.map((e) => e[component] as num)));
+    var res = nest.entries(out) as List<Map>;
+    return res
+        .map((Map e) => {'date': e['key'], component: e['values']})
+        .toList();
   }
 
-  num _mean(Iterable<num> x) {
-    var i = 0;
-    num res = 0;
-    x.forEach((e) {
-      res += e;
-      i++;
-    });
-    return res / i;
-  }
-
+  ///
   /// http://localhost:8080/dalmp/v1/hourly/congestion/ptid/4000/start/20170101/end/20170101
-  @ApiMethod(path: 'hourly/{component}/ptid/{ptid}/start/{start}/end/{end}')
-  Future<ApiResponse> getHourlyPrices(
+  Future<List<Map<String, Object>>> getHourlyPrices(
       String component, int ptid, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getHourlyData(ptid, startDate, endDate, component);
-    return ApiResponse()..result = json.encode(data);
+    return getHourlyData(ptid, startDate, endDate, component);
   }
 
+  ///
   /// http://localhost:8080/dalmp/v1/hourly/congestion/ptid/4000/start/20170101/end/20170101/compact
-  @ApiMethod(
-      path: 'hourly/{component}/ptid/{ptid}/start/{start}/end/{end}/compact')
   Future<List<double>> getHourlyPricesCompact(
       String component, int ptid, String start, String end) async {
     var startDate = Date.parse(start);
@@ -111,16 +150,14 @@ class DaLmp {
     return data.map((e) => e[component] as double).toList();
   }
 
-  @ApiMethod(path: 'ptids')
+  /// Get all ptids in the database
   Future<List<int>> allPtids() async {
     Map res = await coll.distinct('ptid');
-    return res['values'];
+    return res['values'] as List<int>;
   }
 
-  @ApiMethod(path: 'daily/mean/{component}/start/{start}/end/{end}')
-
   /// Average 7x24 price by ptid between the start/end dates
-  Future<ApiResponse> dailyPriceByPtid(
+  Future<List<Map<String, dynamic>>> dailyPriceByPtid(
       String component, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
@@ -140,7 +177,7 @@ class DaLmp {
           '_id': {
             'date': '\$date',
             'ptid': '\$ptid',
-            component: {'\$avg': '\$${component}'},
+            component: {'\$avg': '\$$component'},
           }
         }
       },
@@ -161,27 +198,38 @@ class DaLmp {
     ]);
 
     var res = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(res);
+    return res;
   }
 
   Future<List<Map<String, Object>>> getHourlyData(
       int ptid, Date start, Date end, String component) async {
-    var query = mongo.where;
-    query = query.eq('ptid', ptid);
-    query = query.gte('date', start.toString());
-    query = query.lte('date', end.toString());
-    query = query.fields(['hourBeginning', component]);
+    var query = mongo.where
+      ..eq('ptid', ptid)
+      ..gte('date', start.toString())
+      ..lte('date', end.toString())
+      ..fields(['hourBeginning', component]);
     var data = coll.find(query);
     var out = <Map<String, Object>>[];
     var keys = ['hourBeginning', component];
     await for (Map e in data) {
-      for (var i = 0; i < e['hourBeginning'].length; i++) {
+      var hours = e['hourBeginning'] as List;
+      for (var i = 0; i < hours.length; i++) {
         out.add(Map.fromIterables(keys, [
-          TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+          TZDateTime.from(hours[i] as DateTime, _location).toString(),
           e[component][i]
         ]));
       }
     }
     return out;
+  }
+
+  num _mean(Iterable<num> x) {
+    var i = 0;
+    num res = 0;
+    x.forEach((e) {
+      res += e;
+      i++;
+    });
+    return res / i;
   }
 }

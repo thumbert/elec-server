@@ -2,6 +2,7 @@ library test.db.risk_system.calculator_archive_test;
 
 import 'package:elec/calculators/elec_swap.dart';
 import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'dart:convert';
 import 'package:elec_server/client/risk_system/calculator.dart';
 import 'package:elec_server/src/db/risk_system/calculator_archive.dart';
@@ -22,7 +23,8 @@ void insertData(CalculatorArchive archive) async {
   }
 }
 
-void tests(String rootUrl) async {
+void tests() async {
+  var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = CalculatorArchive();
   group('CalculatorArchive api tests:', () {
     setUp(() async => await archive.db.open());
@@ -106,8 +108,9 @@ void repopulateDb() async {
 }
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
   // await repopulateDb();
 
-  await tests('http://localhost:9080');
+  dotenv.load('.env/prod.env');
+  tests();
 }

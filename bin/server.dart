@@ -39,13 +39,12 @@ final ApiServer _apiServer =
     ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
 const String host = '127.0.0.1';
 
-void registerApis() async {
+Future<void> registerApis() async {
   await DbProd.isone.open();
   _apiServer.addApi(ApiPtids(DbProd.isone));
 //  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
 
   await DbProd.isoexpress.open();
-  _apiServer.addApi(DaLmp(DbProd.isoexpress));
   _apiServer.addApi(BindingConstraints(DbProd.isoexpress));
   _apiServer.addApi(DaEnergyOffers(DbProd.isoexpress));
   _apiServer.addApi(RegulationRequirement(DbProd.isoexpress));
@@ -67,11 +66,14 @@ void registerApis() async {
 
 Future<Router> buildRouter() async {
   final router = Router();
+
+  await DbProd.isoexpress.open();
   await DbProd.marks.open();
   await DbProd.riskSystem.open();
 
   router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
   router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
+  router.mount('/dalmp/v1/', DaLmp(DbProd.isoexpress).router);
   router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);
 
   return router;

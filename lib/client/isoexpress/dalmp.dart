@@ -16,8 +16,6 @@ import 'package:timeseries/timeseries.dart';
 export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
     show ApiRequestError, DetailedApiRequestError;
 
-const String USER_AGENT = 'dart-api-client dalmp/v1';
-
 class DaLmp {
   String rootUrl;
   String servicePath;
@@ -25,8 +23,8 @@ class DaLmp {
   static final DateFormat _mthFmt = DateFormat('yyyy-MM');
 
   DaLmp(http.Client client,
-      {this.rootUrl = 'http://localhost:8080/',
-      this.servicePath = 'dalmp/v1/'});
+      {this.rootUrl = 'http://localhost:8000',
+      this.servicePath = '/dalmp/v1/'});
 
   /// Get hourly prices for a ptid between a start and end date.
   Future<TimeSeries<double>> getHourlyLmp(
@@ -42,9 +40,8 @@ class DaLmp {
         commons.Escaper.ecapeVariable('${end.toString()}');
 
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    var aux = json.decode(data['result']) as List;
-    var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
+    var data = json.decode(_response.body) as List;
+    var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),
         e[cmp])));
     return ts;
@@ -66,9 +63,8 @@ class DaLmp {
         commons.Escaper.ecapeVariable('${bucket.name.toString()}');
 
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    var aux = json.decode(data['result']) as List;
-    var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
+    var data = json.decode(_response.body) as List;
+    var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Date.parse(e['date'], location: location), e[cmp])));
     return ts;
   }
@@ -86,9 +82,8 @@ class DaLmp {
         commons.Escaper.ecapeVariable('${end.toString()}');
 
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    var aux = json.decode(data['result']) as List;
-    var grp = groupBy(aux, (e) => e['ptid'] as int);
+    var data = json.decode(_response.body) as List;
+    var grp = groupBy(data, (e) => e['ptid'] as int);
 
     var out = <int, TimeSeries<num>>{};
     for (var ptid in grp.keys) {
@@ -115,10 +110,9 @@ class DaLmp {
         commons.Escaper.ecapeVariable('${bucket.name.toString()}');
 
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
-    var aux = json.decode(data['result']) as List;
-    var ts = TimeSeries.fromIterable(aux.map((e) => IntervalTuple<double>(
-        Month.parse(e['month'], location: location, fmt: _mthFmt), e[cmp])));
+    var data = json.decode(_response.body) as List;
+    var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
+        Month.parse(e['month'], location: location), e[cmp])));
     return ts;
   }
 }

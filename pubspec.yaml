@@ -12,6 +12,7 @@ dependencies:
   date:
     git:
       url: git://github.com/thumbert/date.git
+      ref: 2.5.0
   dotenv: '>=2.0.0 <3.0.0'
   elec:
     git:
@@ -32,6 +33,7 @@ dependencies:
   table:
     git:
       url: git://github.com/thumbert/table.git
+      ref: non-null
   timezone: '>=0.5.5 <1.0.0'
   tuple: '>=1.0.0 <2.0.0'
 

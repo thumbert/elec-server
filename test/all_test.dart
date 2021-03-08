@@ -5,9 +5,9 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'client/isoexpress/binding_constraints_test.dart' as bc;
 import 'client/isoexpress/da_energy_offer_test.dart' as daoffers;
-import 'client/isoexpress/dalmp_test.dart' as dalmp;
 import 'client/marks/curves/curve_id_test.dart' as curve_id;
 import 'client/other/ptids_test.dart' as ptid;
+import 'db/isoexpress/da_lmp_hourly_test.dart' as dalmp;
 import 'db/isoexpress/wholesale_load_cost_report_test.dart'
     as wholesale_load_cost_report;
 import 'db/isone_ptids_test.dart' as api_ptids;
@@ -26,13 +26,10 @@ import 'utils/to_csv_test.dart' as to_csv;
 
 void main() async {
   initializeTimeZones();
-  var rootUrl = 'http://localhost:8080/';
-  var rootUrl2 = 'http://localhost:8000'; // note the missing / at the end
   DbProd();
-
   dotenv.load('.env/prod.env');
 
-  Logger.root.level = Level.WARNING; // defaults to Level.INFO
+  Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
@@ -40,16 +37,16 @@ void main() async {
   api_ptids.tests();
 
   /// db tests
+  dalmp.tests();
   sd_rtload.tests();
   sr_dalocsum.tests();
   sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();
-  calculators.tests(rootUrl2);
+  calculators.tests();
 
   /// Client tests
   bc.tests();
-  dalmp.tests(rootUrl);
   daoffers.tests();
   curve_id.tests();
   forward_marks.tests();
