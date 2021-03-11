@@ -2,11 +2,10 @@ library api.isoexpress.isone_regulation_requirement;
 
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
-import '../../src/utils/api_response.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'regulation_requirement', version: 'v1')
 class RegulationRequirement {
   DbCollection coll;
   Location location;
@@ -17,12 +16,26 @@ class RegulationRequirement {
     location = getLocation('America/New_York');
   }
 
-  /// http://localhost:8080/regulation_requirement/v1/values
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    /// Get all the historical values
+    /// http://localhost:8080/regulation_requirement/v1/values
+    router.get('/values', (Request request) async {
+      var aux = await regulationRequirements();
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
+
   /// Get all the historical values
-  @ApiMethod(path: 'values')
-  Future<ApiResponse> regulationRequirements() async {
+  Future<List<Map<String, dynamic>>> regulationRequirements() async {
     var query = where.excludeFields(['_id']);
-    var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    return coll.find(query).toList();
   }
 }

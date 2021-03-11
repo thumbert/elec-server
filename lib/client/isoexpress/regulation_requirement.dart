@@ -18,12 +18,12 @@ class RegulationRequirement {
   num Function(Hour) fService;
 
   RegulationRequirement(http.Client client,
-      {this.rootUrl: "http://localhost:8080/",
-      this.servicePath: "regulation_requirement/v1/"});
+      {this.rootUrl = 'http://localhost:8000',
+      this.servicePath = '/regulation_requirement/v1/'});
 
   Future<TimeSeries<num>> hourlyCapacityRequirement(Interval interval) async {
     cache ??= await getSpecification();
-    var hours = interval.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
+    var hours = interval.splitLeft((dt) => Hour.beginning(dt));
     var out = TimeSeries<num>();
     for (var hour in hours) {
       var value = fCapacity(hour);
@@ -47,9 +47,8 @@ class RegulationRequirement {
   Future<List<Map<String, dynamic>>> getSpecification() async {
     var _url = rootUrl + servicePath + 'values';
     var _response = await http.get(_url);
-    var data = json.decode(_response.body);
     var out =
-        (json.decode(data['result']) as List).cast<Map<String, dynamic>>();
+        (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
     out.sort((a, b) => a['from'].compareTo(b['from']));
 
     /// Add an interval for convenience
@@ -63,11 +62,12 @@ class RegulationRequirement {
     return out;
   }
 
-  _makeFunctions(List<Map<String, dynamic>> specification) {
+  void _makeFunctions(List<Map<String, dynamic>> specification) {
     fCapacity = (Hour hour) {
       if (hour.start
-          .isBefore((specification.first['interval'] as Interval).start))
+          .isBefore((specification.first['interval'] as Interval).start)) {
         return null;
+      }
       for (var x in specification) {
         var interval = x['interval'] as Interval;
         if (interval.containsInterval(hour)) {
@@ -81,8 +81,9 @@ class RegulationRequirement {
               .where((e) {
             if (e['weekday'] is List) {
               return (e['weekday'] as List).contains(weekday);
-            } else
+            } else {
               return e['weekday'] == weekday;
+            }
           }).first;
           return one['value'] as num;
         }
@@ -91,8 +92,9 @@ class RegulationRequirement {
     };
     fService = (Hour hour) {
       if (hour.start
-          .isBefore((specification.first['interval'] as Interval).start))
+          .isBefore((specification.first['interval'] as Interval).start)) {
         return null;
+      }
       for (var x in specification) {
         var interval = x['interval'] as Interval;
         if (interval.containsInterval(hour)) {
@@ -106,8 +108,9 @@ class RegulationRequirement {
               .where((e) {
             if (e['weekday'] is List) {
               return (e['weekday'] as List).contains(weekday);
-            } else
+            } else {
               return e['weekday'] == weekday;
+            }
           }).first;
           return one['value'] as num;
         }

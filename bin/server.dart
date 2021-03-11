@@ -40,14 +40,7 @@ final ApiServer _apiServer =
 const String host = '127.0.0.1';
 
 Future<void> registerApis() async {
-  await DbProd.isone.open();
-  _apiServer.addApi(ApiPtids(DbProd.isone));
-//  _apiServer.addApi( new ngrid.ApiCustomerCounts(db2) );
-
   await DbProd.isoexpress.open();
-  _apiServer.addApi(BindingConstraints(DbProd.isoexpress));
-  _apiServer.addApi(DaEnergyOffers(DbProd.isoexpress));
-  _apiServer.addApi(RegulationRequirement(DbProd.isoexpress));
   _apiServer.addApi(WholesaleLoadCost(DbProd.isoexpress));
 
 //  _apiServer.addApi(SccReport(db3) );
@@ -68,13 +61,21 @@ Future<Router> buildRouter() async {
   final router = Router();
 
   await DbProd.isoexpress.open();
+  await DbProd.isone.open();
   await DbProd.marks.open();
   await DbProd.riskSystem.open();
 
+  router.mount('/bc/v1/', BindingConstraints(DbProd.isoexpress).router);
   router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
   router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
   router.mount('/dalmp/v1/', DaLmp(DbProd.isoexpress).router);
+  router.mount(
+      '/da_energy_offers/v1/', DaEnergyOffers(DbProd.isoexpress).router);
   router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);
+  router.mount('/ptids/v1/', ApiPtids(DbProd.isone).router);
+  router.mount('/regulation_requirement/v1/',
+      RegulationRequirement(DbProd.isoexpress).router);
+  router.mount('/rt_load/v1/', WholesaleLoadCost(DbProd.isoexpress).router);
 
   return router;
 }

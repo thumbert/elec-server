@@ -3,14 +3,15 @@ import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-import 'client/isoexpress/binding_constraints_test.dart' as bc;
-import 'client/isoexpress/da_energy_offer_test.dart' as daoffers;
 import 'client/marks/curves/curve_id_test.dart' as curve_id;
-import 'client/other/ptids_test.dart' as ptid;
+import 'db/isoexpress/da_binding_constraints_report_test.dart' as bc;
+import 'db/isoexpress/da_energy_offer_test.dart' as energy_offers;
 import 'db/isoexpress/da_lmp_hourly_test.dart' as dalmp;
+import 'db/isoexpress/regulation_requirement_test.dart'
+    as regulation_requirement;
 import 'db/isoexpress/wholesale_load_cost_report_test.dart'
     as wholesale_load_cost_report;
-import 'db/isone_ptids_test.dart' as api_ptids;
+import 'db/isone_ptids_test.dart' as ptids;
 import 'db/lib_mis_reports_test.dart' as mis;
 import 'db/marks/forward_marks_test.dart' as forward_marks;
 import 'db/mis/sd_rtload_test.dart' as sd_rtload;
@@ -34,24 +35,23 @@ void main() async {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 
-  api_ptids.tests();
-
   /// db tests
+  bc.tests();
+  calculators.tests();
   dalmp.tests();
+  energy_offers.tests();
+  ptids.tests();
+  regulation_requirement.tests();
   sd_rtload.tests();
   sr_dalocsum.tests();
   sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();
-  calculators.tests();
 
   /// Client tests
-  bc.tests();
-  daoffers.tests();
   curve_id.tests();
   forward_marks.tests();
 //  sysdem.tests(rootUrl);
-  ptid.tests();
   mis.tests();
   wholesale_load_cost_report.tests();
 

@@ -18,7 +18,11 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   @override
   String dir;
 
-  static final List<String> _unitStates = ['UNAVAILABLE', 'MUST_RUN', 'ECONOMIC'];
+  static final List<String> _unitStates = [
+    'UNAVAILABLE',
+    'MUST_RUN',
+    'ECONOMIC'
+  ];
   var location = getLocation('America/New_York');
 
   DaEnergyOfferArchive({this.dbConfig, this.dir}) {
@@ -29,12 +33,15 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
 
     dir ??= baseDir + 'PricingReports/DaEnergyOffer/Raw/';
   }
+
+  mongo.Db get db => dbConfig.db;
+
   @override
   final reportName = 'Day-Ahead Energy Market Historical Offer Report';
   @override
   String getUrl(Date asOfDate) =>
-      'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/' +
-      'hbdayaheadenergyoffer_' +
+      'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/'
+          'hbdayaheadenergyoffer_' +
       yyyymmdd(asOfDate) +
       '.csv';
   @override
@@ -117,7 +124,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
 
   /// Recreate the collection from scratch.
   @override
-  setupDb() async {
+  Future<Null> setupDb() async {
     await dbConfig.db.open();
     var collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName)) {

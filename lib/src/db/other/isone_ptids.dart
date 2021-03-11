@@ -15,9 +15,9 @@ class PtidArchive {
   PtidArchive({this.config, this.dir}) {
     Map env = Platform.environment;
     config ??= ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isone'
-        ..collectionName = 'pnode_table';
+      ..host = '127.0.0.1'
+      ..dbName = 'isone'
+      ..collectionName = 'pnode_table';
 
     dir ??= env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
   }
@@ -31,14 +31,15 @@ class PtidArchive {
     var data = readXlsx(file);
     return config.coll
         .insertAll(data)
-        .then((_) => print('--->  SUCCESS inserting ${path.basename(file.path)}'))
+        .then(
+            (_) => print('--->  SUCCESS inserting ${path.basename(file.path)}'))
         .catchError((e) => print('   ' + e.toString()));
   }
 
   /// Read an XLSX file.  Note that ISO files are xls, so you will need to
   /// convert it by hand for now.
   /// filename should look like this: 'pnode_table_2017_08_03.xlsx'
-  List<Map<String,dynamic>> readXlsx(File file, {String asOfDate}) {
+  List<Map<String, dynamic>> readXlsx(File file, {String asOfDate}) {
     var filename = path.basename(file.path);
     if (path.extension(filename).toLowerCase() != '.xlsx') {
       throw 'Filename needs to be in the xlsx format';
@@ -48,7 +49,7 @@ class PtidArchive {
 
     var bytes = file.readAsBytesSync();
     var decoder = SpreadsheetDecoder.decodeBytes(bytes);
-    List<Map<String,Object>> res;
+    List<Map<String, Object>> res;
 
     if (Date.parse(asOfDate).isBefore(Date(2018, 6, 7))) {
       res = _readXlsxVersion1(decoder);
@@ -65,8 +66,8 @@ class PtidArchive {
   }
 
   /// prior to 2018-06-07 the spreadsheet had only one sheet
-  List<Map<String,Object>> _readXlsxVersion1(SpreadsheetDecoder decoder) {
-    var res = <Map<String,Object>>[];
+  List<Map<String, Object>> _readXlsxVersion1(SpreadsheetDecoder decoder) {
+    var res = <Map<String, Object>>[];
     var table = decoder.tables['New England'];
 
     /// the 2rd row is the Hub
@@ -78,7 +79,7 @@ class PtidArchive {
     });
 
     /// rows 4:11 are the Zones
-    for (var r=4; r<12; r++) {
+    for (var r = 4; r < 12; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -88,7 +89,7 @@ class PtidArchive {
     }
 
     /// rows 13:16 are Reserve Zones
-    for (var r=13; r<17; r++) {
+    for (var r = 13; r < 17; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][0],
@@ -97,7 +98,7 @@ class PtidArchive {
     }
 
     /// rows 18:23 are Interfaces
-    for (var r=18; r<24; r++) {
+    for (var r = 18; r < 24; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -107,7 +108,7 @@ class PtidArchive {
 
     /// rows 26:end are simple nodes
     var nRows = table.rows.length;
-    for (var r=26; r<nRows; r++) {
+    for (var r = 26; r < nRows; r++) {
       // sometimes the spreadsheet has empty rows
       if (table.rows[r][5] != null) {
         var aux = {
@@ -127,10 +128,9 @@ class PtidArchive {
     return res;
   }
 
-
   /// after 2018-06-07 the format changed to 2 sheets
-  List<Map<String,Object>> _readXlsxVersion2(SpreadsheetDecoder decoder) {
-    var res = <Map<String,Object>>[];
+  List<Map<String, Object>> _readXlsxVersion2(SpreadsheetDecoder decoder) {
+    var res = <Map<String, Object>>[];
     var table = decoder.tables['Zone Information'];
 
     /// the 2rd row is the Hub
@@ -142,7 +142,7 @@ class PtidArchive {
     });
 
     /// rows 5:12 are the Zones
-    for (var r=5; r<13; r++) {
+    for (var r = 5; r < 13; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -152,7 +152,7 @@ class PtidArchive {
     }
 
     /// rows 15:18 are Reserve Zones
-    for (var r=15; r<19; r++) {
+    for (var r = 15; r < 19; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][0],
@@ -161,7 +161,7 @@ class PtidArchive {
     }
 
     /// rows 21:26 are Interfaces
-    for (var r=21; r<27; r++) {
+    for (var r = 21; r < 27; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -170,7 +170,7 @@ class PtidArchive {
     }
 
     /// rows 8:26 are the DRR aggregation zones
-    for (var r=7; r<27; r++) {
+    for (var r = 7; r < 27; r++) {
       res.add({
         'ptid': table.rows[r][7],
         'name': table.rows[r][6],
@@ -179,12 +179,11 @@ class PtidArchive {
       });
     }
 
-
     /// Second tab
     /// rows 26:end are simple nodes
     table = decoder.tables['New England'];
     var nRows = table.rows.length;
-    for (var r=2; r<nRows; r++) {
+    for (var r = 2; r < nRows; r++) {
       // sometimes the spreadsheet has empty rows
       if (table.rows[r][5] != null) {
         var aux = {
@@ -204,7 +203,6 @@ class PtidArchive {
     }
     return res;
   }
-
 
   /// Return the asOfDate in the yyyy-mm-dd format from the filename.
   /// Filename is usually just the basename, and in the form: 'pnode_table_2017_08_03.xlsx'
@@ -231,19 +229,17 @@ class PtidArchive {
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
-        response.pipe(fileout.openWrite()));
+            response.pipe(fileout.openWrite()));
   }
-
 
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
   void setup() async {
     if (!Directory(dir).existsSync()) {
-      Directory(dir)
-        .createSync(recursive: true);
+      Directory(dir).createSync(recursive: true);
     }
-    var fname = 'pnode_table_2017_08_03.xls';
-    var url = 'https://www.iso-ne.com/static-assets/documents/2017/08/$fname';
+    // var fname = 'pnode_table_2017_08_03.xls';
+    // var url = 'https://www.iso-ne.com/static-assets/documents/2017/08/$fname';
     //await downloadFile(url);
 
     await config.db.open();
@@ -265,6 +261,4 @@ class PtidArchive {
     await config.db.createIndex(config.collectionName, keys: {'asOfDate': 1});
     await config.db.close();
   }
-
 }
-

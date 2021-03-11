@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
+import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
@@ -38,6 +40,19 @@ void insertDays(DailyIsoExpressReport archive, List<Date> days) async {
   await archive.dbConfig.db.open();
   for (var day in days) {
     print('Working on $day');
+    await archive.downloadDay(day);
+    await archive.insertDay(day);
+  }
+  await archive.dbConfig.db.close();
+}
+
+Future<void> insertDaEnergyOffers({List<Date> days}) async {
+  /// What I need to pass the tests
+  days ??= Term.parse('Jan17-Dec17', UTC).days();
+
+  var archive = DaEnergyOfferArchive();
+  await archive.dbConfig.db.open();
+  for (var day in days) {
     await archive.downloadDay(day);
     await archive.insertDay(day);
   }
@@ -95,11 +110,23 @@ void insertMisReports() async {
   await archive.dbConfig.db.close();
 }
 
+void insertRegulationRequirement() async {
+  var archive = RegulationRequirementArchive();
+  await archive.setupDb();
+  await archive.downloadFile();
+
+  var data = archive.readAllData();
+  await archive.db.open();
+  await archive.insertData(data);
+  await archive.db.close();
+}
+
 void insertWholesaleLoadReports() async {
   /// minimal setup to pass the tests
   var archive = WholesaleLoadCostReportArchive();
+  await archive.setupDb();
   await archive.dbConfig.db.open();
-  await archive.dbConfig.coll.remove(<String, dynamic>{});
+  // await archive.dbConfig.coll.remove(<String, dynamic>{});
   var file = archive.getFilename(Month(2019, 1), 4004);
   if (!file.existsSync()) {
     await archive.downloadFile(Month(2019, 1), 4004);
@@ -107,7 +134,6 @@ void insertWholesaleLoadReports() async {
   var data = archive.processFile(file);
   await archive.insertData(data);
   await archive.dbConfig.db.close();
-  await archive.setupDb();
 }
 
 void insertPtidTable() async {
@@ -129,16 +155,23 @@ void insertPtidTable() async {
   await archive.db.close();
 }
 
+/// Try to redo them all
+void redoAll() async {
+  // TODO
+}
+
 void main() async {
-  await initializeTimeZones();
-  dotenv.load('${Platform.environment['HOME']}/.env/isone.env');
+  initializeTimeZones();
+  dotenv.load('.env/prod.env');
 
   // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();
 
-  await insertMisReports();
+  insertRegulationRequirement();
+
+  // insertMisReports();
 
 //  await insertPtidTable();
 

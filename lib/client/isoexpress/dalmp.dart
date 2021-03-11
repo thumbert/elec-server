@@ -20,7 +20,6 @@ class DaLmp {
   String rootUrl;
   String servicePath;
   final location = getLocation('America/New_York');
-  static final DateFormat _mthFmt = DateFormat('yyyy-MM');
 
   DaLmp(http.Client client,
       {this.rootUrl = 'http://localhost:8000',

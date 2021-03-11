@@ -95,7 +95,7 @@ class ForwardMarksArchive {
         }
         await dbConfig.coll.insert(newDocument);
         print(
-            '--->  Inserted forward marks for ${curveId} for ${fromDate} successfully');
+            '--->  Inserted forward marks for $curveId for $fromDate successfully');
       }
     }
     return Future.value(0);
@@ -258,7 +258,7 @@ class ForwardMarksArchive {
   //   }
   // }
 
-  void setup() async {
+  Future<void> setup() async {
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'curveId': 1, 'fromDate': 1}, unique: true);
     await dbConfig.db

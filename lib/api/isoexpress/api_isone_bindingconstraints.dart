@@ -3,25 +3,51 @@ library api.isone_bingingconstraints;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import '../../src/utils/api_response.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'bc', version: 'v1')
 class BindingConstraints {
   DbCollection coll;
-  Location _location = getLocation('America/New_York');
-  final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
+  final Location _location = getLocation('America/New_York');
+  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'binding_constraints';
 
   BindingConstraints(Db db) {
     coll = db.collection(collectionName);
   }
 
-  @ApiMethod(path: 'market/da/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetDaBindingConstraintsByDay(
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    /// Get all the constraints between start/end date
+    router.get('/market/da/start/<start>/end/<end>',
+        (Request request, String start, String end) async {
+      var aux = await apiGetDaBindingConstraintsByDay(start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get the occurrences of one constraint between start/end
+    router.get(
+        '/market/<market>/constraintname/<constraintname>/start/<start>/end/<end>',
+        (Request request, String market, String constraintName, String start,
+            String end) async {
+      constraintName = Uri.decodeComponent(constraintName);
+      var aux = await apiGetBindingConstraintsByName(
+          market, constraintName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
+
+  Future<List<Map<String, dynamic>>> apiGetDaBindingConstraintsByDay(
       String start, String end) async {
     var query = where;
     query = query.gte('date', Date.parse(start).toString());
@@ -33,13 +59,10 @@ class BindingConstraints {
       e['hourBeginning'] = start.toString();
       return e;
     }).toList();
-    return ApiResponse()..result = json.encode(res);
+    return res;
   }
 
-  @ApiMethod(
-      path:
-          'market/{market}/constraintname/{constraintName}/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetBindingConstraintsByName(
+  Future<List<Map<String, dynamic>>> apiGetBindingConstraintsByName(
       String market, String constraintName, String start, String end) async {
     var query = where;
     query = query.gte('date', Date.parse(start).toString());
@@ -52,6 +75,6 @@ class BindingConstraints {
       e['hourBeginning'] = start.toString();
       return e;
     }).toList();
-    return ApiResponse()..result = json.encode(res);
+    return res;
   }
 }

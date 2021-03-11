@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
+import 'package:mongo_dart/mongo_dart.dart';
 import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:timezone/timezone.dart';
@@ -25,6 +26,8 @@ class DaBindingConstraintsReportArchive {
       ..collectionName = 'binding_constraints';
     dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
   }
+
+  Db get db => dbConfig.db;
 
   String getUrl(Date asOfDate) =>
       'https://webservices.iso-ne.com/api/v1.1/dayaheadconstraints/day/' +

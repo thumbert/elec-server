@@ -24,10 +24,11 @@ class RegulationRequirementArchive {
 
   Db get db => dbConfig.db;
 
+  /// Always insert ALL available historical data
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
     try {
-      await dbConfig.coll.remove(<String,dynamic>{});
+      await dbConfig.coll.remove(<String, dynamic>{}); // empty the collection
       await dbConfig.coll.insertAll(data);
       print('---> Inserted $reportName successfully');
       return Future.value(0);
@@ -39,31 +40,47 @@ class RegulationRequirementArchive {
 
   /// Read all the files
   List<Map<String, dynamic>> readAllData() {
-    var data = <Map<String,dynamic>>[
-       {
+    var data = <Map<String, dynamic>>[];
+
+    if (readXlsx(Date(2014, 4, 1)).isNotEmpty) {
+      data.add({
         'from': '2014-04-01',
         'to': '2016-02-24',
-        ..._readXlsx(Date(2014, 4, 1)),
-      },
-      {
+        ...readXlsx(Date(2014, 4, 1)),
+      });
+    }
+
+    if (readXlsx(Date(2016, 2, 25)).isNotEmpty) {
+      data.add({
         'from': '2016-02-25',
         'to': '2018-07-15',
-        ..._readXlsx(Date(2016, 2, 25)),
-      },
-      {
+        ...readXlsx(Date(2016, 2, 25)),
+      });
+    }
+
+    if (readXlsx(Date(2018, 7, 16)).isNotEmpty) {
+      data.add({
         'from': '2018-07-16',
+        'to': '2021-02-09',
+        ...readXlsx(Date(2018, 7, 16)),
+      });
+    }
+
+    if (readXlsx(Date(2021, 2, 10)).isNotEmpty) {
+      data.add({
+        'from': '2021-02-10',
         'to': '2099-12-31',
-        ..._readXlsx(Date(2018, 7, 16)),
-      },
-    ];
+        ...readXlsx(Date(2021, 2, 10)),
+      });
+    }
+
     return data;
   }
 
-  /// As the regulation requirements change over time, you need to create a new
-  /// file, and a new from/to interval.
-  Map<String, dynamic> _readXlsx(Date asOfDate) {
-    var file =
-        File(dir + '${asOfDate.toString()}_daily_regulation_requirement.xlsx');
+  Map<String, dynamic> readFile(File file) {
+    if (!file.existsSync()) {
+      return <String, dynamic>{};
+    }
     var bytes = file.readAsBytesSync();
     var decoder = SpreadsheetDecoder.decodeBytes(bytes);
     var res = <String, dynamic>{
@@ -72,8 +89,9 @@ class RegulationRequirementArchive {
     };
     var sheetNames = decoder.tables.keys.toList();
     // Regulation Capacity
-    var table = decoder.tables[sheetNames[0]];
-    for (int r = 3; r < table.maxRows; r++) {
+    var ind = sheetNames.where((e) => e.contains('Reg Cap Reqmnt')).first;
+    var table = decoder.tables[ind];
+    for (var r = 3; r < table.maxRows; r++) {
       var day;
       var dayType = (table.rows[r][0] as String).trim().toLowerCase();
       if (dayType == 'week') {
@@ -85,7 +103,7 @@ class RegulationRequirementArchive {
       } else {
         throw ArgumentError('Unknown day: ${table.rows[r][0]}');
       }
-      for (int m = 1; m <= 12; m++) {
+      for (var m = 1; m <= 12; m++) {
         (res['regulation capacity'] as List).add({
           'month': m,
           'weekday': day,
@@ -95,8 +113,9 @@ class RegulationRequirementArchive {
       }
     }
     // Regulation Service
-    table = decoder.tables[sheetNames[1]];
-    for (int r = 3; r < table.maxRows; r++) {
+    ind = sheetNames.where((e) => e.contains('Reg Service Reqmnt')).first;
+    table = decoder.tables[ind];
+    for (var r = 3; r < table.maxRows; r++) {
       var day;
       var dayType = (table.rows[r][0] as String).trim().toLowerCase();
       if (dayType == 'week') {
@@ -108,7 +127,7 @@ class RegulationRequirementArchive {
       } else {
         throw ArgumentError('Unknown day: ${table.rows[r][0]}');
       }
-      for (int m = 1; m <= 12; m++) {
+      for (var m = 1; m <= 12; m++) {
         (res['regulation service'] as List).add({
           'month': m,
           'dayOfWeek': day,
@@ -119,6 +138,14 @@ class RegulationRequirementArchive {
     }
 
     return res;
+  }
+
+  /// As the regulation requirements change over time, you need to create a new
+  /// file, and a new from/to interval.
+  Map<String, dynamic> readXlsx(Date asOfDate) {
+    var file =
+        File(dir + '${asOfDate.toString()}_daily_regulation_requirement.xlsx');
+    return readFile(file);
   }
 
   /// Return the asOfDate in the yyyy-mm-dd format from the filename.
@@ -141,10 +168,15 @@ class RegulationRequirementArchive {
         .then((HttpClientResponse response) =>
             response.pipe(fileout.openWrite()));
 
+    var asOfDate = getAsOfDate(fileout);
+    // Check that this file is in the archive.  If not, save it.
+    var lastFile = File(dir + asOfDate.toString() + '_' + filename);
+    if (!lastFile.existsSync()) {
+      fileout.copySync(lastFile.path.toString());
+    }
     // check that the asOfDate is different from the last one, if not,
     // delete this file ...
-    var asOfDate = getAsOfDate(fileout);
-    if (asOfDate == Date(2018, 7, 16)) {
+    if (asOfDate == Date(2021, 2, 10)) {
       fileout.deleteSync();
     } else {
       throw ArgumentError('New as of date!  Please refactor code.');
@@ -166,16 +198,17 @@ class RegulationRequirementArchive {
   List<File> getAllFiles() {
     return Directory(dir)
         .listSync()
-        .where((f) => path.extension(f.path).toLowerCase() == '.xlsx')
-        .toList()
-        .cast<File>();
+        .whereType<File>()
+        .where((f) => f.path.endsWith('_daily_regulation_requirement.xlsx'))
+        .toList();
   }
 
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
-  setupDb() async {
-    if (!Directory(dir).existsSync())
+  Future<void> setupDb() async {
+    if (!Directory(dir).existsSync()) {
       Directory(dir).createSync(recursive: true);
+    }
 
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,

@@ -20,7 +20,6 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
   final _setEq = const SetEquality();
   static final location = getLocation('America/New_York');
 
-
   WholesaleLoadCostReportArchive({this.dbConfig, this.dir}) {
     dbConfig ??= ComponentConfig()
       ..host = '127.0.0.1'
@@ -32,23 +31,24 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
   /// Data is also available as webservices, for example
   /// https://webservices.iso-ne.com/api/v1.1/whlsecost/hourly/month/202007/location/4004
 
-
   String getUrl(Month month, int ptid) =>
       'https://www.iso-ne.com/transform/csv/whlsecost/hourly?month='
-          '${month.toIso8601String().replaceAll('-', '')}&locationId=$ptid';
+      '${month.toIso8601String().replaceAll('-', '')}&locationId=$ptid';
 
-  File getFilename(Month month, int ptid) =>
-      File(dir + 'whlsecost_hourly_$ptid' + '_' +
-          '${month.toIso8601String().replaceAll('-', '')}.csv');
+  File getFilename(Month month, int ptid) => File(dir +
+      'whlsecost_hourly_$ptid' +
+      '_' +
+      '${month.toIso8601String().replaceAll('-', '')}.csv');
 
-  void downloadFile(Month month, int ptid) async =>
-      await downloadUrl(getUrl(month, ptid), getFilename(month, ptid), overwrite: true);
+  Future<void> downloadFile(Month month, int ptid) async =>
+      await downloadUrl(getUrl(month, ptid), getFilename(month, ptid),
+          overwrite: true);
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var row = rows.first;
     var date = formatDate(row['Local Date']);
-    return <String,dynamic>{
+    return <String, dynamic>{
       'date': date,
       'ptid': row['Location ID'],
       'rtLoad': rows.map((e) => e['RTLO'] as num).toList()
@@ -60,19 +60,19 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String, dynamic>>[];
     var dataByDate = groupBy(data, (row) => row['Local Date']);
-    var out = dataByDate.keys
-        .map((date) => converter(dataByDate[date]))
-        .toList();
+    var out =
+        dataByDate.keys.map((date) => converter(dataByDate[date])).toList();
     return out;
   }
-
 
   /// Can insert more than one zone and date at a time.
   @override
   Future insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
+
     /// split data by ptid and date
-    var groups = groupBy(data, (e) => Tuple2(e['ptid'] as int, e['date'] as String));
+    var groups =
+        groupBy(data, (e) => Tuple2(e['ptid'] as int, e['date'] as String));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
@@ -81,20 +81,23 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
         });
         await dbConfig.coll.insertAll(groups[key]);
       }
-      var month = (data.first['date'] as String).substring(0,7);
+      var month = (data.first['date'] as String).substring(0, 7);
       print('--->  Inserted $reportName for month '
-          '${month}, ptid ${data.first['ptid']}');
+          '$month, ptid ${data.first['ptid']}');
     } catch (e) {
       print('XXX ' + e.toString());
     }
   }
 
-
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'ptid': 1, 'date': 1,}, unique: true);
+        keys: {
+          'ptid': 1,
+          'date': 1,
+        },
+        unique: true);
     await dbConfig.db.close();
   }
 }

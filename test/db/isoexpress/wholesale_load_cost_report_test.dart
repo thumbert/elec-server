@@ -9,11 +9,13 @@ import 'package:date/date.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
+import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 void tests() async {
   var archive = WholesaleLoadCostReportArchive();
   var api = WholesaleLoadCost(archive.dbConfig.db);
-  group('Wholesale load cost report archive:', () {
+  group('Wholesale load cost report db tests: ', () {
     setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('read file Jan19, CT', () async {
@@ -24,12 +26,11 @@ void tests() async {
       expect(xs.first['rtLoad'] is List, true);
     });
   });
-  group('Wholesale load cost report API:', () {
+  group('Wholesale load cost report API tests: ', () {
     setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('get CT RT load for Jan19', () async {
-      var res = await api.apiGetZonalRtLoad(4004, '20190101', '20190131');
-      var data = json.decode(res.result);
+      var data = await api.apiGetZonalRtLoad(4004, '20190101', '20190131');
       expect(data.length, 31);
       expect(data.first.keys.toSet(), {'date', 'rtLoad'});
       expect(data.first['rtLoad'] is List, true);
@@ -57,9 +58,9 @@ void insertMonths({List<Month> months}) async {
 }
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
   // await WholesaleLoadCostReportArchive().setupDb();
 
-  await insertMonths();
-//  await tests();
+  dotenv.load('.env/prod.env');
+  tests();
 }

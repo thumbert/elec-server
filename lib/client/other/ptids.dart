@@ -1,94 +1,72 @@
-// This is a generated file (see the discoveryapis_generator project).
-
-// ignore_for_file: unnecessary_cast
-
 library elec_server.ptids.v1;
 
 import 'dart:convert';
 import 'dart:async';
-
-import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
-
-export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
-    show ApiRequestError, DetailedApiRequestError;
-
-const String USER_AGENT = 'dart-api-client ptids/v1';
 
 class PtidsApi {
-  final commons.ApiRequester _requester;
-
   PtidsApi(http.Client client,
-      {String rootUrl = 'http://localhost:8080/',
-      String servicePath = 'ptids/v1/'})
-      : _requester =
-            commons.ApiRequester(client, rootUrl, servicePath, USER_AGENT);
+      {this.rootUrl = 'http://localhost:8000',
+      this.servicePath = '/ptids/v1/'});
 
-  /// Request parameters:
-  ///
+  final String rootUrl;
+  final String servicePath;
+
+  /// current ptid table cached
+  Map<int, Map<String, dynamic>> _ptidTableCache = {};
+
+  /// Get ptid table
   /// [asOfDate] - Path parameter: 'asOfDate'.  If [null] return the last
   /// date in the database.
-  ///
-  /// Completes with a [ApiResponse].
-  ///
-  /// Completes with a [commons.ApiRequestError] if the API endpoint returned an
-  /// error.
-  ///
-  /// If the used [http.Client] completes with an error when making a REST call,
-  /// this method will complete with the same error.
   Future<List<Map<String, Object>>> getPtidTable({Date asOfDate}) async {
-    var _url = null;
-    var _queryParams = <String, List<String>>{};
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
+    var _url = rootUrl + servicePath;
     if (asOfDate == null) {
-      _url = 'current';
+      _url += 'current';
     } else {
-      _url = 'asofdate/' + commons.Escaper.ecapeVariable('$asOfDate');
+      _url += 'asofdate/$asOfDate';
+    }
+    var _response = await http.get(_url);
+    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<List<Date>> getAvailableAsOfDates() async {
+    var _url = rootUrl + servicePath + 'dates';
+    var _response = await http.get(_url);
+    var aux = json.decode(_response.body) as List;
+    var x = aux.map((e) => Date.parse(e as String)).toList();
+    return x;
+  }
+
+  /// Get all ptids for a given zone from the current table.
+  /// Only  'All', 'MAINE', 'NH', 'VT', 'CT', 'RI', 'SEMA', 'WCMA', 'NEMA' are
+  /// allowed for [zoneName]
+  Future<List<int>> getPtidsForZone(String zoneName) async {
+    if (_ptidTableCache.isEmpty) {
+      var aux = await getPtidTable();
+      _ptidTableCache = {for (var e in aux) e['ptid']: e};
     }
 
-    var _response = _requester.request(_url, 'GET',
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) {
-      var aux = ApiResponse.fromJson(data);
-      return (json.decode(aux.result) as List).cast<Map<String, Object>>();
-    });
-  }
-
-  /// Request parameters:
-  ///
-  /// Completes with a [ListOfString].
-  ///
-  /// Completes with a [commons.ApiRequestError] if the API endpoint returned an
-  /// error.
-  ///
-  /// If the used [http.Client] completes with an error when making a REST call,
-  /// this method will complete with the same error.
-  Future<ListOfString> getAvailableAsOfDates() {
-    var _url = null;
-    var _queryParams = <String, List<String>>{};
-    var _uploadMedia = null;
-    var _uploadOptions = null;
-    var _downloadOptions = commons.DownloadOptions.Metadata;
-    var _body = null;
-
-    _url = 'dates';
-
-    var _response = _requester.request(_url, 'GET',
-        body: _body,
-        queryParams: _queryParams,
-        uploadOptions: _uploadOptions,
-        uploadMedia: _uploadMedia,
-        downloadOptions: _downloadOptions);
-    return _response.then((data) => ListOfString.fromJson(data));
+    if (zoneName == 'All') {
+      return _ptidTableCache.keys.toList();
+    } else {
+      var zonePtid = zoneMap[zoneName];
+      var ptids = _ptidTableCache.entries
+          .where((e) => e.value['zonePtid'] == zonePtid)
+          .map((e) => e.value['ptid']);
+      return [zonePtid, ...ptids];
+    }
   }
 }
+
+/// Go from a zone name to ptid, e.g. 'MAINE' -> 4001, 'WCMA' -> 4007
+const Map<String, int> zoneMap = {
+  'MAINE': 4001,
+  'NH': 4002,
+  'VT': 4003,
+  'CT': 4004,
+  'RI': 4005,
+  'SEMA': 4006,
+  'WCMA': 4007,
+  'NEMA': 4008
+};

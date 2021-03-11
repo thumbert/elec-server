@@ -4,19 +4,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:more/ordering.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
-import '../../src/utils/api_response.dart';
+//import '../../src/utils/api_response.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'da_energy_offers', version: 'v1')
 class DaEnergyOffers {
   DbCollection coll;
   Location location;
-  final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
+  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'da_energy_offer';
   var ordering;
 
@@ -31,13 +31,89 @@ class DaEnergyOffers {
     ordering = byPrice.compound(byAssetId);
   }
 
-  //http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
-  @ApiMethod(path: 'stack/date/{date}/hourending/{hourending}')
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    /// return the stack, energy offers for one date, hour.
+    ///http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16
+    router.get('/stack/date/<date>/hourending/<hourending>',
+        (Request request, String date, String hourEnding) async {
+      var aux = await getGenerationStack(date, hourEnding);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// return the energy offers for one date, hour.
+    ///http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16
+    router.get('/date/<date>/hourending/<hourending>',
+        (Request request, String date, String hourEnding) async {
+      var aux = await _getEnergyOffers(date, hourEnding);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Return the energy offers for one assetId, date, hour.
+    /// http://localhost:8080/da_energy_offers/v1/assetId/41406/start/20170701/end/20171001
+    router.get('/assetId/<assetId>/start/<start>/end/<end>',
+        (Request request, String assetId, String start, String end) async {
+      var aux = await getEnergyOffersForAssetId(assetId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get a variable between a start and end date for all the assets.
+    /// http://localhost:8080/da_energy_offers/v1/daily/variable/Maximum Daily Energy/start/20170701/end/20171001
+    router.get('/daily/variable/<variable>/start/<start>/end/<end>',
+        (Request request, String variable, String start, String end) async {
+      variable = Uri.encodeComponent(variable);
+      var aux = await oneDailyVariable(variable, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get daily data for all assets, for one day
+    /// http://localhost:8080/da_energy_offers/v1/daily_data/day/20170701
+    router.get('/daily_data/day/<day>', (Request request, String day) async {
+      var aux = await dailyData(day);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// http://localhost:8080/da_energy_offers/v1/assets/day/20170301
+    router.get('/assets/day/<day>', (Request request, String day) async {
+      var aux = await assetsByDay(day);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// http://localhost:8080/da_energy_offers/v1/assets/participantId/355376/start/20170301/end/20170305
+    router.get('/assets/participantId/<participantId>/start/<start>/end/<end>',
+        (Request request, String participantId, String start,
+            String end) async {
+      var aux =
+          await assetsForParticipant(int.parse(participantId), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// http://localhost:8080/da_energy_offers/v1/ownership/assetId/80076/start/20170501/end/20170801
+    router.get('/ownership/assetId/<assetId>/start/<start>/end/<end>',
+        (Request request, String assetId, String start, String end) async {
+      var aux = await assetOwnership(int.parse(assetId), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// http://localhost:8080/da_energy_offers/v1/lastday
+    router.get('/lastday', (Request request) async {
+      var aux = await lastDay();
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
 
   /// return the stack, energy offers sorted.
-  Future<ApiResponse> getGenerationStack(String date, String hourending) async {
+  Future<List<Map<String, dynamic>>> getGenerationStack(
+      String date, String hourEnding) async {
     var stack = <Map<String, dynamic>>[];
-    var eo = await _getEnergyOffers(date, hourending);
+    var eo = await _getEnergyOffers(date, hourEnding);
 
     /// 1) get rid of the unavailable units (some still submit offers!),
     /// 2) make the must run units have $-150 prices in the first block only.
@@ -52,33 +128,31 @@ class DaEnergyOffers {
         offers.first['price'] = -150;
       }
       offers.forEach((Map e) {
-        if (e['quantity'] > e['Economic Maximum'])
+        if (e['quantity'] > e['Economic Maximum']) {
           e['quantity'] = e['Economic Maximum'] / offers.length;
+        }
       });
       stack.addAll(offers);
     });
     ordering.sort(stack);
-    return new ApiResponse()..result = json.encode(stack);
+    return stack;
   }
 
-  //http://localhost:8080/da_energy_offers/v1/date/20170701/hourending/16
-  @ApiMethod(path: 'date/{date}/hourending/{hourending}')
-
   /// Return the energy offers (price/quantity pairs) for a given datetime.
-  Future<ApiResponse> getEnergyOffers(String date, String hourending) async {
-    var data = await _getEnergyOffers(date, hourending);
-    return ApiResponse()..result = json.encode(data);
+  Future<List<Map<String, dynamic>>> getEnergyOffers(
+      String date, String hourending) async {
+    return _getEnergyOffers(date, hourending);
   }
 
   Future<List<Map<String, dynamic>>> _getEnergyOffers(
       String date, String hourending) async {
     hourending = hourending.padLeft(2, '0');
-    Date day = Date.parse(date);
-    TZDateTime dt = parseHourEndingStamp(mmddyyyy(day), hourending);
-    String hB = TZDateTime.fromMillisecondsSinceEpoch(
+    var day = Date.parse(date);
+    var dt = parseHourEndingStamp(mmddyyyy(day), hourending);
+    var hB = TZDateTime.fromMillisecondsSinceEpoch(
             location, dt.millisecondsSinceEpoch)
         .toIso8601String();
-    List pipeline = [];
+    var pipeline = [];
     pipeline.add({
       '\$match': {
         'date': {
@@ -104,7 +178,7 @@ class DaEnergyOffers {
       }
     });
     pipeline.add({'\$unwind': '\$hours'});
-    var res = await coll.aggregateToStream(pipeline);
+    var res = coll.aggregateToStream(pipeline);
 
     /// flatten the map in Dart
     var out = <Map<String, dynamic>>[];
@@ -118,8 +192,8 @@ class DaEnergyOffers {
 
     await for (var e in res) {
       List prices = e['hours']['price'];
-      for (int i = 0; i < prices.length; i++) {
-        out.add(new Map.fromIterables(keys, [
+      for (var i = 0; i < prices.length; i++) {
+        out.add(Map.fromIterables(keys, [
           e['Masked Asset ID'],
           e['Unit Status'],
           e['hours']['Economic Maximum'],
@@ -131,13 +205,10 @@ class DaEnergyOffers {
     return out;
   }
 
-  //http://localhost:8080/da_energy_offers/v1/assetId/41406/start/20170701/end/20171001
-  @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
-
   /// Get everything for one generator between a start and end date
-  Future<ApiResponse> getEnergyOffersForAssetId(
+  Future<List<Map<String, dynamic>>> getEnergyOffersForAssetId(
       String assetId, String start, String end) async {
-    List pipeline = [];
+    var pipeline = [];
     pipeline.add({
       '\$match': {
         'date': {
@@ -161,16 +232,13 @@ class DaEnergyOffers {
     aux.forEach((document) {
       document['hours'] = json.encode(document['hours']);
     });
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  //http://localhost:8080/da_energy_offers/v1/daily/variable/Maximum Daily Energy/start/20170701/end/20171001
-  @ApiMethod(path: 'daily/variable/{variable}/start/{start}/end/{end}')
-
   /// Get a variable between a start and end date for all the assets.
-  Future<ApiResponse> oneDailyVariable(
+  Future<List<Map<String, dynamic>>> oneDailyVariable(
       String variable, String start, String end) async {
-    List pipeline = [];
+    var pipeline = [];
     pipeline.add({
       '\$match': {
         'date': {
@@ -191,13 +259,11 @@ class DaEnergyOffers {
       '\$sort': {'date': 1}
     });
     var aux = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  //http://localhost:8080/da_energy_offers/v1/daily_data/day/20170701
-  @ApiMethod(path: 'daily_data/day/{day}')
-  Future<ApiResponse> dailyData(String day) async {
-    List pipeline = [];
+  Future<List<Map<String, dynamic>>> dailyData(String day) async {
+    var pipeline = [];
     pipeline.add({
       '\$match': {
         'date': {
@@ -227,53 +293,42 @@ class DaEnergyOffers {
       '\$sort': {'date': 1}
     });
     var aux = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  /// http://localhost:8080/da_energy_offers/v1/assets/day/20170301
-  @ApiMethod(path: 'assets/day/{day}')
-  Future<ApiResponse> assetsByDay(String day) async {
+  Future<List<Map<String, dynamic>>> assetsByDay(String day) async {
     var query = where.eq('date', Date.parse(day).toString()).excludeFields(
         ['_id']).fields(['Masked Asset ID', 'Masked Lead Participant ID']);
     var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    return res;
   }
 
-  /// http://localhost:8080/da_energy_offers/v1/assets/participantId/355376/start/20170301/end/20170305
-  @ApiMethod(path: 'assets/participantId/{participantId}/start/{start}/end/{end}')
-  Future<ApiResponse> assetsForParticipant(int participantId,
-      String start, String end) async {
+  Future<List<Map<String, dynamic>>> assetsForParticipant(
+      int participantId, String start, String end) async {
     var query = where
         .gte('date', Date.parse(start).toString())
         .lte('date', Date.parse(end).toString())
         .eq('Masked Lead Participant ID', participantId)
-        .excludeFields(['_id'])
-        .fields(['date', 'Masked Asset ID']);
+        .excludeFields(['_id']).fields(['date', 'Masked Asset ID']);
     var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    return res;
   }
 
-  /// http://localhost:8080/da_energy_offers/v1/ownership/assetId/80076/start/20170501/end/20170801
-  @ApiMethod(path: 'ownership/assetId/{assetId}/start/{start}/end/{end}')
-  Future<ApiResponse> assetOwnership(int assetId,
-      String start, String end) async {
+  Future<List<Map<String, dynamic>>> assetOwnership(
+      int assetId, String start, String end) async {
     var query = where
         .gte('date', Date.parse(start).toString())
         .lte('date', Date.parse(end).toString())
         .eq('Masked Asset ID', assetId)
-        .excludeFields(['_id'])
-        .fields(['date', 'Masked Asset ID', 'Masked Lead Participant ID']);
+        .excludeFields(['_id']).fields(
+            ['date', 'Masked Asset ID', 'Masked Lead Participant ID']);
     var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    return res;
   }
 
-
-
-  /// http://localhost:8080/da_energy_offers/v1/lastday
-  @ApiMethod(path: 'lastday')
-  Future<ApiResponse> lastDay() async {
+  Future<String> lastDay() async {
     var query = where.sortBy('date', descending: true).limit(1);
-    var aux = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(aux.first['date']);
+    var aux = (await coll.find(query).toList()).first;
+    return aux['date'] as String;
   }
 }

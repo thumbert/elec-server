@@ -3,13 +3,10 @@ library api.isoexpress.api_wholesale_load_cost;
 import 'dart:convert';
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
-import 'package:timezone/timezone.dart';
-import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'rt_load', version: 'v1')
 class WholesaleLoadCost {
   DbCollection coll;
   String collectionName = 'wholesale_load_cost';
@@ -19,33 +16,51 @@ class WholesaleLoadCost {
     coll = db.collection(collectionName);
   }
 
-  /// http://localhost:8080/rt_load/v1/ptid/4004/start/20190101/end/20190131
-  @ApiMethod(path: 'isone/load_zone/ptid/{ptid}/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetZonalRtLoad(
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    /// Get all zonal load between start/end date
+    /// http://localhost:8000/rt_load/v1/isone/load_zone/ptid/4004/start/20190101/end/20190131
+    router.get('/isone/load_zone/ptid/<ptid>/start/<start>/end/<end>',
+        (Request request, String ptid, String start, String end) async {
+      var aux = await apiGetZonalRtLoad(int.parse(ptid), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get all zonal load between start/end date
+    /// http://localhost:8000/rt_load/v1/pool/start/20190101/end/20190131
+    router.get('/isone/load_zone/ptid/<ptid>/start/<start>/end/<end>',
+        (Request request, String start, String end) async {
+      var aux = await apiGetPoolRtLoad(start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
+
+  Future<List<Map<String, dynamic>>> apiGetZonalRtLoad(
       int ptid, String start, String end) async {
     var query = where
-      .eq('ptid', ptid)
-      .gte('date', Date.parse(start).toString())
-      .lte('date', Date.parse(end).toString())
-      .excludeFields(['_id'])
-      .fields(['date', 'rtLoad']);
+        .eq('ptid', ptid)
+        .gte('date', Date.parse(start).toString())
+        .lte('date', Date.parse(end).toString())
+        .excludeFields(['_id']).fields(['date', 'rtLoad']);
     var data = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(data);
+    return data;
   }
 
-  /// http://localhost:8080/rt_load/v1/pool/start/20190101/end/20190131
-  @ApiMethod(path: 'isone/pool/start/{start}/end/{end}')
-  Future<ApiResponse> apiGetPoolRtLoad(String start, String end) async {
+  Future<List<Map<String, dynamic>>> apiGetPoolRtLoad(
+      String start, String end) async {
     var query = where
-      .eq('ptid', 4000)
-      .gte('date', Date.parse(start).toString())
-      .lte('date', Date.parse(end).toString())
-      .excludeFields(['_id'])
-      .fields(['date', 'rtLoad']);
+        .eq('ptid', 4000)
+        .gte('date', Date.parse(start).toString())
+        .lte('date', Date.parse(end).toString())
+        .excludeFields(['_id']).fields(['date', 'rtLoad']);
     var data = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(data);
+    return data;
   }
-
-
-
 }

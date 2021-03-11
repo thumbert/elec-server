@@ -10,7 +10,7 @@ import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
     as isone;
 
 void tests() async {
-  group('CurveIds API:', () {
+  group('CurveIds API tests:', () {
     var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
     var archive = CurveIdArchive();
     var api = CurveIds(archive.db);
