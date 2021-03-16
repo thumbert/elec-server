@@ -43,11 +43,10 @@ void tests() async {
     test('return last settlement for several ids', () async {
       var start = '2013-06-01';
       var assetIds = '201,202';
-      var aux = await api.hourlyRtLoadForAssetIdsLastSettlement(
+      var data = await api.hourlyRtLoadForAssetIdsLastSettlement(
           start, start, assetIds);
-      var data = json.decode(aux.result) as List;
       expect(data.length, 2); // two asset ids
-      Map<String, dynamic> x0 = data.first;
+      var x0 = data.first;
       expect(x0.keys.toSet(), {
         'date',
         'Asset ID',

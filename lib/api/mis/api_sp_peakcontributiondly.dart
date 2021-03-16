@@ -11,7 +11,7 @@ import 'package:date/date.dart';
 class SpPeakContributionDly {
   mongo.DbCollection coll;
   Location location;
-  final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
+  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sp_peakcontributiondly';
 
   SpPeakContributionDly(mongo.Db db) {
@@ -21,9 +21,9 @@ class SpPeakContributionDly {
 
   //http://localhost:8080/sp_peakcontributiondly/v1/assetId/2481/start/20180101/end/20180201
   @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
-  Future<List<Map<String,String>>> peakByAsset(
+  Future<List<Map<String, String>>> peakByAsset(
       String assetId, String start, String end) async {
-    List pipeline = [];
+    var pipeline = [];
     pipeline.add({
       '\$match': {
         'Asset ID': {
@@ -49,14 +49,16 @@ class SpPeakContributionDly {
   }
 
   @ApiMethod(path: 'month/{month}/assetIds/{assetIds}')
-  /// enter assetIds comma separated, e.g. 1485,2481
-  Future<List<Map<String,String>>> peakByAssets(String month,
-      String assetIds) async {
-    month = month.replaceAll('-', '');
-    var m = Month(int.parse(month.substring(0,4)),
-          int.parse(month.substring(4,6)));
 
-    List<int> loadIds = assetIds.split(',').map((e) => int.parse(e.trim())).toList();
+  /// enter assetIds comma separated, e.g. 1485,2481
+  Future<List<Map<String, String>>> peakByAssets(
+      String month, String assetIds) async {
+    month = month.replaceAll('-', '');
+    var m = Month(
+        int.parse(month.substring(0, 4)), int.parse(month.substring(4, 6)));
+
+    List<int> loadIds =
+        assetIds.split(',').map((e) => int.parse(e.trim())).toList();
     List pipeline = [];
     pipeline.add({
       '\$match': {
@@ -82,11 +84,9 @@ class SpPeakContributionDly {
     return res.toList();
   }
 
-
   //http://localhost:8080/sp_peakcontributiondly/v1/start/20180101/end/20180101
   @ApiMethod(path: 'start/{start}/end/{end}')
-  Future<List<Map<String,String>>> peakAll(
-      String start, String end) async {
+  Future<List<Map<String, String>>> peakAll(String start, String end) async {
     List pipeline = [];
     pipeline.add({
       '\$match': {
@@ -108,5 +108,4 @@ class SpPeakContributionDly {
     var res = coll.aggregateToStream(pipeline);
     return res.toList();
   }
-
 }

@@ -3,31 +3,139 @@ library api.mis.sr_dalocsum;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
-import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart';
 import 'package:tuple/tuple.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'sr_dalocsum', version: 'v1')
 class SrDaLocSum {
   DbCollection coll;
-  Location _location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sr_dalocsum';
 
   SrDaLocSum(Db db) {
     coll = db.collection(collectionName);
-    _location = getLocation('America/New_York');
   }
 
-  @ApiMethod(
-      path:
-          'daenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> dailyDaSettlementForAccount(
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    router.get(
+        '/daenergy_settlement/daily/accountId/<accountId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String start, String end,
+            String settlement) async {
+      var aux = await dailyDaSettlementForAccount(
+          accountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/daenergy_settlement/daily/accountId/<accountId>/start/<start>/end/<end>/locations/<locations>/settlement/<settlement>',
+        (Request request, String accountId, String start, String end,
+            String locations, String settlement) async {
+      var aux = await dailyDaSettlementForAccountLocations(
+          accountId, start, end, locations, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/daenergy_settlement/daily/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end, String settlement) async {
+      var aux = await dailyDaSettlementForSubaccount(
+          accountId, subaccountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/daenergy_settlement/daily/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>/locations/<locations>/settlement/<settlement>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end, String locations, String settlement) async {
+      var aux = await dailyDaSettlementForSubaccountLocations(accountId,
+          subaccountId, start, end, locations, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get('/accountId/<accountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String start, String end) async {
+      var aux = await apiGetTab0(accountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/locationId/<locationId>/start/<start>/end/<end>',
+        (Request request, String accountId, String locationId, String start,
+            String end) async {
+      var aux = await apiGetTab0ByLocation(
+          accountId, int.parse(locationId), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
+        (Request request, String accountId, String locationId,
+            String columnName, String start, String end) async {
+      var aux = await apiGetTab0ByLocationColumn(
+          accountId, int.parse(locationId), columnName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request,
+            String accountId,
+            String locationId,
+            String columnName,
+            String start,
+            String end,
+            String settlement) async {
+      var aux = await apiGetTab0ByLocationColumnSettlement(accountId,
+          int.parse(locationId), columnName, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/subaccount/<subaccountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end) async {
+      var aux = await apiGetTab1(accountId, subaccountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/subaccount/<subaccountId>/locationId/<locationId>/start/<start>/end/<end>',
+        (Request request, String accountId, String subaccountId,
+            String locationId, String start, String end) async {
+      var aux = await apiGetTab1ByLocation(
+          accountId, subaccountId, int.parse(locationId), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/subaccount/<subaccountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
+        (Request request,
+            String accountId,
+            String subaccountId,
+            String locationId,
+            String columnName,
+            String start,
+            String end) async {
+      var aux = await apiGetTab1ByLocationColumn(accountId, subaccountId,
+          int.parse(locationId), columnName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
+
+  Future<List<Map<String, dynamic>>> dailyDaSettlementForAccount(
       String accountId, String start, String end, int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
@@ -38,16 +146,16 @@ class SrDaLocSum {
           'Day Ahead Congestion Charge / Credit',
           'Day Ahead Loss Charge / Credit',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
+    return data..forEach((e) => e.remove('version'));
   }
 
   /// Locations should be comma separated, e.g. '503,4001,4004'
-  @ApiMethod(
-      path:
-          'daenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/locations/{locations}/settlement/{settlement}')
-  Future<ApiResponse> dailyDaSettlementForAccountLocations(String accountId,
-      String start, String end, String locations, int settlement) async {
+  Future<List<Map<String, dynamic>>> dailyDaSettlementForAccountLocations(
+      String accountId,
+      String start,
+      String end,
+      String locations,
+      int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
     var data = await _getDailyData(
@@ -57,15 +165,15 @@ class SrDaLocSum {
           'Day Ahead Congestion Charge / Credit',
           'Day Ahead Loss Charge / Credit',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
+    return data..forEach((e) => e.remove('version'));
   }
 
-  @ApiMethod(
-      path:
-          'daenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> dailyDaSettlementForSubaccount(String accountId,
-      String subaccountId, String start, String end, int settlement) async {
+  Future<List<Map<String, dynamic>>> dailyDaSettlementForSubaccount(
+      String accountId,
+      String subaccountId,
+      String start,
+      String end,
+      int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
     var data = await _getDailyData(
@@ -75,15 +183,14 @@ class SrDaLocSum {
           'Day Ahead Congestion Charge / Credit',
           'Day Ahead Loss Charge / Credit',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
+    return data..forEach((e) => e.remove('version'));
   }
 
   /// Location is a comma separated string, e.g. '503,4001'
-  @ApiMethod(
-      path:
-          'daenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/locations/{locations}/settlement/{settlement}')
-  Future<ApiResponse> dailyDaSettlementForSubaccountLocations(
+  // @ApiMethod(
+  //     path:
+  //         'daenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/locations/{locations}/settlement/{settlement}')
+  Future<List<Map<String, dynamic>>> dailyDaSettlementForSubaccountLocations(
       String accountId,
       String subaccountId,
       String start,
@@ -99,8 +206,7 @@ class SrDaLocSum {
           'Day Ahead Congestion Charge / Credit',
           'Day Ahead Loss Charge / Credit',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
+    return data..forEach((e) => e.remove('version'));
   }
 
   /// Get daily total for a subaccount for a given location, one settlement.
@@ -162,11 +268,8 @@ class SrDaLocSum {
     return aux;
   }
 
-  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/start/20170101/end/20170101
-  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
-
   /// Get all data in tab 0 for a given location.
-  Future<ApiResponse> apiGetTab0(
+  Future<List<Map<String, dynamic>>> apiGetTab0(
       String accountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
@@ -174,15 +277,13 @@ class SrDaLocSum {
     var scalarKeys = {'version', 'Location ID'};
     var vectorKeys = data.first.keys.toSet()..removeAll(scalarKeys);
     var aux = expandDocument(data, scalarKeys, vectorKeys);
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}')
-
-  /// Get all data (all locations) for the account.
-  Future<ApiResponse> apiGetTab0ByLocation(
+  // @ApiMethod(
+  //     path:
+  //         'accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}')
+  Future<List<Map<String, dynamic>>> apiGetTab0ByLocation(
       String accountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
@@ -192,16 +293,20 @@ class SrDaLocSum {
     var vectorKeys = data.first.keys.toSet()
       ..removeAll({...scalarKeys, 'Location ID'});
     var aux = expandDocument(data, scalarKeys, vectorKeys);
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
+  // @ApiMethod(
+  //     path:
+  //         'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
 
   /// Get one location, one column for the account.
-  Future<ApiResponse> apiGetTab0ByLocationColumn(String accountId,
-      int locationId, String columnName, String start, String end) async {
+  Future<List<Map<String, dynamic>>> apiGetTab0ByLocationColumn(
+      String accountId,
+      int locationId,
+      String columnName,
+      String start,
+      String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getData(
@@ -209,15 +314,15 @@ class SrDaLocSum {
     var scalarKeys = {'version'};
     var vectorKeys = {'hourBeginning', columnName};
     var aux = expandDocument(data, scalarKeys, vectorKeys);
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}/settlement/{settlement}')
+  // @ApiMethod(
+  //     path:
+  //         'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}/settlement/{settlement}')
 
   /// Get one location, one column for the account.
-  Future<ApiResponse> apiGetTab0ByLocationColumnSettlement(
+  Future<List<Map<String, dynamic>>> apiGetTab0ByLocationColumnSettlement(
       String accountId,
       int locationId,
       String columnName,
@@ -232,15 +337,14 @@ class SrDaLocSum {
     var scalarKeys = <String>{};
     var vectorKeys = {'hourBeginning', columnName};
     var out = expandDocument(data, scalarKeys, vectorKeys);
-    return ApiResponse()..result = json.encode(out);
+    return out;
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
-
+  // @ApiMethod(
+  //     path:
+  //         'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for all locations.
-  Future<ApiResponse> apiGetTab1(
+  Future<List<Map<String, dynamic>>> apiGetTab1(
       String accountId, String subaccountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
@@ -249,15 +353,14 @@ class SrDaLocSum {
     var scalarKeys = {'version', 'Location ID'};
     var vectorKeys = data.first.keys.toSet()..removeAll({...scalarKeys});
     var aux = expandDocument(data, scalarKeys, vectorKeys);
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}')
-
+  // @ApiMethod(
+  //     path:
+  //         'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for a given location.
-  Future<ApiResponse> apiGetTab1ByLocation(String accountId,
+  Future<List<Map<String, dynamic>>> apiGetTab1ByLocation(String accountId,
       String subaccountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
@@ -267,15 +370,14 @@ class SrDaLocSum {
     var vectorKeys = data.first.keys.toSet()
       ..removeAll({...scalarKeys, 'Location ID'});
     var aux = expandDocument(data, scalarKeys, vectorKeys);
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
-
+  // @ApiMethod(
+  //     path:
+  //         'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
   /// Get all data for a subaccount for a given location, one column.
-  Future<ApiResponse> apiGetTab1ByLocationColumn(
+  Future<List<Map<String, dynamic>>> apiGetTab1ByLocationColumn(
       String accountId,
       String subaccountId,
       int locationId,
@@ -289,7 +391,7 @@ class SrDaLocSum {
     var scalarKeys = {'version'};
     var vectorKeys = {'hourBeginning', columnName};
     var aux = expandDocument(data, scalarKeys, vectorKeys);
-    return ApiResponse()..result = json.encode(aux);
+    return aux;
   }
 
   /// Extract data from the collection

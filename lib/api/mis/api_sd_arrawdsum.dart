@@ -3,13 +3,11 @@ library api.sd_arrawdsum;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
-import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'sd_arrawdsum', version: 'v1')
 class SdArrAwdSum {
   DbCollection coll;
   Location location;
@@ -20,9 +18,24 @@ class SdArrAwdSum {
     location = getLocation('America/New_York');
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
-  Future<ApiResponse> reportData(String accountId, String start, String end) async {
+  final headers = {
+    'Content-Type': 'application/json',
+  };
 
+  Router get router {
+    final router = Router();
+
+    router.get('/accountId/<accountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String start, String end) async {
+      var aux = await reportData(accountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
+
+  Future<List<Map<String, dynamic>>> reportData(
+      String accountId, String start, String end) async {
     var startMonth = parseMonth(start).toIso8601String();
     var endMonth = parseMonth(end).toIso8601String();
 
@@ -32,8 +45,6 @@ class SdArrAwdSum {
       ..lte('month', endMonth)
       ..excludeFields(['_id', 'account']);
 
-    var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    return coll.find(query).toList();
   }
-
 }

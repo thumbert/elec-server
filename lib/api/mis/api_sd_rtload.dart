@@ -4,16 +4,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
-import 'package:rpc/rpc.dart';
 import 'package:table/table.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 import 'package:tuple/tuple.dart';
 import 'package:dama/dama.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'sd_rtload', version: 'v1')
 class SdRtload {
   mongo.DbCollection coll;
   Location location;
@@ -23,6 +22,60 @@ class SdRtload {
   SdRtload(mongo.Db db) {
     coll = db.collection(collectionName);
     location = getLocation('America/New_York');
+  }
+
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    router.get('/assetId/<assetId>/start/<start>/end/<end>',
+        (Request request, String assetId, String start, String end) async {
+      var aux = await rtload(assetId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get('/assetId/<assetId>/start/<start>/end/<end>/csv',
+        (Request request, String assetId, String start, String end) async {
+      var aux = await rtloadCsv(assetId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get('/start/<start>/end/<end>/assetIds/<assetIds>/lastSettlement',
+        (Request request, String start, String end, String assetIds) async {
+      var aux =
+          await hourlyRtLoadForAssetIdsLastSettlement(start, end, assetIds);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get('/daily/assetId/<assetId>/start/<start>/end/<end>',
+        (Request request, String assetId, String start, String end) async {
+      var aux = await dailyRtLoad(assetId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get('/start/<start>/end/<end>',
+        (Request request, String start, String end) async {
+      var aux = await rtloadAll(start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get('/daily/start/<start>/end/<end>',
+        (Request request, String start, String end) async {
+      var aux = await dailyRtLoadAll(start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get('/monthly/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String start, String end, String settlement) async {
+      var aux =
+          await monthlyRtLoadSettlement(start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
   }
 
   /// Hourly data, all settlements for one assset id.  Return a list with
@@ -37,11 +90,10 @@ class SdRtload {
   ///}
   /// ```
   ///http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201
-  @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
-  Future<ApiResponse> rtload(String assetId, String start, String end) async {
+  Future<List<Map<String, dynamic>>> rtload(
+      String assetId, String start, String end) async {
     var res = _rtloadQuery(assetId, start, end);
-    var out = await _format(res);
-    return ApiResponse()..result = json.encode(out);
+    return _format(res);
   }
 
   /// Hourly data last settlement for several assset ids aggregated.
@@ -55,8 +107,8 @@ class SdRtload {
   ///   "Share of Load Reading" : [ -15, ..., -15 ] }
   /// ```
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/2481/start/20171201/end/20171201
-  @ApiMethod(path: 'start/{start}/end/{end}/assetIds/{assetIds}/lastSettlement')
-  Future<ApiResponse> hourlyRtLoadForAssetIdsLastSettlement(
+  // @ApiMethod(path: 'start/{start}/end/{end}/assetIds/{assetIds}/lastSettlement')
+  Future<List<Map<String, dynamic>>> hourlyRtLoadForAssetIdsLastSettlement(
       String start, String end, String assetIds) async {
     var ids = assetIds.split(',').map((e) => int.parse(e.trim())).toList();
     var pipeline = [
@@ -106,14 +158,13 @@ class SdRtload {
         }
       }
     ];
-    var res = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(res);
+    return coll.aggregateToStream(pipeline).toList();
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/daily/assetId/2481/start/20171201/end/20171201
   /// Return the daily MWh for this assetId, all versions.
-  @ApiMethod(path: 'daily/assetId/{assetId}/start/{start}/end/{end}')
-  Future<ApiResponse> dailyRtLoad(
+  // @ApiMethod(path: 'daily/assetId/{assetId}/start/{start}/end/{end}')
+  Future<List<Map<String, dynamic>>> dailyRtLoad(
       String assetId, String start, String end) async {
     var pipeline = [
       {
@@ -143,13 +194,12 @@ class SdRtload {
         }
       }
     ];
-    var res = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(res);
+    return coll.aggregateToStream(pipeline).toList();
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/start/20171201/end/20171201
-  @ApiMethod(path: 'start/{start}/end/{end}')
-  Future<ApiResponse> rtloadAll(String start, String end) async {
+  // @ApiMethod(path: 'start/{start}/end/{end}')
+  Future<List<Map<String, dynamic>>> rtloadAll(String start, String end) async {
     var pipeline = [];
     pipeline.add({
       '\$match': {
@@ -165,18 +215,17 @@ class SdRtload {
       }
     });
     var res = coll.aggregateToStream(pipeline);
-    var out = await _format2(res);
-    return ApiResponse()..result = json.encode(out);
+    return _format2(res);
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/daily/start/20171201/end/20171201
   /// Return the daily MWh for all assetId, all versions.
-  @ApiMethod(path: 'daily/start/{start}/end/{end}')
-  Future<ApiResponse> dailyRtLoadAll(String start, String end) async {
+  // @ApiMethod(path: 'daily/start/{start}/end/{end}')
+  Future<List<Map<String, dynamic>>> dailyRtLoadAll(
+      String start, String end) async {
     var pipeline =
         _pipelineAllAssetsVersionsDaily(Date.parse(start), Date.parse(end));
-    var res = await coll.aggregateToStream(pipeline).toList();
-    return ApiResponse()..result = json.encode(res);
+    return coll.aggregateToStream(pipeline).toList();
   }
 
   List<Map<String, dynamic>> _pipelineAllAssetsVersionsDaily(
@@ -213,8 +262,8 @@ class SdRtload {
 
   /// Return the monthly MWh for all assetId, all versions.
   /// Start and end are months in yyyy-mm format.
-  @ApiMethod(path: 'monthly/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> monthlyRtLoadSettlement(
+  // @ApiMethod(path: 'monthly/start/{start}/end/{end}/settlement/{settlement}')
+  Future<List<Map<String, dynamic>>> monthlyRtLoadSettlement(
       String start, String end, int settlement) async {
     // Note that you can't do the monthly aggregation on the Mongo side, because
     // the version is different between days and doesn't match the settlement #.
@@ -243,12 +292,11 @@ class SdRtload {
           });
 
     var aux = nest.map(res);
-    var out = flattenMap(aux, ['month', 'Asset ID']);
-    return ApiResponse()..result = json.encode(out);
+    return flattenMap(aux, ['month', 'Asset ID']);
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/1485/start/20171201/end/20171201/csv
-  @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}/csv')
+  // @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}/csv')
   Future<List<String>> rtloadCsv(
       String assetId, String start, String end) async {
     var res = _rtloadQuery(assetId, start, end);

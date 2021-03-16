@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
@@ -7,13 +5,11 @@ import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
-import 'package:rpc/rpc.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 
 import 'package:timezone/standalone.dart';
-
 import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
 import 'package:elec_server/api/isoexpress/api_isone_rtlmp.dart';
 import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
@@ -34,28 +30,7 @@ import 'package:elec_server/api/isoexpress/api_system_demand.dart';
 import 'package:elec_server/api/isoexpress/api_isone_zonal_demand.dart';
 import 'package:elec_server/src/utils/cors_middleware.dart';
 
-const String _API_PREFIX = '';
-final ApiServer _apiServer =
-    ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
 const String host = '127.0.0.1';
-
-Future<void> registerApis() async {
-  await DbProd.isoexpress.open();
-  _apiServer.addApi(WholesaleLoadCost(DbProd.isoexpress));
-
-//  _apiServer.addApi(SccReport(db3) );
-//  _apiServer.addApi(DaDemandBids(db3) );
-//  _apiServer.addApi(SystemDemand(db3) );
-//
-//  var db4 = Db('mongodb://$host/eversource');
-//  await db4.open();
-//  _apiServer.addApi( eversource.ApiCustomerCounts(db4) );
-//  _apiServer.addApi( eversourceLoad.ApiLoadEversource(db4) );
-//
-//  var db5 = Db('mongodb://$host/utility');
-//  await db5.open();
-//  _apiServer.addApi( eversourcecs.ApiCompetitiveCustomerCountsCt(db5) );
-}
 
 Future<Router> buildRouter() async {
   final router = Router();
@@ -88,13 +63,9 @@ void main() async {
   });
 
   DbProd();
-  await registerApis();
-  _apiServer.enableDiscoveryApi();
 
   var port = 8080; // production
   //var port = 8081;  // test
-  var server = await HttpServer.bind(InternetAddress.anyIPv4, port);
-  server.listen(_apiServer.httpRequestHandler);
 
   /// the new Shelf server
   final app = await buildRouter();
