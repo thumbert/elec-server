@@ -14,6 +14,7 @@ import 'db/isoexpress/wholesale_load_cost_report_test.dart'
 import 'db/isone_ptids_test.dart' as ptids;
 import 'db/lib_mis_reports_test.dart' as mis;
 import 'db/marks/forward_marks_test.dart' as forward_marks;
+import 'db/mis/sd_arrawdsum_test.dart' as sd_arrawdsum;
 import 'db/mis/sd_rtload_test.dart' as sd_rtload;
 import 'db/mis/sr_dalocsum_test.dart' as sr_dalocsum;
 import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
@@ -42,6 +43,7 @@ void main() async {
   energy_offers.tests();
   ptids.tests();
   regulation_requirement.tests();
+  sd_arrawdsum.tests();
   sd_rtload.tests();
   sr_dalocsum.tests();
   sr_rtlocsum.tests();
