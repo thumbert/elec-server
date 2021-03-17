@@ -82,6 +82,7 @@ class SrDaLocSum {
         '/accountId/<accountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
         (Request request, String accountId, String locationId,
             String columnName, String start, String end) async {
+      columnName = Uri.decodeComponent(columnName);
       var aux = await apiGetTab0ByLocationColumn(
           accountId, int.parse(locationId), columnName, start, end);
       return Response.ok(json.encode(aux), headers: headers);
@@ -96,6 +97,7 @@ class SrDaLocSum {
             String start,
             String end,
             String settlement) async {
+      columnName = Uri.decodeComponent(columnName);
       var aux = await apiGetTab0ByLocationColumnSettlement(accountId,
           int.parse(locationId), columnName, start, end, int.parse(settlement));
       return Response.ok(json.encode(aux), headers: headers);
@@ -127,6 +129,7 @@ class SrDaLocSum {
             String columnName,
             String start,
             String end) async {
+      columnName = Uri.decodeComponent(columnName);
       var aux = await apiGetTab1ByLocationColumn(accountId, subaccountId,
           int.parse(locationId), columnName, start, end);
       return Response.ok(json.encode(aux), headers: headers);
