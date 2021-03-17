@@ -2,7 +2,8 @@ library test.mis.sr_dalocsum_test;
 
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:date/date.dart';
 import 'package:elec_server/api/mis/api_sr_dalocsum.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -12,6 +13,7 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
 void tests() async {
+  var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var dir = Directory('test/_assets');
   var file = dir
       .listSync()
@@ -61,12 +63,33 @@ void tests() async {
       expect(data.length, 2);
     });
   });
+
+  group('MIS report sr_dalocsum client tests', () {
+    test('get one column for one zone, for account', () async {
+      var url = rootUrl +
+          '/sr_dalocsum/v1/accountId/000000003/locationId/401/column'
+              '/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
+      var res = await http.get(url);
+      var data = json.decode(res.body);
+      expect(data.length, 24);
+    });
+    test('get one column for one zone, for subaccount', () async {
+      var url = rootUrl +
+          '/sr_dalocsum/v1/accountId/000000003/subaccountId/9001/locationId/401/column'
+              '/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
+      var res = await http.get(url);
+      var data = json.decode(res.body);
+      expect(data.length, 24);
+    });
+  });
 }
 
 void insertMonths(List<Month> months) async {}
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
   DbProd();
-  await tests();
+  dotenv.load('.env/prod.env');
+
+  tests();
 }

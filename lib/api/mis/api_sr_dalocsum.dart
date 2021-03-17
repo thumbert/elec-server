@@ -104,7 +104,7 @@ class SrDaLocSum {
     });
 
     router.get(
-        '/accountId/<accountId>/subaccount/<subaccountId>/start/<start>/end/<end>',
+        '/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>',
         (Request request, String accountId, String subaccountId, String start,
             String end) async {
       var aux = await apiGetTab1(accountId, subaccountId, start, end);
@@ -112,7 +112,7 @@ class SrDaLocSum {
     });
 
     router.get(
-        '/accountId/<accountId>/subaccount/<subaccountId>/locationId/<locationId>/start/<start>/end/<end>',
+        '/accountId/<accountId>/subaccountId/<subaccountId>/locationId/<locationId>/start/<start>/end/<end>',
         (Request request, String accountId, String subaccountId,
             String locationId, String start, String end) async {
       var aux = await apiGetTab1ByLocation(
@@ -121,7 +121,7 @@ class SrDaLocSum {
     });
 
     router.get(
-        '/accountId/<accountId>/subaccount/<subaccountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
+        '/accountId/<accountId>/subaccountId/<subaccountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
         (Request request,
             String accountId,
             String subaccountId,

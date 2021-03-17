@@ -2,6 +2,7 @@ import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
+import 'package:elec_server/api/mis/api_sr_dalocsum.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
@@ -51,6 +52,9 @@ Future<Router> buildRouter() async {
   router.mount('/regulation_requirement/v1/',
       RegulationRequirement(DbProd.isoexpress).router);
   router.mount('/rt_load/v1/', WholesaleLoadCost(DbProd.isoexpress).router);
+
+  await DbProd.mis.open();
+  router.mount('/sr_dalocsum/v1/', SrDaLocSum(DbProd.mis).router);
 
   return router;
 }
