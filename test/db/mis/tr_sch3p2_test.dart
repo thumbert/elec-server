@@ -42,15 +42,13 @@ void tests() async {
     setUp(() async => await db.open());
     tearDown(() async => await db.close());
     test('get summary for account', () async {
-      var aux = await api.dataForAccount('000000001', '2006-01', '2006-01');
-      var data = json.decode(aux.result) as List;
+      var data = await api.dataForAccount('000000001', '2006-01', '2006-01');
       expect(data.length, 2);
       expect(data.first['Charges'], 27528);
     });
     test('get summary for subaccount', () async {
-      var aux = await api.dataForSubaccount(
+      var data = await api.dataForSubaccount(
           '000000001', 'Default', '2006-01', '2006-01');
-      var data = json.decode(aux.result) as List;
       expect(data.length, 2);
       expect(data.first['Charges'], 27528);
     });
@@ -60,7 +58,7 @@ void tests() async {
 void insertMonths(List<Month> months) async {}
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
   DbProd();
-  await tests();
+  tests();
 }

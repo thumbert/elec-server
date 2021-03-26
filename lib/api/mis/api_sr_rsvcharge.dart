@@ -5,12 +5,11 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 import 'package:tuple/tuple.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'sr_rsvcharge', version: 'v1')
 class SrRsvCharge {
   DbCollection coll;
   final collectionName = 'sr_rsvcharge';
@@ -19,9 +18,50 @@ class SrRsvCharge {
     coll = db.collection(collectionName);
   }
 
-/// Get all data in tab 4, participant section
-  @ApiMethod(path: 'charges/accountId/{accountId}/start/{start}/end/{end}')
-  Future<ApiResponse> chargesAccount(
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    router.get('/charges/accountId/<accountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String start, String end) async {
+      var aux = await chargesAccount(accountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/charges/accountId/<accountId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String start, String end,
+            String settlement) async {
+      var aux = await chargesAccountSettlement(
+          accountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/charges/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end) async {
+      var aux = await chargesSubaccount(accountId, subaccountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/charges/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end, String settlement) async {
+      var aux = await chargesSubaccountSettlement(
+          accountId, subaccountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
+
+  /// Get all data in tab 4, participant section
+  Future<List<Map<String, dynamic>>> chargesAccount(
       String accountId, String start, String end) async {
     var query = where
       ..eq('account', accountId)
@@ -30,13 +70,11 @@ class SrRsvCharge {
       ..lte('date', Date.parse(end).toString())
       ..excludeFields(['_id', 'account', 'tab']);
 
-    var data = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(data);
+    return coll.find(query).toList();
   }
 
   /// Get all data in tab 4, participant section, one settlement
-  @ApiMethod(path: 'charges/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> chargesAccountSettlement(
+  Future<List<Map<String, dynamic>>> chargesAccountSettlement(
       String accountId, String start, String end, int settlement) async {
     var query = where
       ..eq('account', accountId)
@@ -46,17 +84,12 @@ class SrRsvCharge {
       ..excludeFields(['_id', 'account', 'tab']);
 
     var data = await coll.find(query).toList();
-    var out = getNthSettlement(
-        data, (e) => Tuple2(e['date'], e['Load Zone ID']),
+    return getNthSettlement(data, (e) => Tuple2(e['date'], e['Load Zone ID']),
         n: settlement);
-    return ApiResponse()..result = json.encode(out);
   }
 
   /// tab 6, subaccount section, all settlements
-  @ApiMethod(
-      path:
-          'charges/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
-  Future<ApiResponse> chargesSubaccount(
+  Future<List<Map<String, dynamic>>> chargesSubaccount(
       String accountId, String subaccountId, String start, String end) async {
     var query = where
       ..eq('account', accountId)
@@ -65,16 +98,16 @@ class SrRsvCharge {
       ..gte('date', Date.parse(start).toString())
       ..lte('date', Date.parse(end).toString())
       ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
-    var data = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(data);
+    return coll.find(query).toList();
   }
 
   /// tab 6, subaccount section
-  @ApiMethod(
-      path:
-          'charges/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> chargesSubaccountSettlement(String accountId,
-      String subaccountId, String start, String end, int settlement) async {
+  Future<List<Map<String, dynamic>>> chargesSubaccountSettlement(
+      String accountId,
+      String subaccountId,
+      String start,
+      String end,
+      int settlement) async {
     var query = where
       ..eq('account', accountId)
       ..eq('tab', 6)
@@ -84,10 +117,7 @@ class SrRsvCharge {
       ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
     var data = await coll.find(query).toList();
 
-    var out = getNthSettlement(
-        data, (e) => Tuple2(e['date'], e['Load Zone ID']),
+    return getNthSettlement(data, (e) => Tuple2(e['date'], e['Load Zone ID']),
         n: settlement);
-    return ApiResponse()..result = json.encode(out);
   }
-
 }

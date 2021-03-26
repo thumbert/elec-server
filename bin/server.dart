@@ -4,6 +4,10 @@ import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/api/mis/api_sd_arrawdsum.dart';
 import 'package:elec_server/api/mis/api_sr_dalocsum.dart';
+import 'package:elec_server/api/mis/api_sr_rsvcharge.dart';
+import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
+import 'package:elec_server/api/mis/api_tr_sch2tp.dart';
+import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
@@ -57,7 +61,11 @@ Future<Router> buildRouter() async {
   await DbProd.mis.open();
   <String, Router>{
     '/sd_arrawdsum/v1/': SdArrAwdSum(DbProd.mis).router,
-    '/sr_dalocsum/v1/': SrDaLocSum(DbProd.mis).router
+    '/sr_dalocsum/v1/': SrDaLocSum(DbProd.mis).router,
+    '/sr_rsvcharge/v1/': SrRsvCharge(DbProd.mis).router,
+    '/sr_rtlocsum/v1/': SrRtLocSum(DbProd.mis).router,
+    '/tr_sch2tp/v1/': TrSch2tp(DbProd.mis).router,
+    '/tr_sch3p2/v1/': TrSch3p2(DbProd.mis).router,
   }.forEach((key, value) {
     router.mount(key, value);
   });
@@ -86,6 +94,6 @@ void main() async {
     return Response.ok('Hello!  This is a Dart server.');
   });
   final handler = Pipeline().addMiddleware(cors()).addHandler(app);
-  await io.serve(handler, host, port - 80);
-  print('Shelf server started on port ${port - 80}');
+  await io.serve(handler, host, port);
+  print('Shelf server started on port $port');
 }

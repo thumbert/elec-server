@@ -6,6 +6,7 @@ import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 
@@ -41,34 +42,30 @@ void tests() async {
     setUp(() async => await db.open());
     tearDown(() async => await db.close());
     test('get daily rt energy settlement, all locations', () async {
-      var aux = await api.dailyRtSettlementForAccount(
+      var data = await api.dailyRtSettlementForAccount(
           '000000001', '2015-06-01', '2015-06-01', 0);
-      var data = json.decode(aux.result) as List;
       expect(data.length, 17);
     });
     test('get daily rt energy settlement, some locations', () async {
-      var aux = await api.dailyRtSettlementForAccountLocations(
+      var data = await api.dailyRtSettlementForAccountLocations(
           '000000001', '2015-06-01', '2015-06-01', '401,402', 0);
-      var data = json.decode(aux.result) as List;
       expect(data.length, 2);
     });
     test('get daily rt energy for subaccount, all locations', () async {
-      var aux = await api.dailyRtSettlementForSubaccount(
+      var data = await api.dailyRtSettlementForSubaccount(
           '000000001', '9001', '2015-06-01', '2015-06-01', 0);
-      var data = json.decode(aux.result) as List;
       expect(data.length, 17);
     });
     test('get daily rt energy for subaccount, some locations', () async {
-      var aux = await api.dailyRtSettlementForSubaccountLocations(
+      var data = await api.dailyRtSettlementForSubaccountLocations(
           '000000001', '9001', '2015-06-01', '2015-06-01', '401,402', 0);
-      var data = json.decode(aux.result) as List;
       expect(data.length, 2);
     });
   });
 }
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
   DbProd();
-  await tests();
+  tests();
 }

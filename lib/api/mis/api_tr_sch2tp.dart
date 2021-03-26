@@ -5,12 +5,11 @@ import 'dart:convert';
 
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_settlements.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'tr_sch2tp', version: 'v1')
 class TrSch2tp {
   DbCollection coll;
   Location location;
@@ -21,11 +20,43 @@ class TrSch2tp {
     location = getLocation('America/New_York');
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+  final headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Router get router {
+    final router = Router();
+
+    router.get('/accountId/<accountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String start, String end) async {
+      var aux = await reportData(accountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/start/<start>/end/<end>/settlement/<settlement>/summary',
+        (Request request, String accountId, String start, String end,
+            String settlement) async {
+      var aux =
+          await summaryForAccount(accountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>/settlement/<settlement>/summary',
+        (Request request, String accountId, String subaccountId, String start,
+            String end, String settlement) async {
+      var aux = await summaryForSubaccount(
+          accountId, subaccountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
 
   /// [start], [end] are months in yyyy-mm format.  Return all account,
   /// subaccount data for all settlements.
-  Future<ApiResponse> reportData(
+  Future<List<Map<String, dynamic>>> reportData(
       String accountId, String start, String end) async {
     var startMonth = parseMonth(start).toIso8601String();
     var endMonth = parseMonth(end).toIso8601String();
@@ -34,28 +65,18 @@ class TrSch2tp {
       ..gte('month', startMonth)
       ..lte('month', endMonth)
       ..excludeFields(['_id', 'account']);
-    var res = await coll.find(query).toList();
-    return ApiResponse()..result = json.encode(res);
+    return coll.find(query).toList();
   }
 
   /// One entry for the month, aggregate the 3 blocks together
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}/summary')
-  Future<ApiResponse> summaryForAccount(
+  Future<List<Map<String, dynamic>>> summaryForAccount(
       String accountId, String start, String end, int settlement) async {
-    var out = await _getSummary(accountId, null, start, end, settlement);
-    return ApiResponse()..result = json.encode(out);
+    return _getSummary(accountId, null, start, end, settlement);
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}/summary')
-  Future<ApiResponse> summaryForSubaccount(String accountId,
+  Future<List<Map<String, dynamic>>> summaryForSubaccount(String accountId,
       String subaccountId, String start, String end, int settlement) async {
-    var out =
-        await _getSummary(accountId, subaccountId, start, end, settlement);
-    return ApiResponse()..result = json.encode(out);
+    return _getSummary(accountId, subaccountId, start, end, settlement);
   }
 
   Future<List<Map<String, dynamic>>> _getSummary(String accountId,

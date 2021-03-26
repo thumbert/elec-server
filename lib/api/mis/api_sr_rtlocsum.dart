@@ -3,21 +3,20 @@ library api.mis.sr_rtlocsum;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:tuple/tuple.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 import 'package:table/table.dart';
 import 'package:dama/dama.dart';
 import 'package:elec_server/src/db/lib_settlements.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 
-@ApiClass(name: 'sr_rtlocsum', version: 'v1')
 class SrRtLocSum {
   DbCollection coll;
   Location _location;
-  final DateFormat fmt = DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
+  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sr_rtlocsum';
 
   SrRtLocSum(Db db) {
@@ -25,100 +24,229 @@ class SrRtLocSum {
     _location = getLocation('America/New_York');
   }
 
-  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/start/20170101/end/20170101
-  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+  final headers = {
+    'Content-Type': 'application/json',
+  };
 
+  Router get router {
+    final router = Router();
+
+    router.get('/accountId/<accountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String start, String end) async {
+      var aux = await apiGetTab0(accountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/locationId/<locationId>/start/<start>/end/<end>',
+        (Request request, String accountId, String locationId, String start,
+            String end) async {
+      var aux = await apiGetTab0ByLocation(
+          accountId, int.parse(locationId), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
+        (Request request, String accountId, String locationId,
+            String columnName, String start, String end) async {
+      columnName = Uri.decodeComponent(columnName);
+      var aux = await apiGetTab0ByLocationColumn(
+          accountId, int.parse(locationId), columnName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/daily/accountId/<accountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
+        (Request request, String accountId, String locationId,
+            String columnName, String start, String end) async {
+      columnName = Uri.decodeComponent(columnName);
+      var aux = await apiGetTab0ByLocationColumnDaily(
+          accountId, int.parse(locationId), columnName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end) async {
+      var aux = await apiGetTab1(accountId, subaccountId, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/subaccountId/<subaccountId>/locationId/<locationId>/start/<start>/end/<end>',
+        (Request request, String accountId, String subaccountId,
+            String locationId, String start, String end) async {
+      var aux = await apiGetTab1ByLocation(
+          accountId, subaccountId, int.parse(locationId), start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/subaccountId/<subaccountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
+        (Request request,
+            String accountId,
+            String subaccountId,
+            String locationId,
+            String columnName,
+            String start,
+            String end) async {
+      columnName = Uri.decodeComponent(columnName);
+      var aux = await apiGetTab1ByLocationColumn(accountId, subaccountId,
+          int.parse(locationId), columnName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/daily/accountId/<accountId>/subaccountId/<subaccountId>/locationId/<locationId>/column/<columnName>/start/<start>/end/<end>',
+        (Request request,
+            String accountId,
+            String subaccountId,
+            String locationId,
+            String columnName,
+            String start,
+            String end) async {
+      columnName = Uri.decodeComponent(columnName);
+      var aux = await apiGetTab1ByLocationColumnDaily(accountId, subaccountId,
+          int.parse(locationId), columnName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/rtload/monthly/accountId/<accountId>/locationId/<locationId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String locationId, String start,
+            String end, String settlement) async {
+      var aux = await monthlyRtLoadForAccountZone(
+          accountId, int.parse(locationId), start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/rtload/monthly/accountId/<accountId>/subaccountId/<subaccountId>/locationId/<locationId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request,
+            String accountId,
+            String subaccountId,
+            String locationId,
+            String start,
+            String end,
+            String settlement) async {
+      var aux = await monthlyRtLoadForSubaccountZone(accountId, subaccountId,
+          int.parse(locationId), start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/rtenergy_settlement/daily/accountId/<accountId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String start, String end,
+            String settlement) async {
+      var aux = await dailyRtSettlementForAccount(
+          accountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/rtenergy_settlement/daily/accountId/<accountId>/start/<start>/end/<end>/locations/<locations>/settlement/<settlement>',
+        (Request request, String accountId, String start, String end,
+            String locations, String settlement) async {
+      locations = Uri.decodeComponent(locations);
+      var aux = await dailyRtSettlementForAccountLocations(
+          accountId, start, end, locations, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/rtenergy_settlement/daily/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end, String settlement) async {
+      var aux = await dailyRtSettlementForSubaccount(
+          accountId, subaccountId, start, end, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/rtenergy_settlement/daily/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>/locations/<locations>/settlement/<settlement>',
+        (Request request, String accountId, String subaccountId, String start,
+            String end, String locations, String settlement) async {
+      locations = Uri.decodeComponent(locations);
+      var aux = await dailyRtSettlementForSubaccountLocations(accountId,
+          subaccountId, start, end, locations, int.parse(settlement));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    return router;
+  }
+
+  /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/start/20170101/end/20170101
   /// Get all data in tab 0 for a given location.
-  Future<ApiResponse> apiGetTab0(
+  Future<List<Map<String, dynamic>>> apiGetTab0(
       String accountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data =
         await getHourlyData(accountId, null, null, null, startDate, endDate);
-    var aux = _processStream(data);
-    return ApiResponse()..result = json.encode(aux);
+    return _processStream(data);
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}')
-
   /// Get all data (all locations) for the account.
-  Future<ApiResponse> apiGetTab0ByLocation(
+  Future<List<Map<String, dynamic>>> apiGetTab0ByLocation(
       String accountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
         accountId, null, locationId, null, startDate, endDate);
-    var aux = _processStream(data, hasLocationId: false);
-    return ApiResponse()..result = json.encode(aux);
+    return _processStream(data, hasLocationId: false);
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
-
   /// Get one location, one column for the account.
-  Future<ApiResponse> apiGetTab0ByLocationColumn(String accountId,
-      int locationId, String columnName, String start, String end) async {
+  Future<List<Map<String, dynamic>>> apiGetTab0ByLocationColumn(
+      String accountId,
+      int locationId,
+      String columnName,
+      String start,
+      String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
         accountId, null, locationId, columnName, startDate, endDate);
-    var aux = _processStream(data, hasLocationId: false);
-    return ApiResponse()..result = json.encode(aux);
+    return _processStream(data, hasLocationId: false);
   }
-
-  @ApiMethod(
-      path:
-          'daily/accountId/{accountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
 
   /// Get one location, one column for the account.
-  Future<ApiResponse> apiGetTab0ByLocationColumnDaily(String accountId,
-      int locationId, String columnName, String start, String end) async {
+  Future<List<Map<String, dynamic>>> apiGetTab0ByLocationColumnDaily(
+      String accountId,
+      int locationId,
+      String columnName,
+      String start,
+      String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getDailyDataColumn(
+    return getDailyDataColumn(
         accountId, null, locationId, columnName, startDate, endDate);
-    return ApiResponse()..result = json.encode(data);
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
-
   /// Get all data in tab 1 for all locations.
-  Future<ApiResponse> apiGetTab1(
+  Future<List<Map<String, dynamic>>> apiGetTab1(
       String accountId, String subaccountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
         accountId, subaccountId, null, null, startDate, endDate);
-    var aux = _processStream(data);
-    return ApiResponse()..result = json.encode(aux);
+    return _processStream(data);
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}')
-
   /// Get all data in tab 1 for a given location.
-  Future<ApiResponse> apiGetTab1ByLocation(String accountId,
+  Future<List<Map<String, dynamic>>> apiGetTab1ByLocation(String accountId,
       String subaccountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
         accountId, subaccountId, locationId, null, startDate, endDate);
-    var aux = _processStream(data, hasLocationId: false);
-    return ApiResponse()..result = json.encode(aux);
+    return _processStream(data, hasLocationId: false);
   }
 
-  @ApiMethod(
-      path:
-          'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
-
   /// Get all data for a subaccount for a given location, one column.
-  Future<ApiResponse> apiGetTab1ByLocationColumn(
+  Future<List<Map<String, dynamic>>> apiGetTab1ByLocationColumn(
       String accountId,
       String subaccountId,
       int locationId,
@@ -129,16 +257,11 @@ class SrRtLocSum {
     var endDate = Date.parse(end);
     var data = await getHourlyData(
         accountId, subaccountId, locationId, columnName, startDate, endDate);
-    var aux = _processStream(data, hasLocationId: false);
-    return ApiResponse()..result = json.encode(aux);
+    return _processStream(data, hasLocationId: false);
   }
 
-  @ApiMethod(
-      path:
-          'daily/accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
-
   /// Get all data for a subaccount for a given location, one column.
-  Future<ApiResponse> apiGetTab1ByLocationColumnDaily(
+  Future<List<Map<String, dynamic>>> apiGetTab1ByLocationColumnDaily(
       String accountId,
       String subaccountId,
       int locationId,
@@ -147,21 +270,16 @@ class SrRtLocSum {
       String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getDailyDataColumn(
+    return getDailyDataColumn(
         accountId, subaccountId, locationId, columnName, startDate, endDate);
-    return ApiResponse()..result = json.encode(data);
   }
 
-  @ApiMethod(
-      path:
-          'rtload/monthly/accountId/{accountId}/locationId/{locationId}/start/{start}/end/{end}/settlement/{settlement}')
-
   /// Get monthly total load for a subaccount for a given location, one settlement.
-  Future<ApiResponse> monthlyRtLoadForAccountZone(String accountId,
+  Future<Map<String, dynamic>> monthlyRtLoadForAccountZone(String accountId,
       int locationId, String start, String end, int settlement) async {
     var startDate = parseMonth(start).startDate.toString();
     var endDate = parseMonth(end).endDate.toString();
-    return await _getMonthlyData(
+    return _getMonthlyData(
       accountId,
       null,
       locationId,
@@ -172,13 +290,9 @@ class SrRtLocSum {
     );
   }
 
-  @ApiMethod(
-      path:
-          'rtload/monthly/accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/start/{start}/end/{end}/settlement/{settlement}')
-
   /// Get monthly total load for a subaccount for a given location, one settlement.
   /// [start] and [end] are in the yyyymm format.
-  Future<ApiResponse> monthlyRtLoadForSubaccountZone(
+  Future<Map<String, dynamic>> monthlyRtLoadForSubaccountZone(
       String accountId,
       String subaccountId,
       int locationId,
@@ -187,7 +301,7 @@ class SrRtLocSum {
       int settlement) async {
     var startDate = parseMonth(start).startDate.toString();
     var endDate = parseMonth(end).endDate.toString();
-    return await _getMonthlyData(
+    return _getMonthlyData(
       accountId,
       subaccountId,
       locationId,
@@ -198,15 +312,11 @@ class SrRtLocSum {
     );
   }
 
-  @ApiMethod(
-      path:
-          'rtenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> dailyRtSettlementForAccount(
+  Future<List<Map<String, dynamic>>> dailyRtSettlementForAccount(
       String accountId, String start, String end, int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
-    var data = await _getDailyData(
-        accountId, null, startDate, endDate, null, settlement,
+    return _getDailyData(accountId, null, startDate, endDate, null, settlement,
         columns: [
           'Real Time Energy Charge/Credit',
           'Real Time Congestion Charge/Credit',
@@ -216,19 +326,18 @@ class SrRtLocSum {
           'Real Time Marginal Loss Revenue Allocation',
           'External Inadvertent Cost Distribution',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
   }
 
   /// Locations is a comma separated string of ptids, e.g. '4001,4004'
-  @ApiMethod(
-      path:
-          'rtenergy_settlement/daily/accountId/{accountId}/start/{start}/end/{end}/locations/{locations}/settlement/{settlement}')
-  Future<ApiResponse> dailyRtSettlementForAccountLocations(String accountId,
-      String start, String end, String locations, int settlement) async {
+  Future<List<Map<String, dynamic>>> dailyRtSettlementForAccountLocations(
+      String accountId,
+      String start,
+      String end,
+      String locations,
+      int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
-    var data = await _getDailyData(
+    return _getDailyData(
         accountId, null, startDate, endDate, locations, settlement,
         columns: [
           'Real Time Energy Charge/Credit',
@@ -239,18 +348,17 @@ class SrRtLocSum {
           'Real Time Marginal Loss Revenue Allocation',
           'External Inadvertent Cost Distribution',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
   }
 
-  @ApiMethod(
-      path:
-          'rtenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/settlement/{settlement}')
-  Future<ApiResponse> dailyRtSettlementForSubaccount(String accountId,
-      String subaccountId, String start, String end, int settlement) async {
+  Future<List<Map<String, dynamic>>> dailyRtSettlementForSubaccount(
+      String accountId,
+      String subaccountId,
+      String start,
+      String end,
+      int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
-    var data = await _getDailyData(
+    return _getDailyData(
         accountId, subaccountId, startDate, endDate, null, settlement,
         columns: [
           'Real Time Energy Charge/Credit',
@@ -261,14 +369,9 @@ class SrRtLocSum {
           'Real Time Marginal Loss Revenue Allocation',
           'External Inadvertent Cost Distribution',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
   }
 
-  @ApiMethod(
-      path:
-          'rtenergy_settlement/daily/accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}/locations/{locations}/settlement/{settlement}')
-  Future<ApiResponse> dailyRtSettlementForSubaccountLocations(
+  Future<List<Map<String, dynamic>>> dailyRtSettlementForSubaccountLocations(
       String accountId,
       String subaccountId,
       String start,
@@ -277,7 +380,7 @@ class SrRtLocSum {
       int settlement) async {
     var startDate = Date.parse(start).toString();
     var endDate = Date.parse(end).toString();
-    var data = await _getDailyData(
+    return _getDailyData(
         accountId, subaccountId, startDate, endDate, locations, settlement,
         columns: [
           'Real Time Energy Charge/Credit',
@@ -288,8 +391,6 @@ class SrRtLocSum {
           'Real Time Marginal Loss Revenue Allocation',
           'External Inadvertent Cost Distribution',
         ]);
-    return ApiResponse()
-      ..result = json.encode(data..forEach((e) => e.remove('version')));
   }
 
   /// Get daily total for a subaccount for a given location, one settlement.
@@ -352,8 +453,13 @@ class SrRtLocSum {
   }
 
   /// Get monthly total for a subaccount for a given zone, one settlement.
-  Future<ApiResponse> _getMonthlyData(String accountId, String subaccountId,
-      int locationId, String startDate, String endDate, int settlement,
+  Future<Map<String, dynamic>> _getMonthlyData(
+      String accountId,
+      String subaccountId,
+      int locationId,
+      String startDate,
+      String endDate,
+      int settlement,
       {String column = 'Real Time Load Obligation'}) async {
     var pipeline = [
       {
@@ -398,7 +504,7 @@ class SrRtLocSum {
       ..key((e) => e['date'].substring(0, 7))
       ..rollup((List xs) => -sum(xs.map((e) => e['value'] as num)));
     var out = nest.map(aux);
-    return ApiResponse()..result = json.encode(out);
+    return Map<String, dynamic>.from(out);
   }
 
   List<Map<String, dynamic>> _processStream(List<Map<String, dynamic>> data,
