@@ -1,4 +1,5 @@
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
+import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
@@ -42,21 +43,29 @@ Future<Router> buildRouter() async {
   final router = Router();
 
   await DbProd.isoexpress.open();
+  <String, Router>{
+    '/bc/v1/': BindingConstraints(DbProd.isoexpress).router,
+    '/da_energy_offers/v1/': DaEnergyOffers(DbProd.isoexpress).router,
+    '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
+    '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
+    '/dalmp/v1/': DaLmp(DbProd.isoexpress).router,
+    '/regulation_requirement/v1/':
+        RegulationRequirement(DbProd.isoexpress).router,
+    '/rt_load/v1/': WholesaleLoadCost(DbProd.isoexpress).router,
+    '/rtlmp/v1/': RtLmp(DbProd.isoexpress).router,
+    '/system_demand/v1/': SystemDemand(DbProd.isoexpress).router,
+  }.forEach((key, value) {
+    router.mount(key, value);
+  });
+
   await DbProd.isone.open();
   await DbProd.marks.open();
   await DbProd.riskSystem.open();
 
-  router.mount('/bc/v1/', BindingConstraints(DbProd.isoexpress).router);
   router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
   router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
-  router.mount('/dalmp/v1/', DaLmp(DbProd.isoexpress).router);
-  router.mount(
-      '/da_energy_offers/v1/', DaEnergyOffers(DbProd.isoexpress).router);
   router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);
   router.mount('/ptids/v1/', ApiPtids(DbProd.isone).router);
-  router.mount('/regulation_requirement/v1/',
-      RegulationRequirement(DbProd.isoexpress).router);
-  router.mount('/rt_load/v1/', WholesaleLoadCost(DbProd.isoexpress).router);
 
   await DbProd.mis.open();
   <String, Router>{
