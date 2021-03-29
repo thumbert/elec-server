@@ -435,7 +435,7 @@ class SrRtLocSum {
         '\$project': {
           '_id': 0,
           'date': '\$_id.date',
-          'version': '\$_id.version',
+          'version': {'\$toString': '\$_id.version'},
           'Location ID': '\$_id.Location ID',
           ...{for (var column in columns) column: '\$_id.$column'},
         },
@@ -508,7 +508,7 @@ class SrRtLocSum {
   }
 
   List<Map<String, dynamic>> _processStream(List<Map<String, dynamic>> data,
-      {bool hasLocationId: true}) {
+      {bool hasLocationId = true}) {
     var out = <Map<String, dynamic>>[];
     List<String> otherKeys;
     for (var e in data) {
