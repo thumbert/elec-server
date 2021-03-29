@@ -47,7 +47,8 @@ class SdArrAwdSum {
         '/dollars/accountId/<accountId>/subaccountId/<subaccountId>/start/<start>/end/<end>/settlement/<settlement>',
         (Request request, String accountId, String subaccountId, String start,
             String end, String settlement) async {
-      var aux = await arrDollars(accountId, start, end, int.parse(settlement));
+      var aux = await arrDollarsForSubaccount(
+          accountId, subaccountId, start, end, int.parse(settlement));
       return Response.ok(json.encode(aux), headers: headers);
     });
 
