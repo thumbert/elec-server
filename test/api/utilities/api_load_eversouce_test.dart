@@ -4,11 +4,11 @@ import 'dart:convert';
 
 import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/api/utilities/api_load_eversource.dart';
 
-
-tests() async {
+void tests() async {
   Db db;
   ApiLoadEversource api;
   setUp(() async {
@@ -22,10 +22,9 @@ tests() async {
 
   group('Eversource load test', () {
     test('CT load (CL&P)', () async {
-      var data = await api.ctLoad('2014-01-01', '2014-01-01');
-      var res = jsonDecode(data.result) as List;
+      var res = await api.ctLoad('2014-01-01', '2014-01-01');
       expect(res.length, 1);
-      var e = res.first as Map<String,dynamic>;
+      var e = res.first;
       expect(e.keys.toList(), ['date', 'version', 'hourBeginning', 'load']);
       expect(e['hourBeginning'] is List, true);
       expect(e['hourBeginning'].first, '2014-01-01T00:00:00.000-0500');
@@ -33,7 +32,7 @@ tests() async {
   });
 }
 
-main() async {
-  await initializeTimeZone();
-  await tests();
+void main() async {
+  initializeTimeZones();
+  tests();
 }
