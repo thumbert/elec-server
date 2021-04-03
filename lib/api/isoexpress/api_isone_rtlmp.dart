@@ -48,11 +48,10 @@ class RtLmp {
     });
 
     router.get(
-        '/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>/bucket/<bucket>',
+        '/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>',
         (Request request, String component, String ptid, String start,
-            String end, String bucket) async {
-      var aux = await apiGetDailyBucketPrice(
-          component, int.parse(ptid), start, end, bucket);
+            String end) async {
+      var aux = await getHourlyPrices(component, int.parse(ptid), start, end);
       return Response.ok(json.encode(aux), headers: headers);
     });
 
