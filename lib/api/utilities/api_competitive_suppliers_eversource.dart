@@ -3,11 +3,10 @@ library api.utilities.api_competitive_suppliers_eversource;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:elec_server/src/utils/api_response.dart';
 import 'package:date/date.dart';
 
-@ApiClass(name: 'eversource_competitive_suppliers', version: 'v1')
+// @ApiClass(name: 'eversource_competitive_suppliers', version: 'v1')
 class ApiCompetitiveCustomerCountsCt {
   DbCollection coll1;
 
@@ -16,10 +15,10 @@ class ApiCompetitiveCustomerCountsCt {
   }
 
   /// get all suppliers
-  @ApiMethod(path: 'customercounts/ct/start/{start}/end/{end}')
+  // @ApiMethod(path: 'customercounts/ct/start/{start}/end/{end}')
   Future<ApiResponse> getCustomerCounts(String start, String end) async {
 
-    SelectorBuilder query = where;
+    var query = where;
     query.gte('month', Date.parse(start).toString().substring(0,7));
     query.lte('month', Date.parse(end).toString().substring(0,8));
     query.sortBy('month');
@@ -29,9 +28,9 @@ class ApiCompetitiveCustomerCountsCt {
   }
 
   /// get only one supplier
-  @ApiMethod(path: 'customercounts/ct/supplier/{supplier}')
+  // @ApiMethod(path: 'customercounts/ct/supplier/{supplier}')
   Future<ApiResponse> getCustomerCountsFor(String supplier) async {
-    SelectorBuilder query = where;
+    var query = where;
     query.gte('supplierName', supplier);
     query.sortBy('month');
     query = query.excludeFields(['_id']);

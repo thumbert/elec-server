@@ -2,12 +2,11 @@ library api.sp_peakcontributiondly;
 
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 
-@ApiClass(name: 'sp_peakcontributiondly', version: 'v1')
+// @ApiClass(name: 'sp_peakcontributiondly', version: 'v1')
 class SpPeakContributionDly {
   mongo.DbCollection coll;
   Location location;
@@ -20,7 +19,7 @@ class SpPeakContributionDly {
   }
 
   //http://localhost:8080/sp_peakcontributiondly/v1/assetId/2481/start/20180101/end/20180201
-  @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
+  // @ApiMethod(path: 'assetId/{assetId}/start/{start}/end/{end}')
   Future<List<Map<String, String>>> peakByAsset(
       String assetId, String start, String end) async {
     var pipeline = [];
@@ -48,7 +47,7 @@ class SpPeakContributionDly {
     return res.toList();
   }
 
-  @ApiMethod(path: 'month/{month}/assetIds/{assetIds}')
+  // @ApiMethod(path: 'month/{month}/assetIds/{assetIds}')
 
   /// enter assetIds comma separated, e.g. 1485,2481
   Future<List<Map<String, String>>> peakByAssets(
@@ -85,7 +84,7 @@ class SpPeakContributionDly {
   }
 
   //http://localhost:8080/sp_peakcontributiondly/v1/start/20180101/end/20180101
-  @ApiMethod(path: 'start/{start}/end/{end}')
+  // @ApiMethod(path: 'start/{start}/end/{end}')
   Future<List<Map<String, String>>> peakAll(String start, String end) async {
     List pipeline = [];
     pipeline.add({

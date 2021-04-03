@@ -3,13 +3,10 @@ library api.mis.sr_regsummary;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
-import 'package:timezone/timezone.dart';
-import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/api_response.dart';
 
-@ApiClass(name: 'sr_regsummary', version: 'v1')
+// @ApiClass(name: 'sr_regsummary', version: 'v1')
 class SrRegSummary {
   DbCollection coll;
   String collectionName = 'sr_regsummary';
@@ -19,7 +16,7 @@ class SrRegSummary {
   }
 
   /// http://localhost:8080/sr_regsummary/v1/account/0000523477/start/20170101/end/20170101
-  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+  // @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
   /// Get all data in tab 0 for a given location.
   Future<ApiResponse> apiGetTab0 (String accountId,
       String start, String end) async {
@@ -30,7 +27,7 @@ class SrRegSummary {
   }
 
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
+  // @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/start/{start}/end/{end}')
   /// Get all data in tab 1 for all locations.
   Future<ApiResponse> apiGetTab1 (String accountId,
       String subaccountId, String start, String end) async {
@@ -41,8 +38,8 @@ class SrRegSummary {
   }
 
 
-  @ApiMethod(
-      path: 'accountId/{accountId}/column/{columnName}/start/{start}/end/{end}')
+  // @ApiMethod(
+  //     path: 'accountId/{accountId}/column/{columnName}/start/{start}/end/{end}')
   /// Get one location, one column for the account.
   Future<ApiResponse> apiGetTab0ByLocationColumn (String accountId,
       String columnName, String start, String end) async {
@@ -53,7 +50,7 @@ class SrRegSummary {
   }
 
 
-  @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/column/{columnName}/start/{start}/end/{end}')
+  // @ApiMethod(path: 'accountId/{accountId}/subaccountId/{subaccountId}/column/{columnName}/start/{start}/end/{end}')
   /// Get all data for a subaccount for a given location, one column.
   Future<ApiResponse> apiGetTab1ByLocationColumn (String accountId,
       String subaccountId, String columnName, String start, String end) async {

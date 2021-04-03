@@ -2,12 +2,11 @@ library api.isone_zonal_demand;
 
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 
-@ApiClass(name: 'zonal_demand', version: 'v1')
+// @ApiClass(name: 'zonal_demand', version: 'v1')
 class ZonalDemand {
   DbCollection coll;
   Location _location;
@@ -32,15 +31,15 @@ class ZonalDemand {
   }
 
   /// http://localhost:8080/zonal_demand/v1/zone/isone/start/20170101/end/20170101
-  @ApiMethod(path: 'zone/{zone}/start/{start}/end/{end}')
+  // @ApiMethod(path: 'zone/{zone}/start/{start}/end/{end}')
   Future<List<Map<String, String>>> apiGetZonalDemand(
       String zone, String start, String end) async {
-    Date startDate = Date.parse(start);
-    Date endDate = Date.parse(end);
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
 
     Stream aux = _getHourlyData(zone, startDate: startDate, endDate: endDate);
-    List out = [];
-    List keys = [
+    var out = [];
+    var keys = [
       'hourBeginning',
       'DA_Demand',
       'RT_Demand',
@@ -49,9 +48,9 @@ class ZonalDemand {
     ];
     await for (var e in aux) {
       /// each element is a list of 24 hours, prices
-      for (int i = 0; i < e['hourBeginning'].length; i++) {
-        out.add(new Map.fromIterables(keys, [
-          new TZDateTime.from(e['hourBeginning'][i], _location).toString(),
+      for (var i = 0; i < e['hourBeginning'].length; i++) {
+        out.add(Map.fromIterables(keys, [
+          TZDateTime.from(e['hourBeginning'][i], _location).toString(),
           e['DA_Demand'][i],
           e['RT_Demand'][i],
           e['DryBulb'][i],
@@ -66,12 +65,12 @@ class ZonalDemand {
   /// Workhorse to extract the data ...
   /// returns one element for each day
   Stream _getHourlyData(String zone, {Date startDate, Date endDate}) {
-    List pipeline = [];
-    Map match = {};
+    var pipeline = [];
+    var match = {};
     zone = zone.toUpperCase();
     if (_canonicalZones.contains(zone)) match['zoneName'] = zone;
 
-    Map date = {};
+    var date = {};
     if (startDate != null) date['\$gte'] = startDate.toString();
     if (endDate != null) date['\$lt'] = endDate.add(1).toString();
     if (date.isNotEmpty) match['date'] = date;

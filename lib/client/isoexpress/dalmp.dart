@@ -3,18 +3,12 @@ library elec_server.client.dalmp.v1;
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
-import 'package:intl/intl.dart';
-
-import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
-
-export 'package:_discoveryapis_commons/_discoveryapis_commons.dart'
-    show ApiRequestError, DetailedApiRequestError;
 
 class DaLmp {
   String rootUrl;
@@ -31,12 +25,9 @@ class DaLmp {
     var cmp = component.toString();
     var _url = rootUrl +
         servicePath +
-        'hourly/$cmp/ptid/' +
-        commons.Escaper.ecapeVariable('${ptid.toString()}') +
-        '/start/' +
-        commons.Escaper.ecapeVariable('${start.toString()}') +
-        '/end/' +
-        commons.Escaper.ecapeVariable('${end.toString()}');
+        'hourly/$cmp/ptid/${ptid.toString()}' +
+        '/start/${start.toString()}' +
+        '/end/${end.toString()}';
 
     var _response = await http.get(_url);
     var data = json.decode(_response.body) as List;
@@ -52,14 +43,10 @@ class DaLmp {
     var cmp = component.toString();
     var _url = rootUrl +
         servicePath +
-        'daily/$cmp/ptid/' +
-        commons.Escaper.ecapeVariable('${ptid.toString()}') +
-        '/start/' +
-        commons.Escaper.ecapeVariable('${start.toString()}') +
-        '/end/' +
-        commons.Escaper.ecapeVariable('${end.toString()}') +
-        '/bucket/' +
-        commons.Escaper.ecapeVariable('${bucket.name.toString()}');
+        'daily/$cmp/ptid/${ptid.toString()}' +
+        '/start/${start.toString()}' +
+        '/end/${end.toString()}' +
+        '/bucket/${bucket.name}';
 
     var _response = await http.get(_url);
     var data = json.decode(_response.body) as List;
@@ -75,10 +62,8 @@ class DaLmp {
     var _url = rootUrl +
         servicePath +
         'daily/mean/$cmp' +
-        '/start/' +
-        commons.Escaper.ecapeVariable('${start.toString()}') +
-        '/end/' +
-        commons.Escaper.ecapeVariable('${end.toString()}');
+        '/start/${start.toString()}' +
+        '/end/${end.toString()}';
 
     var _response = await http.get(_url);
     var data = json.decode(_response.body) as List;
@@ -99,14 +84,10 @@ class DaLmp {
     var cmp = component.toString();
     var _url = rootUrl +
         servicePath +
-        'monthly/$cmp/ptid/' +
-        commons.Escaper.ecapeVariable('${ptid.toString()}') +
-        '/start/' +
-        commons.Escaper.ecapeVariable('${start.toIso8601String()}') +
-        '/end/' +
-        commons.Escaper.ecapeVariable('${end.toIso8601String()}') +
-        '/bucket/' +
-        commons.Escaper.ecapeVariable('${bucket.name.toString()}');
+        'monthly/$cmp/ptid/${ptid.toString()}' +
+        '/start/${start.toIso8601String()}' +
+        '/end/${end.toIso8601String()}' +
+        '/bucket/${bucket.name}';
 
     var _response = await http.get(_url);
     var data = json.decode(_response.body) as List;

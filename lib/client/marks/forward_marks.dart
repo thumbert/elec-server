@@ -1,7 +1,6 @@
 library client.marks.forward_marks;
 
 import 'dart:convert';
-import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
@@ -23,8 +22,7 @@ class ForwardMarks {
     tzLocation ??= asOfDate.location;
     var _url = rootUrl +
         servicePath +
-        'curveId/' +
-        commons.Escaper.ecapeVariable('${curveId.toString()}') +
+        'curveId/${Uri.encodeComponent(curveId)}' +
         '/asOfDate/${asOfDate.toString()}';
     var _response = await http.get(_url);
     var data = json.decode(_response.body) as Map<String, dynamic>;
@@ -37,8 +35,7 @@ class ForwardMarks {
     tzLocation ??= asOfDate.location;
     var _url = rootUrl +
         servicePath +
-        'curveId/' +
-        commons.Escaper.ecapeVariable('${curveId.toString()}') +
+        'curveId/${Uri.encodeComponent(curveId)}' +
         '/asOfDate/${asOfDate.toString()}';
     var _response = await http.get(_url);
     var data = json.decode(_response.body) as Map<String, dynamic>;
@@ -51,8 +48,7 @@ class ForwardMarks {
     tzLocation ??= asOfDate.location;
     var _url = rootUrl +
         servicePath +
-        'curveId/' +
-        commons.Escaper.ecapeVariable('${curveId.toString()}') +
+        'curveId/${Uri.encodeComponent(curveId)}' +
         '/asOfDate/${asOfDate.toString()}';
     var _response = await http.get(_url);
     var data = json.decode(_response.body) as Map<String, dynamic>;

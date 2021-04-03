@@ -3,13 +3,11 @@ library api.sd_rtncpcpymt;
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:rpc/rpc.dart';
 import 'package:timezone/timezone.dart';
-import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/api_response.dart';
 
-@ApiClass(name: 'sd_rtncpcpymt', version: 'v1')
+// @ApiClass(name: 'sd_rtncpcpymt', version: 'v1')
 class SdRtNcpcPymt {
   DbCollection coll;
   final Location location = getLocation('America/New_York');
@@ -18,7 +16,7 @@ class SdRtNcpcPymt {
     coll = db.collection('sd_rtncpcpymt');
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
+  // @ApiMethod(path: 'accountId/{accountId}/start/{start}/end/{end}')
   Future<ApiResponse> data0(String accountId, String start, String end) async {
     var query = where
       ..eq('account', accountId)
@@ -30,7 +28,7 @@ class SdRtNcpcPymt {
     return ApiResponse()..result = json.encode(res);
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/assetId/{assetId}/start/{start}/end/{end}')
+  // @ApiMethod(path: 'accountId/{accountId}/assetId/{assetId}/start/{start}/end/{end}')
   Future<ApiResponse> data0ForAsset(String accountId, int assetId,
       String start, String end) async {
     var query = where
@@ -44,7 +42,7 @@ class SdRtNcpcPymt {
     return ApiResponse()..result = json.encode(res);
   }
 
-  @ApiMethod(path: 'accountId/{accountId}/details/start/{start}/end/{end}')
+  // @ApiMethod(path: 'accountId/{accountId}/details/start/{start}/end/{end}')
   /// Get the ncpc credit details for all assets, all versions of the report
   Future<ApiResponse> data2CreditDetails(String accountId, String subaccountId,
       String start, String end) async {

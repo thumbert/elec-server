@@ -1,7 +1,6 @@
 library client.mis.sd_rtncpcpymnt;
 
 import 'dart:convert';
-import 'package:_discoveryapis_commons/_discoveryapis_commons.dart' as commons;
 import 'package:collection/collection.dart';
 import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:http/http.dart' as http;
@@ -15,12 +14,12 @@ class SdRtNcpcPymnt {
 
   SdRtNcpcPymnt(http.Client client,
       {this.rootUrl = 'http://localhost:8080/',
-      this.servicePath: 'sd_rtncpcpymt/v1/'});
+      this.servicePath = 'sd_rtncpcpymt/v1/'});
 
   /// Get details for all generators between a start/end date.
   Future<List<Map<String, dynamic>>> getPaymentsForAllGenerators(
       String accountId, Date start, Date end,
-      {int settlement: 99}) async {
+      {int settlement = 99}) async {
     var _url = rootUrl +
         servicePath +
         'accountId/{accountId}/details' +
