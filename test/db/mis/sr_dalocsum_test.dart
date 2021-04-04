@@ -3,7 +3,7 @@ library test.mis.sr_dalocsum_test;
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:date/date.dart';
 import 'package:elec_server/api/mis/api_sr_dalocsum.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -12,8 +12,8 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
-void tests() async {
-  var rootUrl = dotenv.env['SHELF_ROOT_URL'];
+void tests(String rootUrl) async {
+  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var dir = Directory('test/_assets');
   var file = dir
       .listSync()
@@ -89,7 +89,7 @@ void insertMonths(List<Month> months) async {}
 void main() async {
   initializeTimeZones();
   DbProd();
-  dotenv.load('.env/prod.env');
+  // dotenv.load('.env/prod.env');
 
-  tests();
+  tests('http://127.0.0.1:8080');
 }

@@ -1,7 +1,7 @@
 library test.db.isoexpress.regulation_requirement_test;
 
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart'
     as api;
@@ -13,9 +13,9 @@ import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
-void tests() async {
+void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
+  // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = RegulationRequirementArchive();
   group('Regulation requirements archive test:', () {
     setUp(() async => await archive.db.open());
@@ -45,7 +45,7 @@ void tests() async {
     });
   });
   group('Regulation requirement client test', () {
-    var client = RegulationRequirement(http.Client(), rootUrl: shelfRootUrl);
+    var client = RegulationRequirement(http.Client(), rootUrl: rootUrl);
     test('get specifications', () async {
       var specs = await client.getSpecification();
       expect(specs.first.keys.toSet(), {
@@ -82,6 +82,6 @@ void main() async {
   initializeTimeZones();
 //  await DailyRegulationRequirementArchive().setupDb();
 
-  dotenv.load('.env/prod.env');
-  tests();
+  // dotenv.load('.env/prod.env');
+  tests('http://127.0.0.1:8080');
 }

@@ -9,11 +9,11 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 
-void tests() async {
+void tests(String rootUrl) async {
   var db = DbProd.mis;
-  var rootUrl = dotenv.env['SHELF_ROOT_URL'];
+  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = SdArrAwdSumArchive();
   var api = SdArrAwdSum(db);
 
@@ -63,6 +63,6 @@ void tests() async {
 void main() async {
   initializeTimeZones();
   DbProd();
-  dotenv.load('.env/prod.env');
-  tests();
+  // dotenv.load('.env/prod.env');
+  tests('http://127.0.0.1:8080');
 }

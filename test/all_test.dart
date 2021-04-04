@@ -1,7 +1,7 @@
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'client/marks/curves/curve_id_test.dart' as curve_id;
 import 'db/isoexpress/da_binding_constraints_report_test.dart' as bc;
@@ -29,7 +29,8 @@ import 'utils/to_csv_test.dart' as to_csv;
 void main() async {
   initializeTimeZones();
   DbProd();
-  dotenv.load('.env/prod.env');
+  var rootUrl = 'http://127.0.0.1:8080';
+  // dotenv.load('.env/prod.env');
 
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
@@ -37,22 +38,22 @@ void main() async {
   });
 
   /// db tests
-  bc.tests();
-  calculators.tests();
-  dalmp.tests();
-  energy_offers.tests();
-  ptids.tests();
-  regulation_requirement.tests();
-  sd_arrawdsum.tests();
+  bc.tests(rootUrl);
+  calculators.tests(rootUrl);
+  dalmp.tests(rootUrl);
+  energy_offers.tests(rootUrl);
+  ptids.tests(rootUrl);
+  regulation_requirement.tests(rootUrl);
+  sd_arrawdsum.tests(rootUrl);
   sd_rtload.tests();
-  sr_dalocsum.tests();
+  sr_dalocsum.tests(rootUrl);
   sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();
 
   /// Client tests
-  curve_id.tests();
-  forward_marks.tests();
+  curve_id.tests(rootUrl);
+  forward_marks.tests(rootUrl);
 //  sysdem.tests(rootUrl);
   mis.tests();
   wholesale_load_cost_report.tests();

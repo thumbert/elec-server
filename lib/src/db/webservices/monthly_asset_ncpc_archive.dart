@@ -9,7 +9,7 @@ import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:timezone/timezone.dart';
 import '../lib_iso_express.dart';
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 
 class AssetNcpcArchive {
   ComponentConfig dbConfig;
@@ -34,8 +34,8 @@ class AssetNcpcArchive {
       File(dir + 'asset_ncpc_' + month.toIso8601String() + '.json');
 
   Future downloadMonth(Month month) async {
-    var _user = dotenv.env['isone_ws_user'];
-    var _pwd = dotenv.env['isone_ws_password'];
+    var _user = Platform.environment['isone_ws_user'];
+    var _pwd = Platform.environment['isone_ws_password'];
 
     var client = HttpClient()
       ..addCredentials(

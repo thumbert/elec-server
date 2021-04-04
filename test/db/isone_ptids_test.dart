@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/client/other/ptids.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
@@ -43,8 +43,8 @@ void ingestionTest() async {
   await archive.db.close();
 }
 
-void tests() async {
-  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
+void tests(String rootUrl) async {
+  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var config = ComponentConfig()
     ..host = '127.0.0.1'
     ..dbName = 'isone'
@@ -91,13 +91,13 @@ void tests() async {
       expect(res is List<String>, true);
     });
     test('Get the list of available dates (http)', () async {
-      var res = await http.get('$shelfRootUrl/ptids/v1/dates',
+      var res = await http.get('$rootUrl/ptids/v1/dates',
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
       expect(data.first is String, true);
     });
     test('Get all the ptid information for one date (http)', () async {
-      var res = await http.get('$shelfRootUrl/ptids/v1/current',
+      var res = await http.get('$rootUrl/ptids/v1/current',
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body);
       expect(data.length > 950, true);
@@ -113,7 +113,7 @@ void tests() async {
     test('Get the list of available dates for one ptid', () async {
       var aux = await api.apiPtid(1616);
       expect(aux.isNotEmpty, true);
-      var res = await http.get('$shelfRootUrl/ptids/v1/ptid/1616',
+      var res = await http.get('$rootUrl/ptids/v1/ptid/1616',
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body);
       expect(data is List, true);
@@ -121,7 +121,7 @@ void tests() async {
     });
   });
   group('Ptid table client tests:', () {
-    var client = PtidsApi(http.Client(), rootUrl: shelfRootUrl);
+    var client = PtidsApi(http.Client(), rootUrl: rootUrl);
     test('get current ptid table', () async {
       var data = await client.getPtidTable();
       expect(data.length > 950, true);
@@ -151,6 +151,5 @@ void main() async {
 //  await ingestionTest();
 
   DbProd();
-  dotenv.load('.env/prod.env');
-  tests();
+  tests('http://127.0.0.1:8080');
 }

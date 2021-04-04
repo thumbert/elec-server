@@ -2,7 +2,7 @@ library test.db.isoexpress.da_energy_offers_test;
 
 import 'package:elec_server/api/isoexpress/api_isone_energyoffers.dart';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
@@ -10,8 +10,8 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/client/isoexpress/da_energy_offer.dart' as eo;
 
-void tests() async {
-  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
+void tests(String rootUrl) async {
+  // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var location = getLocation('America/New_York');
   var archive = DaEnergyOfferArchive();
 
@@ -73,7 +73,7 @@ void tests() async {
   });
 
   group('DA energy offers client tests: ', () {
-    var client = eo.DaEnergyOffers(http.Client(), rootUrl: shelfRootUrl);
+    var client = eo.DaEnergyOffers(http.Client(), rootUrl: rootUrl);
     test('get energy offers for hour 2017-07-01 16:00:00', () async {
       var hour = Hour.beginning(TZDateTime(location, 2017, 7, 1, 16));
       var aux = await client.getDaEnergyOffers(hour);
@@ -144,6 +144,6 @@ void main() async {
   initializeTimeZones();
   //await DaEnergyOfferArchive().setupDb();
 
-  dotenv.load('.env/prod.env');
-  tests();
+  // dotenv.load('.env/prod.env');
+  tests('http://127.0.0.1:8080');
 }

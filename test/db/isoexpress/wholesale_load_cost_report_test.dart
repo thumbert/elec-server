@@ -10,7 +10,6 @@ import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
 
 void tests() async {
   var archive = WholesaleLoadCostReportArchive();
@@ -61,6 +60,5 @@ void main() async {
   initializeTimeZones();
   // await WholesaleLoadCostReportArchive().setupDb();
 
-  dotenv.load('.env/prod.env');
   tests();
 }

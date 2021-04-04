@@ -17,7 +17,7 @@ import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import '../test/db/marks/marks_special_days.dart';
-import 'package:dotenv/dotenv.dart' as dotenv;
+// //import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:path/path.dart';
 
 /// Create the MongoDb from scratch to pass all tests.  This script is useful
@@ -162,7 +162,7 @@ void redoAll() async {
 
 void main() async {
   initializeTimeZones();
-  dotenv.load('.env/prod.env');
+  // dotenv.load('.env/prod.env');
 
   // await insertDaBindingConstraints();
 

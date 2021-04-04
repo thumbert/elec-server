@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
@@ -29,9 +29,9 @@ void prepareData() async {
   await archive.downloadDays(days);
 }
 
-void tests() async {
+void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
+  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   group('DAM LMP db tests: ', () {
     var archive = DaLmpHourlyArchive();
     setUp(() async {
@@ -88,7 +88,7 @@ void tests() async {
         'lmp': 35.12,
       });
       var res = await http.get(
-          '$shelfRootUrl/dalmp/v1/hourly/lmp/'
+          '$rootUrl/dalmp/v1/hourly/lmp/'
           'ptid/4000/start/2017-01-01/end/2017-01-02',
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
@@ -111,7 +111,7 @@ void tests() async {
       expect(data.length, 4);
       expect(data.first, {'date': '2017-07-03', 'lmp': 35.225});
       var res = await http.get(
-          '$shelfRootUrl/dalmp/v1/daily/lmp/'
+          '$rootUrl/dalmp/v1/daily/lmp/'
           'ptid/4000/start/2017-07-01/end/2017-07-07/bucket/5x16',
           headers: {'Content-Type': 'application/json'});
       var aux = json.decode(res.body) as List;
@@ -141,7 +141,7 @@ void tests() async {
     });
   });
   group('DAM LMP client tests: ', () {
-    var daLmp = client.DaLmp(http.Client(), rootUrl: shelfRootUrl);
+    var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
     test('get daily peak price between two dates', () async {
       var data = await daLmp.getDailyLmpBucket(4000, LmpComponent.lmp,
           IsoNewEngland.bucket5x16, Date(2017, 1, 1), Date(2017, 1, 5));
@@ -202,8 +202,8 @@ void main() async {
   // await prepareData();
 
   DbProd();
-  dotenv.load('.env/prod.env');
-  tests();
+  // dotenv.load('.env/prod.env');
+  tests('http://127.0.0.1:8080');
 
 //  Db db = new Db('mongodb://localhost/isoexpress');
 //  await new DaLmpHourlyArchive().updateDb(new DaLmp(db));

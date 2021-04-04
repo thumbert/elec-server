@@ -2,7 +2,7 @@ import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
 import 'package:elec_server/client/isoexpress/binding_constraints.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
@@ -10,9 +10,9 @@ import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart
 import 'package:timezone/timezone.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
-void tests() async {
+void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
+  // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = DaBindingConstraintsReportArchive();
   group('Binding constraints db tests:', () {
     setUp(() async => await archive.db.open());
@@ -72,7 +72,7 @@ void tests() async {
     });
   });
   group('Binding constraints client tests:', () {
-    var client = BindingConstraintsApi(http.Client(), rootUrl: shelfRootUrl);
+    var client = BindingConstraintsApi(http.Client(), rootUrl: rootUrl);
     test('get da binding constraints data for 3 days', () async {
       var interval = Interval(
           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 1, 3));
@@ -117,8 +117,9 @@ void main() async {
 
   // await prepareData();
 
-  dotenv.load('.env/prod.env');
-  tests();
+  // dotenv.load('.env/prod.env');
+  var rootUrl = 'http://127.0.0.1:8080';
+  tests(rootUrl);
 
   // await uploadDays();
 }

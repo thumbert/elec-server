@@ -3,7 +3,7 @@ library test.client.forward_marks;
 import 'dart:convert';
 import 'package:elec/elec.dart';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart' as dotenv;
+//import 'package:dotenv/dotenv.dart' as dotenv;
 
 import '../../../bin/setup_db.dart';
 import 'package:http/http.dart';
@@ -37,8 +37,8 @@ List<String> getMarkedCurveIds() {
   ]..sort();
 }
 
-void tests() async {
-  var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
+void tests(String rootUrl) async {
+  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = ForwardMarksArchive();
   group('ForwardMarks archive tests:', () {
     setUp(() async => await archive.db.open());
@@ -207,7 +207,7 @@ void tests() async {
       ...getMarkedCurveIds(),
     };
     test('api get all curveIds', () async {
-      var aux = await http.get('$shelfRootUrl/forward_marks/v1/curveIds',
+      var aux = await http.get('$rootUrl/forward_marks/v1/curveIds',
           headers: {'Content-Type': 'application/json'});
       var res = json.decode(aux.body) as List;
       expect(allCurveIds.containsAll(res), true);
@@ -239,7 +239,7 @@ void tests() async {
         'get mh forward curve as of 5/29/2020, May20 mark gets expanded'
         'to daily', () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
           'asOfDate/2020-05-29',
           headers: {'Content-Type': 'application/json'});
@@ -251,7 +251,7 @@ void tests() async {
     });
     test('get mh forward curve as of 7/6/2020', () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
           'asOfDate/2020-07-06',
           headers: {'Content-Type': 'application/json'});
@@ -266,7 +266,7 @@ void tests() async {
     });
     test('get one composite forward curve, add 2', () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4004_da_lmp/'
           'asOfDate/2020-07-06',
           headers: {'Content-Type': 'application/json'});
@@ -279,7 +279,7 @@ void tests() async {
     });
     test('get one composite forward curve, nodal mark', () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4011_da_lmp/'
           'asOfDate/2020-07-06',
           headers: {'Content-Type': 'application/json'});
@@ -295,7 +295,7 @@ void tests() async {
     });
     test('get one composite forward curve, subtract two curves', () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4011_da_basis/'
           'asOfDate/2020-07-06',
           headers: {'Content-Type': 'application/json'});
@@ -310,7 +310,7 @@ void tests() async {
     });
     test('get one forward curve, all marked buckets', () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
           'asOfDate/2020-07-10',
           headers: {'Content-Type': 'application/json'});
@@ -324,7 +324,7 @@ void tests() async {
     });
     test('get one hourlyshape curve, isone_energy_4000_hourlyshape', () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_hourlyshape/'
           'asOfDate/2020-07-10',
           headers: {'Content-Type': 'application/json'});
@@ -340,7 +340,7 @@ void tests() async {
     test('get one forward curve, all marked buckets, daily + monthly',
         () async {
       var aux = await http.get(
-          '$shelfRootUrl/forward_marks/v1/'
+          '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
           'asOfDate/2020-07-10',
           headers: {'Content-Type': 'application/json'});
@@ -366,7 +366,7 @@ void tests() async {
   });
 
   group('ForwardMarks client tests:', () {
-    var clientFm = client.ForwardMarks(Client(), rootUrl: shelfRootUrl);
+    var clientFm = client.ForwardMarks(Client(), rootUrl: rootUrl);
     var location = getLocation('America/New_York');
     test('get mh curve as of 5/29/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_da_lmp';
@@ -411,6 +411,7 @@ void main() async {
 
   // await insertMarks();
 
-  dotenv.load('.env/prod.env');
-  tests();
+  // dotenv.load('.env/prod.env');
+  var rootUrl = 'http://127.0.0.1:8080';
+  tests(rootUrl);
 }

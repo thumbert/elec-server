@@ -13,7 +13,7 @@ dependencies:
     git:
       url: git://github.com/thumbert/date.git
       ref: 2.5.0
-  dotenv: '>=2.0.0 <3.0.0'
+#  dotenv: '>=2.0.0 <3.0.0'
   elec:
     git:
       url: git://github.com/thumbert/elec.git
