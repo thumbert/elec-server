@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
+import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
@@ -17,14 +18,15 @@ import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import '../test/db/marks/marks_special_days.dart';
-// //import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:path/path.dart';
 
+/// ============================================================================
 /// Create the MongoDb from scratch to pass all tests.  This script is useful
 /// if you update the MongoDb installation and all the data is erased.
 ///
 
-void insertDaBindingConstraints() async {
+Future<void> insertDaBindingConstraints() async {
   var archive = DaBindingConstraintsReportArchive();
   var days = [
     Date(2015, 2, 17), // empty file
@@ -36,7 +38,17 @@ void insertDaBindingConstraints() async {
   }
 }
 
-void insertDays(DailyIsoExpressReport archive, List<Date> days) async {
+Future<void> insertDaDemandBids() async {
+  var archive = DaDemandBidArchive();
+
+  var days = [Date(2020, 10, 1)];
+  // var days = Month(2019, 2).days();
+  await insertDays(archive, days);
+
+  // await archive.setupDb();
+}
+
+Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
   await archive.dbConfig.db.open();
   for (var day in days) {
     print('Working on $day');
@@ -162,14 +174,16 @@ void redoAll() async {
 
 void main() async {
   initializeTimeZones();
-  // dotenv.load('.env/prod.env');
+  dotenv.load('.env/prod.env');
 
   // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();
 
-  insertRegulationRequirement();
+  await insertDaDemandBids();
+
+  // insertRegulationRequirement();
 
   // insertMisReports();
 

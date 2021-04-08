@@ -39,8 +39,6 @@ class DaBindingConstraintsReportArchive {
   Future downloadDay(Date asOfDate) async {
     var _user = dotenv.env['isone_ws_user'];
     var _pwd = dotenv.env['isone_ws_password'];
-    // var _user = Platform.environment['isone_ws_user'];
-    // var _pwd = Platform.environment['isone_ws_password'];
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(asOfDate)), '',
