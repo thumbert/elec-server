@@ -12,7 +12,7 @@ import 'package:timezone/timezone.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';
 import '../converters.dart';
-//import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 class DaBindingConstraintsReportArchive {
   ComponentConfig dbConfig;
@@ -37,8 +37,10 @@ class DaBindingConstraintsReportArchive {
       dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.json');
 
   Future downloadDay(Date asOfDate) async {
-    var _user = Platform.environment['isone_ws_user'];
-    var _pwd = Platform.environment['isone_ws_password'];
+    var _user = dotenv.env['isone_ws_user'];
+    var _pwd = dotenv.env['isone_ws_password'];
+    // var _user = Platform.environment['isone_ws_user'];
+    // var _pwd = Platform.environment['isone_ws_password'];
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(asOfDate)), '',
