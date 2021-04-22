@@ -15,9 +15,9 @@ File latestFile(Directory dir) {
 List<File> listFiles(Directory dir, {Pattern pattern}) {
   if (!dir.existsSync()) return [];
   var files = dir.listSync()
-      .where((entity) => entity is File)
-      .where((entity) => basenameWithoutExtension((entity as File).path).contains(pattern))
       .whereType<File>()
+      .where((entity) => basenameWithoutExtension((entity).path).contains(pattern))
+      .where((e) => !e.path.endsWith('lnk'))
       .toList();
   files.sort((a,b) => a.path.compareTo(b.path));
   return files;
