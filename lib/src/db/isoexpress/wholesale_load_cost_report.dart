@@ -1,5 +1,6 @@
 library db.isoexpress.monthly_wholesale_load_cost;
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -10,6 +11,7 @@ import 'package:timezone/timezone.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../converters.dart';
 import '../lib_iso_express.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 class WholesaleLoadCostReportArchive extends IsoExpressReport {
   @override
@@ -17,7 +19,6 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
   String dir;
   @override
   final String reportName = 'Monthly Wholesale Load Cost Report';
-  final _setEq = const SetEquality();
   static final location = getLocation('America/New_York');
 
   WholesaleLoadCostReportArchive({this.dbConfig, this.dir}) {
@@ -30,38 +31,66 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
 
   /// Data is also available as webservices, for example
   /// https://webservices.iso-ne.com/api/v1.1/whlsecost/hourly/month/202007/location/4004
-
+  /// Use 4000 for the entire ISONE territory.
+  /// It is also available as CSV files from
+  /// https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/hourly-wholesale-load-cost-report
   String getUrl(Month month, int ptid) =>
-      'https://www.iso-ne.com/transform/csv/whlsecost/hourly?month='
-      '${month.toIso8601String().replaceAll('-', '')}&locationId=$ptid';
+      'https://webservices.iso-ne.com/api/v1.1/whlsecost/hourly/month/'
+          '${month.toIso8601String().replaceAll('-', '')}/location/$ptid';
 
   File getFilename(Month month, int ptid) => File(dir +
       'whlsecost_hourly_$ptid' +
       '_' +
-      '${month.toIso8601String().replaceAll('-', '')}.csv');
+      '${month.toIso8601String().replaceAll('-', '')}.json');
 
-  Future<void> downloadFile(Month month, int ptid) async =>
-      await downloadUrl(getUrl(month, ptid), getFilename(month, ptid),
-          overwrite: true);
+  Future<void> downloadFile(Month month, int ptid) async {
+    var _user = dotenv.env['isone_ws_user'];
+    var _pwd = dotenv.env['isone_ws_password'];
 
-  @override
-  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
-    var row = rows.first;
-    var date = formatDate(row['Local Date']);
-    return <String, dynamic>{
-      'date': date,
-      'ptid': row['Location ID'],
-      'rtLoad': rows.map((e) => e['RTLO'] as num).toList()
-    };
+    var client = HttpClient()
+      ..addCredentials(Uri.parse(getUrl(month, ptid)), '',
+          HttpClientBasicCredentials(_user, _pwd))
+      ..userAgent = 'Mozilla/4.0'
+      ..badCertificateCallback = (cert, host, port) {
+        print('Bad certificate connecting to $host:$port:');
+        return true;
+      };
+    var request = await client.getUrl(Uri.parse(getUrl(month, ptid)));
+    request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+    var response = await request.close();
+    await response.pipe(getFilename(month, ptid).openWrite());
+
   }
 
   @override
   List<Map<String, dynamic>> processFile(File file) {
-    var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return <Map<String, dynamic>>[];
-    var dataByDate = groupBy(data, (row) => row['Local Date']);
-    var out =
-        dataByDate.keys.map((date) => converter(dataByDate[date])).toList();
+    var aux = json.decode(file.readAsStringSync());
+    List xs;
+    if ((aux as Map).containsKey('WhlseCosts')) {
+      if (aux['WhlseCosts'] == '') return <Map<String, dynamic>>[];
+      xs = aux['WhlseCosts']['WhlseCost'] as List;
+    }
+    var data = xs.map((e) {
+      return <String,dynamic>{
+        'date': (e['BeginDate'] as String).substring(0, 10),
+        'hourBeginning': e['BeginDate'] as String,
+        'rtLoad': e['RTLO'] as num,
+      };
+    }).toList();
+    data.sortBy((e) => e['hourBeginning'] as String);
+    var ptid = int.parse(xs.first['Location']['@LocId']);
+    var groups = groupBy(data, (e) => e['date'] as String);
+
+    var out = <Map<String, dynamic>>[];
+    for (var date in groups.keys) {
+      var group = groups[date];
+      out.add({
+        'date': date,
+        'ptid': ptid,
+        'rtLoad': group.map((e) => e['rtLoad']).toList()
+      });
+    }
+
     return out;
   }
 
@@ -99,5 +128,11 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
         },
         unique: true);
     await dbConfig.db.close();
+  }
+
+  @override
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
+    // TODO: implement converter
+    throw UnimplementedError();
   }
 }

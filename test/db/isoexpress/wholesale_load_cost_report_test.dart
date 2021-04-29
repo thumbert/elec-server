@@ -23,6 +23,9 @@ void tests() async {
       expect(xs.length, 31);
       expect(xs.first.keys.toSet(), {'date', 'ptid', 'rtLoad'});
       expect(xs.first['rtLoad'] is List, true);
+      var rtLoad = xs.first['rtLoad'] as List;
+      expect(rtLoad.first, 2713.617);
+      expect(xs.first['date'], '2019-01-01');
     });
   });
   group('Wholesale load cost report API tests: ', () {

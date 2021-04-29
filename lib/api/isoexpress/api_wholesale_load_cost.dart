@@ -24,6 +24,7 @@ class WholesaleLoadCost {
     final router = Router();
 
     /// Get all zonal load between start/end date
+    /// Use 4000 for the entire ISONE territory.
     /// http://localhost:8000/rt_load/v1/isone/load_zone/ptid/4004/start/20190101/end/20190131
     router.get('/isone/load_zone/ptid/<ptid>/start/<start>/end/<end>',
         (Request request, String ptid, String start, String end) async {

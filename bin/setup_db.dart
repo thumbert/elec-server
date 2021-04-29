@@ -6,6 +6,7 @@ import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
+import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
@@ -122,6 +123,25 @@ void insertMisReports() async {
   await archive.dbConfig.db.close();
 }
 
+void insertPtidTable() async {
+  var archive = PtidArchive();
+  var baseUrl = 'https://www.iso-ne.com/static-assets/documents/';
+  var urls = [
+    '2019/02/2.6.20_pnode_table_2019_02_05.xlsx',
+    '2020/06/pnode_table_2020_06_11.xlsx',
+  ];
+  if (!Directory(archive.dir).existsSync()) {
+    Directory(archive.dir).createSync(recursive: true);
+  }
+  await archive.db.open();
+  for (var url in urls) {
+    await archive.downloadFile(baseUrl + url);
+    var file = path.join(archive.dir, path.basename(url));
+    await archive.insertMongo(File(file));
+  }
+  await archive.db.close();
+}
+
 void insertRegulationRequirement() async {
   var archive = RegulationRequirementArchive();
   await archive.setupDb();
@@ -148,23 +168,25 @@ void insertWholesaleLoadReports() async {
   await archive.dbConfig.db.close();
 }
 
-void insertPtidTable() async {
-  var archive = PtidArchive();
-  var baseUrl = 'https://www.iso-ne.com/static-assets/documents/';
-  var urls = [
-    '2019/02/2.6.20_pnode_table_2019_02_05.xlsx',
-    '2020/06/pnode_table_2020_06_11.xlsx',
-  ];
-  if (!Directory(archive.dir).existsSync()) {
-    Directory(archive.dir).createSync(recursive: true);
+Future<void> insertZonalDemand() async {
+  var archive = ZonalDemandArchive();
+  await ZonalDemandArchive().setupDb();
+
+  var years = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021];
+  for (var year in years) {
+    // download the files and convert to xlsx
   }
-  await archive.db.open();
-  for (var url in urls) {
-    await archive.downloadFile(baseUrl + url);
-    var file = path.join(archive.dir, path.basename(url));
-    await archive.insertMongo(File(file));
+
+  await archive.dbConfig.db.open();
+  for (var year in years) {
+    print('Year: $year');
+    var file = archive.getFilename(year);
+    var data = archive.processFile(file);
+    // data.take(5).forEach(print);
+    await archive.insertData(data);
   }
-  await archive.db.close();
+  await archive.dbConfig.db.close();
+
 }
 
 /// Try to redo them all
@@ -181,7 +203,7 @@ void main() async {
 //  await insertForwardMarks();
 //   await insertIsoExpress();
 
-  await insertDaDemandBids();
+  // await insertDaDemandBids();
 
   // insertRegulationRequirement();
 
@@ -189,5 +211,8 @@ void main() async {
 
 //  await insertPtidTable();
 
-//  await insertWholesaleLoadReports();
+ await insertWholesaleLoadReports();
+
+  // await insertZonalDemand();
+
 }
