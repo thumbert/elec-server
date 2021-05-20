@@ -17,14 +17,14 @@ void tests(String rootUrl) async {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     test('get all commodities', () async {
-      var aux = await http.get('$rootUrl/curve_ids/v1/commodities',
+      var aux = await http.get(Uri.parse('$rootUrl/curve_ids/v1/commodities'),
           headers: {'Content-Type': 'application/json'});
       var res = json.decode(aux.body);
       expect(res.contains('electricity'), true);
     });
     test('get all regions for commodity electricity', () async {
-      var aux = await http.get(
-          '$rootUrl/curve_ids/v1/commodity/electricity/regions',
+      var aux = await http.get(Uri.parse(
+          '$rootUrl/curve_ids/v1/commodity/electricity/regions'),
           headers: {'Content-Type': 'application/json'});
       var regions = json.decode(aux.body);
       expect(regions.contains('isone'), true);
@@ -38,16 +38,16 @@ void tests(String rootUrl) async {
           true);
     });
     test('get energy curves for electricity, isone', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/curve_ids/v1/data/commodity/electricity'
-          '/region/isone/serviceType/energy',
+          '/region/isone/serviceType/energy'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body) as List;
       expect(xs.length >= 30, true);
     });
     test('get curve details for curveId isone_energy_4004_da_lmp', () async {
-      var aux = await http.get(
-          '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4004_da_lmp',
+      var aux = await http.get(Uri.parse(
+          '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4004_da_lmp'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body);
       expect(xs['children'].toSet(), {
@@ -56,8 +56,8 @@ void tests(String rootUrl) async {
       });
     });
     test('get curve details for curveId isone_energy_4000_da_lmp', () async {
-      var aux = await http.get(
-          '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4000_da_lmp',
+      var aux = await http.get(Uri.parse(
+          '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4000_da_lmp'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body);
       expect(xs['volatilityCurveId'], {
@@ -69,15 +69,15 @@ void tests(String rootUrl) async {
       var curves = ['isone_energy_4000_da_lmp', 'isone_energy_4001_da_lmp'];
       var x = await api.getCurveIds(curves.join('|'));
       expect(x.length, 2);
-      var aux = await http.get(
-          '$rootUrl/curve_ids/v1/data/curveIds/${curves.join('|')}',
+      var aux = await http.get(Uri.parse(
+          '$rootUrl/curve_ids/v1/data/curveIds/${curves.join('|')}'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body) as List;
       expect(xs.length, 2);
     });
     test('get mass hub daily volatility', () async {
-      var aux = await http.get(
-          '$rootUrl/curve_ids/v1/data/curveId/isone_volatility_4000_da_daily',
+      var aux = await http.get(Uri.parse(
+          '$rootUrl/curve_ids/v1/data/curveId/isone_volatility_4000_da_daily'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body);
       expect(xs['commodity'], 'volatility');

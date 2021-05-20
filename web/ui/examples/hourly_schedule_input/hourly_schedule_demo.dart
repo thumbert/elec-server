@@ -7,7 +7,7 @@ import 'package:timezone/timezone.dart';
 
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
 
   var location = getLocation('US/Eastern');
   var term = Term.parse('Jan21-Mar21', location);
@@ -17,20 +17,20 @@ void main() async {
 
   /// make an HourlyScheduleInput show up when editing
   ///
-  var input = querySelector('#value-input');
-  var hs2 = HourlyScheduleInput(term, header: 'Quantity schedule')
-    ..visibility = false;
-  querySelector('#hs2').children.add(hs2.inner);
-  input.onKeyDown.listen((e) {
-    if (e.altKey == true && e.keyCode == 49) {
-      e.preventDefault();
-      hs2.visibility = true;
-    }
-  });
-  hs2.onClose((e) {
-    print('input closed');
-    print(hs2.timeseries);
-  });
+  // var input = querySelector('#value-input');
+  // var hs2 = HourlyScheduleInput(term, header: 'Quantity schedule')
+  //   ..visibility = false;
+  // querySelector('#hs2').children.add(hs2.inner);
+  // input.onKeyDown.listen((e) {
+  //   if (e.altKey == true && e.keyCode == 49) {
+  //     e.preventDefault();
+  //     hs2.visibility = true;
+  //   }
+  // });
+  // hs2.onClose((e) {
+  //   print('input closed');
+  //   print(hs2.timeseries);
+  // });
 
 
 

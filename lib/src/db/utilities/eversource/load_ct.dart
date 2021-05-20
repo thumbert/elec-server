@@ -208,7 +208,7 @@ int getYear(String link) {
 
 /// Get all the API links from url with a given pattern
 Future<List<String>> getLinks(String url, {List<Pattern> patterns}) async {
-  var aux = await http.get(url);
+  var aux = await http.get(Uri.parse(url));
   var body = aux.body;
   var document = parse(body);
   var links = <String>[];

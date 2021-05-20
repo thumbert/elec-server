@@ -24,7 +24,7 @@ class DaEnergyOffers {
     var hourEnding = aux[1];
     var _url =
         rootUrl + servicePath + 'date/$startDate' + '/hourending/$hourEnding';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var out =
         (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
 
@@ -39,7 +39,7 @@ class DaEnergyOffers {
         'assetId/${maskedAssetId.toString()}' +
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var out =
         (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
     out.forEach((e) {
@@ -58,14 +58,14 @@ class DaEnergyOffers {
         'stack/date/$startDate' +
         '/hourending/$hourEnding';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get the masked asset id and the masked participant id for this date.
   Future<List<Map<String, dynamic>>> assetsForDay(Date date) async {
     var _url = rootUrl + servicePath + 'assets/day/${date.toString()}';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
@@ -78,7 +78,7 @@ class DaEnergyOffers {
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
@@ -91,14 +91,14 @@ class DaEnergyOffers {
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get the last date inserted in the database
   Future<Date> lastDate() async {
     var _url = rootUrl + servicePath + 'lastday';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var date = json.decode(_response.body) as String;
     return Date.parse(date);
   }

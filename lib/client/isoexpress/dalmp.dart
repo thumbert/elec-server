@@ -29,7 +29,7 @@ class DaLmp {
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),
@@ -48,7 +48,7 @@ class DaLmp {
         '/end/${end.toString()}' +
         '/bucket/${bucket.name}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Date.parse(e['date'], location: location), e[cmp])));
@@ -65,7 +65,7 @@ class DaLmp {
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     var grp = groupBy(data, (e) => e['ptid'] as int);
 
@@ -89,7 +89,7 @@ class DaLmp {
         '/end/${end.toIso8601String()}' +
         '/bucket/${bucket.name}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Month.parse(e['month'], location: location), e[cmp])));

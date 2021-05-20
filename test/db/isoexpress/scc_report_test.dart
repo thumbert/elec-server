@@ -78,7 +78,7 @@ apiTest() async {
 //    });
     test('Get the SCC report for one month, all assets (http)', () async {
       var url = 'http://localhost:8080/scc_report/v1/month/2018-10';
-      var res = await get(url);
+      var res = await get(Uri.parse(url));
       var data = json.decode(json.decode(res.body)['result']);
       expect(data.length > 950, true);
     });
@@ -86,7 +86,7 @@ apiTest() async {
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
 
 //  await downloadFile();

@@ -22,7 +22,7 @@ class EversourceLoad {
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var xs = json.decode(_response.body) as List;
 
     var ts = TimeSeries<Map<String, num>>.fromIterable([]);

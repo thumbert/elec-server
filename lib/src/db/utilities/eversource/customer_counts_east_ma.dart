@@ -140,7 +140,7 @@ class EversourceEastMaCustomerCountsArchive {
 
 /// Get all the API links from url with a given pattern
 Future<List<String>> getLinks(String url, {Pattern pattern}) async {
-  var aux = await http.get(url);
+  var aux = await http.get(Uri.parse(url));
   var body = aux.body;
   var document = parse(body);
   var links = <String>[];
@@ -148,8 +148,9 @@ Future<List<String>> getLinks(String url, {Pattern pattern}) async {
     var link = linkElement.attributes['href'];
 
     /// ignore the internal links and the applications
-    if (link != null && link.contains(pattern) && !link.startsWith('http'))
+    if (link != null && link.contains(pattern) && !link.startsWith('http')) {
       links.add(link);
+    }
   }
   links.sort();
   return links;

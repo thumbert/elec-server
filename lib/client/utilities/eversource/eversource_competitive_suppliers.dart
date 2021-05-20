@@ -28,7 +28,7 @@ class EversourceCompetitiveSuppliers {
         '/start/${start.toString().substring(0,7)}' +
         '/end/${end.toString().substring(0,7)}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = (json.decode(_response.body) as List).cast<Map<String,dynamic>>();
     return data;
   }

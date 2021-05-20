@@ -69,7 +69,7 @@ void tests(String rootUrl) async {
       var url = rootUrl +
           '/sr_dalocsum/v1/accountId/000000003/locationId/401/column'
               '/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
-      var res = await http.get(url);
+      var res = await http.get(Uri.parse(url));
       var data = json.decode(res.body);
       expect(data.length, 24);
     });
@@ -77,7 +77,7 @@ void tests(String rootUrl) async {
       var url = rootUrl +
           '/sr_dalocsum/v1/accountId/000000003/subaccountId/9001/locationId/401/column'
               '/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
-      var res = await http.get(url);
+      var res = await http.get(Uri.parse(url));
       var data = json.decode(res.body);
       expect(data.length, 24);
     });

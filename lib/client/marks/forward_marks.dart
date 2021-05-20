@@ -24,7 +24,7 @@ class ForwardMarks {
         servicePath +
         'curveId/${Uri.encodeComponent(curveId)}' +
         '/asOfDate/${asOfDate.toString()}';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as Map<String, dynamic>;
     return PriceCurve.fromMongoDocument(data, tzLocation);
   }
@@ -37,7 +37,7 @@ class ForwardMarks {
         servicePath +
         'curveId/${Uri.encodeComponent(curveId)}' +
         '/asOfDate/${asOfDate.toString()}';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as Map<String, dynamic>;
     return VolatilitySurface.fromJson(data, location: tzLocation);
   }
@@ -50,7 +50,7 @@ class ForwardMarks {
         servicePath +
         'curveId/${Uri.encodeComponent(curveId)}' +
         '/asOfDate/${asOfDate.toString()}';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as Map<String, dynamic>;
     return HourlyShape.fromJson(data, tzLocation);
   }

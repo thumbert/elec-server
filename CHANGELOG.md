@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.0 (released 2021-05-30)
+- Move to null-safety
+
 ## 1.2.1 (released 2021-05-17)
 - very little updates, again prepare for null safety migration
 

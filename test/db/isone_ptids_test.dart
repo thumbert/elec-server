@@ -91,13 +91,13 @@ void tests(String rootUrl) async {
       expect(res is List<String>, true);
     });
     test('Get the list of available dates (http)', () async {
-      var res = await http.get('$rootUrl/ptids/v1/dates',
+      var res = await http.get(Uri.parse('$rootUrl/ptids/v1/dates'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
       expect(data.first is String, true);
     });
     test('Get all the ptid information for one date (http)', () async {
-      var res = await http.get('$rootUrl/ptids/v1/current',
+      var res = await http.get(Uri.parse('$rootUrl/ptids/v1/current'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body);
       expect(data.length > 950, true);
@@ -113,7 +113,7 @@ void tests(String rootUrl) async {
     test('Get the list of available dates for one ptid', () async {
       var aux = await api.apiPtid(1616);
       expect(aux.isNotEmpty, true);
-      var res = await http.get('$rootUrl/ptids/v1/ptid/1616',
+      var res = await http.get(Uri.parse('$rootUrl/ptids/v1/ptid/1616'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body);
       expect(data is List, true);

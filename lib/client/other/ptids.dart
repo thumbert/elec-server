@@ -26,13 +26,13 @@ class PtidsApi {
     } else {
       _url += 'asofdate/$asOfDate';
     }
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
   Future<List<Date>> getAvailableAsOfDates() async {
     var _url = rootUrl + servicePath + 'dates';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var aux = json.decode(_response.body) as List;
     var x = aux.map((e) => Date.parse(e as String)).toList();
     return x;

@@ -223,7 +223,7 @@ class EversourceCtCompetitiveSupply {
 
 /// Get all the API links from url with a given pattern
 Future<List<String>> getLinks(String url, {Pattern pattern}) async {
-  var aux = await http.get(url);
+  var aux = await http.get(Uri.parse(url));
   var body = aux.body;
   var document = parse(body);
   var links = <String>[];
@@ -259,8 +259,9 @@ String getFilename(String link) {
 String parseMonth(String filename) {
   var aux = filename.replaceAll('customer-count-report-', '');
   aux = aux.replaceAll('customer-report-', '');
-  if (aux == 'october-2019.xlsx') // messed up file on the website
+  if (aux == 'october-2019.xlsx') {
     return '2018-10';
+  }
 
   var reg = RegExp('(.*).xlsx');
   var matches = reg.allMatches(aux);

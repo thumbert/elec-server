@@ -25,7 +25,7 @@ class SdRtNcpcPymnt {
         'accountId/{accountId}/details' +
         '/start/${start.toString()}/end/${end.toString()}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var aux = json.decode(_response.body);
     var data = (json.decode(aux['result']) as List).cast<Map<String, dynamic>>();
 

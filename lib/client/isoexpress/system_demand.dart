@@ -31,7 +31,7 @@ class SystemDemand {
       columnName = 'Total Load';
     }
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),

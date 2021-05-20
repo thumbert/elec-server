@@ -207,7 +207,7 @@ void tests(String rootUrl) async {
       ...getMarkedCurveIds(),
     };
     test('api get all curveIds', () async {
-      var aux = await http.get('$rootUrl/forward_marks/v1/curveIds',
+      var aux = await http.get(Uri.parse('$rootUrl/forward_marks/v1/curveIds'),
           headers: {'Content-Type': 'application/json'});
       var res = json.decode(aux.body) as List;
       expect(allCurveIds.containsAll(res), true);
@@ -238,10 +238,10 @@ void tests(String rootUrl) async {
     test(
         'get mh forward curve as of 5/29/2020, May20 mark gets expanded'
         'to daily', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-05-29',
+          'asOfDate/2020-05-29'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -250,10 +250,10 @@ void tests(String rootUrl) async {
       expect(data['buckets']['5x16'][0], null); // it's a Saturday
     });
     test('get mh forward curve as of 7/6/2020', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-07-06',
+          'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -265,10 +265,10 @@ void tests(String rootUrl) async {
           {'isone_energy_4000_da_lmp', 'isone_energy_4004_da_basis'});
     });
     test('get one composite forward curve, add 2', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4004_da_lmp/'
-          'asOfDate/2020-07-06',
+          'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -278,10 +278,10 @@ void tests(String rootUrl) async {
       expect((data['buckets']['5x16'][30] as num).toStringAsFixed(2), '60.05');
     });
     test('get one composite forward curve, nodal mark', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4011_da_lmp/'
-          'asOfDate/2020-07-06',
+          'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
 
@@ -294,10 +294,10 @@ void tests(String rootUrl) async {
           lmpJan21.toStringAsFixed(4));
     });
     test('get one composite forward curve, subtract two curves', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4011_da_basis/'
-          'asOfDate/2020-07-06',
+          'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -309,10 +309,10 @@ void tests(String rootUrl) async {
           lmpJan21.toStringAsFixed(4));
     });
     test('get one forward curve, all marked buckets', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-07-10',
+          'asOfDate/2020-07-10'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -323,10 +323,10 @@ void tests(String rootUrl) async {
       expect((data['buckets']['5x16'] as List).length, 86);
     });
     test('get one hourlyshape curve, isone_energy_4000_hourlyshape', () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_hourlyshape/'
-          'asOfDate/2020-07-10',
+          'asOfDate/2020-07-10'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -339,10 +339,10 @@ void tests(String rootUrl) async {
     });
     test('get one forward curve, all marked buckets, daily + monthly',
         () async {
-      var aux = await http.get(
+      var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-07-10',
+          'asOfDate/2020-07-10'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});

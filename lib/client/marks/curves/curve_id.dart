@@ -17,7 +17,7 @@ class CurveIdClient {
     if (pattern != null) {
       _url += '/pattern/$pattern';
     }
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     return data.cast<String>();
   }
@@ -25,7 +25,7 @@ class CurveIdClient {
   /// Get all commodities.
   Future<List<String>> commodities() async {
     var _url = rootUrl + servicePath + 'commodities';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     return data.cast<String>();
   }
@@ -33,7 +33,7 @@ class CurveIdClient {
   /// Get all regions.
   Future<List<String>> regions(String commodity) async {
     var _url = rootUrl + servicePath + 'commodity/$commodity/regions';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     return data.cast<String>();
   }
@@ -43,7 +43,7 @@ class CurveIdClient {
     var _url = rootUrl +
         servicePath +
         'commodity/$commodity/region/$region/serviceTypes';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     return data.cast<String>();
   }
@@ -55,14 +55,14 @@ class CurveIdClient {
         servicePath +
         'data/commodity/electricity/region'
             '/$region/serviceType/$serviceType';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get one curveId document
   Future<Map<String, dynamic>> getCurveId(String curveId) async {
     var _url = rootUrl + servicePath + 'data/curveId/$curveId';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return json.decode(_response.body) as Map<String, dynamic>;
   }
 
@@ -70,7 +70,7 @@ class CurveIdClient {
   Future<List<Map<String, dynamic>>> getCurveIds(List<String> curveIds) async {
     var _ids = curveIds.join('|');
     var _url = rootUrl + servicePath + 'data/curveIds/$_ids';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 }

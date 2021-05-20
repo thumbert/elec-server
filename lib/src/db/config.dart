@@ -10,6 +10,9 @@ class ComponentConfig {
   String host;
   /// name of the mongo collection
   String collectionName;
+
+
+
   /// get the mongo database
   Db get db {
     _db ??= Db('mongodb://$host/$dbName');

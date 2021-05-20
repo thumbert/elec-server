@@ -87,9 +87,9 @@ void tests(String rootUrl) async {
         'hourBeginning': '2017-01-01 00:00:00.000-0500',
         'lmp': 35.12,
       });
-      var res = await http.get(
+      var res = await http.get(Uri.parse(
           '$rootUrl/dalmp/v1/hourly/lmp/'
-          'ptid/4000/start/2017-01-01/end/2017-01-02',
+          'ptid/4000/start/2017-01-01/end/2017-01-02'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
       expect(data.length, 48);
@@ -110,9 +110,9 @@ void tests(String rootUrl) async {
           'lmp', 4000, '2017-07-01', '2017-07-07', '5x16');
       expect(data.length, 4);
       expect(data.first, {'date': '2017-07-03', 'lmp': 35.225});
-      var res = await http.get(
+      var res = await http.get(Uri.parse(
           '$rootUrl/dalmp/v1/daily/lmp/'
-          'ptid/4000/start/2017-07-01/end/2017-07-07/bucket/5x16',
+          'ptid/4000/start/2017-07-01/end/2017-07-07/bucket/5x16'),
           headers: {'Content-Type': 'application/json'});
       var aux = json.decode(res.body) as List;
       expect(aux.length, 4);

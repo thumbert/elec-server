@@ -34,7 +34,7 @@ class EiaApi {
     }
 
     var _url = rootUrl + '?api_key=$apiKey&series_id=$id';
-    var aux = await http.get(_url);
+    var aux = await http.get(Uri.parse(_url));
     var data = json.decode(aux.body) as Map;
     return (data['series'] as List).first;
   }

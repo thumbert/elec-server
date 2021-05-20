@@ -29,7 +29,7 @@ class BindingConstraintsApi {
         'market/da' +
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
@@ -44,7 +44,7 @@ class BindingConstraintsApi {
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
-    var _response = await http.get(_url);
+    var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 }

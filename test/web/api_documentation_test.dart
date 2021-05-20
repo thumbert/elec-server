@@ -34,11 +34,11 @@ tests(String rootUrl, Set<String> skip) async {
   var links = getLinks();
   //links.forEach(print);
 
-  Client client = Client();
+  var client = Client();
   for (var link in links) {
     var uri = Uri.encodeFull(rootUrl + link);
-    test('Url ${uri}', () async {
-      var response = await client.get(uri);
+    test('Url $uri', () async {
+      var response = await client.get(Uri.parse(uri));
       expect(response.statusCode, 200);
       //var body = response.body;
       //print(body);
