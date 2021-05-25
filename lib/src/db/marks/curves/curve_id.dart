@@ -5,7 +5,7 @@ import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
 class CurveIdArchive {
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
 
   final _mustHaveKeys = <String>{
     'curveId',
@@ -18,11 +18,11 @@ class CurveIdArchive {
 
   /// Keep track of curve details, e.g. region, serviceType, location, children,
   /// and the rule for composing it
-  CurveIdArchive({this.dbConfig}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'marks'
-      ..collectionName = 'curve_ids';
+  CurveIdArchive({ComponentConfig? dbConfig}) {
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'marks', collectionName: 'curve_ids');
+    }
   }
 
   mongo.Db get db => dbConfig.db;

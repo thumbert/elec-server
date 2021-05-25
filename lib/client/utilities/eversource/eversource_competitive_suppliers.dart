@@ -9,7 +9,7 @@ import 'package:timezone/timezone.dart';
 
 class EversourceCompetitiveSuppliers {
   final location = getLocation('America/New_York');
-  String rootUrl;
+  late String rootUrl;
   final String servicePath = 'eversource_competitive_suppliers/v1/';
 
   EversourceCompetitiveSuppliers(http.Client client,

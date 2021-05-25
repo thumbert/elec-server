@@ -6,7 +6,7 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/generated/timeseries.pbgrpc.dart';
 
 class LmpService extends LmpServiceBase {
-  DbCollection collection;
+  late DbCollection collection;
   final _location = getLocation('America/New_York');
 
   LmpService(Db db) {

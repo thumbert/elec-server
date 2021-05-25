@@ -12,15 +12,15 @@ import '../lib_iso_express.dart';
 //import 'package:dotenv/dotenv.dart' as dotenv;
 
 class AssetNcpcArchive {
-  ComponentConfig dbConfig;
-  String dir;
+  late ComponentConfig dbConfig;
+  String? dir;
   final Location location = getLocation('America/New_York');
 
-  AssetNcpcArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isone_ws'
-      ..collectionName = 'asset_ncpc';
+  AssetNcpcArchive({ComponentConfig? dbConfig, this.dir}) {
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'isone_ws', collectionName: 'asset_ncpc');
+    }
     dir ??= baseDir + 'webservices/Raw/';
   }
 
@@ -31,11 +31,11 @@ class AssetNcpcArchive {
       month.toIso8601String().replaceAll('-', '');
 
   File getFilename(Month month) =>
-      File(dir + 'asset_ncpc_' + month.toIso8601String() + '.json');
+      File(dir! + 'asset_ncpc_' + month.toIso8601String() + '.json');
 
   Future downloadMonth(Month month) async {
-    var _user = Platform.environment['isone_ws_user'];
-    var _pwd = Platform.environment['isone_ws_password'];
+    var _user = Platform.environment['isone_ws_user']!;
+    var _pwd = Platform.environment['isone_ws_password']!;
 
     var client = HttpClient()
       ..addCredentials(

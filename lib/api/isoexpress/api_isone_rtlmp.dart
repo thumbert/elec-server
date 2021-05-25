@@ -12,8 +12,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class RtLmp {
-  mongo.DbCollection coll;
-  Location _location;
+  late mongo.DbCollection coll;
+  late Location _location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'rt_lmp_hourly';
 
@@ -61,10 +61,10 @@ class RtLmp {
   /// http://localhost:8080/rtlmp/v1/monthly/lmp/ptid/4000/start/201701/end/201701/bucket/5x16
   Future<List<Map<String, dynamic>>> apiGetMonthlyBucketPrice(String component,
       int ptid, String start, String end, String bucket) async {
-    var startDate = Date(
+    var startDate = Date.utc(
         int.parse(start.substring(0, 4)), int.parse(start.substring(4, 6)), 1);
     var endDate =
-        Month(int.parse(end.substring(0, 4)), int.parse(end.substring(4, 6)))
+        Month.utc(int.parse(end.substring(0, 4)), int.parse(end.substring(4, 6)))
             .endDate;
     var bucketO = Bucket.parse(bucket);
 
@@ -114,11 +114,11 @@ class RtLmp {
     return data;
   }
 
-  num _mean(Iterable<num> x) {
+  num _mean(Iterable<num?> x) {
     var i = 0;
     num res = 0;
     x.forEach((e) {
-      res += e;
+      res += e!;
       i++;
     });
     return res / i;

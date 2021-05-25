@@ -33,6 +33,12 @@ void main() async {
   var rootUrl = 'http://127.0.0.1:8080';
   dotenv.load('.env/prod.env');
 
+  // var keys = ['a', 'b', 'c'];
+  // var xs = [1, null, 3];
+  // var m = {for (var i=0; i<3; i++) keys[i] : xs[i] as num?};
+  // var m2 = Map.fromIterables(keys, xs);
+
+
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');

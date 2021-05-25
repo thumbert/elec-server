@@ -147,22 +147,18 @@ List<String> winterStorms() {
 }
 
 class WinterStormsArchive extends IsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
-  Location location = getLocation('America/New_York');
   var _fmt = new DateFormat('M/dd/yyyy h:mm a');
 
-  WinterStormsArchive({this.dbConfig, this.dir}) {
-    dir ??= env['HOME'] + '/Downloads/Archive/Weather/WinterStorms/Raw/';
-    if (dbConfig == null) {
-      this.dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'weather'
-        ..collectionName = 'winter_storms';
-    }
+  WinterStormsArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'weather', collectionName: 'winter_storms');
+    dir ??= Platform.environment['HOME']! + '/Downloads/Archive/Weather/WinterStorms/Raw/';
+    this.dir = dir;
   }
 
-  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {}
+  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
+    return <String,dynamic>{};
+  }
 
   /// SNOW total accumulation, RAIN totals (inches), and wind speeds are reported.
   ///
@@ -209,7 +205,7 @@ class WinterStormsArchive extends IsoExpressReport {
         ]));
       }
     }
-    return out;
+    return out as List<Map<String, dynamic>>;
   }
 
   /// date is ":4/19/2018", time is " 700 AM"
@@ -232,7 +228,7 @@ class WinterStormsArchive extends IsoExpressReport {
 
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
@@ -244,7 +240,7 @@ class WinterStormsArchive extends IsoExpressReport {
   /// inserting them into the db.
   Future<Null> updateDb() async {
     List stormIds = winterStorms();
-    for (String stormId in stormIds.take(3)) {
+    for (String stormId in stormIds.take(3) as Iterable<String>) {
       bool inDb = await isStormInserted(stormId);
       if (!inDb) {
         var url = _makeUrl(stormId);
@@ -258,7 +254,7 @@ class WinterStormsArchive extends IsoExpressReport {
 
   /// Construct the url to download from the stormId.  A stormId is the
   /// dates in the required format, as returned by winterStorms()
-  String _makeUrl(String stormId, {String base}) {
+  String _makeUrl(String stormId, {String? base}) {
     base ??=
         'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/';
     return base + '$stormId/${stormId}_Text_Xml.xml';

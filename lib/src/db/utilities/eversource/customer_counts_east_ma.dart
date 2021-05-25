@@ -12,25 +12,23 @@ import 'package:elec_server/src/db/config.dart';
 
 
 class EversourceEastMaCustomerCountsArchive {
-  ComponentConfig dbConfig;
-  String dir;
+  late ComponentConfig dbConfig;
+  String? dir;
 
-  EversourceEastMaCustomerCountsArchive({this.dbConfig, this.dir}) {
+  EversourceEastMaCustomerCountsArchive({ComponentConfig? dbConfig, this.dir}) {
     Map env = Platform.environment;
     if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'utility'
-        ..collectionName = 'eversource_customer_counts';
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'utility', collectionName: 'eversource_customer_counts');
     }
-    if (dir == null)
-      dir =
-          env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/East_MA/';
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+
+    dir ??= env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/East_MA/';
+    if (!Directory(dir!).existsSync()) {
+      Directory(dir!).createSync(recursive: true);
+    }
   }
 
-  mongo.Db get db => dbConfig.db;
+  mongo.Db? get db => dbConfig.db;
 
   /// insert data from one or multiple files
   Future<int> insertData(List<Map<String, dynamic>> data) async {
@@ -72,7 +70,7 @@ class EversourceEastMaCustomerCountsArchive {
         if (sheet.toLowerCase().contains('primarily')) zone = 'primarily sema';
       }
 
-      var rows = _decoder.tables[sheet].rows;
+      var rows = _decoder.tables[sheet]!.rows;
       // 3 columns of data
       for (int i = 2; i < rows.length; i++) {
         if (rows[i][0] != null && rows[i][2] is num) {
@@ -97,7 +95,7 @@ class EversourceEastMaCustomerCountsArchive {
 
   /// Get the file for this month
   File getFile(Month month) {
-    return File(dir + '${month.startDate.toString().substring(0, 7)}.xlsx');
+    return File(dir! + '${month.startDate.toString().substring(0, 7)}.xlsx');
   }
 
   /// Download a file.
@@ -107,14 +105,14 @@ class EversourceEastMaCustomerCountsArchive {
     var regExp = RegExp(r'(.*)/(customer-info-.*\.xls)\?(.*)');
     var matches = regExp.allMatches(url);
     var match = matches.elementAt(0);
-    var fName = match.group(2);
+    var fName = match.group(2)!;
 
     url = 'https://www.eversource.com' + url;
 
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
 
-    var fileout = File(dir + fName);
+    var fileout = File(dir! + fName);
 
     return new HttpClient()
         .getUrl(Uri.parse(url))
@@ -124,8 +122,8 @@ class EversourceEastMaCustomerCountsArchive {
   }
 
   Future<Null> setup() async {
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
 
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
@@ -139,7 +137,7 @@ class EversourceEastMaCustomerCountsArchive {
 }
 
 /// Get all the API links from url with a given pattern
-Future<List<String>> getLinks(String url, {Pattern pattern}) async {
+Future<List<String>> getLinks(String url, {Pattern? pattern}) async {
   var aux = await http.get(Uri.parse(url));
   var body = aux.body;
   var document = parse(body);
@@ -148,7 +146,7 @@ Future<List<String>> getLinks(String url, {Pattern pattern}) async {
     var link = linkElement.attributes['href'];
 
     /// ignore the internal links and the applications
-    if (link != null && link.contains(pattern) && !link.startsWith('http')) {
+    if (link != null && link.contains(pattern!) && !link.startsWith('http')) {
       links.add(link);
     }
   }
@@ -169,7 +167,7 @@ String parseMonth(String filename) {
   var reg = RegExp('customer-info-(.*).xlsx');
   var matches = reg.allMatches(filename);
   var match = matches.elementAt(0);
-  var g1 = match.group(1);
+  var g1 = match.group(1)!;
 
   /// there may still be another '-(1)' at the end of the month, e.g.
   /// customer-info-november-2016-(1).xlsx
@@ -177,6 +175,6 @@ String parseMonth(String filename) {
   // september is special!
   if (bux[0].toLowerCase() == 'sept') bux[0] = 'sep';
   var input = bux.take(2).join(' ');
-  var parser = parseTerm(input.toUpperCase());
+  var parser = parseTerm(input.toUpperCase())!;
   return Month.fromTZDateTime(parser.start).toIso8601String();
 }

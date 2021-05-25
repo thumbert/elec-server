@@ -4,12 +4,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:elec_server/src/db/risk_system/calculator_archive.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:elec_server/src/utils/api_response.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class ApiCalculators {
-  DbCollection coll;
+  late DbCollection coll;
   String collectionName = 'calculators';
 
   ApiCalculators(Db db) {
@@ -83,20 +82,24 @@ class ApiCalculators {
     return names;
   }
 
-  Future<ApiResponse> getCalculator(
+  Future<Map<String,dynamic>> getCalculator(
       String userId, String calculatorName) async {
-    var res = await coll
-        .findOne({'userId': userId, 'calculatorName': calculatorName});
-    res.remove('_id');
-    return ApiResponse()..result = json.encode(res);
+    var res = await (coll
+        .findOne({'userId': userId, 'calculatorName': calculatorName}));
+    if (res == null) {
+      return <String,dynamic>{};
+    } else {
+      res.remove('_id');
+      return res;
+    }
   }
 
-  Future<ApiResponse> removeCalculator(
+  Future<Map<String,dynamic>> removeCalculator(
       String userId, String calculatorName) async {
     var res =
         await coll.remove({'userId': userId, 'calculatorName': calculatorName});
     var out = <String, dynamic>{'err': res['err'], 'ok': res['ok']};
-    return ApiResponse()..result = json.encode(out);
+    return out;
   }
 
   Future<List<String>> getCalculatorTypes() async {

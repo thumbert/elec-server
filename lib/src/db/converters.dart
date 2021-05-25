@@ -23,7 +23,7 @@ Map conversions = {
     var year = int.parse(x.substring(6, 10));
     var month = int.parse(x.substring(0, 2));
     var day = int.parse(x.substring(3, 5));
-    return Date(year, month, day);
+    return Date.utc(year, month, day);
   },
   'toDateTime': (String localDate, String hourEnding) {
     parseHourEndingStamp(localDate, hourEnding);

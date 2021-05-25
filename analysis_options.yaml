@@ -10,8 +10,8 @@ include: package:pedantic/analysis_options.yaml
 #     - camel_case_types
 
 # see https://dash-overflow.net/articles/getting_started/
-analyzer:
-  strong-mode:
+#analyzer:
+#  strong-mode:
 #    implicit-casts: false
     #implicit-dynamic: false
 #   exclude:

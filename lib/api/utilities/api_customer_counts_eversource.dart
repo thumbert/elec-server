@@ -7,7 +7,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class ApiCustomerCounts {
-  DbCollection coll1;
+  late DbCollection coll1;
 
   ApiCustomerCounts(Db db) {
     coll1 = db.collection('eversource_customer_counts');
@@ -68,7 +68,7 @@ class ApiCustomerCounts {
         },
       }
     });
-    var res = coll1.aggregateToStream(pipeline);
+    var res = coll1.aggregateToStream(pipeline as List<Map<String, Object>>);
     var out = <Map<String, dynamic>>[];
     await for (var e in res) {
       out.add({'utility': 'eversource'}..addAll(e['_id']));

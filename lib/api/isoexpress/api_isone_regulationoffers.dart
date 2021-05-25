@@ -8,8 +8,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class DaRegulationOffers {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  Location? location;
   final collectionName = 'da_regulation_offer';
 
   DaRegulationOffers(Db db) {

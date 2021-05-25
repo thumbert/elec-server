@@ -2,7 +2,9 @@ library test.client.forward_marks;
 
 import 'dart:convert';
 import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
 import 'package:http/http.dart' as http;
+import 'package:timezone/data/latest.dart';
 //import 'package:dotenv/dotenv.dart' as dotenv;
 
 import '../../../bin/setup_db.dart';
@@ -12,7 +14,7 @@ import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/client/marks/forward_marks.dart' as client;
 import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:test/test.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 
 /// Get the curves that are directly marked
 List<String> getMarkedCurveIds() {
@@ -40,6 +42,7 @@ List<String> getMarkedCurveIds() {
 void tests(String rootUrl) async {
   // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = ForwardMarksArchive();
+  var location = getLocation('America/New_York');
   group('ForwardMarks archive tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
@@ -249,7 +252,14 @@ void tests(String rootUrl) async {
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
       expect(data['buckets']['5x16'][0], null); // it's a Saturday
     });
-    test('get mh forward curve as of 7/6/2020', () async {
+    test('get mh forward curve as of 7/6/2020, direct', () async {
+      var xs = await api.getForwardCurve(Date.utc(2020, 7, 6),
+          'isone_energy_4000_da_lmp') as PriceCurve;
+      expect(xs.length, 90);
+      expect(xs.firstMonth, Month(2020, 8, location: location));
+      expect(xs.first.value, {Bucket.b5x16: 23.48, Bucket.b7x8: 15.5});
+    });
+    test('get mh forward curve as of 7/6/2020, http', () async {
       var aux = await http.get(Uri.parse(
           '$rootUrl/forward_marks/v1/'
           'curveId/isone_energy_4000_da_lmp/'
@@ -260,8 +270,8 @@ void tests(String rootUrl) async {
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
     });
     test('cache of curveDetails', () async {
-      var res = await ForwardMarks.curveIdCache.get('isone_energy_4004_da_lmp');
-      expect(res['children'].toSet(),
+      var res = await (ForwardMarks.curveIdCache.get('isone_energy_4004_da_lmp'));
+      expect(res!['children'].toSet(),
           {'isone_energy_4000_da_lmp', 'isone_energy_4004_da_basis'});
     });
     test('get one composite forward curve, add 2', () async {
@@ -370,7 +380,7 @@ void tests(String rootUrl) async {
     var location = getLocation('America/New_York');
     test('get mh curve as of 5/29/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_da_lmp';
-      var res = await clientFm.getForwardCurve(curveId, Date(2020, 5, 29),
+      var res = await clientFm.getForwardCurve(curveId, Date.utc(2020, 5, 29),
           tzLocation: location);
       expect(res[0].interval, Date(2020, 5, 30, location: location));
       expect(res.length, 81);
@@ -379,7 +389,7 @@ void tests(String rootUrl) async {
     });
     test('get mh curve as of 7/6/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_da_lmp';
-      var res = await clientFm.getForwardCurve(curveId, Date(2020, 7, 6),
+      var res = await clientFm.getForwardCurve(curveId, Date.utc(2020, 7, 6),
           tzLocation: location);
       expect(res[0].interval, Date(2020, 7, 7, location: location));
       expect(res.length, 90);
@@ -388,7 +398,7 @@ void tests(String rootUrl) async {
     });
     test('get mh hourly shape as of 5/29/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_hourlyshape';
-      var hs = await clientFm.getHourlyShape(curveId, Date(2020, 5, 29),
+      var hs = await clientFm.getHourlyShape(curveId, Date.utc(2020, 5, 29),
           tzLocation: location);
       expect(hs.buckets.length, 3);
       expect(
@@ -407,7 +417,7 @@ void tests(String rootUrl) async {
 void insertMarks() => insertForwardMarks();
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
 
   // await insertMarks();
 

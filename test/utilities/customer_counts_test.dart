@@ -8,11 +8,10 @@ import 'package:elec_server/api/utilities/api_customer_counts_ngrid.dart';
 
 Map env = Platform.environment;
 
-ComponentConfig config = new ComponentConfig()
-  ..host = '127.0.0.1'
-  ..dbName = 'isone'
-  ..collectionName = 'ngrid_customer_counts';
-String dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
+var config = ComponentConfig(
+    host: '127.0.0.1', dbName: 'isone', collectionName: 'ngrid_customer_counts');
+
+String? dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
 
 updateDb() async {
 

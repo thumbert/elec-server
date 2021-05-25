@@ -3,9 +3,9 @@ library ui.checkbox;
 import 'dart:html' as html;
 
 class CheckboxLabel {
-  html.Element wrapper;
-  html.Element _wrapper;
-  html.CheckboxInputElement _checkboxInputElement;
+  html.Element? wrapper;
+  late html.Element _wrapper;
+  late html.CheckboxInputElement _checkboxInputElement;
   String name;
 
   /// A simple checkbox with a text label.
@@ -19,7 +19,7 @@ class CheckboxLabel {
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
 
     // create the string for the checkbox id
-    var id = '${wrapper.id}__cbl__${name}';
+    var id = '${wrapper!.id}__cbl__${name}';
     _checkboxInputElement = html.CheckboxInputElement()..id = id;
     _wrapper.children.add(_checkboxInputElement);
 
@@ -28,19 +28,19 @@ class CheckboxLabel {
       ..text = name
       ..htmlFor = id);
 
-    wrapper.children.add(_wrapper);
+    wrapper!.children.add(_wrapper);
   }
 
   void setAttribute(String name, String value) =>
       _wrapper.setAttribute(name, value);
 
 
-  set checked(bool x) => _checkboxInputElement.checked = x;
+  set checked(bool? x) => _checkboxInputElement.checked = x;
 
-  bool get checked => _checkboxInputElement.checked;
+  bool? get checked => _checkboxInputElement.checked;
 
   void onChange(Function x) {
-    _checkboxInputElement.onChange.listen(x);
+    _checkboxInputElement.onChange.listen(x as void Function(html.Event)?);
   }
 }
 

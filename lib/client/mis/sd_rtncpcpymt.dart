@@ -29,11 +29,11 @@ class SdRtNcpcPymnt {
     var aux = json.decode(_response.body);
     var data = (json.decode(aux['result']) as List).cast<Map<String, dynamic>>();
 
-    var grp = groupBy(data, (e) => e['Asset ID']);
+    var grp = groupBy(data, (dynamic e) => e['Asset ID']);
     // TODO:  use (e) => Tuple2(e['Asset ID'], e['date'])
     var out = <Map<String,dynamic>>[];
     for (var assetId in grp.keys) {
-      out.addAll(getNthSettlement(grp[assetId], (e) => e['date'],  n: settlement));
+      out.addAll(getNthSettlement(grp[assetId]!, (e) => e['date'],  n: settlement));
     }
 
     return out;

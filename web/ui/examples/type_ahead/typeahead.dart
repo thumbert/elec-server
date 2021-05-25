@@ -235,10 +235,10 @@ void main() {
   var wrapper = querySelector('#wrapper-ta');
   var message = querySelector('#message');
 
-  var ac = TypeAhead(wrapper, countries, placeholder: 'Country name');
-  ac.onSelect((e) => message.text = 'You selected ${ac.value}');
+  var ac = TypeAhead(wrapper as DivElement?, countries, placeholder: 'Country name');
+  ac.onSelect((e) => message!.text = 'You selected ${ac.value}');
 
-  var bs = TypeAhead(querySelector('#wrapper-ta2'),
+  var bs = TypeAhead(querySelector('#wrapper-ta2') as DivElement?,
     ['Buy', 'Sell'], placeholder: 'Buy/Sell');
 
 

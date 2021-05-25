@@ -6,23 +6,24 @@ import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:timezone/timezone.dart';
 
 class RegulationRequirementArchive {
-  ComponentConfig dbConfig;
-  String dir;
+  late ComponentConfig dbConfig;
+  String? dir;
   final reportName = 'Regulation Requirement';
 
-  RegulationRequirementArchive({this.dbConfig, this.dir}) {
+  RegulationRequirementArchive({ComponentConfig? dbConfig, this.dir}) {
     var env = Platform.environment;
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'regulation_requirement';
-    dir ??= env['HOME'] +
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'regulation_requirement');
+    }
+    dir ??= env['HOME']! +
         '/Downloads/Archive/IsoExpress/OperationsReports/DailyRegulationRequirement/Raw/';
   }
 
-  Db get db => dbConfig.db;
+  Db? get db => dbConfig.db;
 
   /// Always insert ALL available historical data
   Future<int> insertData(List<Map<String, dynamic>> data) async {
@@ -42,35 +43,35 @@ class RegulationRequirementArchive {
   List<Map<String, dynamic>> readAllData() {
     var data = <Map<String, dynamic>>[];
 
-    if (readXlsx(Date(2014, 4, 1)).isNotEmpty) {
+    if (readXlsx(Date.utc(2014, 4, 1)).isNotEmpty) {
       data.add({
         'from': '2014-04-01',
         'to': '2016-02-24',
-        ...readXlsx(Date(2014, 4, 1)),
+        ...readXlsx(Date.utc(2014, 4, 1)),
       });
     }
 
-    if (readXlsx(Date(2016, 2, 25)).isNotEmpty) {
+    if (readXlsx(Date.utc(2016, 2, 25)).isNotEmpty) {
       data.add({
         'from': '2016-02-25',
         'to': '2018-07-15',
-        ...readXlsx(Date(2016, 2, 25)),
+        ...readXlsx(Date.utc(2016, 2, 25)),
       });
     }
 
-    if (readXlsx(Date(2018, 7, 16)).isNotEmpty) {
+    if (readXlsx(Date.utc(2018, 7, 16)).isNotEmpty) {
       data.add({
         'from': '2018-07-16',
         'to': '2021-02-09',
-        ...readXlsx(Date(2018, 7, 16)),
+        ...readXlsx(Date.utc(2018, 7, 16)),
       });
     }
 
-    if (readXlsx(Date(2021, 2, 10)).isNotEmpty) {
+    if (readXlsx(Date.utc(2021, 2, 10)).isNotEmpty) {
       data.add({
         'from': '2021-02-10',
         'to': '2099-12-31',
-        ...readXlsx(Date(2021, 2, 10)),
+        ...readXlsx(Date.utc(2021, 2, 10)),
       });
     }
 
@@ -90,7 +91,7 @@ class RegulationRequirementArchive {
     var sheetNames = decoder.tables.keys.toList();
     // Regulation Capacity
     var ind = sheetNames.where((e) => e.contains('Reg Cap Reqmnt')).first;
-    var table = decoder.tables[ind];
+    var table = decoder.tables[ind]!;
     for (var r = 3; r < table.maxRows; r++) {
       var day;
       var dayType = (table.rows[r][0] as String).trim().toLowerCase();
@@ -114,7 +115,7 @@ class RegulationRequirementArchive {
     }
     // Regulation Service
     ind = sheetNames.where((e) => e.contains('Reg Service Reqmnt')).first;
-    table = decoder.tables[ind];
+    table = decoder.tables[ind]!;
     for (var r = 3; r < table.maxRows; r++) {
       var day;
       var dayType = (table.rows[r][0] as String).trim().toLowerCase();
@@ -144,7 +145,7 @@ class RegulationRequirementArchive {
   /// file, and a new from/to interval.
   Map<String, dynamic> readXlsx(Date asOfDate) {
     var file =
-        File(dir + '${asOfDate.toString()}_daily_regulation_requirement.xlsx');
+        File(dir! + '${asOfDate.toString()}_daily_regulation_requirement.xlsx');
     return readFile(file);
   }
 
@@ -156,11 +157,11 @@ class RegulationRequirementArchive {
   /// Download the file from the ISO.  Append a date to the name.
   /// If the asOfDate is the same as the 2018-07-16, delete the file as it
   /// is not needed.
-  Future<int> downloadFile({String url}) async {
+  Future<int> downloadFile({String? url}) async {
     url ??=
         'https://www.iso-ne.com/static-assets/documents/sys_ops/op_frcstng/dlyreg_req/daily_regulation_requirement.xlsx';
     var filename = path.basename(url);
-    var fileout = File(dir + Date.today().toString() + '_' + filename);
+    var fileout = File(dir! + Date.today(location: UTC).toString() + '_' + filename);
 
     await HttpClient()
         .getUrl(Uri.parse(url))
@@ -170,13 +171,13 @@ class RegulationRequirementArchive {
 
     var asOfDate = getAsOfDate(fileout);
     // Check that this file is in the archive.  If not, save it.
-    var lastFile = File(dir + asOfDate.toString() + '_' + filename);
+    var lastFile = File(dir! + asOfDate.toString() + '_' + filename);
     if (!lastFile.existsSync()) {
       fileout.copySync(lastFile.path.toString());
     }
     // check that the asOfDate is different from the last one, if not,
     // delete this file ...
-    if (asOfDate == Date(2021, 2, 10)) {
+    if (asOfDate == Date.utc(2021, 2, 10)) {
       fileout.deleteSync();
     } else {
       throw ArgumentError('New as of date!  Please refactor code.');
@@ -190,13 +191,13 @@ class RegulationRequirementArchive {
     var bytes = file.readAsBytesSync();
     var decoder = SpreadsheetDecoder.decodeBytes(bytes);
     var sheetNames = decoder.tables.keys.toList();
-    var table = decoder.tables[sheetNames.first];
+    var table = decoder.tables[sheetNames.first]!;
     var asOfDate = table.rows[0][1] as String;
     return Date.parse(asOfDate.substring(0, 10));
   }
 
   List<File> getAllFiles() {
-    return Directory(dir)
+    return Directory(dir!)
         .listSync()
         .whereType<File>()
         .where((f) => f.path.endsWith('_daily_regulation_requirement.xlsx'))
@@ -206,8 +207,8 @@ class RegulationRequirementArchive {
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
   Future<void> setupDb() async {
-    if (!Directory(dir).existsSync()) {
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync()) {
+      Directory(dir!).createSync(recursive: true);
     }
 
     await dbConfig.db.open();

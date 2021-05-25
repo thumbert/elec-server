@@ -6,7 +6,7 @@ import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
 class CalculatorArchive {
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
 
   static final _mustHaveKeys = <String>{
     'userId',
@@ -20,14 +20,16 @@ class CalculatorArchive {
 
   final log = Logger('CalculatorArchive');
 
-  CalculatorArchive({this.dbConfig}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'risk_system'
-      ..collectionName = 'calculators';
+  CalculatorArchive({ComponentConfig? dbConfig}) {
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'risk_system',
+          collectionName: 'calculators');
+    }
   }
 
-  mongo.Db get db => dbConfig.db;
+  mongo.Db? get db => dbConfig.db;
 
   /// Insert one calculator at a time in the collection
   Future<int> insertData(Map<String, dynamic> data) async {
@@ -60,7 +62,8 @@ class CalculatorArchive {
   }
 
   void setup() async {
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'userId': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'userId': 1});
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
           'userId': 1,

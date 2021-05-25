@@ -13,16 +13,16 @@ import '../lib_iso_express.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
 class DaBindingConstraintsReportArchive {
-  ComponentConfig dbConfig;
-  String dir;
+  late ComponentConfig dbConfig;
+  late String dir;
   final Location location = getLocation('America/New_York');
 
-  DaBindingConstraintsReportArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'binding_constraints';
+  DaBindingConstraintsReportArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'binding_constraints');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
+    this.dir = dir;
   }
 
   Db get db => dbConfig.db;
@@ -35,8 +35,8 @@ class DaBindingConstraintsReportArchive {
       dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.json');
 
   Future downloadDay(Date asOfDate) async {
-    var _user = dotenv.env['isone_ws_user'];
-    var _pwd = dotenv.env['isone_ws_password'];
+    var _user = dotenv.env['isone_ws_user']!;
+    var _pwd = dotenv.env['isone_ws_password']!;
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(asOfDate)), '',
@@ -58,7 +58,7 @@ class DaBindingConstraintsReportArchive {
     var xs;
     if ((aux as Map).containsKey('DayAheadConstraints')) {
       if (aux['DayAheadConstraints'] == '') return <Map<String, dynamic>>[];
-      xs = aux['DayAheadConstraints']['DayAheadConstraint'] as List;
+      xs = aux['DayAheadConstraints']['DayAheadConstraint'] as List?;
     }
 
     var out = <Map<String, dynamic>>[];
@@ -82,19 +82,18 @@ class DaBindingConstraintsReportArchive {
   /// Insert data into db
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
-    var groups = groupBy(data, (e) => e['date']);
+    var groups = groupBy(data, (dynamic e) => e['date']);
     try {
       for (var date in groups.keys) {
         await dbConfig.coll.remove({'date': date});
-        await dbConfig.coll.insertAll(groups[date]);
-        print('--->  Inserted DA binding constraints for day ${date}');
+        await dbConfig.coll.insertAll(groups[date]!);
+        print('--->  Inserted DA binding constraints for day $date');
       }
       return 0;
     } catch (e) {
       print('xxxx ERROR xxxx ' + e.toString());
       return 1;
     }
-    ;
   }
 
   Future<Null> setupDb() async {

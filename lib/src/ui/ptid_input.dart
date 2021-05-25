@@ -9,8 +9,8 @@ class PtidInput {
   Map<int,String> ptidToName;
   bool canBeEmpty;
 
-  html.TextInputElement _textInput;
-  html.LabelElement _nodeLabel;
+  late html.TextInputElement _textInput;
+  late html.LabelElement _nodeLabel;
 
 
   /// A ptid input field.
@@ -42,18 +42,18 @@ class PtidInput {
     wrapper.children.add(_wrapper);
   }
 
-  int get value {
-    int aux;
-    if (_textInput.value.isEmpty) {
+  int? get value {
+    int? aux;
+    if (_textInput.value!.isEmpty) {
       aux = null;
       if (!canBeEmpty) {
         _textInput.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
       }
     } else {
-      aux = int.parse(_textInput.value);
+      aux = int.parse(_textInput.value!);
       _textInput.setAttribute('style', 'margin-left: 15px; border-color: initial;');
     }
-    var text = ptidToName[aux];
+    var text = ptidToName[aux!];
     if (aux != null && text == null) {
       // name not in the ptidToName map
       _textInput.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
@@ -67,7 +67,7 @@ class PtidInput {
 
   /// trigger a change when the input changes
   void onChange(Function x) {
-    _textInput.onChange.listen(x);
+    _textInput.onChange.listen(x as void Function(html.Event)?);
   }
 
 }

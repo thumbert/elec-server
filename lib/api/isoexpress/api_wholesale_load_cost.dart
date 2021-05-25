@@ -8,7 +8,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class WholesaleLoadCost {
-  DbCollection coll;
+  late DbCollection coll;
   String collectionName = 'wholesale_load_cost';
 
   /// the only report published by the ISONE where you find zonal RT load

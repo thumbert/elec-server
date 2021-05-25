@@ -20,7 +20,7 @@ Map<String, dynamic> _template1() => <String, dynamic>{
     };
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
   var rootUrl = 'http://localhost:8080/';
   var wrapper = querySelector('#wrapper-elec-calc-cfd');
   // var cacheProvider = CacheProvider.test(client: Client(), rootUrl: rootUrl);

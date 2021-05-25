@@ -8,9 +8,9 @@ import 'package:shelf_router/shelf_router.dart';
 
 class CurveIds {
   mongo.Db db;
-  mongo.DbCollection coll;
-  Map<String, Map<String, dynamic>> curveDefinitions;
-  List<Map<String, dynamic>> compositeCurves;
+  late mongo.DbCollection coll;
+  Map<String, Map<String, dynamic>>? curveDefinitions;
+  List<Map<String, dynamic>>? compositeCurves;
 
   CurveIds(this.db) {
     coll = db.collection('curve_ids');
@@ -94,7 +94,7 @@ class CurveIds {
 
   /// Get all the existing curve ids in the database that match the pattern,
   /// sorted
-  Future<List<String>> curveIdsWithPattern(String pattern) async {
+  Future<List<String?>> curveIdsWithPattern(String pattern) async {
     var pipeline = [
       {
         '\$match': {
@@ -113,12 +113,12 @@ class CurveIds {
     ];
     return await coll
         .aggregateToStream(pipeline)
-        .map((e) => e['curveId'] as String)
+        .map((e) => e['curveId'] as String?)
         .toList();
   }
 
   /// Get the document associated with this curveId
-  Future<Map<String, dynamic>> getCurveId(String curveId) async {
+  Future<Map<String, dynamic>?> getCurveId(String curveId) async {
     var query = mongo.where
       ..eq('curveId', curveId)
       ..excludeFields(['_id']);
@@ -136,7 +136,7 @@ class CurveIds {
   }
 
   /// For a given commodity, get all the unique regions, sorted
-  Future<List<String>> getRegions(String commodity) async {
+  Future<List<String?>> getRegions(String commodity) async {
     var pipeline = [
       {
         '\$match': {
@@ -160,12 +160,12 @@ class CurveIds {
     ];
     return await coll
         .aggregateToStream(pipeline)
-        .map((e) => e['region'] as String)
+        .map((e) => e['region'] as String?)
         .toList();
   }
 
   /// For a given commodity and region, get all the serviceTypes, sorted
-  Future<List<String>> getServiceTypes(String commodity, String region) async {
+  Future<List<String?>> getServiceTypes(String commodity, String region) async {
     var pipeline = [
       {
         '\$match': {
@@ -190,7 +190,7 @@ class CurveIds {
     ];
     return await coll
         .aggregateToStream(pipeline)
-        .map((e) => e['serviceType'] as String)
+        .map((e) => e['serviceType'] as String?)
         .toList();
   }
 

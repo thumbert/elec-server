@@ -18,7 +18,7 @@ void tests() async {
     setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('read file Jan19, CT', () async {
-      var file = archive.getFilename(Month(2019, 1), 4004);
+      var file = archive.getFilename(Month.utc(2019, 1), 4004);
       var xs = archive.processFile(file);
       expect(xs.length, 31);
       expect(xs.first.keys.toSet(), {'date', 'ptid', 'rtLoad'});
@@ -40,7 +40,7 @@ void tests() async {
   });
 }
 
-void insertMonths({List<Month> months}) async {
+void insertMonths({List<Month>? months}) async {
   final location = getLocation('America/New_York');
   months ??= Term.parse('Jan16-Dec16', location)
       .interval

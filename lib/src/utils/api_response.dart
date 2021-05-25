@@ -3,18 +3,18 @@ library utils.api_response;
 import 'dart:collection' as collection;
 
 class ApiResponse {
-  String result;
+  String? result;
 
   ApiResponse();
 
   ApiResponse.fromJson(Map _json) {
     if (_json.containsKey('result')) {
-      result = _json['result'] as String;
+      result = _json['result'] as String?;
     }
   }
 
-  Map<String, Object> toJson() {
-    final _json = <String, Object>{};
+  Map<String, Object?> toJson() {
+    final _json = <String, Object?>{};
     if (result != null) {
       _json['result'] = result;
     }

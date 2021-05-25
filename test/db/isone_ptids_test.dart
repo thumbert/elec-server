@@ -15,11 +15,9 @@ import 'package:elec_server/api/api_isone_ptids.dart';
 var env = Platform.environment;
 
 void downloadFile() async {
-  var config = ComponentConfig()
-    ..host = '127.0.0.1'
-    ..dbName = 'isone'
-    ..collectionName = 'pnode_table';
-  var dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+  var config = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
+  var dir = env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
 
   var archive = PtidArchive(config: config, dir: dir);
   var url =
@@ -28,11 +26,9 @@ void downloadFile() async {
 }
 
 void ingestionTest() async {
-  var config = ComponentConfig()
-    ..host = '127.0.0.1'
-    ..dbName = 'isone'
-    ..collectionName = 'pnode_table';
-  var dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+  var config = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
+  var dir = env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
 
   var archive = PtidArchive(config: config);
   //await archive.setup();
@@ -45,11 +41,9 @@ void ingestionTest() async {
 
 void tests(String rootUrl) async {
   // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
-  var config = ComponentConfig()
-    ..host = '127.0.0.1'
-    ..dbName = 'isone'
-    ..collectionName = 'pnode_table';
-  var dir = env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+  var config = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
+  var dir = env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
   var archive = PtidArchive(config: config, dir: dir);
   var api = ApiPtids(config.db);
   group('Ptid table db tests:', () {

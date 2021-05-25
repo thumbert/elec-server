@@ -11,7 +11,7 @@ import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 
 void tests() async {
-  group('DA energy offers report', () {
+  group('DA demand bid report (masked bids)', () {
     var archive = DaDemandBidArchive();
     test('process file 2019-02-28.csv', () {
       var file = File(archive.dir + 'hbdayaheaddemandbid_20190228.csv');
@@ -37,7 +37,7 @@ void tests() async {
       expect(aux.length, 791);
     });
     test('read 2020-09-01 from webservices', () async {
-      var asOfDate = Date(2020, 9, 1);
+      var asOfDate = Date.utc(2020, 9, 1);
       var file = archive.getFilename(asOfDate);
       if (!file.existsSync()) {
         await archive.downloadDay(asOfDate);
@@ -73,32 +73,6 @@ void tests() async {
 
     });
 
-//    test('DA energy offers report, DST day spring', () async {
-//      File file = archive.getFilename(new Date(2017, 3, 12));
-//      var res = await archive.processFile(file);
-//      expect(res.first['hours'].length, 23);
-//    });
-//    test('DA hourly lmp report, DST day fall', () async {
-//      File file = archive.getFilename(new Date(2017, 11, 5));
-//      var res = await archive.processFile(file);
-//      expect(res.first['hourBeginning'].length, 25);
-//    });
-//     test('Insert one day', () async {
-//       await archive.dbConfig.db.open();
-//       await archive.insertDay(Date(2017, 3, 12));
-//       await archive.dbConfig.db.close();
-//     });
-//    test('insert several days', () async {
-//      List days =
-//      new Interval(new DateTime(2017, 1, 1), new DateTime(2017, 1, 5))
-//          .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
-//      await archive.dbConfig.db.open();
-//      await for (var day in new Stream.fromIterable(days)) {
-//        await archive.downloadDay(day);
-//        await archive.insertDay(day);
-//      }
-//      archive.dbConfig.db.close();
-//    });
   });
 }
 
@@ -108,7 +82,7 @@ Future insertDays() async {
   var archive = DaDemandBidArchive();
   var days = Interval(TZDateTime(location, 2019, 2, 1),
       TZDateTime(location, 2019, 2, 28))
-      .splitLeft((dt) => Date(dt.year, dt.month, dt.day));
+      .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
 
   for (var day in days) {
@@ -121,7 +95,7 @@ Future insertDays() async {
 
 Future soloTest() async {
   var archive = DaDemandBidArchive();
-  var data = archive.processFile(archive.getFilename(Date(2017,3,12)));
+  var data = archive.processFile(archive.getFilename(Date.utc(2017,3,12)));
   print(data);
 }
 

@@ -10,15 +10,15 @@ enum SelectionType {
 }
 
 class SelectableList {
-  Element wrapper;
-  List<String> _values;
+  Element? wrapper;
+  late List<String> _values;
   String highlightColor;
   SelectionType selectionType;
 
-  List<bool> _onOff; // keep track of which elements are selected
-  List<int> _ind;
-  DivElement _listWrapper;
-  List<DivElement> _divs;
+  late List<bool> _onOff; // keep track of which elements are selected
+  late List<int> _ind;
+  late DivElement _listWrapper;
+  late List<DivElement> _divs;
 
   /// A simple vertical list of selectable values.  Selection is done by
   /// clicking on the element, if you click again, the element is deselected.
@@ -35,7 +35,7 @@ class SelectableList {
 
     this.values = values;
 
-    wrapper.children.add(_listWrapper);
+    wrapper!.children.add(_listWrapper);
   }
 
   List<String> get values => _values;
@@ -46,7 +46,7 @@ class SelectableList {
     _values = List.from(xs);
     _onOff = List.filled(xs.length, false);
     _ind = List.generate(xs.length, (i) => i);
-    var _wId = wrapper.id; // to create unique ids
+    var _wId = wrapper!.id; // to create unique ids
 
     _listWrapper.children.clear();
     _divs = <DivElement>[];
@@ -86,6 +86,6 @@ class SelectableList {
 
   /// Listen to changes
   void onChange(Function x) {
-    _listWrapper.onChange.listen(x);
+    _listWrapper.onChange.listen(x as void Function(Event)?);
   }
 }

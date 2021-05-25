@@ -3,7 +3,6 @@ library test.db.curves.curve_id_test;
 import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
@@ -11,7 +10,6 @@ import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
 
 void tests(String rootUrl) async {
   group('CurveIds API tests:', () {
-    // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
     var archive = CurveIdArchive();
     var api = CurveIds(archive.db);
     setUp(() async => await archive.db.open());
@@ -34,6 +32,7 @@ void tests(String rootUrl) async {
       expect(
           serviceTypes
               .toSet()
+              .cast<String?>()
               .containsAll({'arr', 'energy', 'fwdres', 'opres'}),
           true);
     });

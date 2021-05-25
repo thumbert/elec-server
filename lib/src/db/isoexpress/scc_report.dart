@@ -9,15 +9,15 @@ import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
 class SccReportArchive {
-  ComponentConfig config;
-  String dir;
+  late ComponentConfig config;
+  String? dir;
 
-  SccReportArchive({this.config, this.dir}) {
+  SccReportArchive({ComponentConfig? config, this.dir}) {
     Map env = Platform.environment;
-    config ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'scc_report';
+    if (config == null) {
+      this.config = ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'scc_report');
+    }
 
     dir ??= env['HOME'] +
         '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
@@ -47,10 +47,11 @@ class SccReportArchive {
 
     var bytes = file.readAsBytesSync();
     var decoder = new SpreadsheetDecoder.decodeBytes(bytes);
-    List<Map<String, Object>> res;
+    late List<Map<String, Object?>> res;
 
-    if (month.isBefore(Month(2030, 12)))
+    if (month.isBefore(Month.utc(2030, 12))) {
       res = _readXlsxVersion1(decoder, month);
+    }
 
     /// add the asOfDate (as a String) to all rows
     return res.map((e) {
@@ -62,7 +63,7 @@ class SccReportArchive {
   List<Map<String, dynamic>> _readXlsxVersion1(
       SpreadsheetDecoder decoder, Month month) {
     var res = <Map<String, dynamic>>[];
-    var table = decoder.tables['SCC_Report_Current'];
+    var table = decoder.tables['SCC_Report_Current']!;
 
     var yyyymm = convertXlsxDate(table.rows[0][8]).toString().substring(0, 7);
     if (yyyymm != month.toIso8601String())
@@ -104,7 +105,7 @@ class SccReportArchive {
   /// name in the xlsx format.
   Future downloadFile(String url) async {
     String filename = path.basename(url);
-    File fileout = new File(dir + filename);
+    File fileout = new File(dir! + filename);
 
     if (fileout.existsSync()) {
       print("File $filename is already downloaded.");
@@ -120,11 +121,11 @@ class SccReportArchive {
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
   setup() async {
-    if (!new Directory(dir).existsSync())
-      new Directory(dir).createSync(recursive: true);
+    if (!new Directory(dir!).existsSync())
+      new Directory(dir!).createSync(recursive: true);
 
     await config.db.open();
-    List<String> collections = await config.db.getCollectionNames();
+    List<String?> collections = await config.db.getCollectionNames();
     if (collections.contains(config.collectionName)) await config.coll.drop();
 
     // this indexing assures that I don't insert the same data twice
@@ -139,5 +140,5 @@ Date convertXlsxDate(num x) {
   var aux = new DateTime.fromMillisecondsSinceEpoch(
       ((x - 25569) * 86400000).round(),
       isUtc: true);
-  return new Date(aux.year, aux.month, aux.day);
+  return Date.utc(aux.year, aux.month, aux.day);
 }

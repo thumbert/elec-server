@@ -12,8 +12,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class DaLmp {
-  mongo.DbCollection coll;
-  Location _location;
+  late mongo.DbCollection coll;
+  late Location _location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'da_lmp_hourly';
 
@@ -76,7 +76,7 @@ class DaLmp {
 
     /// Get all the existing ptids in the collection, sorted
     router.get('/ptids', (Request request) async {
-      var res = await allPtids();
+      var res = await (allPtids() as FutureOr<List<int>>);
       res.sort();
       return Response.ok(json.encode(res), headers: headers);
     });
@@ -89,7 +89,7 @@ class DaLmp {
       int ptid, String start, String end, String bucket) async {
     var startDate = Date.parse(start.replaceAll('-', '') + '01');
     var aux = Date.parse(end.replaceAll('-', '') + '01');
-    var endDate = Month(aux.year, aux.month).endDate;
+    var endDate = Month.utc(aux.year, aux.month).endDate;
     var bucketO = Bucket.parse(bucket);
 
     var data = await getHourlyData(ptid, startDate, endDate, component);
@@ -101,7 +101,7 @@ class DaLmp {
     // do the monthly aggregation
     var _monthlyNest = Nest()
       ..key((Map e) => (e['hourBeginning'] as String).substring(0, 7))
-      ..rollup((Iterable x) => _mean(x.map((e) => e[component] as num)));
+      ..rollup((Iterable x) => _mean(x.map((e) => e[component] as num?)));
     var res = _monthlyNest.entries(out) as List<Map>;
     return res
         .map((Map e) => {'month': e['key'], component: e['values']})
@@ -124,7 +124,7 @@ class DaLmp {
     // do the daily aggregation
     var nest = Nest()
       ..key((Map e) => (e['hourBeginning'] as String).substring(0, 10))
-      ..rollup((Iterable x) => _mean(x.map((e) => e[component] as num)));
+      ..rollup((Iterable x) => _mean(x.map((e) => e[component] as num?)));
     var res = nest.entries(out) as List<Map>;
     return res
         .map((Map e) => {'date': e['key'], component: e['values']})
@@ -133,7 +133,7 @@ class DaLmp {
 
   ///
   /// http://localhost:8080/dalmp/v1/hourly/congestion/ptid/4000/start/20170101/end/20170101
-  Future<List<Map<String, Object>>> getHourlyPrices(
+  Future<List<Map<String, Object?>>> getHourlyPrices(
       String component, int ptid, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
@@ -142,18 +142,18 @@ class DaLmp {
 
   ///
   /// http://localhost:8080/dalmp/v1/hourly/congestion/ptid/4000/start/20170101/end/20170101/compact
-  Future<List<double>> getHourlyPricesCompact(
+  Future<List<double?>> getHourlyPricesCompact(
       String component, int ptid, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(ptid, startDate, endDate, component);
-    return data.map((e) => e[component] as double).toList();
+    return data.map((e) => e[component] as double?).toList();
   }
 
   /// Get all ptids in the database
-  Future<List<int>> allPtids() async {
+  Future<List<int>?> allPtids() async {
     Map res = await coll.distinct('ptid');
-    return res['values'] as List<int>;
+    return res['values'] as List<int>?;
   }
 
   /// Average 7x24 price by ptid between the start/end dates
@@ -162,7 +162,7 @@ class DaLmp {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
 
-    var pipeline = [];
+    var pipeline = <Map<String,Object>>[];
     pipeline.addAll([
       {
         '\$match': {
@@ -201,7 +201,7 @@ class DaLmp {
     return res;
   }
 
-  Future<List<Map<String, Object>>> getHourlyData(
+  Future<List<Map<String, dynamic>>> getHourlyData(
       int ptid, Date start, Date end, String component) async {
     var query = mongo.where
       ..eq('ptid', ptid)
@@ -209,7 +209,7 @@ class DaLmp {
       ..lte('date', end.toString())
       ..fields(['hourBeginning', component]);
     var data = coll.find(query);
-    var out = <Map<String, Object>>[];
+    var out = <Map<String, dynamic>>[];
     var keys = ['hourBeginning', component];
     await for (Map e in data) {
       var hours = e['hourBeginning'] as List;
@@ -223,11 +223,11 @@ class DaLmp {
     return out;
   }
 
-  num _mean(Iterable<num> x) {
+  num _mean(Iterable<num?> x) {
     var i = 0;
     num res = 0;
     x.forEach((e) {
-      res += e;
+      res += e!;
       i++;
     });
     return res / i;

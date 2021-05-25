@@ -24,7 +24,7 @@ class SystemDemand {
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
-    String columnName;
+    late String columnName;
     if (market.toString().toUpperCase() == 'DA') {
       columnName = 'Day-Ahead Cleared Demand';
     } else if (market.toString().toUpperCase() == 'RT') {

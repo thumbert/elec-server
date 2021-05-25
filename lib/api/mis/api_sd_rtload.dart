@@ -14,8 +14,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class SdRtload {
-  mongo.DbCollection coll;
-  Location location;
+  late mongo.DbCollection coll;
+  late Location location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sd_rtload';
 
@@ -214,7 +214,7 @@ class SdRtload {
         '_id': 0,
       }
     });
-    var res = coll.aggregateToStream(pipeline);
+    var res = coll.aggregateToStream(pipeline as List<Map<String, Object>>);
     return _format2(res);
   }
 
@@ -225,7 +225,7 @@ class SdRtload {
       String start, String end) async {
     var pipeline =
         _pipelineAllAssetsVersionsDaily(Date.parse(start), Date.parse(end));
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 
   List<Map<String, dynamic>> _pipelineAllAssetsVersionsDaily(
@@ -263,7 +263,7 @@ class SdRtload {
   /// Return the monthly MWh for all assetId, all versions.
   /// Start and end are months in yyyy-mm format.
   // @ApiMethod(path: 'monthly/start/{start}/end/{end}/settlement/{settlement}')
-  Future<List<Map<String, dynamic>>> monthlyRtLoadSettlement(
+  Future<List<Map<String, dynamic>>?> monthlyRtLoadSettlement(
       String start, String end, int settlement) async {
     // Note that you can't do the monthly aggregation on the Mongo side, because
     // the version is different between days and doesn't match the settlement #.
@@ -271,13 +271,13 @@ class SdRtload {
     start = start.replaceAll('-', '');
     end = end.replaceAll('-', '');
     var startM =
-        Month(int.parse(start.substring(0, 4)), int.parse(start.substring(4)));
+        Month.utc(int.parse(start.substring(0, 4)), int.parse(start.substring(4)));
     var endM =
-        Month(int.parse(end.substring(0, 4)), int.parse(end.substring(4)));
+        Month.utc(int.parse(end.substring(0, 4)), int.parse(end.substring(4)));
 
     var pipeline =
         _pipelineAllAssetsVersionsDaily(startM.startDate, endM.endDate);
-    var data = await coll.aggregateToStream(pipeline).toList();
+    var data = await coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
     var res = getNthSettlement(data, (e) => Tuple2(e['date'], e['Asset ID']),
         n: settlement);
 
@@ -285,10 +285,10 @@ class SdRtload {
       ..key((e) => (e['date'] as String).substring(0, 7))
       ..key((e) => e['Asset ID'])
       ..rollup((List xs) => {
-            'Load Reading': sum(xs.map((e) => e['Load Reading'])),
+            'Load Reading': sum(xs.map(((e) => e['Load Reading']) as num Function(dynamic))),
             'Ownership Share': xs.first['Ownership Share'],
             'Share of Load Reading':
-                sum(xs.map((e) => e['Share of Load Reading'])),
+                sum(xs.map(((e) => e['Share of Load Reading']) as num Function(dynamic))),
           });
 
     var aux = nest.map(res);
@@ -322,7 +322,7 @@ class SdRtload {
         out.add(sb.toString());
       }
     }
-    return out;
+    return out as FutureOr<List<String>>;
   }
 
   Stream<Map<String, dynamic>> _rtloadQuery(
@@ -342,7 +342,7 @@ class SdRtload {
         '_id': 0,
       }
     });
-    return coll.aggregateToStream(pipeline);
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>);
   }
 
   Future<List<Map<String, dynamic>>> _format(

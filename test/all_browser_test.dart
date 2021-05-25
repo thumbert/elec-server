@@ -56,6 +56,6 @@ void tests(String rootUrl) async {
 void main() async {
   await initializeTimeZone();
 
-  var rootUrl = "http://localhost:8080/"; // testing
-  await tests(rootUrl);
+  var rootUrl = "http://localhost:8080"; // testing
+  tests(rootUrl);
 }

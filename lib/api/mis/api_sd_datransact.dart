@@ -10,8 +10,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class SdDaTransact {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  Location? location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sd_datransact';
 

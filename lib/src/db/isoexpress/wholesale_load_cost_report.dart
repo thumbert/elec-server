@@ -15,18 +15,16 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 
 class WholesaleLoadCostReportArchive extends IsoExpressReport {
   @override
-  ComponentConfig dbConfig;
-  String dir;
-  @override
   final String reportName = 'Monthly Wholesale Load Cost Report';
-  static final location = getLocation('America/New_York');
 
-  WholesaleLoadCostReportArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'wholesale_load_cost';
+  WholesaleLoadCostReportArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'isoexpress',
+          collectionName: 'wholesale_load_cost');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'WholesaleLoadCost/Raw/';
+    this.dir = dir;
   }
 
   /// Data is also available as webservices, for example
@@ -36,7 +34,7 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
   /// https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/hourly-wholesale-load-cost-report
   String getUrl(Month month, int ptid) =>
       'https://webservices.iso-ne.com/api/v1.1/whlsecost/hourly/month/'
-          '${month.toIso8601String().replaceAll('-', '')}/location/$ptid';
+      '${month.toIso8601String().replaceAll('-', '')}/location/$ptid';
 
   File getFilename(Month month, int ptid) => File(dir +
       'whlsecost_hourly_$ptid' +
@@ -44,8 +42,8 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
       '${month.toIso8601String().replaceAll('-', '')}.json');
 
   Future<void> downloadFile(Month month, int ptid) async {
-    var _user = dotenv.env['isone_ws_user'];
-    var _pwd = dotenv.env['isone_ws_password'];
+    var _user = dotenv.env['isone_ws_user']!;
+    var _pwd = dotenv.env['isone_ws_password']!;
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(month, ptid)), '',
@@ -59,31 +57,30 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     var response = await request.close();
     await response.pipe(getFilename(month, ptid).openWrite());
-
   }
 
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var aux = json.decode(file.readAsStringSync());
-    List xs;
+    List? xs;
     if ((aux as Map).containsKey('WhlseCosts')) {
       if (aux['WhlseCosts'] == '') return <Map<String, dynamic>>[];
-      xs = aux['WhlseCosts']['WhlseCost'] as List;
+      xs = aux['WhlseCosts']['WhlseCost'] as List?;
     }
-    var data = xs.map((e) {
-      return <String,dynamic>{
+    var data = xs!.map((e) {
+      return <String, dynamic>{
         'date': (e['BeginDate'] as String).substring(0, 10),
         'hourBeginning': e['BeginDate'] as String,
-        'rtLoad': e['RTLO'] as num,
+        'rtLoad': e['RTLO'] as num?,
       };
     }).toList();
-    data.sortBy((e) => e['hourBeginning'] as String);
+    data.sortBy<String>((e) => e['hourBeginning']);
     var ptid = int.parse(xs.first['Location']['@LocId']);
-    var groups = groupBy(data, (e) => e['date'] as String);
+    var groups = groupBy(data, (dynamic e) => e['date'] as String?);
 
     var out = <Map<String, dynamic>>[];
     for (var date in groups.keys) {
-      var group = groups[date];
+      var group = groups[date]!;
       out.add({
         'date': date,
         'ptid': ptid,
@@ -100,15 +97,15 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
     if (data.isEmpty) return Future.value(null);
 
     /// split data by ptid and date
-    var groups =
-        groupBy(data, (e) => Tuple2(e['ptid'] as int, e['date'] as String));
+    var groups = groupBy(
+        data, (dynamic e) => Tuple2(e['ptid'] as int?, e['date'] as String?));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'ptid': key.item1,
           'date': key.item2,
         });
-        await dbConfig.coll.insertAll(groups[key]);
+        await dbConfig.coll.insertAll(groups[key]!);
       }
       var month = (data.first['date'] as String).substring(0, 7);
       print('--->  Inserted $reportName for month '

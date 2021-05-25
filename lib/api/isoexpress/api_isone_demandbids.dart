@@ -11,8 +11,8 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaDemandBids {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  late Location location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'da_demand_bid';
 
@@ -122,13 +122,13 @@ class DaDemandBids {
       }
     });
     pipeline.add({'\$unwind': '\$hours'});
-    var res = await coll.aggregateToStream(pipeline).toList();
+    var res = await coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
 
     /// flatten the map in Dart
     var out = [];
     var keys = ['locationId', 'participantId', 'bidType', 'price', 'quantity'];
     for (Map e in res) {
-      List prices = e['hours']['price'];
+      List? prices = e['hours']['price'];
       var qty = e['hours']['quantity'] as List;
       prices ??= List.filled(qty.length, 999);
       for (var i = 0; i < prices.length; i++) {
@@ -141,7 +141,7 @@ class DaDemandBids {
         ]));
       }
     }
-    return out;
+    return out as FutureOr<List<Map<String, dynamic>>>;
   }
 
   //http://localhost:8080/da_demand_bids/v1/daily/mwh/participantId/206845/start/20170701/end/20171001
@@ -184,7 +184,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001
@@ -228,7 +228,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 
   /// Get the total daily MWh demand bids for all participants between a start
@@ -270,7 +270,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/ptid/4004/start/20170701/end/20171001
@@ -312,7 +312,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/participant/start/20170701/end/20171001
@@ -355,7 +355,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 
   /// Get total daily MWh of inc/dec between a start and end date.
@@ -396,7 +396,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 
   /// Get total daily MWh demand bids by participant between a start and end date.
@@ -440,7 +440,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline).toList();
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
   }
 }
 

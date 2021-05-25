@@ -10,14 +10,15 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class SrRtLocSumArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
 
-  SrRtLocSumArchive({this.dbConfig}) {
+  SrRtLocSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RTLOCSUM';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = 'sr_rtlocsum';
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'mis',
+          collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Override the implementation.
@@ -35,7 +36,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   Future<int> insertTabData0(List<Map<String, dynamic>> data) async {
-    String account = data.first['account'];
+    String? account = data.first['account'];
 
     /// split the data by Location ID, date, version
     var groups = groupBy(
@@ -49,7 +50,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
           'date': key.item2,
           'version': key.item3,
         });
-        await dbConfig.coll.insertAll(groups[key]);
+        await dbConfig.coll.insertAll(groups[key]!);
       }
       print(
           '--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 0 successfully');
@@ -61,7 +62,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   Future<int> insertTabData1(List<Map<String, dynamic>> data) async {
-    String account = data.first['account'];
+    String? account = data.first['account'];
 
     /// split the data by Asset ID, date, version
     var groups = groupBy(
@@ -78,7 +79,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
           'date': key.item3,
           'version': key.item4,
         });
-        await dbConfig.coll.insertAll(groups[key]);
+        await dbConfig.coll.insertAll(groups[key]!);
       }
       print(
           '--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 1 successfully');
@@ -114,7 +115,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     });
     rows.forEach((e) {
       row['hourBeginning'].add(parseHourEndingStamp(
-          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])));
+          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!));
       keepColumns.forEach((column) {
         row[mis.removeParanthesesEnd(column)].add(e[column]);
       });
@@ -150,7 +151,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     });
     rows.forEach((e) {
       row['hourBeginning'].add(parseHourEndingStamp(
-          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])));
+          mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!));
       keepColumns.forEach((column) {
         row[mis.removeParanthesesEnd(column)].add(e[column]);
       });
@@ -166,10 +167,10 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     var account = report.accountNumber();
     var reportDate = report.forDate();
     var version = report.timestamp();
-    var dataById = groupBy(data, (row) => row['Location ID']);
+    var dataById = groupBy(data, (dynamic row) => row['Location ID']);
     var res0 = dataById.keys
         .map((assetId) =>
-            rowConverter0(dataById[assetId], account, reportDate, version))
+            rowConverter0(dataById[assetId]!, account, reportDate, version))
         .toList();
 
     /// tab 1: subaccount data
@@ -177,10 +178,10 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     var res1 = <Map<String, dynamic>>[];
     if (data.isNotEmpty) {
       var dataById = groupBy(
-          data, (row) => Tuple2(row['Subaccount ID'], row['Location ID']));
+          data, (dynamic row) => Tuple2(row['Subaccount ID'], row['Location ID']));
       res1 = dataById.keys
           .map((tuple) =>
-              rowConverter1(dataById[tuple], account, reportDate, version))
+              rowConverter1(dataById[tuple]!, account, reportDate, version))
           .toList();
     }
 

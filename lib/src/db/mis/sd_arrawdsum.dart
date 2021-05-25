@@ -10,14 +10,14 @@ import 'package:table/table.dart';
 
 class SdArrAwdSumArchive extends mis.MisReportArchive {
   @override
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
 
-  SdArrAwdSumArchive({this.dbConfig}) {
+  SdArrAwdSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_ARRAWDSUM';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
@@ -54,7 +54,7 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
     /// tab 1, data by subaccount
     labels['tab'] = 1;
     rows = mis.readReportTabAsMap(file, tab: 1);
-    var grp = groupBy(rows, (e) => (e['Subaccount ID']).toString());
+    var grp = groupBy(rows, (dynamic e) => (e['Subaccount ID']).toString());
     var tab1 = <Map<String, dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.value.first['Subaccount ID'].toString();
@@ -110,7 +110,8 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> updateDb() {
+  Future<Null> updateDb() async {
     // TODO: implement updateDb
+    return null;
   }
 }

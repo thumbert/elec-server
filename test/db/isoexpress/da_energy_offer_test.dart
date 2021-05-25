@@ -19,18 +19,18 @@ void tests(String rootUrl) async {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('download 2018-02-01 and insert it', () async {
-      var date = Date(2018, 2, 1);
+      var date = Date.utc(2018, 2, 1);
       //await archive.downloadDay(date);
       var res = await archive.insertDay(date);
       expect(res, 0);
     });
     test('DA energy offers report, DST day spring', () {
-      var file = archive.getFilename(Date(2017, 3, 12));
+      var file = archive.getFilename(Date.utc(2017, 3, 12));
       var res = archive.processFile(file);
       expect(res.first['hours'].length, 23);
     });
     test('DA hourly lmp report, DST day fall', () {
-      var file = archive.getFilename(Date(2017, 11, 5));
+      var file = archive.getFilename(Date.utc(2017, 11, 5));
       var res = archive.processFile(file);
       expect(res.first['hours'].length, 25);
     });
@@ -100,7 +100,7 @@ void tests(String rootUrl) async {
       });
     });
     test('get asset ids and participant ids for 2017-07-01', () async {
-      var aux = await client.assetsForDay(Date(2017, 7, 1));
+      var aux = await client.assetsForDay(Date.utc(2017, 7, 1));
       expect(aux.length, 308);
       aux.sort((a, b) =>
           (a['Masked Asset ID'] as int).compareTo(b['Masked Asset ID']));
@@ -115,13 +115,13 @@ void tests(String rootUrl) async {
     });
     test('get energy offers for asset 41406 between 2 dates', () async {
       var data = await client.getDaEnergyOffersForAsset(
-          41406, Date(2017, 7, 1), Date(2017, 7, 2));
+          41406, Date.utc(2017, 7, 1), Date.utc(2017, 7, 2));
       expect(data.length, 2);
     });
     test('get energy offers price/quantity timeseries for asset 41406 ',
         () async {
       var data = await client.getDaEnergyOffersForAsset(
-          41406, Date(2018, 4, 1), Date(2018, 4, 1));
+          41406, Date.utc(2018, 4, 1), Date.utc(2018, 4, 1));
       var out = eo.priceQuantityOffers(data);
       expect(out.length, 5);
       expect(out.first.first.toString(),
@@ -130,7 +130,7 @@ void tests(String rootUrl) async {
     test('get average energy offers price timeseries for asset 41406 ',
         () async {
       var data = await client.getDaEnergyOffersForAsset(
-          41406, Date(2018, 4, 1), Date(2018, 4, 1));
+          41406, Date.utc(2018, 4, 1), Date.utc(2018, 4, 1));
       var pqOffers = eo.priceQuantityOffers(data);
       var out = eo.averageOfferPrice(pqOffers);
       expect(out.length, 24);

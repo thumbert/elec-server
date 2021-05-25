@@ -11,8 +11,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class TrSch2tp {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  Location? location;
   var collectionName = 'tr_sch2tp';
 
   TrSch2tp(Db db) {
@@ -80,7 +80,7 @@ class TrSch2tp {
   }
 
   Future<List<Map<String, dynamic>>> _getSummary(String accountId,
-      String subaccountId, String start, String end, int settlement) async {
+      String? subaccountId, String start, String end, int settlement) async {
     var startMonth = parseMonth(start).toIso8601String();
     var endMonth = parseMonth(end).toIso8601String();
     var pipeline = [

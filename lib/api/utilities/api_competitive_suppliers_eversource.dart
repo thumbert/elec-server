@@ -8,7 +8,7 @@ import 'package:date/date.dart';
 
 // @ApiClass(name: 'eversource_competitive_suppliers', version: 'v1')
 class ApiCompetitiveCustomerCountsCt {
-  DbCollection coll1;
+  late DbCollection coll1;
 
   ApiCompetitiveCustomerCountsCt(Db db) {
     coll1 = db.collection('eversource_competitive_suppliers');

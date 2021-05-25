@@ -30,7 +30,7 @@ void tests(String rootUrl) async {
       await archive.dbConfig.db.close();
     });
     test('read and insert report', () async {
-      var data = archive.processFile(file);
+      var data = archive.processFile(file as File);
       expect(data.length, 2);
       // await archive.insertTabData(data[0], tab: 0);
       // await archive.insertTabData(data[1], tab: 1);

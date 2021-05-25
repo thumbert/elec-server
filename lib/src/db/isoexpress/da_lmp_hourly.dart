@@ -12,29 +12,25 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaLmpHourlyArchive extends DailyIsoExpressReport {
-  @override
-  ComponentConfig dbConfig;
-  @override
-  String dir;
 
-  DaLmpHourlyArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'da_lmp_hourly';
-
+  DaLmpHourlyArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'da_lmp_hourly');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaLmpHourly/Raw/';
+    this.dir = dir;
   }
 
   @override
   String reportName = 'Day-Ahead Energy Market Hourly LMP Report';
-  String getUrl(Date asOfDate) =>
+  @override
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/' +
       'WW_DALMP_ISO_' +
       yyyymmdd(asOfDate) +
       '.csv';
   @override
-  File getFilename(Date asOfDate) =>
+  File getFilename(Date? asOfDate) =>
       File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
   @override
@@ -60,9 +56,9 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String, dynamic>>[];
-    var dataByPtids = groupBy(data, (row) => row['Location ID']);
+    var dataByPtids = groupBy(data, (dynamic row) => row['Location ID']);
     return dataByPtids.keys
-        .map((ptid) => converter(dataByPtids[ptid]))
+        .map((ptid) => converter(dataByPtids[ptid]!))
         .toList();
   }
 
@@ -91,7 +87,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     await dbConfig.db.close();
   }
 
-  Future<Map<String, String>> lastDay() async {
+  Future<Map<String, String?>> lastDay() async {
     var pipeline = [];
     pipeline.add({
       '\$match': {
@@ -108,8 +104,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     return {'lastDay': res['result'][0]['lastDay']};
   }
 
-  Date lastDayAvailable() => Date.today().next;
+  // Date lastDayAvailable() => Date.today().next;
   Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(where.eq('date', day.toString()));
+    return await (dbConfig.coll.remove(where.eq('date', day.toString())) as FutureOr<Null>);
   }
 }

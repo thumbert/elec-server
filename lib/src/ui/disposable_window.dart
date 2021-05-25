@@ -3,8 +3,8 @@ library ui.maya.elec_calc_cfd.help_window;
 import 'dart:html';
 
 class DisposableWindow {
-  DivElement inner, content;
-  ButtonElement close;
+  DivElement? inner, content;
+  ButtonElement? close;
 
   /// A disposable window.
   DisposableWindow(this.content) {
@@ -15,24 +15,24 @@ class DisposableWindow {
       ..text = 'close';
 
     /// close the window
-    close.onClick.listen((event) {
-      inner.children.clear();
+    close!.onClick.listen((event) {
+      inner!.children.clear();
     });
 
-    content.onKeyDown.listen((event) {
+    content!.onKeyDown.listen((event) {
       event.preventDefault();
       /// close the window if you press Esc while mouse is on the content
       if (event.key == 'Escape') {
-        inner.children.clear();
+        inner!.children.clear();
       }
     });
 
     inner = DivElement()
       ..children = [
-        close,
+        close!,
         BRElement(),
         BRElement(),
-        content..tabIndex = -1,  // make it focusable
+        content!..tabIndex = -1,  // make it focusable
       ];
   }
 }

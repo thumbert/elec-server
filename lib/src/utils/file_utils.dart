@@ -12,11 +12,11 @@ File latestFile(Directory dir) {
 
 /// List all the files from a directory that contain a pattern in the filename. 
 /// If the directory doesn't exist, return [];
-List<File> listFiles(Directory dir, {Pattern pattern}) {
+List<File> listFiles(Directory dir, {Pattern? pattern}) {
   if (!dir.existsSync()) return [];
   var files = dir.listSync()
       .whereType<File>()
-      .where((entity) => basenameWithoutExtension((entity).path).contains(pattern))
+      .where((entity) => basenameWithoutExtension((entity).path).contains(pattern!))
       .where((e) => !e.path.endsWith('lnk'))
       .toList();
   files.sort((a,b) => a.path.compareTo(b.path));

@@ -11,16 +11,16 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:tuple/tuple.dart';
 
 class SrRsvChargeArchive extends mis.MisReportArchive {
-  @override
-  ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SrRsvChargeArchive({this.dbConfig}) {
+  SrRsvChargeArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RSVCHARGE';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'mis',
+          collectionName: reportName.toLowerCase());
+    }
   }
 
   Map<int, List<Map<String, dynamic>>> _processFile_21000101(File file) {
@@ -44,7 +44,7 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
     /// tab 4, participant account section
     labels['tab'] = 4;
     var x4 = mis.readReportTabAsMap(file, tab: 4);
-    var grp4 = groupBy(x4, (e) => e['Load Zone ID'] as int);
+    var grp4 = groupBy(x4, (dynamic e) => e['Load Zone ID'] as int?);
     var tab4 = <Map<String, dynamic>>[];
     for (var entry in grp4.entries) {
       labels['Load Zone ID'] = entry.key;
@@ -66,7 +66,7 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
     var x6 = mis.readReportTabAsMap(file, tab: 6);
     var grp6 = groupBy(
         x6,
-            (e) =>
+            (dynamic e) =>
             Tuple2(e['Subaccount ID'], e['Load Zone ID']));
     var tab6 = <Map<String, dynamic>>[];
     for (var entry in grp6.entries) {
@@ -97,9 +97,9 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
-    if (reportDate.isBefore(Date(2017, 3, 1))) {
+    if (reportDate.isBefore(Date.utc(2017, 3, 1))) {
       return <int, List<Map<String, dynamic>>>{};
-    } else if (reportDate.isBefore(Date(2100, 1, 1))) {
+    } else if (reportDate.isBefore(Date.utc(2100, 1, 1))) {
       return _processFile_21000101(file);
     } else {
       return _processFile_21000101(file);

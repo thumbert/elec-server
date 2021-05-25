@@ -10,7 +10,7 @@ import '../src/utils/api_response.dart';
 
 // @ApiClass(name: 'scc_report', version: 'v1')
 class SccReport {
-  mongo.DbCollection coll;
+  late mongo.DbCollection coll;
   String collectionName = 'scc_report';
 
   SccReport(mongo.Db db) {
@@ -23,7 +23,7 @@ class SccReport {
     if (yyyymm.length != 6) {
       throw ArgumentError('Invalid month format $month');
     }
-    var mon = Month(int.parse(yyyymm.substring(0,4)),
+    var mon = Month.utc(int.parse(yyyymm.substring(0,4)),
         int.parse(yyyymm.substring(4)));
 
     var query = mongo.where;

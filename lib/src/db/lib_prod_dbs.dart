@@ -5,9 +5,9 @@ import 'package:mongo_dart/mongo_dart.dart';
 abstract class DbEnv {}
 
 class DbProd extends DbEnv {
-  static String connection;
+  static String? connection;
 
-  DbProd({String connection}) {
+  DbProd({String? connection}) {
     connection ??= '127.0.0.1:27017';
     DbProd.connection = connection;
   }

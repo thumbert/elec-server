@@ -7,6 +7,7 @@ import 'package:path/path.dart';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
 import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart';
 import 'config.dart';
 
 ///
@@ -35,12 +36,13 @@ abstract class DbDataConverter {
 }
 
 abstract class MisReportArchive {
-  String reportName;
-  ComponentConfig dbConfig;
+  late String reportName;
+  late ComponentConfig dbConfig;
+  final Location location = getLocation('America/New_York');
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
-  Map<String, dynamic> Function(List<Map<String, dynamic>>) converter;
+  Map<String, dynamic> Function(List<Map<String, dynamic>>)? converter;
 
   /// Setup the database from scratch again, including the index
   Future<Null> setupDb();
@@ -93,8 +95,8 @@ class MisReport {
   }
 
   /// all the lines in the report
-  List<String> _lines;
-  CsvToListConverter _converter;
+  List<String>? _lines;
+  CsvToListConverter? _converter;
 
   /// Note that there can be several reports for the same report date
   /// because of resettlements.
@@ -107,10 +109,10 @@ class MisReport {
   }
 
   /// Get the name of the company from the report.
-  Future<String> companyName() async {
+  Future<String?> companyName() async {
     var _comments = await comments();
     _converter ??= CsvToListConverter();
-    var aux = _converter.convert(_comments[2])[0];
+    var aux = _converter!.convert(_comments[2])[0];
     return aux[1];
   }
 
@@ -138,10 +140,10 @@ class MisReport {
         );
   }
 
-  Future<String> filename() async {
+  Future<String?> filename() async {
     var _comments = await comments();
     var regex = RegExp(r'Filename: (.*)(")');
-    var matches = regex.firstMatch(_comments[1]);
+    var matches = regex.firstMatch(_comments[1])!;
     return matches.group(1);
   }
 
@@ -177,13 +179,13 @@ class MisReport {
   List<List> _readReport({int tab = 0}) {
     var converter = CsvToListConverter();
     _lines ??= file.readAsLinesSync();
-    if (_lines.isEmpty ||
-        !(_lines.last.startsWith('"T"') || _lines.last.startsWith('T'))) {
+    if (_lines!.isEmpty ||
+        !(_lines!.last.startsWith('"T"') || _lines!.last.startsWith('T'))) {
       throw IncompleteReportException('Incomplete CSV file ${file.path}');
     }
 
     var nHeaders = -1;
-    return _lines
+    return _lines!
         .where((e) {
           if (e[0] == 'H' || e.startsWith('"H"')) nHeaders++;
           if (nHeaders == 2 * tab || nHeaders == (2 * tab + 1)) {

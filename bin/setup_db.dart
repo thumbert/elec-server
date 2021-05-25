@@ -30,9 +30,9 @@ import 'package:path/path.dart';
 Future<void> insertDaBindingConstraints() async {
   var archive = DaBindingConstraintsReportArchive();
   var days = [
-    Date(2015, 2, 17), // empty file
-    Date(2017, 12, 31), // plenty of constraints
-    Date(2018, 7, 10), // has duplicates
+    Date.utc(2015, 2, 17), // empty file
+    Date.utc(2017, 12, 31), // plenty of constraints
+    Date.utc(2018, 7, 10), // has duplicates
   ];
   for (var date in days) {
     await archive.downloadDay(date);
@@ -42,7 +42,7 @@ Future<void> insertDaBindingConstraints() async {
 Future<void> insertDaDemandBids() async {
   var archive = DaDemandBidArchive();
 
-  var days = [Date(2020, 10, 1)];
+  var days = [Date.utc(2020, 10, 1)];
   // var days = Month(2019, 2).days();
   await insertDays(archive, days);
 
@@ -59,7 +59,7 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> insertDaEnergyOffers({List<Date> days}) async {
+Future<void> insertDaEnergyOffers({List<Date>? days}) async {
   /// What I need to pass the tests
   days ??= Term.parse('Jan17-Dec17', UTC).days();
 
@@ -109,17 +109,17 @@ void insertMisReports() async {
       .where((e) => basename(e.path).startsWith('sd_rtload_'))
       .first;
   var data = archive.processFile(file);
-  await archive.insertTabData(data[0], tab: 0);
+  await archive.insertTabData(data[0]!, tab: 0);
   await archive.dbConfig.db.close();
   await archive.setupDb();
 
   /// change the version and reinsert, so that you have two versions in the
   /// database
-  for (var x in data[0]) {
+  for (var x in data[0]!) {
     x['version'] = TZDateTime.utc(2014, 3, 15);
   }
   await archive.dbConfig.db.open();
-  await archive.insertTabData(data[0], tab: 0);
+  await archive.insertTabData(data[0]!, tab: 0);
   await archive.dbConfig.db.close();
 }
 
@@ -148,20 +148,20 @@ void insertRegulationRequirement() async {
   await archive.downloadFile();
 
   var data = archive.readAllData();
-  await archive.db.open();
+  await archive.db!.open();
   await archive.insertData(data);
-  await archive.db.close();
+  await archive.db!.close();
 }
 
-void insertWholesaleLoadReports() async {
+Future<void> insertWholesaleLoadReports() async {
   /// minimal setup to pass the tests
   var archive = WholesaleLoadCostReportArchive();
   await archive.setupDb();
   await archive.dbConfig.db.open();
   // await archive.dbConfig.coll.remove(<String, dynamic>{});
-  var file = archive.getFilename(Month(2019, 1), 4004);
+  var file = archive.getFilename(Month.utc(2019, 1), 4004);
   if (!file.existsSync()) {
-    await archive.downloadFile(Month(2019, 1), 4004);
+    await archive.downloadFile(Month.utc(2019, 1), 4004);
   }
   var data = archive.processFile(file);
   await archive.insertData(data);
@@ -173,9 +173,9 @@ Future<void> insertZonalDemand() async {
   await ZonalDemandArchive().setupDb();
 
   var years = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021];
-  for (var year in years) {
-    // download the files and convert to xlsx
-  }
+  // for (var year in years) {
+  //   // download the files and convert to xlsx
+  // }
 
   await archive.dbConfig.db.open();
   for (var year in years) {

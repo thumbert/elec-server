@@ -5,12 +5,12 @@ import 'package:timezone/browser.dart';
 import 'package:date/date.dart';
 
 class TermInput {
-  html.Element wrapper;
-  html.DivElement _wrapper;
-  html.TextInputElement _textInput;
+  html.Element? wrapper;
+  late html.DivElement _wrapper;
+  late html.TextInputElement _textInput;
   String name;
-  String defaultValue;
-  Location tzLocation;
+  String? defaultValue;
+  Location? tzLocation;
 
   /// A term input (DateTime Interval) with a label.
   ///
@@ -21,9 +21,9 @@ class TermInput {
       {this.name = 'Term',
       this.defaultValue,
       this.tzLocation,
-      String placeholder,
+      String? placeholder,
       int size = 9}) {
-    var aux = '';
+    String? aux = '';
     placeholder = '';
     if (defaultValue != null) {
       aux = defaultValue;
@@ -34,21 +34,21 @@ class TermInput {
     _wrapper.children.add(html.LabelElement()..text = '$name');
     _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
-      ..placeholder = placeholder
+      ..placeholder = placeholder!
       ..size = size
       ..value = aux;
     _wrapper.children.add(_textInput);
 
-    wrapper.children.add(_wrapper);
+    wrapper!.children.add(_wrapper);
   }
 
   void setAttribute(String name, String value) =>
       _wrapper.setAttribute(name, value);
 
-  Interval get value {
-    Interval aux;
+  Interval? get value {
+    Interval? aux;
     try {
-      aux = parseTerm(_textInput.value, tzLocation: tzLocation);
+      aux = parseTerm(_textInput.value!, tzLocation: tzLocation);
       _textInput.setAttribute(
           'style', 'margin-left: 15px; border-color: initial;');
     } on ArgumentError {
@@ -62,6 +62,6 @@ class TermInput {
 
   /// trigger a change when either one of the two inputs change
   void onChange(Function x) {
-    _textInput.onChange.listen(x);
+    _textInput.onChange.listen(x as void Function(html.Event)?);
   }
 }

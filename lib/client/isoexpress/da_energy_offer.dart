@@ -108,7 +108,7 @@ class DaEnergyOffers {
 /// [getDaEnergyOffersForAsset] and create the timeseries of price offers.
 /// First offer point for each hour forms the first TimeSeries, etc.
 ///
-List<TimeSeries<Map<String, num>>> priceQuantityOffers(
+List<TimeSeries<Map<String, num?>>> priceQuantityOffers(
     List<Map<String, dynamic>> energyOffers) {
   var out = <TimeSeries<Map<String, num>>>[];
   for (var row in energyOffers) {
@@ -136,17 +136,17 @@ List<TimeSeries<Map<String, num>>> priceQuantityOffers(
 /// convenient way to compare energy offers accross different power plants.
 ///
 /// Input [pqOffers] is the output of the [priceQuantityOffers] function.
-TimeSeries<Map<String, num>> averageOfferPrice(
-    List<TimeSeries<Map<String, num>>> pqOffers) {
+TimeSeries<Map<String, num?>> averageOfferPrice(
+    List<TimeSeries<Map<String, num?>>> pqOffers) {
   /// all pqOffers TimeSeries don't always have the same length need to merge
   var out = pqOffers.reduce((x, y) {
-    var z = x.merge(y, joinType: JoinType.Outer, f: (a, b) {
+    var z = x.merge(y, joinType: JoinType.Outer, f: (a, dynamic b) {
       a ??= {'price': 0, 'quantity': 0};
       b ??= {'price': 0, 'quantity': 0};
-      var totalQ = a['quantity'] + b['quantity'];
+      var totalQ = a['quantity']! + b['quantity'];
       return {
         'price':
-            (a['price'] * a['quantity'] + b['price'] * b['quantity']) / totalQ,
+            (a['price']! * a['quantity']! + b['price'] * b['quantity']) / totalQ,
         'quantity': totalQ,
       };
     });

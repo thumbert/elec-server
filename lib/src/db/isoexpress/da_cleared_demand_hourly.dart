@@ -11,27 +11,27 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaClearedDemandReportArchive extends DailyIsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
 
-  DaClearedDemandReportArchive({this.dbConfig, this.dir}) {
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'system_demand';
-    }
-    if (dir == null) dir = baseDir + 'EnergyReports/DaHourlyDemand/Raw/';
+  DaClearedDemandReportArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'system_demand');
+    this.dbConfig = dbConfig;
+    dir ??= baseDir + 'EnergyReports/DaHourlyDemand/Raw/';
+    this.dir = dir;
   }
+  @override
   String reportName = 'Day-Ahead Energy Market Hourly Demand Report';
-  String getUrl(Date asOfDate) =>
+  @override
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hourlydayaheaddemand?start=' +
       yyyymmdd(asOfDate) +
       '&end=' +
       yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) =>
-      new File(dir + 'da_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
+  @override
+  File getFilename(Date? asOfDate) =>
+      File(dir + 'da_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
+  @override
   Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
     var row = <String,dynamic>{};
     var localDate = (rows.first['Date'] as String).substring(0, 10);
@@ -47,6 +47,7 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
     return row;
   }
 
+  @override
   List<Map<String,dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String,dynamic>>[];
@@ -64,19 +65,20 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
 
 
   /// Recreate the collection from scratch.
-  setupDb() async {
+  @override
+  Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
-      await dbConfig.coll.drop();
+    // List<String?> collections = await dbConfig.db.getCollectionNames();
+    // if (collections.contains(dbConfig.collectionName))
+    //   await dbConfig.coll.drop();
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'market': 1, 'date': 1}, unique: true);
     await dbConfig.db.close();
   }
 
-  Future<Map<String, String>> lastDay() async {
-    List pipeline = [];
+  Future<Map<String, String?>> lastDay() async {
+    var pipeline = [];
     pipeline.add({
       '\$group': {
         '_id': 0,
@@ -87,10 +89,10 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
     return {'lastDay': res['result'][0]['lastDay']};
   }
 
-  Date lastDayAvailable() => Date.today().next;
+  // Date lastDayAvailable() => Date.today().next;
 
   Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(where.eq('date', day.toString()));
+    return await (dbConfig.coll.remove(where.eq('date', day.toString())) as FutureOr<Null>);
   }
 }
 

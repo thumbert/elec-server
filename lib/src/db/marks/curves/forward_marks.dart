@@ -10,16 +10,16 @@ import 'package:dama/dama.dart';
 import 'package:timezone/timezone.dart';
 
 class ForwardMarksArchive {
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
 
   /// Marks are inserted into the db for a given (curveId, fromDate) tuple.
   /// Not all curves have marks updated every day.
   ///
-  ForwardMarksArchive({this.dbConfig, this.marksAbsTolerance = 1E-6}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'marks'
-      ..collectionName = 'forward_marks';
+  ForwardMarksArchive({ComponentConfig? dbConfig, this.marksAbsTolerance = 1E-6}) {
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'marks', collectionName: 'forward_marks');
+    }
   }
 
   mongo.Db get db => dbConfig.db;
@@ -82,7 +82,7 @@ class ForwardMarksArchive {
     for (var newDocument in data) {
       checkDocument(newDocument);
       var fromDate = newDocument['fromDate'] as String;
-      var curveId = newDocument['curveId'] as String;
+      var curveId = newDocument['curveId'] as String?;
 
       /// Get the last document with the curve, and check if you need to
       /// reinsert it.
@@ -140,13 +140,13 @@ class ForwardMarksArchive {
     var values1 = newDocument['buckets'];
     for (var bucket in values0.keys) {
       var x0 = values0[bucket].sublist(i) as List;
-      var x1 = values1[bucket] as List;
+      var x1 = values1[bucket] as List?;
       // It's either a volatilitySurface, or hourlyShape document.
       // Need to compare individual elements which are themselves lists.
       for (var i = 0; i < x0.length; i++) {
         var x0i = x0[i] as List;
         for (var j = 0; j < x0i.length; j++) {
-          if (!((x0i[j] as num).isCloseTo(x1[i][j] as num,
+          if (!((x0i[j] as num).isCloseTo(x1![i][j] as num,
               absoluteTolerance: marksAbsTolerance))) {
             return true;
           }
@@ -173,8 +173,8 @@ class ForwardMarksArchive {
         return true;
       }
       for (var bucket in a.keys) {
-        if (!a[bucket]
-            .isCloseTo(b[bucket], absoluteTolerance: marksAbsTolerance)) {
+        if (!a[bucket]!
+            .isCloseTo(b[bucket]!, absoluteTolerance: marksAbsTolerance)) {
           return true;
         }
       }
@@ -193,7 +193,7 @@ class ForwardMarksArchive {
       'terms',
     };
     if (!keys.containsAll(mustHaveKeys)) {
-      throw ArgumentError('Document ${document} is missing required fields.');
+      throw ArgumentError('Document $document is missing required fields.');
     }
     var fromDate = Date.parse(document['fromDate'] as String);
 
@@ -213,7 +213,7 @@ class ForwardMarksArchive {
 
   /// Get the document for this [curveId] and [fromDate].
   static Future<Map<String, dynamic>> getDocument(
-      String asOfDate, String curveId, mongo.DbCollection coll) async {
+      String asOfDate, String? curveId, mongo.DbCollection coll) async {
     var pipeline = [
       {
         '\$match': {

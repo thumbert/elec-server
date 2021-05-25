@@ -63,7 +63,7 @@ updateDb() async {
   await archive.dbConfig.db.open();
   for (var link in links) {
 //    await archive.downloadFile(link);
-    var file = File(archive.dir + getFilename(link));
+    var file = File(archive.dir! + getFilename(link));
     print('Working on ${file.path}');
     var data = archive.readXlsx(file);
     //print(data);

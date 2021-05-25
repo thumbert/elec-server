@@ -3,10 +3,10 @@ library ui.numeric_range_filter;
 import 'dart:html' as html;
 
 class NumericRangeFilter {
-  html.Element wrapper;
-  html.TextInputElement _min;
-  html.TextInputElement _max;
-  num _defaultMin, _defaultMax;
+  html.Element? wrapper;
+  late html.TextInputElement _min;
+  late html.TextInputElement _max;
+  num? _defaultMin, _defaultMax;
   String name;
 
   /// A two way range filter for a numeric variable.
@@ -15,7 +15,7 @@ class NumericRangeFilter {
   ///
   /// Need to trigger an action onChange.
   NumericRangeFilter(this.wrapper, num minValue, num maxValue, this.name,
-      {int size}) {
+      {int? size}) {
     _defaultMin = minValue;
     _defaultMax = maxValue;
     size ??= 4;
@@ -42,20 +42,20 @@ class NumericRangeFilter {
       ..value = maxValue.round().toString();
     _wrapper.children.add(_max);
 
-    wrapper.children.add(_wrapper);
+    wrapper!.children.add(_wrapper);
   }
 
-  num get minValue {
+  num? get minValue {
     var minV, maxV;
-    if (_min.value.isEmpty) {
+    if (_min.value!.isEmpty) {
       minV = _defaultMin;
     } else {
-      minV = num.parse(_min.value);
+      minV = num.parse(_min.value!);
     }
     if (_max.value == '') {
       maxV = _defaultMax;
     } else {
-      maxV = num.parse(_max.value);
+      maxV = num.parse(_max.value!);
     }
     if (minV > maxV) {
       _min.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
@@ -67,15 +67,15 @@ class NumericRangeFilter {
 
   num get maxValue {
     var minV, maxV;
-    if (_min.value.isEmpty) {
+    if (_min.value!.isEmpty) {
       minV = _defaultMin;
     } else {
-      minV = num.parse(_min.value);
+      minV = num.parse(_min.value!);
     }
     if (_max.value == '') {
       maxV = _defaultMax;
     } else {
-      maxV = num.parse(_max.value);
+      maxV = num.parse(_max.value!);
     }
     if (minV > maxV) {
       _max.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
@@ -87,7 +87,7 @@ class NumericRangeFilter {
 
   /// trigger a change when either one of the two inputs change
   void onChange(Function x) {
-    _min.onChange.listen(x);
-    _max.onChange.listen(x);
+    _min.onChange.listen(x as void Function(html.Event)?);
+    _max.onChange.listen(x as void Function(html.Event)?);
   }
 }

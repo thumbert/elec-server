@@ -7,7 +7,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class ApiPtids {
-  DbCollection coll;
+  late DbCollection coll;
   String collectionName = 'pnode_table';
 
   ApiPtids(Db db) {

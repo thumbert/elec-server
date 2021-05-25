@@ -11,9 +11,9 @@ class RegulationRequirement {
   String servicePath;
   final location = getLocation('America/New_York');
 
-  List<Map<String, dynamic>> cache;
-  num Function(Hour) fCapacity;
-  num Function(Hour) fService;
+  List<Map<String, dynamic>>? cache;
+  late num? Function(Hour) fCapacity;
+  late num? Function(Hour) fService;
 
   RegulationRequirement(http.Client client,
       {this.rootUrl = 'http://localhost:8000',
@@ -83,7 +83,7 @@ class RegulationRequirement {
               return e['weekday'] == weekday;
             }
           }).first;
-          return one['value'] as num;
+          return one['value'] as num?;
         }
       }
       return null;
@@ -110,7 +110,7 @@ class RegulationRequirement {
               return e['weekday'] == weekday;
             }
           }).first;
-          return one['value'] as num;
+          return one['value'] as num?;
         }
       }
       return null;

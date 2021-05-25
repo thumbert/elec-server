@@ -8,8 +8,8 @@ import 'package:date/date.dart';
 
 // @ApiClass(name: 'zonal_demand', version: 'v1')
 class ZonalDemand {
-  DbCollection coll;
-  Location _location;
+  late DbCollection coll;
+  late Location _location;
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'zonal_demand';
 
@@ -58,13 +58,13 @@ class ZonalDemand {
         ]));
       }
     }
-    return out;
+    return out as FutureOr<List<Map<String, String>>>;
   }
 
 
   /// Workhorse to extract the data ...
   /// returns one element for each day
-  Stream _getHourlyData(String zone, {Date startDate, Date endDate}) {
+  Stream _getHourlyData(String zone, {Date? startDate, Date? endDate}) {
     var pipeline = [];
     var match = {};
     zone = zone.toUpperCase();
@@ -79,6 +79,6 @@ class ZonalDemand {
     pipeline.add({
       '\$project': {'_id': 0}
     });
-    return coll.aggregateToStream(pipeline);
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>);
   }
 }

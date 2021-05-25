@@ -11,7 +11,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class SrRsvCharge {
-  DbCollection coll;
+  late DbCollection coll;
   final collectionName = 'sr_rsvcharge';
 
   SrRsvCharge(Db db) {

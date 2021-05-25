@@ -5,27 +5,27 @@ import 'dart:math';
 /// Port of https://www.w3schools.com/howto/howto_js_autocomplete.asp
 
 class TypeAhead {
-  DivElement wrapper;
-  InputElement _input;
+  DivElement? wrapper;
+  late InputElement _input;
   List<String> values;
 
   /// the max height of the dropdown in px
   int maxHeight;
   int maxDropdown;
-  String _value;
+  String? _value;
 
   // the wrapper for the autocomplete-list
-  DivElement _al;
-  int _currentFocus;
+  late DivElement _al;
+  late int _currentFocus;
   /// All matches that satisfy the input.  Only [maxDropdown] elements of
   /// this list are shown on the screen.
-  List<DivElement> _bs;
+  late List<DivElement> _bs;
 
 
   TypeAhead(this.wrapper, this.values,
       {String placeholder = '', this.maxHeight = 300, this.maxDropdown = 12}) {
     _input = InputElement(type: 'text')
-      ..id = '${wrapper.id}-input'
+      ..id = '${wrapper!.id}-input'
       ..placeholder = placeholder;
 
     // a div element that will hold all the items
@@ -50,13 +50,13 @@ class TypeAhead {
 //            .where((e) => e.toUpperCase().startsWith(_value.toUpperCase()));
         /// match everywhere inside
         candidates = values
-            .where((e) => e.toUpperCase().contains(_value.toUpperCase()))
+            .where((e) => e.toUpperCase().contains(_value!.toUpperCase()))
             .toList();
       }
 
       for (var value in candidates) {
         // highlight the match with <strong>
-        var regex = RegExp(_value, caseSensitive: false);
+        var regex = RegExp(_value!, caseSensitive: false);
         var matches = regex.allMatches(value);
         var splits = value.split(regex);
         var innerHtml = '';
@@ -67,7 +67,7 @@ class TypeAhead {
         var _b = DivElement()..innerHtml = innerHtml;
 //        _b.innerHtml = '<strong>${value.substring(0, _value.length)}</strong>';
 //        _b.innerHtml += value.substring(_value.length);
-        _b.innerHtml += '<input type="hidden" value="${value}">';
+        _b.innerHtml = _b.innerHtml! + '<input type="hidden" value="$value">';
         _b.onClick.listen((e) {
           _input.value = value;
           _closeAllLists();
@@ -101,8 +101,8 @@ class TypeAhead {
     });
     _input.onClick.listen((e) => _closeAllLists());
 
-    wrapper.children.add(_input);
-    wrapper.children.add(_al);
+    wrapper!.children.add(_input);
+    wrapper!.children.add(_al);
   }
 
   void _addActive(List<DivElement> xs) {
@@ -123,15 +123,15 @@ class TypeAhead {
 
   }
 
-  String get value => _input.value;
+  String? get value => _input.value;
 
   void setAttribute(String name, String value) => _input.setAttribute(name, value);
 
-  set value(String x) => _input.value = x;
+  set value(String? x) => _input.value = x;
 
   set spellcheck(bool value) => _input.spellcheck = value;
 
-  void onSelect(Function x) => _input.onSelect.listen(x);
+  void onSelect(Function x) => _input.onSelect.listen(x as void Function(Event)?);
 
 
   void _removeActive(List<DivElement> xs) {

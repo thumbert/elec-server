@@ -10,7 +10,7 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 /// prepare data by downloading a few reports
 prepareData() async {
   var archive = RtSystemDemandReportArchive();
-  var days = [Date(2018, 1, 1), Date(2018, 1, 31)];
+  var days = [Date.utc(2018, 1, 1), Date.utc(2018, 1, 31)];
   await archive.downloadDays(days);
 }
 

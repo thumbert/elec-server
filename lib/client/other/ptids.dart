@@ -19,7 +19,7 @@ class PtidsApi {
   /// Get ptid table
   /// [asOfDate] - Path parameter: 'asOfDate'.  If [null] return the last
   /// date in the database.
-  Future<List<Map<String, Object>>> getPtidTable({Date asOfDate}) async {
+  Future<List<Map<String, dynamic>>> getPtidTable({Date? asOfDate}) async {
     var _url = rootUrl + servicePath;
     if (asOfDate == null) {
       _url += 'current';
@@ -44,16 +44,16 @@ class PtidsApi {
   Future<List<int>> getPtidsForZone(String zoneName) async {
     if (_ptidTableCache.isEmpty) {
       var aux = await getPtidTable();
-      _ptidTableCache = {for (var e in aux) e['ptid']: e};
+      _ptidTableCache = {for (var e in aux) e['ptid'] as int: e};
     }
 
     if (zoneName == 'All') {
       return _ptidTableCache.keys.toList();
     } else {
-      var zonePtid = zoneMap[zoneName];
+      var zonePtid = zoneMap[zoneName]!;
       var ptids = _ptidTableCache.entries
           .where((e) => e.value['zonePtid'] == zonePtid)
-          .map((e) => e.value['ptid']);
+          .map((e) => e.value['ptid'] as int);
       return [zonePtid, ...ptids];
     }
   }

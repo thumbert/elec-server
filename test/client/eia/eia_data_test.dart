@@ -9,7 +9,7 @@ import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/client/eia/eia_data.dart';
 
 /// retrieve the key from the environment variables
-String getEiaKey() {
+String? getEiaKey() {
   var env = Platform.environment;
   if (!env.containsKey('EIA_API_KEY'))
     throw new StateError('EIA_API_KEY is not set as an enviroment variable.');
@@ -28,7 +28,7 @@ tests() async {
       expect(aux.containsKey('data'), true);
       expect((aux['data'] as List).length > 400, true);
       var ts = processSeries(aux);
-      expect(ts.observationAt(Date(2018,12,21)).value, 2725);
+      expect(ts.observationAt(Date.utc(2018,12,21)).value, 2725);
       //ts.sublist(460).forEach(print);
     });
   });

@@ -8,25 +8,22 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
   final String reportName = 'NCPC Rapid Response Pricing Opportunity Cost';
   var _setEq = const SetEquality();
 
-  NcpcRapidResponsePricingReportArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'ncpc';
-
+  NcpcRapidResponsePricingReportArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'NCPC/RapidResponsePricingOpportunityCost/Raw/';
+    this.dir = dir;
   }
 
-  String getUrl(Date asOfDate) =>
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=rrp&start=' +
       yyyymmdd(asOfDate);
 
-  File getFilename(Date asOfDate) =>
+  File getFilename(Date? asOfDate) =>
       File(dir + 'ncpc_rrp_' + yyyymmdd(asOfDate) + '.csv');
 
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {

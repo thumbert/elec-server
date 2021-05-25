@@ -3,10 +3,10 @@ library ui.categorical_dropdown_checkbox_filter;
 import 'dart:html' as html;
 
 class CategoricalDropdownCheckboxFilter {
-  html.Element wrapper;
-  html.Element _wrapper;
-  html.SelectElement _selector;
-  html.CheckboxInputElement _checkboxInputElement;
+  html.Element? wrapper;
+  late html.Element _wrapper;
+  late html.SelectElement _selector;
+  late html.CheckboxInputElement _checkboxInputElement;
   String name;
 
   /// A dropdown filter for a categorical variable, for example a list of
@@ -22,7 +22,7 @@ class CategoricalDropdownCheckboxFilter {
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
 
     // create a random string for the checkbox id
-    var id = '${wrapper.id}__cb__${name}';
+    var id = '${wrapper!.id}__cb__${name}';
     _checkboxInputElement = html.CheckboxInputElement()..id = id;
     _wrapper.children.add(_checkboxInputElement);
 
@@ -41,12 +41,12 @@ class CategoricalDropdownCheckboxFilter {
     });
     _wrapper.children.add(_selector);
 
-    wrapper.children.add(_wrapper);
+    wrapper!.children.add(_wrapper);
   }
 
-  set value(String x) => _selector.value = x;
+  set value(String? x) => _selector.value = x;
 
-  String get value => _selector.value;
+  String? get value => _selector.value;
 
   void setAttribute(String name, String value) =>
       _wrapper.setAttribute(name, value);
@@ -63,11 +63,11 @@ class CategoricalDropdownCheckboxFilter {
     });
   }
   
-  bool get checked => _checkboxInputElement.checked;
+  bool? get checked => _checkboxInputElement.checked;
 
   void onChange(Function x) {
-    _selector.onChange.listen(x);
-    _checkboxInputElement.onChange.listen(x);
+    _selector.onChange.listen(x as void Function(html.Event)?);
+    _checkboxInputElement.onChange.listen(x as void Function(html.Event)?);
   }
 }
 

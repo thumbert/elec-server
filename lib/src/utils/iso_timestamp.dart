@@ -33,7 +33,7 @@ TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
 List<String> toIsoHourEndingStamp(TZDateTime hourBeginning) {
   var hour = Hour.beginning(hourBeginning);
   var offsetStart = hour.start.timeZoneOffset.inHours;
-  var isFallBack = isFallBackDate(Date(
+  var isFallBack = isFallBackDate(Date.utc(
       hourBeginning.year, hourBeginning.month, hourBeginning.day));
   var res = [hour.start.toString().substring(0,10)];
 
@@ -75,7 +75,7 @@ bool isFallBackDate(Date date) {
 
 /// When you read the MIS reports with csv, the hour ending is an integer.
 /// Fix it with this function.
-String stringHourEnding(dynamic hourEnding) {
+String? stringHourEnding(dynamic hourEnding) {
   if (hourEnding is int) {
     hourEnding = hourEnding.toString().padLeft(2, '0');
   }

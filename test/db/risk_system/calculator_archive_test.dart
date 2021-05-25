@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'calculator_examples.dart';
 
-void insertData(CalculatorArchive archive) async {
+Future<void> insertData(CalculatorArchive archive) async {
   var xs = [
     calc1(),
     calc2(),
@@ -26,8 +26,8 @@ void tests(String rootUrl) async {
   // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = CalculatorArchive();
   group('CalculatorArchive api tests:', () {
-    setUp(() async => await archive.db.open());
-    tearDown(() async => await archive.db.close());
+    setUp(() async => await archive.db!.open());
+    tearDown(() async => await archive.db!.close());
     test('get all users', () async {
       var aux = await http.get(Uri.parse('$rootUrl/calculators/v1/users'),
           headers: {'Content-Type': 'application/json'});
@@ -51,8 +51,7 @@ void tests(String rootUrl) async {
           'calculator-name/custom monthly quantities, 1 leg';
       var aux =
           await http.get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
-      var res = json.decode(aux.body);
-      var calc = json.decode(res['result'] as String);
+      var calc = json.decode(aux.body);
       expect(calc['userId'], 'e11111');
     });
     test('save a calculator, then delete it', () async {
@@ -98,12 +97,12 @@ void tests(String rootUrl) async {
 
 void repopulateDb() async {
   var archive = CalculatorArchive();
-  await archive.db.open();
+  await archive.db!.open();
   // await archive.db.dropCollection('calculators');
   // await archive.dbConfig.coll.remove(<String, dynamic>{});
   await insertData(archive);
   // await archive.setup();
-  await archive.db.close();
+  await archive.db!.close();
 }
 
 void main() async {

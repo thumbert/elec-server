@@ -3,12 +3,12 @@ library ui.numeric_input;
 import 'dart:html' as html;
 
 class NumericInput {
-  html.Element wrapper, _wrapper;
-  html.TextInputElement _textInput;
+  html.Element? wrapper, _wrapper;
+  late html.TextInputElement _textInput;
   String leftLabel, rightLabel;
-  num initialValue;
+  num? initialValue;
   String thousandSeparator;
-  num placeholder;
+  num? placeholder;
 
   /// A numeric input with a label.
   ///
@@ -23,25 +23,25 @@ class NumericInput {
       this.thousandSeparator = ','}) {
     _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
-    _wrapper.children.add(html.LabelElement()..text = leftLabel);
+    _wrapper!.children.add(html.LabelElement()..text = leftLabel);
     _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px;margin-right: 15px')
       ..placeholder = (placeholder == null) ? '' : placeholder.toString()
       ..size = size
       ..value = (initialValue == null) ? '' : initialValue.toString();
-    _wrapper.children.add(_textInput);
-    _wrapper.children.add(html.LabelElement()..text = rightLabel);
+    _wrapper!.children.add(_textInput);
+    _wrapper!.children.add(html.LabelElement()..text = rightLabel);
 
-    wrapper.children.add(_wrapper);
+    wrapper!.children.add(_wrapper!);
   }
 
-  num get value {
-    num aux;
-    if (_textInput.value.isEmpty) {
+  num? get value {
+    num? aux;
+    if (_textInput.value!.isEmpty) {
       aux = initialValue;
     } else {
       try {
-        aux = num.parse(_textInput.value.replaceAll(thousandSeparator, ''));
+        aux = num.parse(_textInput.value!.replaceAll(thousandSeparator, ''));
         _textInput.setAttribute('style',
             'margin-left: 15px; margin-right: 15px; border-color: initial;');
       } catch (e) {
@@ -53,10 +53,10 @@ class NumericInput {
   }
 
   void setAttribute(String name, String value) =>
-      _wrapper.setAttribute(name, value);
+      _wrapper!.setAttribute(name, value);
 
   /// trigger a change when either one of the two inputs change
   void onChange(Function x) {
-    _textInput.onChange.listen(x);
+    _textInput.onChange.listen(x as void Function(html.Event)?);
   }
 }

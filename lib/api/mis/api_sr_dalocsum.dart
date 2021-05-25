@@ -12,7 +12,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class SrDaLocSum {
-  DbCollection coll;
+  late DbCollection coll;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sr_dalocsum';
 
@@ -215,12 +215,12 @@ class SrDaLocSum {
   /// Get daily total for a subaccount for a given location, one settlement.
   Future<List<Map<String, dynamic>>> _getDailyData(
       String accountId,
-      String subaccountId,
+      String? subaccountId,
       String startDate,
       String endDate,
-      String locations,
+      String? locations,
       int settlement,
-      {List<String> columns}) async {
+      {required List<String> columns}) async {
     var _locations = <int>[];
     if (locations != null) {
       _locations = locations.split(',').map((e) => int.parse(e)).toList();
@@ -404,9 +404,9 @@ class SrDaLocSum {
   /// If [column] is [null] return all columns
   Future<List<Map<String, dynamic>>> getData(
       String account,
-      String subaccountId,
-      int locationId,
-      String column,
+      String? subaccountId,
+      int? locationId,
+      String? column,
       Date startDate,
       Date endDate) async {
     var excludeFields = <String>['_id', 'account', 'tab', 'date'];

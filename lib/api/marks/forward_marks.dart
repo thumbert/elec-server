@@ -28,16 +28,18 @@ final _curveCompositionRules = <String, CompositionRule>{
 
 class ForwardMarks {
   mongo.Db db;
-  mongo.DbCollection coll, collCurveId;
+  late mongo.DbCollection coll;
+  late mongo.DbCollection collCurveId;
 
   final log = Logger('ForwardMarks API');
 
   /// Cache with curve details to be used by composite curves.
-  static Cache<String, Map<String, dynamic>> curveIdCache;
+  /// TODO:  What to do if there is no curve?
+  static late Cache<String, Map<String, dynamic>?> curveIdCache;
 
   /// Cache with curve values.  The key is: (asOfDate, curveId)
   /// TODO: if curves are resubmitted intra-day, they need be removed from the cache
-  static Cache<Tuple2<Date, String>, MarksCurve> marksCache;
+  static late Cache<Tuple2<Date, String>, MarksCurve> marksCache;
 
   final headers = {
     'Content-Type': 'application/json',
@@ -49,7 +51,7 @@ class ForwardMarks {
     coll = db.collection('forward_marks');
 
     collCurveId = db.collection('curve_ids');
-    curveIdCache = Cache<String, Map<String, dynamic>>.lru(
+    curveIdCache = Cache<String, Map<String, dynamic>?>.lru(
         loader: _curveIdCacheLoader, maximumSize: 10000);
     marksCache = Cache<Tuple2<Date, String>, MarksCurve>.lru(
         loader: (x) => getForwardCurve(x.item1, x.item2), maximumSize: 10000);
@@ -136,7 +138,7 @@ class ForwardMarks {
   }
 
   /// Get all the dates a curve was marked.
-  Future<List<String>> getFromDatesForCurveId(String curveId) async {
+  Future<List<String?>> getFromDatesForCurveId(String curveId) async {
     var pipeline = [
       {
         '\$match': {
@@ -155,12 +157,12 @@ class ForwardMarks {
     ];
     return await coll
         .aggregateToStream(pipeline)
-        .map((e) => e['fromDate'] as String)
+        .map((e) => e['fromDate'] as String?)
         .toList();
   }
 
   /// Get all the curves that were marked on this date
-  Future<List<String>> getCurveIdsForFromDate(String fromDate) async {
+  Future<List<String?>> getCurveIdsForFromDate(String fromDate) async {
     var pipeline = [
       {
         '\$match': {
@@ -179,7 +181,7 @@ class ForwardMarks {
     ];
     return await coll
         .aggregateToStream(pipeline)
-        .map((e) => e['curveId'] as String)
+        .map((e) => e['curveId'] as String?)
         .toList();
   }
 
@@ -250,13 +252,13 @@ class ForwardMarks {
       // return from prompt month forward
       var start = Month.fromTZDateTime(asOfDate.start).next.start;
       var end = (curve as VolatilitySurface).terms.last.end;
-      (curve as VolatilitySurface).window(Interval(start, end));
+      curve.window(Interval(start, end));
     } else if (curveId.contains('hourlyshape')) {
       curve = toHourlyShape(x, location);
       // return from cash month forward
       var start = TZDateTime(location, asOfDate.year, asOfDate.month);
       var end = (curve as HourlyShape).data.last.interval.end;
-      (curve as HourlyShape).window(Interval(start, end));
+      curve.window(Interval(start, end));
     } else {
       // return from next day after asOfDate
       curve = toPriceCurve(x, asOfDate, location);
@@ -270,7 +272,7 @@ class ForwardMarks {
       Date asOfDate, Map<String, dynamic> curveDetails) async {
     var rule = curveDetails['rule'];
     if (_curveCompositionRules.containsKey(rule)) {
-      return _curveCompositionRules[rule](asOfDate, curveDetails);
+      return _curveCompositionRules[rule]!(asOfDate, curveDetails);
     }
     print('Rule $rule not supported yet for ${curveDetails['curveId']}');
     return MarksCurveEmpty();
@@ -319,7 +321,7 @@ class ForwardMarks {
 
   /// Loader for [curveIdCache] with all curveDetails.  Returns [null] if
   /// curve doesn't exist.
-  Future<Map<String, dynamic>> _curveIdCacheLoader(String curveId) {
+  Future<Map<String, dynamic>?> _curveIdCacheLoader(String curveId) {
     return collCurveId.findOne({'curveId': curveId});
   }
 
@@ -343,10 +345,14 @@ class ForwardMarks {
     var terms = document['terms'] as List;
     var xs = <IntervalTuple<Map<Bucket, num>>>[];
     for (var i = 0; i < terms.length; i++) {
-      var one = {
-        for (var bucket in bKeys)
-          buckets[bucket]: document['buckets'][bucket][i] as num
-      };
+      var one = <Bucket,num>{};
+      for (var bucket in bKeys) {
+        num? aux = document['buckets'][bucket][i];
+        if (aux != null) {
+          one[buckets[bucket]!] = aux;
+        }
+      }
+
       Interval term;
       if (terms[i].length == 7) {
         term = Month.parse(terms[i] as String, location: location);

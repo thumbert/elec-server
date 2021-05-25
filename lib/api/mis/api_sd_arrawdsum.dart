@@ -13,8 +13,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class SdArrAwdSum {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  Location? location;
   var collectionName = 'sd_arrawdsum';
 
   SdArrAwdSum(Db db) {
@@ -118,6 +118,7 @@ class SdArrAwdSum {
 
   List<Map<String, dynamic>> _aggregate(
       List<Map<String, dynamic>> ys, int settlement) {
+    if (ys.isEmpty) return ys;
     var data = getNthSettlement(ys, (e) => e['month'], n: settlement);
     var xs = expandDocument(data, {'month'},
         {'Market Name', 'Location ID', 'Peak Hour Load', 'Load Share Dollars'});
@@ -127,10 +128,10 @@ class SdArrAwdSum {
       ..key((e) => e['month'])
       ..key((e) => e['Location ID'])
       ..key((e) => e['Peak Hour Load'])
-      ..rollup((List x) => sum(x.map((e) => e['Load Share Dollars'])));
+      ..rollup((List x) => sum(x.map(((e) => e['Load Share Dollars'] as num))));
     var aux = nest.map(xs);
     var out = flattenMap(
         aux, ['month', 'Location ID', 'Peak Hour Load', 'Load Share Dollars']);
-    return out;
+    return out!;
   }
 }

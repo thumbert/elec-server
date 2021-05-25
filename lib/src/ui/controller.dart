@@ -2,13 +2,13 @@ library ui.controller;
 
 class Controller {
   /// Keep track of which checkboxes are toggled
-  var checkboxes = <String>[];
+  List<String>? checkboxes = <String>[];
 
   /// Keep track of which value selectors have values
-  var filters = <String,dynamic>{};
+  Map<String, dynamic>? filters = <String,dynamic>{};
 
   /// Keep track of which range selectors have values
-  var ranges = <String,List<num>>{};
+  Map<String, List<num>>? ranges = <String,List<num>>{};
 
   /// A Controller to keep track of UI elements that are selected and/or toggled.
   /// This allows you to separate the aggregation logic from the UI elements,
@@ -27,17 +27,17 @@ class Controller {
   
   String toString() {
     var out = '';
-    if (checkboxes.isNotEmpty)
-      out = out + 'checkboxes: ${checkboxes.join(',')}\n';
-    if (filters.isNotEmpty) {
+    if (checkboxes!.isNotEmpty)
+      out = out + 'checkboxes: ${checkboxes!.join(',')}\n';
+    if (filters!.isNotEmpty) {
       out = out + 'filters:\n';
-      for (var e in filters.entries) {
+      for (var e in filters!.entries) {
         out = out + '   ${e.key}: ${e.value}\n';
       }
     }
-    if (ranges.isNotEmpty) {
+    if (ranges!.isNotEmpty) {
       out = out + 'ranges:\n';
-      for (var e in filters.entries) {
+      for (var e in filters!.entries) {
         out = out + '   ${e.key}: {min: ${e.value[0]}, max: ${e.value[1]}}\n';
       }
     }

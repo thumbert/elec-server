@@ -12,27 +12,26 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class RtSystemDemandReportArchive extends DailyIsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
   var location = getLocation('America/New_York');
 
-  RtSystemDemandReportArchive({this.dbConfig, this.dir}) {
-    if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'system_demand';
-    }
-    if (dir == null) dir = baseDir + 'EnergyReports/RtHourlyDemand/Raw/';
+  RtSystemDemandReportArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'system_demand');
+    this.dbConfig = dbConfig;
+    dir ??= baseDir + 'EnergyReports/RtHourlyDemand/Raw/';
+    this.dir = dir;
   }
+  @override
   String reportName = 'Real-Time Hourly System Load Report';
-  String getUrl(Date asOfDate) =>
+  @override
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hourlysystemdemand?start=' +
       yyyymmdd(asOfDate) +
       '&end=' +
       yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) =>
-      new File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
+  @override
+  File getFilename(Date? asOfDate) =>
+      File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
   /// File may be incomplete if downloaded during the day ...
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
@@ -77,7 +76,7 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   /// Recreate the collection from scratch.
   setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
 
@@ -86,7 +85,7 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
     await dbConfig.db.close();
   }
 
-  Future<Map<String, String>> lastDay() async {
+  Future<Map<String, String?>> lastDay() async {
     List pipeline = [];
     pipeline.add({
       '\$group': {
@@ -98,8 +97,8 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
     return {'lastDay': res['result'][0]['lastDay']};
   }
 
-  Date lastDayAvailable() => Date.today().subtract(2);
+  Date lastDayAvailable() => Date.today(location: UTC).subtract(2);
   Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(mongo.where.eq('date', day.toString()));
+    return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString())) as FutureOr<Null>);
   }
 }

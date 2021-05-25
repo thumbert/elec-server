@@ -7,21 +7,21 @@ enum LayoutMode { layout, simple, table, linePrinter, raw }
 /// Read a pdf file using the xpdf tools (pdftotext utility).
 ///
 Future<List<String>> readPdf(File file,
-    {int firstPage,
-    int lastPage,
-    LayoutMode layoutMode,
-    bool raw,
-    int fixed,
-    int lineSpacing,
-    bool noDiagonalText,
-    String eol, // one of 'unix', 'dos', 'mac'
-    bool noPageBreaks,
-    bool byteOrderMarker,
-    String ownerPassword,
-    String userPassword,
-    bool quiet,
-    File fileout,
-    Directory pathTopdftotext}) async {
+    {int? firstPage,
+    int? lastPage,
+    LayoutMode layoutMode = LayoutMode.simple,
+    bool? raw,
+    int? fixed,
+    int? lineSpacing,
+    bool? noDiagonalText,
+    String? eol, // one of 'unix', 'dos', 'mac'
+    bool? noPageBreaks,
+    bool? byteOrderMarker,
+    String? ownerPassword,
+    String? userPassword,
+    bool? quiet,
+    File? fileout,
+    required Directory pathTopdftotext}) async {
   var executable = '"${pathTopdftotext.path}pdftotext" "' + file.path + '"';
 
   var options = <String>[];

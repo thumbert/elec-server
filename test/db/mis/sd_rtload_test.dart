@@ -20,9 +20,9 @@ void tests() async {
           .listSync()
           .where((e) => basename(e.path).startsWith('sd_rtload_'))
           .first;
-      var data = archive.processFile(file);
+      var data = archive.processFile(file as File);
       expect(data.keys.toSet(), {0}); // only one tab
-      var xs = data[0];
+      var xs = data[0]!;
       expect(xs.length, 5); // 5 load asset ids
       expect(xs.first.keys.toSet(), {
         'date',
@@ -60,7 +60,7 @@ void tests() async {
 }
 
 void main() async {
-  await initializeTimeZones();
+  initializeTimeZones();
   DbProd();
-  await tests();
+  tests();
 }

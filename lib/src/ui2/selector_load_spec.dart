@@ -3,9 +3,10 @@ library ui2.selector_load_spec;
 import 'dart:html' as html;
 
 class LoadSpecSelector {
-  html.Element wrapper, inner;
+  html.Element? wrapper, inner;
 
-  html.InputElement _entityRadio, _assetIdRadio;
+  html.RadioButtonInputElement? _entityRadio, _assetIdRadio;
+
 
 
   LoadSpecSelector(this.wrapper) {
@@ -28,9 +29,9 @@ class LoadSpecSelector {
       ..className = 'custom-control-input'
       ..required = true;
 
-    inner.children.addAll([_entityRadio, _assetIdRadio]);
+    inner!.children.addAll([_entityRadio!, _assetIdRadio!]);
 
-    wrapper.children.add(inner);
+    wrapper!.children.add(inner!);
   }
 
 }

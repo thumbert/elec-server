@@ -10,7 +10,7 @@ class CalculatorClient {
   String rootUrl;
   String servicePath;
 
-  String _baseUrl;
+  late String _baseUrl;
 
   CalculatorClient(http.Client client,
       {this.rootUrl = 'http://localhost:9080',
@@ -20,7 +20,7 @@ class CalculatorClient {
 
   /// Delete a calculator from the database
   Future<Map<String, dynamic>> deleteCalculator(
-      String userId, String calculatorName) async {
+      String? userId, String? calculatorName) async {
     var url = _baseUrl + 'user/$userId/calculator-name/$calculatorName';
     var aux = await http.delete(Uri.parse(url));
     return json.decode(aux.body) as Map<String, dynamic>;

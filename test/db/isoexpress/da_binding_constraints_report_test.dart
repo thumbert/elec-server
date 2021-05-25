@@ -18,7 +18,7 @@ void tests(String rootUrl) async {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('read binding constraints file for 2017-12-31', () async {
-      var file = archive.getFilename(Date(2017, 12, 31));
+      var file = archive.getFilename(Date.utc(2017, 12, 31));
       var data = archive.processFile(file);
       expect(data.first, {
         'Constraint Name': 'BNGW',
@@ -31,13 +31,13 @@ void tests(String rootUrl) async {
       });
     });
     test('empty file for 2015-02-17', () async {
-      var file = archive.getFilename(Date(2015, 2, 17));
+      var file = archive.getFilename(Date.utc(2015, 2, 17));
       var data = archive.processFile(file);
       expect(data.isEmpty, true);
     });
     test('DA Binding Constraints Report for 2018-07-10 has duplicates',
         () async {
-      var file = archive.getFilename(Date(2018, 7, 10));
+      var file = archive.getFilename(Date.utc(2018, 7, 10));
       var data = archive.processFile(file);
       // 20 entries, only 10 unique
       expect(data.length, 10);
@@ -90,7 +90,7 @@ void tests(String rootUrl) async {
     test('get all occurrences of constraint Paris', () async {
       var name = 'PARIS   O154          A LN';
       var aux = await client.getDaBindingConstraint(
-          name, Date(2017, 1, 5), Date(2017, 1, 6));
+          name, Date.utc(2017, 1, 5), Date.utc(2017, 1, 6));
       expect(aux.length, 2);
     });
   });
@@ -101,7 +101,7 @@ void tests(String rootUrl) async {
 //   var archive = DaBindingConstraintsReportArchive();
 //   var days = Interval(
 //           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2018, 1, 1))
-//       .splitLeft((dt) => Date(dt.year, dt.month, dt.day, location: location));
+//       .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day, location: location));
 //   await archive.dbConfig.db.open();
 //   for (var day in days) {
 //     await archive.downloadDay(day);

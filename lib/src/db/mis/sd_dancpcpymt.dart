@@ -10,15 +10,15 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SdDaNcpcPymtArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SdDaNcpcPymtArchive({this.dbConfig}) {
+  SdDaNcpcPymtArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_DANCPCPYMT';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
@@ -56,7 +56,7 @@ class SdDaNcpcPymtArchive extends mis.MisReportArchive {
     /// tab 1, Generator credits section -- hourly
     labels['tab'] = 1;
     var x2 = mis.readReportTabAsMap(file, tab: 1);
-    var grp = groupBy(x2, (e) => e['Asset ID']);
+    var grp = groupBy(x2, (dynamic e) => e['Asset ID']);
     var tab1 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Asset ID'] = entry.key;
@@ -76,7 +76,7 @@ class SdDaNcpcPymtArchive extends mis.MisReportArchive {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
-    if (reportDate.isBefore(Date(2017, 3, 1))) {
+    if (reportDate.isBefore(Date.utc(2017, 3, 1))) {
       return <int,List<Map<String,dynamic>>>{};
     } else {
       return _processFile_21000101(file);

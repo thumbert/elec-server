@@ -20,14 +20,14 @@ void tests() {
       }
       return Future.value(out);
     };
-    var keyAssign = (Map<String, dynamic> e) => e['date'] as Date;
+    var keyAssign = (Map<String, dynamic> e) => e['date'] as Date?;
     var keysFromInterval = (Interval interval) =>
         interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
 
     test('domain test', () async {
       var cache = TermCache(loader, keyAssign, keysFromInterval);
       expect(cache.domain().isEmpty, true);
-      var term1 = parseTerm('1Jan19-4Jan19');
+      var term1 = parseTerm('1Jan19-4Jan19')!;
       await cache.set(term1);
       expect(cache.domain(), [term1]);
       expect(cache.get(term1).length, 4);
@@ -35,13 +35,13 @@ void tests() {
 
     test('get missing days only', () async {
       var cache = TermCache(loader, keyAssign, keysFromInterval);
-      var term1 = parseTerm('1Jan19-4Jan19');
+      var term1 = parseTerm('1Jan19-4Jan19')!;
       await cache.set(term1);
-      var term2 = parseTerm('8Jan19-12Jan19');
+      var term2 = parseTerm('8Jan19-12Jan19')!;
       await cache.set(term1);
       await cache.set(term2);
       expect(cache.domain(), [term1, term2]);
-      await cache.set(parseTerm('3Jan19-11Jan19'));
+      await cache.set(parseTerm('3Jan19-11Jan19')!);
       expect(cache.domain(), [parseTerm('1Jan19-12Jan19')]);
     });
 
@@ -58,7 +58,7 @@ void tests() {
         }
         return Future.value(out);
       };
-      var keyAssign = (Map<String, dynamic> e) => e['month'] as Month;
+      var keyAssign = (Map<String, dynamic> e) => e['month'] as Month?;
       var cache = MonthCache(loader, keyAssign);
       await cache.set(parseMonth('Oct19'));
       await cache.set(parseMonth('Nov19'));
@@ -68,5 +68,5 @@ void tests() {
 }
 
 void main() async {
-  await tests();
+  tests();
 }

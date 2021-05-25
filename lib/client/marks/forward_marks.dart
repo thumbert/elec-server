@@ -18,7 +18,7 @@ class ForwardMarks {
 
   /// Get marks for one curve, for one asOfDate, all available buckets.
   Future<PriceCurve> getForwardCurve(String curveId, Date asOfDate,
-      {Location tzLocation}) async {
+      {Location? tzLocation}) async {
     tzLocation ??= asOfDate.location;
     var _url = rootUrl +
         servicePath +
@@ -31,7 +31,7 @@ class ForwardMarks {
 
   /// Get the volatility surface.
   Future<VolatilitySurface> getVolatilitySurface(String curveId, Date asOfDate,
-      {Location tzLocation}) async {
+      {Location? tzLocation}) async {
     tzLocation ??= asOfDate.location;
     var _url = rootUrl +
         servicePath +
@@ -44,7 +44,7 @@ class ForwardMarks {
 
   /// Get hourly shape curve
   Future<HourlyShape> getHourlyShape(String curveId, Date asOfDate,
-      {Location tzLocation}) async {
+      {Location? tzLocation}) async {
     tzLocation ??= asOfDate.location;
     var _url = rootUrl +
         servicePath +

@@ -11,14 +11,14 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class SdRtloadArchive extends mis.MisReportArchive {
   @override
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
 
-  SdRtloadArchive({this.dbConfig}) {
+  SdRtloadArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_RTLOAD';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = 'sd_rtload';
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: 'sd_rtload');
+    }
   }
 
   Map<String, dynamic> rowConverter(
@@ -51,10 +51,10 @@ class SdRtloadArchive extends mis.MisReportArchive {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
     var version = report.timestamp();
-    var dataByAssetId = groupBy(data, (row) => row['Asset ID'] as int);
+    var dataByAssetId = groupBy(data, (dynamic row) => row['Asset ID'] as int?);
     var res = dataByAssetId.keys
         .map((assetId) =>
-            rowConverter(dataByAssetId[assetId], reportDate, version))
+            rowConverter(dataByAssetId[assetId]!, reportDate, version))
         .toList();
     return {0: res};
   }
@@ -74,7 +74,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
           'date': key.item2,
           'version': key.item3,
         });
-        await dbConfig.coll.insertAll(groups[key]);
+        await dbConfig.coll.insertAll(groups[key]!);
       }
       print(
           '--->  Inserted $reportName for ${data.first['date']} tab $tab, version ${data.first['version']} successfully');

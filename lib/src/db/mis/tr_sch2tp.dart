@@ -9,15 +9,15 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:table/table.dart';
 
 class TrSch2tpArchive extends mis.MisReportArchive {
-  @override
-  ComponentConfig dbConfig;
 
-  TrSch2tpArchive({this.dbConfig}) {
+  TrSch2tpArchive({ComponentConfig? dbConfig}) {
     reportName = 'TR_SCH2TP';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'mis',
+          collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
@@ -55,7 +55,7 @@ class TrSch2tpArchive extends mis.MisReportArchive {
     /// tab 1, data by subaccount
     labels['tab'] = 1;
     rows = mis.readReportTabAsMap(file, tab: 1);
-    var grp = groupBy(rows, (e) => e['Subaccount ID']);
+    var grp = groupBy(rows, (dynamic e) => e['Subaccount ID']);
     var tab1 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.value.first['Subaccount ID'];

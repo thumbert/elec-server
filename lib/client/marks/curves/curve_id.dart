@@ -12,7 +12,7 @@ class CurveIdClient {
       this.servicePath = '/curve_ids/v1/'});
 
   /// Get all curveIds in the database.
-  Future<List<String>> curveIds({String pattern}) async {
+  Future<List<String>> curveIds({String? pattern}) async {
     var _url = rootUrl + servicePath + 'curveIds';
     if (pattern != null) {
       _url += '/pattern/$pattern';
@@ -39,13 +39,15 @@ class CurveIdClient {
   }
 
   /// Get all serviceTypes.
-  Future<List<String>> serviceTypes(String commodity, String region) async {
+  /// As of 2021-05, some curves don't have serviceType specified, for example
+  /// the hourlyShape curves.
+  Future<List<String?>> serviceTypes(String commodity, String region) async {
     var _url = rootUrl +
         servicePath +
         'commodity/$commodity/region/$region/serviceTypes';
     var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
-    return data.cast<String>();
+    return data.cast<String?>();
   }
 
   /// Get all electricity documents for a region, serviceType.
@@ -59,7 +61,7 @@ class CurveIdClient {
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 
-  /// Get one curveId document
+  /// Get one curveId document.  If it doesn't exist return an empty Map.
   Future<Map<String, dynamic>> getCurveId(String curveId) async {
     var _url = rootUrl + servicePath + 'data/curveId/$curveId';
     var _response = await http.get(Uri.parse(_url));

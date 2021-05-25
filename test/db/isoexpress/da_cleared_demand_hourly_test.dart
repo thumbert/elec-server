@@ -15,8 +15,8 @@ Location location = getLocation('America/New_York');
 prepareData() async {
   var archive = new DaClearedDemandReportArchive();
   var days = [
-    new Date(2015,2,17),    // empty file
-    new Date(2017,12,13)    // plenty of constraints
+    new Date.utc(2015,2,17),    // empty file
+    new Date.utc(2017,12,13)    // plenty of constraints
   ];
   await archive.downloadDays(days);
 }
@@ -26,7 +26,7 @@ DaClearedDemandTest() async {
   group('DA Cleared Demand report', (){
     test('read da cleared demand files', () async {
       var archive = new DaClearedDemandReportArchive();
-      File file = archive.getFilename(new Date(2017,1,1));
+      File file = archive.getFilename(new Date.utc(2017,1,1));
       var data = archive.processFile(file);
       expect(data.length, 1);
       expect(data.first['Day-Ahead Cleared Demand'].first, 11167.0);
@@ -39,7 +39,7 @@ uploadDaysDa() async {
   List days =
   new Interval(new TZDateTime(location, 2017, 1, 1),
       new TZDateTime(location, 2018, 1, 1))
-      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+      .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   await for (var day in new Stream.fromIterable(days)) {
     await archive.downloadDay(day);
@@ -54,7 +54,7 @@ uploadDaysRt() async {
   List days =
   new Interval(new TZDateTime(location, 2017, 1, 5),
       new TZDateTime(location, 2017, 12, 20))
-      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+      .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
   await for (var day in new Stream.fromIterable(days)) {
     await archive.downloadDay(day);

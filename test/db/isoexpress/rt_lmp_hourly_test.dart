@@ -11,13 +11,13 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 /// prepare data by downloading a few reports
 prepareData() async {
   var archive = new RtLmpHourlyArchive();
-  var days = [new Date(2017, 3, 12), new Date(2017, 11, 5)];
+  var days = [new Date.utc(2017, 3, 12), new Date.utc(2017, 11, 5)];
   await archive.downloadDays(days);
 }
 
 RtLmpHourlyTest() async {
   group('RT hourly lmp report', () {
-    RtLmpHourlyArchive archive;
+    late RtLmpHourlyArchive archive;
     setUp(() async {
       archive = new RtLmpHourlyArchive();
       await archive.dbConfig.db.open();
@@ -27,23 +27,23 @@ RtLmpHourlyTest() async {
     });
 
 //    test('RT hourly lmp report, DST day spring', () async {
-//      File file = archive.getFilename(new Date(2017, 3, 12));
+//      File file = archive.getFilename(new Date.utc(2017, 3, 12));
 //      var res = await archive.processFile(file);
 //      expect(res.first['hourBeginning'].length, 23);
 //    });
 //    test('RT hourly lmp report, DST day fall', () async {
-//      File file = archive.getFilename(new Date(2017, 11, 5));
+//      File file = archive.getFilename(new Date.utc(2017, 11, 5));
 //      var res = await archive.processFile(file);
 //      expect(res.first['hourBeginning'].length, 25);
 //    });
     test('Insert one day', () async {
-      await archive.downloadDay(new Date(2017, 1, 1));
-      await archive.insertDay(new Date(2017, 1, 1));
+      await archive.downloadDay(new Date.utc(2017, 1, 1));
+      await archive.insertDay(new Date.utc(2017, 1, 1));
     });
     test('insert several days', () async {
       List days =
-          new Interval(new Date(2017, 1, 1).start, new Date(2017, 1, 5).start)
-              .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+          new Interval(new Date.utc(2017, 1, 1).start, new Date.utc(2017, 1, 5).start)
+              .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
       for (var day in days) {
         await archive.downloadDay(day);
         await archive.insertDay(day);
@@ -55,8 +55,8 @@ RtLmpHourlyTest() async {
 Future fillDb() async {
   var archive = new RtLmpHourlyArchive();
   await archive.dbConfig.db.open();
-  List days = new Interval(new Date(2017,12,31).start, new Date(2018,1,1).start)
-      .splitLeft((dt) => new Date(dt.year, dt.month, dt.day));
+  List days = new Interval(new Date.utc(2017,12,31).start, new Date.utc(2018,1,1).start)
+      .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
   for (var day in days) {
     await archive.downloadDay(day);
     await archive.insertDay(day);

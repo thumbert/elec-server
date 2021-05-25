@@ -9,8 +9,8 @@ import 'package:timezone/standalone.dart';
 import 'package:elec_server/api/utilities/api_load_eversource.dart';
 
 void tests() async {
-  Db db;
-  ApiLoadEversource api;
+  late Db db;
+  late ApiLoadEversource api;
   setUp(() async {
     db = Db('mongodb://localhost/eversource');
     api = ApiLoadEversource(db);

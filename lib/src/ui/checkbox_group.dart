@@ -5,11 +5,11 @@ import 'dart:html' as html;
 enum CheckboxGroupOrientation { horizontal, vertical }
 
 class CheckboxGroup {
-  html.Element wrapper;
-  html.Element inner;
-  List<html.CheckboxInputElement> _checkboxes;
+  html.Element? wrapper;
+  late html.Element inner;
+  late List<html.CheckboxInputElement?> _checkboxes;
   List<String> labels;
-  List<bool> state;
+  List<bool>? state;
   /// If you want a label to the left of the checkboxes
   String leftLabel;
   /// space between the elements, in px
@@ -33,7 +33,7 @@ class CheckboxGroup {
       throw ArgumentError('Not all labels are distinct');
     }
 
-    _checkboxes = List<html.InputElement>(labels.length);
+    _checkboxes = List<html.InputElement?>.filled(labels.length, null);
 
     inner = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px;')
@@ -44,45 +44,45 @@ class CheckboxGroup {
     if (orientation == CheckboxGroupOrientation.horizontal) {
       for (var i = 0; i < labels.length; i++) {
         _checkboxes[i] = html.CheckboxInputElement()
-          ..id = '${wrapper.id}__cgl__${labels[i]}'
-          ..checked = state[i];
-        inner.children.add(_checkboxes[i]);
+          ..id = '${wrapper!.id}__cgl__${labels[i]}'
+          ..checked = state![i];
+        inner.children.add(_checkboxes[i]!);
         inner.children.add(html.LabelElement()
           ..setAttribute('style',
               'margin-left: 8px; margin-right: ${marginRight}px;')
           ..text = labels[i]
-          ..htmlFor = _checkboxes[i].id);
+          ..htmlFor = _checkboxes[i]!.id);
       }
     } else {
       throw UnimplementedError('Implement vertical!');
       // see radio_group_input
     }
 
-    wrapper.children.add(inner);
+    wrapper!.children.add(inner);
   }
 
   void setAttribute(String name, String value) =>
       inner.setAttribute(name, value);
 
-  set checked(List<bool> x) {
+  set checked(List<bool?> x) {
     for (var i = 0; i < x.length; i++) {
-      _checkboxes[i].checked = x[i];
+      _checkboxes[i]!.checked = x[i];
     }
   }
 
-  List<bool> get checked => _checkboxes.map((e) => e.checked).toList();
+  List<bool?> get checked => _checkboxes.map((e) => e!.checked).toList();
 
   List<String> get selected {
     var out = <String>[];
     for (var i=0; i<labels.length; i++) {
-      if (_checkboxes[i].checked) out.add(labels[i]);
+      if (_checkboxes[i]!.checked!) out.add(labels[i]);
     }
     return out;
   }
 
   void onChange(Function x) {
     _checkboxes = _checkboxes.map((e) {
-      e.onChange.listen(x);
+      e!.onChange.listen(x as void Function(html.Event)?);
       return e;
     }).toList();
   }

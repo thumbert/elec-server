@@ -16,15 +16,16 @@ import 'package:elec_server/client/isoexpress/dalmp.dart' as client;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
+import 'package:timezone/timezone.dart';
 
 /// prepare data by downloading a few reports
 /// Missing 9/29/2018 and 9/30/2018 !!!
 void prepareData() async {
   var archive = DaLmpHourlyArchive();
   var days = [
-    Date(2018, 9, 26),
-    Date(2018, 9, 29),
-    Date(2018, 9, 30),
+    Date.utc(2018, 9, 26),
+    Date.utc(2018, 9, 29),
+    Date.utc(2018, 9, 30),
   ];
   await archive.downloadDays(days);
 }
@@ -41,23 +42,23 @@ void tests(String rootUrl) async {
       await archive.dbConfig.db.close();
     });
     test('DA hourly lmp report, DST day spring', () {
-      var file = archive.getFilename(Date(2017, 3, 12));
+      var file = archive.getFilename(Date.utc(2017, 3, 12));
       var res = archive.processFile(file);
       expect(res.first['hourBeginning'].length, 23);
     });
     test('DA hourly lmp report, DST day fall', () async {
-      var file = archive.getFilename(Date(2017, 11, 5));
+      var file = archive.getFilename(Date.utc(2017, 11, 5));
       var res = archive.processFile(file);
       expect(res.first['hourBeginning'].length, 25);
     });
     test('Insert one day', () async {
-      var date = Date(2017, 1, 1);
+      var date = Date.utc(2017, 1, 1);
       if (!await archive.hasDay(date)) await archive.insertDay(date);
     });
     test('insert several days', () async {
       var days = Interval(TZDateTime(location, 2017, 1, 1),
               TZDateTime(location, 2017, 1, 5))
-          .splitLeft((dt) => Date(dt.year, dt.month, dt.day));
+          .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
       await for (var day in Stream.fromIterable(days)) {
         if (!await archive.hasDay(day)) {
           await archive.downloadDay(day);
@@ -66,10 +67,10 @@ void tests(String rootUrl) async {
       }
     });
     test('hasDay', () async {
-      var d1 = Date(2017, 1, 1);
+      var d1 = Date.utc(2017, 1, 1);
       var res = await archive.hasDay(d1);
       expect(res, true);
-      var d2 = Date.today().next.next;
+      var d2 = Date.today(location: UTC).next.next;
       res = await archive.hasDay(d2);
       expect(res, false);
     });
@@ -81,15 +82,15 @@ void tests(String rootUrl) async {
     tearDown(() async => await db.close());
     test('get lmp data for 2 days', () async {
       var aux = await api.getHourlyData(
-          4000, Date(2017, 1, 1), Date(2017, 1, 2), 'lmp');
+          4000, Date.utc(2017, 1, 1), Date.utc(2017, 1, 2), 'lmp');
       expect(aux.length, 48);
       expect(aux.first, {
         'hourBeginning': '2017-01-01 00:00:00.000-0500',
         'lmp': 35.12,
       });
-      var res = await http.get(Uri.parse(
-          '$rootUrl/dalmp/v1/hourly/lmp/'
-          'ptid/4000/start/2017-01-01/end/2017-01-02'),
+      var url = '$rootUrl/dalmp/v1/hourly/lmp/'
+          'ptid/4000/start/2017-01-01/end/2017-01-02';
+      var res = await http.get(Uri.parse(url),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
       expect(data.length, 48);
@@ -144,7 +145,7 @@ void tests(String rootUrl) async {
     var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
     test('get daily peak price between two dates', () async {
       var data = await daLmp.getDailyLmpBucket(4000, LmpComponent.lmp,
-          IsoNewEngland.bucket5x16, Date(2017, 1, 1), Date(2017, 1, 5));
+          IsoNewEngland.bucket5x16, Date.utc(2017, 1, 1), Date.utc(2017, 1, 5));
       expect(data.length, 3);
       expect(data.toList(), [
         IntervalTuple(Date(2017, 1, 3, location: location), 45.64124999999999),
@@ -155,7 +156,7 @@ void tests(String rootUrl) async {
 
     test('get monthly peak price between two dates', () async {
       var data = await daLmp.getMonthlyLmpBucket(4000, LmpComponent.lmp,
-          IsoNewEngland.bucket5x16, Month(2017, 1), Month(2017, 8));
+          IsoNewEngland.bucket5x16, Month.utc(2017, 1), Month.utc(2017, 8));
       expect(data.length, 8);
       expect(data.first,
           IntervalTuple(Month(2017, 1, location: location), 42.55883928571426));
@@ -163,7 +164,7 @@ void tests(String rootUrl) async {
 
     test('get hourly price for 2017-01-01', () async {
       var data = await daLmp.getHourlyLmp(
-          4000, LmpComponent.lmp, Date(2017, 1, 1), Date(2017, 1, 1));
+          4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
       expect(data.length, 24);
       expect(
           data.first,
@@ -173,9 +174,9 @@ void tests(String rootUrl) async {
 
     test('get daily prices all nodes', () async {
       var data = await daLmp.getDailyPricesAllNodes(
-          LmpComponent.lmp, Date(2017, 1, 1), Date(2017, 1, 3));
+          LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 3));
       expect(data.length, 1136);
-      var p321 = data[321];
+      var p321 = data[321]!;
       expect(p321.first.value, 37.755);
     });
   });

@@ -8,7 +8,7 @@ import 'package:elec_server/src/utils/api_response.dart';
 
 // @ApiClass(name: 'sr_regsummary', version: 'v1')
 class SrRegSummary {
-  DbCollection coll;
+  late DbCollection coll;
   String collectionName = 'sr_regsummary';
 
   SrRegSummary(Db db) {
@@ -64,8 +64,8 @@ class SrRegSummary {
   /// returns one element for each day
   /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
   /// If [column] is [null] return all columns
-  Future<List<Map<String,dynamic>>> getData(String account, String subaccountId,
-      String column, Date startDate, Date endDate) async {
+  Future<List<Map<String,dynamic>>> getData(String account, String? subaccountId,
+      String? column, Date startDate, Date endDate) async {
     var excludeFields = <String>['_id', 'account', 'tab'];
 
     var query = where;

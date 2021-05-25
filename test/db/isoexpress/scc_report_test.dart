@@ -13,12 +13,10 @@ import 'package:elec_server/api/api_scc_report.dart';
 
 Map env = Platform.environment;
 
-downloadFile() async {
-  ComponentConfig config = new ComponentConfig()
-    ..host = '127.0.0.1'
-    ..dbName = 'isoexpress'
-    ..collectionName = 'scc_report';
-  String dir = env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
+void downloadFile() async {
+  var config = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'scc_report');
+  String? dir = env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
 
   var archive = new SccReportArchive(config: config, dir: dir);
   await archive.setup();
@@ -28,18 +26,16 @@ downloadFile() async {
   archive.downloadFile(url);
 }
 
-ingestionTest() async {
-  ComponentConfig config = new ComponentConfig()
-    ..host = '127.0.0.1'
-    ..dbName = 'isoexpress'
-    ..collectionName = 'scc_report';
+void ingestionTest() async {
+  var config = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'scc_report');
   String dir = env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
 
   var archive = new SccReportArchive(config: config, dir: dir);
   await archive.setup();
 
   File file = new File(dir + 'scc_october_2018.xlsx');
-  var data = await archive.readXlsx(file, Month(2018,10));
+  var data = await archive.readXlsx(file, Month.utc(2018,10));
   //print(data);
 
   await archive.db.open();
@@ -49,14 +45,11 @@ ingestionTest() async {
 
 apiTest() async {
   group('SCC Report API tests:', () {
-    ComponentConfig config;
-    SccReport api;
+    late ComponentConfig config;
+    late SccReport api;
     setUp(() async {
-      config = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'scc_report';
-
+      config = ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'scc_report');
       api = SccReport(config.db);
       await config.db.open();
     });

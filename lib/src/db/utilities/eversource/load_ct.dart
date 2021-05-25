@@ -15,23 +15,21 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:elec_server/src/db/config.dart';
 
 class EversourceCtLoadArchive {
-  ComponentConfig dbConfig;
-  SpreadsheetDecoder _decoder;
-  String dir;
+  late ComponentConfig dbConfig;
+  late SpreadsheetDecoder _decoder;
+  String? dir;
   Location location = getLocation('America/New_York');
 
-  EversourceCtLoadArchive({this.dbConfig, this.dir}) {
+  EversourceCtLoadArchive({ComponentConfig? dbConfig, this.dir}) {
     var env = Platform.environment;
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'eversource', collectionName: 'load_ct');
+    }
+    dir ??= env['HOME']! + '/Downloads/Archive/Utility/Eversource/CT/load/Raw/';
 
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'eversource'
-      ..collectionName = 'load_ct';
-
-    dir ??= env['HOME'] + '/Downloads/Archive/Utility/Eversource/CT/load/Raw/';
-
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
   }
 
   /// insert data into mongo
@@ -39,14 +37,14 @@ class EversourceCtLoadArchive {
     if (data.isEmpty) return Future.value(null);
     // split the data by day and version
     var groups = groupBy(
-        data, (Map e) => Tuple2<String, String>(e['date'], e['version']));
+        data, (Map e) => Tuple2<String?, String?>(e['date'], e['version']));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'date': key.item1,
           'version': key.item2,
         });
-        await dbConfig.coll.insertAll(groups[key]);
+        await dbConfig.coll.insertAll(groups[key]!);
       }
       print(
           '---> Inserted Eversource CT load data from ${data.first['date']} to ${data.last['date']}');
@@ -75,7 +73,7 @@ class EversourceCtLoadArchive {
       throw new ArgumentError(
           'File format changed ${file.path}.  Only one sheet expected.');
 
-    var table = _decoder.tables[sheetNames.first];
+    var table = _decoder.tables[sheetNames.first]!;
     var n = table.rows.length;
     var res = <Map<String, dynamic>>[];
 
@@ -102,13 +100,13 @@ class EversourceCtLoadArchive {
       var row = table.rows[i];
       if (row[0] != null) {
         var date = Date.parse((row[0] as String).substring(0, 10));
-        String hE;
+        String? hE;
         if (row[1] is int)
           hE = row[1].toString().padLeft(2, '0');
         else if (row[1] == '2*')
           hE = '02X';
         else {
-          if (date == Date(2018, 3, 11) && hE == null) continue;
+          if (date == Date.utc(2018, 3, 11) && hE == null) continue;
           throw ArgumentError('Unknown hour ending ${row[1]}');
         }
         var _hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);
@@ -133,10 +131,10 @@ class EversourceCtLoadArchive {
     }
 
     /// group by date
-    Map<String, List<Map>> aux = groupBy(res, (Map row) => row['date']);
+    Map<String?, List<Map>> aux = groupBy(res, (Map row) => row['date']);
     var data = <Map<String, dynamic>>[];
-    aux.keys.forEach((String date) {
-      var bux = aux[date];
+    aux.keys.forEach((String? date) {
+      var bux = aux[date]!;
       var hB = [];
       var load = [];
       for (var row in bux) {
@@ -155,8 +153,8 @@ class EversourceCtLoadArchive {
   }
 
   /// Get the file for this month
-  File getFile(int year) {
-    return File(dir + 'actual_load_${year.toString()}.xlsx');
+  File getFile(int? year) {
+    return File(dir! + 'actual_load_${year.toString()}.xlsx');
   }
 
   /// Download a file.
@@ -175,7 +173,7 @@ class EversourceCtLoadArchive {
 
   Future<Null> setup() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
@@ -198,16 +196,16 @@ int getYear(String link) {
   var reg = RegExp('(.*)actual-load(.*).xlsx(.*)');
   var matches = reg.allMatches(link);
   var match = matches.elementAt(0);
-  var aux = match.group(2);
+  var aux = match.group(2)!;
 
   var reg2 = RegExp(r'(\d{4})');
   var e = reg2.allMatches(aux).elementAt(0);
-  var year = e.group(0);
+  var year = e.group(0)!;
   return int.parse(year);
 }
 
 /// Get all the API links from url with a given pattern
-Future<List<String>> getLinks(String url, {List<Pattern> patterns}) async {
+Future<List<String>> getLinks(String url, {List<Pattern>? patterns}) async {
   var aux = await http.get(Uri.parse(url));
   var body = aux.body;
   var document = parse(body);

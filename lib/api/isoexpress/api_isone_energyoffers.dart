@@ -14,11 +14,11 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class DaEnergyOffers {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  late Location location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'da_energy_offer';
-  var ordering;
+  late var ordering;
 
   DaEnergyOffers(Db db) {
     coll = db.collection(collectionName);
@@ -119,9 +119,9 @@ class DaEnergyOffers {
     /// 2) make the must run units have $-150 prices in the first block only.
     /// 3) some units have MW for a segment > Ecomax.
     var gEo = groupBy(eo.where((e) => e['Unit Status'] != 'UNAVAILABLE'),
-        (e) => e['assetId']);
+        (dynamic e) => e['assetId']);
     gEo.keys.forEach((assetId) {
-      var offers = gEo[assetId].cast<Map<String, dynamic>>();
+      var offers = gEo[assetId]!.cast<Map<String, dynamic>>();
       if (offers.first['Unit Status'] == 'MUST_RUN') {
         /// need to sort them just in case ...
         offers.sort((a, b) => a['price'].compareTo(b['price']));
@@ -152,7 +152,7 @@ class DaEnergyOffers {
     var hB = TZDateTime.fromMillisecondsSinceEpoch(
             location, dt.millisecondsSinceEpoch)
         .toIso8601String();
-    var pipeline = [];
+    var pipeline = <Map<String,Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -208,7 +208,7 @@ class DaEnergyOffers {
   /// Get everything for one generator between a start and end date
   Future<List<Map<String, dynamic>>> getEnergyOffersForAssetId(
       String assetId, String start, String end) async {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -238,7 +238,7 @@ class DaEnergyOffers {
   /// Get a variable between a start and end date for all the assets.
   Future<List<Map<String, dynamic>>> oneDailyVariable(
       String variable, String start, String end) async {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -263,7 +263,7 @@ class DaEnergyOffers {
   }
 
   Future<List<Map<String, dynamic>>> dailyData(String day) async {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {

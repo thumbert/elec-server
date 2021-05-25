@@ -7,7 +7,7 @@ import '../../src/utils/api_response.dart';
 
 // @ApiClass(name: 'ngrid/', version: 'v1')
 class ApiCustomerCounts {
-  DbCollection coll;
+  late DbCollection coll;
   String collectionName = 'ngrid_customer_counts';
 
   ApiCustomerCounts(Db db) {

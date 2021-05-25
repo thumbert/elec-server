@@ -7,14 +7,12 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SrArrDistrArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
-
-  SrArrDistrArchive({this.dbConfig}) {
+  SrArrDistrArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_ARRDISTR';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
+    }
   }
 
   /// the entire tab is one document
@@ -79,8 +77,4 @@ class SrArrDistrArchive extends mis.MisReportArchive {
     await dbConfig.db.close();
   }
 
-  @override
-  Future<Null> updateDb() {
-    // TODO: implement updateDb
-  }
 }

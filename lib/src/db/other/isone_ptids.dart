@@ -9,17 +9,16 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
 
 class PtidArchive {
-  ComponentConfig config;
-  String dir;
+  late ComponentConfig config;
+  late String dir;
 
-  PtidArchive({this.config, this.dir}) {
+  PtidArchive({ComponentConfig? config, String? dir}) {
     Map env = Platform.environment;
-    config ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isone'
-      ..collectionName = 'pnode_table';
-
-    dir ??= env['HOME'] + '/Downloads/Archive/PnodeTable/Raw/';
+    config ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
+    this.config = config;
+    dir ??= env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
+    this.dir = dir!;
   }
 
   Db get db => config.db;
@@ -39,7 +38,7 @@ class PtidArchive {
   /// Read an XLSX file.  Note that ISO files are xls, so you will need to
   /// convert it by hand for now.
   /// filename should look like this: 'pnode_table_2017_08_03.xlsx'
-  List<Map<String, dynamic>> readXlsx(File file, {String asOfDate}) {
+  List<Map<String, dynamic>> readXlsx(File file, {String? asOfDate}) {
     var filename = path.basename(file.path);
     if (path.extension(filename).toLowerCase() != '.xlsx') {
       throw 'Filename needs to be in the xlsx format';
@@ -49,9 +48,9 @@ class PtidArchive {
 
     var bytes = file.readAsBytesSync();
     var decoder = SpreadsheetDecoder.decodeBytes(bytes);
-    List<Map<String, Object>> res;
+    List<Map<String, Object?>> res;
 
-    if (Date.parse(asOfDate).isBefore(Date(2018, 6, 7))) {
+    if (Date.parse(asOfDate).isBefore(Date.utc(2018, 6, 7))) {
       res = _readXlsxVersion1(decoder);
     } else {
       /// current format
@@ -66,9 +65,9 @@ class PtidArchive {
   }
 
   /// prior to 2018-06-07 the spreadsheet had only one sheet
-  List<Map<String, Object>> _readXlsxVersion1(SpreadsheetDecoder decoder) {
-    var res = <Map<String, Object>>[];
-    var table = decoder.tables['New England'];
+  List<Map<String, Object?>> _readXlsxVersion1(SpreadsheetDecoder decoder) {
+    var res = <Map<String, Object?>>[];
+    var table = decoder.tables['New England']!;
 
     /// the 2rd row is the Hub
     res.add({
@@ -129,9 +128,9 @@ class PtidArchive {
   }
 
   /// after 2018-06-07 the format changed to 2 sheets
-  List<Map<String, Object>> _readXlsxVersion2(SpreadsheetDecoder decoder) {
-    var res = <Map<String, Object>>[];
-    var table = decoder.tables['Zone Information'];
+  List<Map<String, Object?>> _readXlsxVersion2(SpreadsheetDecoder decoder) {
+    var res = <Map<String, Object?>>[];
+    var table = decoder.tables['Zone Information']!;
 
     /// the 2rd row is the Hub
     res.add({
@@ -181,7 +180,7 @@ class PtidArchive {
 
     /// Second tab
     /// rows 26:end are simple nodes
-    table = decoder.tables['New England'];
+    table = decoder.tables['New England']!;
     var nRows = table.rows.length;
     for (var r = 2; r < nRows; r++) {
       // sometimes the spreadsheet has empty rows

@@ -12,10 +12,10 @@ String getLocationTzdb() {
     if (env['USERNAME'].toString().toLowerCase() == 'procmon2') {
       tzdb = 'S:/All/Structured Risk/NEPOOL/Software/Dart/pub_cache/' + tzdb;
     } else {
-      tzdb = Platform.environment['USERPROFILE'] + '/AppData/Roaming/Pub/Cache/' + tzdb;
+      tzdb = Platform.environment['USERPROFILE']! + '/AppData/Roaming/Pub/Cache/' + tzdb;
     }
   } else if (Platform.isLinux) {
-    tzdb = Platform.environment['HOME'] + '/.pub-cache/' + tzdb;
+    tzdb = Platform.environment['HOME']! + '/.pub-cache/' + tzdb;
   }
   return tzdb;
 }

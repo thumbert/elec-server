@@ -5,16 +5,20 @@ import 'dart:io';
 import 'package:date/date.dart';
 import 'package:path/path.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:timezone/timezone.dart';
 import 'lib_mis_reports.dart' as mis;
 
-Map env = Platform.environment;
-String baseDir = env['HOME'] + '/Downloads/Archive/IsoExpress/';
+var _env = Platform.environment;
+String baseDir = (_env['HOME'] ?? '') + '/Downloads/Archive/IsoExpress/';
 void setBaseDir(String dirName) => baseDir = dirName;
 
 /// An generic ISO Express Report class.
 abstract class IsoExpressReport {
-  String reportName;
-  ComponentConfig dbConfig;
+  late String reportName;
+  late ComponentConfig dbConfig;
+  final Location location = getLocation('America/New_York');
+  /// the location of this report on disk
+  late String dir;
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
@@ -31,7 +35,7 @@ abstract class IsoExpressReport {
   List<Map<String, dynamic>> processFile(File file);
 
   /// Download this url to a file.
-  Future downloadUrl(String url, File fileout, {bool overwrite = true}) async {
+  Future downloadUrl(String? url, File fileout, {bool overwrite = true}) async {
     if (fileout.existsSync() && !overwrite) {
       print('File ${fileout.path} was already downloaded.  Skipping.');
       return Future.value(1);
@@ -41,7 +45,7 @@ abstract class IsoExpressReport {
         print('Created directory ${dirname(fileout.path)}');
       }
       var client = HttpClient();
-      var request = await client.getUrl(Uri.parse(url));
+      var request = await client.getUrl(Uri.parse(url!));
       var response = await request.close();
       await response.pipe(fileout.openWrite());
     }
@@ -58,16 +62,14 @@ abstract class IsoExpressReport {
 
 /// An archive that gets daily updates.  Easy to update!
 abstract class DailyIsoExpressReport extends IsoExpressReport {
-  /// the location of this report on disk
-  String dir;
 
   /// Get the url of this report for this date
-  String getUrl(Date asOfDate);
+  String getUrl(Date? asOfDate);
 
   /// Get the filename of this report as saved on disk.  There is one ISO
   /// Express report per day.  Note that you can have multiple MIS reports
   /// per day.
-  File getFilename(Date asOfDate);
+  File getFilename(Date? asOfDate);
 
   /// Return the last day inserted in the db.
   /// Future<Map<String, String>> lastDay();
@@ -82,7 +84,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   //Future<Null> deleteDay(Date day);
 
   /// Download one day.  Check if the file has downloaded successfully.
-  Future downloadDay(Date day) async {
+  Future downloadDay(Date? day) async {
     return await downloadUrl(getUrl(day), getFilename(day), overwrite: true);
   }
 
@@ -98,7 +100,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// Remove the data associated with this [day] before reinserting.
   /// Returns 0 for success, 1 for error, null if there is no data to insert.
   ///
-  Future<int> insertDay(Date day) async {
+  Future<int> insertDay(Date? day) async {
     var file = getFilename(day);
     var data;
     try {
@@ -120,4 +122,4 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
 }
 
 /// Format a date to the yyyymmdd format, e.g. 20170115.
-String yyyymmdd(Date date) => date.toString().replaceAll('-', '');
+String yyyymmdd(Date? date) => date.toString().replaceAll('-', '');

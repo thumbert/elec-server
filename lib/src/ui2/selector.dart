@@ -3,7 +3,7 @@ library ui2.zone_selector;
 import 'dart:html' as html;
 
 class Selector {
-  html.Element inner;
+  late html.Element inner;
 
   Selector(html.Element wrapper, List<String> values, String name,
       {bool hasCheckbox = false}) {
@@ -29,7 +29,7 @@ class Selector {
     wrapper.children.add(inner);
   }
 
-  String get value => ((inner.children[0] as html.DivElement).children[1] as html.SelectElement).value;
+  String? get value => ((inner.children[0] as html.DivElement).children[1] as html.SelectElement).value;
 
   void setAttribute(String name, String value) =>
       inner.setAttribute(name, value);
@@ -47,5 +47,5 @@ class Selector {
     });
   }
 
-  void onChange(Function x) => (inner.children[0] as html.DivElement).children[1].onChange.listen(x);
+  void onChange(Function x) => (inner.children[0] as html.DivElement).children[1].onChange.listen(x as void Function(html.Event)?);
 }

@@ -10,15 +10,16 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SrRtCustSumArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SrRtCustSumArchive({this.dbConfig}) {
+  SrRtCustSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RTCUSTSUM';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'mis',
+          collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
@@ -56,7 +57,7 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     /// tab 1, subaccount info
     labels['tab'] = 1;
     var x1 = mis.readReportTabAsMap(file, tab: 1);
-    var grp = groupBy(x1, (e) => e['Subaccount ID']);
+    var grp = groupBy(x1, (dynamic e) => e['Subaccount ID']);
     var tab1 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
@@ -76,9 +77,9 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
-    if (reportDate.isBefore(Date(2017, 3, 1))) {
+    if (reportDate.isBefore(Date.utc(2017, 3, 1))) {
       return <int,List<Map<String,dynamic>>>{};
-    } else if (reportDate.isBefore(Date(2100, 1, 1))) {
+    } else if (reportDate.isBefore(Date.utc(2100, 1, 1))) {
       return _processFile_21000101(file);
     } else {
       return _processFile_21000101(file);
@@ -110,7 +111,7 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
@@ -135,8 +136,4 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     await dbConfig.db.close();
   }
 
-
-  Future<Null> updateDb() {
-    // TODO: implement updateDb
-  }
 }

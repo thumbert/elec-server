@@ -1,8 +1,8 @@
 library utils.env;
 
 class Env {
-  final String mongoConnection;
-  final String rootUrl;
+  final String? mongoConnection;
+  final String? rootUrl;
 
   const Env._internal({this.mongoConnection, this.rootUrl});
 

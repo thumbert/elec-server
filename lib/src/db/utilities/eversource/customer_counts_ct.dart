@@ -11,25 +11,23 @@ import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
 class EversourceCtCustomerCountsArchive {
-  ComponentConfig dbConfig;
-  SpreadsheetDecoder _decoder;
-  String dir;
+  late ComponentConfig dbConfig;
+  late SpreadsheetDecoder _decoder;
+  String? dir;
 
-  EversourceCtCustomerCountsArchive({this.dbConfig, this.dir}) {
+  EversourceCtCustomerCountsArchive({ComponentConfig? dbConfig, this.dir}) {
     var env = Platform.environment;
     if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'utility'
-        ..collectionName = 'eversource_customer_counts';
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'utility', collectionName: 'eversource_customer_counts');
     }
-    if (dir == null)
-      dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    dir ??= env['HOME']! + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
+    if (!Directory(dir!).existsSync()) {
+      Directory(dir!).createSync(recursive: true);
+    }
   }
 
-  mongo.Db get db => dbConfig.db;
+  mongo.Db? get db => dbConfig.db;
 
   /// insert data from one or multiple files
   Future<int> insertData(List<Map<String, dynamic>> data) async {
@@ -52,7 +50,7 @@ class EversourceCtCustomerCountsArchive {
     var bytes = file.readAsBytesSync();
     _decoder = new SpreadsheetDecoder.decodeBytes(bytes);
 
-    var table = _decoder.tables['Smry Load Customer'];
+    var table = _decoder.tables['Smry Load Customer']!;
     var res = [
       {
         'service': 'competitive',
@@ -104,23 +102,23 @@ class EversourceCtCustomerCountsArchive {
 
   /// Download a file
   /// https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)
-  Future downloadFile(String url, {File fileout}) async {
-    fileout ??= File(dir + getFilename(url));
+  Future downloadFile(String url, {File? fileout}) async {
+    fileout ??= File(dir! + getFilename(url));
     url = 'https://www.eversource.com' + url;
 
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
 
     return HttpClient()
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
-            response.pipe(fileout.openWrite()));
+            response.pipe(fileout!.openWrite()));
   }
 
   Future<Null> setup() async {
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
 
     await dbConfig.db.open();
     await dbConfig.db
@@ -133,22 +131,22 @@ class EversourceCtCustomerCountsArchive {
 }
 
 class EversourceCtCompetitiveSupply {
-  ComponentConfig dbConfig;
-  SpreadsheetDecoder _decoder;
-  String dir;
+  late ComponentConfig dbConfig;
+  late SpreadsheetDecoder _decoder;
+  String? dir;
 
-  EversourceCtCompetitiveSupply({this.dbConfig, this.dir}) {
+  EversourceCtCompetitiveSupply({ComponentConfig? dbConfig, this.dir}) {
     var env = Platform.environment;
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'eversource'
-      ..collectionName = 'competitive_suppliers';
-    dir ??= env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'eversource', collectionName: 'competitive_suppliers');
+    }
+    dir ??= env['HOME']! + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
   }
 
-  mongo.Db get db => dbConfig.db;
+  mongo.Db? get db => dbConfig.db;
 
   /// insert data from one or multiple files
   Future<int> insertData(List<Map<String, dynamic>> data) async {
@@ -174,7 +172,7 @@ class EversourceCtCompetitiveSupply {
 
     if (!_decoder.tables.containsKey('Suppliers'))
       throw ArgumentError('No sheet Suppliers in $file');
-    var table = _decoder.tables['Suppliers'];
+    var table = _decoder.tables['Suppliers']!;
     var res = <Map<String, dynamic>>[];
     for (var row in table.rows) {
       if (row[0] != null && row[0] is num) {
@@ -197,23 +195,23 @@ class EversourceCtCompetitiveSupply {
 
   /// Download a file
   /// https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)
-  Future downloadFile(String url, {File fileout}) async {
-    fileout ??= File(dir + getFilename(url));
+  Future downloadFile(String url, {File? fileout}) async {
+    fileout ??= File(dir! + getFilename(url));
     url = 'https://www.eversource.com' + url;
 
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
 
     return HttpClient()
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
-            response.pipe(fileout.openWrite()));
+            response.pipe(fileout!.openWrite()));
   }
 
   Future<Null> setup() async {
-    if (!Directory(dir).existsSync())
-      Directory(dir).createSync(recursive: true);
+    if (!Directory(dir!).existsSync())
+      Directory(dir!).createSync(recursive: true);
     await dbConfig.db.open();
     await dbConfig.db
         .createIndex(dbConfig.collectionName, keys: {'region': 1, 'month': 1});
@@ -222,7 +220,7 @@ class EversourceCtCompetitiveSupply {
 }
 
 /// Get all the API links from url with a given pattern
-Future<List<String>> getLinks(String url, {Pattern pattern}) async {
+Future<List<String>> getLinks(String url, {Pattern? pattern}) async {
   var aux = await http.get(Uri.parse(url));
   var body = aux.body;
   var document = parse(body);
@@ -266,12 +264,12 @@ String parseMonth(String filename) {
   var reg = RegExp('(.*).xlsx');
   var matches = reg.allMatches(aux);
   var match = matches.elementAt(0);
-  var g1 = match.group(1);
+  var g1 = match.group(1)!;
 
   var bux = g1.split('-');
   // september is special!
   if (bux[0].toLowerCase() == 'sept') bux[0] = 'sep';
   var input = bux.take(2).join(' ');
-  var parser = parseTerm(input.toUpperCase());
+  var parser = parseTerm(input.toUpperCase())!;
   return Month.fromTZDateTime(parser.start).toIso8601String();
 }

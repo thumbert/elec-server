@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: timeseries.proto
 //
-// @dart = 2.3
+
 // ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
 import 'dart:async' as $async;
@@ -21,12 +21,12 @@ class LmpClient extends $grpc.Client {
           ($core.List<$core.int> value) =>
               $0.NumericTimeSeries.fromBuffer(value));
 
-  LmpClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
+  LmpClient($grpc.ClientChannel channel, {$grpc.CallOptions? options})
       : super(channel, options: options);
 
   $grpc.ResponseFuture<$0.NumericTimeSeries> getLmp(
       $0.HistoricalLmpRequest request,
-      {$grpc.CallOptions options}) {
+      {$grpc.CallOptions? options}) {
     final call = $createCall(_$getLmp, $async.Stream.fromIterable([request]),
         options: options);
     return $grpc.ResponseFuture(call);

@@ -10,8 +10,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class TrSch3p2 {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  Location? location;
   var collectionName = 'tr_sch3p2';
 
   TrSch3p2(Db db) {

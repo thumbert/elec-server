@@ -18,8 +18,8 @@ void tests(String rootUrl) async {
   // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = RegulationRequirementArchive();
   group('Regulation requirements archive test:', () {
-    setUp(() async => await archive.db.open());
-    tearDown(() async => await archive.db.close());
+    setUp(() async => await archive.db!.open());
+    tearDown(() async => await archive.db!.close());
     test('read and insert all data', () async {
       var data = archive.readAllData();
       expect(data.length, 1);
@@ -57,7 +57,7 @@ void tests(String rootUrl) async {
       });
     });
     test('get hourly capacity requirement', () async {
-      var interval = parseTerm('Jan22-Dec22', tzLocation: location);
+      var interval = parseTerm('Jan22-Dec22', tzLocation: location)!;
       var capReq = await client.hourlyCapacityRequirement(interval);
       expect(capReq.length, 8760);
       var hour = Hour.beginning(TZDateTime(location, 2022));

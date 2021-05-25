@@ -67,11 +67,11 @@ class DaLmp {
 
     var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
-    var grp = groupBy(data, (e) => e['ptid'] as int);
+    var grp = groupBy(data, (e) => (e as Map)['ptid'] as int);
 
     var out = <int, TimeSeries<num>>{};
     for (var ptid in grp.keys) {
-      out[ptid] = TimeSeries.fromIterable(grp[ptid].map((e) =>
+      out[ptid] = TimeSeries.fromIterable(grp[ptid]!.map((e) =>
           IntervalTuple<double>(
               Date.parse(e['date'], location: location), e[cmp])));
     }

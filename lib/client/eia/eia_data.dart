@@ -10,7 +10,7 @@ const String USER_AGENT = 'dart-api-client eia/v1';
 
 class EiaApi {
   /// this is the api key that you request from eia
-  final String apiKey;
+  final String? apiKey;
   String rootUrl;
 
   EiaApi(http.Client client, this.apiKey,
@@ -43,8 +43,8 @@ class EiaApi {
 /// Create a timeseries from the EIA series data.
 /// Note that input [data] has most recent data first, so data needs
 /// to be reversed.
-TimeSeries<num> processSeries(Map<String, dynamic> data) {
-  var ts = TimeSeries<num>();
+TimeSeries<num?> processSeries(Map<String, dynamic> data) {
+  var ts = TimeSeries<num?>();
   var xs = data['data'] as List;
   var n = xs.length;
   for (var i = n - 1; i >= 0; i--) {

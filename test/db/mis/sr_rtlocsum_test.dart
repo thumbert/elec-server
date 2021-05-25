@@ -12,7 +12,7 @@ import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 
 void tests() async {
   var dir = Directory(
-      Platform.environment['HOME'] + '/Downloads/Archive/mis/all_samples');
+      Platform.environment['HOME']! + '/Downloads/Archive/mis/all_samples');
   var file = dir
       .listSync()
       .where((e) => basename(e.path).startsWith('sr_rtlocsum_'))
@@ -29,7 +29,7 @@ void tests() async {
 
   group('MIS report sr_rtlocsum', () {
     test('read report', () async {
-      var data = archive.processFile(file);
+      var data = archive.processFile(file as File);
       expect(data.length, 2);
       // await archive.insertTabData(data[0], tab: 0);
       // await archive.insertTabData(data[1], tab: 1);

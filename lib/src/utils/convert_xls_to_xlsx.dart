@@ -12,7 +12,7 @@ import 'dart:io';
 /// current directory before running this command.  
 /// 
 /// Return 0 if successful, 1 if a fail.
-Future<int> convertXlsToXlsx(File fileIn, {Directory pathToLibreOffice})
+Future<int> convertXlsToXlsx(File fileIn, {Directory? pathToLibreOffice})
   async {
   String exec;
   if (Platform.isWindows) {

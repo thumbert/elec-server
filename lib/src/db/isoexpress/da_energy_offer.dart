@@ -13,25 +13,20 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaEnergyOfferArchive extends DailyIsoExpressReport {
-  @override
-  ComponentConfig dbConfig;
-  @override
-  String dir;
-
   static final List<String> _unitStates = [
     'UNAVAILABLE',
     'MUST_RUN',
     'ECONOMIC'
   ];
-  var location = getLocation('America/New_York');
 
-  DaEnergyOfferArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'da_energy_offer';
-
+  DaEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'isoexpress',
+        collectionName: 'da_energy_offer');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaEnergyOffer/Raw/';
+    this.dir = dir;
   }
 
   mongo.Db get db => dbConfig.db;
@@ -39,13 +34,13 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   @override
   final reportName = 'Day-Ahead Energy Market Historical Offer Report';
   @override
-  String getUrl(Date asOfDate) =>
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/'
           'hbdayaheadenergyoffer_' +
       yyyymmdd(asOfDate) +
       '.csv';
   @override
-  File getFilename(Date asOfDate) =>
+  File getFilename(Date? asOfDate) =>
       File(dir + 'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
@@ -81,8 +76,8 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       aux['No Load Price'] = hour['No Load Price'];
 
       /// add the non empty price/quantity pairs
-      var pricesHour = <num>[];
-      var quantitiesHour = <num>[];
+      var pricesHour = <num?>[];
+      var quantitiesHour = <num?>[];
       for (var i = 1; i <= 10; i++) {
         if (!(hour['Segment $i Price'] is num)) break;
         pricesHour.add(hour['Segment $i Price']);
@@ -108,9 +103,9 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return [];
-    var dataByAssetId = groupBy(data, (row) => row['Masked Asset ID']);
+    var dataByAssetId = groupBy(data, (dynamic row) => row['Masked Asset ID']);
     var out = dataByAssetId.keys
-        .map((ptid) => converter(dataByAssetId[ptid]))
+        .map((ptid) => converter(dataByAssetId[ptid]!))
         .toList();
     return out;
   }
@@ -142,7 +137,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     await dbConfig.db.close();
   }
 
-  Future<Map<String, String>> lastDay() async {
+  Future<Map<String, String?>> lastDay() async {
     var pipeline = [];
     pipeline.add({
       '\$group': {
@@ -157,11 +152,12 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   /// return the last day of the fourth month before the current month.
   Date lastDayAvailable() {
     var m3 = Month.current().subtract(3);
-    return Date(m3.year, m3.month, 1).previous;
+    return Date.utc(m3.year, m3.month, 1).previous;
   }
 
   Future<Null> deleteDay(Date day) async {
-    return await dbConfig.coll.remove(mongo.where.eq('date', day.toString()));
+    return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString()))
+        as FutureOr<Null>);
   }
 
   /// Check if this document is OK.  Throws otherwise.  May not catch all

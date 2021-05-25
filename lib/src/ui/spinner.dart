@@ -3,13 +3,13 @@ library ui.spinner;
 import 'dart:html' as html;
 
 class Spinner {
-  html.Element wrapper;
-  html.DivElement _spinner;
+  html.Element? wrapper;
+  late html.DivElement _spinner;
 
   Spinner(this.wrapper) {
     _spinner = html.DivElement()
       ..className = 'loader';
-    wrapper.children.add(_spinner);
+    wrapper!.children.add(_spinner);
   }
 
   /// If flag is true, make it visible (the default on creation),

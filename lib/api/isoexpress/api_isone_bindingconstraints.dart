@@ -10,7 +10,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class BindingConstraints {
-  DbCollection coll;
+  late DbCollection coll;
   final Location _location = getLocation('America/New_York');
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'binding_constraints';
@@ -54,7 +54,7 @@ class BindingConstraints {
     query = query.lte('date', Date.parse(end).toString());
     query = query.eq('market', 'DA');
     query = query.excludeFields(['_id', 'date', 'market']);
-    var res = await coll.find(query).map((Map<String, Object> e) {
+    var res = await coll.find(query).map((Map<String, Object?> e) {
       var start = TZDateTime.from(e['hourBeginning'] as DateTime, _location);
       e['hourBeginning'] = start.toString();
       return e;
@@ -70,7 +70,7 @@ class BindingConstraints {
     query = query.eq('Constraint Name', constraintName);
     query = query.eq('market', market.toUpperCase());
     query = query.excludeFields(['_id', 'date', 'market']);
-    var res = await coll.find(query).map((Map<String, Object> e) {
+    var res = await coll.find(query).map((Map<String, Object?> e) {
       var start = TZDateTime.from(e['hourBeginning'] as DateTime, _location);
       e['hourBeginning'] = start.toString();
       return e;

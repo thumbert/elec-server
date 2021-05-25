@@ -5,7 +5,7 @@ import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/utilities/eversource/load_ct.dart';
 
 loadTest() async {
-  EversourceCtLoadArchive archive;
+  late EversourceCtLoadArchive archive;
   group('eversource ct loads', (){
     setUp(()async {
       archive =  EversourceCtLoadArchive();
@@ -38,8 +38,8 @@ updateDb() async {
 
   await archive.dbConfig.db.open();
   for (var e in years) {
-    await archive.downloadFile(e['link']);
-    var data = archive.readXlsx(archive.getFile(e['year']));
+    await archive.downloadFile(e['link'] as String);
+    var data = archive.readXlsx(archive.getFile(e['year'] as int?));
     await archive.insertData(data);
   }
   await archive.dbConfig.db.close();

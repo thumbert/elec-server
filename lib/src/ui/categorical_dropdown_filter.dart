@@ -3,9 +3,9 @@ library ui.categorical_dropdown_filter;
 import 'dart:html' as html;
 
 class CategoricalDropdownFilter {
-  html.Element wrapper;
-  html.Element inner;
-  html.SelectElement _selector;
+  html.Element? wrapper;
+  late html.Element inner;
+  late html.SelectElement _selector;
   String name;
 
   /// A dropdown filter for a categorical variable, for example a list of
@@ -31,12 +31,12 @@ class CategoricalDropdownFilter {
     });
     inner.children.add(_selector);
 
-    wrapper.children.add(inner);
+    wrapper!.children.add(inner);
   }
 
-  set value(String x) => _selector.value = x;
+  set value(String? x) => _selector.value = x;
 
-  String get value => _selector.value;
+  String? get value => _selector.value;
 
   void setAttribute(String name, String value) =>
       inner.setAttribute(name, value);
@@ -53,6 +53,6 @@ class CategoricalDropdownFilter {
     });
   }
 
-  void onChange(Function x) =>  _selector.onChange.listen(x);
+  void onChange(Function x) =>  _selector.onChange.listen(x as void Function(html.Event)?);
 }
 

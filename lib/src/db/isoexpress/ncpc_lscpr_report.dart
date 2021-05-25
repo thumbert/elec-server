@@ -10,12 +10,10 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class NcpcLscprReportArchive extends DailyIsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
   final String reportName =
       'Local Second Contingency Net Commitment Period Compensation Report';
   var _setEq = const SetEquality();
-  var _columnNames = {
+  final _columnNames = {
     'H',
     'Operating Day',
     'Region ID',
@@ -28,20 +26,19 @@ class NcpcLscprReportArchive extends DailyIsoExpressReport {
     'RT LSCPR NCPC Rate',
   };
 
-  NcpcLscprReportArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'ncpc';
-
+  NcpcLscprReportArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'NCPC/LscprCost/Raw/';
+    this.dir = dir;
   }
 
-  String getUrl(Date asOfDate) =>
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=lscpr&start=' +
       yyyymmdd(asOfDate);
 
-  File getFilename(Date asOfDate) =>
+  File getFilename(Date? asOfDate) =>
       File(dir + 'ncpc_lscpr_' + yyyymmdd(asOfDate) + '.csv');
 
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {

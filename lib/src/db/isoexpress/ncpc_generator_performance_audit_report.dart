@@ -10,28 +10,26 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class NcpcGpaReportArchive extends DailyIsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
+  @override
   final String reportName = 'Generator Performance Audit Net Commitment Period Compensation Report';
-  var _setEq = const SetEquality();
-  var _columnNames = {'H', 'Operating Day', 'GPA NCPC Charge',
+  final _setEq = const SetEquality();
+  final _columnNames = {'H', 'Operating Day', 'GPA NCPC Charge',
     'GPA Real-Time Load Obligation',	'GPA NCPC Charge Rate',
   };
 
-  NcpcGpaReportArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'ncpc';
-
+  NcpcGpaReportArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'NCPC/GpaCost/Raw/';
+    this.dir = dir;
   }
 
-  String getUrl(Date asOfDate) =>
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=GPA&start=' +
           yyyymmdd(asOfDate);
 
-  File getFilename(Date asOfDate) =>
+  File getFilename(Date? asOfDate) =>
       File(dir + 'ncpc_gpa_' + yyyymmdd(asOfDate) + '.csv');
 
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {

@@ -13,17 +13,13 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class ZonalDemandArchive extends IsoExpressReport {
-  @override
-  ComponentConfig dbConfig;
-  String dir;
-  Location location = getLocation('America/New_York');
 
-  ZonalDemandArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isoexpress'
-        ..collectionName = 'zonal_demand';
+  ZonalDemandArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'zonal_demand');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/ZonalInformation/Raw/';
+    this.dir = dir;
   }
   @override
   String reportName = 'Zonal information';
@@ -58,7 +54,7 @@ class ZonalDemandArchive extends IsoExpressReport {
     var tabs = decoder.tables.keys;
     var tabName = tabs.firstWhere((t) => t.startsWith(zoneName.substring(0,2)));
     print('Reading tab $tabName');
-    var table = decoder.tables[tabName];
+    var table = decoder.tables[tabName]!;
     var keys = ['date', 'hourBeginning', 'DA_Demand', 'RT_Demand',
       'DryBulb', 'DewPoint', 'zoneName'];
     var aux = <Map<String,dynamic>>[];
@@ -71,7 +67,7 @@ class ZonalDemandArchive extends IsoExpressReport {
       }
       aux.add(Map.fromIterables(keys, [
         date.toString(),
-        parseHourEndingStamp(mmddyyyy(date), stringHourEnding(row[1])),
+        parseHourEndingStamp(mmddyyyy(date), stringHourEnding(row[1])!),
         row[2],
         row[3],
         row[12],
@@ -119,9 +115,9 @@ class ZonalDemandArchive extends IsoExpressReport {
   Future insertData(List<Map<String,dynamic>> data) async {
     /// group data by day
     var dayData = groupBy(data, (Map x) => x['date']);
-    for (String day in dayData.keys) {
+    for (String? day in dayData.keys as Iterable<String?>) {
       await dbConfig.coll.remove({'date': day});
-      await dbConfig.coll.insertAll(dayData[day]);
+      await dbConfig.coll.insertAll(dayData[day]!);
       print('Inserted day $day successfully in isoexpress/zonal_demand');
     }
   }

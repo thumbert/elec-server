@@ -11,33 +11,30 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
 
 class NGridCustomerCountsArchive {
-  ComponentConfig dbConfig;
-  SpreadsheetDecoder _decoder;
-  String dir;
+  late ComponentConfig dbConfig;
+  late SpreadsheetDecoder _decoder;
+  String? dir;
 
-  NGridCustomerCountsArchive({this.dbConfig, this.dir}) {
+  NGridCustomerCountsArchive({ComponentConfig? dbConfig, this.dir}) {
     Map env = Platform.environment;
     if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'isone'
-        ..collectionName = 'ngrid_customer_counts';
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'isone', collectionName: 'ngrid_customer_counts');
     }
-    if (dir == null)
-      dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
+    dir ??= env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
   }
 
-  Db get db => dbConfig.db;
+  Db? get db => dbConfig.db;
 
   /// Insert one xlsx file into the collection.
   /// [file] points to the downloaded xlsx file.  NOTE that you have to convert
   /// the file to xlsx by hand (for now).
-  Future insertMongo({File file}) {
+  Future insertMongo({File? file}) {
     file ??= getLatestFile();
     List<Map> data = readXlsx(file);
     print('Inserting ${file.path} into db');
     return dbConfig.coll
-        .insertAll(data)
+        .insertAll(data as List<Map<String, dynamic>>)
         .then((_) => print('--->  SUCCESS'))
         .catchError((e) => print('   ' + e.toString()));
   }
@@ -63,7 +60,7 @@ class NGridCustomerCountsArchive {
     int nRowsTown = 52;
 
     List<Map> res = [];
-    var table = _decoder.tables[sheet];
+    var table = _decoder.tables[sheet]!;
 
     /// the first row is the months, starts in column 3
     List<Date> months = table.rows[0]
@@ -156,13 +153,13 @@ class NGridCustomerCountsArchive {
 
   /// Get the most recent file in the archive folder
   File getLatestFile() {
-    Directory directory = new Directory(dir);
+    Directory directory = new Directory(dir!);
     var files = directory
         .listSync()
         .where((f) => path.extension(f.path).toLowerCase() == '.xlsx')
         .toList();
     files.sort((a, b) => a.path.compareTo(b.path));
-    return files.last;
+    return files.last as File;
   }
 
   /// Download a file.  Append the date to the filename.
@@ -174,7 +171,7 @@ class NGridCustomerCountsArchive {
     var match = matches.elementAt(0);
 
     String filename = path.basename(url);
-    File fileout = new File(dir + match.group(2) + '_' + filename);
+    File fileout = new File(dir! + match.group(2)! + '_' + filename);
     print(fileout);
 
     if (fileout.existsSync()) {
@@ -189,11 +186,11 @@ class NGridCustomerCountsArchive {
   }
 
   Future<Null> setup() async {
-    if (!new Directory(dir).existsSync())
-      new Directory(dir).createSync(recursive: true);
+    if (!new Directory(dir!).existsSync())
+      new Directory(dir!).createSync(recursive: true);
 
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     print('Collections in ${dbConfig.dbName} db:');
     print(collections);
     if (collections.contains(dbConfig.collectionName)) await dbConfig.coll.drop();

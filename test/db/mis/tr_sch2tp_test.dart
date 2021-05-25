@@ -27,7 +27,7 @@ void tests() async {
       await archive.dbConfig.db.close();
     });
     test('read report', () async {
-      var data = archive.processFile(file);
+      var data = archive.processFile(file as File);
       expect(data.length, 2);
       // await archive.insertTabData(data[0]);
       // await archive.insertTabData(data[1]);

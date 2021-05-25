@@ -14,26 +14,26 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class RegulationOfferArchive extends DailyIsoExpressReport {
-  ComponentConfig dbConfig;
-  String dir;
-  final location = getLocation('America/New_York');
 
-  RegulationOfferArchive({this.dbConfig, this.dir}) {
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'isoexpress'
-      ..collectionName = 'regulation_offer';
-
+  RegulationOfferArchive({ComponentConfig? dbConfig, String? dir}) {
+    dbConfig ??= ComponentConfig(
+          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'regulation_offer');
+    this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaRegulationOffer/Raw/';
+    this.dir = dir;
   }
-  var reportName = 'Historical Regulation Offer Data Report';
-  String getUrl(Date asOfDate) =>
+  @override
+  String reportName = 'Historical Regulation Offer Data Report';
+  @override
+  String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hbregulationoffer?start=' +
           yyyymmdd(asOfDate);
-  File getFilename(Date asOfDate) =>
+  @override
+  File getFilename(Date? asOfDate) =>
       File(dir + 'hbregulationoffer_' + yyyymmdd(asOfDate) + '.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
+  @override
   Map<String, dynamic> converter(List<Map> rows) {
     var row = <String, dynamic>{};
     /// daily info
@@ -48,7 +48,7 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
           .toIso8601String();
     }).toList();
 
-    row.addAll(rowsToColumns(rows, columns: [
+    row.addAll(rowsToColumns(rows as List<Map<String, dynamic>>, columns: [
       'Regulation Low Limit',
       'Regulation High Limit',
       'Regulation Status',   // AVAILABLE or UNAVAILABLE
@@ -68,11 +68,13 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
   }
 
   /// One report at a time.  Each element of the list is one Masked Asset ID.
+  @override
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
     var days = data.map((e) => e['date']).toSet();
-    if (days.length > 1)
+    if (days.length > 1) {
       throw ArgumentError('Only one date at a time allowed for insertion');
+    }
     try {
       await dbConfig.coll.remove({'date': data.first['date']});
       await dbConfig.coll.insertAll(data);
@@ -84,12 +86,13 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
     }
   }
 
+  @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String,dynamic>>[];
-    var dataByAssetId = groupBy(data, (row) => row['Masked Asset ID']);
+    var dataByAssetId = groupBy(data, (dynamic row) => row['Masked Asset ID']);
     var out = dataByAssetId.keys
-        .map((ptid) => converter(dataByAssetId[ptid]))
+        .map((ptid) => converter(dataByAssetId[ptid]!))
         .toList();
     return out;
   }

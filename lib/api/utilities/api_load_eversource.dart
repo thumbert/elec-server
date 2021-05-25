@@ -9,7 +9,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class ApiLoadEversource {
-  DbCollection coll1;
+  late DbCollection coll1;
   var location;
 
   ApiLoadEversource(Db db) {

@@ -10,22 +10,24 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SdRsvAstDtlArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SdRsvAstDtlArchive({this.dbConfig}) {
+  SdRsvAstDtlArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_RSVASTDTL';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
   List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
       Map<String,dynamic> labels, List<String> removeColumns) {
     return rows.map((e) {
-      for (var column in removeColumns) e.remove(column);
+      for (var column in removeColumns) {
+        e.remove(column);
+      }
       var out = <String,dynamic>{
         ...labels,
         ...e,
@@ -48,7 +50,7 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
       'version': version,
     };
     var x4 = mis.readReportTabAsMap(file, tab: 4);
-    var grp = groupBy(x4, (e) => e['Asset ID']);
+    var grp = groupBy(x4, (dynamic e) => e['Asset ID']);
     var tab4 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Asset ID'] = entry.key;
@@ -68,7 +70,7 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
-    if (reportDate.isBefore(Date(2014, 12, 3))) {
+    if (reportDate.isBefore(Date.utc(2014, 12, 3))) {
       return <int,List<Map<String,dynamic>>>{};
     } else {
       return _processFile_21000101(file);
@@ -80,8 +82,9 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
   Future<Null> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
     if (data.isEmpty) return Future.value(null);
     var tabs = data.map((e) => e['tab']).toSet();
-    if (tabs.length != 1)
+    if (tabs.length != 1) {
       throw ArgumentError('Input data can\'t be for multiple tabs: $tabs');
+    }
     try {
       await dbConfig.coll.remove({
         'account': data.first['account'],
@@ -100,7 +103,7 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
@@ -115,7 +118,8 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
   }
 
 
-  Future<Null> updateDb() {
+  Future<Null> updateDb() async {
     // TODO: implement updateDb
+    return null;
   }
 }

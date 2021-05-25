@@ -2,6 +2,7 @@ library test.api.mis.sr_rtncpcstlmntsum;
 
 import 'dart:io';
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sr_rtncpcstlmntsum.dart';
 
@@ -19,6 +20,6 @@ void tests() async {
 
 
 void main() async {
-  await initializeTimeZone();
-  await tests();
+  initializeTimeZones();
+  tests();
 }

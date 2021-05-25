@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:elec_server/src/db/mis/sr_rsvcharge.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 
 void tests() async {
@@ -22,10 +23,10 @@ void tests() async {
       await archive.dbConfig.db.close();
     });
     test('read and insert report', () async {
-      var data = archive.processFile(file);
+      var data = archive.processFile(file as File);
       expect(data.length, 3);
       for (var tab in data.keys) {
-        await archive.insertTabData(data[tab]);
+        await archive.insertTabData(data[tab]!);
       }
     });
   });
@@ -35,6 +36,6 @@ void tests() async {
 }
 
 void main() async {
-  await initializeTimeZone();
-  await tests();
+  initializeTimeZones();
+  tests();
 }

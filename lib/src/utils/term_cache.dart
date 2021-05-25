@@ -12,19 +12,19 @@ class TermCache {
   /// Function to partition the data returned by the [loader] into keys for
   /// storing into the cache.  Usually this function returns a Date or a Month
   /// object. e.g. keyAssign = (e) => e['date'] as Date;
-  Interval Function(Map<String, dynamic>) keyAssign;
+  Interval? Function(Map<String, dynamic>) keyAssign;
 
   /// Split the interval and return the cache keys.  For example
   /// keysFromInterval = (interval) => interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
   List<Interval> Function(Interval) keysFromInterval;
 
-  Map<Interval, List<Map<String, dynamic>>> _cache;
+  late Map<Interval, List<Map<String, dynamic>>?> _cache;
 
   /// A cache in the style of pacakage:more/cache.dart that stores data
   /// associated with an interval.
   ///
   TermCache(this.loader, this.keyAssign, this.keysFromInterval) {
-    _cache = <Interval, List<Map<String, dynamic>>>{};
+    _cache = <Interval, List<Map<String, dynamic>>?>{};
   }
 
   /// Domain of the cache (where the cache has values.)
@@ -61,7 +61,7 @@ class TermCache {
     var keys = keysFromInterval(interval);
     var out = <Map<String, dynamic>>[];
     for (var key in keys) {
-      out.addAll(_cache[key]);
+      out.addAll(_cache[key]!);
     }
     return out;
   }
@@ -80,7 +80,7 @@ class DateCache extends TermCache {
   /// storing into the cache.  Usually this function returns a Date or a Month
   /// object. e.g. keyAssign = (e) => e['date'] as Date;
   @override
-  Interval Function(Map<String, dynamic>) keyAssign;
+  Interval? Function(Map<String, dynamic>) keyAssign;
 
   /// A [TermCache] using [Date]s as keys.  Each key contains data as a
   /// [List<Map<String,dynamic>>]
@@ -107,7 +107,7 @@ class MonthCache extends TermCache {
   /// storing into the cache.  Usually this function returns a Date or a Month
   /// object. e.g. keyAssign = (e) => e['date'] as Date;
   @override
-  Interval Function(Map<String, dynamic>) keyAssign;
+  Interval? Function(Map<String, dynamic>) keyAssign;
 
   /// A [TermCache] using [Month]s as keys.
   MonthCache(this.loader, this.keyAssign)

@@ -14,8 +14,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class SrRtLocSum {
-  DbCollection coll;
-  Location _location;
+  late DbCollection coll;
+  late Location _location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'sr_rtlocsum';
 
@@ -396,12 +396,12 @@ class SrRtLocSum {
   /// Get daily total for a subaccount for a given location, one settlement.
   Future<List<Map<String, dynamic>>> _getDailyData(
       String accountId,
-      String subaccountId,
+      String? subaccountId,
       String startDate,
       String endDate,
-      String locations,
+      String? locations,
       int settlement,
-      {List<String> columns}) async {
+      {required List<String> columns}) async {
     var _locations = <int>[];
     if (locations != null) {
       _locations = locations.split(',').map((e) => int.parse(e)).toList();
@@ -455,7 +455,7 @@ class SrRtLocSum {
   /// Get monthly total for a subaccount for a given zone, one settlement.
   Future<Map<String, dynamic>> _getMonthlyData(
       String accountId,
-      String subaccountId,
+      String? subaccountId,
       int locationId,
       String startDate,
       String endDate,
@@ -502,7 +502,7 @@ class SrRtLocSum {
     var aux = getNthSettlement(data, (e) => e['date'], n: settlement);
     var nest = Nest()
       ..key((e) => e['date'].substring(0, 7))
-      ..rollup((List xs) => -sum(xs.map((e) => e['value'] as num)));
+      ..rollup((List xs) => -sum(xs.map(((e) => (e['value'] as num?)!) as num Function(dynamic))));
     var out = nest.map(aux);
     return Map<String, dynamic>.from(out);
   }
@@ -510,7 +510,7 @@ class SrRtLocSum {
   List<Map<String, dynamic>> _processStream(List<Map<String, dynamic>> data,
       {bool hasLocationId = true}) {
     var out = <Map<String, dynamic>>[];
-    List<String> otherKeys;
+    List<String>? otherKeys;
     for (var e in data) {
       otherKeys ??= e.keys.toList()
         ..remove('hourBeginning')
@@ -539,9 +539,9 @@ class SrRtLocSum {
   /// If [column] is [null] return all columns
   Future<List<Map<String, dynamic>>> getHourlyData(
       String account,
-      String subaccountId,
-      int locationId,
-      String column,
+      String? subaccountId,
+      int? locationId,
+      String? column,
       Date startDate,
       Date endDate) async {
     var excludeFields = <String>['_id', 'account', 'tab', 'date'];
@@ -577,7 +577,7 @@ class SrRtLocSum {
   /// If [column] is [null] return all columns
   Future<List<Map<String, dynamic>>> getDailyDataColumn(
       String account,
-      String subaccountId,
+      String? subaccountId,
       int locationId,
       String column,
       Date startDate,

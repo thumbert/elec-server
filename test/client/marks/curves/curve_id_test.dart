@@ -18,7 +18,7 @@ void tests(String rootUrl) async {
       expect(ids.length, 8);
     });
     test('get data for one curveId', () async {
-      var xs = await client.getCurveId('isone_energy_4000_da_lmp');
+      var xs = await (client.getCurveId('isone_energy_4000_da_lmp'));
       expect(xs.keys.length > 11, true);
     });
     test('get data for several curveIds', () async {

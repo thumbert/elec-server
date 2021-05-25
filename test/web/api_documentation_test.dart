@@ -13,7 +13,7 @@ List<String> getLinks() {
   var document = parse(input);
   var links = <String>[];
   for (var linkElement in document.querySelectorAll('a')) {
-    var link = linkElement.attributes['href'];
+    var link = linkElement.attributes['href']!;
     /// ignore the internal links and the applications
     if (link.startsWith('#') || link.endsWith('.html'))
       continue;
@@ -25,9 +25,9 @@ List<String> getLinks() {
 }
 
 /// Test if this url returns some content.
-bool hasContent(String url, Client client) {
-
-}
+// bool hasContent(String url, Client client) {
+//
+// }
 
 
 tests(String rootUrl, Set<String> skip) async {

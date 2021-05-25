@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: timeseries.proto
 //
-// @dart = 2.3
+
 // ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
 import 'dart:core' as $core;
@@ -29,14 +29,14 @@ class HistoricalLmpRequest extends $pb.GeneratedMessage {
   factory HistoricalLmpRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory HistoricalLmpRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   HistoricalLmpRequest clone() => HistoricalLmpRequest()..mergeFromMessage(this);
-  HistoricalLmpRequest copyWith(void Function(HistoricalLmpRequest) updates) => super.copyWith((message) => updates(message as HistoricalLmpRequest));
+  HistoricalLmpRequest copyWith(void Function(HistoricalLmpRequest) updates) => super.copyWith((message) => updates(message as HistoricalLmpRequest)) as HistoricalLmpRequest;
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static HistoricalLmpRequest create() => HistoricalLmpRequest._();
   HistoricalLmpRequest createEmptyInstance() => create();
   static $pb.PbList<HistoricalLmpRequest> createRepeated() => $pb.PbList<HistoricalLmpRequest>();
   static HistoricalLmpRequest getDefault() => _defaultInstance ??= create()..freeze();
-  static HistoricalLmpRequest _defaultInstance;
+  static HistoricalLmpRequest? _defaultInstance;
 
   EnergyMarket get market => $_getN(0);
   set market(EnergyMarket v) { setField(1, v); }
@@ -75,14 +75,14 @@ class EnergyMarket extends $pb.GeneratedMessage {
   factory EnergyMarket.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory EnergyMarket.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   EnergyMarket clone() => EnergyMarket()..mergeFromMessage(this);
-  EnergyMarket copyWith(void Function(EnergyMarket) updates) => super.copyWith((message) => updates(message as EnergyMarket));
+  EnergyMarket copyWith(void Function(EnergyMarket) updates) => super.copyWith((message) => updates(message as EnergyMarket)) as EnergyMarket;
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static EnergyMarket create() => EnergyMarket._();
   EnergyMarket createEmptyInstance() => create();
   static $pb.PbList<EnergyMarket> createRepeated() => $pb.PbList<EnergyMarket>();
   static EnergyMarket getDefault() => _defaultInstance ??= create()..freeze();
-  static EnergyMarket _defaultInstance;
+  static EnergyMarket? _defaultInstance;
 
   EnergyMarket get market => $_getN(0);
   set market(EnergyMarket v) { setField(1, v); }
@@ -101,14 +101,14 @@ class LmpComponent extends $pb.GeneratedMessage {
   factory LmpComponent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory LmpComponent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   LmpComponent clone() => LmpComponent()..mergeFromMessage(this);
-  LmpComponent copyWith(void Function(LmpComponent) updates) => super.copyWith((message) => updates(message as LmpComponent));
+  LmpComponent copyWith(void Function(LmpComponent) updates) => super.copyWith((message) => updates(message as LmpComponent)) as LmpComponent;
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static LmpComponent create() => LmpComponent._();
   LmpComponent createEmptyInstance() => create();
   static $pb.PbList<LmpComponent> createRepeated() => $pb.PbList<LmpComponent>();
   static LmpComponent getDefault() => _defaultInstance ??= create()..freeze();
-  static LmpComponent _defaultInstance;
+  static LmpComponent? _defaultInstance;
 
   LmpComponent_Component get component => $_getN(0);
   set component(LmpComponent_Component v) { setField(1, v); }
@@ -127,14 +127,14 @@ class IntervalType extends $pb.GeneratedMessage {
   factory IntervalType.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory IntervalType.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   IntervalType clone() => IntervalType()..mergeFromMessage(this);
-  IntervalType copyWith(void Function(IntervalType) updates) => super.copyWith((message) => updates(message as IntervalType));
+  IntervalType copyWith(void Function(IntervalType) updates) => super.copyWith((message) => updates(message as IntervalType)) as IntervalType;
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static IntervalType create() => IntervalType._();
   IntervalType createEmptyInstance() => create();
   static $pb.PbList<IntervalType> createRepeated() => $pb.PbList<IntervalType>();
   static IntervalType getDefault() => _defaultInstance ??= create()..freeze();
-  static IntervalType _defaultInstance;
+  static IntervalType? _defaultInstance;
 
   IntervalType_Type get type => $_getN(0);
   set type(IntervalType_Type v) { setField(1, v); }
@@ -154,14 +154,14 @@ class NumericTimeSeries_Observation extends $pb.GeneratedMessage {
   factory NumericTimeSeries_Observation.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory NumericTimeSeries_Observation.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   NumericTimeSeries_Observation clone() => NumericTimeSeries_Observation()..mergeFromMessage(this);
-  NumericTimeSeries_Observation copyWith(void Function(NumericTimeSeries_Observation) updates) => super.copyWith((message) => updates(message as NumericTimeSeries_Observation));
+  NumericTimeSeries_Observation copyWith(void Function(NumericTimeSeries_Observation) updates) => super.copyWith((message) => updates(message as NumericTimeSeries_Observation)) as NumericTimeSeries_Observation;
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static NumericTimeSeries_Observation create() => NumericTimeSeries_Observation._();
   NumericTimeSeries_Observation createEmptyInstance() => create();
   static $pb.PbList<NumericTimeSeries_Observation> createRepeated() => $pb.PbList<NumericTimeSeries_Observation>();
   static NumericTimeSeries_Observation getDefault() => _defaultInstance ??= create()..freeze();
-  static NumericTimeSeries_Observation _defaultInstance;
+  static NumericTimeSeries_Observation? _defaultInstance;
 
   Int64 get start => $_getI64(0);
   set start(Int64 v) { $_setInt64(0, v); }
@@ -188,14 +188,14 @@ class NumericTimeSeries extends $pb.GeneratedMessage {
   factory NumericTimeSeries.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory NumericTimeSeries.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   NumericTimeSeries clone() => NumericTimeSeries()..mergeFromMessage(this);
-  NumericTimeSeries copyWith(void Function(NumericTimeSeries) updates) => super.copyWith((message) => updates(message as NumericTimeSeries));
+  NumericTimeSeries copyWith(void Function(NumericTimeSeries) updates) => super.copyWith((message) => updates(message as NumericTimeSeries)) as NumericTimeSeries;
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static NumericTimeSeries create() => NumericTimeSeries._();
   NumericTimeSeries createEmptyInstance() => create();
   static $pb.PbList<NumericTimeSeries> createRepeated() => $pb.PbList<NumericTimeSeries>();
   static NumericTimeSeries getDefault() => _defaultInstance ??= create()..freeze();
-  static NumericTimeSeries _defaultInstance;
+  static NumericTimeSeries? _defaultInstance;
 
   $core.String get name => $_getS(0, '');
   set name($core.String v) { $_setString(0, v); }

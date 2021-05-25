@@ -10,8 +10,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class SystemDemand {
-  DbCollection coll;
-  Location _location;
+  late DbCollection coll;
+  late Location _location;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'system_demand';
 
@@ -43,7 +43,7 @@ class SystemDemand {
     var endDate = Date.parse(end);
     var res = [];
     var data = _getData(market.toUpperCase(), startDate, endDate);
-    String columnName;
+    String? columnName;
     if (market.toUpperCase() == 'DA') {
       columnName = 'Day-Ahead Cleared Demand';
     } else if (market.toUpperCase() == 'RT') {
@@ -58,7 +58,7 @@ class SystemDemand {
         });
       }
     }
-    return res;
+    return res as FutureOr<List<Map<String, dynamic>>>;
   }
 
   /// Workhorse to extract the data ...
@@ -80,6 +80,6 @@ class SystemDemand {
         'market': 0,
       }
     });
-    return coll.aggregateToStream(pipeline);
+    return coll.aggregateToStream(pipeline as List<Map<String, Object>>);
   }
 }

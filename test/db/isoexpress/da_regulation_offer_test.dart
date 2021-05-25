@@ -18,7 +18,7 @@ tests() async {
     });
     tearDown(() async => await archive.dbConfig.db.close());
     test('download 2017-01-01 and insert it', () async {
-      var date = Date(2017, 1, 1);
+      var date = Date.utc(2017, 1, 1);
 //      await archive.downloadDay(date);
       var res = await archive.insertDay(date);
       expect(res, 0);

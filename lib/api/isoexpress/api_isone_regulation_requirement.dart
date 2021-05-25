@@ -7,8 +7,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class RegulationRequirement {
-  DbCollection coll;
-  Location location;
+  late DbCollection coll;
+  Location? location;
   final collectionName = 'regulation_requirement';
 
   RegulationRequirement(Db db) {

@@ -10,7 +10,7 @@ const corsHeaders = {
 
 /// Set CORS headers with every request
 Middleware cors() {
-  Response handleOptionsRequest(Request request) {
+  Response? handleOptionsRequest(Request request) {
     if (request.method == 'OPTIONS') {
       return Response.ok(null, headers: corsHeaders);
     } else {
@@ -20,7 +20,7 @@ Middleware cors() {
   }
 
   Response addCorsHeaders(Response response) {
-    return response?.change(headers: corsHeaders);
+    return response.change(headers: corsHeaders);
   }
 
   return createMiddleware(

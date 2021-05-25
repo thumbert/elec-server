@@ -10,15 +10,15 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SdRtNcpcPymtArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SdRtNcpcPymtArchive({this.dbConfig}) {
+  SdRtNcpcPymtArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_RTNCPCPYMNT';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
@@ -59,7 +59,7 @@ class SdRtNcpcPymtArchive extends mis.MisReportArchive {
     /// tab 2, Generator credits section -- hourly
     labels['tab'] = 2;
     var x2 = mis.readReportTabAsMap(file, tab: 2);
-    var grp = groupBy(x2, (e) => e['Asset ID']);
+    var grp = groupBy(x2, (dynamic e) => e['Asset ID']);
     var tab2 = <Map<String,dynamic>>[];
     for (var entry in grp.entries) {
       labels['Asset ID'] = entry.key;
@@ -83,7 +83,7 @@ class SdRtNcpcPymtArchive extends mis.MisReportArchive {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
-    if (reportDate.isBefore(Date(2014, 12, 3))) {
+    if (reportDate.isBefore(Date.utc(2014, 12, 3))) {
       return <int,List<Map<String,dynamic>>>{};
     } else {
       return _processFile_21000101(file);
@@ -115,9 +115,9 @@ class SdRtNcpcPymtArchive extends mis.MisReportArchive {
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
-      await dbConfig.coll.drop();
+    // List<String?> collections = await dbConfig.db.getCollectionNames();
+    // if (collections.contains(dbConfig.collectionName))
+    //   await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
           'account': 1,
@@ -134,7 +134,8 @@ class SdRtNcpcPymtArchive extends mis.MisReportArchive {
   }
 
 
-  Future<Null> updateDb() {
+  Future<Null> updateDb() async {
     // TODO: implement updateDb
+    return null;
   }
 }

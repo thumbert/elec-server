@@ -10,15 +10,16 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SrRtNcpcStlmntSumArchive({this.dbConfig}) {
+  SrRtNcpcStlmntSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RTNCPCSTLMNTSUM';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'mis',
+          collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
@@ -124,9 +125,9 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
-    if (reportDate.isBefore(Date(2014, 12, 3))) {
+    if (reportDate.isBefore(Date.utc(2014, 12, 3))) {
       return <int,List<Map<String,dynamic>>>{};
-    } else if (reportDate.isBefore(Date(2019, 1, 1))) {
+    } else if (reportDate.isBefore(Date.utc(2019, 1, 1))) {
       return _processFile_20190101(file);
     } else {
       return _processFile_20190101(file);
@@ -158,7 +159,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
@@ -183,8 +184,4 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
     await dbConfig.db.close();
   }
 
-
-  Future<Null> updateDb() {
-    // TODO: implement updateDb
-  }
 }

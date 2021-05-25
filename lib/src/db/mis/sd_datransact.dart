@@ -9,15 +9,15 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:timezone/timezone.dart';
 
 class SdDaTransactArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
-  Location location;
+  late ComponentConfig dbConfig;
+  late Location location;
 
-  SdDaTransactArchive({this.dbConfig}) {
+  SdDaTransactArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_DATRANSACT';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = 'sd_datransact';
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
+    }
     location = getLocation('America/New_York');
   }
 

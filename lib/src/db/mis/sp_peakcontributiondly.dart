@@ -8,16 +8,14 @@ import 'package:elec_server/src/db/converters.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class SpPeakContributionDlyArchive extends mis.MisReportArchive {
-  ComponentConfig dbConfig;
+  late ComponentConfig dbConfig;
 
-  SpPeakContributionDlyArchive({this.dbConfig}) {
+  SpPeakContributionDlyArchive({ComponentConfig? dbConfig}) {
     reportName = 'SP_PEAKCONTRIBUTIONDLY';
     if (dbConfig == null) {
-      dbConfig = new ComponentConfig()
-        ..host = '127.0.0.1'
-        ..dbName = 'mis';
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
     }
-    dbConfig.collectionName = 'sp_peakcontributiondly';
   }
 
   Map<String,dynamic> rowConverter(Map<String,dynamic> row, DateTime version) {
@@ -33,7 +31,7 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
     var report = new mis.MisReport(file);
     var version = report.timestamp();
     var res = data
-        .map((Map row) => rowConverter(row, version))
+        .map((Map row) => rowConverter(row as Map<String, dynamic>, version))
         .toList();
     return {0: res};
   }
@@ -42,9 +40,9 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
   /// month, so it's best to
   /// remove documents that have Trading Date with a version earlier than a
   /// [maxVersion] is an UTC DateTime
-  Future remove(DateTime maxVersion, List<String> days, List<num> assetIds) async {
+  Future remove(DateTime? maxVersion, List<String?> days, List<num?> assetIds) async {
     List<Future> futs = [];
-    for(String date in days) {
+    for(String? date in days) {
       var selector = where
           .eq('Trading Date', date)
           .oneFrom('Asset ID', assetIds)
@@ -56,12 +54,12 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
 
   @override
   insertTabData(List<Map> data, {int tab: 0}) async {
-    var days = data.map((e) => e['Trading Date'] as String).toSet().toList();
+    var days = data.map((e) => e['Trading Date'] as String?).toSet().toList();
     var maxVersion = data.first['version'];
-    var assetIds = data.map((e) => e['Asset ID'] as num).toSet().toList();
+    var assetIds = data.map((e) => e['Asset ID'] as num?).toSet().toList();
     try{
       await remove(maxVersion, days, assetIds);
-      await dbConfig.coll.insertAll(data);
+      await dbConfig.coll.insertAll(data as List<Map<String, dynamic>>);
       print('--->  Inserted $reportName for ${data.first['Trading Date']} tab $tab, version ${data.first['version']} successfully');
     } catch (e) {
       print('XXX ' + e.toString());
@@ -73,18 +71,13 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
   @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    List<String> collections = await dbConfig.db.getCollectionNames();
+    List<String?> collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'Trading Date': 1, 'Asset ID': 1, 'version': 1},
         unique: true);
     await dbConfig.db.close();
-  }
-
-  @override
-  Future<Null> updateDb() {
-    // TODO: implement updateDb
   }
 
 }

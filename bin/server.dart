@@ -15,6 +15,7 @@ import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
+import 'package:timezone/data/latest.dart';
 
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
@@ -36,8 +37,6 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/isoexpress/api_system_demand.dart';
 import 'package:elec_server/api/isoexpress/api_isone_zonal_demand.dart';
 import 'package:elec_server/src/utils/cors_middleware.dart';
-
-const String host = '127.0.0.1';
 
 Future<Router> buildRouter() async {
   final router = Router();
@@ -83,7 +82,7 @@ Future<Router> buildRouter() async {
 }
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');
@@ -91,6 +90,7 @@ void main() async {
 
   DbProd();
 
+  const host = '127.0.0.1';
   var port = 8080; // production
   //var port = 8081;  // test
 

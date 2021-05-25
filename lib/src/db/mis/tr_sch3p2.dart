@@ -7,15 +7,14 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
 class TrSch3p2Archive extends mis.MisReportArchive {
-  @override
-  ComponentConfig dbConfig;
-
-  TrSch3p2Archive({this.dbConfig}) {
+  TrSch3p2Archive({ComponentConfig? dbConfig}) {
     reportName = 'TR_SCH3P2';
-    dbConfig ??= ComponentConfig()
-      ..host = '127.0.0.1'
-      ..dbName = 'mis';
-    dbConfig.collectionName = reportName.toLowerCase();
+    if (dbConfig == null) {
+      this.dbConfig = ComponentConfig(
+          host: '127.0.0.1',
+          dbName: 'mis',
+          collectionName: reportName.toLowerCase());
+    }
   }
 
   /// Add the index labels, remove unneeded columns.
