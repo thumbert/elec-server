@@ -12,12 +12,12 @@ dependencies:
   date:
     git:
       url: git://github.com/thumbert/date.git
-      ref: 2.5.0
+      ref: with-null
   dotenv: '>=2.0.0 <3.0.0'
   elec:
     git:
       url: git://github.com/thumbert/elec.git
-      ref: with-nulls
+      ref: with-null
   grpc: '>=1.0.0 <2.0.0'
   html: '>=0.13.0 <1.0.0'
   intl: '>=0.14.0 <1.0.0'
