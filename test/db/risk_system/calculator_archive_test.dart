@@ -1,6 +1,6 @@
 library test.db.risk_system.calculator_archive_test;
 
-// import 'package:elec/calculators/elec_swap.dart';
+import 'package:elec/calculators/elec_swap.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:elec_server/client/risk_system/calculator.dart';
@@ -35,13 +35,15 @@ void tests(String rootUrl) async {
       expect(res, ['e11111', 'e42111']);
     });
     test('get calculator names for one user', () async {
-      var aux = await http.get(Uri.parse('$rootUrl/calculators/v1/user/e11111/names'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/calculators/v1/user/e11111/names'),
           headers: {'Content-Type': 'application/json'});
       var res = json.decode(aux.body) as List;
       expect(res.contains('custom monthly quantities, 1 leg'), true);
     });
     test('get all calculator types', () async {
-      var aux = await http.get(Uri.parse('$rootUrl/calculators/v1/calculator-types'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/calculators/v1/calculator-types'),
           headers: {'Content-Type': 'application/json'});
       var res = json.decode(aux.body) as List;
       expect(res.toSet(), {'elec_swap', 'elec_daily_option'});
@@ -49,16 +51,16 @@ void tests(String rootUrl) async {
     test('get one calculator', () async {
       var url = '$rootUrl/calculators/v1/user/e11111/'
           'calculator-name/custom monthly quantities, 1 leg';
-      var aux =
-          await http.get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
+      var aux = await http
+          .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
       var calc = json.decode(aux.body);
       expect(calc['userId'], 'e11111');
     });
     test('save a calculator, then delete it', () async {
       var calc = calc3();
       calc['calculatorName'] = 'test';
-      var aux = await http.post(Uri.parse(
-        '$rootUrl/calculators/v1/save-calculator'),
+      var aux = await http.post(
+        Uri.parse('$rootUrl/calculators/v1/save-calculator'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(calc),
       );
@@ -66,8 +68,8 @@ void tests(String rootUrl) async {
       expect(res['ok'], 1.0);
       // now delete it
       var url = '$rootUrl/calculators/v1/user/e11111/calculator-name/test';
-      var aux2 =
-          await http.delete(Uri.parse(url), headers: {'Content-Type': 'application/json'});
+      var aux2 = await http.delete(Uri.parse(url),
+          headers: {'Content-Type': 'application/json'});
       var res2 = json.decode(aux2.body);
       expect(res2['ok'], 1.0);
     });
@@ -83,15 +85,15 @@ void tests(String rootUrl) async {
           await client.deleteCalculator(calc['userId'], calc['calculatorName']);
       expect(res2['ok'], 1.0);
     });
-    // test('get a calculator one leg', () async {
-    //   var calc = await client.getCalculator(
-    //       'e11111', 'custom monthly quantities, 1 leg');
-    //   expect(calc is ElecSwapCalculator, true);
-    // });
-    // test('get a calculator 2 legs, saved from UI', () async {
-    //   var calc = await client.getCalculator('e11111', 'test 1 2 3');
-    //   expect(calc is ElecSwapCalculator, true);
-    // });
+    test('get a calculator one leg', () async {
+      var calc = await client.getCalculator(
+          'e11111', 'custom monthly quantities, 1 leg');
+      expect(calc is ElecSwapCalculator, true);
+    });
+    test('get a calculator 2 legs, saved from UI', () async {
+      var calc = await client.getCalculator('e11111', 'test 1 2 3');
+      expect(calc is ElecSwapCalculator, true);
+    });
   });
 }
 
