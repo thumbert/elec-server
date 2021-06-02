@@ -9,15 +9,13 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:table/table.dart';
 
 class SdArrAwdSumArchive extends mis.MisReportArchive {
-  @override
-  late ComponentConfig dbConfig;
-
   SdArrAwdSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_ARRAWDSUM';
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
-    }
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'mis',
+        collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
 
   /// Add the index labels, remove unneeded columns.
@@ -107,11 +105,5 @@ class SdArrAwdSumArchive extends mis.MisReportArchive {
       'Subaccount ID': {'\$exists': true},
     });
     await dbConfig.db.close();
-  }
-
-  @override
-  Future<Null> updateDb() async {
-    // TODO: implement updateDb
-    return null;
   }
 }

@@ -104,5 +104,6 @@ void main() async {
   });
   final handler = Pipeline().addMiddleware(cors()).addHandler(app);
   await io.serve(handler, host, port);
+  // await io.serve(handler, InternetAddress.anyIPv4, port);
   print('Shelf server started on port $port');
 }

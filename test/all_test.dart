@@ -30,14 +30,14 @@ import 'utils/to_csv_test.dart' as to_csv;
 void main() async {
   initializeTimeZones();
   DbProd();
-  var rootUrl = 'http://127.0.0.1:8080';
   dotenv.load('.env/prod.env');
+  // var rootUrl = 'http://127.0.0.1:8080';
+  var rootUrl = dotenv.env['ROOT_URL']!;
 
   // var keys = ['a', 'b', 'c'];
   // var xs = [1, null, 3];
   // var m = {for (var i=0; i<3; i++) keys[i] : xs[i] as num?};
   // var m2 = Map.fromIterables(keys, xs);
-
 
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
