@@ -225,14 +225,12 @@ class SdRtload {
       String start, String end) async {
     var pipeline =
         _pipelineAllAssetsVersionsDaily(Date.parse(start), Date.parse(end));
-    return coll
-        .aggregateToStream(pipeline as List<Map<String, Object>>)
-        .toList();
+    return coll.aggregateToStream(pipeline).toList();
   }
 
-  List<Map<String, dynamic>> _pipelineAllAssetsVersionsDaily(
+  List<Map<String, Object>> _pipelineAllAssetsVersionsDaily(
       Date start, Date end) {
-    return [
+    return <Map<String, Object>>[
       {
         '\$match': {
           'date': {
@@ -332,7 +330,7 @@ class SdRtload {
 
   Stream<Map<String, dynamic>> _rtloadQuery(
       String assetId, String start, String end) {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -347,7 +345,7 @@ class SdRtload {
         '_id': 0,
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>);
+    return coll.aggregateToStream(pipeline);
   }
 
   Future<List<Map<String, dynamic>>> _format(
