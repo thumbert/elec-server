@@ -225,7 +225,9 @@ class SdRtload {
       String start, String end) async {
     var pipeline =
         _pipelineAllAssetsVersionsDaily(Date.parse(start), Date.parse(end));
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll
+        .aggregateToStream(pipeline as List<Map<String, Object>>)
+        .toList();
   }
 
   List<Map<String, dynamic>> _pipelineAllAssetsVersionsDaily(
@@ -263,21 +265,23 @@ class SdRtload {
   /// Return the monthly MWh for all assetId, all versions.
   /// Start and end are months in yyyy-mm format.
   // @ApiMethod(path: 'monthly/start/{start}/end/{end}/settlement/{settlement}')
-  Future<List<Map<String, dynamic>>?> monthlyRtLoadSettlement(
+  Future<List<Map<String, dynamic>>> monthlyRtLoadSettlement(
       String start, String end, int settlement) async {
     // Note that you can't do the monthly aggregation on the Mongo side, because
     // the version is different between days and doesn't match the settlement #.
     // Have to use the daily query and aggregate it in dart.
     start = start.replaceAll('-', '');
     end = end.replaceAll('-', '');
-    var startM =
-        Month.utc(int.parse(start.substring(0, 4)), int.parse(start.substring(4)));
+    var startM = Month.utc(
+        int.parse(start.substring(0, 4)), int.parse(start.substring(4)));
     var endM =
         Month.utc(int.parse(end.substring(0, 4)), int.parse(end.substring(4)));
 
     var pipeline =
         _pipelineAllAssetsVersionsDaily(startM.startDate, endM.endDate);
-    var data = await coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    var data = await coll
+        .aggregateToStream(pipeline as List<Map<String, Object>>)
+        .toList();
     var res = getNthSettlement(data, (e) => Tuple2(e['date'], e['Asset ID']),
         n: settlement);
 
@@ -285,14 +289,15 @@ class SdRtload {
       ..key((e) => (e['date'] as String).substring(0, 7))
       ..key((e) => e['Asset ID'])
       ..rollup((List xs) => {
-            'Load Reading': sum(xs.map(((e) => e['Load Reading']) as num Function(dynamic))),
+            'Load Reading': sum(
+                xs.map(((e) => e['Load Reading']) as num Function(dynamic))),
             'Ownership Share': xs.first['Ownership Share'],
-            'Share of Load Reading':
-                sum(xs.map(((e) => e['Share of Load Reading']) as num Function(dynamic))),
+            'Share of Load Reading': sum(xs.map(
+                ((e) => e['Share of Load Reading']) as num Function(dynamic))),
           });
 
     var aux = nest.map(res);
-    return flattenMap(aux, ['month', 'Asset ID']);
+    return flattenMap(aux, ['month', 'Asset ID'])!;
   }
 
   //http://127.0.0.1:8080/sd_rtload/v1/assetId/1485/start/20171201/end/20171201/csv
