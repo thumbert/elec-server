@@ -277,9 +277,7 @@ class SdRtload {
 
     var pipeline =
         _pipelineAllAssetsVersionsDaily(startM.startDate, endM.endDate);
-    var data = await coll
-        .aggregateToStream(pipeline as List<Map<String, Object>>)
-        .toList();
+    var data = await coll.aggregateToStream(pipeline).toList();
     var res = getNthSettlement(data, (e) => Tuple2(e['date'], e['Asset ID']),
         n: settlement);
 
@@ -287,11 +285,10 @@ class SdRtload {
       ..key((e) => (e['date'] as String).substring(0, 7))
       ..key((e) => e['Asset ID'])
       ..rollup((List xs) => {
-            'Load Reading': sum(
-                xs.map(((e) => e['Load Reading']) as num Function(dynamic))),
+            'Load Reading': sum(xs.map((e) => e['Load Reading'])),
             'Ownership Share': xs.first['Ownership Share'],
-            'Share of Load Reading': sum(xs.map(
-                ((e) => e['Share of Load Reading']) as num Function(dynamic))),
+            'Share of Load Reading':
+                sum(xs.map((e) => e['Share of Load Reading'])),
           });
 
     var aux = nest.map(res);
