@@ -2,7 +2,6 @@ import 'dart:html';
 
 import 'package:elec_server/src/ui/disposable_window.dart';
 import 'package:elec_server/src/ui2/selector_checkbox.dart';
-import 'package:elec_server/src/ui2/selector_load_spec.dart';
 import 'package:timezone/browser.dart';
 import 'package:elec_server/ui.dart';
 import 'package:elec_server/src/ui2/selector.dart';
@@ -50,7 +49,8 @@ void testsUi1() {
   var message = querySelector('#radio-group-message');
   var radioGroup =
       RadioGroupInput(querySelector('#radio-group'), ['Federer', 'Nadal']);
-  radioGroup.onChange((e) => message!.text = 'You selected ${radioGroup.value}');
+  radioGroup
+      .onChange((e) => message!.text = 'You selected ${radioGroup.value}');
 
   /// a term input
   var messageTi = querySelector('#term-input-message');
@@ -68,9 +68,8 @@ void testsUi1() {
     'Strawberry',
     'Watermelon'
   ];
-  var selectableList =
-      SelectableList(querySelector('#selectable-list'), fruits,
-          highlightColor: '#007bff');
+  var selectableList = SelectableList(querySelector('#selectable-list'), fruits,
+      highlightColor: '#007bff');
   selectableList.onChange((e) {
     messageSl!.text = 'You selected ${selectableList.selected.join(', ')}';
   });
@@ -114,26 +113,16 @@ void testsUi1() {
   /// a disposable window
   var li =
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-  var disposableWindow =
-      DisposableWindow(DivElement()..text = li);
+  var disposableWindow = DisposableWindow(DivElement()..text = li);
   var disposableWindowWrapper = querySelector('#disposable-window-wrapper')!
     ..children = [disposableWindow.inner!];
-}
 
-void testsUi2() {
-  var zones = ['ALL', 'MAINE', 'NH', 'VT', 'CT', 'RI', 'SEMA', 'WCMA', 'NEMA'];
-  var message1 = querySelector('#ui2-zone-selector-message');
-  var zoneSelector =
-      Selector(querySelector('#ui2-zone-selector')!, zones, 'Load Zone');
-  zoneSelector
-      .onChange((e) => message1!.text = 'You selected ${zoneSelector.value}');
-
-  var zoneSelectorCheckbox = SelectorCheckbox(
-      querySelector('#ui2-zone-selector-checkbox')!, zones, 'Load Zone');
-  print(zoneSelectorCheckbox.value);
-
-//  var loadSpecSelector = LoadSpecSelector(
-//      querySelector('#ui2-load-spec-selector'));
+  /// ptid input
+  // var ptidInput = PtidInput(
+  //     querySelector('#ptid-input'), null, );
+  // checkboxGroup.onChange((e) {
+  //   messageCheckboxGroup.text = 'You selected ${checkboxGroup.selected}';
+  // });
 }
 
 void main() async {

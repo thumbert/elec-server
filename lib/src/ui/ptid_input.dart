@@ -41,6 +41,7 @@ class PtidInput {
 
   int? get value {
     int? aux;
+    var text = '';
     if (_textInput.value!.isEmpty) {
       aux = null;
       if (!canBeEmpty) {
@@ -48,20 +49,20 @@ class PtidInput {
             'style', 'margin-left: 15px; border: 2px solid red;');
       }
     } else {
-      aux = int.parse(_textInput.value!);
+      aux = int.tryParse(_textInput.value!);
       _textInput.setAttribute(
           'style', 'margin-left: 15px; border-color: initial;');
     }
-    var text = ptidToName[aux!];
-    if (aux != null && text == null) {
+    if (aux != null && ptidToName.containsKey(aux)) {
+      text = ptidToName[aux]!;
+    }
+    if (aux != null) {
       // name not in the ptidToName map
       _textInput.setAttribute(
           'style', 'margin-left: 15px; border: 2px solid red;');
-      _nodeLabel.text = '';
-    } else {
-      // you can set the label
-      _nodeLabel.text = text;
     }
+    // you can set the label
+    _nodeLabel.text = text;
     return aux;
   }
 

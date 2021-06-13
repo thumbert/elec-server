@@ -41,13 +41,31 @@ void tableWithSaveIcon() {
     {'airport': 'BWI', 'tmin': '27', 'tmax': '49'},
     {'airport': 'LGA', 'tmin': '25', 'tmax': '47'},
   ];
-  var options = <String,dynamic>{'export': {'format': 'xslx'}};
+  var options = <String, dynamic>{
+    'export': {'format': 'xslx'}
+  };
   HtmlTable(querySelector('#wrapper-simple-table-export'), data,
       options: options);
+}
+
+void tableWithNulls() {
+  var data = <Map<String, dynamic>>[
+    {'airport': 'BOS', 'tmin': 22, 'tmax': 45},
+    {'airport': 'BWI', 'tmin': null, 'tmax': 49},
+    {'airport': 'LGA', 'tmin': 25, 'tmax': null},
+  ];
+  var options = <String, dynamic>{
+    'format': {
+      'tmin': {'valueFormat': (x) => x == null ? '' : x.toString()},
+      'tmax': {'valueFormat': (x) => x == null ? '' : x.toString()},
+    }
+  };
+  HtmlTable(querySelector('#wrapper-with-nulls'), data, options: options);
 }
 
 void main() {
   simpleTable();
   tableWithFormat();
   tableWithSaveIcon();
+  tableWithNulls();
 }
