@@ -1,12 +1,13 @@
 import 'dart:html';
 
+import 'package:http/http.dart';
+import 'package:elec_server/client/other/ptids.dart';
 import 'package:elec_server/src/ui/disposable_window.dart';
-import 'package:elec_server/src/ui2/selector_checkbox.dart';
 import 'package:timezone/browser.dart';
 import 'package:elec_server/ui.dart';
-import 'package:elec_server/src/ui2/selector.dart';
+import 'package:timezone/data/latest.dart';
 
-void testsUi1() {
+Future<void> testsUi1() async {
   var messageCdcf =
       querySelector('#categorical-dropdown-checkbox-filter-message');
   var cdcf = CategoricalDropdownCheckboxFilter(
@@ -118,17 +119,20 @@ void testsUi1() {
     ..children = [disposableWindow.inner!];
 
   /// ptid input
-  // var ptidInput = PtidInput(
-  //     querySelector('#ptid-input'), null, );
-  // checkboxGroup.onChange((e) {
-  //   messageCheckboxGroup.text = 'You selected ${checkboxGroup.selected}';
-  // });
+  var ptidClient = PtidsApi(Client(), rootUrl: 'http://127.0.0.1:8080');
+  var ptids = await ptidClient.getPtidTable();
+  var ptidMap = {for (var e in ptids) e['ptid'] as int: e['name'] as String};
+  var ptidInput = PtidInput(querySelector('#ptid-input')!, 4000, ptidMap);
+  var messagePtid = querySelector('#ptid-input-message')!..text = 'Selected';
+  ptidInput.onChange((e) {
+    messagePtid.text = '  Selected ${ptidInput.value}';
+  });
 }
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
 
 //  testsUi2();
 
-  testsUi1();
+  await testsUi1();
 }

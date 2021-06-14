@@ -56,7 +56,7 @@ class PtidInput {
     if (aux != null && ptidToName.containsKey(aux)) {
       text = ptidToName[aux]!;
     }
-    if (aux != null) {
+    if (text == '') {
       // name not in the ptidToName map
       _textInput.setAttribute(
           'style', 'margin-left: 15px; border: 2px solid red;');
