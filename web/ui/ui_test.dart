@@ -123,7 +123,7 @@ Future<void> testsUi1() async {
   var ptids = await ptidClient.getPtidTable();
   var ptidMap = {for (var e in ptids) e['ptid'] as int: e['name'] as String};
   var ptidInput =
-      PtidInput(querySelector('#ptid-input')!, 4000, ptidMap, canBeEmpty: true);
+      PtidInput(querySelector('#ptid-input')!, null, ptidMap, canBeEmpty: true);
   var messagePtid = querySelector('#ptid-input-message')!..text = 'Selected';
   ptidInput.onChange((e) {
     messagePtid.text = '  Selected ${ptidInput.value}';
