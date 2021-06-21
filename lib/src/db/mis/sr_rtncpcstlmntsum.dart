@@ -136,6 +136,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
   }
 
   /// Only one tab at a time only!
+  @override
   Future<int> insertTabData(List<Map<String, dynamic>> data,
       {int tab = 0}) async {
     if (data.isEmpty) return Future.value(-1);

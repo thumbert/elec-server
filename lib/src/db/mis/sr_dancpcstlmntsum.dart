@@ -96,7 +96,7 @@ class SrDaNcpcStlmntSumArchive extends mis.MisReportArchive {
   @override
   Future<int> insertTabData(List<Map<String, dynamic>> data,
       {int tab = 0}) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(-1);
     var tabs = data.map((e) => e['tab']).toSet();
     if (tabs.length != 1) {
       throw ArgumentError('Input data can\'t be for multiple tabs: $tabs');

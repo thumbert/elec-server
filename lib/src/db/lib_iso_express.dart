@@ -17,12 +17,13 @@ abstract class IsoExpressReport {
   late String reportName;
   late ComponentConfig dbConfig;
   final Location location = getLocation('America/New_York');
+
   /// the location of this report on disk
   late String dir;
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
-  Map<String,dynamic> converter(List<Map<String,dynamic>> rows);
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows);
 
   /// Setup the database from scratch again, including the index
   Future<Null> setupDb();
@@ -62,7 +63,6 @@ abstract class IsoExpressReport {
 
 /// An archive that gets daily updates.  Easy to update!
 abstract class DailyIsoExpressReport extends IsoExpressReport {
-
   /// Get the url of this report for this date
   String getUrl(Date? asOfDate);
 
@@ -78,7 +78,6 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// NCPC reports are 4-7 days later.  Offer data is 4 months later.
   /// If data is not available, the reports will be empty, so no harm done.
   //Date lastDayAvailable();
-
 
   /// Delete one day from the archive.
   //Future<Null> deleteDay(Date day);
@@ -100,12 +99,12 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// Remove the data associated with this [day] before reinserting.
   /// Returns 0 for success, 1 for error, null if there is no data to insert.
   ///
-  Future<int> insertDay(Date? day) async {
+  Future<int> insertDay(Date day) async {
     var file = getFilename(day);
     var data;
     try {
       data = processFile(file);
-      if (data.isEmpty) return Future.value(null);
+      if (data.isEmpty) return Future.value(-1);
       await dbConfig.coll.remove({'date': day.toString()});
       return dbConfig.coll.insertAll(data).then((_) {
         print('--->  Inserted $reportName for day $day');
@@ -113,10 +112,10 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
       }).catchError((e) {
         print('XXXX ' + e.toString());
         return 1;
-      }); 
+      });
     } on mis.IncompleteReportException {
       await file.delete();
-      return Future.value(null);
+      return Future.value(-1);
     }
   }
 }

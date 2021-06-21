@@ -14,6 +14,7 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
         host: '127.0.0.1',
         dbName: 'mis',
         collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
 
   Map<String, dynamic> rowConverter(
