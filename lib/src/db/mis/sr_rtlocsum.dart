@@ -10,15 +10,13 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class SrRtLocSumArchive extends mis.MisReportArchive {
-
   SrRtLocSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RTLOCSUM';
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'mis',
-          collectionName: reportName.toLowerCase());
-    }
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'mis',
+        collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
 
   /// Override the implementation.
@@ -177,8 +175,8 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     data = mis.readReportTabAsMap(file, tab: 1);
     var res1 = <Map<String, dynamic>>[];
     if (data.isNotEmpty) {
-      var dataById = groupBy(
-          data, (dynamic row) => Tuple2(row['Subaccount ID'], row['Location ID']));
+      var dataById = groupBy(data,
+          (dynamic row) => Tuple2(row['Subaccount ID'], row['Location ID']));
       res1 = dataById.keys
           .map((tuple) =>
               rowConverter1(dataById[tuple]!, account, reportDate, version))

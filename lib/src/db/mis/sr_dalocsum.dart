@@ -14,12 +14,11 @@ import 'package:tuple/tuple.dart';
 class SrDaLocSumArchive extends mis.MisReportArchive {
   SrDaLocSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_DALOCSUM';
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'mis',
-          collectionName: reportName.toLowerCase());
-    }
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'mis',
+        collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
 
   /// Override the implementation.

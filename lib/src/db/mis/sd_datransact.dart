@@ -9,19 +9,18 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:timezone/timezone.dart';
 
 class SdDaTransactArchive extends mis.MisReportArchive {
-  late ComponentConfig dbConfig;
-  late Location location;
-
   SdDaTransactArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_DATRANSACT';
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
-    }
-    location = getLocation('America/New_York');
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'mis',
+        collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
 
-  Future<int> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
+  @override
+  Future<int> insertTabData(List<Map<String, dynamic>> data,
+      {int tab = 0}) async {
     if (data.isEmpty) return Future.value(null);
     var account = data.first['account'];
     var tab = data.first['tab'];
@@ -35,14 +34,14 @@ class SdDaTransactArchive extends mis.MisReportArchive {
         'version': version,
       });
       await dbConfig.coll.insertAll(data);
-      print('--->  Inserted $reportName for $date, version $version, tab $tab successfully');
+      print(
+          '--->  Inserted $reportName for $date, version $version, tab $tab successfully');
       return Future.value(0);
     } catch (e) {
       print('XXX ' + e.toString());
       return Future.value(1);
     }
   }
-
 
   /// keep each row as a document, mostly as is
   List<Map<String, dynamic>> rowConverter0(
@@ -68,7 +67,9 @@ class SdDaTransactArchive extends mis.MisReportArchive {
       var hbL = TZDateTime.fromMillisecondsSinceEpoch(
           location, _hb.millisecondsSinceEpoch);
       aux['hourBeginning'] = hbL.toIso8601String();
-      for (var column in columns) aux[column] = row[column];
+      for (var column in columns) {
+        aux[column] = row[column];
+      }
       out.add(aux);
     }
     return out;
@@ -94,11 +95,13 @@ class SdDaTransactArchive extends mis.MisReportArchive {
       aux['date'] = reportDate.toString();
       aux['version'] = version;
       var _hb =
-      parseHourEndingStamp(mmddyyyy(reportDate), row['Trading Interval']);
+          parseHourEndingStamp(mmddyyyy(reportDate), row['Trading Interval']);
       var hbL = TZDateTime.fromMillisecondsSinceEpoch(
           location, _hb.millisecondsSinceEpoch);
       aux['hourBeginning'] = hbL.toIso8601String();
-      for (var column in columns) aux[column] = row[column];
+      for (var column in columns) {
+        aux[column] = row[column];
+      }
       out.add(aux);
     }
     return out;
@@ -106,6 +109,7 @@ class SdDaTransactArchive extends mis.MisReportArchive {
 
   /// Tab 0 is for external transactions
   /// Tab 1 is for internal bilateral transactions
+  @override
   Map<int, List<Map<String, dynamic>>> processFile(File file) {
     var report = mis.MisReport(file);
     var account = report.accountNumber();
@@ -121,6 +125,7 @@ class SdDaTransactArchive extends mis.MisReportArchive {
     return {0: data0, 1: data1};
   }
 
+  @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,

@@ -15,12 +15,11 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
 
   SrRsvChargeArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RSVCHARGE';
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'mis',
-          collectionName: reportName.toLowerCase());
-    }
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'mis',
+        collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
 
   Map<int, List<Map<String, dynamic>>> _processFile_21000101(File file) {
@@ -65,9 +64,7 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
     labels['tab'] = 6;
     var x6 = mis.readReportTabAsMap(file, tab: 6);
     var grp6 = groupBy(
-        x6,
-            (dynamic e) =>
-            Tuple2(e['Subaccount ID'], e['Load Zone ID']));
+        x6, (dynamic e) => Tuple2(e['Subaccount ID'], e['Load Zone ID']));
     var tab6 = <Map<String, dynamic>>[];
     for (var entry in grp6.entries) {
       labels['Subaccount ID'] = entry.key.item1;
@@ -84,7 +81,6 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
             'Load Zone ID',
           ]));
     }
-
 
     return {
       4: tab4,
@@ -145,4 +141,3 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
     await dbConfig.db.close();
   }
 }
-

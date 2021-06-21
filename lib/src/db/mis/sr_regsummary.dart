@@ -14,15 +14,12 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
 
   SrRegSummaryArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_REGSUMMARY';
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'mis',
-          collectionName: reportName.toLowerCase());
-    }
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'mis',
+        collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
-
-
 
 //  /// Add the index labels, remove unneeded columns.
 //  List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
@@ -37,13 +34,13 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
 //    }).toList();
 //  }
 
-  Map<int,List<Map<String,dynamic>>> _processFile_21000101(File file) {
+  Map<int, List<Map<String, dynamic>>> _processFile_21000101(File file) {
     var report = mis.MisReport(file);
     var account = report.accountNumber();
     var reportDate = report.forDate();
     var version = report.timestamp().toIso8601String();
 
-    var labels = <String,dynamic>{
+    var labels = <String, dynamic>{
       'account': account,
       'tab': 0,
       'date': reportDate.toString(),
@@ -56,7 +53,7 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
     labels['tab'] = 1;
     var x1 = mis.readReportTabAsMap(file, tab: 1);
     var grp = groupBy(x1, (dynamic e) => e['Subaccount ID']);
-    var tab1 = <Map<String,dynamic>>[];
+    var tab1 = <Map<String, dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
       tab1.addAll(mis.MisReport.addLabels([rowsToColumns(entry.value)], labels,
@@ -70,20 +67,20 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
   }
 
   @override
-  Map<int,List<Map<String,dynamic>>> processFile(File file) {
+  Map<int, List<Map<String, dynamic>>> processFile(File file) {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
     if (reportDate.isBefore(Date.utc(2017, 12, 1))) {
-      return <int,List<Map<String,dynamic>>>{};
+      return <int, List<Map<String, dynamic>>>{};
     } else {
       return _processFile_21000101(file);
     }
   }
 
-
   /// Only one tab at a time only!
-  Future<Null> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
+  Future<Null> insertTabData(List<Map<String, dynamic>> data,
+      {int tab: 0}) async {
     if (data.isEmpty) return Future.value(null);
     var tabs = data.map((e) => e['tab']).toSet();
     if (tabs.length != 1)
@@ -96,12 +93,12 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
         'version': data.first['version'],
       });
       await dbConfig.coll.insertAll(data);
-      print('--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab $tab, version ${data.first['version']} successfully');
+      print(
+          '--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab $tab, version ${data.first['version']} successfully');
     } catch (e) {
       print('XXX ' + e.toString());
     }
   }
-
 
   @override
   Future<Null> setupDb() async {
@@ -110,12 +107,7 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {
-          'account': 1,
-          'tab': 1,
-          'date': 1,
-          'version': 1
-        });
+        keys: {'account': 1, 'tab': 1, 'date': 1, 'version': 1});
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
           'account': 1,

@@ -14,21 +14,22 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
 
   SrRtCustSumArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RTCUSTSUM';
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'mis',
-          collectionName: reportName.toLowerCase());
-    }
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1',
+        dbName: 'mis',
+        collectionName: reportName.toLowerCase());
+    this.dbConfig = dbConfig;
   }
 
   /// Add the index labels, remove unneeded columns.
-  List<Map<String,dynamic>> addLabels(Iterable<Map<String,dynamic>> rows,
-      Map<String,dynamic> labels, List<String> removeColumns) {
+  List<Map<String, dynamic>> addLabels(Iterable<Map<String, dynamic>> rows,
+      Map<String, dynamic> labels, List<String> removeColumns) {
     if (rows.length == 1 && rows.first.isEmpty) return [];
     return rows.map((e) {
-      for (var column in removeColumns) e.remove(column);
-      var out = <String,dynamic>{
+      for (var column in removeColumns) {
+        e.remove(column);
+      }
+      var out = <String, dynamic>{
         ...labels,
         ...e,
       };
@@ -36,13 +37,13 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     }).toList();
   }
 
-  Map<int,List<Map<String,dynamic>>> _processFile_21000101(File file) {
+  Map<int, List<Map<String, dynamic>>> _processFile_21000101(File file) {
     var report = mis.MisReport(file);
     var account = report.accountNumber();
     var reportDate = report.forDate();
     var version = report.timestamp().toIso8601String();
 
-    var labels = <String,dynamic>{
+    var labels = <String, dynamic>{
       'account': account,
       'tab': 0,
       'date': reportDate.toString(),
@@ -51,20 +52,19 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
 
     /// tab 0, participant and pool info
     var x0 = mis.readReportTabAsMap(file, tab: 0);
-    var tab0 = addLabels([rowsToColumns(x0)], labels,
-        ['H', 'Trading Interval']);
+    var tab0 =
+        addLabels([rowsToColumns(x0)], labels, ['H', 'Trading Interval']);
 
     /// tab 1, subaccount info
     labels['tab'] = 1;
     var x1 = mis.readReportTabAsMap(file, tab: 1);
     var grp = groupBy(x1, (dynamic e) => e['Subaccount ID']);
-    var tab1 = <Map<String,dynamic>>[];
+    var tab1 = <Map<String, dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
       tab1.addAll(addLabels([rowsToColumns(entry.value)], labels,
           ['H', 'Subaccount ID', 'Subaccount Name', 'Trading Interval']));
     }
-
 
     return {
       0: tab0,
@@ -73,12 +73,12 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
   }
 
   @override
-  Map<int,List<Map<String,dynamic>>> processFile(File file) {
+  Map<int, List<Map<String, dynamic>>> processFile(File file) {
     var report = mis.MisReport(file);
     var reportDate = report.forDate();
 
     if (reportDate.isBefore(Date.utc(2017, 3, 1))) {
-      return <int,List<Map<String,dynamic>>>{};
+      return <int, List<Map<String, dynamic>>>{};
     } else if (reportDate.isBefore(Date.utc(2100, 1, 1))) {
       return _processFile_21000101(file);
     } else {
@@ -86,9 +86,9 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     }
   }
 
-
   /// Only one tab at a time only!
-  Future<Null> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
+  Future<Null> insertTabData(List<Map<String, dynamic>> data,
+      {int tab: 0}) async {
     if (data.isEmpty) return Future.value(null);
     var tabs = data.map((e) => e['tab']).toSet();
     if (tabs.length != 1)
@@ -101,12 +101,12 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
         'version': data.first['version'],
       });
       await dbConfig.coll.insertAll(data);
-      print('--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab ${tabs.first}, version ${data.first['version']} successfully');
+      print(
+          '--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab ${tabs.first}, version ${data.first['version']} successfully');
     } catch (e) {
       print('XXX ' + e.toString());
     }
   }
-
 
   @override
   Future<Null> setupDb() async {
@@ -115,25 +115,17 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     if (collections.contains(dbConfig.collectionName))
       await dbConfig.coll.drop();
     await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {
-          'account': 1,
-          'tab': 1,
-          'date': 1,
-          'version': 1
-        });
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {
-          'account': 1,
-          'tab': 1,
-          'date': 1,
-          'version': 1,
-          'Subaccount ID': 1,
-        },
-        partialFilterExpression: {
-          'Subaccount ID': {'\$exists': true},
-          //'tab': {'\$eq': 10},
-        });
+        keys: {'account': 1, 'tab': 1, 'date': 1, 'version': 1});
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {
+      'account': 1,
+      'tab': 1,
+      'date': 1,
+      'version': 1,
+      'Subaccount ID': 1,
+    }, partialFilterExpression: {
+      'Subaccount ID': {'\$exists': true},
+      //'tab': {'\$eq': 10},
+    });
     await dbConfig.db.close();
   }
-
 }
