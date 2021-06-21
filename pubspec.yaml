@@ -1,6 +1,6 @@
 name: elec_server
 description: An elec server
-version: 2.0.0
+version: 2.0.1
 author: Tony Humbert <tony.humberts@gmail.com>
 
 environment:
@@ -19,9 +19,6 @@ dependencies:
   grpc: ^3.0.0
   html: ^0.15.0
   intl: ^0.17.0
-#  jexcel_dart:
-#    git:
-#      url: git://github.com/thumbert/jexcel-dart.git
   logging: ^1.0.1
   mongo_dart: ^0.7.0+1
   more: ^3.0.1

@@ -15,11 +15,11 @@ class ForwardMarksArchive {
   /// Marks are inserted into the db for a given (curveId, fromDate) tuple.
   /// Not all curves have marks updated every day.
   ///
-  ForwardMarksArchive({ComponentConfig? dbConfig, this.marksAbsTolerance = 1E-6}) {
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'marks', collectionName: 'forward_marks');
-    }
+  ForwardMarksArchive(
+      {ComponentConfig? dbConfig, this.marksAbsTolerance = 1E-6}) {
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1', dbName: 'marks', collectionName: 'forward_marks');
+    this.dbConfig = dbConfig;
   }
 
   mongo.Db get db => dbConfig.db;

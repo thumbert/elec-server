@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1 (released 2021-06-19)
+- null-safety version stable
+
 ## 2.0.0 (released 2021-05-30)
 - Move to null-safety
 
