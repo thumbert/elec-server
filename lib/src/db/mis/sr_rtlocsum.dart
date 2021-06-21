@@ -23,13 +23,13 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   @override
   Future<int> insertTabData(List<Map<String, dynamic>> data,
       {int tab = 0}) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(-1);
     if (tab == 0) {
       return await insertTabData0(data);
     } else if (tab == 1) {
       return await insertTabData1(data);
     } else {
-      throw ArgumentError('Unsupported tab $tab for report ${reportName}');
+      throw ArgumentError('Unsupported tab $tab for report $reportName');
     }
   }
 

@@ -53,18 +53,16 @@ class SpPeakContributionDlyArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<void> insertTabData(List<Map> data, {int tab = 0}) async {
+  Future<int> insertTabData(List<Map> data, {int tab = 0}) async {
+    if (data.isEmpty) return Future.value(-1);
     var days = data.map((e) => e['Trading Date'] as String?).toSet().toList();
     var maxVersion = data.first['version'];
     var assetIds = data.map((e) => e['Asset ID'] as num?).toSet().toList();
-    try {
-      await remove(maxVersion, days, assetIds);
-      await dbConfig.coll.insertAll(data as List<Map<String, dynamic>>);
-      print(
-          '--->  Inserted $reportName for ${data.first['Trading Date']} tab $tab, version ${data.first['version']} successfully');
-    } catch (e) {
-      print('XXX ' + e.toString());
-    }
+    await remove(maxVersion, days, assetIds);
+    await dbConfig.coll.insertAll(data as List<Map<String, dynamic>>);
+    print('--->  Inserted $reportName for ${data.first['Trading Date']}'
+        ' tab $tab, version ${data.first['version']} successfully');
+    return 0;
   }
 
   @override

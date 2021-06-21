@@ -54,12 +54,17 @@ abstract class MisReportArchive {
   Map<int, List<Map<String, dynamic>>> processFile(File file);
 
   /// Insert this data into the database.  Likely to be overwritten in the implementation.
-  Future insertTabData(List<Map<String, dynamic>> data, {int tab = 0}) async {
-    if (data.isEmpty) return Future.value(null);
-    return dbConfig.coll
+  Future<int> insertTabData(List<Map<String, dynamic>> data,
+      {int tab = 0}) async {
+    if (data.isEmpty) return Future.value(-1);
+    await dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
-        .catchError((e) => print('   ' + e.toString()));
+        .catchError((e) {
+      print('   ' + e.toString());
+      throw e;
+    });
+    return 0;
   }
 }
 

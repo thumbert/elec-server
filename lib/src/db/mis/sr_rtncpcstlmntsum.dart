@@ -136,25 +136,23 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
   }
 
   /// Only one tab at a time only!
-  Future<Null> insertTabData(List<Map<String, dynamic>> data,
-      {int tab: 0}) async {
-    if (data.isEmpty) return Future.value(null);
+  Future<int> insertTabData(List<Map<String, dynamic>> data,
+      {int tab = 0}) async {
+    if (data.isEmpty) return Future.value(-1);
     var tabs = data.map((e) => e['tab']).toSet();
-    if (tabs.length != 1)
+    if (tabs.length != 1) {
       throw ArgumentError('Input data can\'t be for multiple tabs: $tabs');
-    try {
-      await dbConfig.coll.remove({
-        'account': data.first['account'],
-        'tab': data.first['tab'],
-        'date': data.first['date'],
-        'version': data.first['version'],
-      });
-      await dbConfig.coll.insertAll(data);
-      print(
-          '--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab ${tabs.first}, version ${data.first['version']} successfully');
-    } catch (e) {
-      print('XXX ' + e.toString());
     }
+    await dbConfig.coll.remove({
+      'account': data.first['account'],
+      'tab': data.first['tab'],
+      'date': data.first['date'],
+      'version': data.first['version'],
+    });
+    await dbConfig.coll.insertAll(data);
+    print(
+        '--->  Inserted $reportName for account ${data.first['account']}, ${data.first['date']}, tab ${tabs.first}, version ${data.first['version']} successfully');
+    return 0;
   }
 
   @override

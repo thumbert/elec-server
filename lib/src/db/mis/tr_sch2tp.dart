@@ -67,7 +67,7 @@ class TrSch2tpArchive extends mis.MisReportArchive {
   @override
   Future<int> insertTabData(List<Map<String, dynamic>> data,
       {int tab = 0}) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(-1);
     var account = data.first['account'];
     var month = data.first['month'];
     var version = data.first['version'];

@@ -11,7 +11,9 @@ class SrArrDistrArchive extends mis.MisReportArchive {
     reportName = 'SR_ARRDISTR';
     if (dbConfig == null) {
       this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'mis', collectionName: reportName.toLowerCase());
+          host: '127.0.0.1',
+          dbName: 'mis',
+          collectionName: reportName.toLowerCase());
     }
   }
 
@@ -19,14 +21,20 @@ class SrArrDistrArchive extends mis.MisReportArchive {
   Map<String, dynamic> rowConverter(
       List<Map> rows, Date reportDate, DateTime version, int tab) {
     var document = <String, dynamic>{};
-    document['month'] = reportDate.toString().substring(0,7);  /// yyyy-mm
+    document['month'] = reportDate.toString().substring(0, 7);
+
+    /// yyyy-mm
     document['version'] = version.toIso8601String();
     document['tab'] = tab;
     var columns = rows.first.keys.skip(1);
-    for (var column in columns) document[column] = [];
+    for (var column in columns) {
+      document[column] = [];
+    }
 
     rows.forEach((e) {
-      for (var column in columns) document[column].add(e[column]);
+      for (var column in columns) {
+        document[column].add(e[column]);
+      }
     });
     return document;
   }
@@ -37,8 +45,8 @@ class SrArrDistrArchive extends mis.MisReportArchive {
     var reportDate = report.forDate();
     var version = report.timestamp();
 
-    var out = <int,List<Map<String, dynamic>>>{};
-    for (var tab in [0,1,2]) {
+    var out = <int, List<Map<String, dynamic>>>{};
+    for (var tab in [0, 1, 2]) {
       var rows = mis.readReportTabAsMap(file, tab: tab);
       if (rows.isNotEmpty) {
         var aux = rowConverter(rows, reportDate, version, tab);
@@ -49,7 +57,8 @@ class SrArrDistrArchive extends mis.MisReportArchive {
     return out;
   }
 
-  Future<int> insertTabData(List<Map<String,dynamic>> data, {int tab: 0}) async {
+  Future<int> insertTabData(List<Map<String, dynamic>> data,
+      {int tab: 0}) async {
     if (data.isEmpty) return Future.value(null);
     var date = data.first['month'];
     var version = data.first['version'];
@@ -60,14 +69,14 @@ class SrArrDistrArchive extends mis.MisReportArchive {
         'tab': tab,
       });
       await dbConfig.coll.insertAll(data);
-      print('--->  Inserted $reportName for $date, version $version, tab $tab successfully');
+      print(
+          '--->  Inserted $reportName for $date, version $version, tab $tab successfully');
       return Future.value(0);
     } catch (e) {
       print('XXX ' + e.toString());
       return Future.value(1);
     }
   }
-
 
   @override
   Future<Null> setupDb() async {
@@ -76,5 +85,4 @@ class SrArrDistrArchive extends mis.MisReportArchive {
         keys: {'month': 1, 'tab': 1, 'version': 1}, unique: true);
     await dbConfig.db.close();
   }
-
 }

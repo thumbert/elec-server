@@ -60,27 +60,25 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> insertTabData(List<Map<String, dynamic>> data,
+  Future<int> insertTabData(List<Map<String, dynamic>> data,
       {int tab = 0}) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(-1);
 
     /// split the data by Asset ID, date, version
     var groups = groupBy(
         data, (Map e) => Tuple3(e['Asset ID'], e['date'], e['version']));
-    try {
-      for (var key in groups.keys) {
-        await dbConfig.coll.remove({
-          'Asset ID': key.item1,
-          'date': key.item2,
-          'version': key.item3,
-        });
-        await dbConfig.coll.insertAll(groups[key]!);
-      }
-      print(
-          '--->  Inserted $reportName for ${data.first['date']} tab $tab, version ${data.first['version']} successfully');
-    } catch (e) {
-      print('   ' + e.toString());
+    for (var key in groups.keys) {
+      await dbConfig.coll.remove({
+        'Asset ID': key.item1,
+        'date': key.item2,
+        'version': key.item3,
+      });
+      await dbConfig.coll.insertAll(groups[key]!);
     }
+    print(
+        '--->  Inserted $reportName for ${data.first['date']} tab $tab, version ${data.first['version']} successfully');
+
+    return 0;
   }
 
   @override

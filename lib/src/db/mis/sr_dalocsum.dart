@@ -23,15 +23,17 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
 
   /// Override the implementation.
   @override
-  Future insertTabData(List<Map<String, dynamic>> data, {int tab = 0}) async {
-    if (data.isEmpty) return Future.value(null);
+  Future<int> insertTabData(List<Map<String, dynamic>> data,
+      {int tab = 0}) async {
+    if (data.isEmpty) return Future.value(-1);
     if (tab == 0) {
       await insertTabData0(data);
     } else if (tab == 1) {
       await insertTabData1(data);
     } else {
-      throw ArgumentError('Unsupported tab $tab for report ${reportName}');
+      throw ArgumentError('Unsupported tab $tab for report $reportName');
     }
+    return 0;
   }
 
   Future<Null> insertTabData0(List<Map<String, dynamic>> data) async {
