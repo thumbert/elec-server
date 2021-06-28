@@ -19,7 +19,9 @@ class DaBindingConstraintsReportArchive {
 
   DaBindingConstraintsReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'binding_constraints');
+        host: '127.0.0.1',
+        dbName: 'isoexpress',
+        collectionName: 'binding_constraints');
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
     this.dir = dir;
@@ -81,7 +83,7 @@ class DaBindingConstraintsReportArchive {
 
   /// Insert data into db
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(-1);
     var groups = groupBy(data, (dynamic e) => e['date']);
     try {
       for (var date in groups.keys) {
