@@ -64,7 +64,9 @@ class DaLmp {
       return Response.ok(json.encode(aux), headers: headers);
     });
 
-    /// get hourly prices for one ptid in compact form (?? what is that)
+    /// get hourly prices for one ptid in compact form (only the values)
+    /// need to find a better way because if you have missing data or a
+    /// new/discontinued node you can confuse yourself
     router
         .get('/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>/compact',
             (Request request, String component, String ptid, String start,
@@ -162,7 +164,7 @@ class DaLmp {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
 
-    var pipeline = <Map<String,Object>>[];
+    var pipeline = <Map<String, Object>>[];
     pipeline.addAll([
       {
         '\$match': {
@@ -207,7 +209,8 @@ class DaLmp {
       ..eq('ptid', ptid)
       ..gte('date', start.toString())
       ..lte('date', end.toString())
-      ..fields(['hourBeginning', component]);
+      ..fields(['hourBeginning', component])
+      ..sortBy('hourBeginning');
     var data = coll.find(query);
     var out = <Map<String, dynamic>>[];
     var keys = ['hourBeginning', component];

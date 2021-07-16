@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
+import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
@@ -85,18 +86,21 @@ void insertForwardMarks() async {
   await archive.db.close();
 }
 
-void insertIsoExpress() async {
+Future<void> insertIsoExpress() async {
   var location = getLocation('America/New_York');
-//  // to pass tests
-//  await insertDays(DaEnergyOfferArchive(),
-//      Term.parse('Jul17', location).days());
+  // to pass tests
+  // await insertDays(
+  //     DaEnergyOfferArchive(), Term.parse('Jul17', location).days());
 
   // to calculate hourly shaping for Hub, need Jan19-Dec19
+  // await insertDays(
+  //     DaLmpHourlyArchive(), Term.parse('Jan19-Dec19', location).days());
   await insertDays(
-      DaLmpHourlyArchive(), Term.parse('Jan19-Dec19', location).days());
+      DaCongestionCompactArchive(), Term.parse('Jan19-Dec19', location).days());
+
   // to calculate settlement prices for calculators, Jan20-Aug20
-  await insertDays(
-      DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
+  // await insertDays(
+  //     DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
 }
 
 void insertMisReports() async {
@@ -172,7 +176,19 @@ Future<void> insertZonalDemand() async {
   var archive = ZonalDemandArchive();
   await ZonalDemandArchive().setupDb();
 
-  var years = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021];
+  var years = [
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021
+  ];
   // for (var year in years) {
   //   // download the files and convert to xlsx
   // }
@@ -186,7 +202,6 @@ Future<void> insertZonalDemand() async {
     await archive.insertData(data);
   }
   await archive.dbConfig.db.close();
-
 }
 
 /// Try to redo them all
@@ -201,7 +216,7 @@ void main() async {
   // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
-//   await insertIsoExpress();
+  await insertIsoExpress();
 
   // await insertDaDemandBids();
 
@@ -211,8 +226,7 @@ void main() async {
 
 //  await insertPtidTable();
 
- await insertWholesaleLoadReports();
+  // await insertWholesaleLoadReports();
 
   // await insertZonalDemand();
-
 }

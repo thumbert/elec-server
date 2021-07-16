@@ -7,6 +7,7 @@ import 'client/marks/curves/curve_id_test.dart' as curve_id;
 import 'db/isoexpress/da_binding_constraints_report_test.dart' as bc;
 import 'db/isoexpress/da_energy_offer_test.dart' as energy_offers;
 import 'db/isoexpress/da_demand_bid_test.dart' as demand_bids;
+import 'db/isoexpress/da_congestion_compact_test.dart' as da_congestion;
 import 'db/isoexpress/da_lmp_hourly_test.dart' as dalmp;
 import 'db/isoexpress/regulation_requirement_test.dart'
     as regulation_requirement;
@@ -31,13 +32,7 @@ void main() async {
   initializeTimeZones();
   DbProd();
   dotenv.load('.env/prod.env');
-  // var rootUrl = 'http://127.0.0.1:8080';
   var rootUrl = dotenv.env['ROOT_URL']!;
-
-  // var keys = ['a', 'b', 'c'];
-  // var xs = [1, null, 3];
-  // var m = {for (var i=0; i<3; i++) keys[i] : xs[i] as num?};
-  // var m2 = Map.fromIterables(keys, xs);
 
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
@@ -47,6 +42,7 @@ void main() async {
   /// db tests
   bc.tests(rootUrl);
   calculators.tests(rootUrl);
+  da_congestion.tests(rootUrl);
   dalmp.tests(rootUrl);
   demand_bids.tests();
   energy_offers.tests(rootUrl);

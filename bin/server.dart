@@ -1,3 +1,4 @@
+import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
@@ -17,7 +18,6 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:timezone/data/latest.dart';
 
-import 'package:timezone/standalone.dart';
 import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
 import 'package:elec_server/api/isoexpress/api_isone_rtlmp.dart';
 import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
@@ -44,6 +44,7 @@ Future<Router> buildRouter() async {
   await DbProd.isoexpress.open();
   <String, Router>{
     '/bc/v1/': BindingConstraints(DbProd.isoexpress).router,
+    '/da_congestion_compact/v1/': DaCongestionCompact(DbProd.isoexpress).router,
     '/da_energy_offers/v1/': DaEnergyOffers(DbProd.isoexpress).router,
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,

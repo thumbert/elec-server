@@ -6,16 +6,18 @@ import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:timezone/timezone.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';
 import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaLmpHourlyArchive extends DailyIsoExpressReport {
-
   DaLmpHourlyArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'da_lmp_hourly');
+        host: '127.0.0.1',
+        dbName: 'isoexpress',
+        collectionName: 'da_lmp_hourly');
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaLmpHourly/Raw/';
     this.dir = dir;
@@ -25,8 +27,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   String reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   @override
   String getUrl(Date? asOfDate) =>
-      'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/' +
-      'WW_DALMP_ISO_' +
+      'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/'
+          'WW_DALMP_ISO_' +
       yyyymmdd(asOfDate) +
       '.csv';
   @override
@@ -35,21 +37,31 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
-    var row = <String, dynamic>{};
-    row['date'] = formatDate(rows.first['Date']);
-    row['ptid'] = int.parse(rows.first['Location ID']);
-    row['hourBeginning'] = [];
-    row['congestion'] = [];
-    row['lmp'] = [];
-    row['marginal_loss'] = [];
-    rows.forEach((e) {
-      row['hourBeginning']
-          .add(parseHourEndingStamp(e['Date'], e['Hour Ending']));
-      row['lmp'].add(e['Locational Marginal Price']);
-      row['congestion'].add(e['Congestion Component']);
-      row['marginal_loss'].add(e['Marginal Loss Component']);
-    });
-    return row;
+    var out = <String, dynamic>{
+      'date': formatDate(rows.first['Date']),
+      'ptid': int.parse(rows.first['Location ID']),
+      'hourBeginning': <TZDateTime>[],
+      'congestion': <num>[],
+      'lmp': <num>[],
+      'marginal_loss': <num>[],
+    };
+    var hours = <TZDateTime>{};
+
+    /// Need to check if there are duplicates.  Sometimes the ISO sends
+    /// the same data twice see ptid: 38206, date: 2019-05-19.
+    for (var row in rows) {
+      var hour = parseHourEndingStamp(row['Date'], row['Hour Ending']);
+      if (!hours.contains(hour)) {
+        /// if duplicate, insert only once
+        hours.add(hour);
+        out['hourBeginning'].add(hour);
+        out['lmp'].add(row['Locational Marginal Price']);
+        out['congestion'].add(row['Congestion Component']);
+        out['marginal_loss'].add(row['Marginal Loss Component']);
+      }
+    }
+
+    return out;
   }
 
   @override
@@ -106,6 +118,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
 
   // Date lastDayAvailable() => Date.today().next;
   Future<Null> deleteDay(Date day) async {
-    return await (dbConfig.coll.remove(where.eq('date', day.toString())) as FutureOr<Null>);
+    return await (dbConfig.coll.remove(where.eq('date', day.toString()))
+        as FutureOr<Null>);
   }
 }

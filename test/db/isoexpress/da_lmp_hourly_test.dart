@@ -32,7 +32,6 @@ void prepareData() async {
 
 void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   group('DAM LMP db tests: ', () {
     var archive = DaLmpHourlyArchive();
     setUp(() async {
@@ -40,6 +39,13 @@ void tests(String rootUrl) async {
     });
     tearDown(() async {
       await archive.dbConfig.db.close();
+    });
+    test('process DA hourly lmp report, 2019-05-09', () {
+      /// has duplicated data for ptid: 38206
+      var file = archive.getFilename(Date.utc(2019, 5, 9));
+      var res = archive.processFile(file);
+      var p38206 = res.firstWhere((e) => e['ptid'] == 38206);
+      expect(p38206['hourBeginning'].length, 24);
     });
     test('DA hourly lmp report, DST day spring', () {
       var file = archive.getFilename(Date.utc(2017, 3, 12));
@@ -90,8 +96,8 @@ void tests(String rootUrl) async {
       });
       var url = '$rootUrl/dalmp/v1/hourly/lmp/'
           'ptid/4000/start/2017-01-01/end/2017-01-02';
-      var res = await http.get(Uri.parse(url),
-          headers: {'Content-Type': 'application/json'});
+      var res = await http
+          .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
       expect(data.length, 48);
       expect(data.first, {
@@ -111,9 +117,9 @@ void tests(String rootUrl) async {
           'lmp', 4000, '2017-07-01', '2017-07-07', '5x16');
       expect(data.length, 4);
       expect(data.first, {'date': '2017-07-03', 'lmp': 35.225});
-      var res = await http.get(Uri.parse(
-          '$rootUrl/dalmp/v1/daily/lmp/'
-          'ptid/4000/start/2017-07-01/end/2017-07-07/bucket/5x16'),
+      var res = await http.get(
+          Uri.parse('$rootUrl/dalmp/v1/daily/lmp/'
+              'ptid/4000/start/2017-07-01/end/2017-07-07/bucket/5x16'),
           headers: {'Content-Type': 'application/json'});
       var aux = json.decode(res.body) as List;
       expect(aux.length, 4);
@@ -153,7 +159,6 @@ void tests(String rootUrl) async {
         IntervalTuple(Date(2017, 1, 5, location: location), 56.458749999999995)
       ]);
     });
-
     test('get monthly peak price between two dates', () async {
       var data = await daLmp.getMonthlyLmpBucket(4000, LmpComponent.lmp,
           IsoNewEngland.bucket5x16, Month.utc(2017, 1), Month.utc(2017, 8));
@@ -161,7 +166,6 @@ void tests(String rootUrl) async {
       expect(data.first,
           IntervalTuple(Month(2017, 1, location: location), 42.55883928571426));
     });
-
     test('get hourly price for 2017-01-01', () async {
       var data = await daLmp.getHourlyLmp(
           4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
@@ -171,7 +175,6 @@ void tests(String rootUrl) async {
           IntervalTuple(
               Hour.beginning(TZDateTime(location, 2017, 1, 1)), 35.12));
     });
-
     test('get daily prices all nodes', () async {
       var data = await daLmp.getDailyPricesAllNodes(
           LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 3));
@@ -182,19 +185,12 @@ void tests(String rootUrl) async {
   });
 }
 
-Future soloTest() async {
-  var archive = DaLmpHourlyArchive();
-//  await archive.setupDb();
+Future speedTest(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var days = Interval(
-          TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 9, 1))
-      .splitLeft((dt) => Date.fromTZDateTime(dt));
-  await archive.dbConfig.db.open();
-  for (var day in days) {
-    await archive.downloadDay(day);
-    await archive.insertDay(day);
-  }
-  await archive.dbConfig.db.close();
+  var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
+
+  var data = await daLmp.getHourlyLmp(
+      4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
 }
 
 void main() async {
