@@ -33,7 +33,6 @@ class DaCongestion {
       var _url = rootUrl +
           '/da_congestion_compact/v1'
               '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
-      print(_url);
       var _response = await http.get(Uri.parse(_url));
       var xs = json.decode(_response.body) as List;
       for (var x in xs) {

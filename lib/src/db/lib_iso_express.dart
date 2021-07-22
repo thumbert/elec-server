@@ -45,7 +45,8 @@ abstract class IsoExpressReport {
         Directory(dirname(fileout.path)).createSync(recursive: true);
         print('Created directory ${dirname(fileout.path)}');
       }
-      var client = HttpClient();
+      var client = HttpClient()
+        ..badCertificateCallback = (cert, host, port) => true;
       var request = await client.getUrl(Uri.parse(url!));
       var response = await request.close();
       await response.pipe(fileout.openWrite());
@@ -64,12 +65,12 @@ abstract class IsoExpressReport {
 /// An archive that gets daily updates.  Easy to update!
 abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// Get the url of this report for this date
-  String getUrl(Date? asOfDate);
+  String getUrl(Date asOfDate);
 
   /// Get the filename of this report as saved on disk.  There is one ISO
   /// Express report per day.  Note that you can have multiple MIS reports
   /// per day.
-  File getFilename(Date? asOfDate);
+  File getFilename(Date asOfDate);
 
   /// Return the last day inserted in the db.
   /// Future<Map<String, String>> lastDay();
@@ -83,7 +84,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   //Future<Null> deleteDay(Date day);
 
   /// Download one day.  Check if the file has downloaded successfully.
-  Future downloadDay(Date? day) async {
+  Future downloadDay(Date day) async {
     return await downloadUrl(getUrl(day), getFilename(day), overwrite: true);
   }
 
