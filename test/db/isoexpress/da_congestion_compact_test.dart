@@ -1,28 +1,16 @@
 library test.db.isoexpress.da_congestion_compact_test;
 
-import 'dart:async';
-import 'dart:convert';
 import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart';
 import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-//import 'package:dotenv/dotenv.dart' as dotenv;
-
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
-import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
 import 'package:elec_server/client/isoexpress/dacongestion_compact.dart'
     as client;
-import 'package:elec/elec.dart';
-import 'package:elec/risk_system.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
 
 void tests(String rootUrl) async {
-  var location = getLocation('America/New_York');
   group('DAM congestion compact archive tests: ', () {
     var archive = DaCongestionCompactArchive();
     setUp(() async {
@@ -39,7 +27,7 @@ void tests(String rootUrl) async {
           [0.67, 0, 2, 0.3, 0.84, 0.91, 0.75, 0, 11, 0.02, 6, 0.01, 1]);
     });
   });
-  group('DAM LMP api tests: ', () {
+  group('DA Congestion compact api tests: ', () {
     var db = DbProd.isoexpress;
     var api = DaCongestionCompact(db);
     setUp(() async => await db.open());
@@ -54,17 +42,28 @@ void tests(String rootUrl) async {
       expect((congestion.first as List).take(4).toList(), [0.02, 1, 0.01, 3]);
     });
   });
-  group('DAM LMP client tests: ', () {
+  group('DA congestion compact client tests: ', () {
     var cong = client.DaCongestion(http.Client(), rootUrl: rootUrl);
-    test('get hourly price for 1Jan19-5Jan19', () async {
-      var data =
-          await cong.getTraces(Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
+    test('get hourly traces for 1Jan19-5Jan19', () async {
+      var data = await cong.getHourlyTraces(
+          Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
       expect(data.length, 1191);
       var trace0 = data.first;
       expect(trace0.keys.toList(), ['x', 'y', 'name']);
       var y0 = trace0['y'] as List;
       expect(y0.length, 120);
       expect(y0.take(5).toList(), [0.02, 0.01, 0.01, 0.01, 0]);
+    });
+    test('get daily traces for 1Jan19-5Jan19', () async {
+      var data =
+          await cong.getDailyTraces(Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
+      expect(data.length, 1191);
+      var trace0 = data.first;
+      expect(trace0.keys.toList(), ['x', 'y', 'name']);
+      var y0 = trace0['y'] as List;
+      expect(y0.length, 5);
+      expect(y0.map((e) => e.toStringAsFixed(3)).toList(),
+          ['0.013', '0.007', '-0.253', '0.004', '0.000']);
     });
   });
 }

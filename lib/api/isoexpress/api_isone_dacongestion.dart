@@ -27,7 +27,20 @@ class DaCongestionCompact {
   Router get router {
     final router = Router();
 
-    /// get hourly prices between a start/end date in rle form
+    /// Get hourly prices between a start/end date in rle form.
+    /// Return a list of Map.  Each element of the list is for one day for all
+    /// the nodes in the pool.  One day looks like this:
+    /// ```
+    /// {
+    ///   'date': '2019-01-01',
+    ///   'ptids': [321, 322, 323, ...],
+    ///   'congestion': [
+    ///      [0.02, 1, 0.01, 3, 0.0, 1, 0.01, 1, 0.02, 2, ...],  // for 321
+    ///      [...], // for 322
+    ///      ...
+    ///   ],
+    /// }
+    /// ```
     router.get('/start/<start>/end/<end>',
         (Request request, String start, String end) async {
       var aux = await getPrices(Date.parse(start), Date.parse(end));

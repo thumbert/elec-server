@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import 'package:dama/basic/rle.dart';
+import 'package:dama/dama.dart';
 
 class DaCongestion {
   final String rootUrl;
@@ -23,29 +24,12 @@ class DaCongestion {
 
   /// Get hourly congestion prices between a start and end date for all the
   /// nodes in the pool. Inputs [start] and [end] should be UTC Dates.
-  Future<List<Map<String, dynamic>>> getTraces(Date start, Date end,
+  Future<List<Map<String, dynamic>>> getHourlyTraces(Date start, Date end,
       {List<int>? ptids}) async {
     if (start.isAfter(end)) {
       throw ArgumentError('Invalid inputs: start is AFTER end');
     }
-    var term = _calculateStartEnd(start, end);
-    if (term != null) {
-      var _url = rootUrl +
-          '/da_congestion_compact/v1'
-              '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
-      var _response = await http.get(Uri.parse(_url));
-      var xs = json.decode(_response.body) as List;
-      for (var x in xs) {
-        var date = Date.parse(x['date'], location: UTC);
-        var one = <int, List<num>>{};
-        var ptids = x['ptids'] as List;
-        var congestion = x['congestion'] as List;
-        for (var i = 0; i < ptids.length; i++) {
-          one[ptids[i] as int] = (congestion[i] as List).cast<num>();
-        }
-        cache[date] = one;
-      }
-    }
+    await _populateCache(start, end);
 
     /// the cache should now have all the days you requested
     /// need to traverse it twice, once for the ptids, once for the days
@@ -75,6 +59,61 @@ class DaCongestion {
       }
     }
     return aux.values.toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getDailyTraces(Date start, Date end,
+      {List<int>? ptids}) async {
+    if (start.isAfter(end)) {
+      throw ArgumentError('Invalid inputs: start is AFTER end');
+    }
+    await _populateCache(start, end);
+
+    /// the cache should now have all the days you requested
+    /// need to traverse it twice, once for the ptids, once for the days
+    var aux = <int, Map<String, dynamic>>{};
+    var days = Term(start, end).days();
+    for (var day in days) {
+      if (cache.containsKey(day)) {
+        var data = cache[day];
+        var ptids = data!.keys.toList();
+        for (var i = 0; i < ptids.length; ++i) {
+          var ptid = ptids[i];
+          if (!aux.containsKey(ptid)) {
+            aux[ptid] = {
+              'x': [],
+              'y': [],
+              'name': ptid,
+            };
+          }
+          (aux[ptid]!['x'] as List).add(day.toString());
+          (aux[ptid]!['y'] as List)
+              .add(mean(runLenghtDecode(data[ptid]!, keys: keys)));
+        }
+      }
+    }
+    return aux.values.toList();
+  }
+
+  /// Populate the cache if needed
+  Future<void> _populateCache(Date start, Date end) async {
+    var term = _calculateStartEnd(start, end);
+    if (term != null) {
+      var _url = rootUrl +
+          '/da_congestion_compact/v1'
+              '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
+      var _response = await http.get(Uri.parse(_url));
+      var xs = json.decode(_response.body) as List;
+      for (var x in xs) {
+        var date = Date.parse(x['date'], location: UTC);
+        var one = <int, List<num>>{};
+        var ptids = x['ptids'] as List;
+        var congestion = x['congestion'] as List;
+        for (var i = 0; i < ptids.length; i++) {
+          one[ptids[i] as int] = (congestion[i] as List).cast<num>();
+        }
+        cache[date] = one;
+      }
+    }
   }
 
   /// Calculate the extend of the data you need.  If it returns [null] you
