@@ -16,7 +16,9 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
 
 Future<void> tests() async {
   var location = getLocation('America/New_York');
-  var days = Date.today(location: location).previousN(10);
+
+  // var days = Date.today(location: location).previousN(10);
+  var days = Term.parse('Mar21-Jul21', UTC).days();
   await insertDays(DaLmpHourlyArchive(), days);
 }
 

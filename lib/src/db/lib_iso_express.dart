@@ -46,6 +46,8 @@ abstract class IsoExpressReport {
         print('Created directory ${dirname(fileout.path)}');
       }
       var client = HttpClient()
+        ..userAgent =
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3419.0 Safari/537.36'
         ..badCertificateCallback = (cert, host, port) => true;
       var request = await client.getUrl(Uri.parse(url!));
       var response = await request.close();

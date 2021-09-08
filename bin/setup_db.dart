@@ -30,14 +30,14 @@ import 'package:path/path.dart';
 
 Future<void> insertDaBindingConstraints() async {
   var archive = DaBindingConstraintsReportArchive();
-  var days = [
-    Date.utc(2015, 2, 17), // empty file
-    Date.utc(2017, 12, 31), // plenty of constraints
-    Date.utc(2018, 7, 10), // has duplicates
-  ];
-  for (var date in days) {
-    await archive.downloadDay(date);
-  }
+  // var days = [
+  //   Date.utc(2015, 2, 17), // empty file
+  //   ...Term.parse('Jan17', UTC).days(),
+  //   Date.utc(2017, 12, 31), // plenty of constraints
+  //   Date.utc(2018, 7, 10), // has duplicates
+  // ];
+  var days = Term.parse('Jan21-Jul21', UTC).days();
+  await insertDays(archive, days);
 }
 
 Future<void> insertDaDemandBids() async {
@@ -50,11 +50,14 @@ Future<void> insertDaDemandBids() async {
   // await archive.setupDb();
 }
 
-Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
+Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
+    {bool download = true}) async {
   await archive.dbConfig.db.open();
   for (var day in days) {
     print('Working on $day');
-    await archive.downloadDay(day);
+    if (download) {
+      await archive.downloadDay(day);
+    }
     await archive.insertDay(day);
   }
   await archive.dbConfig.db.close();
@@ -96,7 +99,7 @@ Future<void> insertIsoExpress() async {
   // await insertDays(
   //     DaLmpHourlyArchive(), Term.parse('Jan19-Dec19', location).days());
   await insertDays(
-      DaCongestionCompactArchive(), Term.parse('Jan19-Dec19', location).days());
+      DaCongestionCompactArchive(), Term.parse('Jan21-Jul21', location).days());
 
   // to calculate settlement prices for calculators, Jan20-Aug20
   // await insertDays(
@@ -213,10 +216,10 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  // await insertDaBindingConstraints();
+  await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
-  await insertIsoExpress();
+//   await insertIsoExpress();
 
   // await insertDaDemandBids();
 

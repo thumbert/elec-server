@@ -49,32 +49,27 @@ class BindingConstraints {
 
   Future<List<Map<String, dynamic>>> apiGetDaBindingConstraintsByDay(
       String start, String end) async {
-    var query = where;
-    query = query.gte('date', Date.parse(start).toString());
-    query = query.lte('date', Date.parse(end).toString());
-    query = query.eq('market', 'DA');
-    query = query.excludeFields(['_id', 'date', 'market']);
-    var res = await coll.find(query).map((Map<String, Object?> e) {
-      var start = TZDateTime.from(e['hourBeginning'] as DateTime, _location);
-      e['hourBeginning'] = start.toString();
-      return e;
+    var query = where
+      ..eq('market', 'DA')
+      ..gte('date', Date.parse(start).toString())
+      ..lte('date', Date.parse(end).toString())
+      ..excludeFields(['_id', 'date', 'market']);
+    var aux = await coll.find(query).toList();
+    var out = aux.map((e) => e['constraints'] as List).expand((constraints) {
+      constraints.forEach((constraint) {
+        var start =
+            TZDateTime.from(constraint['hourBeginning'] as DateTime, _location);
+        constraint['hourBeginning'] = start.toString();
+      });
+      return constraints.cast<Map<String, dynamic>>();
     }).toList();
-    return res;
+    return out;
   }
 
   Future<List<Map<String, dynamic>>> apiGetBindingConstraintsByName(
       String market, String constraintName, String start, String end) async {
-    var query = where;
-    query = query.gte('date', Date.parse(start).toString());
-    query = query.lte('date', Date.parse(end).toString());
-    query = query.eq('Constraint Name', constraintName);
-    query = query.eq('market', market.toUpperCase());
-    query = query.excludeFields(['_id', 'date', 'market']);
-    var res = await coll.find(query).map((Map<String, Object?> e) {
-      var start = TZDateTime.from(e['hourBeginning'] as DateTime, _location);
-      e['hourBeginning'] = start.toString();
-      return e;
-    }).toList();
-    return res;
+    /// TODO: do it in Mongo
+    var aux = await apiGetDaBindingConstraintsByDay(start, end);
+    return aux.where((e) => e['Constraint Name'] == constraintName).toList();
   }
 }

@@ -3,6 +3,7 @@ doc/api/
 .buildlog
 .DS_Store
 .idea
+.local-chromium
 .packages
 .project
 .settings

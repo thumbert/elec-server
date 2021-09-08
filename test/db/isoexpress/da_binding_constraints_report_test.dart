@@ -2,7 +2,6 @@ import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
 import 'package:elec_server/client/isoexpress/binding_constraints.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
@@ -12,7 +11,6 @@ import 'package:timezone/timezone.dart';
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = DaBindingConstraintsReportArchive();
   group('Binding constraints db tests:', () {
     setUp(() async => await archive.db.open());
@@ -20,14 +18,16 @@ void tests(String rootUrl) async {
     test('read binding constraints file for 2017-12-31', () async {
       var file = archive.getFilename(Date.utc(2017, 12, 31));
       var data = archive.processFile(file);
-      expect(data.first, {
+      expect(data.length, 1);
+      expect(data.first.keys.toList(), ['market', 'date', 'constraints']);
+      var c0 = data.first['constraints'] as List;
+      expect(c0.length, 36);
+      expect(c0.first, {
         'Constraint Name': 'BNGW',
         'Contingency Name': 'Interface',
         'Interface Flag': 'Y',
         'Marginal Value': -69.34,
         'hourBeginning': TZDateTime(UTC, 2017, 12, 31, 5),
-        'market': 'DA',
-        'date': '2017-12-31',
       });
     });
     test('empty file for 2015-02-17', () async {
@@ -39,8 +39,9 @@ void tests(String rootUrl) async {
         () async {
       var file = archive.getFilename(Date.utc(2018, 7, 10));
       var data = archive.processFile(file);
-      // 20 entries, only 10 unique
-      expect(data.length, 10);
+      // 20 entries in the file, only 10 are unique
+      var constraints = data.first['constraints'] as List;
+      expect(constraints.length, 10);
       // await archive.insertData(data);
     });
   });
@@ -96,30 +97,12 @@ void tests(String rootUrl) async {
   });
 }
 
-// void uploadDays() async {
-//   var location = getLocation('America/New_York');
-//   var archive = DaBindingConstraintsReportArchive();
-//   var days = Interval(
-//           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2018, 1, 1))
-//       .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day, location: location));
-//   await archive.dbConfig.db.open();
-//   for (var day in days) {
-//     await archive.downloadDay(day);
-//     await archive.insertDay(day);
-//   }
-//   await archive.dbConfig.db.close();
-// }
-
 void main() async {
   initializeTimeZones();
-
   // await DaBindingConstraintsReportArchive().setupDb();
 
   // await prepareData();
 
-  // dotenv.load('.env/prod.env');
   var rootUrl = 'http://127.0.0.1:8080';
   tests(rootUrl);
-
-  // await uploadDays();
 }

@@ -12,11 +12,7 @@ import 'package:timezone/timezone.dart';
 import '../lib_iso_express.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-class DaBindingConstraintsReportArchive {
-  late ComponentConfig dbConfig;
-  late String dir;
-  final Location location = getLocation('America/New_York');
-
+class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   DaBindingConstraintsReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1',
@@ -29,13 +25,19 @@ class DaBindingConstraintsReportArchive {
 
   Db get db => dbConfig.db;
 
+  @override
+  final reportName = 'Day-Ahead Binding Constraints Report';
+
+  @override
   String getUrl(Date asOfDate) =>
       'https://webservices.iso-ne.com/api/v1.1/dayaheadconstraints/day/' +
       yyyymmdd(asOfDate);
 
+  @override
   File getFilename(Date asOfDate) => File(
       dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.json');
 
+  @override
   Future downloadDay(Date asOfDate) async {
     var _user = dotenv.env['isone_ws_user']!;
     var _pwd = dotenv.env['isone_ws_password']!;
@@ -54,36 +56,51 @@ class DaBindingConstraintsReportArchive {
     await response.pipe(getFilename(asOfDate).openWrite());
   }
 
-  /// Need to take the unique rows.  On 2018-07-10, there were duplicates!
+  @override
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
+    var constraints = <Map<String, dynamic>>[];
+    for (var row in rows) {
+      constraints.add({
+        'Constraint Name': row['ConstraintName'],
+        'Contingency Name': row['ContingencyName'],
+        'Interface Flag': row['InterfaceFlag'],
+        'Marginal Value': row['MarginalValue'],
+        'hourBeginning': TZDateTime.parse(location, row['BeginDate']).toUtc(),
+      });
+    }
+
+    /// Need to take the unique rows.  On 2018-07-10, there were duplicates!
+    var uConstraints = unique(constraints);
+
+    return {
+      'market': 'DA',
+      'date': (rows.first['BeginDate'] as String).substring(0, 10),
+      'constraints': uConstraints,
+    };
+  }
+
+  @override
   List<Map<String, dynamic>> processFile(File file) {
     var aux = json.decode(file.readAsStringSync());
-    var xs;
+    late var xs;
     if ((aux as Map).containsKey('DayAheadConstraints')) {
       if (aux['DayAheadConstraints'] == '') return <Map<String, dynamic>>[];
-      xs = aux['DayAheadConstraints']['DayAheadConstraint'] as List?;
+      xs = (aux['DayAheadConstraints']['DayAheadConstraint'] as List)
+          .cast<Map<String, dynamic>>();
+    } else {
+      throw ArgumentError('Can\'t find key DayAheadConstraints.  Check file!');
     }
 
-    var out = <Map<String, dynamic>>[];
-    for (Map<String, dynamic> x in xs) {
-      // print(x);
-      var one = <String, dynamic>{
-        'Constraint Name': x['ConstraintName'],
-        'Contingency Name': x['ContingencyName'],
-        'Interface Flag': x['InterfaceFlag'],
-        'Marginal Value': x['MarginalValue'],
-        'hourBeginning': TZDateTime.parse(location, x['BeginDate']).toUtc(),
-        'market': 'DA',
-        'date': (x['BeginDate'] as String).substring(0, 10),
-      };
-      out.add(one);
-    }
-
-    return unique(out).cast<Map<String, dynamic>>();
+    return [converter(xs)];
   }
 
   /// Insert data into db
+  @override
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) return Future.value(-1);
+    if (data.isEmpty) {
+      print('--->  No data');
+      return Future.value(-1);
+    }
     var groups = groupBy(data, (dynamic e) => e['date']);
     try {
       for (var date in groups.keys) {
@@ -98,12 +115,11 @@ class DaBindingConstraintsReportArchive {
     }
   }
 
+  @override
   Future<Null> setupDb() async {
     await dbConfig.db.open();
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'Constraint Name': 1, 'market': 1});
     await dbConfig.db
-        .createIndex(dbConfig.collectionName, keys: {'date': 1, 'market': 1});
+        .createIndex(dbConfig.collectionName, keys: {'market': 1, 'date': 1});
     await dbConfig.db.close();
   }
 }
