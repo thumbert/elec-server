@@ -47,4 +47,23 @@ class BindingConstraintsApi {
     var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
+
+  /// Return an indicator Map with keys the constraint names and values
+  /// an hourly time series with value = 1 for the hours where the given
+  /// constraint was binding.
+  // Future<Map<String,TimeSeries<num>>> getBindingConstraintIndicator(
+  //     Date start, Date end) async {
+  //   var aux = await getDaBindingConstraints(start, end);
+  //   var bux = aux.map((e) => <String,dynamic>{
+  //     'Constraint Name': e['Constraint Name'],
+  //     'hour': Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),
+  //   });
+  //   var grp = groupBy(bux, (dynamic e) => e['Constraint Name'] as String);
+  //
+  //   return grp.map((name, v) {
+  //     var hours = v.map((e) => e['hour'] as Hour).toSet();
+  //     return MapEntry(name, TimeSeries.fill(hours, 1));
+  //   });
+  // }
+
 }

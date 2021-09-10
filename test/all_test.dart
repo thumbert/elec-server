@@ -23,6 +23,8 @@ import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
 import 'db/mis/tr_sch2tp_test.dart' as trsch2;
 import 'db/mis/tr_sch3p2_test.dart' as trsch3;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
+
+import 'utils/env_file_test.dart' as env_file;
 import 'utils/iso_timestamp_test.dart' as iso_timestamp;
 import 'utils/parse_custom_integer_range_test.dart' as parse_int_range;
 import 'utils/term_cache_test.dart' as term_cache;
@@ -63,6 +65,7 @@ void main() async {
   wholesale_load_cost_report.tests();
 
   /// Utils tests
+  env_file.tests();
   iso_timestamp.tests();
   parse_int_range.tests();
   term_cache.tests();

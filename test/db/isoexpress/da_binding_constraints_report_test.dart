@@ -94,6 +94,7 @@ void tests(String rootUrl) async {
           name, Date.utc(2017, 1, 5), Date.utc(2017, 1, 6));
       expect(aux.length, 2);
     });
+    test('get constraint indicator', () {});
   });
 }
 
