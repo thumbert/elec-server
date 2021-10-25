@@ -36,7 +36,13 @@ abstract class IsoExpressReport {
   List<Map<String, dynamic>> processFile(File file);
 
   /// Download this url to a file.
-  Future downloadUrl(String? url, File fileout, {bool overwrite = true}) async {
+  /// Basic authentication is supported.
+  /// [acceptHeader] can be set to 'application/json' if you need json output.
+  Future downloadUrl(String url, File fileout,
+      {bool overwrite = true,
+      String? username,
+      String? password,
+      String? acceptHeader}) async {
     if (fileout.existsSync() && !overwrite) {
       print('File ${fileout.path} was already downloaded.  Skipping.');
       return Future.value(1);
@@ -49,7 +55,14 @@ abstract class IsoExpressReport {
         ..userAgent =
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3419.0 Safari/537.36'
         ..badCertificateCallback = (cert, host, port) => true;
-      var request = await client.getUrl(Uri.parse(url!));
+      if (username != null && password != null) {
+        client.addCredentials(
+            Uri.parse(url), '', HttpClientBasicCredentials(username, password));
+      }
+      var request = await client.getUrl(Uri.parse(url));
+      if (acceptHeader != null) {
+        request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+      }
       var response = await request.close();
       await response.pipe(fileout.openWrite());
     }

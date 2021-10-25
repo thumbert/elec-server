@@ -5,6 +5,7 @@ import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
+import 'package:elec_server/src/db/isoexpress/monthly_ncpc_asset.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
@@ -30,13 +31,13 @@ import 'package:path/path.dart';
 
 Future<void> insertDaBindingConstraints() async {
   var archive = DaBindingConstraintsReportArchive();
-  // var days = [
-  //   Date.utc(2015, 2, 17), // empty file
-  //   ...Term.parse('Jan17', UTC).days(),
-  //   Date.utc(2017, 12, 31), // plenty of constraints
-  //   Date.utc(2018, 7, 10), // has duplicates
-  // ];
-  var days = Term.parse('Jan21-Jul21', UTC).days();
+  var days = [
+    Date.utc(2015, 2, 17), // empty file
+    ...Term.parse('Jan17', UTC).days(),
+    Date.utc(2017, 12, 31), // plenty of constraints
+    Date.utc(2018, 7, 10), // has duplicates
+  ];
+  // var days = Term.parse('Jan21-Jul21', UTC).days();
   await insertDays(archive, days);
 }
 
@@ -130,6 +131,26 @@ void insertMisReports() async {
   await archive.dbConfig.db.close();
 }
 
+Future<void> insertMonthlyNcpcAsset({bool download = false}) async {
+  // var months = [
+  //   Month.utc(2019, 1),
+  // ];
+  var months = Term.parse('Feb19-Jun21', UTC)
+      .interval
+      .splitLeft((dt) => Month.fromTZDateTime(dt));
+  var archive = MonthlyNcpcAssetArchive();
+  await archive.dbConfig.db.open();
+  for (var month in months) {
+    print('Working on $month');
+    if (download) {
+      await archive.downloadMonth(month);
+    }
+    var data = archive.processFile(archive.getFilename(month));
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
 void insertPtidTable() async {
   var archive = PtidArchive();
   var baseUrl = 'https://www.iso-ne.com/static-assets/documents/';
@@ -216,7 +237,7 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  await insertDaBindingConstraints();
+  // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();
@@ -226,6 +247,7 @@ void main() async {
   // insertRegulationRequirement();
 
   // insertMisReports();
+  await insertMonthlyNcpcAsset(download: true);
 
 //  await insertPtidTable();
 
