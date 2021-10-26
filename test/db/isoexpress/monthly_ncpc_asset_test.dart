@@ -2,6 +2,8 @@ library test.db.isoexpress.monthly_ncpc_asset_test;
 
 // import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
 // import 'package:elec_server/client/isoexpress/binding_constraints.dart';
+import 'package:elec_server/api/isoexpress/api_isone_monthly_ncpc_asset.dart';
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
@@ -28,33 +30,19 @@ void tests(String rootUrl) async {
       });
     });
   });
-  // group('Monthly NCPC by asset API tests:', () {
-  //   var api = BindingConstraints(
-  //     archive.db,
-  //   );
-  //   setUp(() async => await archive.db.open());
-  //   tearDown(() async => await archive.db.close());
-  //   test('Get all constraints between two dates', () async {
-  //     var res =
-  //         await api.apiGetDaBindingConstraintsByDay('2017-01-01', '2017-01-02');
-  //     expect(res.length, 44);
-  //     var x0 = res.firstWhere((e) =>
-  //         e['Constraint Name'] == 'SHFHGE' &&
-  //         e['hourBeginning'] == '2017-01-01 00:00:00.000-0500');
-  //     expect(x0, {
-  //       'Constraint Name': 'SHFHGE',
-  //       'Contingency Name': 'Interface',
-  //       'Interface Flag': 'Y',
-  //       'Marginal Value': -7.31,
-  //       'hourBeginning': '2017-01-01 00:00:00.000-0500'
-  //     });
-  //   });
-  //   test('Get one constraint between two dates', () async {
-  //     var res = await api.apiGetBindingConstraintsByName(
-  //         'DA', 'PARIS   O154          A LN', '2017-01-05', '2017-01-06');
-  //     expect(res.length, 2);
-  //   });
-  // });
+  group('Monthly NCPC by asset API tests:', () {
+    var api = MonthlyNcpcAsset(archive.db);
+    setUp(() async => await archive.db.open());
+    tearDown(() async => await archive.db.close());
+    test('Get NCPC for all assets Jan19-Mar19', () async {
+      var res = await api.apiGetAllAssets('2019-01', '2019-03');
+      expect(res.length, 44);
+    }, solo: true);
+    test('Get one NCPC payments for one asset', () async {
+      var res = await api.apiGetAsset('1616', '2019-01', '2021-06');
+      expect(res.length, 2);
+    });
+  });
   // group('Binding constraints client tests:', () {
   //   var client = BindingConstraintsApi(http.Client(), rootUrl: rootUrl);
   //   test('get da binding constraints data for 3 days', () async {
@@ -83,7 +71,8 @@ void tests(String rootUrl) async {
 
 void main() async {
   initializeTimeZones();
-  await MonthlyNcpcAssetArchive().setupDb();
+  DbProd();
+  // await MonthlyNcpcAssetArchive().setupDb();
 
   // await prepareData();
 
