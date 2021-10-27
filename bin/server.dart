@@ -1,5 +1,5 @@
 import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart';
-import 'package:elec_server/api/isoexpress/api_isone_monthly_ncpc_asset.dart';
+import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
@@ -50,7 +50,7 @@ Future<Router> buildRouter() async {
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
     '/dalmp/v1/': DaLmp(DbProd.isoexpress).router,
-    '/monthly_ncpc_asset/v1/': MonthlyNcpcAsset(DbProd.isoexpress).router,
+    '/monthly_asset_ncpc/v1/': ApiMonthlyAssetNcpc(DbProd.isoexpress).router,
     '/regulation_requirement/v1/':
         RegulationRequirement(DbProd.isoexpress).router,
     '/rt_load/v1/': WholesaleLoadCost(DbProd.isoexpress).router,

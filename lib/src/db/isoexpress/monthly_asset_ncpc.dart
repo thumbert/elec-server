@@ -10,14 +10,14 @@ import 'package:elec_server/src/db/config.dart';
 import '../lib_iso_express.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-class MonthlyNcpcAssetArchive extends IsoExpressReport {
-  MonthlyNcpcAssetArchive({ComponentConfig? dbConfig, String? dir}) {
+class MonthlyAssetNcpcArchive extends IsoExpressReport {
+  MonthlyAssetNcpcArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1',
         dbName: 'isoexpress',
-        collectionName: 'monthly_ncpc_asset');
+        collectionName: 'monthly_asset_ncpc');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'GridReports/MonthlyNcpcByAsset/Raw/';
+    dir ??= baseDir + 'GridReports/MonthlyAssetNcpc/Raw/';
     this.dir = dir;
   }
 
@@ -46,6 +46,8 @@ class MonthlyNcpcAssetArchive extends IsoExpressReport {
     for (var row in rows) {
       out['month'] = (row['BeginDate'] as String).substring(0, 7);
       out['assetId'] = row['AssetId'] as int;
+      out['name'] = row['AssetName'] as String;
+      out['zoneId'] = int.parse(row['Location']['@LocId']);
       out['daNcpc'] = row['DaNcpcCredit'] as num;
       out['rtNcpc'] = row['RtNcpcCredit'] as num;
     }

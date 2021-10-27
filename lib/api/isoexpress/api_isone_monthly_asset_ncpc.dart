@@ -9,14 +9,12 @@ import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:shelf/shelf.dart';
 
-class MonthlyNcpcAsset {
+class ApiMonthlyAssetNcpc {
   late DbCollection coll;
-  late Location _location;
-  String collectionName = 'monthly_ncpc_asset';
+  String collectionName = 'monthly_asset_ncpc';
 
-  MonthlyNcpcAsset(Db db) {
+  ApiMonthlyAssetNcpc(Db db) {
     coll = db.collection(collectionName);
-    _location = getLocation('America/New_York');
   }
 
   final headers = {
@@ -46,8 +44,8 @@ class MonthlyNcpcAsset {
   Future<List<Map<String, dynamic>>> apiGetAllAssets(
       String startMonth, String endMonth) async {
     var query = where
-      ..gte('month', Month.parse(startMonth).toString())
-      ..lte('month', Month.parse(endMonth).toString())
+      ..gte('month', Month.parse(startMonth).toIso8601String())
+      ..lte('month', Month.parse(endMonth).toIso8601String())
       ..excludeFields(['_id']);
 
     return coll.find(query).toList();
@@ -57,9 +55,9 @@ class MonthlyNcpcAsset {
       String assetId, String startMonth, String endMonth) async {
     var query = where
       ..eq('assetId', int.parse(assetId))
-      ..gte('month', Month.parse(startMonth).toString())
-      ..lte('month', Month.parse(endMonth).toString())
-      ..excludeFields(['_id']);
+      ..gte('month', Month.parse(startMonth).toIso8601String())
+      ..lte('month', Month.parse(endMonth).toIso8601String())
+      ..excludeFields(['_id', 'assetId', 'zoneId', 'name']);
     return coll.find(query).toList();
   }
 }

@@ -5,7 +5,7 @@ import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
-import 'package:elec_server/src/db/isoexpress/monthly_ncpc_asset.dart';
+import 'package:elec_server/src/db/isoexpress/monthly_asset_ncpc.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
@@ -131,14 +131,14 @@ void insertMisReports() async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> insertMonthlyNcpcAsset({bool download = false}) async {
+Future<void> insertMonthlyAssetNcpc({bool download = false}) async {
   // var months = [
   //   Month.utc(2019, 1),
   // ];
-  var months = Term.parse('Feb19-Jun21', UTC)
+  var months = Term.parse('Jan19-Jun21', UTC)
       .interval
       .splitLeft((dt) => Month.fromTZDateTime(dt));
-  var archive = MonthlyNcpcAssetArchive();
+  var archive = MonthlyAssetNcpcArchive();
   await archive.dbConfig.db.open();
   for (var month in months) {
     print('Working on $month');
@@ -247,7 +247,7 @@ void main() async {
   // insertRegulationRequirement();
 
   // insertMisReports();
-  await insertMonthlyNcpcAsset(download: true);
+  await insertMonthlyAssetNcpc(download: false);
 
 //  await insertPtidTable();
 

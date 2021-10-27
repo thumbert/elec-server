@@ -19,7 +19,9 @@ class EversourceCtCustomerCountsArchive {
     var env = Platform.environment;
     if (dbConfig == null) {
       this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'utility', collectionName: 'eversource_customer_counts');
+          host: '127.0.0.1',
+          dbName: 'utility',
+          collectionName: 'eversource_customer_counts');
     }
     dir ??= env['HOME']! + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
     if (!Directory(dir!).existsSync()) {
@@ -31,7 +33,7 @@ class EversourceCtCustomerCountsArchive {
 
   /// insert data from one or multiple files
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.length == 0) return Future.value(0);
+    if (data.isEmpty) return Future.value(0);
     var month = data.first['month'];
     await dbConfig.coll.remove({'region': 'CT', 'month': month});
     try {
@@ -40,7 +42,7 @@ class EversourceCtCustomerCountsArchive {
       print(' XXXX ' + e.toString());
       return Future.value(1);
     }
-    print('--->  SUCCESS Eversource CT inserting month ${month}');
+    print('--->  SUCCESS Eversource CT inserting month $month');
     return Future.value(0);
   }
 
@@ -48,7 +50,7 @@ class EversourceCtCustomerCountsArchive {
   /// Mongo insertion.
   List<Map<String, dynamic>> readXlsx(File file) {
     var bytes = file.readAsBytesSync();
-    _decoder = new SpreadsheetDecoder.decodeBytes(bytes);
+    _decoder = SpreadsheetDecoder.decodeBytes(bytes);
 
     var table = _decoder.tables['Smry Load Customer']!;
     var res = [
@@ -106,8 +108,9 @@ class EversourceCtCustomerCountsArchive {
     fileout ??= File(dir! + getFilename(url));
     url = 'https://www.eversource.com' + url;
 
-    if (!Directory(dir!).existsSync())
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
 
     return HttpClient()
         .getUrl(Uri.parse(url))
@@ -117,8 +120,9 @@ class EversourceCtCustomerCountsArchive {
   }
 
   Future<Null> setup() async {
-    if (!Directory(dir!).existsSync())
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
 
     await dbConfig.db.open();
     await dbConfig.db
@@ -139,18 +143,21 @@ class EversourceCtCompetitiveSupply {
     var env = Platform.environment;
     if (dbConfig == null) {
       this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'eversource', collectionName: 'competitive_suppliers');
+          host: '127.0.0.1',
+          dbName: 'eversource',
+          collectionName: 'competitive_suppliers');
     }
     dir ??= env['HOME']! + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
-    if (!Directory(dir!).existsSync())
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
   }
 
   mongo.Db? get db => dbConfig.db;
 
   /// insert data from one or multiple files
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.length == 0) return Future.value(0);
+    if (data.isEmpty) return Future.value(0);
     var month = data.first['month'];
     await dbConfig.coll.remove({'region': 'CT', 'month': month});
     try {
@@ -159,8 +166,7 @@ class EversourceCtCompetitiveSupply {
       print(' XXXX ' + e.toString());
       return Future.value(1);
     }
-    print(
-        '--->  SUCCESS Eversource CT competitive suppliers for month ${month}');
+    print('--->  SUCCESS Eversource CT competitive suppliers for month $month');
     return Future.value(0);
   }
 
@@ -168,10 +174,11 @@ class EversourceCtCompetitiveSupply {
   /// Mongo insertion.
   List<Map<String, dynamic>> readXlsx(File file) {
     var bytes = file.readAsBytesSync();
-    _decoder = new SpreadsheetDecoder.decodeBytes(bytes);
+    _decoder = SpreadsheetDecoder.decodeBytes(bytes);
 
-    if (!_decoder.tables.containsKey('Suppliers'))
+    if (!_decoder.tables.containsKey('Suppliers')) {
       throw ArgumentError('No sheet Suppliers in $file');
+    }
     var table = _decoder.tables['Suppliers']!;
     var res = <Map<String, dynamic>>[];
     for (var row in table.rows) {
@@ -199,8 +206,9 @@ class EversourceCtCompetitiveSupply {
     fileout ??= File(dir! + getFilename(url));
     url = 'https://www.eversource.com' + url;
 
-    if (!Directory(dir!).existsSync())
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
 
     return HttpClient()
         .getUrl(Uri.parse(url))
@@ -210,8 +218,9 @@ class EversourceCtCompetitiveSupply {
   }
 
   Future<Null> setup() async {
-    if (!Directory(dir!).existsSync())
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
     await dbConfig.db.open();
     await dbConfig.db
         .createIndex(dbConfig.collectionName, keys: {'region': 1, 'month': 1});
