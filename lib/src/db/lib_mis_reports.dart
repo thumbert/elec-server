@@ -6,7 +6,6 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
-import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart';
 import 'config.dart';
 

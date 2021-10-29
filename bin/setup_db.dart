@@ -12,6 +12,7 @@ import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
+import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
@@ -28,6 +29,8 @@ import 'package:path/path.dart';
 /// Create the MongoDb from scratch to pass all tests.  This script is useful
 /// if you update the MongoDb installation and all the data is erased.
 ///
+
+var env = Platform.environment;
 
 Future<void> insertDaBindingConstraints() async {
   var archive = DaBindingConstraintsReportArchive();
@@ -151,6 +154,29 @@ Future<void> insertMonthlyAssetNcpc({bool download = false}) async {
   await archive.dbConfig.db.close();
 }
 
+Future<void> insertNoaaTemperatures({bool download = false}) async {
+  var archive = NoaaDailySummaryArchive()
+    ..dir = (env['HOME'] ?? '') +
+        '/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
+  await archive.dbConfig.db.open();
+
+  var stationIds = [
+    'USW00014739', // Boston
+  ];
+  for (var stationId in stationIds) {
+    print('Working on stationId: $stationId');
+    if (download) {
+      var url = archive.getUrl(
+          stationId, Date.utc(1970, 1, 1), Date.today(location: UTC));
+      await archive.downloadUrl(url, archive.getFilename(stationId));
+    }
+    var data = archive.processFile(archive.getFilename(stationId));
+    await archive.insertData(data);
+  }
+
+  await archive.dbConfig.db.close();
+}
+
 void insertPtidTable() async {
   var archive = PtidArchive();
   var baseUrl = 'https://www.iso-ne.com/static-assets/documents/';
@@ -237,6 +263,8 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
+  await insertNoaaTemperatures(download: true);
+
   // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
@@ -247,7 +275,7 @@ void main() async {
   // insertRegulationRequirement();
 
   // insertMisReports();
-  await insertMonthlyAssetNcpc(download: false);
+  // await insertMonthlyAssetNcpc(download: false);
 
 //  await insertPtidTable();
 

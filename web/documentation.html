@@ -34,7 +34,7 @@
             <li><a href="#masked-da-demand-bids">Masked DA demand bids</a></li>
             <li><a href="#masked-da-energy-offers">Masked DA energy offers</a></li>
             <li><a href="#ptid-table">Ptid table</a></li>
-            <li><a href="#ncpc-pool">NCPC costs</a></li>
+            <li><a href="#ncpc-pool">Pool NCPC costs</a></li>
             <li><a href="#rt-daily-prices">RT daily prices by bucket</a></li>
             <li><a href="#rt-hourly-prices">RT hourly prices</a></li>
             <li><a href="#scc-report">Seasonal Claimed Capability report</a></li>
@@ -42,6 +42,8 @@
             <li><a href="#utility-load">Utility load</a></li>
             <li><a href="#zonal-demand">ISONE zonal demand, DA and RT</a></li>
             <li><a href="#wholesale_load_cost_report">ISONE wholesale load cost report</a></li>
+            <li><a href="#monthly-asset-ncpc">Monthly DA and RT NCPC credits by generator </a></li>
+            <li><a href="#weather-noaa-daily-summary">NOAA daily summary report (temperature)</a></li>
         </ul>
         <div id="customer-counts-ngrid">
             <h4>Customer counts for NGrid</h4>
@@ -374,6 +376,31 @@
                 </li>
                 <li>To get pool aggregated data
                     <div><a href="http://localhost:8080/rt_load/v1/isone/pool/start/20190101/end/20190131">rt_load/v1/isone/pool/4004/start/20190101/end/20190131</a></div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="monthly-asset-ncpc">
+            <h4>Historical monthly asset NCPC from ISONE.  Data is from 2019 onwards, published with a
+            4 months lag.</h4>
+            <ul>
+                <li>Get the DA/RT NCPC credits by generator between a start/end month
+                    <div><a href="http://localhost:8080/monthly_asset_ncpc/v1/all/start/201901/end/201902">monthly_asset_ncpc/v1/all/start/201901/end/201902</a></div>
+                </li>
+                <li>Get the DA/RT NCPC credits for one generator between a start/end month
+                    <div><a href="http://localhost:8080/monthly_asset_ncpc/v1/assetId/1616/start/201901/end/201912">monthly_asset_ncpc/v1/assetId/1616/start/201901/end/201912</a></div>
+                </li>
+
+            </ul>
+        </div>
+
+
+        <div id="weather-noaa-daily-summary">
+            <h4>Temperature data from NOAA for different US locations.</h4>
+            <ul>
+                <li>Get daily min temperature and max temperature for Boston between a start/end date.  Temperature
+                    is in Fahrenheit.
+                    <div><a href="http://localhost:8080/noaa_daily_summary/v1/stationId/USW00014739/start/20190115/end/20190228">noaa_daily_summary/v1/stationId/USW00014739/start/20190115/end/20190228</a></div>
                 </li>
             </ul>
         </div>

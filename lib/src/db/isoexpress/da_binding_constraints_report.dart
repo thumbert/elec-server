@@ -98,7 +98,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   @override
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) {
-      print('--->  No data');
+      print('--->  No datathanks');
       return Future.value(-1);
     }
     var groups = groupBy(data, (dynamic e) => e['date']);

@@ -24,6 +24,7 @@ import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
 import 'db/mis/tr_sch2tp_test.dart' as trsch2;
 import 'db/mis/tr_sch3p2_test.dart' as trsch3;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
+import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
 import 'utils/env_file_test.dart' as env_file;
 import 'utils/iso_timestamp_test.dart' as iso_timestamp;
@@ -58,6 +59,7 @@ void main() async {
   sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();
+  noaa_daily_summary.tests(rootUrl);
 
   /// Client tests
   curve_id.tests(rootUrl);

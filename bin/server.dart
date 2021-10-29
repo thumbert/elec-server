@@ -12,6 +12,7 @@ import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 import 'package:elec_server/api/mis/api_tr_sch2tp.dart';
 import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
+import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
@@ -80,6 +81,10 @@ Future<Router> buildRouter() async {
   }.forEach((key, value) {
     router.mount(key, value);
   });
+
+  await DbProd.weather.open();
+  router.mount(
+      '/noaa_daily_summary/v1/', ApiNoaaDailySummary(DbProd.weather).router);
 
   return router;
 }
