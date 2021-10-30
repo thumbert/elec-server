@@ -11,6 +11,7 @@ import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
+import 'package:timezone/timezone.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 void tests(String rootUrl) async {
@@ -58,19 +59,18 @@ void tests(String rootUrl) async {
   group('Monthly asset ncpc client tests:', () {
     var client = NoaaDailySummary(http.Client(), rootUrl: rootUrl);
     test('get min/max temperatures', () async {
-      var data = await client.getHistoricalMinMaxTemperature(
-          'BOS', Date.utc(2019, 1, 15), Date.utc(2019, 2, 28));
+      var term = Term.parse('15Jan19-28Feb19', UTC);
+      var data = await client.getDailyHistoricalMinMaxTemperature(
+          'BOS', term.interval);
       expect(data.length, 45);
       var first = data.first;
-      expect(first, {
-        'date': '2019-01-15',
-        'tMin': 24,
-        'tMax': 39,
-      });
+      expect(first.interval, Date.utc(2019, 1, 15));
+      expect(first.value, {'min': 24, 'max': 39});
     });
     test('get average temperature', () async {
-      var data = await client.getHistoricalTemperature(
-          'BOS', Date.utc(2019, 1, 15), Date.utc(2019, 2, 28));
+      var term = Term.parse('15Jan19-28Feb19', UTC);
+      var data =
+          await client.getDailyHistoricalTemperature('BOS', term.interval);
       expect(data.length, 45);
       var first = data.first;
       expect(first, IntervalTuple<num>(Date.utc(2019, 1, 15), 31.5));

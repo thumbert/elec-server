@@ -11,15 +11,13 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:collection/collection.dart';
 
 class NoaaDailySummaryArchive extends IsoExpressReport {
-  // late ComponentConfig dbConfig;
-
   NoaaDailySummaryArchive({ComponentConfig? dbConfig}) {
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'weather',
-          collectionName: 'noaa_daily_summary');
-    }
+    this.dbConfig = dbConfig ??
+        ComponentConfig(
+            host: '127.0.0.1',
+            dbName: 'weather',
+            collectionName: 'noaa_daily_summary');
+
     dir = baseDir + 'Noaa/DailySummary/Raw/';
   }
 
@@ -117,8 +115,10 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
 
   @override
   Future<Null> setupDb() async {
+    await dbConfig.db.open();
     await dbConfig.db
         .createIndex(dbConfig.collectionName, keys: {'stationId': 1});
+    await dbConfig.db.open();
   }
 
   @override

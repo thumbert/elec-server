@@ -22,12 +22,12 @@ class NoaaDailySummary {
   };
 
   /// Daily average temperature in Fahrenheit.
-  Future<TimeSeries<num>> getHistoricalTemperature(
-      String airportCode, Date start, Date end) async {
-    var data = await getHistoricalMinMaxTemperature(airportCode, start, end);
+  Future<TimeSeries<num>> getDailyHistoricalTemperature(
+      String airportCode, Interval interval) async {
+    var data = await getDailyHistoricalMinMaxTemperature(airportCode, interval);
     var out = TimeSeries.fromIterable(data.map((e) {
-      var value = (e['tMin'] + e['tMax']) / 2 as num; // in Celsius
-      return IntervalTuple(Date.parse(e['date'], location: UTC), value);
+      var value = 0.5 * (e.value['min']! + e.value['max']!);
+      return IntervalTuple(e.interval, value);
     }));
 
     return out;
@@ -36,20 +36,25 @@ class NoaaDailySummary {
   /// Return temperature data for a given 3 letter [airportCode].
   /// For example, Boston is 'BOS'.  Temperature is in Fahrenheit.
   /// ```
-  /// {
-  ///   'date': '2019-01-15',
-  ///   'tMin': 24,
-  ///   'tMax': 39,
-  /// }
+  ///   '2019-01-15' -> {'min': 24, 'max': 39},
+  ///   '2019-01-16' -> {'min': 22, 'max': 40},
+  ///   ...
   /// ```
-  Future<List<Map<String, dynamic>>> getHistoricalMinMaxTemperature(
-      String airportCode, Date start, Date end) async {
+  Future<TimeSeries<Map<String, num>>> getDailyHistoricalMinMaxTemperature(
+      String airportCode, Interval interval) async {
     var stationId = airportCodeMap[airportCode]!;
+    var location = interval.start.location;
+    var start = interval.start.toString().substring(0, 10);
+    var end =
+        interval.end.subtract(Duration(minutes: 1)).toString().substring(0, 10);
     var _url =
         rootUrl + servicePath + 'stationId/$stationId/start/$start/end/$end';
 
     var _response = await client.get(Uri.parse(_url));
-    var xs = (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
-    return xs;
+    var xs = json.decode(_response.body) as List;
+
+    return TimeSeries.fromIterable(xs.map((e) => IntervalTuple(
+        Date.parse(e['date'], location: location),
+        {'min': e['tMin'], 'max': e['tMax']})));
   }
 }
