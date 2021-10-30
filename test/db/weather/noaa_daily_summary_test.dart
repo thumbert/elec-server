@@ -40,7 +40,7 @@ void tests(String rootUrl) async {
     var api = ApiNoaaDailySummary(archive.db);
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
-    test('Get ', () async {
+    test('Get a few months', () async {
       var res =
           await api.apiGetStationId('USW00014739', '2019-01-15', '2019-02-28');
       expect(res.length, 45);
@@ -53,6 +53,21 @@ void tests(String rootUrl) async {
         'date': '2019-02-28',
         'tMin': 19,
         'tMax': 31,
+      });
+    });
+    test('Get an interval crossing an year boundary', () async {
+      var res =
+          await api.apiGetStationId('USW00014739', '2020-01-01', '2021-09-30');
+      expect(res.length, 639);
+      expect(res.first, {
+        'date': '2020-01-01',
+        'tMin': 36,
+        'tMax': 43,
+      });
+      expect(res.last, {
+        'date': '2021-09-30',
+        'tMin': 53,
+        'tMax': 64,
       });
     });
   });

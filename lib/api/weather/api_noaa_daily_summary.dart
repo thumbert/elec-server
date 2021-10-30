@@ -43,7 +43,7 @@ class ApiNoaaDailySummary {
     var query = where
       ..eq('stationId', stationId)
       ..gte('year', yearStart)
-      ..gte('year', yearEnd)
+      ..lte('year', yearEnd)
       ..excludeFields(['_id', 'stationId']);
     var xs = await coll.find(query).toList();
 
