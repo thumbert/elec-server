@@ -18,7 +18,11 @@ class NoaaDailySummary {
 
   /// from airport code to stationId
   static const airportCodeMap = <String, String>{
-    'BOS': 'USW00014739',
+    'ATL': 'USW00013874', // Atlanta
+    'BOS': 'USW00014739', // Boston
+    'BWI': 'USW00093721', // Baltimore
+    'LGA': 'USW00014732', // NYC La Guardia
+    'ORD': 'USW00094846', // Chicago O'Hare
   };
 
   /// Daily average temperature in Fahrenheit.
