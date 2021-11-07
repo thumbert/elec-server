@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
+import 'package:elec_server/client/weather/noaa_daily_summary.dart';
 import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
@@ -160,9 +161,9 @@ Future<void> insertNoaaTemperatures({bool download = false}) async {
         '/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
   await archive.dbConfig.db.open();
 
-  var stationIds = [
-    'USW00014739', // Boston
-  ];
+  /// what stations get inserted in the database
+  var stationIds = NoaaDailySummary.airportCodeMap.values;
+
   for (var stationId in stationIds) {
     print('Working on stationId: $stationId');
     if (download) {
