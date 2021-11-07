@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:http/http.dart' as http;
-import 'package:timezone/timezone.dart';
 
 class NoaaDailySummary {
   NoaaDailySummary(this.client,

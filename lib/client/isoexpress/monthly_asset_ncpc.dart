@@ -60,6 +60,7 @@ class MonthlyAssetNcpc {
   /// For example if the filter [zoneId] is null, it means all zones,
   /// if the checkbox [byZoneId] is true, it will aggregate the data by zone, etc.
   /// Valid zone values are: 'Maine', 'NH', 'VT', ... , 'WCMA', 'NEMA'.
+  ///
   List<Map<String, dynamic>> summary(Iterable<Map<String, dynamic>> data,
       {int? zoneId,
       bool byZoneId = false,

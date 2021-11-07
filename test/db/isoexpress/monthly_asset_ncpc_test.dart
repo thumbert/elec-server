@@ -132,6 +132,23 @@ void tests(String rootUrl) async {
         'value': 256270,
       });
     });
+    test('filter by zone: 4005, byMarket: true, byMonth: true ', () {
+      var out = client.summary(data,
+          zoneId: 4005,
+          byZoneId: true,
+          market: null,
+          byMarket: true,
+          assetName: null,
+          byAssetName: false,
+          byMonth: true);
+      expect(out.length, 12);
+      expect(out.first, {
+        'zone': 4005,
+        'market': Market.da,
+        'month': '2021-01',
+        'value': 57852,
+      });
+    });
     test('filter by assetName: "MYSTIC 9", byMonth: true ', () {
       var out = client.summary(data,
           zoneId: null,
