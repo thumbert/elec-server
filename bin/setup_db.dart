@@ -10,6 +10,7 @@ import 'package:elec_server/src/db/isoexpress/monthly_asset_ncpc.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
+import 'package:elec_server/src/db/isone/masked_ids.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
@@ -48,8 +49,14 @@ Future<void> insertDaBindingConstraints() async {
 Future<void> insertDaDemandBids() async {
   var archive = DaDemandBidArchive();
 
-  var days = [Date.utc(2020, 10, 1)];
-  // var days = Month(2019, 2).days();
+  var days = [
+    Date.utc(2017, 1, 1),
+    Date.utc(2017, 7, 1),
+    Date.utc(2019, 2, 28),
+    Date.utc(2020, 9, 1),
+    Date.utc(2020, 10, 1),
+  ];
+  // var days = Term.parse('Jan21-Jun21', UTC).days();
   await insertDays(archive, days);
 
   // await archive.setupDb();
@@ -109,6 +116,15 @@ Future<void> insertIsoExpress() async {
   // to calculate settlement prices for calculators, Jan20-Aug20
   // await insertDays(
   //     DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
+}
+
+Future<void> insertMaskedAssetIds() async {
+  var archive = IsoNeMaskedIdsArchive();
+  await archive.db.open();
+  await archive.setup();
+  var data = archive.readXlsx();
+  await archive.insertMongo(data);
+  await archive.db.close();
 }
 
 void insertMisReports() async {
@@ -264,14 +280,16 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  await insertNoaaTemperatures(download: true);
+  // await insertNoaaTemperatures(download: true);
 
   // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();
 
-  // await insertDaDemandBids();
+  await insertDaDemandBids();
+
+  // await insertMaskedAssetIds();
 
   // insertRegulationRequirement();
 

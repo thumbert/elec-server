@@ -3,6 +3,7 @@ import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
+import 'package:elec_server/api/isone/api_isone_masked_ids.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/api/mis/api_sd_arrawdsum.dart';
@@ -62,6 +63,8 @@ Future<Router> buildRouter() async {
   });
 
   await DbProd.isone.open();
+  router.mount('/isone_masked_ids/v1/', ApiIsoneMaskedIds(DbProd.isone).router);
+
   await DbProd.marks.open();
   await DbProd.riskSystem.open();
 

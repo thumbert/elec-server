@@ -15,6 +15,8 @@ import 'db/isoexpress/regulation_requirement_test.dart'
 import 'db/isoexpress/wholesale_load_cost_report_test.dart'
     as wholesale_load_cost_report;
 import 'db/isone_ptids_test.dart' as ptids;
+import 'db/isone/masked_ids_test.dart' as masked_ids;
+
 import 'db/lib_mis_reports_test.dart' as mis;
 import 'db/marks/forward_marks_test.dart' as forward_marks;
 import 'db/mis/sd_arrawdsum_test.dart' as sd_arrawdsum;
@@ -32,7 +34,7 @@ import 'utils/parse_custom_integer_range_test.dart' as parse_int_range;
 import 'utils/term_cache_test.dart' as term_cache;
 import 'utils/to_csv_test.dart' as to_csv;
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
   DbProd();
   dotenv.load('.env/prod.env');
@@ -50,6 +52,7 @@ void main() async {
   dalmp.tests(rootUrl);
   demand_bids.tests();
   energy_offers.tests(rootUrl);
+  await masked_ids.tests(rootUrl);
   monthly_asset_ncpc.tests(rootUrl);
   ptids.tests(rootUrl);
   regulation_requirement.tests(rootUrl);

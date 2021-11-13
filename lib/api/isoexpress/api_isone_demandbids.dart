@@ -4,7 +4,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
@@ -52,8 +52,8 @@ class DaDemandBids {
       return Response.ok(json.encode(aux), headers: headers);
     });
 
-    router.get('/daily/mwh/demandbid/start/<start>/end/<end>', (Request request,
-        String participantId, String start, String end) async {
+    router.get('/daily/mwh/demandbid/start/<start>/end/<end>',
+        (Request request, String start, String end) async {
       var aux = await dailyMWhDemandBid(start, end);
       return Response.ok(json.encode(aux), headers: headers);
     });
@@ -66,7 +66,16 @@ class DaDemandBids {
 
     router.get('/daily/mwh/demandbid/participant/start/<start>/end/<end>',
         (Request request, String start, String end) async {
-      var aux = await dailyMwhDemandBidByParticipant(start, end);
+      var aux =
+          await dailyMwhDemandBidByParticipantForZone(start, end, ptid: null);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/daily/mwh/demandbid/participant/ptid/<ptid>/start/<start>/end/<end>',
+        (Request request, String ptid, String start, String end) async {
+      var aux = await dailyMwhDemandBidByParticipantForZone(start, end,
+          ptid: int.parse(ptid));
       return Response.ok(json.encode(aux), headers: headers);
     });
 
@@ -96,7 +105,7 @@ class DaDemandBids {
             location, _dt.millisecondsSinceEpoch)
         .toIso8601String();
 
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -122,12 +131,12 @@ class DaDemandBids {
       }
     });
     pipeline.add({'\$unwind': '\$hours'});
-    var res = await coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    var res = await coll.aggregateToStream(pipeline).toList();
 
     /// flatten the map in Dart
-    var out = [];
+    var out = <Map<String, dynamic>>[];
     var keys = ['locationId', 'participantId', 'bidType', 'price', 'quantity'];
-    for (Map e in res) {
+    for (var e in res) {
       List? prices = e['hours']['price'];
       var qty = e['hours']['quantity'] as List;
       prices ??= List.filled(qty.length, 999);
@@ -141,7 +150,7 @@ class DaDemandBids {
         ]));
       }
     }
-    return out as FutureOr<List<Map<String, dynamic>>>;
+    return out;
   }
 
   //http://localhost:8080/da_demand_bids/v1/daily/mwh/participantId/206845/start/20170701/end/20171001
@@ -149,7 +158,7 @@ class DaDemandBids {
   /// and end date, return all available zones.
   Future<List<Map<String, dynamic>>> dailyMwhDemandBidByZoneForParticipant(
       String participantId, String start, String end) async {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -184,7 +193,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll.aggregateToStream(pipeline).toList();
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/participantId/206845/ptid/4004/start/20170701/end/20171001
@@ -192,7 +201,7 @@ class DaDemandBids {
   /// between a start and end date,
   Future<List<Map<String, dynamic>>> dailyMwhDemandBidForParticipantZone(
       String participantId, String ptid, String start, String end) async {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -228,7 +237,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll.aggregateToStream(pipeline).toList();
   }
 
   /// Get the total daily MWh demand bids for all participants between a start
@@ -270,7 +279,9 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll
+        .aggregateToStream(pipeline as List<Map<String, Object>>)
+        .toList();
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/ptid/4004/start/20170701/end/20171001
@@ -312,14 +323,18 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll
+        .aggregateToStream(pipeline as List<Map<String, Object>>)
+        .toList();
   }
 
   //http://localhost:8080/da_demand_bids/v1/mwh/participant/start/20170701/end/20171001
   /// Get total daily MWh demand bids by participant between a start and end date.
-  Future<List<Map<String, dynamic>>> dailyMwhDemandBidByParticipant(
-      String start, String end) async {
-    var pipeline = [];
+  /// If [ptid] == null, all zones.  If [ptid] = 4004, get CT only, etc.
+  Future<List<Map<String, dynamic>>> dailyMwhDemandBidByParticipantForZone(
+      String start, String end,
+      {int? ptid}) async {
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -329,7 +344,9 @@ class DaDemandBids {
         'Location Type': {'\$eq': 'LOAD ZONE'},
         'Bid Type': {
           '\$in': ['FIXED', 'PRICE']
-        }
+        },
+        if (ptid != null)
+          'Masked Location ID': {'\$eq': _unmaskedLocations[ptid]},
       }
     });
     pipeline.add({
@@ -355,13 +372,62 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll.aggregateToStream(pipeline).toList();
+  }
+
+  /// Get total daily MWh demand bids by participant between a start and end date.
+  /// If [ptid] == null, all zones.  If [ptid] = 4004, get CT only, etc.
+  ///
+  Future<List<Map<String, dynamic>>> monthlyMwhDemandBidByParticipantForZone(
+      String startMonth, String endMonth,
+      {int? ptid}) async {
+    var pipeline = <Map<String, Object>>[];
+    pipeline.add({
+      '\$match': {
+        'date': {
+          '\$gte': Month.parse(startMonth).startDate.toString(),
+          '\$lte': Month.parse(endMonth).endDate.toString(),
+        },
+        'Location Type': {'\$eq': 'LOAD ZONE'},
+        'Bid Type': {
+          '\$in': ['FIXED', 'PRICE']
+        },
+        if (ptid != null)
+          'Masked Location ID': {'\$eq': _unmaskedLocations[ptid]},
+      }
+    });
+    pipeline.add({
+      '\$unwind': '\$hours',
+    });
+    pipeline.add({
+      '\$unwind': '\$hours.quantity',
+    });
+    pipeline.add({
+      '\$group': {
+        '_id': {
+          'participantId': '\$Masked Lead Participant ID',
+          'month': {
+            '\$substr': ['\$date', 0, 7]
+          },
+        },
+        'MWh': {'\$sum': '\$hours.quantity'},
+      }
+    });
+    pipeline.add({
+      '\$project': {
+        '_id': 0,
+        'participantId': '\$_id.participantId',
+        'month': '\$_id.month',
+        'MWh': '\$MWh',
+      }
+    });
+    return coll.aggregateToStream(pipeline).toList();
   }
 
   /// Get total daily MWh of inc/dec between a start and end date.
   Future<List<Map<String, dynamic>>> dailyMwhIncDec(
       String start, String end) async {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -396,13 +462,13 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll.aggregateToStream(pipeline).toList();
   }
 
   /// Get total daily MWh demand bids by participant between a start and end date.
   Future<List<Map<String, dynamic>>> dailyMwhIncDecByParticipant(
       String start, String end) async {
-    var pipeline = [];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -440,7 +506,7 @@ class DaDemandBids {
         'MWh': '\$MWh',
       }
     });
-    return coll.aggregateToStream(pipeline as List<Map<String, Object>>).toList();
+    return coll.aggregateToStream(pipeline).toList();
   }
 }
 
