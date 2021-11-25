@@ -44,13 +44,13 @@ List<Map<String, dynamic>> getEnergyCurves() {
       for (var market in markets) {
         var aux = '${market.name}_${component.name}'.toLowerCase();
         var one = <String, dynamic>{
-          'curveId': 'isone_energy_${ptid}_${aux}', // isone_energy_4000_da_lmp
+          'curveId': 'isone_energy_${ptid}_$aux', // isone_energy_4000_da_lmp
           'serviceType': 'energy',
           'ptid': ptid,
           'market': market.name.toLowerCase(),
           'lmpComponent': component.name,
           'location': _zoneMap[ptid], // hub, ct, etc.
-          'curve': '${_zoneMap[ptid]}_${aux}', // 'hub_da_lmp'
+          'curve': '${_zoneMap[ptid]}_$aux', // 'hub_da_lmp'
           'unit': '\$/MWh',
           'buckets': ['5x16', '2x16H', '7x8'],
           'hourlyShapeCurveId': 'isone_energy_4000_hourlyshape',

@@ -5,6 +5,8 @@ import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id.dart';
+import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_ng.dart'
+    as ng;
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
     as isone;
 
@@ -21,8 +23,8 @@ void tests(String rootUrl) async {
       expect(res.contains('electricity'), true);
     });
     test('get all regions for commodity electricity', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/curve_ids/v1/commodity/electricity/regions'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/curve_ids/v1/commodity/electricity/regions'),
           headers: {'Content-Type': 'application/json'});
       var regions = json.decode(aux.body);
       expect(regions.contains('isone'), true);
@@ -37,16 +39,17 @@ void tests(String rootUrl) async {
           true);
     });
     test('get energy curves for electricity, isone', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/curve_ids/v1/data/commodity/electricity'
-          '/region/isone/serviceType/energy'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/curve_ids/v1/data/commodity/electricity'
+              '/region/isone/serviceType/energy'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body) as List;
       expect(xs.length >= 30, true);
     });
     test('get curve details for curveId isone_energy_4004_da_lmp', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4004_da_lmp'),
+      var aux = await http.get(
+          Uri.parse(
+              '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4004_da_lmp'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body);
       expect(xs['children'].toSet(), {
@@ -55,8 +58,9 @@ void tests(String rootUrl) async {
       });
     });
     test('get curve details for curveId isone_energy_4000_da_lmp', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4000_da_lmp'),
+      var aux = await http.get(
+          Uri.parse(
+              '$rootUrl/curve_ids/v1/data/curveId/isone_energy_4000_da_lmp'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body);
       expect(xs['volatilityCurveId'], {
@@ -68,15 +72,16 @@ void tests(String rootUrl) async {
       var curves = ['isone_energy_4000_da_lmp', 'isone_energy_4001_da_lmp'];
       var x = await api.getCurveIds(curves.join('|'));
       expect(x.length, 2);
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/curve_ids/v1/data/curveIds/${curves.join('|')}'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/curve_ids/v1/data/curveIds/${curves.join('|')}'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body) as List;
       expect(xs.length, 2);
     });
     test('get mass hub daily volatility', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/curve_ids/v1/data/curveId/isone_volatility_4000_da_daily'),
+      var aux = await http.get(
+          Uri.parse(
+              '$rootUrl/curve_ids/v1/data/curveId/isone_volatility_4000_da_daily'),
           headers: {'Content-Type': 'application/json'});
       var xs = json.decode(aux.body);
       expect(xs['commodity'], 'volatility');
@@ -86,18 +91,19 @@ void tests(String rootUrl) async {
   });
 }
 
-void insertData() async {
+Future<void> insertData() async {
   var archive = CurveIdArchive();
   await archive.db.open();
   await archive.dbConfig.coll.remove(<String, dynamic>{});
   await archive.insertData(isone.getCurves());
+  await archive.insertData(ng.getCurves());
   await archive.setup();
   await archive.db.close();
 }
 
 void main() async {
-  // await insertData();
+  await insertData();
 
   // dotenv.load('.env/prod.env');
-  tests('http://127.0.0.1:8080');
+  // tests('http://127.0.0.1:8080');
 }

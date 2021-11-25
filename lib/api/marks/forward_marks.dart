@@ -242,7 +242,9 @@ class ForwardMarks {
       log.severe('No marks for curveId: $curveId, asOfDate: $asOfDate');
       return MarksCurveEmpty();
     }
-    var location = getLocation(curveDetails['tzLocation'] as String);
+    var location = curveDetails['tzLocation'] == 'UTC'
+        ? UTC
+        : getLocation(curveDetails['tzLocation'] as String);
     // now asOfDate becomes localized
     asOfDate =
         Date(asOfDate.year, asOfDate.month, asOfDate.day, location: location);
@@ -345,7 +347,7 @@ class ForwardMarks {
     var terms = document['terms'] as List;
     var xs = <IntervalTuple<Map<Bucket, num>>>[];
     for (var i = 0; i < terms.length; i++) {
-      var one = <Bucket,num>{};
+      var one = <Bucket, num>{};
       for (var bucket in bKeys) {
         num? aux = document['buckets'][bucket][i];
         if (aux != null) {
