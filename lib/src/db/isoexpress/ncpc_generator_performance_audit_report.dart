@@ -25,17 +25,21 @@ class NcpcGpaReportArchive extends DailyIsoExpressReport {
     this.dir = dir;
   }
 
+  @override
   String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=GPA&start=' +
           yyyymmdd(asOfDate);
 
+  @override
   File getFilename(Date? asOfDate) =>
       File(dir + 'ncpc_gpa_' + yyyymmdd(asOfDate) + '.csv');
 
+  @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var row = rows.first; // one row at at time
-    if (!_setEq.equals(row.keys.toSet(), _columnNames))
+    if (!_setEq.equals(row.keys.toSet(), _columnNames)) {
       throw ArgumentError('Report $reportName has changed format!');
+    }
     var date = formatDate(row['Operating Day']);
     row.remove('H');
     row.remove('Operating Day');
@@ -43,6 +47,7 @@ class NcpcGpaReportArchive extends DailyIsoExpressReport {
   }
 
   /// Each file has only one row.
+  @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String, dynamic>>[];
@@ -50,11 +55,13 @@ class NcpcGpaReportArchive extends DailyIsoExpressReport {
     return out;
   }
 
-  Future<Null> setupDb() async {
+  @override
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     var collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.remove({'ncpcType': 'GPA'});
+    }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'date': 1, 'ncpcType': 1});
     await dbConfig.db.createIndex(dbConfig.collectionName,

@@ -25,10 +25,12 @@ class Controller {
     ranges ??= <String,List<num>>{};
   }
   
+  @override
   String toString() {
     var out = '';
-    if (checkboxes!.isNotEmpty)
+    if (checkboxes!.isNotEmpty) {
       out = out + 'checkboxes: ${checkboxes!.join(',')}\n';
+    }
     if (filters!.isNotEmpty) {
       out = out + 'filters:\n';
       for (var e in filters!.entries) {

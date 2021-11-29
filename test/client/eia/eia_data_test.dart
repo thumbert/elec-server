@@ -11,8 +11,9 @@ import 'package:elec_server/client/eia/eia_data.dart';
 /// retrieve the key from the environment variables
 String? getEiaKey() {
   var env = Platform.environment;
-  if (!env.containsKey('EIA_API_KEY'))
-    throw new StateError('EIA_API_KEY is not set as an enviroment variable.');
+  if (!env.containsKey('EIA_API_KEY')) {
+    throw StateError('EIA_API_KEY is not set as an enviroment variable.');
+  }
   return env['EIA_API_KEY'];
 }
 

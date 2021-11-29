@@ -25,7 +25,7 @@ class TextInput {
     inner = html.DivElement()
       ..setAttribute('style', 'margin-top: 8px');
     inner.children.add(html.LabelElement()
-      ..text = '$name');
+      ..text = name);
     _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..value = aux;

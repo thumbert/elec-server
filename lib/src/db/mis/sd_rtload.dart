@@ -31,7 +31,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
     row['Load Reading'] = [];
     row['Ownership Share'] = [];
     row['Share of Load Reading'] = [];
-    rows.forEach((e) {
+    for (var e in rows) {
       if (e['Trading interval'] is num) {
         e['Trading interval'] =
             e['Trading interval'].toString().padLeft(2, '0');
@@ -41,7 +41,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
       row['Load Reading'].add(e['Load Reading']);
       row['Ownership Share'].add(e['Ownership Share']);
       row['Share of Load Reading'].add(e['Share of Load Reading']);
-    });
+    }
     return row;
   }
 
@@ -82,7 +82,7 @@ class SdRtloadArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'Asset ID': 1, 'date': 1, 'version': 1}, unique: true);

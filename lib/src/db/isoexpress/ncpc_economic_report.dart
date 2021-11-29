@@ -58,7 +58,7 @@ class NcpcEconomicReportArchive extends DailyIsoExpressReport {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     var collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName)) {

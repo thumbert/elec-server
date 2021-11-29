@@ -10,7 +10,7 @@ import 'package:date/date.dart';
 class ZonalDemand {
   late DbCollection coll;
   late Location _location;
-  final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
+  final DateFormat fmt = DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'zonal_demand';
 
   static final List<String> _canonicalZones = [

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2 (released 2021-11-28)
+- Improve forward_marks API and client.  Added a route to pull strip prices 
+  in an efficient way (batch call to the DB and caching.)
+- Switched to lints, applied dart fix
+
 ## 2.0.1 (released 2021-06-19)
 - null-safety version stable
 

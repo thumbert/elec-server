@@ -109,7 +109,7 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     var collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName)) {
@@ -125,7 +125,7 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
     await dbConfig.db.close();
   }
 
-  Future<Null> updateDb() async {
+  Future<void> updateDb() async {
     // TODO: implement updateDb
     return null;
   }

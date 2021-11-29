@@ -7,7 +7,7 @@ import 'package:elec_server/elec-server.dart';
 import 'package:elec_server/src/db/weather/winter_storms.dart';
 
 winterStormTests() async {
-  var archive = new WinterStormsArchive();
+  var archive = WinterStormsArchive();
 
   await archive.setupDb();
 

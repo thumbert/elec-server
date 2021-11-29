@@ -31,11 +31,11 @@ class SrArrDistrArchive extends mis.MisReportArchive {
       document[column] = [];
     }
 
-    rows.forEach((e) {
+    for (var e in rows) {
       for (var column in columns) {
         document[column].add(e[column]);
       }
-    });
+    }
     return document;
   }
 
@@ -80,7 +80,7 @@ class SrArrDistrArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'month': 1, 'tab': 1, 'version': 1}, unique: true);

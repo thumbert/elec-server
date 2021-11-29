@@ -44,7 +44,7 @@ abstract class MisReportArchive {
   Map<String, dynamic> Function(List<Map<String, dynamic>>)? converter;
 
   /// Setup the database from scratch again, including the index
-  Future<Null> setupDb();
+  Future<void> setupDb();
 
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.

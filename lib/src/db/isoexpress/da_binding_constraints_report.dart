@@ -116,7 +116,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db
         .createIndex(dbConfig.collectionName, keys: {'market': 1, 'date': 1});

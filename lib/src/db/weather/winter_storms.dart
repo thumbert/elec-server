@@ -147,7 +147,7 @@ List<String> winterStorms() {
 }
 
 class WinterStormsArchive extends IsoExpressReport {
-  var _fmt = new DateFormat('M/dd/yyyy h:mm a');
+  final _fmt = DateFormat('M/dd/yyyy h:mm a');
 
   WinterStormsArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
@@ -156,19 +156,21 @@ class WinterStormsArchive extends IsoExpressReport {
     this.dir = dir;
   }
 
+  @override
   Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
     return <String,dynamic>{};
   }
 
   /// SNOW total accumulation, RAIN totals (inches), and wind speeds are reported.
   ///
+  @override
   List<Map<String,dynamic>> processFile(File file) {
     print(file.path);
     var aux = file.readAsStringSync();
 
     /// keep only the metadata lines, which start with ':'
     var lines = aux.split('\n').where((String line) => line.startsWith(':'));
-    var converter = new CsvToListConverter();
+    var converter = CsvToListConverter();
     var rows = lines.map((String row) => converter.convert(row).first).toList();
     List<Map> out = [];
     List keys = [
@@ -189,8 +191,8 @@ class WinterStormsArchive extends IsoExpressReport {
 //        if ((row[11] as String).trim() != 'Inch')
 //          throw new StateError('Unit is not Inch.  Do something! \n$row');
         var dt = parseTimestamp(row[0], row[1]);
-        out.add(new Map.fromIterables(keys, [
-          new Date.fromTZDateTime(dt).toString(),
+        out.add(Map.fromIterables(keys, [
+          Date.fromTZDateTime(dt).toString(),
           dt,
           (row[2] as String).trim(), // state
           (row[3] as String).trim(), // county
@@ -215,7 +217,7 @@ class WinterStormsArchive extends IsoExpressReport {
     time = time.trimLeft();
     date = date.substring(1);
     var dt = _fmt.parse('$date $time');
-    return new TZDateTime.from(dt, location);
+    return TZDateTime.from(dt, location);
   }
 
   /// Check if this storm has been inserted already.  Should be a fast check.
@@ -226,11 +228,13 @@ class WinterStormsArchive extends IsoExpressReport {
     });
   }
 
-  Future<Null> setupDb() async {
+  @override
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     List<String?> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.drop();
+    }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'stormId': 1}, unique: true);
     await dbConfig.db.close();
@@ -238,13 +242,13 @@ class WinterStormsArchive extends IsoExpressReport {
 
   /// Update the db by going through the list of storms, downloading them and
   /// inserting them into the db.
-  Future<Null> updateDb() async {
+  Future<void> updateDb() async {
     List stormIds = winterStorms();
     for (String stormId in stormIds.take(3) as Iterable<String>) {
       bool inDb = await isStormInserted(stormId);
       if (!inDb) {
         var url = _makeUrl(stormId);
-        var file = new File(_makeUrl(stormId, base: dir));
+        var file = File(_makeUrl(stormId, base: dir));
         if (!file.existsSync()) await downloadUrl(url, file);
         var rows = processFile(file);
         rows.forEach(print);

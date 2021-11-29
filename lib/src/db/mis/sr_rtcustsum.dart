@@ -108,11 +108,12 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     List<String?> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.drop();
+    }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'account': 1, 'tab': 1, 'date': 1, 'version': 1});
     await dbConfig.db.createIndex(dbConfig.collectionName, keys: {

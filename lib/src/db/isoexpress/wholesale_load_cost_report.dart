@@ -116,7 +116,7 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {

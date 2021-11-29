@@ -32,7 +32,7 @@ class EversourceEastMaCustomerCountsArchive {
 
   /// insert data from one or multiple files
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.length == 0) return Future.value(0);
+    if (data.isEmpty) return Future.value(0);
     var month = data.first['month'];
     await dbConfig.coll.remove({'region': 'East MA', 'month': month});
     try {
@@ -41,7 +41,7 @@ class EversourceEastMaCustomerCountsArchive {
       print(' XXXX ' + e.toString());
       return Future.value(1);
     }
-    print('--->  SUCCESS Eversource East MA inserting month ${month}');
+    print('--->  SUCCESS Eversource East MA inserting month $month');
     return Future.value(0);
   }
 
@@ -74,8 +74,9 @@ class EversourceEastMaCustomerCountsArchive {
       // 3 columns of data
       for (int i = 2; i < rows.length; i++) {
         if (rows[i][0] != null && rows[i][2] is num) {
-          if (zone == null || service == null)
+          if (zone == null || service == null) {
             throw 'Can\'t parse the zone and service type.';
+          }
           var aux = <String, dynamic>{
             'region': 'East MA',
             'month': month,
@@ -109,21 +110,23 @@ class EversourceEastMaCustomerCountsArchive {
 
     url = 'https://www.eversource.com' + url;
 
-    if (!Directory(dir!).existsSync())
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
 
     var fileout = File(dir! + fName);
 
-    return new HttpClient()
+    return HttpClient()
         .getUrl(Uri.parse(url))
         .then((HttpClientRequest request) => request.close())
         .then((HttpClientResponse response) =>
             response.pipe(fileout.openWrite()));
   }
 
-  Future<Null> setup() async {
-    if (!Directory(dir!).existsSync())
+  Future<void> setup() async {
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
 
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,

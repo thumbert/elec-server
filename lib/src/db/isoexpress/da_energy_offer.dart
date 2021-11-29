@@ -62,7 +62,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
 
     /// hourly info
     row['hours'] = [];
-    rows.forEach((Map hour) {
+    for (var hour in rows) {
       var aux = <String, dynamic>{};
       var utc = parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
       aux['hourBeginning'] = TZDateTime.fromMicrosecondsSinceEpoch(
@@ -79,14 +79,14 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       var pricesHour = <num?>[];
       var quantitiesHour = <num?>[];
       for (var i = 1; i <= 10; i++) {
-        if (!(hour['Segment $i Price'] is num)) break;
+        if (hour['Segment $i Price'] is! num) break;
         pricesHour.add(hour['Segment $i Price']);
         quantitiesHour.add(hour['Segment $i MW']);
       }
       aux['price'] = pricesHour;
       aux['quantity'] = quantitiesHour;
       row['hours'].add(aux);
-    });
+    }
     validateDocument(row);
     return row;
   }
@@ -119,7 +119,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
 
   /// Recreate the collection from scratch.
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     var collections = await dbConfig.db.getCollectionNames();
     if (collections.contains(dbConfig.collectionName)) {
@@ -155,9 +155,9 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     return Date.utc(m3.year, m3.month, 1).previous;
   }
 
-  Future<Null> deleteDay(Date day) async {
+  Future<void> deleteDay(Date day) async {
     return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString()))
-        as FutureOr<Null>);
+        as FutureOr<void>);
   }
 
   /// Check if this document is OK.  Throws otherwise.  May not catch all

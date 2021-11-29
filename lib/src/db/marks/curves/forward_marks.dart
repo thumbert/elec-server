@@ -82,7 +82,7 @@ class ForwardMarksArchive {
     for (var newDocument in data) {
       checkDocument(newDocument);
       var fromDate = newDocument['fromDate'] as String;
-      var curveId = newDocument['curveId'] as String?;
+      var curveId = newDocument['curveId'] as String;
 
       /// Get the last document with the curve, and check if you need to
       /// reinsert it.
@@ -213,7 +213,7 @@ class ForwardMarksArchive {
 
   /// Get the document for this [curveId] and [fromDate].
   static Future<Map<String, dynamic>> getDocument(
-      String asOfDate, String? curveId, mongo.DbCollection coll) async {
+      String asOfDate, String curveId, mongo.DbCollection coll) async {
     var pipeline = [
       {
         '\$match': {
@@ -231,7 +231,6 @@ class ForwardMarksArchive {
         '\$project': {
           '_id': 0,
           'curveId': 0,
-          'markType': 0,
         }
       },
     ];
@@ -240,23 +239,58 @@ class ForwardMarksArchive {
     return <String, dynamic>{...aux.first};
   }
 
-  /// Determine if it's a simple price curve from the name
-  bool isPriceCurve(String curveId) {
+  /// Get all the documents for this [curveId] between [startDate] and [endDate].
+  /// Return documents sorted by [fromDate] from earliest to latest.
+  /// [endDate] needs to be earlier than today and [startDate] later than the
+  /// first day marked.
+  static Future<List<Map<String, dynamic>>> getDocumentsOneCurveStartEnd(
+      String curveId,
+      mongo.DbCollection coll,
+      String startDate,
+      String endDate) async {
+    var pipeline = [
+      {
+        '\$match': {
+          'curveId': {'\$eq': curveId},
+          'fromDate': {
+            '\$lte': Date.parse(endDate).toString(),
+            '\$gte': Date.parse(startDate).toString(),
+          },
+        }
+      },
+      {
+        '\$sort': {'fromDate': 1},
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'curveId': 0,
+        }
+      },
+    ];
+    var aux = await coll.aggregateToStream(pipeline).toList();
+
+    /// If the curve is not marked at all between [startDate] and [endDate],
+    /// get the value from [startDate].
+    /// Or, if the curve is not marked on [startDate] you need to add the
+    /// existing mark as of [startDate] at the beginning of the list
+    /// (if it exists, as startDate could be before the first day with marks)
+    if (aux.isEmpty || aux.first['fromDate'].compareTo(startDate) == 1) {
+      var _first = await getDocument(startDate, curveId, coll);
+      if (_first.isNotEmpty) aux.insert(0, _first);
+    }
+    return <Map<String, dynamic>>[...aux];
+  }
+
+  /// Determine if it's a simple price curve from the name.
+  /// TODO: consider improving it.  Is fragile as curve naming conventions may
+  /// not be respected.
+  static bool isPriceCurve(String curveId) {
     if (curveId.contains('volatility') || curveId.contains('hourlyshape')) {
       return false;
     }
     return true;
   }
-
-  // Interval _parseTerm(String x) {
-  //   if (x.length == 7) {
-  //     return Month.parse(x);
-  //   } else if (x.length == 10) {
-  //     return Date.parse(x);
-  //   } else {
-  //     throw ArgumentError('Unknown interval $x');
-  //   }
-  // }
 
   Future<void> setup() async {
     await dbConfig.db.createIndex(dbConfig.collectionName,

@@ -42,13 +42,13 @@ class RtLmpHourlyArchive extends DailyIsoExpressReport {
     row['congestion'] = [];
     row['lmp'] = [];
     row['marginal_loss'] = [];
-    rows.forEach((e) {
+    for (var e in rows) {
       row['hourBeginning'].add(
           parseHourEndingStamp(e['Date'], stringHourEnding(e['Hour Ending'])!));
       row['lmp'].add(e['Locational Marginal Price']);
       row['congestion'].add(e['Congestion Component']);
       row['marginal_loss'].add(e['Marginal Loss Component']);
-    });
+    }
     return row;
   }
 
@@ -71,7 +71,7 @@ class RtLmpHourlyArchive extends DailyIsoExpressReport {
 
   /// Recreate the collection from scratch.
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     // List<String?> collections = await dbConfig.db.getCollectionNames();
     // if (collections.contains(dbConfig.collectionName))
@@ -106,8 +106,8 @@ class RtLmpHourlyArchive extends DailyIsoExpressReport {
   }
 
   Date lastDayAvailable() => Date.today(location: UTC).next;
-  Future<Null> deleteDay(Date day) async {
+  Future<void> deleteDay(Date day) async {
     return await (dbConfig.coll.remove(where.eq('date', day.toString()))
-        as FutureOr<Null>);
+        as FutureOr<void>);
   }
 }

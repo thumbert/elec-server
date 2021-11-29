@@ -39,12 +39,12 @@ class Selector {
   set values(Iterable<String> xs) {
     var _selector = inner.children[1] as html.SelectElement;
     _selector.children.clear();
-    xs.forEach((e) {
+    for (var e in xs) {
       _selector.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
-    });
+    }
   }
 
   void onChange(Function x) => (inner.children[0] as html.DivElement).children[1].onChange.listen(x as void Function(html.Event)?);

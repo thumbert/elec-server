@@ -1,5 +1,7 @@
 library api.other.forward_marks;
 
+import 'dart:math';
+
 import 'package:shelf/shelf.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -38,6 +40,8 @@ class ForwardMarks {
   static late Cache<String, Map<String, dynamic>?> curveIdCache;
 
   /// Cache with curve values.  The key is: (asOfDate, curveId)
+  /// The [asOfDate] key is a UTC date, but the [MarksCurve] is in the correct
+  /// [curveId] timezone.
   /// TODO: if curves are resubmitted intra-day, they need be removed from the cache
   static late Cache<Tuple2<Date, String>, MarksCurve> marksCache;
 
@@ -52,9 +56,9 @@ class ForwardMarks {
 
     collCurveId = db.collection('curve_ids');
     curveIdCache = Cache<String, Map<String, dynamic>?>.lru(
-        loader: _curveIdCacheLoader, maximumSize: 10000);
+        loader: _curveIdCacheLoader, maximumSize: 20000);
     marksCache = Cache<Tuple2<Date, String>, MarksCurve>.lru(
-        loader: (x) => getForwardCurve(x.item1, x.item2), maximumSize: 10000);
+        loader: (x) => _getForwardCurve(x.item1, x.item2), maximumSize: 10000);
   }
 
   Router get router {
@@ -76,6 +80,20 @@ class ForwardMarks {
       var out = aux.toMongoDocument(Date.parse(asOfDate), curveId);
       out.remove('fromDate');
       out.remove('curveId');
+      return Response.ok(json.encode(out), headers: headers);
+    });
+
+    /// Get the price of a strip and bucket between a start/end date.
+    /// Only works for a PriceCurve.
+    router.get(
+        '/curveId/<curveId>/term/<term>/bucket/<bucket>/start/<start>/end/<end>',
+        (Request request, String curveId, String term, String bucket,
+            String start, String end) async {
+      var _term = Term.parse(term, UTC);
+      var _bucket = Bucket.parse(bucket);
+      var _start = Date.parse(start, location: UTC);
+      var _end = Date.parse(end, location: UTC);
+      var out = await getStripPrice(curveId, _term, _bucket, _start, _end);
       return Response.ok(json.encode(out), headers: headers);
     });
 
@@ -223,6 +241,12 @@ class ForwardMarks {
   /// ```
   /// [asOfDate] is an UTC date, as there is no curve information yet
   Future<MarksCurve> getForwardCurve(Date asOfDate, String curveId) async {
+    return marksCache.get(Tuple2(asOfDate, curveId));
+  }
+
+  /// Get one curve from Mongo and add it to the cache.  The loader function
+  /// needs to be internal.
+  Future<MarksCurve> _getForwardCurve(Date asOfDate, String curveId) async {
     var curveDetails = await curveIdCache.get(curveId) ?? {};
     if (curveDetails.isEmpty) {
       log.severe('No curve details for curveId: $curveId');
@@ -237,46 +261,125 @@ class ForwardMarks {
     var x = await ForwardMarksArchive.getDocument(
         asOfDate.toString(), curveId, coll);
 
+    return _formatMongoDocument(
+        x, asOfDate.toString(), curveId, curveDetails['tzLocation']!);
+  }
+
+  /// Get strip price between start/end.  Only works for a [curveId] that is a
+  /// [PriceCurve].  For other curve types, e.g. hourlyshape or volatility,
+  /// it does return empty.
+  ///
+  /// Return a Map with each element in form {'yyyy-mm-dd': num}.
+  Future<Map<String, num>> getStripPrice(
+      String curveId, Term term, Bucket bucket, Date start, Date end) async {
+    var out = <String, num>{};
+    if (!ForwardMarksArchive.isPriceCurve(curveId)) {
+      log.severe('CurveId $curveId is not a price curve!');
+      return out;
+    }
+    // fill the cache with one call to the database
+    await fillMarksCacheBulk(curveId, start, end);
+
+    // need to set the term to the curve's native timezone
+    var curveDetails = await curveIdCache.get(curveId) ?? {};
+    if (curveDetails.isEmpty) {
+      log.severe('No curve details for curveId: $curveId');
+    }
+    String tzLocation = curveDetails['tzLocation']!;
+    var location = getLocation(tzLocation);
+    term = Term.fromInterval(term.interval.withTimeZone(location));
+
+    var date = start;
+    while (!date.isAfter(end)) {
+      var aux = await marksCache.get(Tuple2(date, curveId)) as PriceCurve;
+      out[date.toString()] = aux.value(term.interval, bucket);
+      date = date.next;
+    }
+    return out;
+  }
+
+  /// Make one call to the database and fill the cache for a [curveId]
+  /// multiple days.  Reinsert exiting days in the cache if they fall between
+  /// [start] and [end] dates.
+  Future<void> fillMarksCacheBulk(String curveId, Date start, Date end) async {
+    var curveDetails = await curveIdCache.get(curveId) ?? {};
+    if (curveDetails.isEmpty) {
+      log.severe('No curve details for curveId: $curveId');
+    }
+    String tzLocation = curveDetails['tzLocation']!;
+    var curveIds = <String>[];
+
+    /// for composite curves, need to get all the children
+    if (curveDetails.containsKey('children')) {
+      curveIds = curveDetails['children'];
+    } else {
+      curveIds = [curveId];
+    }
+    var days = start.upTo(end);
+    for (var curveId in curveIds) {
+      var docs = await ForwardMarksArchive.getDocumentsOneCurveStartEnd(
+          curveId, coll, start.toString(), end.toString());
+      if (docs.isEmpty) {
+        log.severe('Curve $curveId is not marked before $end');
+        return;
+      } else if (docs.length == 1) {
+        // all days have the same curve, easy
+        for (var day in days) {
+          var value = _formatMongoDocument(
+              docs.first, day.toString(), curveId, tzLocation);
+          await marksCache.set(Tuple2(day, curveId), value);
+        }
+      } else {
+        var i = 1;
+        for (var day in days) {
+          var anchorDate = docs[min(i, docs.length - 1)]['fromDate'];
+          if (day.toString().compareTo(anchorDate) == 0) {
+            i = min(i + 1, docs.length);
+          }
+          var value = _formatMongoDocument(
+              docs[i - 1], day.toString(), curveId, tzLocation);
+          await marksCache.set(Tuple2(day, curveId), value);
+        }
+      }
+    }
+  }
+
+  /// Prepare the Mongo document to store in the cache.
+  MarksCurve _formatMongoDocument(Map<String, dynamic> document,
+      String asOfDate, String curveId, String tzLocation) {
     /// If this curveId doesn't exist, bail out.
-    if (x.isEmpty) {
+    if (document.isEmpty) {
       log.severe('No marks for curveId: $curveId, asOfDate: $asOfDate');
       return MarksCurveEmpty();
     }
-    var location = curveDetails['tzLocation'] == 'UTC'
-        ? UTC
-        : getLocation(curveDetails['tzLocation'] as String);
-    // now asOfDate becomes localized
-    asOfDate =
-        Date(asOfDate.year, asOfDate.month, asOfDate.day, location: location);
+    var location = tzLocation == 'UTC' ? UTC : getLocation(tzLocation);
+    // localize asOfDate in the timezone of the curve
+    var _asOfDate = Date.parse(asOfDate, location: location);
     MarksCurve curve;
-    if (curveId.contains('volatility')) {
-      curve = toVolatilitySurface(x, location);
-      // return from prompt month forward
-      var start = Month.fromTZDateTime(asOfDate.start).next.start;
-      var end = (curve as VolatilitySurface).terms.last.end;
-      curve.window(Interval(start, end));
-    } else if (curveId.contains('hourlyshape')) {
-      curve = toHourlyShape(x, location);
-      // return from cash month forward
-      var start = TZDateTime(location, asOfDate.year, asOfDate.month);
-      var end = (curve as HourlyShape).data.last.interval.end;
-      curve.window(Interval(start, end));
+    if (ForwardMarksArchive.isPriceCurve(curveId)) {
+      curve = _toPriceCurve(document, _asOfDate);
     } else {
-      // return from next day after asOfDate
-      curve = toPriceCurve(x, asOfDate, location);
+      if (curveId.contains('volatility')) {
+        curve = _toVolatilitySurface(document, _asOfDate);
+      } else if (curveId.contains('hourlyshape')) {
+        curve = _toHourlyShape(document, _asOfDate);
+      } else {
+        log.severe('Unknown classification for curve $curveId');
+        return MarksCurveEmpty();
+      }
     }
-
     return curve;
   }
 
-  /// Get a composite curve.  For now only support addition of two children.
+  /// Get a composite curve.  Support only a limited number of rules as
+  /// defined in [_curveCompositionRules].
   Future<MarksCurve> _getForwardCurveComposite(
       Date asOfDate, Map<String, dynamic> curveDetails) async {
     var rule = curveDetails['rule'];
     if (_curveCompositionRules.containsKey(rule)) {
       return _curveCompositionRules[rule]!(asOfDate, curveDetails);
     }
-    print('Rule $rule not supported yet for ${curveDetails['curveId']}');
+    log.severe('Rule $rule not supported yet for ${curveDetails['curveId']}');
     return MarksCurveEmpty();
   }
 
@@ -328,8 +431,12 @@ class ForwardMarks {
   }
 
   /// Take a document for an hourly shape and convert it
-  HourlyShape toHourlyShape(Map<String, dynamic> document, Location location) {
-    return HourlyShape.fromJson(document, location);
+  HourlyShape _toHourlyShape(Map<String, dynamic> document, Date asOfDate) {
+    var curve = HourlyShape.fromJson(document, asOfDate.location);
+    var start = TZDateTime(asOfDate.location, asOfDate.year, asOfDate.month);
+    var end = curve.data.last.interval.end;
+    curve.window(Interval(start, end));
+    return curve;
   }
 
   /// Take a Mongo document for a price curve and convert it to a [PriceCurve].
@@ -337,9 +444,8 @@ class ForwardMarks {
   /// monthly value, break it into dailies and return only the days after
   /// [asOfDate].
   ///
-  /// [asOfDate] is localized.
-  PriceCurve toPriceCurve(
-      Map<String, dynamic> document, Date asOfDate, Location location) {
+  /// [asOfDate] is localized in the [PriceCurve] timezone.
+  PriceCurve _toPriceCurve(Map<String, dynamic> document, Date asOfDate) {
     var buckets = {
       for (var b in document['buckets'].keys) b: Bucket.parse(b as String)
     };
@@ -357,13 +463,13 @@ class ForwardMarks {
 
       Interval term;
       if (terms[i].length == 7) {
-        term = Month.parse(terms[i] as String, location: location);
+        term = Month.parse(terms[i] as String, location: asOfDate.location);
         if (term.end.isAfter(asOfDate.start)) {
           /// If the cash month is marked with a monthly mark, return it.
           xs.add(IntervalTuple(term, one));
         }
       } else if (terms[i].length == 10) {
-        term = Date.parse(terms[i] as String, location: location);
+        term = Date.parse(terms[i] as String, location: asOfDate.location);
         if (term.start.isAfter(asOfDate.start)) {
           xs.add(IntervalTuple(term, one));
         }
@@ -384,56 +490,18 @@ class ForwardMarks {
   }
 
   /// Convert a document to a [VolatilitySurface].
-  VolatilitySurface toVolatilitySurface(
-      Map<String, dynamic> document, Location location) {
+  /// Return values from prompt month forward.
+  VolatilitySurface _toVolatilitySurface(
+      Map<String, dynamic> document, Date asOfDate) {
     if (!document.containsKey('strikeRatios')) {
       throw ArgumentError('Invalid document, not a volatility surface');
     }
-    return VolatilitySurface.fromJson(document, location: location);
+    var curve =
+        VolatilitySurface.fromJson(document, location: asOfDate.location);
+    // return from prompt month forward
+    var start = Month.fromTZDateTime(asOfDate.start).next.start;
+    var end = curve.terms.last.end;
+    curve.window(Interval(start, end));
+    return curve;
   }
 }
-
-// /// Return a document associated with a forward curve for only one bucket.
-// /// If the bucket doesn't exist in the database, calculate it.
-// router.get('/curveId/<curveId>/bucket/<bucket>/asOfDate/<asOfDate>',
-//     (Request request, String curveId, String bucket,
-//         String asOfDate) async {
-//   var out = await getForwardCurveForBucket(curveId, bucket, asOfDate);
-//   return Response.ok(json.encode(out), headers: headers);
-// });
-
-/// Return a document associated with a forward curve for only one bucket.
-/// If the bucket doesn't exist in the database, calculate it.
-///
-// Future<Map<String, dynamic>> getForwardCurveForBucket(
-//     String curveId, String bucket, String asOfDate) async {
-//   var aux = await _getForwardCurve(Date.parse(asOfDate), curveId);
-//   if (aux is MarksCurveEmpty) return <String, dynamic>{};
-//   var _bucket = Bucket.parse(bucket);
-//   var out = <String, dynamic>{};
-//   if (aux.buckets.contains(_bucket)) {
-//     // lucky, return what you have already in the db
-//     out = aux.toMongoDocument(Date.parse(asOfDate), curveId);
-//     out['buckets'] = {bucket: out['buckets'][bucket]};
-//   } else {
-//     // this bucket is not in the database, it needs to be computed
-//     if (aux is PriceCurve) {
-//       // for price curves only
-//       var data = PriceCurve();
-//       // if the buckets are not standard, calculate them here
-//       for (var term in aux.intervals) {
-//         var hourlyValues = aux.toHourly().window(term);
-//         if (hourlyValues.isNotEmpty) {
-//           var value = dama.mean(hourlyValues
-//               .where((e) => _bucket.containsHour(e.interval as Hour))
-//               .map((e) => e.value));
-//           data.add(IntervalTuple(term, {_bucket: value}));
-//         }
-//       }
-//       out = data.toMongoDocument(Date.parse(asOfDate), curveId);
-//     }
-//   }
-//   out.remove('fromDate');
-//   out.remove('curveId');
-//   return out;
-// }

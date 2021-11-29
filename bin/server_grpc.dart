@@ -13,6 +13,7 @@ class LmpService extends LmpServiceBase {
     collection = db.collection('da_lmp_hourly');
   }
 
+  @override
   Future<NumericTimeSeries> getLmp(
       ServiceCall call, HistoricalLmpRequest request) async {
     var ptid = request.ptid;

@@ -5,7 +5,8 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
-//import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:tuple/tuple.dart';
+import 'package:timeseries/timeseries.dart';
 
 import '../../../bin/setup_db.dart';
 import 'package:http/http.dart';
@@ -40,7 +41,6 @@ List<String> getMarkedCurveIds() {
 }
 
 void tests(String rootUrl) async {
-  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = ForwardMarksArchive();
   var location = getLocation('America/New_York');
   group('ForwardMarks archive tests:', () {
@@ -189,7 +189,7 @@ void tests(String rootUrl) async {
       };
       expect(archive.needToInsert(xOld, xNew), false);
     });
-    test('getMarks', () async {
+    test('getMarks for one day', () async {
       var hub = await ForwardMarksArchive.getDocument(
           '2020-07-06', 'isone_energy_4000_da_lmp', archive.dbConfig.coll);
       expect(hub['terms'].first, '2020-07-07');
@@ -200,8 +200,33 @@ void tests(String rootUrl) async {
           'isone_volatility_4000_da_daily', archive.dbConfig.coll);
       expect(vs['terms'].first, '2020-08');
     });
+
+    test('getMarks for one curve, multiple days', () async {
+      var marks = await ForwardMarksArchive.getDocumentsOneCurveStartEnd(
+          'isone_energy_4000_da_lmp',
+          archive.dbConfig.coll,
+          '2020-05-15',
+          '2020-08-01');
+      expect(marks.length, 2);
+      expect(marks.first['fromDate'], '2020-05-29');
+      expect(marks.first['terms'].first, '2020-05');
+      expect(marks.last['fromDate'], '2020-07-06');
+      expect(marks.last['terms'].first, '2020-07-07');
+    });
+
+    test('getMarks for one curve, multiple days non spanning a mark', () async {
+      var marks = await ForwardMarksArchive.getDocumentsOneCurveStartEnd(
+          'isone_energy_4000_da_lmp',
+          archive.dbConfig.coll,
+          '2020-05-31',
+          '2020-07-01');
+      expect(marks.length, 1); // only the mark from 2020-05-29 exists!
+      expect(marks.first['fromDate'], '2020-05-29');
+      expect(marks.first['terms'].first, '2020-05');
+    });
   });
 
+  //-----------------------------------------------------------------
   group('ForwardMarks api tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
@@ -241,10 +266,10 @@ void tests(String rootUrl) async {
     test(
         'get mh forward curve as of 5/29/2020, May20 mark gets expanded'
         'to daily', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-05-29'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4000_da_lmp/'
+              'asOfDate/2020-05-29'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -253,32 +278,33 @@ void tests(String rootUrl) async {
       expect(data['buckets']['5x16'][0], null); // it's a Saturday
     });
     test('get mh forward curve as of 7/6/2020, direct', () async {
-      var xs = await api.getForwardCurve(Date.utc(2020, 7, 6),
-          'isone_energy_4000_da_lmp') as PriceCurve;
+      var xs = await api.getForwardCurve(
+          Date.utc(2020, 7, 6), 'isone_energy_4000_da_lmp') as PriceCurve;
       expect(xs.length, 90);
       expect(xs.firstMonth, Month(2020, 8, location: location));
       expect(xs.first.value, {Bucket.b5x16: 23.48, Bucket.b7x8: 15.5});
     });
     test('get mh forward curve as of 7/6/2020, http', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-07-06'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4000_da_lmp/'
+              'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
       expect((data['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
     });
     test('cache of curveDetails', () async {
-      var res = await (ForwardMarks.curveIdCache.get('isone_energy_4004_da_lmp'));
+      var res =
+          await (ForwardMarks.curveIdCache.get('isone_energy_4004_da_lmp'));
       expect(res!['children'].toSet(),
           {'isone_energy_4000_da_lmp', 'isone_energy_4004_da_basis'});
     });
     test('get one composite forward curve, add 2', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4004_da_lmp/'
-          'asOfDate/2020-07-06'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4004_da_lmp/'
+              'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -288,10 +314,10 @@ void tests(String rootUrl) async {
       expect((data['buckets']['5x16'][30] as num).toStringAsFixed(2), '60.05');
     });
     test('get one composite forward curve, nodal mark', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4011_da_lmp/'
-          'asOfDate/2020-07-06'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4011_da_lmp/'
+              'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
 
@@ -304,10 +330,10 @@ void tests(String rootUrl) async {
           lmpJan21.toStringAsFixed(4));
     });
     test('get one composite forward curve, subtract two curves', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4011_da_basis/'
-          'asOfDate/2020-07-06'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4011_da_basis/'
+              'asOfDate/2020-07-06'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -319,10 +345,10 @@ void tests(String rootUrl) async {
           lmpJan21.toStringAsFixed(4));
     });
     test('get one forward curve, all marked buckets', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-07-10'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4000_da_lmp/'
+              'asOfDate/2020-07-10'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -333,10 +359,10 @@ void tests(String rootUrl) async {
       expect((data['buckets']['5x16'] as List).length, 86);
     });
     test('get one hourlyshape curve, isone_energy_4000_hourlyshape', () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4000_hourlyshape/'
-          'asOfDate/2020-07-10'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4000_hourlyshape/'
+              'asOfDate/2020-07-10'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -349,10 +375,10 @@ void tests(String rootUrl) async {
     });
     test('get one forward curve, all marked buckets, daily + monthly',
         () async {
-      var aux = await http.get(Uri.parse(
-          '$rootUrl/forward_marks/v1/'
-          'curveId/isone_energy_4000_da_lmp/'
-          'asOfDate/2020-07-10'),
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4000_da_lmp/'
+              'asOfDate/2020-07-10'),
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(aux.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'terms', 'buckets'});
@@ -373,8 +399,74 @@ void tests(String rootUrl) async {
       var b2 = await api.getBucketsMarked('ng_henryhub');
       expect(b2, {'7x24'});
     });
+
+    test('fill marksCache in bulk', () async {
+      await ForwardMarks.marksCache.invalidateAll();
+      var start = Date.utc(2020, 5, 29);
+      var end = Date.utc(2020, 7, 6);
+      await api.fillMarksCacheBulk('isone_energy_4000_da_lmp', start, end);
+      expect(await ForwardMarks.marksCache.size(), 39);
+      var jan21 = Month(2021, 1, location: location);
+      var feb21 = Month(2021, 2, location: location);
+
+      var p529 = await api.getForwardCurve(
+          Date.utc(2020, 7, 5), 'isone_energy_4000_da_lmp') as PriceCurve;
+      expect(await ForwardMarks.marksCache.size(), 39); // in the cache already
+      expect(p529.first.interval, Date(2020, 7, 6, location: location));
+      expect(p529.first.value[Bucket.b5x16], 25.4); // the value as of 5/29/2020
+      expect(p529.value(jan21, Bucket.b5x16), 58.25);
+      expect(p529.value(feb21, Bucket.b5x16), 55.75);
+
+      var p76 = await api.getForwardCurve(
+          Date.utc(2020, 7, 6), 'isone_energy_4000_da_lmp') as PriceCurve;
+      expect(p76.value(jan21, Bucket.b5x16), 60.7);
+      expect(p76.value(feb21, Bucket.b5x16), 57.2);
+    });
+
+    test('fill marksCache in bulk, take 2', () async {
+      await ForwardMarks.marksCache.invalidateAll();
+      var start = Date.utc(2020, 7, 5);
+      var end = Date.utc(2020, 7, 7);
+      await api.fillMarksCacheBulk('isone_energy_4000_da_lmp', start, end);
+      expect(await ForwardMarks.marksCache.size(), 3);
+      var jan21 = Month(2021, 1, location: location);
+      var feb21 = Month(2021, 2, location: location);
+
+      var p75 = await ForwardMarks.marksCache
+              .get(Tuple2(Date.utc(2020, 7, 5), 'isone_energy_4000_da_lmp'))
+          as PriceCurve;
+      expect(p75.first.interval, Date(2020, 7, 6, location: location));
+      expect(p75.first.value[Bucket.b5x16], 25.4); // the value as of 5/29/2020
+      expect(p75.value(jan21, Bucket.b5x16), 58.25);
+      expect(p75.value(feb21, Bucket.b5x16), 55.75);
+
+      var p76 = await ForwardMarks.marksCache
+              .get(Tuple2(Date.utc(2020, 7, 6), 'isone_energy_4000_da_lmp'))
+          as PriceCurve;
+      expect(p76.value(jan21, Bucket.b5x16), 60.7);
+      expect(p76.value(feb21, Bucket.b5x16), 57.2);
+
+      var p77 = await ForwardMarks.marksCache
+              .get(Tuple2(Date.utc(2020, 7, 7), 'isone_energy_4000_da_lmp'))
+          as PriceCurve;
+      expect(p77.value(jan21, Bucket.b5x16), 60.7);
+      expect(p77.value(feb21, Bucket.b5x16), 57.2);
+    });
+
+    test('get a strip price between start/end dates', () async {
+      var term = Term.parse('Jan21-Feb21', location);
+      var bucket = Bucket.b5x16;
+      var price = await api.getStripPrice('isone_energy_4000_da_lmp', term,
+          bucket, Date.utc(2020, 5, 29), Date.utc(2020, 7, 7));
+      expect(price.length, 40);
+      expect(price['2020-05-29'], 57.0);
+      expect(price['2020-05-30'], 57.0);
+      expect(price['2020-07-06'], 58.95);
+      expect(price['2020-07-07'], 58.95);
+    });
   });
 
+  // Client tests ---------------------------------------------------------
   group('ForwardMarks client tests:', () {
     var clientFm = client.ForwardMarks(Client(), rootUrl: rootUrl);
     var location = getLocation('America/New_York');
@@ -387,6 +479,21 @@ void tests(String rootUrl) async {
       var jan21 = res.observationAt(Month(2021, 1, location: location));
       expect(jan21.value[IsoNewEngland.bucket5x16], 58.25);
     });
+    test('get mh Jan21-Feb21 5x16 strip price', () async {
+      var curveId = 'isone_energy_4000_da_lmp';
+      var term = Term.parse('Jan21-Feb21', location);
+      var res = await clientFm.getStripPrice(curveId, term, Bucket.b5x16,
+          Date.utc(2020, 5, 29), Date.utc(2020, 7, 10));
+      expect(res[0],
+          IntervalTuple<num>(Date(2020, 5, 29, location: location), 57.0));
+      expect(res[1],
+          IntervalTuple<num>(Date(2020, 5, 30, location: location), 57.0));
+      expect(res[37],
+          IntervalTuple<num>(Date(2020, 7, 5, location: location), 57.0));
+      expect(res[38],
+          IntervalTuple<num>(Date(2020, 7, 6, location: location), 58.95));
+    });
+
     test('get mh curve as of 7/6/2020 for all buckets', () async {
       var curveId = 'isone_energy_4000_da_lmp';
       var res = await clientFm.getForwardCurve(curveId, Date.utc(2020, 7, 6),

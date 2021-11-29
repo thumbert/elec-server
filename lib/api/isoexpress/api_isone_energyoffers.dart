@@ -120,20 +120,20 @@ class DaEnergyOffers {
     /// 3) some units have MW for a segment > Ecomax.
     var gEo = groupBy(eo.where((e) => e['Unit Status'] != 'UNAVAILABLE'),
         (dynamic e) => e['assetId']);
-    gEo.keys.forEach((assetId) {
+    for (var assetId in gEo.keys) {
       var offers = gEo[assetId]!.cast<Map<String, dynamic>>();
       if (offers.first['Unit Status'] == 'MUST_RUN') {
         /// need to sort them just in case ...
         offers.sort((a, b) => a['price'].compareTo(b['price']));
         offers.first['price'] = -150;
       }
-      offers.forEach((Map e) {
+      for (var e in offers) {
         if (e['quantity'] > e['Economic Maximum']) {
           e['quantity'] = e['Economic Maximum'] / offers.length;
         }
-      });
+      }
       stack.addAll(offers);
-    });
+    }
     ordering.sort(stack);
     return stack;
   }
@@ -152,7 +152,7 @@ class DaEnergyOffers {
     var hB = TZDateTime.fromMillisecondsSinceEpoch(
             location, dt.millisecondsSinceEpoch)
         .toIso8601String();
-    var pipeline = <Map<String,Object>>[];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -178,7 +178,7 @@ class DaEnergyOffers {
       }
     });
     pipeline.add({'\$unwind': '\$hours'});
-    var res = coll.aggregateToStream(pipeline);
+    var res = await coll.aggregateToStream(pipeline).toList();
 
     /// flatten the map in Dart
     var out = <Map<String, dynamic>>[];
@@ -190,7 +190,7 @@ class DaEnergyOffers {
       'quantity'
     ];
 
-    await for (var e in res) {
+    for (var e in res) {
       List prices = e['hours']['price'];
       for (var i = 0; i < prices.length; i++) {
         out.add(Map.fromIterables(keys, [
@@ -229,9 +229,9 @@ class DaEnergyOffers {
       '\$sort': {'date': 1}
     });
     var aux = await coll.aggregateToStream(pipeline).toList();
-    aux.forEach((document) {
+    for (var document in aux) {
       document['hours'] = json.encode(document['hours']);
-    });
+    }
     return aux;
   }
 

@@ -23,7 +23,7 @@ class PtidInput {
 
     var _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px');
     _wrapper.children.add(html.LabelElement()
-      ..text = '$name'
+      ..text = name
       ..setAttribute('style', 'margin-left: 15px'));
     _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')

@@ -10,8 +10,8 @@ import 'package:elec_server/src/utils/timezone_utils.dart';
 
 /// prepare data by downloading a few reports
 prepareData() async {
-  var archive = new RtLmpHourlyArchive();
-  var days = [new Date.utc(2017, 3, 12), new Date.utc(2017, 11, 5)];
+  var archive = RtLmpHourlyArchive();
+  var days = [Date.utc(2017, 3, 12), Date.utc(2017, 11, 5)];
   await archive.downloadDays(days);
 }
 
@@ -19,7 +19,7 @@ RtLmpHourlyTest() async {
   group('RT hourly lmp report', () {
     late RtLmpHourlyArchive archive;
     setUp(() async {
-      archive = new RtLmpHourlyArchive();
+      archive = RtLmpHourlyArchive();
       await archive.dbConfig.db.open();
     });
     tearDown(() async {
@@ -37,13 +37,13 @@ RtLmpHourlyTest() async {
 //      expect(res.first['hourBeginning'].length, 25);
 //    });
     test('Insert one day', () async {
-      await archive.downloadDay(new Date.utc(2017, 1, 1));
-      await archive.insertDay(new Date.utc(2017, 1, 1));
+      await archive.downloadDay(Date.utc(2017, 1, 1));
+      await archive.insertDay(Date.utc(2017, 1, 1));
     });
     test('insert several days', () async {
       List days =
-          new Interval(new Date.utc(2017, 1, 1).start, new Date.utc(2017, 1, 5).start)
-              .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
+          Interval(Date.utc(2017, 1, 1).start, Date.utc(2017, 1, 5).start)
+              .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
       for (var day in days) {
         await archive.downloadDay(day);
         await archive.insertDay(day);
@@ -53,10 +53,10 @@ RtLmpHourlyTest() async {
 }
 
 Future fillDb() async {
-  var archive = new RtLmpHourlyArchive();
+  var archive = RtLmpHourlyArchive();
   await archive.dbConfig.db.open();
-  List days = new Interval(new Date.utc(2017,12,31).start, new Date.utc(2018,1,1).start)
-      .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
+  List days = Interval(Date.utc(2017,12,31).start, Date.utc(2018,1,1).start)
+      .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
   for (var day in days) {
     await archive.downloadDay(day);
     await archive.insertDay(day);

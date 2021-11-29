@@ -34,6 +34,7 @@ class LmpClient extends $grpc.Client {
 }
 
 abstract class LmpServiceBase extends $grpc.Service {
+  //@override
   $core.String get $name => 'elec.Lmp';
 
   LmpServiceBase() {

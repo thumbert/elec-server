@@ -19,7 +19,7 @@ class CheckboxLabel {
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
 
     // create the string for the checkbox id
-    var id = '${wrapper!.id}__cbl__${name}';
+    var id = '${wrapper!.id}__cbl__$name';
     _checkboxInputElement = html.CheckboxInputElement()..id = id;
     _wrapper.children.add(_checkboxInputElement);
 

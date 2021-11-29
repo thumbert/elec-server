@@ -39,11 +39,11 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
     row['market'] = 'DA';
     row['hourBeginning'] = [];
     row['Day-Ahead Cleared Demand'] = [];
-    rows.forEach((e) {
+    for (var e in rows) {
       row['hourBeginning'].add(parseHourEndingStamp(localDate,
         e['Hour Ending']));
       row['Day-Ahead Cleared Demand'].add(e['Day-Ahead Cleared Demand']);
-    });
+    }
     return row;
   }
 
@@ -66,7 +66,7 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
 
   /// Recreate the collection from scratch.
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     // List<String?> collections = await dbConfig.db.getCollectionNames();
     // if (collections.contains(dbConfig.collectionName))
@@ -91,8 +91,8 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
 
   // Date lastDayAvailable() => Date.today().next;
 
-  Future<Null> deleteDay(Date day) async {
-    return await (dbConfig.coll.remove(where.eq('date', day.toString())) as FutureOr<Null>);
+  Future<void> deleteDay(Date day) async {
+    return await (dbConfig.coll.remove(where.eq('date', day.toString())) as FutureOr<void>);
   }
 }
 

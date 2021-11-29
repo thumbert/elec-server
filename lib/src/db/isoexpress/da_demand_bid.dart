@@ -16,12 +16,11 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaDemandBidArchive extends DailyIsoExpressReport {
-
   DaDemandBidArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'isoexpress',
-          collectionName: 'da_demand_bid');
+        host: '127.0.0.1',
+        dbName: 'isoexpress',
+        collectionName: 'da_demand_bid');
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaDemandBid/Raw/';
     this.dir = dir;
@@ -41,6 +40,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
   File getFilename(Date? asOfDate) =>
       File(dir + 'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.json');
 
+  /// The CSV parser, not used anymore
   /// [rows] has the data for all the hours of the day for one location id
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
@@ -57,7 +57,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
 
     /// hourly info
     row['hours'] = <Map<String, dynamic>>[];
-    rows.forEach((Map hour) {
+    for (var hour in rows) {
       var aux = <String, dynamic>{};
       var he = stringHourEnding(hour['Hour'])!;
       var hb = parseHourEndingStamp(hour['Day'], he);
@@ -69,11 +69,11 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
       var pricesHour = <num?>[];
       var quantitiesHour = <num?>[];
       for (var i = 1; i <= 10; i++) {
-        if (!(hour['Segment $i MW'] is num)) {
+        if (hour['Segment $i MW'] is! num) {
           break;
         }
         quantitiesHour.add(hour['Segment $i MW']);
-        if (!(hour['Segment $i Price'] is num)) {
+        if (hour['Segment $i Price'] is! num) {
           break;
         }
         pricesHour.add(hour['Segment $i Price']);
@@ -82,7 +82,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
       if (pricesHour.isNotEmpty) aux['price'] = pricesHour;
       aux['quantity'] = quantitiesHour;
       row['hours'].add(aux);
-    });
+    }
     return row;
   }
 
@@ -108,7 +108,8 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     late List<Map> xs;
     if ((aux as Map).containsKey('HbDayAheadDemandBids')) {
       if (aux['HbDayAheadDemandBids'] == '') return <Map<String, dynamic>>[];
-      xs = (aux['HbDayAheadDemandBids']['HbDayAheadDemandBid'] as List).cast<Map>();
+      xs = (aux['HbDayAheadDemandBids']['HbDayAheadDemandBid'] as List)
+          .cast<Map>();
     } else {
       throw StateError('File $file not in proper format');
     }
@@ -141,7 +142,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
           throw StateError('Invalid state!');
         }
         hours.add({
-          'hourBeginning': x['BeginDate'],
+          'hourBeginning': _reformatDateTime(x['BeginDate']),
           'quantity': quantity,
           if (price.isNotEmpty) 'price': price,
         });
@@ -175,22 +176,22 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
   }
 
   @override
-  Future<void> downloadDay(Date? asOfDate) async {
+  Future<void> downloadDay(Date? day) async {
     var _user = dotenv.env['isone_ws_user']!;
     var _pwd = dotenv.env['isone_ws_password']!;
 
     var client = HttpClient()
-      ..addCredentials(Uri.parse(getUrl(asOfDate)), '',
-          HttpClientBasicCredentials(_user, _pwd))
+      ..addCredentials(
+          Uri.parse(getUrl(day)), '', HttpClientBasicCredentials(_user, _pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');
         return true;
       };
-    var request = await client.getUrl(Uri.parse(getUrl(asOfDate)));
+    var request = await client.getUrl(Uri.parse(getUrl(day)));
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     var response = await request.close();
-    await response.pipe(getFilename(asOfDate).openWrite());
+    await response.pipe(getFilename(day).openWrite());
   }
 
   /// Check if this date is in the db already
@@ -202,7 +203,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
 
   /// Recreate the collection from scratch.
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     // var collections = await dbConfig.db.getCollectionNames();
     // if (collections.contains(dbConfig.collectionName)) {
@@ -223,8 +224,15 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     await dbConfig.db.close();
   }
 
-  Future<Null> deleteDay(Date day) async {
-    return await (dbConfig.coll.remove(where.eq('date', day.toString()))
-        as FutureOr<Null>);
+  Future<void> deleteDay(Date day) async {
+    await (dbConfig.coll.remove(where.eq('date', day.toString())));
+  }
+
+  /// The date time from json file is not in ISO-8601 format.
+  /// For example input is: "2017-07-01T13:00:00.000-04:00",
+  /// should be "2017-07-01T13:00:00.000-0400" !
+  String _reformatDateTime(String input) {
+    var n = input.length;
+    return input.substring(0, n - 3) + input.substring(n - 2);
   }
 }

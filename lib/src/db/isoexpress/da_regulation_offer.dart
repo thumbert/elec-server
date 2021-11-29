@@ -98,6 +98,7 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
   }
 
   /// Recreate the collection from scratch.
+  @override
   setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,

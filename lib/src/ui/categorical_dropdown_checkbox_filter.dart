@@ -22,7 +22,7 @@ class CategoricalDropdownCheckboxFilter {
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
 
     // create a random string for the checkbox id
-    var id = '${wrapper!.id}__cb__${name}';
+    var id = '${wrapper!.id}__cb__$name';
     _checkboxInputElement = html.CheckboxInputElement()..id = id;
     _wrapper.children.add(_checkboxInputElement);
 
@@ -33,12 +33,12 @@ class CategoricalDropdownCheckboxFilter {
 
     _selector = html.SelectElement()
       ..setAttribute('style', 'margin-left: 15px;');
-    values.forEach((String e) {
+    for (var e in values) {
       _selector.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
-    });
+    }
     _wrapper.children.add(_selector);
 
     wrapper!.children.add(_wrapper);
@@ -55,12 +55,12 @@ class CategoricalDropdownCheckboxFilter {
   /// initialization
   set values(Iterable<String> xs) {
     _selector.children.clear();
-    xs.forEach((e) {
+    for (var e in xs) {
       _selector.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
-    });
+    }
   }
   
   bool? get checked => _checkboxInputElement.checked;

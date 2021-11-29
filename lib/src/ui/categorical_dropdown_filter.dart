@@ -23,12 +23,12 @@ class CategoricalDropdownFilter {
 
     _selector = html.SelectElement()
       ..setAttribute('style', 'margin-left: 15px;');
-    values.forEach((String e) {
+    for (var e in values) {
       _selector.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
-    });
+    }
     inner.children.add(_selector);
 
     wrapper!.children.add(inner);
@@ -45,12 +45,12 @@ class CategoricalDropdownFilter {
   /// initialization
   set values(Iterable<String> xs) {
     _selector.children.clear();
-    xs.forEach((e) {
+    for (var e in xs) {
       _selector.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
-    });
+    }
   }
 
   void onChange(Function x) =>  _selector.onChange.listen(x as void Function(html.Event)?);

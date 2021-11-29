@@ -56,11 +56,11 @@ class BindingConstraints {
       ..excludeFields(['_id', 'date', 'market']);
     var aux = await coll.find(query).toList();
     var out = aux.map((e) => e['constraints'] as List).expand((constraints) {
-      constraints.forEach((constraint) {
+      for (var constraint in constraints) {
         var start =
             TZDateTime.from(constraint['hourBeginning'] as DateTime, _location);
         constraint['hourBeginning'] = start.toString();
-      });
+      }
       return constraints.cast<Map<String, dynamic>>();
     }).toList();
     return out;

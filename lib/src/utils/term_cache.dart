@@ -39,7 +39,7 @@ class TermCache {
   /// If the loader doesn't return any data for an interval, the keys associated
   /// with that interval will contain an empty list to prevent the loader from
   /// trying to fetch that interval again in the future.
-  Future<Null> set(Interval interval) async {
+  Future<void> set(Interval interval) async {
     var missingIntervals = interval.difference(domain());
     for (var missingInterval in missingIntervals) {
       var data = await loader(missingInterval);

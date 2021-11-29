@@ -90,7 +90,7 @@ class TrSch2tpArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'account': 1, 'tab': 1, 'month': 1, 'version': 1});

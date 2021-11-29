@@ -18,7 +18,7 @@ void downloadFile() async {
       host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'scc_report');
   String? dir = env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
 
-  var archive = new SccReportArchive(config: config, dir: dir);
+  var archive = SccReportArchive(config: config, dir: dir);
   await archive.setup();
 
   String url =
@@ -31,11 +31,11 @@ void ingestionTest() async {
       host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'scc_report');
   String dir = env['HOME'] + '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
 
-  var archive = new SccReportArchive(config: config, dir: dir);
+  var archive = SccReportArchive(config: config, dir: dir);
   await archive.setup();
 
-  File file = new File(dir + 'scc_october_2018.xlsx');
-  var data = await archive.readXlsx(file, Month.utc(2018,10));
+  File file = File(dir + 'scc_october_2018.xlsx');
+  var data = archive.readXlsx(file, Month.utc(2018,10));
   //print(data);
 
   await archive.db.open();

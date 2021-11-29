@@ -229,10 +229,10 @@ class DaLmp {
   num _mean(Iterable<num?> x) {
     var i = 0;
     num res = 0;
-    x.forEach((e) {
+    for (var e in x) {
       res += e!;
       i++;
-    });
+    }
     return res / i;
   }
 }

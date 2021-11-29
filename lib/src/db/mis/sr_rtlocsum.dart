@@ -108,16 +108,16 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     ];
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
-    keepColumns.forEach((column) {
+    for (var column in keepColumns) {
       row[mis.removeParanthesesEnd(column)] = [];
-    });
-    rows.forEach((e) {
+    }
+    for (var e in rows) {
       row['hourBeginning'].add(parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!));
-      keepColumns.forEach((column) {
+      for (var column in keepColumns) {
         row[mis.removeParanthesesEnd(column)].add(e[column]);
-      });
-    });
+      }
+    }
     return row;
   }
 
@@ -144,16 +144,16 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     ];
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
-    keepColumns.forEach((column) {
+    for (var column in keepColumns) {
       row[mis.removeParanthesesEnd(column)] = [];
-    });
-    rows.forEach((e) {
+    }
+    for (var e in rows) {
       row['hourBeginning'].add(parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!));
-      keepColumns.forEach((column) {
+      for (var column in keepColumns) {
         row[mis.removeParanthesesEnd(column)].add(e[column]);
-      });
-    });
+      }
+    }
     return row;
   }
 
@@ -187,7 +187,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     // var collections = await dbConfig.db.getCollectionNames();
     // if (collections.contains(dbConfig.collectionName)) {

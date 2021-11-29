@@ -84,7 +84,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
 
   /// Recreate the collection from scratch.
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
 //    List<String> collections = await dbConfig.db.getCollectionNames();
 //    if (collections.contains(dbConfig.collectionName))
@@ -118,8 +118,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   }
 
   // Date lastDayAvailable() => Date.today().next;
-  Future<Null> deleteDay(Date day) async {
+  Future<void> deleteDay(Date day) async {
     return await (dbConfig.coll.remove(where.eq('date', day.toString()))
-        as FutureOr<Null>);
+        as FutureOr<void>);
   }
 }

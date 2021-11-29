@@ -50,11 +50,11 @@ class RegulationRequirement {
     out.sort((a, b) => a['from'].compareTo(b['from']));
 
     /// Add an interval for convenience
-    out.forEach((x) {
+    for (var x in out) {
       var start = Date.parse(x['from'], location: location);
       var end = Date.parse(x['to'], location: location);
       x['interval'] = Interval(start.start, end.end);
-    });
+    }
     cache = out;
     _makeFunctions(out);
     return out;

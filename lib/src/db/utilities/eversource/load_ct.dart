@@ -28,8 +28,9 @@ class EversourceCtLoadArchive {
     }
     dir ??= env['HOME']! + '/Downloads/Archive/Utility/Eversource/CT/load/Raw/';
 
-    if (!Directory(dir!).existsSync())
+    if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
+    }
   }
 
   /// insert data into mongo
@@ -67,11 +68,12 @@ class EversourceCtLoadArchive {
   /// Mongo insertion.
   List<Map<String, dynamic>> readXlsx(File file) {
     var bytes = file.readAsBytesSync();
-    _decoder = new SpreadsheetDecoder.decodeBytes(bytes);
+    _decoder = SpreadsheetDecoder.decodeBytes(bytes);
     var sheetNames = _decoder.tables.keys;
-    if (sheetNames.length != 1)
-      throw new ArgumentError(
+    if (sheetNames.length != 1) {
+      throw ArgumentError(
           'File format changed ${file.path}.  Only one sheet expected.');
+    }
 
     var table = _decoder.tables[sheetNames.first]!;
     var n = table.rows.length;
@@ -89,8 +91,8 @@ class EversourceCtLoadArchive {
     var keys = <String>[
       'date',
       'version',
-      'hourBeginning',
-    ]..addAll(loadKeys);
+      'hourBeginning', ...loadKeys,
+    ];
 
     /// TODO: Check that the column names haven't changed
     var actualNames =
@@ -101,11 +103,11 @@ class EversourceCtLoadArchive {
       if (row[0] != null) {
         var date = Date.parse((row[0] as String).substring(0, 10));
         String? hE;
-        if (row[1] is int)
+        if (row[1] is int) {
           hE = row[1].toString().padLeft(2, '0');
-        else if (row[1] == '2*')
+        } else if (row[1] == '2*') {
           hE = '02X';
-        else {
+        } else {
           if (date == Date.utc(2018, 3, 11) && hE == null) continue;
           throw ArgumentError('Unknown hour ending ${row[1]}');
         }
@@ -133,7 +135,7 @@ class EversourceCtLoadArchive {
     /// group by date
     Map<String?, List<Map>> aux = groupBy(res, (Map row) => row['date']);
     var data = <Map<String, dynamic>>[];
-    aux.keys.forEach((String? date) {
+    for (var date in aux.keys) {
       var bux = aux[date]!;
       var hB = [];
       var load = [];
@@ -147,7 +149,7 @@ class EversourceCtLoadArchive {
         'hourBeginning': hB,
         'load': load,
       });
-    });
+    }
 
     return data;
   }
@@ -171,11 +173,12 @@ class EversourceCtLoadArchive {
             response.pipe(fileout.openWrite()));
   }
 
-  Future<Null> setup() async {
+  Future<void> setup() async {
     await dbConfig.db.open();
     List<String?> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.drop();
+    }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'date': 1, 'version': 1}, unique: true);
 

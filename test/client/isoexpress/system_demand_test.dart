@@ -32,7 +32,7 @@ tests(String rootUrl) async {
       var days = Interval(TZDateTime(location, year), TZDateTime(location, year+1))
         .splitLeft((dt) => Date.fromTZDateTime(dt)).toSet();
       var missingDays = days.difference(aux.map((e) => e.key).toSet());
-      if (missingDays.length != 0) {
+      if (missingDays.isNotEmpty) {
         print("missing days for rt system demand");
         print(missingDays);
       }

@@ -43,12 +43,12 @@ class ZoneSelector {
   /// initialization
   set values(Iterable<String> xs) {
     _selector!.children.clear();
-    xs.forEach((e) {
+    for (var e in xs) {
       _selector!.children.add(html.OptionElement()
         ..id = e
         ..value = e
         ..text = e);
-    });
+    }
   }
 
   void onChange(Function x) =>  _selector!.onChange.listen(x as void Function(html.Event)?);

@@ -70,17 +70,17 @@ class Slider2 {
         var value = num.parse(_inputL!.value!);
         var children = first.childNodes;
         // inverse-left
-        (children[0] as html.Element)..setAttribute('style', 'width:${value}%');
+        (children[0] as html.Element).setAttribute('style', 'width:$value%');
         // range
         var _style = (children[2] as html.Element).getAttribute('style')!;
         _style = ['left:$value%', _style.split(';')[1]].join(';');
-        (children[2] as html.Element)..setAttribute('style', _style);
+        (children[2] as html.Element).setAttribute('style', _style);
         // thumb
-        (children[3] as html.Element)..setAttribute('style', 'left:$value%');
+        (children[3] as html.Element).setAttribute('style', 'left:$value%');
         // sign
-        (children[5] as html.Element)..setAttribute('style', 'left:$value%');
+        (children[5] as html.Element).setAttribute('style', 'left:$value%');
         (children[5].firstChild as html.Element)
-          ..innerHtml = '${format!(scaleInverse(num.parse(_inputL!.value!)))}';
+          .innerHtml = format!(scaleInverse(num.parse(_inputL!.value!)));
       });
 
     _inputR = html.InputElement()
@@ -101,19 +101,19 @@ class Slider2 {
         var children = first.childNodes;
         // inverse-right
         (children[1] as html.Element)
-          ..setAttribute('style', 'width:${_rightWidth}%');
+          .setAttribute('style', 'width:$_rightWidth%');
         var _style = (children[2] as html.Element).getAttribute('style')!;
-        _style = [_style.split(';')[0], 'right:${_rightWidth}%'].join(';');
+        _style = [_style.split(';')[0], 'right:$_rightWidth%'].join(';');
         // range
-        (children[2] as html.Element)..setAttribute('style', _style);
+        (children[2] as html.Element).setAttribute('style', _style);
         // thumb
         (children[4] as html.Element)
-          ..setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
+          .setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
         // sign
         (children[6] as html.Element)
-          ..setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
+          .setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
         (children[6].firstChild as html.Element)
-          ..innerHtml = '${format!(scaleInverse(num.parse(_inputR!.value!)))}';
+          .innerHtml = format!(scaleInverse(num.parse(_inputR!.value!)));
       });
 
     var _rightInitialWidth =

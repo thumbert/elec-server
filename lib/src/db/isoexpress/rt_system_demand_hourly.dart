@@ -12,6 +12,7 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class RtSystemDemandReportArchive extends DailyIsoExpressReport {
+  @override
   var location = getLocation('America/New_York');
 
   RtSystemDemandReportArchive({ComponentConfig? dbConfig, String? dir}) {
@@ -34,31 +35,34 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
       File(dir + 'rt_hourlydemand_' + yyyymmdd(asOfDate) + '.csv');
 
   /// File may be incomplete if downloaded during the day ...
+  @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var row = <String, dynamic>{};
     var localDate = (rows.first['Date'] as String).substring(0, 10);
     int numberOfHours = Date.parse(formatDate(localDate), location: location)
-        .splitLeft((dt) => new Hour.beginning(dt))
+        .splitLeft((dt) => Hour.beginning(dt))
         .length;
-    if (rows.length != numberOfHours)
-      throw new mis.IncompleteReportException('$reportName for $localDate');
+    if (rows.length != numberOfHours) {
+      throw mis.IncompleteReportException('$reportName for $localDate');
+    }
 
     row['date'] = formatDate(localDate);
     row['market'] = 'RT';
 
     row['hourBeginning'] = [];
     row['Total Load'] = <num>[];
-    rows.forEach((e) {
+    for (var e in rows) {
 //      var hb = parseHourEndingStamp(localDate, e['Hour Ending']);
 //      row['hourBeginning'].add(TZDateTime.fromMillisecondsSinceEpoch(
 //              location, hb.millisecondsSinceEpoch)
 //          .toIso8601String());
       row['hourBeginning'].add(parseHourEndingStamp(localDate, e['Hour Ending']));
       row['Total Load'].add(e['Total Load']);
-    });
+    }
     return row;
   }
 
+  @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String, dynamic>>[];
@@ -74,11 +78,13 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   }
 
   /// Recreate the collection from scratch.
+  @override
   setupDb() async {
     await dbConfig.db.open();
     List<String?> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.drop();
+    }
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'market': 1, 'date': 1}, unique: true);
@@ -98,7 +104,7 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   }
 
   Date lastDayAvailable() => Date.today(location: UTC).subtract(2);
-  Future<Null> deleteDay(Date day) async {
-    return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString())) as FutureOr<Null>);
+  Future<void> deleteDay(Date day) async {
+    return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString())) as FutureOr<void>);
   }
 }

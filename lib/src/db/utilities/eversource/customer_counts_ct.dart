@@ -120,7 +120,7 @@ class EversourceCtCustomerCountsArchive {
             response.pipe(fileout!.openWrite()));
   }
 
-  Future<Null> setup() async {
+  Future<void> setup() async {
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
     }
@@ -218,7 +218,7 @@ class EversourceCtCompetitiveSupply {
             response.pipe(fileout!.openWrite()));
   }
 
-  Future<Null> setup() async {
+  Future<void> setup() async {
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
     }

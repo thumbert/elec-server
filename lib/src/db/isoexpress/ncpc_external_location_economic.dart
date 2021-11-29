@@ -50,6 +50,7 @@ class NcpcExternalLocationEconomicArchive extends DailyIsoExpressReport {
     return {'date': date, 'ncpcType': 'External Location Economic', ...row};
   }
 
+  @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
     if (data.isEmpty) return <Map<String, dynamic>>[];
@@ -57,11 +58,13 @@ class NcpcExternalLocationEconomicArchive extends DailyIsoExpressReport {
     return out;
   }
 
-  Future<Null> setupDb() async {
+  @override
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     List<String?> collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName))
+    if (collections.contains(dbConfig.collectionName)) {
       await dbConfig.coll.drop();
+    }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'date': 1, 'ncpcType': 1}, unique: true);
     await dbConfig.db.close();

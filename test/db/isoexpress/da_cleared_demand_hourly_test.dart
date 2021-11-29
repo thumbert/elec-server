@@ -13,10 +13,10 @@ Location location = getLocation('America/New_York');
 
 /// prepare data by downloading a few reports
 prepareData() async {
-  var archive = new DaClearedDemandReportArchive();
+  var archive = DaClearedDemandReportArchive();
   var days = [
-    new Date.utc(2015,2,17),    // empty file
-    new Date.utc(2017,12,13)    // plenty of constraints
+    Date.utc(2015,2,17),    // empty file
+    Date.utc(2017,12,13)    // plenty of constraints
   ];
   await archive.downloadDays(days);
 }
@@ -25,8 +25,8 @@ prepareData() async {
 DaClearedDemandTest() async {
   group('DA Cleared Demand report', (){
     test('read da cleared demand files', () async {
-      var archive = new DaClearedDemandReportArchive();
-      File file = archive.getFilename(new Date.utc(2017,1,1));
+      var archive = DaClearedDemandReportArchive();
+      File file = archive.getFilename(Date.utc(2017,1,1));
       var data = archive.processFile(file);
       expect(data.length, 1);
       expect(data.first['Day-Ahead Cleared Demand'].first, 11167.0);
@@ -35,13 +35,13 @@ DaClearedDemandTest() async {
 }
 
 uploadDaysDa() async {
-  var archive = new DaClearedDemandReportArchive();
+  var archive = DaClearedDemandReportArchive();
   List days =
-  new Interval(new TZDateTime(location, 2017, 1, 1),
-      new TZDateTime(location, 2018, 1, 1))
-      .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
+  Interval(TZDateTime(location, 2017, 1, 1),
+      TZDateTime(location, 2018, 1, 1))
+      .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
-  await for (var day in new Stream.fromIterable(days)) {
+  await for (var day in Stream.fromIterable(days)) {
     await archive.downloadDay(day);
     await archive.insertDay(day);
   }
@@ -50,13 +50,13 @@ uploadDaysDa() async {
 
 
 uploadDaysRt() async {
-  var archive = new RtSystemDemandReportArchive();
+  var archive = RtSystemDemandReportArchive();
   List days =
-  new Interval(new TZDateTime(location, 2017, 1, 5),
-      new TZDateTime(location, 2017, 12, 20))
-      .splitLeft((dt) => new Date.utc(dt.year, dt.month, dt.day));
+  Interval(TZDateTime(location, 2017, 1, 5),
+      TZDateTime(location, 2017, 12, 20))
+      .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
   await archive.dbConfig.db.open();
-  await for (var day in new Stream.fromIterable(days)) {
+  await for (var day in Stream.fromIterable(days)) {
     await archive.downloadDay(day);
     await archive.insertDay(day);
   }

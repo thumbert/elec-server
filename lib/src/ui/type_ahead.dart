@@ -63,7 +63,7 @@ class TypeAhead {
         for (var s=0; s<splits.length-1; s++) {
           innerHtml += '${splits[s]}<strong>${matches.elementAt(s).group(0)}</strong>';
         }
-        innerHtml += '${splits.last}';
+        innerHtml += splits.last;
         var _b = DivElement()..innerHtml = innerHtml;
 //        _b.innerHtml = '<strong>${value.substring(0, _value.length)}</strong>';
 //        _b.innerHtml += value.substring(_value.length);

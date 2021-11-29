@@ -27,9 +27,9 @@ class DaDemandBids {
     var _response = await http.get(Uri.parse(_url));
     var out =
         (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
-    out.forEach((e) {
+    for (var e in out) {
       e['hours'] = json.decode(e['hours']);
-    });
+    }
     return out;
   }
 
@@ -44,9 +44,9 @@ class DaDemandBids {
     var _response = await http.get(Uri.parse(_url));
     var out =
         (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
-    out.forEach((e) {
+    for (var e in out) {
       e['hours'] = json.decode(e['hours']);
-    });
+    }
     return out;
   }
 
@@ -60,9 +60,9 @@ class DaDemandBids {
     var _response = await http.get(Uri.parse(_url));
     var out =
         (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
-    out.forEach((e) {
+    for (var e in out) {
       e['hours'] = json.decode(e['hours']);
-    });
+    }
     return out;
   }
 }

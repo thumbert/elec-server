@@ -13,8 +13,8 @@ String _nullToEmpty(dynamic x) {
 /// If [columnNames] are not specified, return all the available columns.
 /// The default [nullPolicy] is to convert the nulls to empty strings
 ///
-String listOfMapToCsv(List<Map> x, {List<String>? columnNames,
-   String Function(dynamic)? nullPolicy}) {
+String listOfMapToCsv(List<Map> x,
+    {List<String>? columnNames, String Function(dynamic)? nullPolicy}) {
   nullPolicy ??= _nullToEmpty;
 
   if (columnNames == null) {
@@ -27,34 +27,33 @@ String listOfMapToCsv(List<Map> x, {List<String>? columnNames,
 
   var aux = <List>[];
   aux.add(columnNames);
-  x.forEach((Map row) {
+  for (var row in x) {
     var sRow = [];
-    for (var columnName in columnNames!) {
+    for (var columnName in columnNames) {
       if (row.containsKey(columnName)) {
         var value = row[columnName];
-        value ??= nullPolicy!(value);
+        value ??= nullPolicy(value);
         sRow.add(value);
       } else {
         sRow.add('');
       }
     }
     aux.add(sRow);
-  });
+  }
   return const ListToCsvConverter().convert(aux);
 }
 
-
 /// Write a map to CSV. Return a two column csv table, first column are the
 /// keys, second column are the values.
-String mapToCsv(Map x, {List<String>? columnNames,
-    String Function(dynamic)? nullPolicy}) {
+String mapToCsv(Map x,
+    {List<String>? columnNames, String Function(dynamic)? nullPolicy}) {
   var aux = <List>[];
   if (columnNames != null) aux.add(columnNames);
-  x.forEach((k,v){
+  x.forEach((k, v) {
     if (v is Iterable) {
       aux.add([k, ...v]);
     } else {
-      aux.add([k]..add(v));
+      aux.add([k, v]);
     }
   });
   return const ListToCsvConverter().convert(aux);

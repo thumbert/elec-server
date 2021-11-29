@@ -26,7 +26,7 @@ abstract class IsoExpressReport {
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows);
 
   /// Setup the database from scratch again, including the index
-  Future<Null> setupDb();
+  Future<void> setupDb();
 
   /// Bring the database up to date.
   /// Future<Null> updateDb();

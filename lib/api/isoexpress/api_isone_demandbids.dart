@@ -110,7 +110,7 @@ class DaDemandBids {
       '\$match': {
         'date': {
           '\$eq': day.toString(),
-        }
+        },
       }
     });
     pipeline.add({

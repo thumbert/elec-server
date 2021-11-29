@@ -8,7 +8,7 @@ import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 
 
 SrRtLocSumTest(Db db) async {
-  var api = new SrRtLocSum(db);
+  var api = SrRtLocSum(db);
   test('get testing data', () async {
     await db.open();
 //    var data = await api('0', 401, 'Real Time Load Obligation',
@@ -22,7 +22,7 @@ SrRtLocSumTest(Db db) async {
 
 main() async {
   await initializeTimeZone();
-  Db db = new Db('mongodb://localhost/mis');
+  Db db = Db('mongodb://localhost/mis');
   await SrRtLocSumTest(db);
 
 }

@@ -110,13 +110,13 @@ class ZonalDemandArchive extends IsoExpressReport {
         'DryBulb': [],
         'DewPoint': [],
       };
-      v.forEach((Map e) {
+      for (var e in v) {
         one['hourBeginning'].add(e['hourBeginning']);
         one['DA_Demand'].add(e['DA_Demand']);
         one['RT_Demand'].add(e['RT_Demand']);
         one['DryBulb'].add(e['DryBulb']);
         one['DewPoint'].add(e['DewPoint']);
-      });
+      }
       out.add(one);
     });
 
@@ -124,7 +124,7 @@ class ZonalDemandArchive extends IsoExpressReport {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'zoneName': 1, 'date': 1}, unique: true);

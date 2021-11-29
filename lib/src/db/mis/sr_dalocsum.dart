@@ -36,7 +36,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     return 0;
   }
 
-  Future<Null> insertTabData0(List<Map<String, dynamic>> data) async {
+  Future<void> insertTabData0(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
     String? account = data.first['account'];
 
@@ -61,7 +61,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     }
   }
 
-  Future<Null> insertTabData1(List<Map<String, dynamic>> data) async {
+  Future<void> insertTabData1(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
     String? account = data.first['account'];
 
@@ -109,25 +109,25 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     ];
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
-    keepColumns.forEach((column) {
+    for (var column in keepColumns) {
       var name = mis.removeParanthesesEnd(column);
 
       /// Fix column name: 'Day Ahead Generation Obligation D=(A+B+C)'
       if (name.endsWith(' D=')) name = name.replaceAll(' D=', '');
       row[name] = [];
-    });
-    rows.forEach((e) {
+    }
+    for (var e in rows) {
       var hB = parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!);
       hB = TZDateTime.fromMillisecondsSinceEpoch(
           location, hB.millisecondsSinceEpoch);
       row['hourBeginning'].add(hB.toIso8601String());
-      keepColumns.forEach((column) {
+      for (var column in keepColumns) {
         var name = mis.removeParanthesesEnd(column);
         if (name.endsWith(' D=')) name = name.replaceAll(' D=', '');
         row[name].add(e[column]);
-      });
-    });
+      }
+    }
     return row;
   }
 
@@ -154,19 +154,19 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     ];
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
-    keepColumns.forEach((column) {
+    for (var column in keepColumns) {
       row[mis.removeParanthesesEnd(column)] = [];
-    });
-    rows.forEach((e) {
+    }
+    for (var e in rows) {
       var hB = parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!);
       hB = TZDateTime.fromMillisecondsSinceEpoch(
           location, hB.millisecondsSinceEpoch);
       row['hourBeginning'].add(hB.toIso8601String());
-      keepColumns.forEach((column) {
+      for (var column in keepColumns) {
         row[mis.removeParanthesesEnd(column)].add(e[column]);
-      });
-    });
+      }
+    }
     return row;
   }
 
@@ -200,7 +200,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
   }
 
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     var collections = await dbConfig.db.getCollectionNames();
     // if (collections.contains(dbConfig.collectionName)) {

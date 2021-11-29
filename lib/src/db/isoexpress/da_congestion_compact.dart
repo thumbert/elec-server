@@ -78,7 +78,7 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
 
   /// Recreate the collection from scratch.
   @override
-  Future<Null> setupDb() async {
+  Future<void> setupDb() async {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1});
     await dbConfig.db.close();
