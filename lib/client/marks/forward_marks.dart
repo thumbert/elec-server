@@ -46,6 +46,9 @@ class ForwardMarks {
             '/start/${start.toString()}'
             '/end/${end.toString()}';
     var _response = await http.get(Uri.parse(_url));
+    if (_response.body == 'Internal Server Error') {
+      return TimeSeries<num>();
+    }
     var data = json.decode(_response.body) as Map<String, dynamic>;
     return TimeSeries.fromIterable(data.entries.map((entry) => IntervalTuple(
         Date.parse(entry.key, location: tzLocation), entry.value as num)));

@@ -2,6 +2,7 @@ library api.weather.api_noaa_daily_summary;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:timezone/timezone.dart';
@@ -46,27 +47,36 @@ class ApiNoaaDailySummary {
       ..lte('year', yearEnd)
       ..excludeFields(['_id', 'stationId']);
     var xs = await coll.find(query).toList();
+    var aux = {for (var x in xs) x['year'] as int: x}; // for faster access
 
     var out = <Map<String, dynamic>>[];
     var _startDate = Date.parse(startDate, location: UTC);
     var _endDate = Date.parse(endDate, location: UTC);
-    var term = Term.fromInterval(Interval(_startDate.start, _endDate.end));
+    var years = List.generate(
+        _endDate.year - _startDate.year + 1, (i) => _startDate.year + i);
+
+    var term = Term(_startDate, _endDate);
     var days = term.days();
-    var aux = {for (var x in xs) x['year'] as int: x}; // for faster access
+    var currentYear = _startDate.year;
+    var data = aux[currentYear];
     for (var day in days) {
-      var year = day.year;
-      var index = day.dayOfYear() - 1;
-      var data = aux[year];
+      if (currentYear != day.year) {
+        currentYear++;
+        data = aux[currentYear];
+      }
       if (data != null) {
-        /// only if in the database
-        out.add({
-          'date': day.toString(),
-          'tMin': data['tMin'][index],
-          'tMax': data['tMax'][index],
-        });
+        /// the year may not be in the database
+        var index = day.dayOfYear() - 1;
+        if (index < data['tMin'].length) {
+          /// this day of the year may not be in the database yet
+          out.add({
+            'date': day.toString(),
+            'tMin': data['tMin'][index],
+            'tMax': data['tMax'][index],
+          });
+        }
       }
     }
-
     return out;
   }
 }

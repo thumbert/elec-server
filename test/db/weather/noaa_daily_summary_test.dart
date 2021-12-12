@@ -70,6 +70,15 @@ void tests(String rootUrl) async {
         'tMax': 64,
       });
     });
+    test('Get an interval in the future', () async {
+      var today = Date.today(location: UTC);
+      var futureDate = Date(today.year, 12, 31, location: UTC);
+      var res = await api.apiGetStationId(
+          'USW00014739', '2020-01-15', futureDate.toString());
+      expect(res.length >= 650, true);
+      var lastDate = Date.parse(res.last['date'], location: UTC);
+      expect(lastDate.isBefore(futureDate), true);
+    });
   });
   group('Monthly asset ncpc client tests:', () {
     var client = NoaaDailySummary(http.Client(), rootUrl: rootUrl);

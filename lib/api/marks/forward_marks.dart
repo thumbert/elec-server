@@ -77,6 +77,9 @@ class ForwardMarks {
     router.get('/curveId/<curveId>/asOfDate/<asOfDate>',
         (Request request, String curveId, String asOfDate) async {
       var aux = await marksCache.get(Tuple2(Date.parse(asOfDate), curveId));
+      if (aux is MarksCurveEmpty) {
+        return Response.ok(json.encode({}), headers: headers);
+      }
       var out = aux.toMongoDocument(Date.parse(asOfDate), curveId);
       out.remove('fromDate');
       out.remove('curveId');
@@ -286,13 +289,16 @@ class ForwardMarks {
       log.severe('No curve details for curveId: $curveId');
     }
     String tzLocation = curveDetails['tzLocation']!;
-    var location = getLocation(tzLocation);
+    var location = tzLocation == 'UTC' ? UTC : getLocation(tzLocation);
     term = Term.fromInterval(term.interval.withTimeZone(location));
 
     var date = start;
     while (!date.isAfter(end)) {
-      var aux = await marksCache.get(Tuple2(date, curveId)) as PriceCurve;
-      out[date.toString()] = aux.value(term.interval, bucket);
+      var aux = await marksCache.get(Tuple2(date, curveId));
+      if (aux is PriceCurve) {
+        // could be a MarksCurveEmpty
+        out[date.toString()] = aux.value(term.interval, bucket);
+      }
       date = date.next;
     }
     return out;

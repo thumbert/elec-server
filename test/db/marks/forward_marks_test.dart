@@ -201,6 +201,12 @@ void tests(String rootUrl) async {
       expect(vs['terms'].first, '2020-08');
     });
 
+    test('if you try a curve before first mark date return empty', () async {
+      var hub = await ForwardMarksArchive.getDocument(
+          '2020-05-01', 'isone_energy_4000_da_lmp', archive.dbConfig.coll);
+      expect(hub.isEmpty, true);
+    });
+
     test('getMarks for one curve, multiple days', () async {
       var marks = await ForwardMarksArchive.getDocumentsOneCurveStartEnd(
           'isone_energy_4000_da_lmp',
@@ -262,6 +268,15 @@ void tests(String rootUrl) async {
       await ForwardMarks.curveIdCache.get('isone_energy_4000_da_lmp');
       sw.stop();
       expect(sw.elapsedMilliseconds < 10, true); // 2 ms on the laptop
+    });
+    test('Return an empty map if date is before first date', () async {
+      var aux = await http.get(
+          Uri.parse('$rootUrl/forward_marks/v1/'
+              'curveId/isone_energy_4000_da_lmp/'
+              'asOfDate/2020-05-01'),
+          headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as Map<String, dynamic>;
+      expect(data.isEmpty, true);
     });
     test(
         'get mh forward curve as of 5/29/2020, May20 mark gets expanded'
@@ -463,6 +478,15 @@ void tests(String rootUrl) async {
       expect(price['2020-05-30'], 57.0);
       expect(price['2020-07-06'], 58.95);
       expect(price['2020-07-07'], 58.95);
+    });
+
+    test('get an empty map for a strip for dates before first marked date',
+        () async {
+      var term = Term.parse('Jan21-Feb21', location);
+      var bucket = Bucket.b5x16;
+      var price = await api.getStripPrice('isone_energy_4000_da_lmp', term,
+          bucket, Date.utc(2020, 5, 1), Date.utc(2020, 5, 10));
+      expect(price.isEmpty, true);
     });
   });
 
