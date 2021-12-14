@@ -25,7 +25,7 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
 
   /// Get the url to download daily min/max temperatures for a given station.
   /// Boston: USW00014739
-  /// If units = 'metric', return the data in Celsius, units = 'standard'
+  /// If units = 'metric', return the data in Celsius, if units = 'standard'
   /// return the data in Fahrenheit.
   /// https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
   /// https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMIN,TMAX&stations=USW00014739&startDate=2021-01-01&endDate=2021-12-31&format=csv&units=standard&options=includeAttributes:0

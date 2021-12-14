@@ -43,6 +43,7 @@ class ForwardMarks {
   /// The [asOfDate] key is a UTC date, but the [MarksCurve] is in the correct
   /// [curveId] timezone.
   /// TODO: if curves are resubmitted intra-day, they need be removed from the cache
+  /// or always pull current day marks in the cache.
   static late Cache<Tuple2<Date, String>, MarksCurve> marksCache;
 
   final headers = {
@@ -97,6 +98,30 @@ class ForwardMarks {
       var _start = Date.parse(start, location: UTC);
       var _end = Date.parse(end, location: UTC);
       var out = await getStripPrice(curveId, _term, _bucket, _start, _end);
+      return Response.ok(json.encode(out), headers: headers);
+    });
+
+    /// Get all the points of a strip and bucket between a start/end date.
+    /// Only works for a PriceCurve.
+    /// If you ask for a Jan21-Feb21 term, bucket 5x16, between 1Jan20 and
+    /// 31Dec20 the shape of the document returned is
+    /// ```dart
+    /// [
+    ///   {'2020-01-01': [70.1, 68.75]},
+    ///   ...
+    ///   {'2020-12-31': [140.1, 138.25]},
+    /// ]
+    /// ```
+    router.get(
+        '/curveId/<curveId>/term/<term>/bucket/<bucket>/start/<start>/end/<end>/values',
+        (Request request, String curveId, String term, String bucket,
+            String start, String end) async {
+      var _term = Term.parse(term, UTC);
+      var _bucket = Bucket.parse(bucket);
+      var _start = Date.parse(start, location: UTC);
+      var _end = Date.parse(end, location: UTC);
+      var out =
+          await getStripPriceValues(curveId, _term, _bucket, _start, _end);
       return Response.ok(json.encode(out), headers: headers);
     });
 
@@ -270,7 +295,7 @@ class ForwardMarks {
 
   /// Get strip price between start/end.  Only works for a [curveId] that is a
   /// [PriceCurve].  For other curve types, e.g. hourlyshape or volatility,
-  /// it does return empty.
+  /// it returns empty.
   ///
   /// Return a Map with each element in form {'yyyy-mm-dd': num}.
   Future<Map<String, num>> getStripPrice(
@@ -304,6 +329,42 @@ class ForwardMarks {
     return out;
   }
 
+  /// Get the price values for the strip between start/end.
+  /// Only works for a [curveId] that is a [PriceCurve].  For other curve types,
+  /// e.g. hourlyshape or volatility, it returns empty.
+  ///
+  Future<Map<String, List<num>>> getStripPriceValues(
+      String curveId, Term term, Bucket bucket, Date start, Date end) async {
+    var out = <String, List<num>>{};
+    if (!ForwardMarksArchive.isPriceCurve(curveId)) {
+      log.severe('CurveId $curveId is not a price curve!');
+      return out;
+    }
+    // fill the cache with one call to the database
+    await fillMarksCacheBulk(curveId, start, end);
+
+    // need to set the term to the curve's native timezone
+    var curveDetails = await curveIdCache.get(curveId) ?? {};
+    if (curveDetails.isEmpty) {
+      log.severe('No curve details for curveId: $curveId');
+    }
+    String tzLocation = curveDetails['tzLocation']!;
+    var location = tzLocation == 'UTC' ? UTC : getLocation(tzLocation);
+    term = Term.fromInterval(term.interval.withTimeZone(location));
+
+    var date = start;
+    while (!date.isAfter(end)) {
+      var aux = await marksCache.get(Tuple2(date, curveId));
+      if (aux is PriceCurve) {
+        // could be a MarksCurveEmpty
+        out[date.toString()] =
+            aux.points(bucket, interval: term.interval).values.toList();
+      }
+      date = date.next;
+    }
+    return out;
+  }
+
   /// Make one call to the database and fill the cache for a [curveId]
   /// multiple days.  Reinsert exiting days in the cache if they fall between
   /// [start] and [end] dates.
@@ -326,7 +387,7 @@ class ForwardMarks {
       var docs = await ForwardMarksArchive.getDocumentsOneCurveStartEnd(
           curveId, coll, start.toString(), end.toString());
       if (docs.isEmpty) {
-        log.severe('Curve $curveId is not marked before $end');
+        log.warning('Curve $curveId is not marked before $end');
         return;
       } else if (docs.length == 1) {
         // all days have the same curve, easy
@@ -355,7 +416,7 @@ class ForwardMarks {
       String asOfDate, String curveId, String tzLocation) {
     /// If this curveId doesn't exist, bail out.
     if (document.isEmpty) {
-      log.severe('No marks for curveId: $curveId, asOfDate: $asOfDate');
+      log.warning('No marks for curveId: $curveId, asOfDate: $asOfDate');
       return MarksCurveEmpty();
     }
     var location = tzLocation == 'UTC' ? UTC : getLocation(tzLocation);

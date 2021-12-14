@@ -480,6 +480,18 @@ void tests(String rootUrl) async {
       expect(price['2020-07-07'], 58.95);
     });
 
+    test('get the values for a strip between start/end dates', () async {
+      var term = Term.parse('Jan21-Feb21', location);
+      var bucket = Bucket.b5x16;
+      var price = await api.getStripPriceValues('isone_energy_4000_da_lmp',
+          term, bucket, Date.utc(2020, 5, 29), Date.utc(2020, 7, 7));
+      expect(price.length, 40);
+      expect(price['2020-05-29'], [58.25, 55.75]);
+      expect(price['2020-05-30'], [58.25, 55.75]);
+      expect(price['2020-07-06'], [60.7, 57.2]);
+      expect(price['2020-07-07'], [60.7, 57.2]);
+    });
+
     test('get an empty map for a strip for dates before first marked date',
         () async {
       var term = Term.parse('Jan21-Feb21', location);

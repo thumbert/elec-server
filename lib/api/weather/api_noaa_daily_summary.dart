@@ -52,8 +52,6 @@ class ApiNoaaDailySummary {
     var out = <Map<String, dynamic>>[];
     var _startDate = Date.parse(startDate, location: UTC);
     var _endDate = Date.parse(endDate, location: UTC);
-    var years = List.generate(
-        _endDate.year - _startDate.year + 1, (i) => _startDate.year + i);
 
     var term = Term(_startDate, _endDate);
     var days = term.days();
