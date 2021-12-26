@@ -49,7 +49,7 @@ void tests(String rootUrl) async {
           Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
       expect(data.length, 1191);
       var trace0 = data.first;
-      expect(trace0.keys.toList(), ['x', 'y', 'name']);
+      expect(trace0.keys.toList(), ['x', 'y', 'ptid']);
       var y0 = trace0['y'] as List;
       expect(y0.length, 120);
       expect(y0.take(5).toList(), [0.02, 0.01, 0.01, 0.01, 0]);
@@ -65,8 +65,27 @@ void tests(String rootUrl) async {
       expect(y0.map((e) => e.toStringAsFixed(3)).toList(),
           ['0.013', '0.007', '-0.253', '0.004', '0.000']);
     });
+    test('speed test', () async {
+      var sw = Stopwatch()..start();
+      var data = await cong.getHourlyTraces(
+          Date.utc(2021, 10, 1), Date.utc(2021, 10, 30));
+      sw.stop();
+      expect(data.length > 1191, true);
+      print(sw.elapsedMilliseconds);
+      expect(sw.elapsedMilliseconds < 1000, true); // < 800 ms
+      // second time should be faster
+      sw.reset();
+      sw.start();
+      data = await cong.getHourlyTraces(
+          Date.utc(2021, 10, 1), Date.utc(2021, 10, 30));
+      sw.stop();
+      print(sw.elapsedMilliseconds);
+      expect(sw.elapsedMilliseconds < 100, true); // only 71 ms
+    });
   });
 }
+
+// Future<void> speedTests(String rootUrl) async {}
 
 void main() async {
   initializeTimeZones();

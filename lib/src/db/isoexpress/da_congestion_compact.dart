@@ -21,11 +21,10 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaLmpHourly/Raw/';
     this.dir = dir;
+    reportName = 'Day-Ahead Congestion Compact Archive';
   }
   final keys = {0, 0.01, 0.02};
 
-  @override
-  String reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   @override
   String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/'

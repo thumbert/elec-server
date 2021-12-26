@@ -24,6 +24,14 @@ class DaCongestion {
 
   /// Get hourly congestion prices between a start and end date for all the
   /// nodes in the pool. Inputs [start] and [end] should be UTC Dates.
+  /// Return a [List] with elements in shape:
+  /// ```dart
+  /// {
+  ///   'x': <TZDateTime>[...],  // hour beginning
+  ///   'y': <num>[...],  // values
+  ///   'ptid': <int>
+  /// }
+  /// ```
   Future<List<Map<String, dynamic>>> getHourlyTraces(Date start, Date end,
       {List<int>? ptids}) async {
     if (start.isAfter(end)) {
@@ -32,7 +40,7 @@ class DaCongestion {
     await _populateCache(start, end);
 
     /// the cache should now have all the days you requested
-    /// need to traverse it twice, once for the ptids, once for the days
+    /// need to loop over all the days in range and then for all ptids
     var aux = <int, Map<String, dynamic>>{};
     var days = Term(start, end).days();
     for (var day in days) {
@@ -49,7 +57,7 @@ class DaCongestion {
             aux[ptid] = {
               'x': [],
               'y': [],
-              'name': ptid,
+              'ptid': ptid,
             };
           }
           (aux[ptid]!['x'] as List).addAll(hours);
@@ -82,7 +90,7 @@ class DaCongestion {
             aux[ptid] = {
               'x': [],
               'y': [],
-              'name': ptid,
+              'ptid': ptid,
             };
           }
           (aux[ptid]!['x'] as List).add(day.toString());

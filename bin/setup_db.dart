@@ -36,13 +36,13 @@ var env = Platform.environment;
 
 Future<void> insertDaBindingConstraints() async {
   var archive = DaBindingConstraintsReportArchive();
-  var days = [
-    Date.utc(2015, 2, 17), // empty file
-    ...Term.parse('Jan17', UTC).days(),
-    Date.utc(2017, 12, 31), // plenty of constraints
-    Date.utc(2018, 7, 10), // has duplicates
-  ];
-  // var days = Term.parse('Jan21-Jul21', UTC).days();
+  // var days = [
+  //   Date.utc(2015, 2, 17), // empty file
+  //   ...Term.parse('Jan17', UTC).days(),
+  //   Date.utc(2017, 12, 31), // plenty of constraints
+  //   Date.utc(2018, 7, 10), // has duplicates
+  // ];
+  var days = Term.parse('1Jul21-17Dec21', UTC).days();
   await insertDays(archive, days);
 }
 
@@ -122,10 +122,10 @@ Future<void> insertIsoExpress() async {
   //     DaEnergyOfferArchive(), Term.parse('Jul17', location).days());
 
   // to calculate hourly shaping for Hub, need Jan19-Dec19
-  // await insertDays(
-  //     DaLmpHourlyArchive(), Term.parse('Jan19-Dec19', location).days());
   await insertDays(
-      DaCongestionCompactArchive(), Term.parse('Jan21-Jul21', location).days());
+      DaLmpHourlyArchive(), Term.parse('1Oct21-16Dec21', location).days());
+  await insertDays(DaCongestionCompactArchive(),
+      Term.parse('1Oct21-16Dec21', location).days());
 
   // to calculate settlement prices for calculators, Jan20-Aug20
   // await insertDays(
@@ -294,9 +294,9 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  await insertNoaaTemperatures(download: true);
+  // await insertNoaaTemperatures(download: true);
 
-  // await insertDaBindingConstraints();
+  await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();
