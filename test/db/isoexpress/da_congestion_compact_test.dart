@@ -59,7 +59,7 @@ void tests(String rootUrl) async {
           await cong.getDailyTraces(Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
       expect(data.length, 1191);
       var trace0 = data.first;
-      expect(trace0.keys.toList(), ['x', 'y', 'name']);
+      expect(trace0.keys.toList(), ['x', 'y', 'ptid']);
       var y0 = trace0['y'] as List;
       expect(y0.length, 5);
       expect(y0.map((e) => e.toStringAsFixed(3)).toList(),
@@ -72,8 +72,10 @@ void tests(String rootUrl) async {
       sw.stop();
       expect(data.length > 1191, true);
       print(sw.elapsedMilliseconds);
+      // as of 2021-12-26 this takes 6200 ms!!!
+      /// TODO: fix performance degradation
       expect(sw.elapsedMilliseconds < 1000, true); // < 800 ms
-      // second time should be faster
+      // second time should be faster, because it's cached by the client
       sw.reset();
       sw.start();
       data = await cong.getHourlyTraces(
@@ -85,16 +87,10 @@ void tests(String rootUrl) async {
   });
 }
 
-// Future<void> speedTests(String rootUrl) async {}
-
 void main() async {
   initializeTimeZones();
   // await DaCongestionCompactArchive().setupDb();
 
   DbProd();
   tests('http://127.0.0.1:8080');
-
-//  Db db = new Db('mongodb://localhost/isoexpress');
-
-  // await soloTest();
 }

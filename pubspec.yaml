@@ -1,6 +1,7 @@
 name: elec_server
 description: An elec server
 version: 2.0.2
+publish_to: none
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -9,12 +10,10 @@ dependencies:
   args: ^2.1.0
   collection: ^1.15.0
   date:
-    git:
-      url: git://github.com/thumbert/date.git
+    git: https://github.com/thumbert/date.git
   dotenv: ^3.0.0
   elec:
-    git:
-      url: git://github.com/thumbert/elec.git
+    git: https://github.com/thumbert/elec.git
   grpc: ^3.0.0
   html: ^0.15.0
   intl: ^0.17.0
@@ -25,8 +24,7 @@ dependencies:
   shelf_router: ^1.0.0
   spreadsheet_decoder: ^2.0.0
   table:
-    git:
-      url: git://github.com/thumbert/table.git
+    git: https://github.com/thumbert/table.git
   timezone: ^0.7.0
   tuple: ^2.0.0
 

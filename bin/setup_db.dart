@@ -42,7 +42,7 @@ Future<void> insertDaBindingConstraints() async {
   //   Date.utc(2017, 12, 31), // plenty of constraints
   //   Date.utc(2018, 7, 10), // has duplicates
   // ];
-  var days = Term.parse('1Jul21-17Dec21', UTC).days();
+  var days = Term.parse('17Dec21-11Jan22', UTC).days();
   await insertDays(archive, days);
 }
 
@@ -122,10 +122,9 @@ Future<void> insertIsoExpress() async {
   //     DaEnergyOfferArchive(), Term.parse('Jul17', location).days());
 
   // to calculate hourly shaping for Hub, need Jan19-Dec19
-  await insertDays(
-      DaLmpHourlyArchive(), Term.parse('1Oct21-16Dec21', location).days());
-  await insertDays(DaCongestionCompactArchive(),
-      Term.parse('1Oct21-16Dec21', location).days());
+  var days = Term.parse('17Dec21-11Jan22', location).days();
+  await insertDays(DaLmpHourlyArchive(), days);
+  await insertDays(DaCongestionCompactArchive(), days);
 
   // to calculate settlement prices for calculators, Jan20-Aug20
   // await insertDays(
@@ -296,10 +295,10 @@ void main() async {
 
   // await insertNoaaTemperatures(download: true);
 
-  await insertDaBindingConstraints();
+  // await insertDaBindingConstraints();
 
 //  await insertForwardMarks();
-//   await insertIsoExpress();
+  await insertIsoExpress();
 
   // await insertDaDemandBids();
 
