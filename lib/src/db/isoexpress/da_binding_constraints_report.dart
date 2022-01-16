@@ -21,12 +21,10 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
     this.dir = dir;
+    reportName = 'Day-Ahead Binding Constraints Report';
   }
 
   Db get db => dbConfig.db;
-
-  @override
-  final reportName = 'Day-Ahead Binding Constraints Report';
 
   @override
   String getUrl(Date asOfDate) =>

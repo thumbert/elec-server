@@ -14,6 +14,7 @@ import 'package:elec_server/src/db/isone/masked_ids.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
+import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -34,7 +35,7 @@ import 'package:path/path.dart';
 
 var env = Platform.environment;
 
-Future<void> insertDaBindingConstraints() async {
+Future<void> insertDaBindingConstraintsIsone() async {
   var archive = DaBindingConstraintsReportArchive();
   // var days = [
   //   Date.utc(2015, 2, 17), // empty file
@@ -44,6 +45,18 @@ Future<void> insertDaBindingConstraints() async {
   // ];
   var days = Term.parse('17Dec21-11Jan22', UTC).days();
   await insertDays(archive, days);
+}
+
+Future<void> insertDaBindingConstraintsNyiso() async {
+  var archive = NyisoDaBindingConstraintsReportArchive();
+  // var days = [
+  //   Date.utc(2015, 2, 17), // empty file
+  //   ...Term.parse('Jan17', UTC).days(),
+  //   Date.utc(2017, 12, 31), // plenty of constraints
+  //   Date.utc(2018, 7, 10), // has duplicates
+  // ];
+  var days = Term.parse('1Jan21-31Jan21', UTC).days();
+  await insertDays(archive, days, download: true);
 }
 
 Future<void> insertDaDemandBids() async {
@@ -84,7 +97,7 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     if (download) {
       await archive.downloadDay(day);
     }
-    await archive.insertDay(day);
+    // await archive.insertDay(day);
   }
   await archive.dbConfig.db.close();
 }
@@ -295,10 +308,12 @@ void main() async {
 
   // await insertNoaaTemperatures(download: true);
 
-  // await insertDaBindingConstraints();
+  // await insertDaBindingConstraintsIsone();
+  await insertDaBindingConstraintsNyiso();
+
 
 //  await insertForwardMarks();
-  await insertIsoExpress();
+//   await insertIsoExpress();
 
   // await insertDaDemandBids();
 

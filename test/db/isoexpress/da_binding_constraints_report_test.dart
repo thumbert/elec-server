@@ -3,7 +3,6 @@ import 'package:elec_server/client/isoexpress/binding_constraints.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:timezone/timezone.dart';
