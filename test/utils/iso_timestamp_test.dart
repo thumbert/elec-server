@@ -42,14 +42,14 @@ void tests() {
       ['2015-03-08', '04'],
       ['2015-03-08', '05'],
     ];
-    for (var i=0; i<4; i++) {
+    for (var i = 0; i < 4; i++) {
       expect(toIsoHourEndingStamp(hB[i].start), out[i]);
     }
   });
 
   test('to ISO timestamp, fall back', () {
-    var hB = Interval(TZDateTime(location,2015,11,1),
-        TZDateTime(location,2015,11,1,4))
+    var hB = Interval(TZDateTime(location, 2015, 11, 1),
+            TZDateTime(location, 2015, 11, 1, 4))
         .splitLeft((dt) => Hour.beginning(dt));
     var out = [
       ['2015-11-01', '01'],
@@ -58,16 +58,17 @@ void tests() {
       ['2015-11-01', '03'],
       ['2015-11-01', '04'],
     ];
-    for (var i=0; i<5; i++) {
+    for (var i = 0; i < 5; i++) {
       expect(toIsoHourEndingStamp(hB[i].start), out[i]);
     }
   });
 
   test('to ISO timestamp, regular day', () {
-    var hB = Interval(TZDateTime(location,2015,1,1),
-        TZDateTime(location,2015,1,1,4))
-        .splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
-    hB.add(Hour.beginning(TZDateTime(location,2015,1,1,23)));
+    var hB = Interval(TZDateTime(location, 2015, 1, 1),
+            TZDateTime(location, 2015, 1, 1, 4))
+        .splitLeft((dt) => Hour.beginning(dt))
+        .cast<Hour>();
+    hB.add(Hour.beginning(TZDateTime(location, 2015, 1, 1, 23)));
     var out = [
       ['2015-01-01', '01'],
       ['2015-01-01', '02'],
@@ -75,7 +76,7 @@ void tests() {
       ['2015-01-01', '04'],
       ['2015-01-01', '24'],
     ];
-    for (var i=0; i<out.length; i++) {
+    for (var i = 0; i < out.length; i++) {
       expect(toIsoHourEndingStamp(hB[i].start), out[i]);
     }
   });
@@ -83,8 +84,9 @@ void tests() {
   test('is fallback date?', () {
     expect(isFallBackDate(Date(2015, 11, 1, location: location)), true);
     expect(isFallBackDate(Date(2015, 11, 2, location: location)), false);
+    expect(isFallBackDate(Date.utc(2020, 3, 8)), false);
+    expect(isFallBackDate(Date.utc(2020, 11, 1)), true);
   });
-
 }
 
 void main() async {

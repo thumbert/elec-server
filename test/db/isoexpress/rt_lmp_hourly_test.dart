@@ -3,10 +3,10 @@ library test.db.isoexpress.rt_lmp_hourly_test;
 import 'dart:io';
 import 'dart:async';
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_hourly.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 
 /// prepare data by downloading a few reports
 prepareData() async {
@@ -55,7 +55,7 @@ RtLmpHourlyTest() async {
 Future fillDb() async {
   var archive = RtLmpHourlyArchive();
   await archive.dbConfig.db.open();
-  List days = Interval(Date.utc(2017,12,31).start, Date.utc(2018,1,1).start)
+  List days = Interval(Date.utc(2017, 12, 31).start, Date.utc(2018, 1, 1).start)
       .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
   for (var day in days) {
     await archive.downloadDay(day);
@@ -65,7 +65,7 @@ Future fillDb() async {
 }
 
 main() async {
-  await initializeTimeZone(getLocationTzdb());
+  initializeTimeZones();
   // await new RtLmpHourlyArchive().setupDb();
   // await prepareData();
 

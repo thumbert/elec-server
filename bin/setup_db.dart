@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
 import 'package:elec_server/src/db/archive.dart';
@@ -15,6 +16,7 @@ import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
+import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -49,14 +51,18 @@ Future<void> insertDaBindingConstraintsIsone() async {
 
 Future<void> insertDaBindingConstraintsNyiso() async {
   var archive = NyisoDaBindingConstraintsReportArchive();
-  // var days = [
-  //   Date.utc(2015, 2, 17), // empty file
-  //   ...Term.parse('Jan17', UTC).days(),
-  //   Date.utc(2017, 12, 31), // plenty of constraints
-  //   Date.utc(2018, 7, 10), // has duplicates
-  // ];
-  var days = Term.parse('1Jan21-31Jan21', UTC).days();
-  await insertDays(archive, days, download: true);
+  // await archive.setupDb();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2019, 1).upTo(Month.utc(2021, 1));
+  for (var month in months) {
+    await archive.downloadMonth(month);
+    for (var date in month.days()) {
+      var file = archive.getFile(date);
+      var data = archive.processFile(file);
+      await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
 }
 
 Future<void> insertDaDemandBids() async {
@@ -113,6 +119,24 @@ Future<void> insertDaEnergyOffers({List<Date>? days}) async {
     await archive.insertDay(day);
   }
   await archive.dbConfig.db.close();
+}
+
+Future<void> insertDaLmpHourlyNyiso() async {
+  var archive = NyisoDaLmpHourlyArchive();
+  await archive.setupDb();
+  // await archive.dbConfig.db.open();
+  // var months = Month.utc(2019, 2).upTo(Month.utc(2021, 1));
+  // for (var month in months) {
+  //   archive.nodeType = NodeType.zone;
+  //   await archive.downloadMonth(month);
+  //   archive.nodeType = NodeType.gen;
+  //   await archive.downloadMonth(month);
+  //   for (var date in month.days()) {
+  //     var data = archive.processDay(date); // both zone and gen nodes
+  //     await archive.insertData(data);
+  //   }
+  // }
+  // await archive.dbConfig.db.close();
 }
 
 void insertForwardMarks() async {
@@ -309,8 +333,8 @@ void main() async {
   // await insertNoaaTemperatures(download: true);
 
   // await insertDaBindingConstraintsIsone();
-  await insertDaBindingConstraintsNyiso();
-
+  // await insertDaBindingConstraintsNyiso();
+  await insertDaLmpHourlyNyiso();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();

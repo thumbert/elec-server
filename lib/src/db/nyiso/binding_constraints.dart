@@ -2,19 +2,19 @@ library db.nyiso.binding_constraints;
 
 /// Data from http://mis.nyiso.com/public/
 
-import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
+import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_nyiso_report.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
-import 'package:timezone/timezone.dart';
+import 'package:tuple/tuple.dart';
 
 class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
-  NyisoDaBindingConstraintsReportArchive({ComponentConfig? dbConfig, String? dir}) {
+  NyisoDaBindingConstraintsReportArchive(
+      {ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1',
         dbName: 'nyiso',
@@ -34,63 +34,81 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
   @override
   String getUrl(Date asOfDate) =>
       'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/' +
-          yyyymmdd(asOfDate) + 'DAMLimitingConstraints.csv';
+      yyyymmdd(asOfDate) +
+      'DAMLimitingConstraints.csv';
 
   @override
-  File getFilename(Date asOfDate) => File(
-      dir + yyyymmdd(asOfDate) + 'DAMLimitingConstraints.csv');
+  File getFile(Date asOfDate) =>
+      File(dir + yyyymmdd(asOfDate) + 'DAMLimitingConstraints.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
-    var constraints = <Map<String, dynamic>>[];
-    for (var row in rows) {
-      constraints.add({
-        'Constraint Name': row['ConstraintName'],
-        'Contingency Name': row['ContingencyName'],
-        'Interface Flag': row['InterfaceFlag'],
-        'Marginal Value': row['MarginalValue'],
-        'hourBeginning': TZDateTime.parse(location, row['BeginDate']).toUtc(),
+    return <String, dynamic>{};
+  }
+
+  /// Return a list with each element of this form, ready for insertion
+  /// into the Db.
+  /// ```
+  /// {
+  ///   'date': '2020-01-01',
+  ///   'market': 'DA',
+  ///   'limitingFacility': 'CENTRAL EAST-VC',
+  ///   'hours': [
+  ///      {
+  ///        'hourBeginning': TZDateTime.utc(...),
+  ///        'Contingency': 'BASE CASE',
+  ///        'Constraint Cost($)': 20.26,
+  ///      },
+  ///      ...
+  ///   ],
+  /// }
+  /// ```
+  @override
+  List<Map<String, dynamic>> processFile(File file) {
+    var out = <Map<String, dynamic>>[];
+
+    var xs = readReport(getReportDate(file));
+    if (xs.isEmpty) return out;
+
+    var date = Date.fromTZDateTime(NyisoReport.parseTimestamp(
+            xs.first['Time Stamp'], xs.first['Time Zone']))
+        .toString();
+    var groups =
+        groupBy(xs, (Map e) => (e['Limiting Facility'] as String).trim());
+
+    for (var group in groups.entries) {
+      out.add({
+        'date': date,
+        'market': 'DA',
+        'limitingFacility': group.key,
+        'hours': group.value
+            .map((e) => {
+                  'hourBeginning': NyisoReport.parseTimestamp(
+                      e['Time Stamp'], e['Time Zone']),
+                  'contingency': (e['Contingency'] as String).trim(),
+                  'cost': e['Constraint Cost(\$)'],
+                })
+            .toList(),
       });
     }
 
-    /// Need to take the unique rows.  On 2018-07-10, there were duplicates!
-    var uConstraints = unique(constraints);
-
-    return {
-      'market': 'DA',
-      'date': (rows.first['BeginDate'] as String).substring(0, 10),
-      'constraints': uConstraints,
-    };
+    return out;
   }
 
-  @override
-  List<Map<String, dynamic>> processFile(File file) {
-    var aux = json.decode(file.readAsStringSync());
-    late var xs;
-    if ((aux as Map).containsKey('DayAheadConstraints')) {
-      if (aux['DayAheadConstraints'] == '') return <Map<String, dynamic>>[];
-      xs = (aux['DayAheadConstraints']['DayAheadConstraint'] as List)
-          .cast<Map<String, dynamic>>();
-    } else {
-      throw ArgumentError('Can\'t find key DayAheadConstraints.  Check file!');
-    }
-
-    return [converter(xs)];
-  }
-
-  /// Insert data into db
+  /// Insert data into db.  You can pass in several days at once.
   @override
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) {
       print('--->  No data');
       return Future.value(-1);
     }
-    var groups = groupBy(data, (dynamic e) => e['date']);
+    var groups = groupBy(data, (Map e) => Tuple2(e['market'], e['date']));
     try {
-      for (var date in groups.keys) {
-        await dbConfig.coll.remove({'date': date});
-        await dbConfig.coll.insertAll(groups[date]!);
-        print('--->  Inserted DA binding constraints for day $date');
+      for (var t2 in groups.keys) {
+        await dbConfig.coll.remove({'market': t2.item1, 'date': t2.item2});
+        await dbConfig.coll.insertAll(groups[t2]!);
+        print(
+            '--->  Inserted ${t2.item1} binding constraints for day ${t2.item2}');
       }
       return 0;
     } catch (e) {
@@ -105,5 +123,14 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
     await dbConfig.db
         .createIndex(dbConfig.collectionName, keys: {'market': 1, 'date': 1});
     await dbConfig.db.close();
+  }
+
+  @override
+  Date getReportDate(File file) {
+    var yyyymmdd = basename(file.path).substring(0, 8);
+    return Date.utc(
+        int.parse(yyyymmdd.substring(0, 4)),
+        int.parse(yyyymmdd.substring(4, 6)),
+        int.parse(yyyymmdd.substring(6, 8)));
   }
 }

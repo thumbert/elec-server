@@ -2,7 +2,10 @@ library db.lib_nysio_report;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:date/date.dart';
+import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:path/path.dart';
 import 'package:csv/csv.dart';
 import 'package:archive/archive.dart';
@@ -14,10 +17,41 @@ import 'lib_mis_reports.dart' as mis;
 abstract class NyisoReport {
   late String reportName;
   late ComponentConfig dbConfig;
-  final Location location = getLocation('America/New_York');
+  static final Location location = getLocation('America/New_York');
 
   /// the location of this report on disk
-  String dir = (Platform.environment['HOME'] ?? '') + '/Downloads/Archive/Nyiso/';
+  String dir =
+      (Platform.environment['HOME'] ?? '') + '/Downloads/Archive/Nyiso/';
+
+  /// Parse NYISO timestamp as it appears in the Csv reports.
+  /// Possible inputs (for example):
+  ///   '01/01/2020 00:00', 'EST'
+  ///   '03/08/2020 01:00', 'EST'  // spring forward next
+  ///   '03/08/2020 03:00', 'EDT'
+  ///   '11/01/2020 01:00', 'EDT'  // fall back next
+  ///   '11/01/2020 01:00', 'EST'
+  ///
+  /// Return a datetime in UTC.  See also [parseHourEndingStamp] from
+  /// src/utils/iso_timestamp.dart for the corresponding ISONE function.
+  ///
+  static TZDateTime parseTimestamp(String timeStamp, String timeZone) {
+    String tz;
+    if (timeZone == 'EST') {
+      tz = '-0500';
+    } else if (timeZone == 'EDT') {
+      tz = '-0400';
+    } else {
+      throw StateError('Unsupported timezone $timeZone');
+    }
+    var yyyy = timeStamp.substring(6, 10);
+    var mm = timeStamp.substring(0, 2);
+    var dd = timeStamp.substring(3, 5);
+    var hh = timeStamp.substring(11, 13);
+    var minutes = timeStamp.substring(14, 16);
+
+    var res = TZDateTime.parse(location, '$yyyy-$mm-${dd}T$hh:$minutes:00$tz');
+    return res.toUtc();
+  }
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
@@ -38,9 +72,9 @@ abstract class NyisoReport {
   /// [acceptHeader] can be set to 'application/json' if you need json output.
   Future downloadUrl(String url, File fileout,
       {bool overwrite = true,
-        String? username,
-        String? password,
-        String? acceptHeader}) async {
+      String? username,
+      String? password,
+      String? acceptHeader}) async {
     if (fileout.existsSync() && !overwrite) {
       print('File ${fileout.path} was already downloaded.  Skipping.');
       return Future.value(1);
@@ -80,22 +114,26 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// Get the url of this report for this date
   String getUrl(Date asOfDate);
 
-  /// Get the filename of this report as saved on disk.  There is one ISO
+  /// Get the file of this report as saved on disk.  There is one ISO
   /// Express report per day.  Note that you can have multiple MIS reports
   /// per day.
-  File getFilename(Date asOfDate);
+  File getFile(Date asOfDate);
+
+  /// Get the date associated with this file.
+  Date getReportDate(File file);
 
   /// Download one day.  Check if the file has downloaded successfully.
-  /// NYISO only keeps the most recent 10 days
+  /// NYISO only keeps the most recent 10 days, so you may have to download
+  /// the entire month.
   Future downloadDay(Date day, {bool overwrite = true}) async {
-    return await downloadUrl(getUrl(day), getFilename(day), overwrite: overwrite);
+    return await downloadUrl(getUrl(day), getFile(day), overwrite: overwrite);
   }
 
   /// All month reports are zipped
   Future downloadMonth(Month month, {bool overwrite = true}) async {
     var asOfDate = month.startDate;
     var url = getUrl(asOfDate).replaceAll('.csv', '_csv') + '.zip';
-    var filename = File(getFilename(asOfDate).path + '.zip');
+    var filename = File(getFile(asOfDate).path + '.zip');
     return await downloadUrl(url, filename, overwrite: overwrite);
   }
 
@@ -106,8 +144,8 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// Returns 0 for success, 1 for error, null if there is no data to insert.
   ///
   Future<int> insertDay(Date day) async {
-    var file = getFilename(day);
-    List<Map<String,dynamic>> data;
+    var file = getFile(day);
+    List<Map<String, dynamic>> data;
     try {
       data = processFile(file);
       if (data.isEmpty) return Future.value(-1);
@@ -125,33 +163,36 @@ abstract class DailyNysioCsvReport extends NyisoReport {
     }
   }
 
-  List<Map<String,dynamic>> readReport(Date date) {
-   var file = getFilename(date);
-
-    /// all the lines in the report
-    var _lines = file.readAsLinesSync();
-
+  /// Read the report associated with the data, doing no processing.
+  /// Return tabular data.  To get the data in the format needed for the
+  /// database see the [processFile(file)] method.
+  List<Map<String, dynamic>> readReport(Date date) {
+    var file = getFile(date);
+    var out = <Map<String, dynamic>>[];
     var converter = CsvToListConverter();
-    if (_lines.isEmpty ||
-        !(_lines.last.startsWith('"T"') || _lines.last.startsWith('T'))) {
-      throw mis.IncompleteReportException('Incomplete CSV file ${file.path}');
+
+    var zipFile =
+        File(getFile(Date.utc(date.year, date.month, 1)).path + '.zip');
+    final bytes = zipFile.readAsBytesSync();
+    var zipArchive = ZipDecoder().decodeBytes(bytes);
+
+    var _file = zipArchive.findFile(basename(file.path));
+    if (_file != null) {
+      var _lines = _file.content as List<int>;
+      var csv = utf8.decoder.convert(_lines);
+      // print(csv);
+      var xs = converter.convert(csv);
+      if (xs.isNotEmpty) {
+        var header = xs.removeAt(0).cast<String>();
+        for (var x in xs) {
+          out.add(Map.fromIterables(header, x));
+        }
+      }
     }
 
-    // var nHeaders = -1;
-    // return _lines
-    //     .where((e) {
-    //   if (e[0] == 'H' || e.startsWith('"H"')) nHeaders++;
-    //   if (nHeaders == 2 * tab || nHeaders == (2 * tab + 1)) {
-    //     return true;
-    //   } else {
-    //     return false;
-    //   }
-    // })
-    //     .map((String row) => converter.convert(row).first)
-    //     .toList();
+    return out;
   }
 }
-
 
 /// Format a date to the yyyymmdd format, e.g. 20170115.
 String yyyymmdd(Date date) => date.toString().replaceAll('-', '');

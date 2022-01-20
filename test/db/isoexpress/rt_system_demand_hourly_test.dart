@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/db/isoexpress/rt_system_demand_hourly.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 
 /// prepare data by downloading a few reports
 prepareData() async {
@@ -32,7 +32,7 @@ uploadDays() async {
 }
 
 main() async {
-  await initializeTimeZone(getLocationTzdb());
+  initializeTimeZones();
 
   //await RtSystemDemandReportArchive().setupDb();
   await uploadDays();

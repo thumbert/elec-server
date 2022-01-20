@@ -3,7 +3,7 @@ library elec.iso_timestamp;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
-Location _eastern = getLocation('America/New_York');
+final Location _eastern = getLocation('America/New_York');
 
 /// Convert from an ISONE string tuple.
 /// [localDate] is a String in format 'mm/dd/yyyy'
@@ -33,9 +33,9 @@ TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
 List<String> toIsoHourEndingStamp(TZDateTime hourBeginning) {
   var hour = Hour.beginning(hourBeginning);
   var offsetStart = hour.start.timeZoneOffset.inHours;
-  var isFallBack = isFallBackDate(Date.utc(
-      hourBeginning.year, hourBeginning.month, hourBeginning.day));
-  var res = [hour.start.toString().substring(0,10)];
+  var isFallBack = isFallBackDate(
+      Date.utc(hourBeginning.year, hourBeginning.month, hourBeginning.day));
+  var res = [hour.start.toString().substring(0, 10)];
 
   if (hourBeginning.hour == 23) {
     res.add('24');
@@ -58,7 +58,8 @@ List<String> toIsoHourEndingStamp(TZDateTime hourBeginning) {
   return res;
 }
 
-/// Check if this date is a fall back date.  Return true if it is.
+/// Check if this date is a fall back date for the America/New_York time zone.
+/// Return true if it is.
 bool isFallBackDate(Date date) {
   var offsetStart = TZDateTime(_eastern, date.year, date.month, date.day)
       .timeZoneOffset
@@ -71,7 +72,6 @@ bool isFallBackDate(Date date) {
   if (offsetStart > offsetEnd) res = true;
   return res;
 }
-
 
 /// When you read the MIS reports with csv, the hour ending is an integer.
 /// Fix it with this function.
@@ -87,4 +87,11 @@ String mmddyyyy(Date date) {
   var mm = date.month.toString().padLeft(2, '0');
   var dd = date.day.toString().padLeft(2, '0');
   return '$mm/$dd/${date.year}';
+}
+
+/// Convert an mm/dd/yyyy string to a UTC date.
+/// For example '11/26/2016' -> Date.utc(2016, 11, 26)
+Date parseMmddyyy(String mmddyyyy) {
+  return Date.utc(int.parse(mmddyyyy.substring(6, 10)),
+      int.parse(mmddyyyy.substring(0, 2)), int.parse(mmddyyyy.substring(3, 5)));
 }

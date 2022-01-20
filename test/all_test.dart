@@ -18,6 +18,7 @@ import 'db/isone_ptids_test.dart' as ptids;
 import 'db/isone/masked_ids_test.dart' as masked_ids;
 
 import 'db/lib_mis_reports_test.dart' as mis;
+import 'db/lib_nyiso_report_test.dart' as lib_nyiso_report;
 import 'db/marks/forward_marks_test.dart' as forward_marks;
 import 'db/mis/sd_arrawdsum_test.dart' as sd_arrawdsum;
 import 'db/mis/sd_rtload_test.dart' as sd_rtload;
@@ -25,6 +26,7 @@ import 'db/mis/sr_dalocsum_test.dart' as sr_dalocsum;
 import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
 import 'db/mis/tr_sch2tp_test.dart' as trsch2;
 import 'db/mis/tr_sch3p2_test.dart' as trsch3;
+import 'db/nyiso/binding_constraints_test.dart' as nyiso_binding_constraints;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
@@ -52,8 +54,10 @@ Future<void> main() async {
   dalmp.tests(rootUrl);
   demand_bids.tests();
   energy_offers.tests(rootUrl);
+  lib_nyiso_report.tests();
   await masked_ids.tests(rootUrl);
   monthly_asset_ncpc.tests(rootUrl);
+  await nyiso_binding_constraints.tests(rootUrl);
   ptids.tests(rootUrl);
   regulation_requirement.tests(rootUrl);
   sd_arrawdsum.tests(rootUrl);

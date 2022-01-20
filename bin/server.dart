@@ -12,6 +12,9 @@ import 'package:elec_server/api/mis/api_sr_rsvcharge.dart';
 import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 import 'package:elec_server/api/mis/api_tr_sch2tp.dart';
 import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
+import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart'
+    as nyiso_bc;
+import 'package:elec_server/api/nyiso/api_nyiso_dalmp.dart' as nyiso_dalmp;
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -36,7 +39,6 @@ import 'package:elec_server/api/utilities/api_competitive_suppliers_eversource.d
     as eversourcecs;
 import 'package:elec_server/api/utilities/api_load_eversource.dart'
     as eversourceLoad;
-import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:elec_server/api/isoexpress/api_system_demand.dart';
 import 'package:elec_server/api/isoexpress/api_isone_zonal_demand.dart';
 import 'package:elec_server/src/utils/cors_middleware.dart';
@@ -66,8 +68,16 @@ Future<Router> buildRouter() async {
   router.mount('/isone_masked_ids/v1/', ApiIsoneMaskedIds(DbProd.isone).router);
 
   await DbProd.marks.open();
-  await DbProd.riskSystem.open();
 
+  await DbProd.nyiso.open();
+  <String, Router>{
+    '/nyiso/bc/v1/': nyiso_bc.BindingConstraints(DbProd.nyiso).router,
+    '/nyiso/dalmp/v1/': nyiso_dalmp.DaLmp(DbProd.nyiso).router,
+  }.forEach((key, value) {
+    router.mount(key, value);
+  });
+
+  await DbProd.riskSystem.open();
   router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
   router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
   router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);

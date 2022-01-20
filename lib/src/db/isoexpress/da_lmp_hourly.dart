@@ -21,10 +21,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaLmpHourly/Raw/';
     this.dir = dir;
+    reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   }
-
-  @override
-  String reportName = 'Day-Ahead Energy Market Hourly LMP Report';
 
   @override
   String getUrl(Date? asOfDate) =>
