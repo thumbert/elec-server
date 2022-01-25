@@ -116,8 +116,8 @@ void tests(String rootUrl) async {
   });
   group('Ptid table client tests:', () {
     var client = PtidsApi(http.Client(), rootUrl: rootUrl);
-    test('get current ptid table', () async {
-      var data = await client.getPtidTable();
+    test('get current ptid table for isone', () async {
+      var data = await client.getPtidTable(region: 'isone');
       expect(data.length > 950, true);
       expect(data.first['ptid'], 4000);
       var me = data.firstWhere((e) => e['ptid'] == 4001);
@@ -126,6 +126,13 @@ void tests(String rootUrl) async {
         'name': '.Z.MAINE',
         'spokenName': 'MAINE',
         'type': 'zone'
+      });
+    });
+    test('get current ptid table for nyiso', () async {
+      var data = await client.getPtidTable(region: 'nyiso');
+      var fitz = data.firstWhere((e) => e['ptid'] == 23598);
+      expect(fitz.keys.toSet(), {'ptid', 'name', 'type', 'zoneName', 'zonePtid',
+        'subzoneName', 'lat/lon',
       });
     });
     test('get asOfDates', () async {

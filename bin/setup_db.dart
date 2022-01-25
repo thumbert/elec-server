@@ -17,6 +17,7 @@ import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
+import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart' as nyiso_ptid;
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -124,19 +125,19 @@ Future<void> insertDaEnergyOffers({List<Date>? days}) async {
 Future<void> insertDaLmpHourlyNyiso() async {
   var archive = NyisoDaLmpHourlyArchive();
   await archive.setupDb();
-  // await archive.dbConfig.db.open();
-  // var months = Month.utc(2019, 2).upTo(Month.utc(2021, 1));
-  // for (var month in months) {
-  //   archive.nodeType = NodeType.zone;
-  //   await archive.downloadMonth(month);
-  //   archive.nodeType = NodeType.gen;
-  //   await archive.downloadMonth(month);
-  //   for (var date in month.days()) {
-  //     var data = archive.processDay(date); // both zone and gen nodes
-  //     await archive.insertData(data);
-  //   }
-  // }
-  // await archive.dbConfig.db.close();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2019, 1).upTo(Month.utc(2019, 1));
+  for (var month in months) {
+    archive.nodeType = NodeType.zone;
+    await archive.downloadMonth(month);
+    archive.nodeType = NodeType.gen;
+    await archive.downloadMonth(month);
+    for (var date in month.days()) {
+      var data = archive.processDay(date); // both zone and gen nodes
+      await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
 }
 
 void insertForwardMarks() async {
@@ -263,6 +264,19 @@ void insertPtidTable() async {
   await archive.db.close();
 }
 
+Future<void> insertPtidTableNyiso() async {
+  var archive = nyiso_ptid.PtidArchive();
+  await archive.setupDb();
+
+  await archive.downloadData();
+  var data = archive.processData(Date.today(location: UTC));
+  //print(data);
+
+  await archive.db.open();
+  await archive.insertData(data);
+  await archive.db.close();
+}
+
 void insertRegulationRequirement() async {
   var archive = RegulationRequirementArchive();
   await archive.setupDb();
@@ -335,6 +349,7 @@ void main() async {
   // await insertDaBindingConstraintsIsone();
   // await insertDaBindingConstraintsNyiso();
   await insertDaLmpHourlyNyiso();
+  // await insertPtidTableNyiso();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();

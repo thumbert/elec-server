@@ -16,17 +16,24 @@ class PtidsApi {
   /// current ptid table cached
   Map<int, Map<String, dynamic>> _ptidTableCache = {};
 
-  /// Get ptid table
+  /// Get ptid table.
   /// [asOfDate] - Path parameter: 'asOfDate'.  If [null] return the last
   /// date in the database.
-  Future<List<Map<String, dynamic>>> getPtidTable({Date? asOfDate}) async {
-    var _url = rootUrl + servicePath;
-    if (asOfDate == null) {
-      _url += 'current';
-    } else {
-      _url += 'asofdate/$asOfDate';
+  /// [region] can be 'isone' or 'nyiso'.
+  Future<List<Map<String, dynamic>>> getPtidTable({Date? asOfDate,
+    String region = 'isone'}) async {
+    var _url = StringBuffer()..write(rootUrl);
+    if (region != 'isone') {
+      _url.write('/');
+      _url.write(region.toLowerCase());
     }
-    var _response = await http.get(Uri.parse(_url));
+    _url.write(servicePath);
+    if (asOfDate == null) {
+      _url.write('current');
+    } else {
+      _url.write('asofdate/$asOfDate');
+    }
+    var _response = await http.get(Uri.parse(_url.toString()));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
 

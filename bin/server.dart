@@ -15,6 +15,7 @@ import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart'
     as nyiso_bc;
 import 'package:elec_server/api/nyiso/api_nyiso_dalmp.dart' as nyiso_dalmp;
+import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart' as nyiso_ptids;
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -73,6 +74,7 @@ Future<Router> buildRouter() async {
   <String, Router>{
     '/nyiso/bc/v1/': nyiso_bc.BindingConstraints(DbProd.nyiso).router,
     '/nyiso/dalmp/v1/': nyiso_dalmp.DaLmp(DbProd.nyiso).router,
+    '/nyiso/ptids/v1/': nyiso_ptids.ApiPtids(DbProd.nyiso).router,
   }.forEach((key, value) {
     router.mount(key, value);
   });

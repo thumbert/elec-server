@@ -35,6 +35,10 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
   File getFilename(Date? asOfDate) =>
       File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
+  /// Return one document for one day for all ptids in the pool.
+  /// Use rle to encode most common values.
+  ///
+  ///
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);

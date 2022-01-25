@@ -3,7 +3,6 @@ library db.lib_nysio_report;
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:path/path.dart';
@@ -60,9 +59,6 @@ abstract class NyisoReport {
   /// Setup the database from scratch again, including the index
   Future<void> setupDb();
 
-  /// Bring the database up to date.
-  /// Future<Null> updateDb();
-
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.
   List<Map<String, dynamic>> processFile(File file);
@@ -104,8 +100,8 @@ abstract class NyisoReport {
   Future insertData(List<Map<String, dynamic>> data) async {
     return dbConfig.coll
         .insertAll(data)
-        .then((_) => print('--->  Inserted successfully'))
-        .catchError((e) => print('   ' + e.toString()));
+        .then((_) => print('--->  Inserted $reportName successfully'))
+        .catchError((e) => print('XXXXX' + e.toString()));
   }
 }
 
