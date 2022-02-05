@@ -12,7 +12,7 @@ import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart' as client;
+import 'package:elec_server/client/dalmp.dart' as client;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
@@ -24,7 +24,8 @@ Future<void> oneByOneAsTimeseries(List<int> ptids,
   var futs = [];
   var start = Date.utc(2019, 1, 1);
   var end = Date.utc(2019, 12, 31);
-  var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
+  var daLmp =
+      client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
   var sw = Stopwatch()..start();
   var out = <int, TimeSeries<double>>{};
   for (var ptid in ptids) {
@@ -38,7 +39,8 @@ Future<void> parallelGet(List<int> ptids,
     {String rootUrl = 'http://127.0.0.1:8080'}) async {
   var start = Date.utc(2019, 1, 1);
   var end = Date.utc(2019, 12, 31);
-  var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
+  var daLmp =
+      client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
   var sw = Stopwatch()..start();
   var out = <int, TimeSeries<double>>{};
   var futs = ptids.map(
@@ -80,7 +82,8 @@ Future<void> compactGet(List<int> ptids,
 
 Future<void> speedTest(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
+  var daLmp =
+      client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
 
   // get all the list of all ptids
   var ptidApi = PtidsApi(http.Client(), rootUrl: rootUrl);

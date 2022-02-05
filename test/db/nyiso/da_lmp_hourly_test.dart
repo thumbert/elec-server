@@ -1,7 +1,7 @@
 library test.db.nyiso.da_lmp_hourly_test;
 
-import 'dart:async';
 import 'dart:convert';
+import 'package:elec_server/client/dalmp.dart' as client;
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
@@ -9,8 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
-import 'package:elec_server/api/nyiso/api_nyiso_dalmp.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart' as client;
+import 'package:elec_server/api/api_dalmp.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
@@ -38,7 +37,7 @@ void tests(String rootUrl) async {
     });
   });
   group('Nyiso DAM LMP api tests: ', () {
-    var api = DaLmp(DbProd.nyiso);
+    var api = DaLmp(DbProd.nyiso, iso: Iso.newYork);
     setUp(() async => await DbProd.nyiso.open());
     tearDown(() async => await DbProd.nyiso.close());
     test('get lmp data for 2 days', () async {
@@ -54,18 +53,7 @@ void tests(String rootUrl) async {
       expect(data.length, 2);
       expect(data['2019-01-01']!.take(3), [26.4, 22.97, 20.99]);
     });
-    // test('get lmp data for 2 days (compact)', () async {
-    //   var aux = await api.getHourlyPricesCompact(
-    //       'lmp', 4000, '2017-01-01', '2017-01-02');
-    //   expect(aux.length, 48);
-    //   expect(aux.first, 35.12);
-    // });
-
-    test('get daily lmp prices by peak bucket', () async {
-      var data = await api.getDailyBucketPrice(
-          'lmp', 61757, '2019-01-01', '2019-01-07', '5x16');
-      expect(data.length, 4);
-      expect(data.first, {'date': '2019-01-02', 'lmp': 36.040000000000006});
+    test('get daily lmp prices by peak bucket for one ptid', () async {
       var res = await http.get(
           Uri.parse('$rootUrl/nyiso/dalmp/v1/daily/lmp/'
               'ptid/61757/start/2019-01-01/end/2019-01-07/bucket/5x16'),
@@ -75,11 +63,60 @@ void tests(String rootUrl) async {
       expect(aux.first, {'date': '2019-01-02', 'lmp': 36.040000000000006});
     });
 
+    test('get daily lmp prices by peak bucket for two ptids', () async {
+      var data = await api.getDailyBucketPriceSeveral('lmp', [61757, 61752],
+          Date.utc(2019, 1, 1), Date.utc(2019, 1, 7), Bucket.b5x16);
+      expect(data.length, 8);
+      var n57 = data
+          .firstWhere((e) => e['ptid'] == 61757 && e['date'] == '2019-01-02');
+      expect(n57,
+          {'ptid': 61757, 'date': '2019-01-02', 'lmp': 36.040000000000006});
+      var res = await http.get(
+          Uri.parse('$rootUrl/nyiso/dalmp/v1/daily/lmp/'
+              'ptids/61757,61752/start/2019-01-01/end/2019-01-07/bucket/5x16'),
+          headers: {'Content-Type': 'application/json'});
+      var aux = json.decode(res.body) as List;
+      expect(aux.length, 8);
+      expect(
+          aux.firstWhere(
+              (e) => e['ptid'] == 61757 && e['date'] == '2019-01-02'),
+          {'ptid': 61757, 'date': '2019-01-02', 'lmp': 36.040000000000006});
+    });
+
     test('get daily lmp prices by flat bucket', () async {
-      var data = await api.getDailyBucketPrice(
-          'lmp', 61757, '2019-01-01', '2019-01-07', 'flat');
+      var data = await api.getDailyBucketPriceSeveral('lmp', [61757],
+          Date.utc(2019, 1, 1), Date.utc(2019, 1, 7), Bucket.atc);
       expect(data[1]['lmp'], 32.415416666666665);
       expect(data.length, 7);
+    });
+
+    test('get daily 7x24 prices direct method (calculated by mongo)', () async {
+      var data = await api.getDailyAtcPrices([61752, 61758],
+          Date.utc(2019, 1, 1), Date.utc(2019, 12, 31), 'congestion');
+      expect(data.first, {
+        'date': '2019-01-01',
+        'ptid': 61752,
+        'congestion': -1.0204166666666667,
+      });
+      expect(data.length, 730);
+      var url = rootUrl +
+          '/nyiso/dalmp/v1/'
+              'daily/congestion/ptids/61752,61758/start/2019-01-01/end/2019-12-31/bucket/7x24';
+      var aux = await http.get(Uri.parse(url));
+      var res = json.decode(aux.body) as List;
+      expect(res.length, 730);
+    });
+
+    test('get monthly 7x24 prices direct method (calculated by mongo)',
+        () async {
+      var data = await api.getMonthlyAtcPrices([61752, 61758],
+          Month.utc(2019, 1), Month.utc(2019, 12), 'congestion');
+      expect(data.first, {
+        'month': '2019-01',
+        'ptid': 61752,
+        'congestion': -4.766330645161291,
+      });
+      expect(data.length, 24);
     });
 
     test('get mean daily 7x24 prices all nodes 2019-01-01 (mongo)', () async {
@@ -92,11 +129,11 @@ void tests(String rootUrl) async {
       var data = await api.getMonthlyBucketPrice(
           'lmp', 61757, '201901', '201902', 'flat');
       expect(data.length, 2);
-      expect(data.first, {'month': '2019-01', 'lmp': 51.03111559139784});
+      expect(data.first, {'month': '2019-01', 'lmp': 51.03111559139785});
     });
   });
-  group('DAM LMP speed tests: ', () {
-    var api = DaLmp(DbProd.nyiso);
+  group('Nyiso DAM LMP speed tests: ', () {
+    var api = DaLmp(DbProd.nyiso, iso: Iso.newYork);
     var sw = Stopwatch();
     setUp(() async => await DbProd.nyiso.open());
     tearDown(() async => await DbProd.nyiso.close());
@@ -120,42 +157,44 @@ void tests(String rootUrl) async {
     });
   });
 
-  // group('DAM LMP client tests: ', () {
-  //   var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
-  //   test('get daily peak price between two dates', () async {
-  //     var data = await daLmp.getDailyLmpBucket(4000, LmpComponent.lmp,
-  //         IsoNewEngland.bucket5x16, Date.utc(2017, 1, 1), Date.utc(2017, 1, 5));
-  //     expect(data.length, 3);
-  //     expect(data.toList(), [
-  //       IntervalTuple(Date(2017, 1, 3, location: location), 45.64124999999999),
-  //       IntervalTuple(Date(2017, 1, 4, location: location), 39.103125),
-  //       IntervalTuple(Date(2017, 1, 5, location: location), 56.458749999999995)
-  //     ]);
-  //   });
-  //   test('get monthly peak price between two dates', () async {
-  //     var data = await daLmp.getMonthlyLmpBucket(4000, LmpComponent.lmp,
-  //         IsoNewEngland.bucket5x16, Month.utc(2017, 1), Month.utc(2017, 8));
-  //     expect(data.length, 8);
-  //     expect(data.first,
-  //         IntervalTuple(Month(2017, 1, location: location), 42.55883928571426));
-  //   });
-  //   test('get hourly price for 2017-01-01', () async {
-  //     var data = await daLmp.getHourlyLmp(
-  //         4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
-  //     expect(data.length, 24);
-  //     expect(
-  //         data.first,
-  //         IntervalTuple(
-  //             Hour.beginning(TZDateTime(location, 2017, 1, 1)), 35.12));
-  //   });
-  //   test('get daily prices all nodes', () async {
-  //     var data = await daLmp.getDailyPricesAllNodes(
-  //         LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 3));
-  //     expect(data.length, 1136);
-  //     var p321 = data[321]!;
-  //     expect(p321.first.value, 37.755);
-  //   });
-  // });
+  group('Nyiso DAM LMP client tests: ', () {
+    var daLmp = client.DaLmp(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
+    test('get daily peak price between two dates', () async {
+      var data = await daLmp.getDailyLmpBucket(61752, LmpComponent.lmp,
+          Bucket.b5x16, Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
+      expect(data.length, 3);
+      expect(data.toList(), [
+        IntervalTuple(Date(2019, 1, 2, location: location), 31.678124999999998),
+        IntervalTuple(Date(2019, 1, 3, location: location), 29.316875000000003),
+        IntervalTuple(Date(2019, 1, 4, location: location), 23.630625000000002),
+      ]);
+    });
+    test('get monthly peak price between two dates', () async {
+      var data = await daLmp.getMonthlyLmpBucket(61752, LmpComponent.congestion,
+          IsoNewEngland.bucket5x16, Month.utc(2019, 1), Month.utc(2019, 12));
+      expect(data.length, 12);
+      expect(
+          data.first,
+          IntervalTuple(
+              Month(2019, 1, location: location), -4.766330645161291));
+    });
+    test('get hourly price for 2017-01-01', () async {
+      var data = await daLmp.getHourlyLmp(
+          61752, LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 1, 1));
+      expect(data.length, 1);
+      expect(
+          data.first,
+          IntervalTuple(
+              Hour.beginning(TZDateTime(location, 2019, 1, 1)), 11.83));
+    });
+    test('get daily prices all nodes', () async {
+      var data = await daLmp.getDailyPricesAllNodes(
+          LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 1, 3));
+      expect(data.length, 570);
+      var zA = data[61752]!;
+      expect(zA.first.value, 17.090833333333332);
+    });
+  });
 }
 
 // Future speedTest(String rootUrl) async {

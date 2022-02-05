@@ -1,3 +1,4 @@
+import 'package:elec/elec.dart';
 import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
@@ -14,8 +15,10 @@ import 'package:elec_server/api/mis/api_tr_sch2tp.dart';
 import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart'
     as nyiso_bc;
-import 'package:elec_server/api/nyiso/api_nyiso_dalmp.dart' as nyiso_dalmp;
+import 'package:elec_server/api/api_dalmp.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart' as nyiso_ptids;
+import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart'
+    as nyiso_tcc_clearing_prices;
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -54,7 +57,7 @@ Future<Router> buildRouter() async {
     '/da_energy_offers/v1/': DaEnergyOffers(DbProd.isoexpress).router,
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
-    '/dalmp/v1/': DaLmp(DbProd.isoexpress).router,
+    '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/monthly_asset_ncpc/v1/': ApiMonthlyAssetNcpc(DbProd.isoexpress).router,
     '/regulation_requirement/v1/':
         RegulationRequirement(DbProd.isoexpress).router,
@@ -73,8 +76,11 @@ Future<Router> buildRouter() async {
   await DbProd.nyiso.open();
   <String, Router>{
     '/nyiso/bc/v1/': nyiso_bc.BindingConstraints(DbProd.nyiso).router,
-    '/nyiso/dalmp/v1/': nyiso_dalmp.DaLmp(DbProd.nyiso).router,
+    '/nyiso/dalmp/v1/': DaLmp(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/ptids/v1/': nyiso_ptids.ApiPtids(DbProd.nyiso).router,
+    '/nyiso/tcc_clearing_prices/v1/':
+        nyiso_tcc_clearing_prices.ApiNyisoTccClearingPrices(DbProd.nyiso)
+            .router,
   }.forEach((key, value) {
     router.mount(key, value);
   });

@@ -3,9 +3,9 @@ library db.nyiso.da_congestion_compact;
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:path/path.dart';
 import 'package:date/date.dart';
+import 'package:dama/basic/rle.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/src/db/lib_nyiso_report.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -82,8 +82,9 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
             .toList());
       }
     }
+
     /// insert the ptid index at position 0
-    for (var i=0; i<ptids.length; i++) {
+    for (var i = 0; i < ptids.length; i++) {
       _congestion[i].insert(0, i);
     }
 
@@ -101,7 +102,6 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
         .compound(Ordering.natural<num>().onResultOf((List xs) => xs[21]));
     ordering.sort(_congestion);
 
-
     /// Transpose the _congestion matrix into a
     /// data matrix with index [hour, ptid]
     var hoursCount = _congestion.first.length - 1;
@@ -109,23 +109,18 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
         hoursCount, (i) => List<num>.generate(ptids.length, (i) => 999.9));
     for (var i = 0; i < hoursCount; i++) {
       for (var j = 0; j < ptids.length; j++) {
-        data[i][j] = _congestion[j][i+1];
+        data[i][j] = _congestion[j][i + 1];
       }
     }
 
     out = {
       'date': date.toString(),
       'ptids': _congestion.map((e) => ptids[e[0] as int]).toList(),
-      'congestion': data.map((List<num> e) => rle(e)).toList(),
+      'congestion': data.map((List<num> e) => runLenghtEncode(e)).toList(),
     };
 
     return out;
   }
-
-  List<num> rle(List<num> xs) {
-
-  }
-
 
   /// Insert data into db.  You can pass in several days at once.
   /// Note: Input [data] needs to contain both the zone and the gen data

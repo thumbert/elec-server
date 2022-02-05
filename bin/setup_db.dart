@@ -18,6 +18,8 @@ import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart' as nyiso_ptid;
+import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart'
+    as nyiso_tcc_cp;
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -288,6 +290,21 @@ void insertRegulationRequirement() async {
   await archive.db!.close();
 }
 
+Future<void> insertTccClearedPricesNyiso() async {
+  var archive = nyiso_tcc_cp.NyisoTccClearingPrices();
+  // await archive.setupDb();
+
+  await archive.db.open();
+  var files = Directory(archive.dir).listSync().whereType<File>();
+  for (var file in files) {
+    print('Working on file ${file.path}');
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+
+  await archive.db.close();
+}
+
 Future<void> insertWholesaleLoadReports() async {
   /// minimal setup to pass the tests
   var archive = WholesaleLoadCostReportArchive();
@@ -348,8 +365,9 @@ void main() async {
 
   // await insertDaBindingConstraintsIsone();
   // await insertDaBindingConstraintsNyiso();
-  await insertDaLmpHourlyNyiso();
+  // await insertDaLmpHourlyNyiso();
   // await insertPtidTableNyiso();
+  await insertTccClearedPricesNyiso();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();

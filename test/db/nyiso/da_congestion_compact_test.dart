@@ -10,8 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
-import 'package:elec_server/api/nyiso/api_nyiso_dalmp.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart' as client;
+import 'package:elec_server/api/api_dalmp.dart';
+import 'package:elec_server/client/dalmp.dart' as client;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
@@ -26,11 +26,23 @@ void tests(String rootUrl) async {
     tearDown(() async {
       await archive.dbConfig.db.close();
     });
-    test('process 2019-01-01 (zones + gen nodes)',
-            () async {
-          var res = archive.processDay(Date.utc(2019, 1, 1));
-          expect(res.length, 570); // both zones and gen nodes
-        });
+    test('process 2019-01-01 (zones + gen nodes)', () async {
+      var res = archive.processDay(Date.utc(2019, 1, 1));
+      var congestion = res['congestion'] as List;
+      expect(congestion.length, 24);
+      expect(congestion[0].take(2).toList(), [14, -32.33]);
+
+      /// How good is the compression?  For 2019-01-01 there are
+      /// 570x24 (=13680) values that get stored as a 7556 list.
+      /// For 2019-04-01, 13704 values get stored as a 5070 list.
+      /// For 2019-06-01, 13704 values get stored as a 7286 list.
+      ///
+      // var count = 0;
+      // for (List e in congestion) {
+      //   count += e.length;
+      // }
+      // print(count);
+    });
   });
   // group('Nyiso DAM LMP api tests: ', () {
   //   var api = DaLmp(DbProd.nyiso);
@@ -152,7 +164,6 @@ void tests(String rootUrl) async {
   //   });
   // });
 }
-
 
 void main() async {
   initializeTimeZones();

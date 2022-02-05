@@ -2,17 +2,15 @@ library test.db.isoexpress.da_lmp_hourly_test;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:elec_server/api/api_dalmp.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-//import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
-import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart' as client;
+import 'package:elec_server/client/dalmp.dart' as client;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
@@ -83,40 +81,30 @@ void tests(String rootUrl) async {
   });
   group('DAM LMP api tests: ', () {
     var db = DbProd.isoexpress;
-    var api = DaLmp(db);
+    var api = DaLmp(db, iso: Iso.newEngland);
     setUp(() async => await db.open());
     tearDown(() async => await db.close());
     test('get lmp data for 2 days', () async {
       var aux = await api.getHourlyData(
           4000, Date.utc(2017, 1, 1), Date.utc(2017, 1, 2), 'lmp');
-      expect(aux.length, 48);
-      expect(aux.first, {
-        'hourBeginning': '2017-01-01 00:00:00.000-0500',
-        'lmp': 35.12,
-      });
+      expect(aux.length, 2);
+      expect((aux['2017-01-01'] as List).first, 35.12);
       var url = '$rootUrl/dalmp/v1/hourly/lmp/'
           'ptid/4000/start/2017-01-01/end/2017-01-02';
       var res = await http
           .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
-      var data = json.decode(res.body) as List;
-      expect(data.length, 48);
-      expect(data.first, {
-        'hourBeginning': '2017-01-01 00:00:00.000-0500',
-        'lmp': 35.12,
-      });
+      var data = json.decode(res.body) as Map;
+      expect(data.length, 2);
+      expect((data['2017-01-01'] as List).first, 35.12);
     });
-    test('get lmp data for 2 days (compact)', () async {
-      var aux = await api.getHourlyPricesCompact(
-          'lmp', 4000, '2017-01-01', '2017-01-02');
-      expect(aux.length, 48);
-      expect(aux.first, 35.12);
-    });
+    // test('get lmp data for 2 days (compact)', () async {
+    //   var aux = await api.getHourlyPricesCompact(
+    //       'lmp', 4000, '2017-01-01', '2017-01-02');
+    //   expect(aux.length, 48);
+    //   expect(aux.first, 35.12);
+    // });
 
     test('get daily lmp prices by peak bucket', () async {
-      var data = await api.getDailyBucketPrice(
-          'lmp', 4000, '2017-07-01', '2017-07-07', '5x16');
-      expect(data.length, 4);
-      expect(data.first, {'date': '2017-07-03', 'lmp': 35.225});
       var res = await http.get(
           Uri.parse('$rootUrl/dalmp/v1/daily/lmp/'
               'ptid/4000/start/2017-07-01/end/2017-07-07/bucket/5x16'),
@@ -127,8 +115,8 @@ void tests(String rootUrl) async {
     });
 
     test('get daily lmp prices by flat bucket', () async {
-      var data = await api.getDailyBucketPrice(
-          'lmp', 4000, '2017-07-01', '2017-07-07', 'flat');
+      var data = await api.getDailyBucketPriceSeveral('lmp', [4000],
+          Date.utc(2017, 1, 1), Date.utc(2017, 1, 2), Bucket.atc);
       expect(data[2]['lmp'], 30.2825);
       expect(data.length, 7);
     });
@@ -148,7 +136,8 @@ void tests(String rootUrl) async {
     });
   });
   group('DAM LMP client tests: ', () {
-    var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
+    var daLmp =
+        client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
     test('get daily peak price between two dates', () async {
       var data = await daLmp.getDailyLmpBucket(4000, LmpComponent.lmp,
           IsoNewEngland.bucket5x16, Date.utc(2017, 1, 1), Date.utc(2017, 1, 5));
@@ -187,7 +176,8 @@ void tests(String rootUrl) async {
 
 Future speedTest(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
+  var daLmp =
+      client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
 
   var data = await daLmp.getHourlyLmp(
       4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));

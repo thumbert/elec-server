@@ -10,31 +10,48 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
 
+/// A Dart client for pulling DA LMP prices from Mongo supporting several
+/// regions.
 class DaLmp {
   String rootUrl;
   String servicePath;
-  final location = getLocation('America/New_York');
+  final Iso iso;
 
   DaLmp(http.Client client,
-      {this.rootUrl = 'http://localhost:8000',
+      {required this.iso,
+      this.rootUrl = 'http://localhost:8000',
       this.servicePath = '/dalmp/v1/'});
 
+  final _isoMap = <Iso, String>{
+    Iso.newEngland: '',
+    Iso.newYork: '/nyiso',
+  };
+
   /// Get hourly prices for a ptid between a start and end date.
+  /// Return an hourly timeseries.
   Future<TimeSeries<double>> getHourlyLmp(
       int ptid, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
     var _url = rootUrl +
+        _isoMap[iso]! +
         servicePath +
         'hourly/$cmp/ptid/${ptid.toString()}' +
         '/start/${start.toString()}' +
         '/end/${end.toString()}';
 
     var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
-    var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
-        Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),
-        e[cmp])));
-    return ts;
+    var data = json.decode(_response.body) as Map;
+    return TimeSeries.fromIterable(data.entries.expand((e) {
+      var date = Date(int.parse(e.key.substring(0, 4)),
+          int.parse(e.key.substring(5, 7)), int.parse(e.key.substring(8)),
+          location: iso.preferredTimeZoneLocation);
+      var hours = date.hours();
+      var out = <IntervalTuple<double>>[];
+      for (var i = 0; i < hours.length; ++i) {
+        out.add(IntervalTuple(hours[i], e.value[i]));
+      }
+      return out;
+    }));
   }
 
   /// Get daily prices for a ptid/bucket between a start and end date.
@@ -42,6 +59,7 @@ class DaLmp {
       Bucket bucket, Date start, Date end) async {
     var cmp = component.toString();
     var _url = rootUrl +
+        _isoMap[iso]! +
         servicePath +
         'daily/$cmp/ptid/${ptid.toString()}' +
         '/start/${start.toString()}' +
@@ -51,7 +69,8 @@ class DaLmp {
     var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
-        Date.parse(e['date'], location: location), e[cmp])));
+        Date.parse(e['date'], location: iso.preferredTimeZoneLocation),
+        e[cmp])));
     return ts;
   }
 
@@ -60,6 +79,7 @@ class DaLmp {
       LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
     var _url = rootUrl +
+        _isoMap[iso]! +
         servicePath +
         'daily/mean/$cmp' +
         '/start/${start.toString()}' +
@@ -73,7 +93,8 @@ class DaLmp {
     for (var ptid in grp.keys) {
       out[ptid] = TimeSeries.fromIterable(grp[ptid]!.map((e) =>
           IntervalTuple<double>(
-              Date.parse(e['date'], location: location), e[cmp])));
+              Date.parse(e['date'], location: iso.preferredTimeZoneLocation),
+              e[cmp])));
     }
     return out;
   }
@@ -83,6 +104,7 @@ class DaLmp {
       LmpComponent component, Bucket bucket, Month start, Month end) async {
     var cmp = component.toString();
     var _url = rootUrl +
+        _isoMap[iso]! +
         servicePath +
         'monthly/$cmp/ptid/${ptid.toString()}' +
         '/start/${start.toIso8601String()}' +
@@ -92,7 +114,8 @@ class DaLmp {
     var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
-        Month.parse(e['month'], location: location), e[cmp])));
+        Month.parse(e['month'], location: iso.preferredTimeZoneLocation),
+        e[cmp])));
     return ts;
   }
 }

@@ -10,12 +10,11 @@ import 'package:http/browser_client.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:dama/dama.dart';
 import 'package:elec/src/common_enums.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart';
-
+import 'package:elec_server/client/dalmp.dart';
 
 void tests(String rootUrl) async {
   test('Add 2 numbers', () {
-    expect(1+2, 3);
+    expect(1 + 2, 3);
   });
 //  test('LMP speed tests', () async {
 //    var location = getLocation('America/New_York');
@@ -38,8 +37,8 @@ void tests(String rootUrl) async {
 
     var res = <num>[];
     var sw = Stopwatch()..start();
-    for (int i=0; i<1000; i++) {
-      for (int j=0; j<n; j++) {
+    for (int i = 0; i < 1000; i++) {
+      for (int j = 0; j < n; j++) {
         x[j] += i;
       }
       res.add(x.reduce((a, b) => a + b));
@@ -47,11 +46,7 @@ void tests(String rootUrl) async {
     sw.stop();
     print('Milliseconds: ${sw.elapsedMilliseconds}');
   });
-
-
-
 }
-
 
 void main() async {
   await initializeTimeZone();
