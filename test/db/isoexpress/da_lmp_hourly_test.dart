@@ -117,8 +117,8 @@ void tests(String rootUrl) async {
     test('get daily lmp prices by flat bucket', () async {
       var data = await api.getDailyBucketPriceSeveral('lmp', [4000],
           Date.utc(2017, 1, 1), Date.utc(2017, 1, 2), Bucket.atc);
-      expect(data[2]['lmp'], 30.2825);
-      expect(data.length, 7);
+      expect(data[0]['lmp'], 37.86666666666667);
+      expect(data.length, 2);
     });
 
     test('get mean daily lmp prices all nodes 2017-01-01 (mongo)', () async {
@@ -132,7 +132,7 @@ void tests(String rootUrl) async {
       var data = await api.getMonthlyBucketPrice(
           'lmp', 4000, '201707', '201708', 'flat');
       expect(data.length, 2);
-      expect(data.first, {'month': '2017-07', 'lmp': 27.604422043010757});
+      expect(data.first, {'month': '2017-07', 'lmp': 27.60442204301075});
     });
   });
   group('DAM LMP client tests: ', () {

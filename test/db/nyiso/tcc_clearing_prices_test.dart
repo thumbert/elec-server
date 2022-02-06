@@ -1,15 +1,15 @@
 library test.db.nyiso.tcc_clearing_prices_test;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:elec/elec.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart';
+import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
-import 'package:date/date.dart';
-import 'package:timezone/timezone.dart';
 
 Future<void> tests(String rootUrl) async {
   var archive = NyisoTccClearingPrices();
@@ -34,11 +34,10 @@ Future<void> tests(String rootUrl) async {
         'J22-boppG22',
       ]);
     });
-
     test('read K21-2Y-R1', () async {
       var data = archive
           .processFile(File(archive.dir + 'clearingprices_K21-2Y-R1.csv'));
-      expect(data.length, 1074);
+      expect(data.length, 358);
       expect(data.first, {
         'auctionName': 'K21-2Y-R1',
         'ptid': 23512,
@@ -56,7 +55,20 @@ Future<void> tests(String rootUrl) async {
       var res = await api.clearingPricesPtid(61752);
       expect(res.length > 10, true);
       var cpG22 = res.firstWhere((e) => e['auctionName'] == 'G22');
+      expect(
+          cpG22.keys.toSet(), {'auctionName', 'bucket', 'clearingPriceHour'});
       expect(cpG22['clearingPriceHour'], 9.857217261904761);
+    });
+    test('Get all clearing prices several nodes', () async {
+      var url = rootUrl + '/nyiso/tcc_clearing_prices/v1/ptids/61752,61758';
+      var aux = await http.get(Uri.parse(url));
+      var res = json.decode(aux.body) as List;
+      expect(res.length > 10, true);
+      var cpG22 = res
+          .firstWhere((e) => e['auctionName'] == 'F21' && e['ptid'] == 61752);
+      expect(cpG22.keys.toSet(),
+          {'auctionName', 'bucket', 'ptid', 'clearingPriceHour'});
+      expect(cpG22['clearingPriceHour'], 1.7079301075268818);
     });
     test('Get all clearing prices for one auction, G22', () async {
       var res = await api.clearingPricesAuction('G22');
@@ -67,30 +79,39 @@ Future<void> tests(String rootUrl) async {
     //   expect(res.length, 3);
     // }, solo: true);
   });
-  // group('Binding constraints client tests:', () {
-  //   var client = BindingConstraintsApi(http.Client(), rootUrl: rootUrl);
-  //   test('get da binding constraints data for 3 days', () async {
-  //     var interval = Interval(
-  //         TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 1, 3));
-  //     var aux = await client.getDaBindingConstraints(interval);
-  //     expect(aux.length, 44);
-  //     var first = aux.first;
-  //     expect(first, {
-  //       'Constraint Name': 'SHFHGE',
-  //       'Contingency Name': 'Interface',
-  //       'Interface Flag': 'Y',
-  //       'Marginal Value': -7.31,
-  //       'hourBeginning': '2017-01-01 00:00:00.000-0500',
-  //     });
-  //   });
-  //   test('get all occurrences of constraint Paris', () async {
-  //     var name = 'PARIS   O154          A LN';
-  //     var aux = await client.getDaBindingConstraint(
-  //         name, Date.utc(2017, 1, 5), Date.utc(2017, 1, 6));
-  //     expect(aux.length, 2);
-  //   });
-  //   test('get constraint indicator', () {});
-  // });
+  group('TCC clearing prices client tests:', () {
+    var client =
+        FtrClearingPrices(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
+    test('get clearing prices for one node', () async {
+      var cp = await client.getClearingPricesForPtid(61752);
+      var x = cp.firstWhere((e) => e['auctionName'] == 'F21');
+      expect(x, {
+        'auctionName': 'F21',
+        'bucket': '7x24',
+        'clearingPriceHour': 1.7079301075268818,
+      });
+    });
+    test('get clearing prices for two nodes', () async {
+      var cp = await client.getClearingPricesForPtids([61752, 61758]);
+      var xs = cp.where((e) => e['auctionName'] == 'F21').toList();
+      expect(xs.length, 2);
+      expect(xs.firstWhere((e) => e['ptid'] == 61752), {
+        'auctionName': 'F21',
+        'ptid': 61752,
+        'bucket': '7x24',
+        'clearingPriceHour': 1.7079301075268818,
+      });
+    });
+    test('get all clearing prices for one auction', () async {
+      var xs = await client.getClearingPricesForAuction('F21');
+      expect(xs.length, 361);
+      expect(xs.firstWhere((e) => e['ptid'] == 61752), {
+        'ptid': 61752,
+        'bucket': '7x24',
+        'clearingPriceHour': 1.7079301075268818,
+      });
+    });
+  });
 }
 
 void main() async {

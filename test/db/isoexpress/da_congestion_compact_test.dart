@@ -11,7 +11,7 @@ import 'package:elec_server/client/isoexpress/dacongestion_compact.dart'
     as client;
 
 void tests(String rootUrl) async {
-  group('DAM congestion compact archive tests: ', () {
+  group('Isone DAM congestion compact archive tests: ', () {
     var archive = DaCongestionCompactArchive();
     setUp(() async {
       await archive.dbConfig.db.open();
@@ -27,7 +27,7 @@ void tests(String rootUrl) async {
           [0.67, 0, 2, 0.3, 0.84, 0.91, 0.75, 0, 11, 0.02, 6, 0.01, 1]);
     });
   });
-  group('DA Congestion compact api tests: ', () {
+  group('Isone DA Congestion compact api tests: ', () {
     var db = DbProd.isoexpress;
     var api = DaCongestionCompact(db);
     setUp(() async => await db.open());

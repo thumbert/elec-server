@@ -126,9 +126,9 @@ Future<void> insertDaEnergyOffers({List<Date>? days}) async {
 
 Future<void> insertDaLmpHourlyNyiso() async {
   var archive = NyisoDaLmpHourlyArchive();
-  await archive.setupDb();
+  // await archive.setupDb();
   await archive.dbConfig.db.open();
-  var months = Month.utc(2019, 1).upTo(Month.utc(2019, 1));
+  var months = Month.utc(2021, 1).upTo(Month.utc(2022, 2));
   for (var month in months) {
     archive.nodeType = NodeType.zone;
     await archive.downloadMonth(month);
