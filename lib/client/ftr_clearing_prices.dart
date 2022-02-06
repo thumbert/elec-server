@@ -1,8 +1,10 @@
 library client.ftr_clearing_prices.v1;
 
 import 'dart:convert';
+import 'package:date/date.dart';
 import 'package:http/http.dart' as http;
 import 'package:elec/elec.dart';
+import 'package:elec/ftr.dart';
 
 /// A Dart client for pulling FTR/TCC clearing prices from Mongo supporting
 /// several regions.
@@ -27,7 +29,7 @@ class FtrClearingPrices {
   ///   'clearingPriceHour': 3.98567,
   /// }
   /// ```
-  /// The clearing price is in $/MWh, ATC
+  /// The clearing price is in $/MWh
   Future<List<Map<String, dynamic>>> getClearingPricesForPtid(int ptid) async {
     var _url = rootUrl + _isoMap[iso]! + '/ptid/$ptid';
 
@@ -49,7 +51,7 @@ class FtrClearingPrices {
   ///   'clearingPriceHour': 3.98567,
   /// }
   /// ```
-  /// The clearing price is in $/MWh, ATC
+  /// The clearing price is in $/MWh
   Future<List<Map<String, dynamic>>> getClearingPricesForPtids(
       List<int> ptids) async {
     var _url = rootUrl + _isoMap[iso]! + '/ptids/${ptids.join(',')}';
@@ -69,8 +71,7 @@ class FtrClearingPrices {
   ///   'clearingPriceHour': 3.98567,
   /// }, ...
   /// ```
-  /// The clearing price is in $/MWh, ATC
-
+  /// The clearing price is in $/MWh
   Future<List<Map<String, dynamic>>> getClearingPricesForAuction(
       String auctionName) async {
     var _url = rootUrl + _isoMap[iso]! + '/auction/$auctionName';
@@ -78,5 +79,23 @@ class FtrClearingPrices {
     var _response = await http.get(Uri.parse(_url));
     var data = json.decode(_response.body) as List;
     return data.cast<Map<String, dynamic>>();
+  }
+
+  /// Get the auctions in the database.
+  /// If [startDate] is specified, return all auctions that are live on
+  /// [startDate] or start after it.
+  Future<List<FtrAuction>> getAuctions({Date? startDate}) async {
+    var _url = rootUrl + _isoMap[iso]! + '/auctions';
+    var _response = await http.get(Uri.parse(_url));
+    var data = json.decode(_response.body) as List;
+    var res = data.map((e) => FtrAuction.parse(e, iso: iso));
+    if (startDate == null) {
+      return res.toList();
+    } else {
+      return res
+          .where((auction) =>
+              startDate.isBefore(auction.end) || startDate == auction.end)
+          .toList();
+    }
   }
 }

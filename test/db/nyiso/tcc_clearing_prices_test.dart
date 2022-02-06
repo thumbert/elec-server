@@ -3,7 +3,9 @@ library test.db.nyiso.tcc_clearing_prices_test;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:date/date.dart';
 import 'package:elec/elec.dart';
+import 'package:elec/ftr.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart';
@@ -74,6 +76,13 @@ Future<void> tests(String rootUrl) async {
       var res = await api.clearingPricesAuction('G22');
       expect(res.length, 358);
     });
+    test('Get all the auction names', () async {
+      var url = rootUrl + '/nyiso/tcc_clearing_prices/v1/auctions';
+      var aux = await http.get(Uri.parse(url));
+      var res = json.decode(aux.body) as List;
+      expect(res.length > 10, true);
+      expect(res.contains('F21'), true);
+    });
     // test('Get cp, sp for a list of auctions', () async {
     //   var res = await api.cpsp(61752, 61758, 'G22,H22-boppG22,J22-boppG22');
     //   expect(res.length, 3);
@@ -90,6 +99,10 @@ Future<void> tests(String rootUrl) async {
         'bucket': '7x24',
         'clearingPriceHour': 1.7079301075268818,
       });
+    });
+    test('get clearing prices for one node that doesn\'t exist', () async {
+      var cp = await client.getClearingPricesForPtid(1);
+      expect(cp.isEmpty, true);
     });
     test('get clearing prices for two nodes', () async {
       var cp = await client.getClearingPricesForPtids([61752, 61758]);
@@ -110,6 +123,13 @@ Future<void> tests(String rootUrl) async {
         'bucket': '7x24',
         'clearingPriceHour': 1.7079301075268818,
       });
+    });
+    test('get all auction names', () async {
+      var xs = await client.getAuctions(
+          startDate: Date(2021, 12, 1, location: NewYorkIso.location));
+      expect(xs.contains(FtrAuction.parse('J21', iso: Iso.newYork)), false);
+      expect(xs.contains(FtrAuction.parse('Z21', iso: Iso.newYork)), true);
+      expect(xs.contains(FtrAuction.parse('F22', iso: Iso.newYork)), true);
     });
   });
 }

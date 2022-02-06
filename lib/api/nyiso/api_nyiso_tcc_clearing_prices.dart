@@ -44,6 +44,14 @@ class ApiNyisoTccClearingPrices {
       return Response.ok(json.encode(res), headers: headers);
     });
 
+    /// Get the auction names that are in the database, lexically sorted
+    router.get('/auctions', (Request request) async {
+      var aux = await coll.distinct('auctionName');
+      var res = <String>[...aux['values']];
+      res.sort();
+      return Response.ok(json.encode(res), headers: headers);
+    });
+
     return router;
   }
 
