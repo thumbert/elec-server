@@ -83,10 +83,6 @@ Future<void> tests(String rootUrl) async {
       expect(res.length > 10, true);
       expect(res.contains('F21'), true);
     });
-    // test('Get cp, sp for a list of auctions', () async {
-    //   var res = await api.cpsp(61752, 61758, 'G22,H22-boppG22,J22-boppG22');
-    //   expect(res.length, 3);
-    // }, solo: true);
   });
   group('TCC clearing prices client tests:', () {
     var client =
@@ -124,12 +120,19 @@ Future<void> tests(String rootUrl) async {
         'clearingPriceHour': 1.7079301075268818,
       });
     });
-    test('get all auction names', () async {
+    test('get all auction names from 2020-12-14', () async {
       var xs = await client.getAuctions(
-          startDate: Date(2021, 12, 1, location: NewYorkIso.location));
-      expect(xs.contains(FtrAuction.parse('J21', iso: Iso.newYork)), false);
+          startDate: Date(2020, 12, 14, location: NewYorkIso.location));
+      expect(xs.contains(FtrAuction.parse('J20', iso: Iso.newYork)), false);
+      expect(xs.contains(FtrAuction.parse('J21', iso: Iso.newYork)), true);
       expect(xs.contains(FtrAuction.parse('Z21', iso: Iso.newYork)), true);
       expect(xs.contains(FtrAuction.parse('F22', iso: Iso.newYork)), true);
+      expect(
+          xs.contains(FtrAuction.parse('K21-2Y-R1Spring21', iso: Iso.newYork)),
+          true);
+      expect(
+          xs.contains(FtrAuction.parse('X21-1Y-R1Autumn21', iso: Iso.newYork)),
+          true);
     });
   });
 }

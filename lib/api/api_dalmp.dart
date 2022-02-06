@@ -155,54 +155,6 @@ class DaLmp {
   /// Get daily bucket price for one ptid.
   /// Return a list of elements like
   /// ```
-  /// {'date': '2020-01-12', 'lmp': 75.21},
-  /// ```
-  /// http://localhost:8080/nyiso/dalmp/v1/daily/lmp/ptid/4000/start/20170101/end/20170101/bucket/5x16
-  // Future<List<Map<String, dynamic>>> getDailyBucketPrice(String component,
-  //     int ptid, String start, String end, String bucket) async {
-  //   var startDate = Date.parse(start);
-  //   var endDate = Date.parse(end);
-  //   var bucketO = Bucket.parse(bucket);
-  //
-  //   /// special case for atc bucket
-  //   if (bucketO == Bucket.atc) {
-  //     var aux = await getDailyAtcPrices([ptid], startDate, endDate, component);
-  //     return [
-  //       for (var e in aux) {'date': e['date'], component: e[component]}
-  //     ];
-  //   }
-  //
-  //   var days = startDate.upTo(endDate);
-  //   var groups = Map.fromIterables(days.map((e) => e.toString()),
-  //       List.generate(days.length, (index) => <num>[]));
-  //
-  //   var aux = await getHourlyData(ptid, startDate, endDate, component);
-  //   for (var e in aux.entries) {
-  //     var date = Date(int.parse(e.key.substring(0, 4)),
-  //         int.parse(e.key.substring(5, 7)), int.parse(e.key.substring(8)),
-  //         location: NewYorkIso.location);
-  //     var currentHour = Hour.beginning(date.start);
-  //     for (var v in e.value) {
-  //       if (bucketO.containsHour(currentHour)) {
-  //         groups[e.key]!.add(v);
-  //       }
-  //       currentHour = currentHour.next;
-  //     }
-  //   }
-  //
-  //   // calculate the mean for each day
-  //   return groups.entries
-  //       .where((e) => e.value.isNotEmpty)
-  //       .map((e) => {
-  //             'date': e.key,
-  //             component: _mean(e.value),
-  //           })
-  //       .toList();
-  // }
-
-  /// Get daily bucket price for one ptid.
-  /// Return a list of elements like
-  /// ```
   /// {'ptid': 61752, 'date': '2020-01-12', 'lmp': 75.21},
   /// ```
   Future<List<Map<String, dynamic>>> getDailyBucketPriceSeveral(
@@ -232,7 +184,7 @@ class DaLmp {
         for (var e in groups[yyyymm]!) {
           out.add({
             'date': yyyymm,
-            'ptid': e['ptid'],
+            if (ptids.length > 1) 'ptid': e['ptid'],
             component: _mean(index.map((i) => e[component][i])),
           });
         }

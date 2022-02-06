@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
+import 'package:elec/ftr.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_nyiso_report.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
@@ -26,7 +28,8 @@ class NyisoTccClearingPrices extends NyisoReport {
   Db get db => dbConfig.db;
 
   final location = getLocation('America/New_York');
-  final token = <int, String>{6: '6M', 12: '1Y', 24: '2Y'};
+  // final token = <int, String>{6: '6M', 12: '1Y', 24: '2Y'};
+  final Iso iso = Iso.newYork;
 
   /// Download the data manually from http://tcc.nyiso.com/tcc/public/view_nodal_prices.do
   /// Try to find a way to push the 'Download CSV' button with the auction of interest
@@ -75,11 +78,11 @@ class NyisoTccClearingPrices extends NyisoReport {
         late String auctionName;
         late int hourCount;
         if (startDate == _startDate) {
-          // monthly auction
+          /// monthly auction
           auctionName = anchorMYY;
           hourCount = Term.fromInterval(anchorMonth).hours().length;
         } else {
-          // monthly bopp auction
+          /// monthly bopp auction
           var _month =
               Month(_startDate.year, _startDate.month, location: location);
           var mYY = formatMYY(_month);
@@ -103,10 +106,23 @@ class NyisoTccClearingPrices extends NyisoReport {
     var term = Term(startDate, endDate);
     var hourCount = term.hours().length;
     var monthCount = xs[10][4] as int;
-    if (!token.containsKey(monthCount)) {
+
+    // Get the month name from the official implementation
+    late FtrAuction auction;
+    if (monthCount == 6) {
+      auction =
+          SixMonthFtrAuction(iso: iso, startMonth: startMonth, round: round);
+    } else if (monthCount == 12) {
+      auction =
+          AnnualFtrAuction(iso: iso, startMonth: startMonth, round: round);
+    } else if (monthCount == 24) {
+      auction =
+          TwoYearFtrAuction(iso: iso, startMonth: startMonth, round: round);
+    } else {
       throw StateError('Unsupported auction with number of months $monthCount');
     }
-    var auctionName = '${formatMYY(startMonth)}-${token[monthCount]}-R$round';
+
+    var auctionName = auction.name;
     for (var x in xs.skip(10).where((List e) => e.length == 9)) {
       out.add({
         'auctionName': auctionName,
