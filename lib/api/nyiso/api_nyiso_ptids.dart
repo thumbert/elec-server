@@ -31,10 +31,10 @@ class ApiPtids {
 
     /// Get the table from asOfDate
     router.get('/asofdate/<asOfDate>',
-            (Request request, String asOfDate) async {
-          var aux = await ptidTableAsOfDate(asOfDate);
-          return Response.ok(json.encode(aux), headers: headers);
-        });
+        (Request request, String asOfDate) async {
+      var aux = await ptidTableAsOfDate(asOfDate);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
 
     /// Get the asOfDays this ptid is in the collection
     router.get('/ptid/<ptid>', (Request request, String ptid) async {
@@ -51,37 +51,31 @@ class ApiPtids {
     return router;
   }
 
+  /// Get the latest ptid table in the database.
   Future<List<Map<String, dynamic>>> ptidTableCurrent() async {
+    // Should find a way to do this in one query
     var last =
-    await getAvailableAsOfDates().then((List days) => days.last as String);
+        await getAvailableAsOfDates().then((List days) => days.last as String);
     var query = where
-     ..eq('asOfDate', last)
+      ..eq('asOfDate', last)
+      ..sortBy('ptid')
       ..excludeFields(['_id', 'asOfDate']);
+
+    // Can't do the approach below because it returns only one document!
+    // var query = where
+    //   ..sortBy('asOfDate', descending: true)
+    //   ..limit(1)
+    //   ..excludeFields(['_id', 'asOfDate'])
+    //   ..sortBy('ptid');
     return coll.find(query).toList();
-
-    // var pipeline = <Map<String, Object>>[
-    //   {
-    //     '\$match': {
-    //       'asOfDate': {
-    //         '\$eq': {
-    //           '\$max': 'asOfDate'
-    //         }
-    //       }
-    //     }
-    //   },
-    // ];
-    // var res = await coll.aggregateToStream(pipeline).toList();
-    // return res;
-
   }
 
-  Future<List<Map<String, dynamic>>> ptidTableAsOfDate(
-      String asOfDate) async {
+  Future<List<Map<String, dynamic>>> ptidTableAsOfDate(String asOfDate) async {
     var asOf = Date.parse(asOfDate);
     var days = await getAvailableAsOfDates()
         .then((days) => days.map((e) => Date.parse(e)));
     var last =
-    days.firstWhere((e) => !e.isBefore(asOf), orElse: () => days.last);
+        days.firstWhere((e) => !e.isBefore(asOf), orElse: () => days.last);
     var query = where
       ..eq('asOfDate', last.toString())
       ..excludeFields(['_id', 'asOfDate']);

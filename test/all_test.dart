@@ -27,6 +27,7 @@ import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
 import 'db/mis/tr_sch2tp_test.dart' as trsch2;
 import 'db/mis/tr_sch3p2_test.dart' as trsch3;
 import 'db/nyiso/binding_constraints_test.dart' as nyiso_binding_constraints;
+import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
@@ -58,6 +59,7 @@ Future<void> main() async {
   await masked_ids.tests(rootUrl);
   monthly_asset_ncpc.tests(rootUrl);
   await nyiso_binding_constraints.tests(rootUrl);
+  await nyiso_ptids.tests(rootUrl);
   ptids.tests(rootUrl);
   regulation_requirement.tests(rootUrl);
   sd_arrawdsum.tests(rootUrl);

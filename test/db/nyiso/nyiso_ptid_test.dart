@@ -46,6 +46,11 @@ Future<void> tests(String rootUrl) async {
       var res = await api.getAvailableAsOfDates();
       expect(res.isNotEmpty, true);
     });
+    test('Get the current table', () async {
+      var res = await api.ptidTableCurrent();
+      expect(res.length > 550, true);
+    });
+
     test('Get the list of available dates (http)', () async {
       var res = await http.get(Uri.parse('$rootUrl/nyiso/ptids/v1/dates'),
           headers: {'Content-Type': 'application/json'});

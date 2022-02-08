@@ -82,7 +82,7 @@ void tests(String rootUrl) async {
     tearDown(() async => await archive.db.close());
     test('Get the list of available dates', () async {
       var res = await api.getAvailableAsOfDates();
-      expect(res is List<String>, true);
+      expect(res.isNotEmpty, true);
     });
     test('Get the list of available dates (http)', () async {
       var res = await http.get(Uri.parse('$rootUrl/ptids/v1/dates'),
@@ -131,8 +131,14 @@ void tests(String rootUrl) async {
     test('get current ptid table for nyiso', () async {
       var data = await client.getPtidTable(region: 'nyiso');
       var fitz = data.firstWhere((e) => e['ptid'] == 23598);
-      expect(fitz.keys.toSet(), {'ptid', 'name', 'type', 'zoneName', 'zonePtid',
-        'subzoneName', 'lat/lon',
+      expect(fitz.keys.toSet(), {
+        'ptid',
+        'name',
+        'type',
+        'zoneName',
+        'zonePtid',
+        'subzoneName',
+        'lat/lon',
       });
     });
     test('get asOfDates', () async {
