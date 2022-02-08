@@ -23,13 +23,18 @@ Future<void> tests(String rootUrl) async {
       var date = archive.lastDate();
       var data = archive.processData(date);
       var zoneF = data.firstWhere((e) => e['spokenName'] == 'Zone F');
-      expect(zoneF.keys.toSet(), {'asOfDate',
-        'ptid', 'name', 'spokenName', 'type'
-      });
+      expect(zoneF.keys.toSet(),
+          {'asOfDate', 'ptid', 'name', 'spokenName', 'type'});
       var fitz = data.firstWhere((e) => e['ptid'] == 23598);
-      expect(fitz.keys.toSet(), {'asOfDate',
-        'ptid', 'name', 'type', 'zoneName', 'zonePtid',
-        'subzoneName', 'lat/lon',
+      expect(fitz.keys.toSet(), {
+        'asOfDate',
+        'ptid',
+        'name',
+        'type',
+        'zoneName',
+        'zonePtid',
+        'subzoneName',
+        'lat/lon',
       });
     });
   });
@@ -53,8 +58,14 @@ Future<void> tests(String rootUrl) async {
       var data = json.decode(res.body);
       expect(data.length > 550, true);
       var fitz = data.firstWhere((e) => e['ptid'] == 23598);
-      expect(fitz.keys.toSet(), {'ptid', 'name', 'type', 'zoneName', 'zonePtid',
-        'subzoneName', 'lat/lon',
+      expect(fitz.keys.toSet(), {
+        'ptid',
+        'name',
+        'type',
+        'zoneName',
+        'zonePtid',
+        'subzoneName',
+        'lat/lon',
       });
     });
     test('Get the list of available dates for one ptid', () async {
@@ -66,6 +77,7 @@ Future<void> tests(String rootUrl) async {
       expect(data is List, true);
     });
   });
+
   /// The client tests are moved together with the ISONE one.
 }
 

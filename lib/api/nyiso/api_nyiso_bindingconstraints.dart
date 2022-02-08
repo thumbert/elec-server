@@ -89,7 +89,7 @@ class BindingConstraints {
   Future<List<Map<String, dynamic>>> apiGetBindingConstraintsForName(
       String market, String constraintName, String start, String end) async {
     var query = where
-      ..eq('market', market)
+      ..eq('market', market.toUpperCase())
       ..gte('date', Date.parse(start).toString())
       ..lte('date', Date.parse(end).toString())
       ..eq('limitingFacility', constraintName)

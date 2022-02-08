@@ -1,6 +1,7 @@
 library test.db.nyiso.binding_constraints_test;
 
-import 'package:elec/elec.dart';
+import 'dart:convert';
+
 import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart';
 import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
 import 'package:test/test.dart';
@@ -56,6 +57,12 @@ Future<void> tests(String rootUrl) async {
           'DA', 'CENTRAL EAST - VC', '2019-01-01', '2019-01-06');
       expect(res.length, 136);
       expect(res.first.keys.toSet(), {'hourBeginning', 'contingency', 'cost'});
+      var url = '$rootUrl/nyiso/bc/v1/market/da/'
+          'constraintname/CENTRAL EAST - VC/start/2019-01-01/end/2019-01-06';
+      var aux = await http
+          .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
+      var data = json.decode(aux.body) as List;
+      expect(data.length, 136);
     });
   });
   // group('Binding constraints client tests:', () {

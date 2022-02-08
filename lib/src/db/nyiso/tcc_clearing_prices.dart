@@ -13,7 +13,8 @@ import 'package:csv/csv.dart';
 import 'package:timezone/timezone.dart';
 
 class NyisoTccClearingPrices extends NyisoReport {
-  NyisoTccClearingPrices({ComponentConfig? config, String? dir}) {
+  NyisoTccClearingPrices(
+      {ComponentConfig? config, String? dir, String? outDir}) {
     Map env = Platform.environment;
     config ??= ComponentConfig(
         host: '127.0.0.1',
@@ -28,7 +29,6 @@ class NyisoTccClearingPrices extends NyisoReport {
   Db get db => dbConfig.db;
 
   final location = getLocation('America/New_York');
-  // final token = <int, String>{6: '6M', 12: '1Y', 24: '2Y'};
   final Iso iso = Iso.newYork;
 
   /// Download the data manually from http://tcc.nyiso.com/tcc/public/view_nodal_prices.do
