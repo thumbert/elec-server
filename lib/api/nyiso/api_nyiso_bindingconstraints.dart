@@ -26,10 +26,17 @@ class BindingConstraints {
   Router get router {
     final router = Router();
 
-    /// Get all the constraints between start/end date
+    /// Get all the constraints between start/end date, hourly data
     router.get('/market/da/start/<start>/end/<end>',
         (Request request, String start, String end) async {
       var aux = await apiGetDaBindingConstraintsByDay(start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get all the constraints between start/end date
+    router.get('/market/da/start/<start>/end/<end>/dailycost',
+        (Request request, String start, String end) async {
+      var aux = await apiGetDaBindingConstraintsDailyCost(start, end);
       return Response.ok(json.encode(aux), headers: headers);
     });
 
@@ -76,6 +83,57 @@ class BindingConstraints {
       }
     }
     return aux;
+  }
+
+  /// Calculate the daily cost of a constraint.  Return a list in form
+  /// ```
+  /// {
+  ///   'date': '2019-01-01',
+  ///   'constraintName': 'CENTRAL EAST - VC',
+  ///   'cost': 187.23,
+  /// }
+  /// ```
+  Future<List<Map<String, dynamic>>> apiGetDaBindingConstraintsDailyCost(
+      String start, String end) async {
+    var pipeline = <Map<String, Object>>[
+      {
+        '\$match': {
+          'date': {
+            '\$lte': Date.parse(end).toString(),
+            '\$gte': Date.parse(start).toString(),
+          },
+        }
+      },
+      {
+        '\$unwind': '\$hours',
+      },
+      {
+        '\$group': {
+          '_id': {
+            'date': '\$date',
+            'name': '\$limitingFacility',
+          },
+          'cost': {'\$sum': '\$hours.cost'},
+        }
+      },
+      {
+        '\$project': {
+          '_id': 0,
+          'date': '\$_id.date',
+          'constraintName': '\$_id.name',
+          'cost': '\$cost',
+        }
+      },
+      {
+        '\$sort': {
+          'date': 1,
+          // 'cost': -1,
+        }
+      }
+    ];
+
+    var res = await coll.aggregateToStream(pipeline).toList();
+    return res;
   }
 
   /// Return a List of elements like this:

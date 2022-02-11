@@ -1,5 +1,7 @@
-import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
-import 'package:elec_server/client/isoexpress/binding_constraints.dart';
+import 'package:elec/elec.dart';
+import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart'
+    as api;
+import 'package:elec_server/client/binding_constraints.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
@@ -45,14 +47,14 @@ void tests(String rootUrl) async {
     });
   });
   group('Binding constraints API tests:', () {
-    var api = BindingConstraints(
+    var bc = api.BindingConstraints(
       archive.db,
     );
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     test('Get all constraints between two dates', () async {
       var res =
-          await api.apiGetDaBindingConstraintsByDay('2017-01-01', '2017-01-02');
+          await bc.apiGetDaBindingConstraintsByDay('2017-01-01', '2017-01-02');
       expect(res.length, 44);
       var x0 = res.firstWhere((e) =>
           e['Constraint Name'] == 'SHFHGE' &&
@@ -66,13 +68,14 @@ void tests(String rootUrl) async {
       });
     });
     test('Get one constraint between two dates', () async {
-      var res = await api.apiGetBindingConstraintsByName(
+      var res = await bc.apiGetBindingConstraintsByName(
           'DA', 'PARIS   O154          A LN', '2017-01-05', '2017-01-06');
       expect(res.length, 2);
     });
   });
   group('Binding constraints client tests:', () {
-    var client = BindingConstraintsApi(http.Client(), rootUrl: rootUrl);
+    var client = BindingConstraints(http.Client(),
+        iso: Iso.newEngland, rootUrl: rootUrl);
     test('get da binding constraints data for 3 days', () async {
       var interval = Interval(
           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 1, 3));
