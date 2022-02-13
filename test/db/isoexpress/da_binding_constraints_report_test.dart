@@ -79,7 +79,7 @@ void tests(String rootUrl) async {
     test('get da binding constraints data for 3 days', () async {
       var interval = Interval(
           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 1, 3));
-      var aux = await client.getDaBindingConstraints(interval);
+      var aux = await client.getDaBindingConstraintsDetails(interval);
       expect(aux.length, 44);
       var first = aux.first;
       expect(first, {

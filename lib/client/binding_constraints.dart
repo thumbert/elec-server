@@ -2,10 +2,13 @@ library elec_server.client.binding_constraints.v1;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:elec/elec.dart';
+import 'package:dama/dama.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
+import 'package:timeseries/timeseries.dart';
 
 /// A multi region client for getting binding constraints data
 class BindingConstraints {
@@ -24,6 +27,42 @@ class BindingConstraints {
     Iso.newYork: '/nyiso',
   };
 
+  /// Get all the constraints costs in a given interval as a timeseries.
+  ///
+  Future<Map<String, TimeSeries<num>>> getDaBindingConstraints(
+      Interval interval) async {
+    var start = Date.fromTZDateTime(interval.start);
+    Date end;
+    if (isBeginningOfDay(interval.end)) {
+      end = Date.fromTZDateTime(interval.end.subtract(Duration(seconds: 1)));
+    } else {
+      end = Date.fromTZDateTime(interval.end);
+    }
+    var _url = rootUrl +
+        _isoMap[iso]! +
+        servicePath +
+        'market/da' +
+        '/start/${start.toString()}' +
+        '/end/${end.toString()}/timeseries';
+    var _response = await http.get(Uri.parse(_url));
+    var xs = json.decode(_response.body) as List;
+    var out = <String, TimeSeries<num>>{};
+    for (var x in xs) {  // loop over the constraints
+      var ts = TimeSeries<num>();
+      var hours = x['hourBeginning'] as List;
+      for (var i = 0; i < hours.length; ++i) {
+        ts.add(IntervalTuple(
+            Hour.beginning(
+                TZDateTime.fromMillisecondsSinceEpoch(location, hours[i])),
+            x['cost'][i] as num));
+      }
+      out[x['constraintName']] = ts;
+    }
+    return out;
+  }
+
+
+
   /// Get all the constraints in a given interval.
   /// For NYISO each element of the list is a map with form
   /// ```
@@ -39,7 +78,7 @@ class BindingConstraints {
   /// }
   /// ```
   /// Note that each element is for one day.
-  Future<List<Map<String, dynamic>>> getDaBindingConstraints(
+  Future<List<Map<String,dynamic>>> getDaBindingConstraintsDetails(
       Interval interval) async {
     var start = Date.fromTZDateTime(interval.start);
     Date end;
@@ -57,6 +96,8 @@ class BindingConstraints {
     var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
+
+
 
   /// Calculate the total cost of this constraint for the day.
   /// Input [xs] is the data returned by [getDaBindingConstraints].

@@ -77,18 +77,24 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
         groupBy(xs, (Map e) => (e['Limiting Facility'] as String).trim());
 
     for (var group in groups.entries) {
+      var _hours = group.value
+          .map((e) => {
+                'hourBeginning':
+                    NyisoReport.parseTimestamp(e['Time Stamp'], e['Time Zone']),
+                'contingency': (e['Contingency'] as String).trim(),
+                'cost': e['Constraint Cost(\$)'],
+              })
+          .toList();
+      // Rarely, the entries are not time-sorted correctly
+      // see for example 2019-12-15 for 'E13THSTA 345 FARRAGUT 345 1'
+      // because there are different contingencies for this limitingFacility
+      // so I will sort them here before storing
+      _hours.sort((a,b) => a['hourBeginning'].compareTo(b['hourBeginning']));
       out.add({
         'date': date,
         'market': 'DA',
         'limitingFacility': group.key,
-        'hours': group.value
-            .map((e) => {
-                  'hourBeginning': NyisoReport.parseTimestamp(
-                      e['Time Stamp'], e['Time Zone']),
-                  'contingency': (e['Contingency'] as String).trim(),
-                  'cost': e['Constraint Cost(\$)'],
-                })
-            .toList(),
+        'hours': _hours,
       });
     }
 

@@ -58,7 +58,7 @@ Future<void> insertDaBindingConstraintsNyiso() async {
   await archive.dbConfig.db.open();
   var months = Month.utc(2019, 1).upTo(Month.utc(2021, 1));
   for (var month in months) {
-    await archive.downloadMonth(month);
+    // await archive.downloadMonth(month);
     for (var date in month.days()) {
       var file = archive.getFile(date);
       var data = archive.processFile(file);
@@ -364,10 +364,11 @@ void main() async {
   // await insertNoaaTemperatures(download: true);
 
   // await insertDaBindingConstraintsIsone();
-  // await insertDaBindingConstraintsNyiso();
+
+  await insertDaBindingConstraintsNyiso();
   // await insertDaLmpHourlyNyiso();
   // await insertPtidTableNyiso();
-  await insertTccClearedPricesNyiso();
+  // await insertTccClearedPricesNyiso();
 
 //  await insertForwardMarks();
 //   await insertIsoExpress();
