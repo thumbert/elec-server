@@ -10,7 +10,7 @@ import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/src/db/lib_nyiso_report.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 
 class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
@@ -38,7 +38,7 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
       'damlbmp_${nodeType.toString()}.csv';
 
   @override
-  File getFile(Date asOfDate) =>
+  File getCsvFile(Date asOfDate) =>
       File(dir + yyyymmdd(asOfDate) + 'damlbmp_${nodeType.toString()}.csv');
 
   @override
@@ -138,6 +138,18 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
   @override
   List<Map<String, dynamic>> processFile(File file) {
     /// use processDay()
+    throw UnimplementedError();
+  }
+
+  @override
+  String getUrlForMonth(Month month) {
+    // TODO: implement getUrlForMonth
+    throw UnimplementedError();
+  }
+
+  @override
+  File getZipFileForMonth(Month month) {
+    // TODO: implement getZipFileForMonth
     throw UnimplementedError();
   }
 }

@@ -21,7 +21,7 @@ Future<void> tests(String rootUrl) async {
     tearDown(() async => await archive.dbConfig.db.close());
     test('read binding constraints file for 2020-01-01', () async {
       var date = Date.utc(2020, 1, 1);
-      var file = archive.getFile(date);
+      var file = archive.getCsvFile(date);
       var data = archive.processFile(file);
       expect(data.length, 5);
       expect(data.first.keys.toSet(),
@@ -37,7 +37,7 @@ Future<void> tests(String rootUrl) async {
     });
     test('data gets properly sorted', () async {
       var date = Date.utc(2019, 12, 19);
-      var file = archive.getFile(date);
+      var file = archive.getCsvFile(date);
       var data = archive.processFile(file);
       var xs = data.firstWhere((e) => e['limitingFacility'] == 'E13THSTA 345 FARRAGUT 345 1');
       var exp = List.from(xs['hours'])..sort((a,b) => a['hourBeginning'].compareTo(b['hourBeginning']));

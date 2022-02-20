@@ -16,6 +16,7 @@ import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
+import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart' as nyiso_ptid;
 import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart'
@@ -58,9 +59,9 @@ Future<void> insertDaBindingConstraintsNyiso() async {
   await archive.dbConfig.db.open();
   var months = Month.utc(2019, 1).upTo(Month.utc(2021, 1));
   for (var month in months) {
-    // await archive.downloadMonth(month);
+    await archive.downloadMonth(month);
     for (var date in month.days()) {
-      var file = archive.getFile(date);
+      var file = archive.getCsvFile(date);
       var data = archive.processFile(file);
       await archive.insertData(data);
     }
@@ -123,6 +124,21 @@ Future<void> insertDaEnergyOffers({List<Date>? days}) async {
   }
   await archive.dbConfig.db.close();
 }
+
+Future<void> insertDaEnergyOffersNyiso() async {
+  var archive = NyisoDaEnergyOfferArchive();
+  // await archive.setupDb();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2021, 1).upTo(Month.utc(2021, 1));
+  for (var month in months) {
+    // await archive.downloadMonth(month);
+    var file = archive.getCsvFile(month.startDate);
+    var data = archive.processFile(file);
+    // await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
 
 Future<void> insertDaLmpHourlyNyiso() async {
   var archive = NyisoDaLmpHourlyArchive();
@@ -365,7 +381,8 @@ void main() async {
 
   // await insertDaBindingConstraintsIsone();
 
-  await insertDaBindingConstraintsNyiso();
+  // await insertDaBindingConstraintsNyiso();
+  await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
   // await insertPtidTableNyiso();
   // await insertTccClearedPricesNyiso();

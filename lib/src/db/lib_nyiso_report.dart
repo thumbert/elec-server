@@ -107,13 +107,22 @@ abstract class NyisoReport {
 
 /// An archive that gets daily updates.
 abstract class DailyNysioCsvReport extends NyisoReport {
-  /// Get the url of this report for this date
+  /// Get the url of this report for this date.  Monthly reports
+  /// do not have an url for each day.
+  /// For daily reports, the most recent 10 days are (usually) available
+  /// separately.
   String getUrl(Date asOfDate);
 
-  /// Get the file of this report as saved on disk.  There is one ISO
-  /// Express report per day.  Note that you can have multiple MIS reports
-  /// per day.
-  File getFile(Date asOfDate);
+  /// Get the url of this report for this month
+  String getUrlForMonth(Month month);
+
+  /// Get the CSV file of this report for the day [asOfDate] as saved on disk.
+  /// There is one ISO report per day.  Monthly reports have one file per month.
+  /// For monthly reports the [asOfDate] is the beginning of the month. 
+  File getCsvFile(Date asOfDate);
+
+  /// Get the file of this report as a monthly zip file on disk.
+  File getZipFileForMonth(Month month);
 
   /// Get the date associated with this file.
   Date getReportDate(File file);
@@ -122,15 +131,16 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// NYISO only keeps the most recent 10 days, so you may have to download
   /// the entire month.
   Future downloadDay(Date day, {bool overwrite = true}) async {
-    return await downloadUrl(getUrl(day), getFile(day), overwrite: overwrite);
+    return await downloadUrl(getUrl(day), getCsvFile(day), overwrite: overwrite);
   }
 
-  /// All month reports are zipped
+  /// (All) month reports are zipped
+  /// http://mis.nyiso.com/public/csv/biddata/20211001biddata_genbids_csv.zip
+  ///
   Future downloadMonth(Month month, {bool overwrite = true}) async {
-    var asOfDate = month.startDate;
-    var url = getUrl(asOfDate).replaceAll('.csv', '_csv') + '.zip';
-    var filename = File(getFile(asOfDate).path + '.zip');
-    return await downloadUrl(url, filename, overwrite: overwrite);
+    var url = getUrlForMonth(month);
+    var file = File(getZipFileForMonth(month).path);
+    return await downloadUrl(url, file, overwrite: overwrite);
   }
 
   /// Read the report from the disk, and insert the data into the database.
@@ -140,7 +150,7 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// Returns 0 for success, 1 for error, null if there is no data to insert.
   ///
   Future<int> insertDay(Date day) async {
-    var file = getFile(day);
+    var file = getCsvFile(day);
     List<Map<String, dynamic>> data;
     try {
       data = processFile(file);
@@ -162,13 +172,16 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// Read the report associated with the data, doing no processing.
   /// Return tabular data.  To get the data in the format needed for the
   /// database see the [processFile(file)] method.
+  /// 
+  /// Read from the monthly zip archive the file corresponding to the [date]
+  /// of interest.   
+  /// 
   List<Map<String, dynamic>> readReport(Date date) {
-    var file = getFile(date);
+   var file = getCsvFile(date);
     var out = <Map<String, dynamic>>[];
     var converter = CsvToListConverter();
 
-    var zipFile =
-        File(getFile(Date.utc(date.year, date.month, 1)).path + '.zip');
+    var zipFile = getZipFileForMonth(Month.utc(date.year, date.month));
     final bytes = zipFile.readAsBytesSync();
     var zipArchive = ZipDecoder().decodeBytes(bytes);
 
