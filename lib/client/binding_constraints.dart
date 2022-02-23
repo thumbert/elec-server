@@ -2,9 +2,7 @@ library elec_server.client.binding_constraints.v1;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:collection/collection.dart';
 import 'package:elec/elec.dart';
-import 'package:dama/dama.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
@@ -47,7 +45,8 @@ class BindingConstraints {
     var _response = await http.get(Uri.parse(_url));
     var xs = json.decode(_response.body) as List;
     var out = <String, TimeSeries<num>>{};
-    for (var x in xs) {  // loop over the constraints
+    for (var x in xs) {
+      // loop over the constraints
       var ts = TimeSeries<num>();
       var hours = x['hourBeginning'] as List;
       for (var i = 0; i < hours.length; ++i) {
@@ -60,8 +59,6 @@ class BindingConstraints {
     }
     return out;
   }
-
-
 
   /// Get all the constraints in a given interval.
   /// For NYISO each element of the list is a map with form
@@ -78,7 +75,7 @@ class BindingConstraints {
   /// }
   /// ```
   /// Note that each element is for one day.
-  Future<List<Map<String,dynamic>>> getDaBindingConstraintsDetails(
+  Future<List<Map<String, dynamic>>> getDaBindingConstraintsDetails(
       Interval interval) async {
     var start = Date.fromTZDateTime(interval.start);
     Date end;
@@ -96,8 +93,6 @@ class BindingConstraints {
     var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
-
-
 
   /// Calculate the total cost of this constraint for the day.
   /// Input [xs] is the data returned by [getDaBindingConstraints].

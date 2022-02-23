@@ -39,8 +39,10 @@ Future<void> tests(String rootUrl) async {
       var date = Date.utc(2019, 12, 19);
       var file = archive.getFile(date);
       var data = archive.processFile(file);
-      var xs = data.firstWhere((e) => e['limitingFacility'] == 'E13THSTA 345 FARRAGUT 345 1');
-      var exp = List.from(xs['hours'])..sort((a,b) => a['hourBeginning'].compareTo(b['hourBeginning']));
+      var xs = data.firstWhere(
+          (e) => e['limitingFacility'] == 'E13THSTA 345 FARRAGUT 345 1');
+      var exp = List.from(xs['hours'])
+        ..sort((a, b) => a['hourBeginning'].compareTo(b['hourBeginning']));
       expect(xs['hours'], exp);
       // note: there can be multiple contingencies for the same hour!
       // for this date hour beginning 2019-12-19 23:00:00
@@ -53,12 +55,14 @@ Future<void> tests(String rootUrl) async {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     test('Get total hourly cost by binding constraint', () async {
-      var res =
-          await bc.apiGetDaBindingConstraintsHourlyCost('2019-12-15', '2019-12-19');
+      var res = await bc.apiGetDaBindingConstraintsHourlyCost(
+          '2019-12-15', '2019-12-19');
       expect(res.length, 26);
       // print(res.map((e) => e['constraintName']).join('\n'));
-      expect(res.first.keys.toSet(), {'constraintName', 'hourBeginning', 'cost'});
-      var x = res.firstWhere((e) => e['constraintName'] == 'E13THSTA 345 FARRAGUT 345 1');
+      expect(
+          res.first.keys.toSet(), {'constraintName', 'hourBeginning', 'cost'});
+      var x = res.firstWhere(
+          (e) => e['constraintName'] == 'E13THSTA 345 FARRAGUT 345 1');
       expect(x['hourBeginning'].last, 1576814400000);
       expect(x['cost'].last, 16.84);
     });
@@ -114,23 +118,25 @@ Future<void> tests(String rootUrl) async {
       var aux = await client.getDaBindingConstraints(interval);
       expect(aux.length, 11);
       var ce = aux['CENTRAL EAST - VC']!;
-      expect(ce.first,
-          IntervalTuple<num>(Hour.beginning(TZDateTime(location, 2019)), 21.24));
+      expect(
+          ce.first,
+          IntervalTuple<num>(
+              Hour.beginning(TZDateTime(location, 2019)), 21.24));
     });
 
-    test('get hourly da binding constraints data for 2 years, speed test', () async {
+    test('get hourly da binding constraints data for 2 years, speed test',
+        () async {
       var interval = Interval(
           TZDateTime(location, 2019, 1, 1), TZDateTime(location, 2020, 12, 31));
       var sw = Stopwatch()..start();
       var aux = await client.getDaBindingConstraints(interval);
       sw.stop();
       var elapsed = sw.elapsedMilliseconds;
+
       /// on laptop 761 ms, 2/13/2022
-      expect(elapsed < 1000, true);  // 761 ms
+      expect(elapsed < 1000, true); // 761 ms
       expect(aux.isNotEmpty, true);
     });
-
-
     test('get daily cost by constraint', () async {
       var start = Date.utc(2019, 1, 1);
       var end = Date.utc(2019, 1, 3);

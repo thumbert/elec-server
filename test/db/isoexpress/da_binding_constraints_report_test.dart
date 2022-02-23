@@ -43,9 +43,10 @@ void tests(String rootUrl) async {
       // 20 entries in the file, only 10 are unique
       var constraints = data.first['constraints'] as List;
       expect(constraints.length, 10);
-      // await archive.insertData(data);
     });
   });
+  //
+  //
   group('Binding constraints API tests:', () {
     var bc = api.BindingConstraints(
       archive.db,
@@ -67,16 +68,33 @@ void tests(String rootUrl) async {
         'hourBeginning': '2017-01-01 00:00:00.000-0500'
       });
     });
+    test('Get hourly cost by constraint between two dates', () async {
+      var res = await bc.apiGetDaBindingConstraintsHourlyCost(
+          '2017-01-01', '2017-01-02');
+      expect(res.length, 2);
+      var x0 = res.firstWhere((e) => e['constraintName'] == 'NYNE');
+      expect(x0.keys, {'constraintName', 'hourBeginning', 'cost'});
+      expect(x0['hourBeginning'].first, 1483308000000);
+      expect(x0['cost'].first, -12.83);
+    });
     test('Get one constraint between two dates', () async {
       var res = await bc.apiGetBindingConstraintsByName(
           'DA', 'PARIS   O154          A LN', '2017-01-05', '2017-01-06');
       expect(res.length, 2);
     });
   });
+  //
+  //
   group('Binding constraints client tests:', () {
     var client = BindingConstraints(http.Client(),
         iso: Iso.newEngland, rootUrl: rootUrl);
-    test('get da binding constraints data for 3 days', () async {
+    test('get da binding contraints', () async {
+      var term = Term.parse('1Jan17-2Jan17', location);
+      var res = await client.getDaBindingConstraints(term.interval);
+      var nyne = res['NYNE']!;
+      expect(nyne.length, 2);
+    });
+    test('get da binding constraints data for 3 days, details', () async {
       var interval = Interval(
           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 1, 3));
       var aux = await client.getDaBindingConstraintsDetails(interval);
