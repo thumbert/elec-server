@@ -8,7 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_nyiso_report.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 import 'package:tuple/tuple.dart';
 
@@ -38,7 +38,7 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
       'DAMLimitingConstraints.csv';
 
   @override
-  File getFile(Date asOfDate) =>
+  File getCsvFile(Date asOfDate) =>
       File(dir + yyyymmdd(asOfDate) + 'DAMLimitingConstraints.csv');
 
   @override
@@ -138,5 +138,17 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
         int.parse(yyyymmdd.substring(0, 4)),
         int.parse(yyyymmdd.substring(4, 6)),
         int.parse(yyyymmdd.substring(6, 8)));
+  }
+
+  @override
+  String getUrlForMonth(Month month) {
+    // TODO: implement getUrlForMonth
+    throw UnimplementedError();
+  }
+
+  @override
+  File getZipFileForMonth(Month month) {
+    // TODO: implement getZipFileForMonth
+    throw UnimplementedError();
   }
 }
