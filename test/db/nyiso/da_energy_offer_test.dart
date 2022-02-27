@@ -1,10 +1,10 @@
 library test.db.nyiso.da_energy_offer_test;
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
-// import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart' as api;
 import 'package:elec_server/client/binding_constraints.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +12,8 @@ import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import 'package:path/path.dart';
+import 'package:csv/csv.dart';
+import 'package:archive/archive.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
@@ -154,4 +156,29 @@ void main() async {
 
   var rootUrl = 'http://127.0.0.1:8080';
   tests(rootUrl);
+
+  // var converter = CsvToListConverter();
+  // //                            Downloads/Archive/Nyiso/DaEnergyOffer/Raw/20210101biddata_genbids_csv.zip
+  // var file = File('/home/adrian/Downloads/Archive/Nyiso/DaEnergyOffer/Raw/20210101biddata_genbids_csv.zip');
+  // // var file = File('/home/adrian/Downloads/Archive/Nyiso/DaBindingConstraints/Raw/20190101DAMLimitingConstraints.csv.zip');
+  // final bytes = file.readAsBytesSync();
+  // var zipArchive = ZipDecoder().decodeBytes(bytes);
+  // var out = [];
+  //
+  // var _file = zipArchive.findFile('20210101biddata_genbids.csv');
+  // if (_file != null) {
+  //   var _lines = _file.content as List<int>;
+  //   var csv = utf8.decoder.convert(_lines);
+  //   //print(csv);
+  //   var xs = converter.convert(csv, eol: '\n');
+  //   if (xs.isNotEmpty) {
+  //     var header = xs.removeAt(0).cast<String>();
+  //     for (var x in xs) {
+  //       out.add(Map.fromIterables(header, x));
+  //     }
+  //   }
+  // }
+
+
+
 }

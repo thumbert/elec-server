@@ -190,7 +190,7 @@ abstract class DailyNysioCsvReport extends NyisoReport {
       var _lines = _file.content as List<int>;
       var csv = utf8.decoder.convert(_lines);
       // print(csv);
-      var xs = converter.convert(csv);
+      var xs = converter.convert(csv, eol: '\n');  // added the eol for EnergyOffers
       if (xs.isNotEmpty) {
         var header = xs.removeAt(0).cast<String>();
         for (var x in xs) {
