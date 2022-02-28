@@ -142,14 +142,15 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
   }
 
   @override
-  String getUrlForMonth(Month month) {
-    // TODO: implement getUrlForMonth
-    throw UnimplementedError();
-  }
+  String getUrlForMonth(Month month) =>
+      'http://mis.nyiso.com/public/csv/damlbmp/' +
+      month.startDate.toString().replaceAll('-', '') +
+      'damlbmp_${nodeType.toString()}_csv.zip';
 
   @override
   File getZipFileForMonth(Month month) {
-    // TODO: implement getZipFileForMonth
-    throw UnimplementedError();
+    return File(dir +
+        month.startDate.toString().replaceAll('-', '') +
+        'damlbmp_${nodeType.toString()}.csv.zip');
   }
 }

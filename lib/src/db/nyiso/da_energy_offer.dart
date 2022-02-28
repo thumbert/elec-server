@@ -32,7 +32,6 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
 
   mongo.Db get db => dbConfig.db;
 
-
   /// [rows] has the data for all the hours of the day for one asset
   @override
   Map<String, dynamic> converter(List<Map> rows) {
@@ -96,15 +95,14 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
     var out = <Map<String, dynamic>>[];
 
     var reportDate = getReportDate(file);
-    var xs = readReport(getReportDate(file));
+    var xs = readReport(getReportDate(file), eol: '\n');
     if (xs.isEmpty) return out;
 
     var date = Date.fromTZDateTime(NyisoReport.parseTimestamp(
-        xs.first['Time Stamp'], xs.first['Time Zone']))
+            xs.first['Time Stamp'], xs.first['Time Zone']))
         .toString();
     var groups =
-    groupBy(xs, (Map e) => (e['Limiting Facility'] as String).trim());
-
+        groupBy(xs, (Map e) => (e['Limiting Facility'] as String).trim());
 
     return out;
   }
@@ -140,9 +138,9 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
   ///http://mis.nyiso.com/public/csv/biddata/20211001biddata_genbids_csv.zip
   @override
   String getUrlForMonth(Month month) =>
-    'http://mis.nyiso.com/public/csv/biddata/' +
-        yyyymmdd(month.startDate) +
-        'biddata_genbids_csv.zip';
+      'http://mis.nyiso.com/public/csv/biddata/' +
+      yyyymmdd(month.startDate) +
+      'biddata_genbids_csv.zip';
 
   @override
   File getCsvFile(Date asOfDate) {
@@ -156,9 +154,7 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
   String getUrl(Date asOfDate) {
     throw StateError('Individual day url does not exist for this report');
   }
-  
 }
-
 
 // /// Check if this document is OK.  Throws otherwise.  May not catch all
 // /// issues.

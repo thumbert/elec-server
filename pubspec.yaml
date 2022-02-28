@@ -9,6 +9,7 @@ environment:
 dependencies:
   args: ^2.1.0
   collection: ^1.15.0
+  csv: ^5.0.1
   date:
     git: https://github.com/thumbert/date.git
   dotenv: ^3.0.0

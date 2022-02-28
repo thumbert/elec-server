@@ -118,7 +118,7 @@ abstract class DailyNysioCsvReport extends NyisoReport {
 
   /// Get the CSV file of this report for the day [asOfDate] as saved on disk.
   /// There is one ISO report per day.  Monthly reports have one file per month.
-  /// For monthly reports the [asOfDate] is the beginning of the month. 
+  /// For monthly reports the [asOfDate] is the beginning of the month.
   File getCsvFile(Date asOfDate);
 
   /// Get the file of this report as a monthly zip file on disk.
@@ -131,7 +131,8 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// NYISO only keeps the most recent 10 days, so you may have to download
   /// the entire month.
   Future downloadDay(Date day, {bool overwrite = true}) async {
-    return await downloadUrl(getUrl(day), getCsvFile(day), overwrite: overwrite);
+    return await downloadUrl(getUrl(day), getCsvFile(day),
+        overwrite: overwrite);
   }
 
   /// (All) month reports are zipped
@@ -172,12 +173,12 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// Read the report associated with the data, doing no processing.
   /// Return tabular data.  To get the data in the format needed for the
   /// database see the [processFile(file)] method.
-  /// 
+  ///
   /// Read from the monthly zip archive the file corresponding to the [date]
-  /// of interest.   
-  /// 
-  List<Map<String, dynamic>> readReport(Date date) {
-   var file = getCsvFile(date);
+  /// of interest.
+  ///
+  List<Map<String, dynamic>> readReport(Date date, {String eol = '\r\n'}) {
+    var file = getCsvFile(date);
     var out = <Map<String, dynamic>>[];
     var converter = CsvToListConverter();
 
@@ -190,7 +191,7 @@ abstract class DailyNysioCsvReport extends NyisoReport {
       var _lines = _file.content as List<int>;
       var csv = utf8.decoder.convert(_lines);
       // print(csv);
-      var xs = converter.convert(csv, eol: '\n');  // added the eol for EnergyOffers
+      var xs = converter.convert(csv, eol: eol);
       if (xs.isNotEmpty) {
         var header = xs.removeAt(0).cast<String>();
         for (var x in xs) {

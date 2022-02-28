@@ -46,6 +46,8 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
     return <String, dynamic>{};
   }
 
+  /// Input [file] is the daily CSV file,
+  ///
   /// Return a list with each element of this form, ready for insertion
   /// into the Db.
   /// ```
@@ -89,7 +91,7 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
       // see for example 2019-12-15 for 'E13THSTA 345 FARRAGUT 345 1'
       // because there are different contingencies for this limitingFacility
       // so I will sort them here before storing
-      _hours.sort((a,b) => a['hourBeginning'].compareTo(b['hourBeginning']));
+      _hours.sort((a, b) => a['hourBeginning'].compareTo(b['hourBeginning']));
       out.add({
         'date': date,
         'market': 'DA',
@@ -141,14 +143,15 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
   }
 
   @override
-  String getUrlForMonth(Month month) {
-    // TODO: implement getUrlForMonth
-    throw UnimplementedError();
-  }
+  String getUrlForMonth(Month month) =>
+      'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/' +
+      month.startDate.toString().replaceAll('-', '') +
+      'DAMLimitingConstraints_csv.zip';
 
   @override
   File getZipFileForMonth(Month month) {
-    // TODO: implement getZipFileForMonth
-    throw UnimplementedError();
+    return File(dir +
+        month.startDate.toString().replaceAll('-', '') +
+        'DAMLimitingConstraints.csv.zip');
   }
 }
