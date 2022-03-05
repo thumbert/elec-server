@@ -24,7 +24,7 @@ class FtrClearingPrices {
   /// Return a list with elements
   /// ```
   /// {
-  ///   'auctionName': 'X21-6M-R5',
+  ///   'auctionName': 'X21-6M-R5Autumn21',
   ///   'bucket': '7x24',
   ///   'clearingPriceHour': 3.98567,
   /// }
@@ -46,7 +46,7 @@ class FtrClearingPrices {
   /// ```
   /// {
   ///   'ptid': 61752,
-  ///   'auctionName': 'X21-6M-R5',
+  ///   'auctionName': 'X21-6M-R5Autumn21',
   ///   'bucket': '7x24',
   ///   'clearingPriceHour': 3.98567,
   /// }
@@ -66,7 +66,7 @@ class FtrClearingPrices {
   /// ```
   /// {
   ///   'ptid': 61752,
-  ///   'auctionName': 'X21-6M-R5',
+  ///   'auctionName': 'X21-6M-R5Autumn21',
   ///   'bucket': '7x24',
   ///   'clearingPriceHour': 3.98567,
   /// }, ...

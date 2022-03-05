@@ -1,9 +1,13 @@
 import 'dart:io';
 
+import 'package:elec/elec.dart';
+import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
+import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
 import 'package:elec_server/src/db/archive.dart';
+import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
@@ -16,6 +20,7 @@ import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
+import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart' as nyiso_ptid;
@@ -65,6 +70,25 @@ Future<void> insertDaBindingConstraintsNyiso() async {
       var file = archive.getCsvFile(date);
       var data = archive.processFile(file);
       await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
+Future<void> insertDaCongestionCompactNyiso() async {
+  /// get the list of ptids to ingest
+  var client = FtrClearingPrices(Client(), iso: Iso.newYork);
+  var cp = await client.getClearingPricesForAuction('X21-6M-R5Autumn21');
+
+  var archive = NyisoDaCongestionCompactArchive()
+    ..ptids = cp.map((e) => e['ptid'] as int).toSet();
+  // await archive.setupDb();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2019, 2).upTo(Month.utc(2022, 2));
+  for (var month in months) {
+    for (var date in month.days()) {
+      var data = archive.processDay(date);
+      await archive.insertData([data]);
     }
   }
   await archive.dbConfig.db.close();
@@ -307,15 +331,28 @@ void insertRegulationRequirement() async {
 }
 
 Future<void> insertTccClearedPricesNyiso() async {
-  var archive = nyiso_tcc_cp.NyisoTccClearingPrices();
+  var config = ComponentConfig(
+      host: 'localhost:27017',
+      dbName: 'nyiso',
+      collectionName: 'tcc_clearing_prices');
+  var dir =
+      env['HOME']! + '/Downloads/Archive/Nyiso/TCC/ClearingPrices/ToProcess/';
+  var archive = nyiso_tcc_cp.NyisoTccClearingPrices(config: config)..dir = dir;
   // await archive.setupDb();
 
   await archive.db.open();
   var files = Directory(archive.dir).listSync().whereType<File>();
+  // var files = Directory(archive.dir).listSync().whereType<File>();
   for (var file in files) {
     print('Working on file ${file.path}');
     var data = archive.processFile(file);
     await archive.insertData(data);
+    // move the files from the ToProcess folder to Raw
+    var newPath = env['HOME']! +
+        '/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/' +
+        path.basename(file.path);
+    file.copySync(newPath);
+    file.deleteSync();
   }
 
   await archive.db.close();
@@ -382,8 +419,9 @@ void main() async {
   // await insertDaBindingConstraintsIsone();
 
   // await insertDaBindingConstraintsNyiso();
+  await insertDaCongestionCompactNyiso();
   // await insertDaEnergyOffersNyiso();
-  await insertDaLmpHourlyNyiso();
+  // await insertDaLmpHourlyNyiso();
   // await insertPtidTableNyiso();
   // await insertTccClearedPricesNyiso();
 

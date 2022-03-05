@@ -13,6 +13,11 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:more/ordering.dart';
 
 class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
+  /// A collection for storing congestion only prices to get fast access to
+  /// all hourly prices for all locations available for TCCs.
+  ///
+  /// With rle, storing Jan19 data (31 documents) takes 16 kB of storage.
+  ///
   NyisoDaCongestionCompactArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1',
@@ -26,6 +31,10 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
 
   Db get db => dbConfig.db;
   late NodeType nodeType;
+
+  /// A set of ptids to store in the db.  Not all locations are available for
+  /// TCCs.
+  Set<int>? ptids;
 
   /// Data available for the most 10 recent days only at this url.
   /// http://mis.nyiso.com/public/csv/damlbmp/20220113damlbmp_zone.csv
@@ -64,8 +73,10 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
   Map<String, dynamic> processDay(Date date) {
     var out = <String, dynamic>{};
 
-    var ptids = <int>[];
-    var _congestion = <List<num>>[]; // Matrix with indices [ptid,hour]
+    var _ptids = <int>[];
+    // Initially, store the congestion in a List<List<num>> [ptid][hour].
+    // It gets transposed after the sorting.
+    var _congestion = <List<num>>[];
 
     /// Get the congestion from both the zones and the gen nodes and construct
     /// the _congestion matrix.
@@ -76,21 +87,25 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
       if (xs.isEmpty) return out;
       var groups = groupBy(xs, (Map e) => e['PTID'] as int);
       for (var group in groups.entries) {
-        ptids.add(group.key);
-        _congestion.add(group.value
-            .map((e) => e['Marginal Cost Congestion (\$/MWHr)'] as num)
-            .toList());
+        if (ptids == null || ptids!.contains(group.key)) {
+          // only when the ptid is in the set of ptids that are needed
+          _ptids.add(group.key);
+          _congestion.add(group.value
+              .map((e) => e['Marginal Cost Congestion (\$/MWHr)'] as num)
+              .toList());
+        }
       }
     }
 
-    /// insert the ptid index at position 0
-    for (var i = 0; i < ptids.length; i++) {
+    /// insert the ptid index at position 0, so you can keep track of the
+    /// ptid after you do the sorting.
+    for (var i = 0; i < _ptids.length; i++) {
       _congestion[i].insert(0, i);
     }
 
     /// order the congestion data
     var ordering = Ordering.natural<num>()
-        .onResultOf((List xs) => xs[1]) // by hour beginning 0
+        .onResultOf((List xs) => xs[1]) // sort by hour beginning 0
         .compound(Ordering.natural<num>().onResultOf((List xs) => xs[2]))
         .compound(Ordering.natural<num>().onResultOf((List xs) => xs[3]))
         .compound(Ordering.natural<num>().onResultOf((List xs) => xs[4]))
@@ -103,19 +118,19 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
     ordering.sort(_congestion);
 
     /// Transpose the _congestion matrix into a
-    /// data matrix with index [hour, ptid]
+    /// data matrix with index [hour][ptid]
     var hoursCount = _congestion.first.length - 1;
     var data = List.generate(
-        hoursCount, (i) => List<num>.generate(ptids.length, (i) => 999.9));
+        hoursCount, (i) => List<num>.generate(_ptids.length, (i) => 999.9));
     for (var i = 0; i < hoursCount; i++) {
-      for (var j = 0; j < ptids.length; j++) {
+      for (var j = 0; j < _ptids.length; j++) {
         data[i][j] = _congestion[j][i + 1];
       }
     }
 
     out = {
       'date': date.toString(),
-      'ptids': _congestion.map((e) => ptids[e[0] as int]).toList(),
+      'ptids': _congestion.map((e) => _ptids[e[0] as int]).toList(),
       'congestion': data.map((List<num> e) => runLenghtEncode(e)).toList(),
     };
 
@@ -148,14 +163,7 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
   @override
   Future<void> setupDb() async {
     await dbConfig.db.open();
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {
-          'ptid': 1,
-          'date': 1,
-        },
-        unique: true);
     await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1});
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'ptid': 1});
     await dbConfig.db.close();
   }
 
@@ -175,14 +183,15 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
   }
 
   @override
-  String getUrlForMonth(Month month) {
-    // TODO: implement getUrlForMonth
-    throw UnimplementedError();
-  }
+  String getUrlForMonth(Month month) =>
+      'http://mis.nyiso.com/public/csv/damlbmp/' +
+      month.startDate.toString().replaceAll('-', '') +
+      'damlbmp_${nodeType.toString()}_csv.zip';
 
   @override
   File getZipFileForMonth(Month month) {
-    // TODO: implement getZipFileForMonth
-    throw UnimplementedError();
+    return File(dir +
+        month.startDate.toString().replaceAll('-', '') +
+        'damlbmp_${nodeType.toString()}.csv.zip');
   }
 }

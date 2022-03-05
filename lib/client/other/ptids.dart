@@ -20,8 +20,9 @@ class PtidsApi {
   /// [asOfDate] - Path parameter: 'asOfDate'.  If [null] return the last
   /// date in the database.
   /// [region] can be 'isone' or 'nyiso'.
-  Future<List<Map<String, dynamic>>> getPtidTable({Date? asOfDate,
-    String region = 'isone'}) async {
+  Future<List<Map<String, dynamic>>> getPtidTable(
+      {Date? asOfDate, String region = 'isone'}) async {
+    region = region.toLowerCase();
     var _url = StringBuffer()..write(rootUrl);
     if (region != 'isone') {
       _url.write('/');

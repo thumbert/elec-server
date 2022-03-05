@@ -1,5 +1,7 @@
 import 'package:elec/elec.dart';
-import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart';
+import 'package:elec_server/api/api_dacongestion.dart';
+import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart'
+    as isone_dacong;
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
@@ -52,10 +54,14 @@ Future<Router> buildRouter() async {
   await DbProd.isoexpress.open();
   <String, Router>{
     '/bc/v1/': BindingConstraints(DbProd.isoexpress).router,
-    '/da_congestion_compact/v1/': DaCongestionCompact(DbProd.isoexpress).router,
+    '/da_congestion_compact/v1/':
+        isone_dacong.DaCongestionCompact(DbProd.isoexpress)
+            .router, // <-- TODO: deprecate
     '/da_energy_offers/v1/': DaEnergyOffers(DbProd.isoexpress).router,
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
+    '/isone/dacongestion/v1/':
+        DaCongestionCompact(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/monthly_asset_ncpc/v1/': ApiMonthlyAssetNcpc(DbProd.isoexpress).router,
     '/regulation_requirement/v1/':
@@ -75,6 +81,8 @@ Future<Router> buildRouter() async {
   await DbProd.nyiso.open();
   <String, Router>{
     '/nyiso/bc/v1/': nyiso_bc.BindingConstraints(DbProd.nyiso).router,
+    '/nyiso/dacongestion/v1/':
+        DaCongestionCompact(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/dalmp/v1/': DaLmp(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/ptids/v1/': nyiso_ptids.ApiPtids(DbProd.nyiso).router,
     '/nyiso/tcc_clearing_prices/v1/':

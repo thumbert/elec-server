@@ -129,16 +129,16 @@ class PtidArchive extends NyisoReport {
   };
 
   static final zonePtidToSpokenName = <int, String>{
-    61757: 'Zone F',
-    61754: 'Zone C',
-    61760: 'Zone I',
-    61753: 'Zone B',
-    61758: 'Zone G',
-    61762: 'Zone K',
-    61756: 'Zone E',
-    61759: 'Zone H',
-    61761: 'Zone J',
-    61755: 'Zone D',
     61752: 'Zone A',
+    61753: 'Zone B',
+    61754: 'Zone C',
+    61755: 'Zone D',
+    61756: 'Zone E',
+    61757: 'Zone F',
+    61758: 'Zone G',
+    61759: 'Zone H',
+    61760: 'Zone I',
+    61761: 'Zone J',
+    61762: 'Zone K',
   };
 }

@@ -15,7 +15,7 @@ import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   group('Nyiso DAM LMP db tests: ', () {
     var archive = NyisoDaLmpHourlyArchive();
@@ -176,12 +176,12 @@ void tests(String rootUrl) async {
       expect(
           data.first,
           IntervalTuple(
-              Month(2019, 1, location: location), -4.766330645161291));
+              Month(2019, 1, location: location), -7.513068181818175));
     });
     test('get hourly price for 2017-01-01', () async {
       var data = await daLmp.getHourlyLmp(
           61752, LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 1, 1));
-      expect(data.length, 1);
+      expect(data.length, 24);
       expect(
           data.first,
           IntervalTuple(
