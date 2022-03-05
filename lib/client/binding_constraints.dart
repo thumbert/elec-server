@@ -25,7 +25,7 @@ class BindingConstraints {
     Iso.newYork: '/nyiso',
   };
 
-  /// Get all the constraints costs in a given interval as a timeseries.
+  /// Get all the constraints costs in a given interval as an hourly timeseries.
   ///
   Future<Map<String, TimeSeries<num>>> getDaBindingConstraints(
       Interval interval) async {
@@ -75,6 +75,9 @@ class BindingConstraints {
   /// }
   /// ```
   /// Note that each element is for one day.
+  ///
+  /// For ISONE ...
+  ///
   Future<List<Map<String, dynamic>>> getDaBindingConstraintsDetails(
       Interval interval) async {
     var start = Date.fromTZDateTime(interval.start);

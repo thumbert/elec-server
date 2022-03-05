@@ -74,7 +74,7 @@ Future<void> tests(String rootUrl) async {
       expect(trace0.keys.toList(), ['x', 'y', 'ptid']);
       var y0 = trace0['y'] as List;
       expect(y0.length, 120);
-      expect(y0.take(5).toList(), [-32.33, -30.7, -8.12, -7.88, -8.23]);
+      expect(y0.take(5).toList(), [32.33, 30.7, 8.12, 7.88, 8.23]);
     });
     test('speed test: get hourly traces for Jan19', () async {
       var sw = Stopwatch()..start();

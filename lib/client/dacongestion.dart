@@ -86,6 +86,8 @@ class DaCongestion {
           '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
       var _response = await http.get(Uri.parse(_url));
       var xs = json.decode(_response.body) as List;
+      bool flipSign = false;
+      if (iso == Iso.newYork) flipSign = true;
       for (var x in xs) {
         // loop over days
         var date = Date.parse(x['date'], location: UTC);
@@ -100,7 +102,11 @@ class DaCongestion {
           var aux = _rld(data1H);
           for (var i = 0; i < ptids.length; i++) {
             // loop over ptids
-            one[ptids[i]]!.add(aux[i]);
+            if (flipSign) {
+              one[ptids[i]]!.add(-aux[i]);
+            } else {
+              one[ptids[i]]!.add(aux[i]);
+            }
           }
         }
         cache[date] = one;
