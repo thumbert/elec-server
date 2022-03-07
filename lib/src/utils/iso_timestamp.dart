@@ -91,6 +91,7 @@ String mmddyyyy(Date date) {
 
 /// Convert an mm/dd/yyyy string to a UTC date.
 /// For example '11/26/2016' -> Date.utc(2016, 11, 26)
+/// Note: will fail on '10/3/2016'.  Needs to be '10/03/2016'!
 Date parseMmddyyy(String mmddyyyy) {
   return Date.utc(int.parse(mmddyyyy.substring(6, 10)),
       int.parse(mmddyyyy.substring(0, 2)), int.parse(mmddyyyy.substring(3, 5)));

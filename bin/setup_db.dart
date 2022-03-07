@@ -54,7 +54,7 @@ Future<void> insertDaBindingConstraintsIsone() async {
   //   Date.utc(2017, 12, 31), // plenty of constraints
   //   Date.utc(2018, 7, 10), // has duplicates
   // ];
-  var days = Term.parse('17Dec21-11Jan22', UTC).days();
+  var days = Term.parse('12Jan22-6Mar22', UTC).days();
   await insertDays(archive, days);
 }
 
@@ -132,7 +132,7 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     if (download) {
       await archive.downloadDay(day);
     }
-    // await archive.insertDay(day);
+    await archive.insertDay(day);
   }
   await archive.dbConfig.db.close();
 }
@@ -202,9 +202,9 @@ Future<void> insertIsoExpress() async {
   //     DaEnergyOfferArchive(), Term.parse('Jul17', location).days());
 
   // to calculate hourly shaping for Hub, need Jan19-Dec19
-  var days = Term.parse('17Dec21-11Jan22', location).days();
-  await insertDays(DaLmpHourlyArchive(), days);
-  await insertDays(DaCongestionCompactArchive(), days);
+  var days = Term.parse('1Oct21-6Mar22', location).days();
+  // await insertDays(DaLmpHourlyArchive(), days);
+  await insertDays(DaCongestionCompactArchive(), days, download: false);
 
   // to calculate settlement prices for calculators, Jan20-Aug20
   // await insertDays(
@@ -416,10 +416,10 @@ void main() async {
 
   // await insertNoaaTemperatures(download: true);
 
-  // await insertDaBindingConstraintsIsone();
+  await insertDaBindingConstraintsIsone();
 
   // await insertDaBindingConstraintsNyiso();
-  await insertDaCongestionCompactNyiso();
+  // await insertDaCongestionCompactNyiso();
   // await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
   // await insertPtidTableNyiso();

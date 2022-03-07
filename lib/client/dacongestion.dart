@@ -78,7 +78,7 @@ class DaCongestion {
 
   /// Populate the cache if needed.  If the data is compressed, expand it.
   Future<void> _populateCache(Date start, Date end) async {
-    var term = _calculateStartEnd(start, end);
+    var term = calculateStartEnd(start, end);
     if (term != null) {
       var _url = rootUrl +
           _isoMap[iso]! +
@@ -116,25 +116,29 @@ class DaCongestion {
 
   /// Calculate the extend of the data you need.  If it returns [null] you
   /// need no new data.
-  Term? _calculateStartEnd(Date start, Date end) {
+  Term? calculateStartEnd(Date start, Date end) {
     start = Date.utc(start.year, start.month, 1);
     var lastMonth = Month.utc(end.year, end.month);
     end = lastMonth.endDate;
-    if (cache.isNotEmpty) {
-      if (start.isBefore(cache.firstKey()!)) {
-        start = Date.utc(start.year, start.month, 1);
-        if (end.isBefore(cache.lastKey()!) || end == cache.lastKey()) {
-          end = cache.firstKey()!.previous;
-        }
-      }
-      if (start.isAfter(cache.lastKey()!)) {
-        start = cache.lastKey()!.next;
-      }
-      // the easiest case
-      if (cache.containsKey(start) && cache.containsKey(lastMonth.startDate)) {
-        return null;
-      }
-    }
+
+    /// NO CACHING --- things can get too big if you request Jan19 and then
+    /// Oct21, you end up with all the nodes for several years.  Too much
+    /// memory consumption.  So only pull one month at a time.
+    // if (cache.isNotEmpty) {
+    //   if (start.isBefore(cache.firstKey()!)) {
+    //     start = Date.utc(start.year, start.month, 1);
+    //     if (end.isBefore(cache.lastKey()!) || end == cache.lastKey()) {
+    //       end = cache.firstKey()!.previous;
+    //     }
+    //   }
+    //   if (start.isAfter(cache.lastKey()!)) {
+    //     start = cache.lastKey()!.next;
+    //   }
+    //   // the easiest case
+    //   if (cache.containsKey(start) && cache.containsKey(lastMonth.startDate)) {
+    //     return null;
+    //   }
+    // }
     return Term(start, end);
   }
 
