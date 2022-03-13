@@ -26,7 +26,7 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
     this.dbConfig = dbConfig;
     dir ??= super.dir + 'DaLmpHourly/Raw/';
     this.dir = dir;
-    reportName = 'Day-Ahead Hourly LMP';
+    reportName = 'Day-Ahead Hourly Congestion';
   }
 
   Db get db => dbConfig.db;
@@ -151,7 +151,7 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
       for (var date in groups.keys) {
         await dbConfig.coll.remove({'date': date});
         await dbConfig.coll.insertAll(groups[date]!);
-        print('--->  Inserted NYISO DAM LMPs for day $date');
+        print('--->  Inserted NYISO DAM congestion compact for day $date');
       }
       return 0;
     } catch (e) {

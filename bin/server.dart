@@ -59,9 +59,6 @@ Future<Router> buildRouter() async {
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
     '/isone/dacongestion/v1/':
         DaCongestionCompact(DbProd.isoexpress, iso: Iso.newEngland).router,
-    // '/isone/da_congestion_compact/v1/':
-    // isone_dacong.DaCongestionCompact(DbProd.isoexpress)
-    //     .router,
     '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/monthly_asset_ncpc/v1/': ApiMonthlyAssetNcpc(DbProd.isoexpress).router,
     '/regulation_requirement/v1/':

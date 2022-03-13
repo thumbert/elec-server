@@ -202,9 +202,9 @@ Future<void> insertIsoExpress() async {
   //     DaEnergyOfferArchive(), Term.parse('Jul17', location).days());
 
   // to calculate hourly shaping for Hub, need Jan19-Dec19
-  var days = Term.parse('1Oct21-6Mar22', location).days();
-  // await insertDays(DaLmpHourlyArchive(), days);
-  await insertDays(DaCongestionCompactArchive(), days, download: false);
+  var days = Term.parse('1Jun19-30Jun19', location).days();
+  await insertDays(DaLmpHourlyArchive(), days);
+  // await insertDays(DaCongestionCompactArchive(), days, download: false);
 
   // to calculate settlement prices for calculators, Jan20-Aug20
   // await insertDays(
@@ -416,7 +416,7 @@ void main() async {
 
   // await insertNoaaTemperatures(download: true);
 
-  await insertDaBindingConstraintsIsone();
+  // await insertDaBindingConstraintsIsone();
 
   // await insertDaBindingConstraintsNyiso();
   // await insertDaCongestionCompactNyiso();
@@ -426,7 +426,7 @@ void main() async {
   // await insertTccClearedPricesNyiso();
 
 //  await insertForwardMarks();
-//   await insertIsoExpress();
+  await insertIsoExpress();
 
   // await insertDaDemandBids();
 
