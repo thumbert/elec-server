@@ -1,13 +1,15 @@
 library test.db.nyiso.binding_constraints_test;
 
+import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/lib_nyiso_report.dart';
+import 'package:intl/intl.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 
 void tests() async {
   group('NYISO report tests:', () {
-    test('convert timestamp to UTC', () async {
+    test('convert timestamp to UTC', () {
       expect(NyisoReport.parseTimestamp('01/01/2020 05:00', 'EST'),
           TZDateTime.utc(2020, 1, 1, 10));
       expect(NyisoReport.parseTimestamp('03/08/2020 01:00', 'EST'),
@@ -19,6 +21,17 @@ void tests() async {
       expect(NyisoReport.parseTimestamp('11/01/2020 01:00', 'EST'),
           TZDateTime.utc(2020, 11, 1, 6));
     });
+    test('convert iso timestamp 2', () {
+                                      // '01JAN2021:05:00:00'
+      expect(NyisoReport.parseTimestamp2('01Jan2021:05:00:00'),
+          TZDateTime(Iso.newYork.preferredTimeZoneLocation, 2021, 1, 1));
+      expect(NyisoReport.parseTimestamp2('01JAN2021:05:00:00'),
+          TZDateTime(Iso.newYork.preferredTimeZoneLocation, 2021, 1, 1));
+      expect(NyisoReport.parseTimestamp2('01JAN2021:06:00:00'),
+          TZDateTime(Iso.newYork.preferredTimeZoneLocation, 2021, 1, 1, 1));
+    });
+
+
   });
 }
 

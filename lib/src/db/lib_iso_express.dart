@@ -87,17 +87,6 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   /// per day.
   File getFilename(Date asOfDate);
 
-  /// Return the last day inserted in the db.
-  /// Future<Map<String, String>> lastDay();
-
-  /// What is the last day available from the ISO website.  For example,
-  /// NCPC reports are 4-7 days later.  Offer data is 4 months later.
-  /// If data is not available, the reports will be empty, so no harm done.
-  //Date lastDayAvailable();
-
-  /// Delete one day from the archive.
-  //Future<Null> deleteDay(Date day);
-
   /// Download one day.  Check if the file has downloaded successfully.
   Future downloadDay(Date day) async {
     return await downloadUrl(getUrl(day), getFilename(day), overwrite: true);
@@ -117,7 +106,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   ///
   Future<int> insertDay(Date day) async {
     var file = getFilename(day);
-    var data;
+    List<Map<String,dynamic>> data;
     try {
       data = processFile(file);
       if (data.isEmpty) return Future.value(-1);

@@ -13,13 +13,9 @@ import 'package:timezone/timezone.dart';
 import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:tuple/tuple.dart';
 
 class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
-  static final List<String> _unitStates = [
-    'UNAVAILABLE',
-    'MUST_RUN',
-    'ECONOMIC'
-  ];
 
   NyisoDaEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
@@ -27,85 +23,153 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
     this.dbConfig = dbConfig;
     dir ??= super.dir + 'DaEnergyOffer/Raw/';
     this.dir = dir;
-    reportName = 'Day-Ahead Energy Market Historical Offer Report';
+    reportName = 'NYISO DAM Energy Offers';
   }
 
   mongo.Db get db => dbConfig.db;
 
-  /// [rows] has the data for all the hours of the day for one asset
+  /// Insert data into db
   @override
-  Map<String, dynamic> converter(List<Map> rows) {
-    var row = <String, dynamic>{};
-
-    // /// daily info
-    // row['date'] = formatDate(rows.first['Day']);
-    // row['Masked Lead Participant ID'] =
-    //     rows.first['Masked Lead Participant ID'];
-    // row['Masked Asset ID'] = rows.first['Masked Asset ID'];
-    // row['Must Take Energy'] = rows.first['Must Take Energy'];
-    // row['Maximum Daily Energy Available'] =
-    //     rows.first['Maximum Daily Energy Available'];
-    // row['Unit Status'] = rows.first['Unit Status'];
-    // row['Claim 10'] = rows.first['Claim 10'];
-    // row['Claim 30'] = rows.first['Claim 30'];
-    //
-    // /// hourly info
-    // row['hours'] = [];
-    // for (var hour in rows) {
-    //   var aux = <String, dynamic>{};
-    //   var utc = parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
-    //   aux['hourBeginning'] = TZDateTime.fromMicrosecondsSinceEpoch(
-    //           location, utc.microsecondsSinceEpoch)
-    //       .toIso8601String();
-    //   aux['Economic Maximum'] = hour['Economic Maximum'];
-    //   aux['Economic Minimum'] = hour['Economic Minimum'];
-    //   aux['Cold Startup Price'] = hour['Cold Startup Price'];
-    //   aux['Intermediate Startup Price'] = hour['Intermediate Startup Price'];
-    //   aux['Hot Startup Price'] = hour['Hot Startup Price'];
-    //   aux['No Load Price'] = hour['No Load Price'];
-    //
-    //   /// add the non empty price/quantity pairs
-    //   var pricesHour = <num?>[];
-    //   var quantitiesHour = <num?>[];
-    //   for (var i = 1; i <= 10; i++) {
-    //     if (hour['Segment $i Price'] is! num) break;
-    //     pricesHour.add(hour['Segment $i Price']);
-    //     quantitiesHour.add(hour['Segment $i MW']);
-    //   }
-    //   aux['price'] = pricesHour;
-    //   aux['quantity'] = quantitiesHour;
-    //   row['hours'].add(aux);
-    // }
-    // validateDocument(row);
-    return row;
+  Future<int> insertData(List<Map<String, dynamic>> data) async {
+    if (data.isEmpty) {
+      print('--->  No data to insert');
+      return Future.value(-1);
+    }
+    var groups = groupBy(data, (dynamic e) => e['date']);
+    try {
+      for (var date in groups.keys){
+        for (var document in groups[date]!) {
+          await dbConfig.coll.update({
+            'date': date,
+            'Masked Asset ID': document['Masked Asset ID'],
+          }, document);
+        }
+        print('--->  Inserted $reportName for day $date');
+      }
+      return 0;
+    } catch (e) {
+      print('xxxx ERROR xxxx ' + e.toString());
+      return 1;
+    }
   }
 
-  /// Insert data into db.
-  @override
-  Future insertData(List<Map<String, dynamic>> data) async {
-    /// TODO: Make sure you overwrite the same (day,asset)
-    return dbConfig.coll
-        .insertAll(data)
-        .then((_) => print('--->  Inserted successfully'))
-        .catchError((e) => print('   ' + e.toString()));
-  }
 
+  /// One [file] for the entire month for DAM and HAM markets.
+  /// Return a list of documents in this form for DAM market only:
+  /// ```
+  /// {
+  ///   'date': '2021-01-01',
+  ///   'Masked Asset ID': 3636180,
+  ///   'Masked Lead Participant ID': 37249750,
+  ///   'hours': {
+  ///     'Economic Maximum': <num>[...],
+  ///     'Economic Minimum': <num>[...],
+  ///     'Startup Cost': <num>[...],
+  ///     'price': <List<num>>[...],
+  ///     'quantity': <List<num>>[...],
+  ///     'Self Commit MW': <List<num>>[],    // field may not exist if empty
+  ///     '10 Min Spin MW': <num>[],    // field may not exist if empty
+  ///     '10 Min Spin Cost': <num>[],  // field may not exist if empty
+  ///     '30 Min Spin MW': <num>[],    // field may not exist if empty
+  ///     '30 Min Spin Cost': <num>[],  // field may not exist if empty
+  ///     'Regulation MW': <num>[],     // field may not exist if empty
+  ///     'Regulation Cost': <num>[],   // field may not exist if empty
+  ///     'Regulation Movement Cost': <num>[],  // field may not exist if empty
+  ///   }
+  /// }
+  /// ```
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var out = <Map<String, dynamic>>[];
 
-    var reportDate = getReportDate(file);
     var xs = readReport(getReportDate(file), eol: '\n');
     if (xs.isEmpty) return out;
 
-    var date = Date.fromTZDateTime(NyisoReport.parseTimestamp(
-            xs.first['Time Stamp'], xs.first['Time Zone']))
-        .toString();
-    var groups =
-        groupBy(xs, (Map e) => (e['Limiting Facility'] as String).trim());
+    /// Group rows by (Masked Asset ID, date)
+    /// Note that there are two markets: DAM and HAM.
+    /// Only deal with DAM here.
+    var groups = groupBy(xs.where((e) => e['Market'].trim() == 'DAM'), (Map e) {
+      var dt = NyisoReport.parseTimestamp2((e['Date Time'] as String).trim());
+      var date = dt.toString().substring(0,10);
+      return Tuple2(e['Masked Gen ID'] as int, date);
+    });
+
+    for (var group in groups.keys) {
+      out.add(converter(groups[group]!));
+    }
 
     return out;
   }
+
+  /// Format for Mongo
+  @override
+  Map<String, dynamic> converter(List<Map<String,dynamic>> rows) {
+    var row = <String, dynamic>{};
+
+    /// daily info
+    row['date'] = NyisoReport.parseTimestamp2((rows.first['Date Time']).trim())
+        .toString().substring(0,10);
+    row['Masked Lead Participant ID'] = rows.first['Masked Bidder ID'];
+    row['Masked Asset ID'] = rows.first['Masked Gen ID'];
+
+    /// hourly info
+    row['hours'] = [];
+    for (var hour in rows) {
+      var aux = <String, dynamic>{};
+      aux['Economic Maximum'] = hour['Upper Oper Limit'];
+      aux['Economic Minimum'] = hour['Fixed Min Gen MW'];
+      aux['Startup Cost'] = hour['Fixed Min Gen Cost'];
+
+      /// add the non empty price/quantity pairs
+      var pricesHour = <num>[];
+      var quantitiesHour = <num>[];
+      for (var i = 1; i <= 12; i++) {
+        if (hour['Dispatch MW$i'] is! num) break;
+        pricesHour.add(hour['Dispatch \$/MW$i']);
+        quantitiesHour.add(hour['Dispatch MW$i']);
+      }
+      aux['price'] = pricesHour;
+      aux['quantity'] = quantitiesHour;
+      // Deal with self commit MW.  4 segments corresponding to each 15 min
+      // interval within the hour.  May self-commit only for several hours
+      // in the day.  I've seen that there is still a pq pair for the hour.
+      // I assume the self commit takes precedence.
+      var selfCommitMw = <num>[];
+      for (var i = 1; i < 5; i++) {
+        if (hour['Self Commit MW$i'] is! num) break;
+        selfCommitMw.add(hour['Self Commit MW$i']);
+      }
+      if (selfCommitMw.isNotEmpty){
+        aux['Self Commit MW'] = selfCommitMw;
+      }
+      if (hour['10 Min Spin Cost'] is num) {
+        aux['10 Min Spin Cost'] = hour['10 Min Spin Cost'];
+      }
+      if (hour['10 Min Spin MW'] is num) {
+        aux['10 Min Spin MW'] = hour['10 Min Spin MW'];
+      }
+      if (hour['30 Min Spin Cost'] is num) {
+        aux['30 Min Spin Cost'] = hour['30 Min Spin Cost'];
+      }
+      if (hour['30 Min Spin MW'] is num) {
+        aux['30 Min Spin MW'] = hour['30 Min Spin MW'];
+      }
+      if (hour['Regulation MW'] is num) {
+        aux['Regulation MW'] = hour['Regulation MW'];
+      }
+      if (hour['Regulation Cost'] is num) {
+        aux['Regulation Cost'] = hour['Regulation Cost'];
+      }
+      if (hour['Regulation Movement Cost'] is num) {
+        aux['Regulation Movement Cost'] = hour['Regulation Movement Cost'];
+      }
+
+      row['hours'].add(aux);
+    }
+    return row;
+  }
+
+
 
   /// Recreate the collection from scratch.
   @override

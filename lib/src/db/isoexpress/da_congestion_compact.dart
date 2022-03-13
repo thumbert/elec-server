@@ -119,44 +119,6 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
     return [out];
   }
 
-  // List<Map<String, dynamic>> processFile(File file) {
-  //   var data = mis.readReportTabAsMap(file, tab: 0);
-  //   if (data.isEmpty) return <Map<String, dynamic>>[];
-  //   var dataByPtids = groupBy(data, (Map row) => int.parse(row['Location ID']));
-  //   var _ptids = dataByPtids.keys.toList();
-  //
-  //   /// One document for the entire file
-  //   var congestion = List.generate(_ptids.length, (index) => <num>[]);
-  //   for (var i = 0; i < _ptids.length; i++) {
-  //     var ptid = _ptids[i];
-  //     var rows = dataByPtids[ptid]!;
-  //     var hours = <TZDateTime>{};
-  //     var values = <num>[]; // rle of the hourly congestion prices
-  //
-  //     /// Need to check if there are duplicates.  Sometimes the ISO sends
-  //     /// the same data twice see ptid: 38206, date: 2019-05-19.
-  //     for (var row in rows) {
-  //       var hour = parseHourEndingStamp(row['Date'], row['Hour Ending']);
-  //       if (!hours.contains(hour)) {
-  //         /// if duplicate, insert only once
-  //         hours.add(hour);
-  //         values.add(row['Congestion Component']);
-  //       }
-  //     }
-  //
-  //     /// do the rle
-  //     congestion[i].addAll(runLenghtEncode(values, keys: keys));
-  //   }
-  //
-  //   return [
-  //     {
-  //       'date': formatDate(data.first['Date']),
-  //       'ptids': _ptids,
-  //       'congestion': congestion,
-  //     }
-  //   ];
-  // }
-
   /// Recreate the collection from scratch.
   @override
   Future<void> setupDb() async {
