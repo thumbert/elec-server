@@ -34,6 +34,28 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   File getFilename(Date? asOfDate) =>
       File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');
 
+
+  /// Insert data into db.  You can pass in several days at once.
+  @override
+  Future<int> insertData(List<Map<String, dynamic>> data) async {
+    if (data.isEmpty) {
+      print('--->  No data');
+      return Future.value(-1);
+    }
+    var groups = groupBy(data, (Map e) => e['date']);
+    try {
+      for (var date in groups.keys) {
+        await dbConfig.coll.remove({'date': date});
+        await dbConfig.coll.insertAll(groups[date]!);
+        print('--->  Inserted ISONE DAM LMPs for day $date');
+      }
+      return 0;
+    } catch (e) {
+      print('xxxx ERROR xxxx ' + e.toString());
+      return 1;
+    }
+  }
+
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var out = <String, dynamic>{
@@ -116,8 +138,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   }
 
   // Date lastDayAvailable() => Date.today().next;
-  Future<void> deleteDay(Date day) async {
-    return await (dbConfig.coll.remove(where.eq('date', day.toString()))
-        as FutureOr<void>);
-  }
+  // Future<void> deleteDay(Date day) async {
+  //   return await (dbConfig.coll.remove(where.eq('date', day.toString()))
+  //       as FutureOr<void>);
+  // }
 }

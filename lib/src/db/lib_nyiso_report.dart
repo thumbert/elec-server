@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:csv/csv.dart';
 import 'package:archive/archive.dart';
@@ -51,6 +52,19 @@ abstract class NyisoReport {
     var res = TZDateTime.parse(location, '$yyyy-$mm-${dd}T$hh:$minutes:00$tz');
     return res.toUtc();
   }
+
+  static final _fmt = DateFormat('ddMMMyyyy:HH:00:00');
+
+  /// Parse other timestamp formats used by Nyiso.  The format below is used in
+  /// the masked energy bid data reports.
+  /// '01JAN2021:05:00:00'  it is in UTC timezone.  Return in New_York zone.
+  static TZDateTime parseTimestamp2(String x) {
+    // format MMM doesn't parse 'JAN' only 'Jan', so need to lower case the
+    // 2nd and 3rd letter of the month abbreviation.
+    x = x.substring(0,3) + x.substring(3,5).toLowerCase() + x.substring(5);
+    return TZDateTime.fromMillisecondsSinceEpoch(location, _fmt.parse(x, true).millisecondsSinceEpoch);
+  }
+
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.

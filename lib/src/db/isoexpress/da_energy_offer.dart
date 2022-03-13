@@ -27,12 +27,11 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaEnergyOffer/Raw/';
     this.dir = dir;
+    reportName = 'Day-Ahead Energy Market Historical Offer Report';
   }
 
   mongo.Db get db => dbConfig.db;
 
-  @override
-  final reportName = 'Day-Ahead Energy Market Historical Offer Report';
   @override
   String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/'
@@ -93,10 +92,26 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
 
   @override
   Future insertData(List<Map<String, dynamic>> data) async {
-    return dbConfig.coll
-        .insertAll(data)
-        .then((_) => print('--->  Inserted successfully'))
-        .catchError((e) => print('   ' + e.toString()));
+    if (data.isEmpty) {
+      print('--->  No data to insert');
+      return Future.value(-1);
+    }
+    var groups = groupBy(data, (dynamic e) => e['date']);
+    try {
+      for (var date in groups.keys){
+        for (var document in groups[date]!) {
+          await dbConfig.coll.update({
+            'date': date,
+            'Masked Asset ID': document['Masked Asset ID'],
+          }, document);
+        }
+        print('--->  Inserted $reportName for day $date');
+      }
+      return 0;
+    } catch (e) {
+      print('xxxx ERROR xxxx ' + e.toString());
+      return 1;
+    }
   }
 
   @override
@@ -155,10 +170,10 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     return Date.utc(m3.year, m3.month, 1).previous;
   }
 
-  Future<void> deleteDay(Date day) async {
-    return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString()))
-        as FutureOr<void>);
-  }
+  // Future<void> deleteDay(Date day) async {
+  //   return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString()))
+  //       as FutureOr<void>);
+  // }
 
   /// Check if this document is OK.  Throws otherwise.  May not catch all
   /// issues.

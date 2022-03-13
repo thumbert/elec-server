@@ -36,22 +36,22 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
       dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.json');
 
   @override
-  Future downloadDay(Date asOfDate) async {
+  Future downloadDay(Date day) async {
     var _user = dotenv.env['isone_ws_user']!;
     var _pwd = dotenv.env['isone_ws_password']!;
 
     var client = HttpClient()
-      ..addCredentials(Uri.parse(getUrl(asOfDate)), '',
+      ..addCredentials(Uri.parse(getUrl(day)), '',
           HttpClientBasicCredentials(_user, _pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');
         return true;
       };
-    var request = await client.getUrl(Uri.parse(getUrl(asOfDate)));
+    var request = await client.getUrl(Uri.parse(getUrl(day)));
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     var response = await request.close();
-    await response.pipe(getFilename(asOfDate).openWrite());
+    await response.pipe(getFilename(day).openWrite());
   }
 
   @override
@@ -96,7 +96,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   @override
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) {
-      print('--->  No datathanks');
+      print('--->  No data to insert');
       return Future.value(-1);
     }
     var groups = groupBy(data, (dynamic e) => e['date']);

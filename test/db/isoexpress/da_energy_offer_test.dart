@@ -1,21 +1,20 @@
 library test.db.isoexpress.da_energy_offers_test;
 
-import 'package:elec_server/api/isoexpress/api_isone_energyoffers.dart';
+import 'package:elec/elec.dart';
+import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:http/http.dart' as http;
-//import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
-import 'package:elec_server/client/isoexpress/da_energy_offer.dart' as eo;
+import 'package:elec_server/client/da_energy_offer.dart' as eo;
 
 void tests(String rootUrl) async {
-  // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var location = getLocation('America/New_York');
   var archive = DaEnergyOfferArchive();
 
-  group('DA energy offers db tests: ', () {
+  group('ISONE DA energy offers db tests: ', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('download 2018-02-01 and insert it', () async {
@@ -36,8 +35,8 @@ void tests(String rootUrl) async {
     });
   });
 
-  group('DA energy offers API tests: ', () {
-    var api = DaEnergyOffers(archive.db);
+  group('ISONE DA energy offers API tests: ', () {
+    var api = DaEnergyOffers(archive.db, iso: Iso.newEngland);
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     test('get energy offers for one hour', () async {
@@ -51,10 +50,6 @@ void tests(String rootUrl) async {
     test('get stack for one hour', () async {
       var data = await api.getGenerationStack('20170701', '16');
       expect(data.length, 698);
-    });
-    test('last day inserted', () async {
-      var day = await api.lastDay();
-      expect(Date.parse(day) is Date, true);
     });
     test('get assets one day', () async {
       var data = await api.assetsByDay('20170701');
@@ -72,8 +67,8 @@ void tests(String rootUrl) async {
     });
   });
 
-  group('DA energy offers client tests: ', () {
-    var client = eo.DaEnergyOffers(http.Client(), rootUrl: rootUrl);
+  group('ISONE DA energy offers client tests: ', () {
+    var client = eo.DaEnergyOffers(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
     test('get energy offers for hour 2017-07-01 16:00:00', () async {
       var hour = Hour.beginning(TZDateTime(location, 2017, 7, 1, 16));
       var aux = await client.getDaEnergyOffers(hour);
@@ -108,10 +103,6 @@ void tests(String rootUrl) async {
         'Masked Asset ID': 10393,
         'Masked Lead Participant ID': 698953,
       });
-    });
-    test('get last day in db', () async {
-      var date = await client.lastDate();
-      expect(date is Date, true);
     });
     test('get energy offers for asset 41406 between 2 dates', () async {
       var data = await client.getDaEnergyOffersForAsset(
