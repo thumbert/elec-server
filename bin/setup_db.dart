@@ -153,11 +153,11 @@ Future<void> insertDaEnergyOffers({List<Date>? days}) async {
 
 Future<void> insertDaEnergyOffersNyiso() async {
   var archive = NyisoDaEnergyOfferArchive();
-  // await archive.setupDb();
+  await archive.setupDb();
   await archive.dbConfig.db.open();
-  var months = Month.utc(2021, 1).upTo(Month.utc(2021, 1));
+  var months = Month.utc(2020, 2).upTo(Month.utc(2020, 3));
   for (var month in months) {
-    // await archive.downloadMonth(month);
+    await archive.downloadMonth(month);
     var file = archive.getCsvFile(month.startDate);
     var data = archive.processFile(file);
     await archive.insertData(data);
@@ -431,9 +431,9 @@ void main() async {
   /// ----------- Nyiso -----------
   // await insertDaBindingConstraintsNyiso();
   // await insertDaCongestionCompactNyiso();
-  // await insertDaEnergyOffersNyiso();
+  await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
-  await insertMaskedAssetIdsNyiso();
+  // await insertMaskedAssetIdsNyiso();
   // await insertPtidTableNyiso();
   // await insertTccClearedPricesNyiso();
 
