@@ -41,7 +41,7 @@ void tests(String rootUrl) async {
     tearDown(() async => await archive.db.close());
     test('get energy offers for one hour', () async {
       var data = await api.getEnergyOffers('20170701', '16');
-      expect(data.length, 733);
+      expect(data.length, 731);
 
       var a87105 = data.firstWhere((e) => e['assetId'] == 87105);
       expect(a87105['Economic Maximum'], 35);
@@ -49,7 +49,7 @@ void tests(String rootUrl) async {
     });
     test('get stack for one hour', () async {
       var data = await api.getGenerationStack('20170701', '16');
-      expect(data.length, 698);
+      expect(data.length, 696);
     });
     test('get assets one day', () async {
       var data = await api.assetsByDay('20170701');
@@ -68,7 +68,8 @@ void tests(String rootUrl) async {
   });
 
   group('ISONE DA energy offers client tests: ', () {
-    var client = eo.DaEnergyOffers(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
+    var client =
+        eo.DaEnergyOffers(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
     test('get energy offers for hour 2017-07-01 16:00:00', () async {
       var hour = Hour.beginning(TZDateTime(location, 2017, 7, 1, 16));
       var aux = await client.getDaEnergyOffers(hour);
@@ -113,7 +114,7 @@ void tests(String rootUrl) async {
         () async {
       var data = await client.getDaEnergyOffersForAsset(
           41406, Date.utc(2018, 4, 1), Date.utc(2018, 4, 1));
-      var out = eo.priceQuantityOffers(data);
+      var out = eo.priceQuantityOffers(data, iso: Iso.newEngland);
       expect(out.length, 5);
       expect(out.first.first.toString(),
           '[2018-04-01 00:00:00.000-0400, 2018-04-01 01:00:00.000-0400) -> {price: 15.44, quantity: 332}');
@@ -122,7 +123,7 @@ void tests(String rootUrl) async {
         () async {
       var data = await client.getDaEnergyOffersForAsset(
           41406, Date.utc(2018, 4, 1), Date.utc(2018, 4, 1));
-      var pqOffers = eo.priceQuantityOffers(data);
+      var pqOffers = eo.priceQuantityOffers(data, iso: Iso.newEngland);
       var out = eo.averageOfferPrice(pqOffers);
       expect(out.length, 24);
       expect(out.first.toString(),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:elec/elec.dart';
+import 'package:elec_server/src/db/nyiso/masked_ids.dart';
 import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
@@ -152,7 +153,7 @@ Future<void> insertDaEnergyOffers({List<Date>? days}) async {
 
 Future<void> insertDaEnergyOffersNyiso() async {
   var archive = NyisoDaEnergyOfferArchive();
-  await archive.setupDb();
+  // await archive.setupDb();
   await archive.dbConfig.db.open();
   var months = Month.utc(2021, 1).upTo(Month.utc(2021, 1));
   for (var month in months) {
@@ -213,6 +214,15 @@ Future<void> insertIsoExpress() async {
 
 Future<void> insertMaskedAssetIds() async {
   var archive = IsoNeMaskedIdsArchive();
+  await archive.db.open();
+  await archive.setup();
+  var data = archive.readXlsx();
+  await archive.insertMongo(data);
+  await archive.db.close();
+}
+
+Future<void> insertMaskedAssetIdsNyiso() async {
+  var archive = NyisoMaskedIdsArchive();
   await archive.db.open();
   await archive.setup();
   var data = archive.readXlsx();
@@ -421,13 +431,14 @@ void main() async {
   /// ----------- Nyiso -----------
   // await insertDaBindingConstraintsNyiso();
   // await insertDaCongestionCompactNyiso();
-  await insertDaEnergyOffersNyiso();
+  // await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
+  await insertMaskedAssetIdsNyiso();
   // await insertPtidTableNyiso();
   // await insertTccClearedPricesNyiso();
 
 //  await insertForwardMarks();
-  await insertIsoExpress();
+//   await insertIsoExpress();
 
   // await insertDaDemandBids();
 

@@ -17,7 +17,6 @@ import 'package:path/path.dart';
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
   var archive = NyisoDaEnergyOfferArchive();
-  var location = getLocation('America/New_York');
   group('NYISO energy offer db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
@@ -33,8 +32,8 @@ Future<void> tests(String rootUrl) async {
       expect(data.first.keys.toSet(),
           {'date', 'Masked Lead Participant ID', 'Masked Asset ID', 'hours'});
       // Athens 1
-      var a1 = data.firstWhere((e) => e['Masked Asset ID'] == 98347750
-          && e['date'] == '2021-01-01');
+      var a1 = data.firstWhere(
+          (e) => e['Masked Asset ID'] == 98347750 && e['date'] == '2021-01-01');
       expect((a1['hours'] as List).first.keys.toSet(), {
         'Economic Maximum',
         'Economic Minimum',
@@ -49,12 +48,16 @@ Future<void> tests(String rootUrl) async {
       });
       var mw = a1['hours'].first['quantity'] as List;
       var prices = a1['hours'].first['price'] as List;
-      expect(mw.length, 9);     // 9 pq pairs
+      expect(mw.length, 9); // 9 pq pairs, not incremental but cumulative!
       expect(prices.length, 9);
+      // incremental quantities
       expect(mw.take(3).toList(), [
-        310.4,	319.8,	329.2,
+        310.4,
+        9.4,
+        9.4,
       ]);
     });
+
     /// Athens 1,2,3: 98347750, 28347750, 38347750
     /// 35855750 self-commits in DAM on 1/1/2021, 175 MW for a few hours in the middle of the day ...
     ///
@@ -63,18 +66,26 @@ Future<void> tests(String rootUrl) async {
     var api = DaEnergyOffers(archive.db, iso: Iso.newYork);
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
-    // test('get energy offers for one hour', () async {
-    //   var data = await api.getEnergyOffers('20210101', '16');
-    //   expect(data.length, 733);
-    //
-    //   var a87105 = data.firstWhere((e) => e['assetId'] == 87105);
-    //   expect(a87105['Economic Maximum'], 35);
-    //   expect(a87105['quantity'], 9999);
-    // });
-    // test('get stack for one hour', () async {
-    //   var data = await api.getGenerationStack('20170701', '16');
-    //   expect(data.length, 698);
-    // });
+    test('get energy offers for one hour', () async {
+      var data = await api.getEnergyOffers('20210101', '16');
+      expect(data.length, 810);
+
+      var a1 = data.where((e) => e['assetId'] == 98347750).toList();
+      expect(a1.length, 9); // 9 segments
+      expect(a1.first.keys.toSet(), {
+        'assetId',
+        'Economic Maximum',
+        'price',
+        'quantity',
+      });
+      expect(a1.first['Economic Maximum'], 381);
+      expect(a1.first['quantity'], 306.3);
+      expect(a1[1]['quantity'], 9.3);
+    });
+    test('get stack for one hour', () async {
+      var data = await api.getGenerationStack('20210101', '16');
+      expect(data.length, 810);
+    });
     test('get assets one day', () async {
       var data = await api.assetsByDay('20210101');
       expect(data.length, 287);
@@ -85,78 +96,85 @@ Future<void> tests(String rootUrl) async {
     //   expect(data.length, 308);
     // }, solo: true);
     test('get energy offers for one asset between a start/end date', () async {
-      var data =
-      await api.getEnergyOffersForAssetId('98347750', '20210101', '20210103');
+      var _data = await api.getEnergyOffersForAssetId(
+          '98347750', '20210101', '20210103');
+      expect(_data.length, 3);
+      var url =
+          '$rootUrl/nyiso/da_energy_offers/v1/assetId/98347750/start/2021-01-01/end/2021-01-03';
+      var res = await http
+          .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
+      var data = json.decode(res.body) as List;
       expect(data.length, 3);
-      var url = '$rootUrl/nyiso/da_energy_offers/v1/assetId/98347750/start/2021-01-01/end/2021-01-02';
-
-
+      expect(data.first.keys.toSet(), {'date', 'hours'});
     });
   });
 
   group('NYISO energy offers client tests: ', () {
-    var client = eo.DaEnergyOffers(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
-    // test('get energy offers for hour 2017-07-01 16:00:00', () async {
-    //   var hour = Hour.beginning(TZDateTime(location, 2017, 7, 1, 16));
-    //   var aux = await client.getDaEnergyOffers(hour);
-    //   expect(aux.length, 731);
-    //   var e10393 = aux.firstWhere((e) => e['assetId'] == 10393);
-    //   expect(e10393, {
-    //     'assetId': 10393,
-    //     'Unit Status': 'ECONOMIC',
-    //     'Economic Maximum': 14.9,
-    //     'price': -150,
-    //     'quantity': 10.5,
-    //   });
-    // });
-    // test('get generation stack for hour 2017-07-01 16:00:00', () async {
-    //   var hour = Hour.beginning(TZDateTime(location, 2017, 7, 1, 16));
-    //   var aux = await client.getGenerationStack(hour);
-    //   expect(aux.length, 696);
-    //   expect(aux.first, {
-    //     'assetId': 10393,
-    //     'Unit Status': 'ECONOMIC',
-    //     'Economic Maximum': 14.9,
-    //     'price': -150,
-    //     'quantity': 10.5,
-    //   });
-    // });
-    // test('get asset ids and participant ids for 2017-07-01', () async {
-    //   var aux = await client.assetsForDay(Date.utc(2017, 7, 1));
-    //   expect(aux.length, 308);
-    //   aux.sort((a, b) =>
-    //       (a['Masked Asset ID'] as int).compareTo(b['Masked Asset ID']));
-    //   expect(aux.first, {
-    //     'Masked Asset ID': 10393,
-    //     'Masked Lead Participant ID': 698953,
-    //   });
-    // });
-    test('get energy offers for asset 41406 between 2 dates', () async {
+    var client =
+        eo.DaEnergyOffers(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
+    test('get energy offers for hour 2021-01-01 16:00:00', () async {
+      var hour = Hour.beginning(
+          TZDateTime(Iso.newYork.preferredTimeZoneLocation, 2021, 1, 1, 16));
+      var aux = await client.getDaEnergyOffers(hour);
+      expect(aux.length, 810);
+      var a1 = aux.firstWhere((e) => e['assetId'] == 98347750);
+      expect(a1, {
+        'assetId': 98347750,
+        'Economic Maximum': 381.0,
+        'price': 27.21,
+        'quantity': 306.3,
+      });
+    });
+    test('get generation stack for hour 2017-07-01 16:00:00', () async {
+      var hour = Hour.beginning(
+          TZDateTime(Iso.newYork.preferredTimeZoneLocation, 2021, 1, 1, 16));
+      var aux = await client.getGenerationStack(hour);
+      expect(aux.length, 810);
+      expect(aux.first, {
+        'assetId': 37796180,
+        'price': -999.0,
+        'quantity': 50.0,
+      });
+    });
+    test('get asset ids and participant ids for 2021-01-03', () async {
+      var aux = await client.assetsForDay(Date.utc(2021, 1, 3));
+      expect(aux.length, 282);
+      aux.sort((a, b) =>
+          (a['Masked Asset ID'] as int).compareTo(b['Masked Asset ID']));
+      expect(aux.first, {
+        'Masked Asset ID': 36180,
+        'Masked Lead Participant ID': 19092750,
+      });
+    });
+    test('get energy offers for asset 98347750 between 2 dates', () async {
       var data = await client.getDaEnergyOffersForAsset(
-          98347750, Date.utc(2021, 1, 1), Date.utc(2021, 1, 2));
-      expect(data.length, 2);
-    }, solo: true);
-    test('get energy offers price/quantity timeseries for asset 41406 ',
-            () async {
-          var data = await client.getDaEnergyOffersForAsset(
-              41406, Date.utc(2018, 4, 1), Date.utc(2018, 4, 1));
-          var out = eo.priceQuantityOffers(data);
-          expect(out.length, 5);
-          expect(out.first.first.toString(),
-              '[2018-04-01 00:00:00.000-0400, 2018-04-01 01:00:00.000-0400) -> {price: 15.44, quantity: 332}');
-        });
-    test('get average energy offers price timeseries for asset 41406 ',
-            () async {
-          var data = await client.getDaEnergyOffersForAsset(
-              41406, Date.utc(2018, 4, 1), Date.utc(2018, 4, 1));
-          var pqOffers = eo.priceQuantityOffers(data);
-          var out = eo.averageOfferPrice(pqOffers);
-          expect(out.length, 24);
-          expect(out.first.toString(),
-              '[2018-04-01 00:00:00.000-0400, 2018-04-01 01:00:00.000-0400) -> {price: 16.59470909090909, quantity: 550}');
-        });
+          98347750, Date.utc(2021, 1, 1), Date.utc(2021, 1, 3));
+      expect(data.length, 3);
+      expect(data.first.keys.toSet(), {'date', 'hours'});
+    });
+    test('get energy offers price/quantity timeseries for asset 98347750',
+        () async {
+      var data = await client.getDaEnergyOffersForAsset(
+          98347750, Date.utc(2021, 1, 1), Date.utc(2021, 1, 3));
+      var out = eo.priceQuantityOffers(data, iso: Iso.newYork);
+      expect(out.length, 9); // there are 9 segments
+      expect(out.first.first.toString(),
+          '[2021-01-01 00:00:00.000-0500, 2021-01-01 01:00:00.000-0500) -> {price: 27.45, quantity: 310.4}');
+      expect(
+          out[1].first.toString(), // second segment is incremental
+          '[2021-01-01 00:00:00.000-0500, 2021-01-01 01:00:00.000-0500) -> {price: 28.0, quantity: 9.4}');
+    });
+    test('get average energy offers price timeseries for asset 98347750',
+        () async {
+      var data = await client.getDaEnergyOffersForAsset(
+          98347750, Date.utc(2021, 1, 1), Date.utc(2021, 1, 3));
+      var pqOffers = eo.priceQuantityOffers(data, iso: Iso.newYork);
+      var out = eo.averageOfferPrice(pqOffers);
+      expect(out.length, 72);
+      expect(out.first.toString(),
+          '[2021-01-01 00:00:00.000-0500, 2021-01-01 01:00:00.000-0500) -> {price: 27.93945595854924, quantity: 385.99999999999983}');
+    });
   });
-
 }
 
 void main() async {
@@ -164,5 +182,4 @@ void main() async {
 
   var rootUrl = 'http://127.0.0.1:8080';
   tests(rootUrl);
-
 }

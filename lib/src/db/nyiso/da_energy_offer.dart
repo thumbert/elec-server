@@ -16,7 +16,6 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:tuple/tuple.dart';
 
 class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
-
   NyisoDaEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_energy_offer');
@@ -37,12 +36,13 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
     }
     var groups = groupBy(data, (dynamic e) => e['date']);
     try {
-      for (var date in groups.keys){
+      for (var date in groups.keys) {
         for (var document in groups[date]!) {
-          await dbConfig.coll.update({
+          await dbConfig.coll.remove({
             'date': date,
             'Masked Asset ID': document['Masked Asset ID'],
-          }, document);
+          });
+          await dbConfig.coll.insert(document);
         }
         print('--->  Inserted $reportName for day $date');
       }
@@ -52,7 +52,6 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
       return 1;
     }
   }
-
 
   /// One [file] for the entire month for DAM and HAM markets.
   /// Return a list of documents in this form for DAM market only:
@@ -78,6 +77,10 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
   ///   }
   /// }
   /// ```
+  /// Note that the segment quantities returned are now incremental to the
+  /// previous segment.  The original data has segment quantities as cumulative.
+  ///
+  ///
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var out = <Map<String, dynamic>>[];
@@ -90,7 +93,7 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
     /// Only deal with DAM here.
     var groups = groupBy(xs.where((e) => e['Market'].trim() == 'DAM'), (Map e) {
       var dt = NyisoReport.parseTimestamp2((e['Date Time'] as String).trim());
-      var date = dt.toString().substring(0,10);
+      var date = dt.toString().substring(0, 10);
       return Tuple2(e['Masked Gen ID'] as int, date);
     });
 
@@ -103,12 +106,13 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
 
   /// Format for Mongo
   @override
-  Map<String, dynamic> converter(List<Map<String,dynamic>> rows) {
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var row = <String, dynamic>{};
 
     /// daily info
     row['date'] = NyisoReport.parseTimestamp2((rows.first['Date Time']).trim())
-        .toString().substring(0,10);
+        .toString()
+        .substring(0, 10);
     row['Masked Lead Participant ID'] = rows.first['Masked Bidder ID'];
     row['Masked Asset ID'] = rows.first['Masked Gen ID'];
 
@@ -129,7 +133,13 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
         quantitiesHour.add(hour['Dispatch MW$i']);
       }
       aux['price'] = pricesHour;
-      aux['quantity'] = quantitiesHour;
+      // convert quantities to incremental view (helps with processing later)
+      var incrementalQ = List.from(quantitiesHour);
+      for (var i = 1; i < quantitiesHour.length; i++) {
+        incrementalQ[i] =
+            (100 * (quantitiesHour[i] - quantitiesHour[i - 1])).round() / 100;
+      }
+      aux['quantity'] = incrementalQ;
       // Deal with self commit MW.  4 segments corresponding to each 15 min
       // interval within the hour.  May self-commit only for several hours
       // in the day.  I've seen that there is still a pq pair for the hour.
@@ -139,7 +149,7 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
         if (hour['Self Commit MW$i'] is! num) break;
         selfCommitMw.add(hour['Self Commit MW$i']);
       }
-      if (selfCommitMw.isNotEmpty){
+      if (selfCommitMw.isNotEmpty) {
         aux['Self Commit MW'] = selfCommitMw;
       }
       if (hour['10 Min Spin Cost'] is num) {
@@ -168,8 +178,6 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
     }
     return row;
   }
-
-
 
   /// Recreate the collection from scratch.
   @override

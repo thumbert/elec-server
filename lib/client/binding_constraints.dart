@@ -18,7 +18,11 @@ class BindingConstraints {
   BindingConstraints(http.Client client,
       {required this.iso,
       this.rootUrl = 'http://localhost:8080',
-      this.servicePath = '/bc/v1/'});
+      this.servicePath = '/bc/v1/'}) {
+    if (!_isoMap.keys.contains(iso)) {
+      throw ArgumentError('Iso $iso is not supported');
+    }
+  }
 
   final _isoMap = <Iso, String>{
     Iso.newEngland: '',

@@ -1,4 +1,4 @@
-library test.db.isone.masked_ids_test;
+library test.db.nyiso.masked_ids_test;
 
 import 'package:elec/elec.dart';
 import 'package:elec_server/client/masked_ids.dart';
@@ -7,24 +7,24 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
 Future<void> tests(String rootUrl) async {
-  var api = MaskedIds(Client(), iso: Iso.newEngland, rootUrl: rootUrl);
-  group('ISO New England masked assets:', () {
+  var api = MaskedIds(Client(), iso: Iso.newYork, rootUrl: rootUrl);
+  group('NYISO masked assets:', () {
     test('get all masked generators', () async {
       var data = await api.getAssets(type: 'generator');
-      var my9 = data.firstWhere((e) => e['ptid'] == 1616);
-      expect(my9['name'], 'MYSTIC 9');
-      expect(my9['Masked Asset ID'], 72020);
+      var my9 = data.firstWhere((e) => e['ptid'] == 23668);
+      expect(my9['name'], 'Athens 1');
+      expect(my9['Masked Asset ID'], 98347750);
     });
     test('get all masked participants', () async {
       var data = await api.getAssets(type: 'participant');
-      var nxt =
-          data.firstWhere((e) => e['name'] == 'NextEra Energy Power Marketing');
-      expect(nxt['Masked Participant ID'], 206845);
+      var nxt = data
+          .firstWhere((e) => e['name'] == 'Dynegy Marketing and Trade, LLC');
+      expect(nxt['Masked Participant ID'], 78710750);
     });
     test('get all masked locations', () async {
       var data = await api.getAssets(type: 'location');
-      var hub = data.firstWhere((e) => e['ptid'] == 4000);
-      expect(hub['Masked Location ID'], 75309);
+      var zoneA = data.firstWhere((e) => e['ptid'] == 61752);
+      expect(zoneA['Masked Location ID'], 65596180);
     });
   });
 }

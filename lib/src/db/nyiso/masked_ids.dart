@@ -1,4 +1,4 @@
-library db.isone.masked_ids;
+library db.nyiso.masked_ids;
 
 import 'dart:async';
 import 'dart:io';
@@ -6,15 +6,15 @@ import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
 
-class IsoNeMaskedIdsArchive {
+class NyisoMaskedIdsArchive {
   ComponentConfig? config;
   String? dir;
 
-  IsoNeMaskedIdsArchive({this.config, this.dir}) {
+  NyisoMaskedIdsArchive({this.config, this.dir}) {
     Map env = Platform.environment;
     config ??= ComponentConfig(
-        host: '127.0.0.1', dbName: 'isone', collectionName: 'masked_ids');
-    dir ??= env['HOME'] + '/Downloads/Archive/Assets/Raw/';
+        host: '127.0.0.1', dbName: 'nyiso', collectionName: 'masked_ids');
+    dir ??= env['HOME'] + '/Downloads/Archive/Nyiso/Assets/Raw/';
   }
 
   Db get db => config!.db;
@@ -29,14 +29,14 @@ class IsoNeMaskedIdsArchive {
       print('XXXX ' + e.toString());
       return Future.value(1);
     }
-    print('--->  Updated ISONE masked ids successfully');
+    print('--->  Updated NYISO masked ids successfully');
     return Future.value(0);
   }
 
   /// Read the master xlsx file.
   ///
   List<Map<String, dynamic>> readXlsx({File? file}) {
-    file ??= File(dir! + 'unmasked.xlsx');
+    file ??= File(dir! + 'unmasked_nyiso.xlsx');
     if (!file.existsSync()) throw 'File ${file.path} does not exist!';
 
     var res = <Map<String, dynamic>>[];
@@ -67,7 +67,7 @@ class IsoNeMaskedIdsArchive {
 
     table = decoder.tables['asset ID']!;
     for (var row in table.rows.skip(1)) {
-      if (row[0] is num && row[3] != null) {
+      if (row[3] is num && row[3] != null) {
         res.add(<String, dynamic>{
           'type': 'generator',
           'Masked Asset ID': (row[3] as num).toInt(),

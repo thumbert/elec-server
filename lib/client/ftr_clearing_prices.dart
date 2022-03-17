@@ -13,7 +13,11 @@ class FtrClearingPrices {
   final Iso iso;
 
   FtrClearingPrices(http.Client client,
-      {required this.iso, this.rootUrl = 'http://localhost:8080'});
+      {required this.iso, this.rootUrl = 'http://localhost:8080'}) {
+    if (!_isoMap.keys.contains(iso)) {
+      throw ArgumentError('Iso $iso is not supported');
+    }
+  }
 
   final _isoMap = <Iso, String>{
     Iso.newEngland: '/isone/ftr_clearing_prices/v1',
