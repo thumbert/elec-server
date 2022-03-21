@@ -39,13 +39,6 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
       for (var date in groups.keys) {
         await dbConfig.coll.remove({'date': date});
         await dbConfig.coll.insertAll(groups[date]!);
-        // for (var document in groups[date]!) {
-        //   await dbConfig.coll.remove({
-        //     'date': date,
-        //     'Masked Asset ID': document['Masked Asset ID'],
-        //   });
-        //   await dbConfig.coll.insert(document);
-        // }
         print('--->  Inserted $reportName for day $date');
       }
       return 0;

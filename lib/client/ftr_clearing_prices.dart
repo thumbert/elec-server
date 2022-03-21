@@ -24,7 +24,11 @@ class FtrClearingPrices {
     Iso.newYork: '/nyiso/tcc_clearing_prices/v1',
   };
 
-  /// Get all clearing prices for all auctions in the database for one ptid
+  /// Get all clearing prices for all auctions in the database for one ptid,
+  /// for all the buckets that cleared.  For example, in NYISO it will be only
+  /// bucket '7x24', in ISONE there will be two possible values for the bucket
+  /// 'Peak' and 'Offpeak' for each auctionName.
+  ///
   /// Return a list with elements
   /// ```
   /// {

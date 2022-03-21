@@ -124,11 +124,13 @@ class NyisoTccClearingPrices extends NyisoReport {
 
     var auctionName = auction.name;
     for (var x in xs.skip(10).where((List e) => e.length == 9)) {
-      out.add({
-        'auctionName': auctionName,
-        'ptid': x[5] as int,
-        'clearingPriceHour': x[8] / hourCount,
-      });
+      if (x[5] is int) {
+        out.add({
+          'auctionName': auctionName,
+          'ptid': x[5] as int,
+          'clearingPriceHour': x[8] / hourCount,
+        });
+      }
     }
 
     return out;
