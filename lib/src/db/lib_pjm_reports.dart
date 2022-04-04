@@ -1,4 +1,4 @@
-library db.lib_nysio_report;
+library db.lib_pjm_reports;
 
 import 'dart:async';
 import 'dart:io';
@@ -13,58 +13,57 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:timezone/timezone.dart';
 import 'lib_mis_reports.dart' as mis;
 
-/// A generic NYISO Report class.
-abstract class NyisoReport {
+/// A generic PJM Report class.
+abstract class PjmReport {
   late String reportName;
   late ComponentConfig dbConfig;
   static final Location location = getLocation('America/New_York');
 
   /// the location of this report on disk
-  String dir =
-      (Platform.environment['HOME'] ?? '') + '/Downloads/Archive/Nyiso/';
+  String dir = (Platform.environment['HOME'] ?? '') + '/Downloads/Archive/Pjm/';
 
-  /// Parse NYISO timestamp as it appears in the Csv reports.
-  /// Possible inputs (for example):
-  ///   '01/01/2020 00:00', 'EST'
-  ///   '03/08/2020 01:00', 'EST'  // spring forward next
-  ///   '03/08/2020 03:00', 'EDT'
-  ///   '11/01/2020 01:00', 'EDT'  // fall back next
-  ///   '11/01/2020 01:00', 'EST'
-  ///
-  /// Return a datetime in UTC.  See also [parseHourEndingStamp] from
-  /// src/utils/iso_timestamp.dart for the corresponding ISONE function.
-  ///
-  static TZDateTime parseTimestamp(String timeStamp, String timeZone) {
-    String tz;
-    if (timeZone == 'EST') {
-      tz = '-0500';
-    } else if (timeZone == 'EDT') {
-      tz = '-0400';
-    } else {
-      throw StateError('Unsupported timezone $timeZone');
-    }
-    var yyyy = timeStamp.substring(6, 10);
-    var mm = timeStamp.substring(0, 2);
-    var dd = timeStamp.substring(3, 5);
-    var hh = timeStamp.substring(11, 13);
-    var minutes = timeStamp.substring(14, 16);
-
-    var res = TZDateTime.parse(location, '$yyyy-$mm-${dd}T$hh:$minutes:00$tz');
-    return res.toUtc();
-  }
-
-  static final _fmt = DateFormat('ddMMMyyyy:HH:00:00');
-
-  /// Parse other timestamp formats used by Nyiso.  The format below is used in
-  /// the masked energy bid data reports.
-  /// '01JAN2021:05:00:00'  it is in UTC timezone.  Return in New_York zone.
-  static TZDateTime parseTimestamp2(String x) {
-    // format MMM doesn't parse 'JAN' only 'Jan', so need to lower case the
-    // 2nd and 3rd letter of the month abbreviation.
-    x = x.substring(0,3) + x.substring(3,5).toLowerCase() + x.substring(5);
-    return TZDateTime.fromMillisecondsSinceEpoch(location, _fmt.parse(x, true).millisecondsSinceEpoch);
-  }
-
+  // /// Parse NYISO timestamp as it appears in the Csv reports.
+  // /// Possible inputs (for example):
+  // ///   '01/01/2020 00:00', 'EST'
+  // ///   '03/08/2020 01:00', 'EST'  // spring forward next
+  // ///   '03/08/2020 03:00', 'EDT'
+  // ///   '11/01/2020 01:00', 'EDT'  // fall back next
+  // ///   '11/01/2020 01:00', 'EST'
+  // ///
+  // /// Return a datetime in UTC.  See also [parseHourEndingStamp] from
+  // /// src/utils/iso_timestamp.dart for the corresponding ISONE function.
+  // ///
+  // static TZDateTime parseTimestamp(String timeStamp, String timeZone) {
+  //   String tz;
+  //   if (timeZone == 'EST') {
+  //     tz = '-0500';
+  //   } else if (timeZone == 'EDT') {
+  //     tz = '-0400';
+  //   } else {
+  //     throw StateError('Unsupported timezone $timeZone');
+  //   }
+  //   var yyyy = timeStamp.substring(6, 10);
+  //   var mm = timeStamp.substring(0, 2);
+  //   var dd = timeStamp.substring(3, 5);
+  //   var hh = timeStamp.substring(11, 13);
+  //   var minutes = timeStamp.substring(14, 16);
+  //
+  //   var res = TZDateTime.parse(location, '$yyyy-$mm-${dd}T$hh:$minutes:00$tz');
+  //   return res.toUtc();
+  // }
+  //
+  // static final _fmt = DateFormat('ddMMMyyyy:HH:00:00');
+  //
+  // /// Parse other timestamp formats used by Nyiso.  The format below is used in
+  // /// the masked energy bid data reports.
+  // /// '01JAN2021:05:00:00'  it is in UTC timezone.  Return in New_York zone.
+  // static TZDateTime parseTimestamp2(String x) {
+  //   // format MMM doesn't parse 'JAN' only 'Jan', so need to lower case the
+  //   // 2nd and 3rd letter of the month abbreviation.
+  //   x = x.substring(0, 3) + x.substring(3, 5).toLowerCase() + x.substring(5);
+  //   return TZDateTime.fromMillisecondsSinceEpoch(
+  //       location, _fmt.parse(x, true).millisecondsSinceEpoch);
+  // }
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
@@ -72,10 +71,6 @@ abstract class NyisoReport {
 
   /// Setup the database from scratch again, including the index
   Future<void> setupDb();
-
-  /// Load this file from disk and process it (add conversions, reformat, etc.)
-  /// Make it ready for insertion in the database.
-  List<Map<String, dynamic>> processFile(File file);
 
   /// Download this url to a file.
   /// Basic authentication is supported.
@@ -120,26 +115,24 @@ abstract class NyisoReport {
 }
 
 /// An archive that gets daily updates.
-abstract class DailyNysioCsvReport extends NyisoReport {
+abstract class DailyPjmCsvReport extends PjmReport {
   /// Get the url of this report for this date.  Monthly reports
   /// do not have an url for each day.
   /// For daily reports, the most recent 10 days are (usually) available
   /// separately.
   String getUrl(Date asOfDate);
 
-  /// Get the url of this report for this month
-  String getUrlForMonth(Month month);
-
   /// Get the CSV file of this report for the day [asOfDate] as saved on disk.
   /// There is one ISO report per day.  Monthly reports have one file per month.
   /// For monthly reports the [asOfDate] is the beginning of the month.
   File getCsvFile(Date asOfDate);
 
-  /// Get the file of this report as a monthly zip file on disk.
-  File getZipFileForMonth(Month month);
-
   /// Get the date associated with this file.
   Date getReportDate(File file);
+
+  /// Load this file from disk and process it (add conversions, reformat, etc.)
+  /// Make it ready for insertion in the database.
+  List<Map<String, dynamic>> processDate(Date date);
 
   /// Download one day.  Check if the file has downloaded successfully.
   /// NYISO only keeps the most recent 10 days, so you may have to download
@@ -149,26 +142,16 @@ abstract class DailyNysioCsvReport extends NyisoReport {
         overwrite: overwrite);
   }
 
-  /// (All) month reports are zipped
-  /// http://mis.nyiso.com/public/csv/biddata/20211001biddata_genbids_csv.zip
-  ///
-  Future downloadMonth(Month month, {bool overwrite = true}) async {
-    var url = getUrlForMonth(month);
-    var file = File(getZipFileForMonth(month).path);
-    return await downloadUrl(url, file, overwrite: overwrite);
-  }
-
-  /// Read the report from the disk, and insert the data into the database.
+  /// Insert the data into the database.
   /// If the processing of the file throws an IncompleteReportException
   /// delete the file associated with this day.
   /// Remove the data associated with this [day] before reinserting.
-  /// Returns 0 for success, 1 for error, null if there is no data to insert.
+  /// Returns 0 for success, 1 for error, -1 if there is no data to insert.
   ///
   Future<int> insertDay(Date day) async {
-    var file = getCsvFile(day);
     List<Map<String, dynamic>> data;
     try {
-      data = processFile(file);
+      data = processDate(day);
       if (data.isEmpty) return Future.value(-1);
       await dbConfig.coll.remove({'date': day.toString()});
       return dbConfig.coll.insertAll(data).then((_) {
@@ -179,7 +162,7 @@ abstract class DailyNysioCsvReport extends NyisoReport {
         return 1;
       });
     } on mis.IncompleteReportException {
-      await file.delete();
+      await getCsvFile(day).delete();
       return Future.value(-1);
     }
   }
@@ -191,12 +174,16 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// Read from the monthly zip archive the file corresponding to the [date]
   /// of interest.
   ///
-  List<Map<String, dynamic>> readReport(Date date, {String eol = '\r\n'}) {
+  List<Map<String, dynamic>> readZipReport(Date date, {String eol = '\r\n'}) {
     var file = getCsvFile(date);
     var out = <Map<String, dynamic>>[];
     var converter = CsvToListConverter();
 
-    var zipFile = getZipFileForMonth(Month.utc(date.year, date.month));
+    var zipFile = File(getCsvFile(date).path + '.zip');
+    if (!zipFile.existsSync()) {
+      throw StateError('File $zipFile does not exist.');
+    }
+
     final bytes = zipFile.readAsBytesSync();
     var zipArchive = ZipDecoder().decodeBytes(bytes);
 
@@ -218,5 +205,5 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   }
 }
 
-/// Format a date to the yyyymmdd format, e.g. 20170115.
-String yyyymmdd(Date date) => date.toString().replaceAll('-', '');
+// /// Format a date to the yyyymmdd format, e.g. 20170115.
+// String yyyymmdd(Date date) => date.toString().replaceAll('-', '');

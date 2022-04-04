@@ -9,7 +9,7 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec_server/src/db/lib_nyiso_report.dart';
+import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 

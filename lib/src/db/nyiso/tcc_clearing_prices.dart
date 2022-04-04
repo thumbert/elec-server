@@ -7,7 +7,7 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/ftr.dart';
 import 'package:elec_server/src/db/config.dart';
-import 'package:elec_server/src/db/lib_nyiso_report.dart';
+import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:csv/csv.dart';
 import 'package:timezone/timezone.dart';
@@ -68,7 +68,11 @@ class NyisoTccClearingPrices extends NyisoReport {
       /// Several auctions, first one is monthly, after that are bopp
       /// No round
       var groups = groupBy(
-          xs.skip(10).where((List e) => e.length == 9), (List e) => e[2]);
+          xs
+              .skip(10)
+              .takeWhile((List e) => e[0] != '')
+              .where((List e) => e.length == 9),
+          (List e) => e[2]);
       var startDate = Date.parse(groups.keys.first, location: location);
       var anchorMonth =
           Month(startDate.year, startDate.month, location: location);

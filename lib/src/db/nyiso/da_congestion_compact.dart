@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:dama/basic/rle.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec_server/src/db/lib_nyiso_report.dart';
+import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 import 'package:more/ordering.dart';
@@ -178,8 +178,7 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
 
   @override
   List<Map<String, dynamic>> processFile(File file) {
-    /// use processDay()
-    throw UnimplementedError();
+    throw UnimplementedError('Use method processDay() instead.');
   }
 
   @override
