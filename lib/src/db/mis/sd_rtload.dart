@@ -10,14 +10,13 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class SdRtloadArchive extends mis.MisReportArchive {
-  @override
-  late ComponentConfig dbConfig;
-
   SdRtloadArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_RTLOAD';
     if (dbConfig == null) {
       this.dbConfig = ComponentConfig(
           host: '127.0.0.1', dbName: 'mis', collectionName: 'sd_rtload');
+    } else {
+      this.dbConfig = dbConfig;
     }
   }
 

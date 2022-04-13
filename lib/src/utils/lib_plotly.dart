@@ -29,8 +29,14 @@ class Plotly {
     file.writeAsStringSync(_makePage(traces, layout, config));
 
     /// launch chrome on the temporary file
-    var res = Process.runSync('google-chrome', [file.path]);
-    print(res);
+    late ProcessResult res;
+    if (Platform.isWindows) {
+      res = Process.runSync(
+          'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+          [file.path]);
+    } else {
+      res = Process.runSync('google-chrome', [file.path]);
+    }
     if (res.exitCode != 0) {
       print(res);
     }
