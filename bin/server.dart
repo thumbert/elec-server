@@ -2,6 +2,7 @@ import 'package:elec/elec.dart';
 import 'package:elec_server/api/api_dacongestion.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/api/api_masked_ids.dart';
+import 'package:elec_server/api/isoexpress/api_fwdres_auction_results.dart';
 import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart'
     as isone_dacong;
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
@@ -60,9 +61,11 @@ Future<Router> buildRouter() async {
         DaEnergyOffers(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
+    '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
+    '/fwdres_auction_results/v1/':
+        ApiFwdResAuctionResults(DbProd.isoexpress).router,
     '/isone/dacongestion/v1/':
         DaCongestionCompact(DbProd.isoexpress, iso: Iso.newEngland).router,
-    '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/monthly_asset_ncpc/v1/': ApiMonthlyAssetNcpc(DbProd.isoexpress).router,
     '/regulation_requirement/v1/':
         RegulationRequirement(DbProd.isoexpress).router,

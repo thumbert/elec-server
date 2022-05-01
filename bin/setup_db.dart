@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:elec/elec.dart';
+import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
 import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
@@ -194,6 +195,19 @@ void insertForwardMarks() async {
   await archive.insertData(volatilitySurface());
   await archive.setup();
   await archive.db.close();
+}
+
+Future<void> insertFwdResAuctionResults() async {
+  var archive = FwdResAuctionResultsArchive();
+  await archive.dbConfig.db.open();
+  var auctionNames = archive.urls.keys.toList();
+  for (var auctionName in auctionNames) {
+    var file = archive.getFilename(auctionName);
+    await archive.downloadUrl(archive.getUrl(auctionName), file);
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
 }
 
 Future<void> insertIsoExpress() async {
@@ -431,13 +445,14 @@ void main() async {
   /// ----------- Nyiso -----------
   // await insertDaBindingConstraintsNyiso();
   // await insertDaCongestionCompactNyiso();
-  await insertDaEnergyOffersNyiso();
+  // await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
   // await insertMaskedAssetIdsNyiso();
   // await insertPtidTableNyiso();
   // await insertTccClearedPricesNyiso();
 
 //  await insertForwardMarks();
+  await insertFwdResAuctionResults();
 //   await insertIsoExpress();
 
   // await insertDaDemandBids();

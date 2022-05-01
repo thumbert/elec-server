@@ -9,6 +9,7 @@ import 'db/isoexpress/da_energy_offer_test.dart' as energy_offers;
 import 'db/isoexpress/da_demand_bid_test.dart' as demand_bids;
 import 'db/isoexpress/da_congestion_compact_test.dart' as da_congestion;
 import 'db/isoexpress/da_lmp_hourly_test.dart' as dalmp;
+import 'db/isoexpress/fwdres_auction_results_test.dart' as fwdres;
 import 'db/isoexpress/monthly_asset_ncpc_test.dart' as monthly_asset_ncpc;
 import 'db/isoexpress/regulation_requirement_test.dart'
     as regulation_requirement;
@@ -59,6 +60,7 @@ Future<void> main() async {
   dalmp.tests(rootUrl);
   demand_bids.tests();
   energy_offers.tests(rootUrl);
+  await fwdres.tests(rootUrl);
   lib_nyiso_report.tests();
   await masked_ids.tests(rootUrl);
   monthly_asset_ncpc.tests(rootUrl);
