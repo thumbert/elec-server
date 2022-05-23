@@ -52,13 +52,4 @@ void test1() {
 
 void main() {
   test1();
-
-  // var dir = Directory.systemTemp.createTempSync();
-  // var temp = File('${dir.path}/test.html')..createSync();
-  // temp.writeAsStringSync(page);
-  // print(temp.path);
-  //
-  // // Process.runSync('google-chrome', ['http://www.chromium.org']);
-  // Process.runSync('google-chrome', [temp.path]);
-  // dir.deleteSync(recursive: true);
 }
