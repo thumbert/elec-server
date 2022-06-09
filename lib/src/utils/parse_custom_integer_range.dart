@@ -1,6 +1,6 @@
 library utils.parse_custom_integer_range;
 
-/// Do the opposite of [parseCustomIntegerRange].  Go from an integer list
+/// Do the opposite of [unpackIntegerList].  Go from an integer list
 /// to a [String], e.g. '1-5, 8, 11-13'.
 String packIntegerList(List<int> x) {
   if (x.isEmpty) return '';
@@ -36,6 +36,7 @@ List<int> parseCustomIntegerRange(String x) => unpackIntegerList(x);
 /// print format e.g. '1-5, 8, 11-13', etc.
 /// Useful for UI's
 List<int> unpackIntegerList(String x) {
+  if (x == '') return <int>[];
   var rs = x.split(',').map((e) => e.trim());
   var out = <int>[];
   for (var r in rs) {
