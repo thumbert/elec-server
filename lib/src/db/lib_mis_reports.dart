@@ -9,6 +9,25 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import 'config.dart';
 
+/// This function expands (flattens) a list of documents.
+/// For example given:
+/// ```dart
+/// [
+///   {'x': 1, 'y': ['a', 'b', 'c']},
+///   {'x': 2, 'y': ['e', 'c', 'f']},
+/// ]
+/// ```
+/// and with [scalarKeys] = 'x', [vectorKeys] = 'y', return a list
+/// ```dart
+/// [
+///   {'x': 1, 'y': 'a'},
+///   {'x': 1, 'y': 'b'},
+///   {'x': 1, 'y': 'c'},
+///   {'x': 2, 'y': 'e'},
+///   {'x': 2, 'y': 'c'},
+///   {'x': 2, 'y': 'f'},
+/// ]
+/// ```
 ///
 List<Map<String, dynamic>> expandDocument(List<Map<String, dynamic>> xs,
     Set<String> scalarKeys, Set<String> vectorKeys) {

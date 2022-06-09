@@ -376,9 +376,6 @@ class SrDaLocSum {
     return aux;
   }
 
-  // @ApiMethod(
-  //     path:
-  //         'accountId/{accountId}/subaccountId/{subaccountId}/locationId/{locationId}/column/{columnName}/start/{start}/end/{end}')
   /// Get all data for a subaccount for a given location, one column.
   Future<List<Map<String, dynamic>>> apiGetTab1ByLocationColumn(
       String accountId,
