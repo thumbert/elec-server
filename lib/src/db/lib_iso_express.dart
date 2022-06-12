@@ -64,7 +64,11 @@ abstract class IsoExpressReport {
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
       }
       var response = await request.close();
-      await response.pipe(fileout.openWrite());
+      if (response.statusCode == 200) {
+        await response.pipe(fileout.openWrite());
+      } else {
+        print('Error downloading, status code: ${response.statusCode}');
+      }
     }
   }
 
@@ -106,7 +110,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
   ///
   Future<int> insertDay(Date day) async {
     var file = getFilename(day);
-    List<Map<String,dynamic>> data;
+    List<Map<String, dynamic>> data;
     try {
       data = processFile(file);
       if (data.isEmpty) return Future.value(-1);

@@ -438,7 +438,7 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  // await insertNoaaTemperatures(download: true);
+  await insertNoaaTemperatures(download: true);
 
   // await insertDaBindingConstraintsIsone();
 
@@ -452,7 +452,7 @@ void main() async {
   // await insertTccClearedPricesNyiso();
 
 //  await insertForwardMarks();
-  await insertFwdResAuctionResults();
+//   await insertFwdResAuctionResults();
 //   await insertIsoExpress();
 
   // await insertDaDemandBids();
