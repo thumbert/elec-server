@@ -114,14 +114,14 @@ Future<void> insertDaDemandBids() async {
   //   // Date.utc(2020, 9, 1),
   //   //   Date.utc(2020, 10, 1),
   // ];
-  var days = Term.parse('Jan21-Jun21', UTC).days();
-  await insertDays(archive, days, download: false);
-  // await archive.dbConfig.db.open();
-  // for (var day in days) {
-  //   await archive.downloadDay(day);
-  //   await archive.insertDay(day);
-  // }
-  // await archive.dbConfig.db.close();
+  var days = Term.parse('Mar22', UTC).days();
+  // await insertDays(archive, days, download: false);
+  await archive.dbConfig.db.open();
+  for (var day in days) {
+    await archive.downloadDay(day);
+    await archive.insertDay(day);
+  }
+  await archive.dbConfig.db.close();
 
   // await archive.setupDb();
 }

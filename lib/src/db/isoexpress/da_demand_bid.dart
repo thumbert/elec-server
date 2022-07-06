@@ -24,10 +24,9 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= baseDir + 'PricingReports/DaDemandBid/Raw/';
     this.dir = dir;
+    reportName = 'Day-Ahead Energy Market Demand Historical Demand Bid Report';
   }
-  @override
-  String reportName =
-      'Day-Ahead Energy Market Demand Historical Demand Bid Report';
+
   @override
   String getUrl(Date? asOfDate) =>
       'https://webservices.iso-ne.com/api/v1.1/hbdayaheaddemandbid/day/' +

@@ -79,37 +79,6 @@ Future<void> tests(String rootUrl) async {
   });
   //
   //
-  // group('Binding constraints client tests:', () {
-  //   var client = BindingConstraints(http.Client(),
-  //       iso: Iso.newEngland, rootUrl: rootUrl);
-  //   test('get da binding contraints', () async {
-  //     var term = Term.parse('1Jan17-2Jan17', location);
-  //     var res = await client.getDaBindingConstraints(term.interval);
-  //     var nyne = res['NYNE']!;
-  //     expect(nyne.length, 2);
-  //   });
-  //   test('get da binding constraints data for 3 days, details', () async {
-  //     var interval = Interval(
-  //         TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2017, 1, 3));
-  //     var aux = await client.getDaBindingConstraintsDetails(interval);
-  //     expect(aux.length, 44);
-  //     var first = aux.first;
-  //     expect(first, {
-  //       'Constraint Name': 'SHFHGE',
-  //       'Contingency Name': 'Interface',
-  //       'Interface Flag': 'Y',
-  //       'Marginal Value': -7.31,
-  //       'hourBeginning': '2017-01-01 00:00:00.000-0500',
-  //     });
-  //   });
-  //   test('get all occurrences of constraint Paris', () async {
-  //     var name = 'PARIS   O154          A LN';
-  //     var aux = await client.getDaBindingConstraint(
-  //         name, Date.utc(2017, 1, 5), Date.utc(2017, 1, 6));
-  //     expect(aux.length, 2);
-  //   });
-  //   test('get constraint indicator', () {});
-  // });
 }
 
 void main() async {
