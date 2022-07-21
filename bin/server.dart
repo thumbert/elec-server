@@ -24,6 +24,7 @@ import 'package:elec_server/api/api_dalmp.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart' as nyiso_ptids;
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart'
     as nyiso_tcc_clearing_prices;
+import 'package:elec_server/api/pjm/api_pjm_ptids.dart' as pjm_ptids;
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -97,6 +98,14 @@ Future<Router> buildRouter() async {
   }.forEach((key, value) {
     router.mount(key, value);
   });
+
+  await DbProd.pjm.open();
+  <String, Router>{
+    '/pjm/ptids/v1/': pjm_ptids.ApiPtids(DbProd.pjm).router,
+  }.forEach((key, value) {
+    router.mount(key, value);
+  });
+
 
   await DbProd.riskSystem.open();
   router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);

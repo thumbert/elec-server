@@ -17,7 +17,7 @@ var env = Platform.environment;
 void downloadFile() async {
   var config = ComponentConfig(
       host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
-  var dir = env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
+  var dir = '${env['HOME']!}/Downloads/Archive/PnodeTable/Raw/';
 
   var archive = PtidArchive(config: config, dir: dir);
   var url =
@@ -28,12 +28,12 @@ void downloadFile() async {
 void ingestionTest() async {
   var config = ComponentConfig(
       host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
-  var dir = env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
+  var dir = '${env['HOME']!}/Downloads/Archive/PnodeTable/Raw/';
 
   var archive = PtidArchive(config: config);
   //await archive.setup();
 
-  var file = File(dir + 'pnode_table_2019_01_10.xlsx');
+  var file = File('${dir}pnode_table_2019_01_10.xlsx');
   await archive.db.open();
   await archive.insertMongo(file);
   await archive.db.close();
@@ -43,14 +43,14 @@ void tests(String rootUrl) async {
   // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var config = ComponentConfig(
       host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
-  var dir = env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
+  var dir = '${env['HOME']!}/Downloads/Archive/PnodeTable/Raw/';
   var archive = PtidArchive(config: config, dir: dir);
   var api = ApiPtids(config.db);
   group('Ptid table db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.db.close());
     test('read file for 2019-02-05', () {
-      var file = File(archive.dir + '2.6.20_pnode_table_2019_02_05.xlsx');
+      var file = File('${archive.dir}2.6.20_pnode_table_2019_02_05.xlsx');
       var data = archive.readXlsx(file);
       expect(data.length, 1158);
       expect(data.first, {
@@ -63,7 +63,7 @@ void tests(String rootUrl) async {
       expect(data[9]['type'], 'reserve zone');
     });
     test('read file for 2020-06-11', () {
-      var file = File(archive.dir + 'pnode_table_2020_06_11.xlsx');
+      var file = File('${archive.dir}pnode_table_2020_06_11.xlsx');
       var data = archive.readXlsx(file);
       expect(data.length, 1179);
       expect(data.first, {
@@ -140,6 +140,13 @@ void tests(String rootUrl) async {
         'subzoneName',
         'lat/lon',
       });
+    });
+    test('get current ptid table for pjm', () async {
+      var data = await client.getPtidTable(region: 'pjm');
+      var fitz = data.firstWhere((e) => e['ptid'] == 51288);
+      expect(fitz.keys.toSet(),
+          {'ptid', 'name', 'type', 'subtype', 'zoneName',
+            'voltageLevel', 'effectiveDate', 'terminationDate'});
     });
     test('get asOfDates', () async {
       var dates = await client.getAvailableAsOfDates();

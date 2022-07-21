@@ -19,29 +19,31 @@ class PtidsApi {
   /// Get ptid table.
   /// [asOfDate] - Path parameter: 'asOfDate'.  If [null] return the last
   /// date in the database.
-  /// [region] can be 'isone' or 'nyiso'.
+  /// [region] can be 'isone', 'nyiso', 'pjm'.
+  /// Results are not really standardized between regions.  Typically, each
+  /// element with contain the keys: 'ptid', 'name' and other ones.
   Future<List<Map<String, dynamic>>> getPtidTable(
       {Date? asOfDate, String region = 'isone'}) async {
     region = region.toLowerCase();
-    var _url = StringBuffer()..write(rootUrl);
+    var url = StringBuffer()..write(rootUrl);
     if (region != 'isone') {
-      _url.write('/');
-      _url.write(region.toLowerCase());
+      url.write('/');
+      url.write(region.toLowerCase());
     }
-    _url.write(servicePath);
+    url.write(servicePath);
     if (asOfDate == null) {
-      _url.write('current');
+      url.write('current');
     } else {
-      _url.write('asofdate/$asOfDate');
+      url.write('asofdate/$asOfDate');
     }
-    var _response = await http.get(Uri.parse(_url.toString()));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url.toString()));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 
   Future<List<Date>> getAvailableAsOfDates() async {
-    var _url = rootUrl + servicePath + 'dates';
-    var _response = await http.get(Uri.parse(_url));
-    var aux = json.decode(_response.body) as List;
+    var url = '$rootUrl${servicePath}dates';
+    var response = await http.get(Uri.parse(url));
+    var aux = json.decode(response.body) as List;
     var x = aux.map((e) => Date.parse(e as String)).toList();
     return x;
   }

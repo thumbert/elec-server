@@ -32,7 +32,7 @@ class PtidArchive {
         .insertAll(data)
         .then(
             (_) => print('--->  SUCCESS inserting ${path.basename(file.path)}'))
-        .catchError((e) => print('   ' + e.toString()));
+        .catchError((e) => print('   $e'));
   }
 
   /// Read an XLSX file.  Note that ISO files are xls, so you will need to

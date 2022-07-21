@@ -110,12 +110,13 @@ abstract class NyisoReport {
     }
   }
 
-  /// Insert this data into the database.
+  /// Insert this data into the database
   Future insertData(List<Map<String, dynamic>> data) async {
+    var asOfDate = data.first['asOfDate'];
     return dbConfig.coll
         .insertAll(data)
-        .then((_) => print('--->  Inserted $reportName successfully'))
-        .catchError((e) => print('XXXXX' + e.toString()));
+        .then((_) => print('--->  Inserted $reportName for $asOfDate successfully'))
+        .catchError((e) => print('XXXXX$e'));
   }
 }
 

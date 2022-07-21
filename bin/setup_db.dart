@@ -28,6 +28,8 @@ import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart' as nyiso_ptid;
 import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart'
     as nyiso_tcc_cp;
+import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
+
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
@@ -290,8 +292,7 @@ Future<void> insertMonthlyAssetNcpc({bool download = false}) async {
 
 Future<void> insertNoaaTemperatures({bool download = false}) async {
   var archive = NoaaDailySummaryArchive()
-    ..dir = (env['HOME'] ?? '') +
-        '/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
+    ..dir = '${env['HOME'] ?? ''}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
   await archive.dbConfig.db.open();
 
   /// what stations get inserted in the database
@@ -342,6 +343,17 @@ Future<void> insertPtidTableNyiso() async {
   await archive.insertData(data);
   await archive.db.close();
 }
+
+Future<void> insertPtidTablePjm() async {
+  var archive = pjm_ptid.PtidArchive();
+  await archive.setupDb();
+  
+  var data = archive.processData(Date.utc(2022, 3, 25));
+  await archive.db.open();
+  await archive.insertData(data);
+  await archive.db.close();
+}
+
 
 void insertRegulationRequirement() async {
   var archive = RegulationRequirementArchive();
@@ -438,19 +450,10 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  await insertNoaaTemperatures(download: true);
+  // await insertNoaaTemperatures(download: true);
 
   // await insertDaBindingConstraintsIsone();
-
-  /// ----------- Nyiso -----------
-  // await insertDaBindingConstraintsNyiso();
-  // await insertDaCongestionCompactNyiso();
-  // await insertDaEnergyOffersNyiso();
-  // await insertDaLmpHourlyNyiso();
-  // await insertMaskedAssetIdsNyiso();
-  // await insertPtidTableNyiso();
-  // await insertTccClearedPricesNyiso();
-
+  
 //  await insertForwardMarks();
 //   await insertFwdResAuctionResults();
 //   await insertIsoExpress();
@@ -469,4 +472,17 @@ void main() async {
   // await insertWholesaleLoadReports();
 
   // await insertZonalDemand();
+
+  /// ----------- Nyiso -----------
+  // await insertDaBindingConstraintsNyiso();
+  // await insertDaCongestionCompactNyiso();
+  // await insertDaEnergyOffersNyiso();
+  // await insertDaLmpHourlyNyiso();
+  // await insertMaskedAssetIdsNyiso();
+  // await insertPtidTableNyiso();
+  // await insertTccClearedPricesNyiso();
+
+  /// ----------- PJM --------------
+  await insertPtidTablePjm();
+
 }

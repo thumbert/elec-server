@@ -33,6 +33,7 @@ import 'db/nyiso/da_energy_offer_test.dart' as nyiso_daenergyoffer;
 import 'db/nyiso/da_lmp_hourly_test.dart' as nyiso_dalmp;
 import 'db/nyiso/masked_ids_test.dart' as nyiso_masked_ids;
 import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
+import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
@@ -70,6 +71,7 @@ Future<void> main() async {
   await nyiso_dalmp.tests(rootUrl);
   await nyiso_masked_ids.tests(rootUrl);
   await nyiso_ptids.tests(rootUrl);
+  await pjm_ptids.tests(rootUrl);
   ptids.tests(rootUrl);
   regulation_requirement.tests(rootUrl);
   sd_arrawdsum.tests(rootUrl);

@@ -1,4 +1,4 @@
-library db.isone_ptids;
+library db.nyiso.nyiso_ptids;
 
 import 'dart:async';
 import 'dart:io';
@@ -28,7 +28,7 @@ class PtidArchive extends NyisoReport {
   Future<void> downloadData() async {
     var asOfDate = Date.today(location: UTC);
     var url = 'http://mis.nyiso.com/public/csv/generator/generator.csv';
-    var file = File(dir + '/generator_' + asOfDate.toString() + '.csv');
+    var file = File('$dir/generator_$asOfDate.csv');
     await downloadUrl(url, file);
   }
 

@@ -17,6 +17,7 @@ class DbProd extends DbEnv {
   static final marks = Db('mongodb://${DbProd._connection}/marks');
   static final mis = Db('mongodb://${DbProd._connection}/mis');
   static final nyiso = Db('mongodb://${DbProd._connection}/nyiso');
+  static final pjm = Db('mongodb://${DbProd._connection}/pjm');
   static final riskSystem = Db('mongodb://${DbProd._connection}/risk_system');
   static final weather = Db('mongodb://${DbProd._connection}/weather');
 }
