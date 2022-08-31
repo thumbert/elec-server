@@ -30,13 +30,11 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
   /// Data usually available on the 15th of the month for next month
   @override
   String getUrl(Date asOfDate) =>
-      'http://mis.nyiso.com/public/TSCCalc/tsc_ntac_' +
-      yyyymmdd(asOfDate) +
-      '.pdf';
+      'http://mis.nyiso.com/public/TSCCalc/tsc_ntac_${yyyymmdd(asOfDate)}.pdf';
 
   @override
   File getCsvFile(Date asOfDate) =>
-      File(dir + yyyymmdd(asOfDate) + 'DAMLimitingConstraints.csv');
+      File('$dir${yyyymmdd(asOfDate)}DAMLimitingConstraints.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {

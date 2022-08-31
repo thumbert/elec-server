@@ -79,7 +79,7 @@ abstract class MisReportArchive {
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
         .catchError((e) {
-      print('   ' + e.toString());
+      print('   $e');
       throw e;
     });
     return 0;

@@ -19,7 +19,7 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
         dbName: 'isoexpress',
         collectionName: 'fwdres_auction_results');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'FwdRes/AuctionResults/Raw/';
+    dir ??= '${baseDir}FwdRes/AuctionResults/Raw/';
     this.dir = dir;
     reportName = 'Forward Reserve Auction Results Report';
   }
@@ -35,9 +35,7 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
   }
 
   File getFilename(String auctionName) {
-    return File(dir +
-        'fwdres_auction_results_'
-            '${startMonth(auctionName).toIso8601String()}.csv');
+    return File('${dir}fwdres_auction_results_${startMonth(auctionName).toIso8601String()}.csv');
   }
 
   /// Can insert data for multiple auctions at once
@@ -50,7 +48,7 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
       try {
         await dbConfig.coll.insertAll(groups[auctionName]!);
       } catch (e) {
-        print(' XXXX ' + e.toString());
+        print(' XXXX $e');
         return Future.value(1);
       }
       print('--->  SUCCESS inserting $reportName for $auctionName');
@@ -152,6 +150,8 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
         'https://www.iso-ne.com/static-assets/documents/2017/04/fr_auction_sum2017.csv',
     'Summer 16':
         'https://www.iso-ne.com/static-assets/documents/2016/04/fr_auction_sum2016.csv',
+    'Winter 22-23':
+        'https://www.iso-ne.com/static-assets/documents/2022/08/forward_reserve_auction_results.csv',
     'Winter 21-22':
         'https://www.iso-ne.com/static-assets/documents/2021/08/fr_auction_winter2021-22.csv',
     'Winter 20-21':

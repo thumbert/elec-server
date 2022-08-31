@@ -26,10 +26,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
 
   @override
   String getUrl(Date? asOfDate) =>
-      'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/'
-          'WW_DALMP_ISO_' +
-      yyyymmdd(asOfDate) +
-      '.csv';
+      'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv';
   @override
   File getFilename(Date? asOfDate) =>
       File(dir + 'WW_DALMP_ISO_' + yyyymmdd(asOfDate) + '.csv');

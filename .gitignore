@@ -17,6 +17,7 @@ out
 docs
 
 .env/
+ms_graph_*
 
 *.iml
 *.js_
