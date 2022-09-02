@@ -42,17 +42,49 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
     var reportDate = report.forDate();
     var version = report.timestamp().toIso8601String();
 
-    /// tab 4, Asset detail RT reserves hourly
+    /// tab 1, Forward Reserves tab
     var labels = <String, dynamic>{
+      'account': account,
+      'tab': 1,
+      'date': reportDate.toString(),
+      'version': version,
+    };
+    var x1 = mis.readReportTabAsMap(file, tab: 1);
+    /// keep only the rows when you have something assigned
+    x1 = x1.where((e) => e['Forward Reserve TMOR Assigned MWs'] != 0 ||
+        e['Forward Reserve TMNSR Assigned MWs'] != 0).toList();
+    var grp1 = groupBy(x1, (dynamic e) => e['Asset ID']);
+    var tab1 = <Map<String, dynamic>>[];
+    for (var entry in grp1.entries) {
+      labels['Asset ID'] = entry.key;
+      labels['Subaccount ID'] = entry.value.first['Subaccount ID'];
+      tab1.addAll(addLabels(
+          [collapseListOfMap(entry.value)],
+          labels,
+          [
+            'H',
+            'Asset ID',
+            'Asset Name',
+            'Subaccount ID',
+            'Subaccount Name',
+            // 'Reserve Zone ID',
+            'Reserve Zone Name',
+            'Asset Type',
+          ]));
+    }
+
+
+    /// tab 4, Asset detail RT reserves hourly
+    labels = <String, dynamic>{
       'account': account,
       'tab': 4,
       'date': reportDate.toString(),
       'version': version,
     };
     var x4 = mis.readReportTabAsMap(file, tab: 4);
-    var grp = groupBy(x4, (dynamic e) => e['Asset ID']);
+    var grp4 = groupBy(x4, (dynamic e) => e['Asset ID']);
     var tab4 = <Map<String, dynamic>>[];
-    for (var entry in grp.entries) {
+    for (var entry in grp4.entries) {
       labels['Asset ID'] = entry.key;
       labels['Subaccount ID'] = entry.value.first['Subaccount ID'];
       tab4.addAll(addLabels(
@@ -66,14 +98,16 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
             'Subaccount Name',
             'Reserve Zone ID',
             'Reserve Zone Name',
-            'Asset Type'
+            'Asset Type',
           ]));
     }
 
     return {
+      1: tab1,
       4: tab4,
     };
   }
+
 
   @override
   Map<int, List<Map<String, dynamic>>> processFile(File file) {
