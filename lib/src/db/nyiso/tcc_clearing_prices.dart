@@ -8,8 +8,10 @@ import 'package:elec/elec.dart';
 import 'package:elec/ftr.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
+import 'package:http/http.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:csv/csv.dart';
+import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
 
 class NyisoTccClearingPrices extends NyisoReport {
@@ -31,9 +33,52 @@ class NyisoTccClearingPrices extends NyisoReport {
   final location = getLocation('America/New_York');
   final Iso iso = Iso.newYork;
 
+  /// Return the last auctionId downloaded on the file system or throw if
+  /// no files are saved on the file system yet.
+  int lastAuctionId() {
+    var regex = RegExp(r'clearingprices_(\d+).csv');
+    
+    var files = Directory(dir)
+        .listSync()
+        .whereType<File>()
+        .where((e) => regex.hasMatch(basename(e.path)))
+        .toList();
+    if (files.isEmpty) {
+      throw StateError('There are no files with TTC clearing prices downloaded.\n'
+          'Use archive.downloadPrices() to get some files.');
+    }
+
+    var names = files.map((e) {
+      var matches = regex.allMatches(basename(e.path));
+      var match = matches.elementAt(0);
+      return int.parse(match.group(1) ?? '0');
+    }).toList();
+    names.sort();
+
+    return names.last;
+  }
+
   /// Download the data manually from http://tcc.nyiso.com/tcc/public/view_nodal_prices.do
   /// Try to find a way to push the 'Download CSV' button with the auction of interest
   /// Each auction has an integer id, e.g. 3335 for G22-J22 auctions.
+  Future<int> downloadPrices(int auctionId) async {
+    var url = 'http://tcc.nyiso.com/tcc/public/view_nodal_prices_xls_view.do';
+
+    var res = await post(Uri.parse(url), body: {
+      'display': 'Y',
+      'format': 'csv',
+      'roundVersionId': auctionId.toString(),
+    });
+    // print(res.body);
+    if (res.body.length < 100 || res.body.contains('improper')) {
+      // this auction has not cleared yet
+      return -1;
+    }
+    var file = File(join(dir, 'clearingprices_$auctionId.csv'));
+    file.writeAsStringSync(res.body);
+
+    return 0;
+  }
 
   /// Only insert complete (for all ptids) auction data at a time.
   @override
@@ -49,7 +94,7 @@ class NyisoTccClearingPrices extends NyisoReport {
             '--->  Inserted NYISO TCC clearing prices for auction $auctionName successfully');
       }
     } catch (e) {
-      print('XXXX ' + e.toString());
+      print('XXXX $e');
     }
   }
 

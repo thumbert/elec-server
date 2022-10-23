@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
+import 'package:elec_server/src/db/nyiso/btm_solar_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
+import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
 import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
@@ -49,6 +51,24 @@ import 'package:path/path.dart';
 ///
 
 var env = Platform.environment;
+
+Future<void> insertBtmSolarMwNyiso() async {
+  var archive = NyisoBtmSolarActualArchive();
+  await archive.setupDb();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2022, 1).upTo(Month.utc(2022, 9));
+  for (var month in months) {
+    await archive.downloadMonth(month);
+    for (var date in month.days()) {
+      var file = archive.getCsvFile(date);
+      var data = archive.processFile(file);
+      // print(data.length);
+      await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
 
 Future<void> insertDaBindingConstraintsIsone() async {
   var archive = DaBindingConstraintsReportArchive();
@@ -212,6 +232,23 @@ Future<void> insertFwdResAuctionResults() async {
   await archive.dbConfig.db.close();
 }
 
+Future<void> insertHourlyRtZonalLoadNyiso() async {
+  var archive = NyisoHourlyRtZonalLoadReportArchive();
+  await archive.setupDb();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2022, 1).upTo(Month.utc(2022, 9));
+  for (var month in months) {
+    await archive.downloadMonth(month);
+    for (var date in month.days()) {
+      var file = archive.getCsvFile(date);
+      var data = archive.processFile(file);
+      // print(data.length);
+      await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
 Future<void> insertIsoExpress() async {
   var location = getLocation('America/New_York');
   // to pass tests
@@ -354,7 +391,6 @@ Future<void> insertPtidTablePjm() async {
   await archive.db.close();
 }
 
-
 void insertRegulationRequirement() async {
   var archive = RegulationRequirementArchive();
   await archive.setupDb();
@@ -474,15 +510,18 @@ void main() async {
   // await insertZonalDemand();
 
   /// ----------- Nyiso -----------
+  await insertBtmSolarMwNyiso();
   // await insertDaBindingConstraintsNyiso();
   // await insertDaCongestionCompactNyiso();
   // await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
+  // await insertHourlyRtZonalLoadNyiso();
   // await insertMaskedAssetIdsNyiso();
   // await insertPtidTableNyiso();
   // await insertTccClearedPricesNyiso();
 
+
   /// ----------- PJM --------------
-  await insertPtidTablePjm();
+  // await insertPtidTablePjm();
 
 }

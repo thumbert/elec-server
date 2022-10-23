@@ -9,6 +9,7 @@ import 'package:elec/ftr.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
@@ -20,7 +21,7 @@ Future<void> tests(String rootUrl) async {
     tearDown(() async => await archive.dbConfig.db.close());
     test('read G22-J22', () async {
       var data =
-          archive.processFile(File(archive.dir + 'clearingprices_G22-J22.csv'));
+          archive.processFile(File('${archive.dir}clearingprices_G22-J22.csv'));
       expect(data.length, 1074);
       expect(data.first, {
         'auctionName': 'G22',
@@ -38,7 +39,7 @@ Future<void> tests(String rootUrl) async {
     });
     test('read K21-2Y-R1', () async {
       var data = archive
-          .processFile(File(archive.dir + 'clearingprices_K21-2Y-R1.csv'));
+          .processFile(File('${archive.dir}clearingprices_K21-2Y-R1.csv'));
       expect(data.length, 358);
       expect(data.first, {
         'auctionName': 'K21-2Y-R1',
@@ -46,6 +47,24 @@ Future<void> tests(String rootUrl) async {
         'clearingPriceHour': 10.990031963470319,
       });
     });
+    test('get last auctionId', () {
+      var id = archive.lastAuctionId();
+      expect(id > 100, true);
+    });
+
+    // test('download auction results', () async {
+    //   var auctionId = 3366;
+    //   var file = File(join(archive.dir, 'clearingprices_$auctionId.csv'));
+    //   await archive.downloadPrices(auctionId);
+    //   var data = archive.processFile(file);
+    //   expect(data.length, 2142);
+    //   expect(data.first, {
+    //     'auctionName': 'X22',
+    //     'ptid': 23512,
+    //     'clearingPriceHour': 43.19801664355062,
+    //   });
+    // }, solo: true);
+
   });
   group('TCC clearing prices API tests:', () {
     var api = ApiNyisoTccClearingPrices(
