@@ -21,7 +21,7 @@ abstract class NyisoReport {
 
   /// the location of this report on disk
   String dir =
-      (Platform.environment['HOME'] ?? '') + '/Downloads/Archive/Nyiso/';
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Nyiso/';
 
   /// Parse NYISO timestamp as it appears in the Csv reports.
   /// Possible inputs (for example):
@@ -201,10 +201,10 @@ abstract class DailyNysioCsvReport extends NyisoReport {
     final bytes = zipFile.readAsBytesSync();
     var zipArchive = ZipDecoder().decodeBytes(bytes);
 
-    var _file = zipArchive.findFile(basename(file.path));
-    if (_file != null) {
-      var _lines = _file.content as List<int>;
-      var csv = utf8.decoder.convert(_lines);
+    var dailyFile = zipArchive.findFile(basename(file.path));
+    if (dailyFile != null) {
+      var lines = dailyFile.content as List<int>;
+      var csv = utf8.decoder.convert(lines);
       // print(csv);
       var xs = converter.convert(csv, eol: eol);
       if (xs.isNotEmpty) {
