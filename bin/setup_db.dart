@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:elec/elec.dart';
+import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
 import 'package:http/http.dart';
@@ -198,6 +199,21 @@ void insertForwardMarks() async {
   await archive.setup();
   await archive.db.close();
 }
+
+Future<void> insertFuelMixIsone(List<Date> days,
+    {bool setup = false, bool externalDownload = true}) async {
+  var archive = FuelMixReportArchive();
+  if (setup) await archive.setupDb();
+
+  await archive.dbConfig.db.open();
+  for (var day in days) {
+    if (externalDownload) await archive.downloadDay(day);
+    var data = archive.processFile(archive.getFilename(day));
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
 
 Future<void> insertFwdResAuctionResults() async {
   var archive = FwdResAuctionResultsArchive();
@@ -411,23 +427,25 @@ Future<void> insertWholesaleLoadReports() async {
 
 Future<void> insertZonalDemand() async {
   var archive = ZonalDemandArchive();
-  await ZonalDemandArchive().setupDb();
+  // await ZonalDemandArchive().setupDb();
 
   var years = [
-    2011,
-    2012,
-    2013,
-    2014,
-    2015,
-    2016,
-    2017,
-    2018,
-    2019,
-    2020,
-    2021
+    // 2011,
+    // 2012,
+    // 2013,
+    // 2014,
+    // 2015,
+    // 2016,
+    // 2017,
+    // 2018,
+    // 2019,
+    // 2020,
+    2021,
+    2022,
   ];
   // for (var year in years) {
-  //   // download the files and convert to xlsx
+  //   // download the files and convert to xlsx before 2017
+  //   await archive.downloadYear(year);
   // }
 
   await archive.dbConfig.db.open();
@@ -441,10 +459,6 @@ Future<void> insertZonalDemand() async {
   await archive.dbConfig.db.close();
 }
 
-/// Try to redo them all
-void redoAll() async {
-  // TODO
-}
 
 void main() async {
   initializeTimeZones();
@@ -452,12 +466,15 @@ void main() async {
 
   // await insertNoaaTemperatures(download: true);
 
+  /// ------------- Isone -----------------
   // await insertDaBindingConstraintsIsone();
   
 //  await insertForwardMarks();
 //   await insertFwdResAuctionResults();
 //   await insertIsoExpress();
 
+  var days = Date.utc(2020, 1, 1).upTo(Date.utc(2020, 1, 31));
+  await insertFuelMixIsone(days, setup: true, externalDownload: false);
   // await insertDaDemandBids();
 
   // await insertMaskedAssetIds();
@@ -483,6 +500,6 @@ void main() async {
   // await insertTccClearedPricesNyiso();
 
   /// ----------- PJM --------------
-  await insertPtidTablePjm();
+  // await insertPtidTablePjm();
 
 }

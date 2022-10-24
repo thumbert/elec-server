@@ -53,7 +53,7 @@ db.sd_rtload.aggregate([
 
 //use isoexpress;
 //db.wholesale_load_cost.dropIndexes()
-//db.wholesale_load_cost.createIndexe({'ptid': 1, 'date': 1}, {'unique': true});
+//db.wholesale_load_cost.createIndex({'ptid': 1, 'date': 1}, {'unique': true});
 
 //use marks
 //db.curve_ids.dropIndexes()

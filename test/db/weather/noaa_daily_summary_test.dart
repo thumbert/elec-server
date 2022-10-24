@@ -16,8 +16,7 @@ import 'package:timezone/timezone.dart';
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 void tests(String rootUrl) async {
   var archive = NoaaDailySummaryArchive()
-    ..dir = (Platform.environment['HOME'] ?? '') +
-        '/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
+    ..dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
   group('NOAA daily summary db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
@@ -80,7 +79,7 @@ void tests(String rootUrl) async {
       expect(lastDate.isBefore(futureDate), true);
     });
   });
-  group('Monthly asset ncpc client tests:', () {
+  group('NOAA daily temperature summary client tests:', () {
     var client = NoaaDailySummary(http.Client(), rootUrl: rootUrl);
     test('get min/max temperatures', () async {
       var term = Term.parse('15Jan19-28Feb19', UTC);

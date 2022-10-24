@@ -5,6 +5,7 @@ import 'package:elec_server/api/api_masked_ids.dart';
 import 'package:elec_server/api/isoexpress/api_fwdres_auction_results.dart';
 import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart'
     as isone_dacong;
+import 'package:elec_server/api/isoexpress/api_isone_fuelmix.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
@@ -36,7 +37,6 @@ import 'package:timezone/data/latest.dart';
 
 import 'package:elec_server/api/isoexpress/api_isone_rtlmp.dart';
 import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
-import 'package:elec_server/api/isoexpress/api_isone_energyoffers.dart';
 import 'package:elec_server/api/isoexpress/api_isone_demandbids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
 import 'package:elec_server/api/api_scc_report.dart';
@@ -63,6 +63,7 @@ Future<Router> buildRouter() async {
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
     '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
+    '/isone/fuelmix/v1/': ApiIsoneFuelMix(DbProd.isoexpress).router,
     '/fwdres_auction_results/v1/':
         ApiFwdResAuctionResults(DbProd.isoexpress).router,
     '/isone/dacongestion/v1/':
@@ -73,6 +74,7 @@ Future<Router> buildRouter() async {
     '/rt_load/v1/': WholesaleLoadCost(DbProd.isoexpress).router,
     '/rtlmp/v1/': RtLmp(DbProd.isoexpress).router,
     '/system_demand/v1/': SystemDemand(DbProd.isoexpress).router,
+    '/isone/zonal_demand/v1/': ZonalDemand(DbProd.isoexpress).router,
   }.forEach((key, value) {
     router.mount(key, value);
   });

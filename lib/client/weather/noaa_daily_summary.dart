@@ -15,16 +15,25 @@ class NoaaDailySummary {
   final String rootUrl;
   final String servicePath;
 
+  /// It is hard to find the stationId.
+  /// Go to https://www.ncdc.noaa.gov/cdo-web/search
   /// from airport code to stationId
   static const airportCodeMap = <String, String>{
     'ATL': 'USW00013874', // Atlanta
-    'BOS': 'USW00014739', // Boston
-    'BWI': 'USW00093721', // Baltimore
+    'BGR': 'USW00014606', // Bangor International Airport, ME
+    'BLD': 'USW00014740', // Hartford Bradley International Airport, CT
+    'BOS': 'USW00014739', // Boston Logan International Airport
+    'BWI': 'USW00093721', // Baltimore Washington International Airport
+    'CON': 'USW00014745', // Concord Municipal Airport, NH
+    'CVG': 'USW00093814', // Cincinnati-northern Kentucky International Airport
     'LGA': 'USW00014732', // NYC La Guardia
     'ORD': 'USW00094846', // Chicago O'Hare
+    'ORH': 'USW00094746', // Worcester Regional Airport, MA
+    'PHL': 'USW00013739', // Philadelphia International Airport, MA
+    'PVD': 'USW00014765', // Rhode Island T.F. Green International Airport, RI
   };
 
-  /// Daily average temperature in Fahrenheit.
+  /// Daily average temperature in Fahrenheit.  Date is UTC.
   Future<TimeSeries<num>> getDailyHistoricalTemperature(
       String airportCode, Interval interval) async {
     var data = await getDailyHistoricalMinMaxTemperature(airportCode, interval);
@@ -43,6 +52,7 @@ class NoaaDailySummary {
   ///   '2019-01-16' -> {'min': 22, 'max': 40},
   ///   ...
   /// ```
+  /// If the [airportCode] is not in the database, fail with null exception.
   Future<TimeSeries<Map<String, num>>> getDailyHistoricalMinMaxTemperature(
       String airportCode, Interval interval) async {
     var stationId = airportCodeMap[airportCode]!;
@@ -50,11 +60,11 @@ class NoaaDailySummary {
     var start = interval.start.toString().substring(0, 10);
     var end =
         interval.end.subtract(Duration(minutes: 1)).toString().substring(0, 10);
-    var _url =
-        rootUrl + servicePath + 'stationId/$stationId/start/$start/end/$end';
+    var url =
+        '$rootUrl${servicePath}stationId/$stationId/start/$start/end/$end';
 
-    var _response = await client.get(Uri.parse(_url));
-    var xs = json.decode(_response.body) as List;
+    var response = await client.get(Uri.parse(url));
+    var xs = json.decode(response.body) as List;
 
     return TimeSeries.fromIterable(xs.map((e) => IntervalTuple(
         Date.parse(e['date'], location: location),

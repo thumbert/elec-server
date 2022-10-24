@@ -1,5 +1,14 @@
 # Changelog
 
+## Release 2022-10-23
+- Add fuel mix for isone
+- Track StJohns port activity
+- Add archive for rt load nyiso and btm solar actuals
+
+## Release 2022-10-03
+- Fix api for isone zonal_demand, the documentation link, the server 
+  binding
+
 ## 2.0.2 (released 2021-11-28)
 - Improve forward_marks API and client.  Added a route to pull strip prices 
   in an efficient way (batch call to the DB and caching.)

@@ -18,12 +18,18 @@ Future<void> tests() async {
   var location = getLocation('America/New_York');
 
   // var days = Date.today(location: location).previousN(10);
-  var days = Term.parse('Mar21-Jul21', UTC).days();
-  await insertDays(DaLmpHourlyArchive(), days);
+  // var days = Term.parse('Mar21-Jul21', UTC).days();
+  // await insertDays(DaLmpHourlyArchive(), days);
+
+
 }
 
 void main() async {
   initializeTimeZones();
+
+  ///
+  /// See bin/setup_db.dart on how to update a database
+  ///
 
   await tests();
 }

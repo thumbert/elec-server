@@ -10,6 +10,8 @@ dependencies:
   args: ^2.1.0
   collection: ^1.15.0
   csv: ^5.0.1
+  dama:
+    git: https://github.com/thumbert/dama.git
   date:
     git: https://github.com/thumbert/date.git
   dotenv: ^3.0.0
@@ -29,6 +31,8 @@ dependencies:
   spreadsheet_decoder: ^2.0.0
   table:
     git: https://github.com/thumbert/table.git
+  timeseries:
+    git: https://github.com/thumbert/timeseries.git
   timezone: ^0.8.0
   tuple: ^2.0.0
   xml: ^6.1.0

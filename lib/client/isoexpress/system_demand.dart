@@ -18,11 +18,7 @@ class SystemDemand {
   /// Get system demand between a start and end date.
   Future<TimeSeries<double>> getSystemDemand(
       Market market, Date start, Date end) async {
-    var _url = rootUrl +
-        servicePath +
-        'market/${market.toString()}' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}';
+    var url = '$rootUrl${servicePath}market/${market.toString()}/start/${start.toString()}/end/${end.toString()}';
 
     late String columnName;
     if (market.toString().toUpperCase() == 'DA') {
@@ -31,8 +27,8 @@ class SystemDemand {
       columnName = 'Total Load';
     }
 
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),
         e[columnName])));

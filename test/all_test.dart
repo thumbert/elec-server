@@ -15,6 +15,7 @@ import 'db/isoexpress/regulation_requirement_test.dart'
     as regulation_requirement;
 import 'db/isoexpress/wholesale_load_cost_report_test.dart'
     as wholesale_load_cost_report;
+import 'db/isoexpress/zonal_demand_test.dart' as zonal_demand;
 import 'db/isone_ptids_test.dart' as ptids;
 import 'db/isone/masked_ids_test.dart' as masked_ids;
 
@@ -81,6 +82,7 @@ Future<void> main() async {
   trsch2.tests();
   trsch3.tests();
   noaa_daily_summary.tests(rootUrl);
+  zonal_demand.tests(rootUrl);
 
   /// Client tests
   curve_id.tests(rootUrl);

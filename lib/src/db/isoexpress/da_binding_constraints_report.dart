@@ -19,7 +19,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
         dbName: 'isoexpress',
         collectionName: 'binding_constraints');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'GridReports/DaBindingConstraints/Raw/';
+    dir ??= '${baseDir}GridReports/DaBindingConstraints/Raw/';
     this.dir = dir;
     reportName = 'Day-Ahead Binding Constraints Report';
   }
@@ -28,12 +28,11 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
 
   @override
   String getUrl(Date asOfDate) =>
-      'https://webservices.iso-ne.com/api/v1.1/dayaheadconstraints/day/' +
-      yyyymmdd(asOfDate);
+      'https://webservices.iso-ne.com/api/v1.1/dayaheadconstraints/day/${yyyymmdd(asOfDate)}';
 
   @override
   File getFilename(Date asOfDate) => File(
-      dir + 'da_binding_constraints_final_' + yyyymmdd(asOfDate) + '.json');
+      '${dir}da_binding_constraints_final_${yyyymmdd(asOfDate)}.json');
 
   @override
   Future downloadDay(Date day) async {
@@ -108,7 +107,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }

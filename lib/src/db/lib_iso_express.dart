@@ -9,7 +9,7 @@ import 'package:timezone/timezone.dart';
 import 'lib_mis_reports.dart' as mis;
 
 var _env = Platform.environment;
-String baseDir = (_env['HOME'] ?? '') + '/Downloads/Archive/IsoExpress/';
+String baseDir = '${_env['HOME'] ?? ''}/Downloads/Archive/IsoExpress/';
 void setBaseDir(String dirName) => baseDir = dirName;
 
 /// An generic ISO Express Report class.
@@ -77,7 +77,7 @@ abstract class IsoExpressReport {
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted successfully'))
-        .catchError((e) => print('   ' + e.toString()));
+        .catchError((e) => print('   $e'));
   }
 }
 
@@ -119,7 +119,7 @@ abstract class DailyIsoExpressReport extends IsoExpressReport {
         print('--->  Inserted $reportName for day $day');
         return 0;
       }).catchError((e) {
-        print('XXXX ' + e.toString());
+        print('XXXX $e');
         return 1;
       });
     } on mis.IncompleteReportException {

@@ -19,13 +19,13 @@ class ZonalDemandArchive extends IsoExpressReport {
         dbName: 'isoexpress',
         collectionName: 'zonal_demand');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'PricingReports/ZonalInformation/Raw/';
+    reportName = 'Zonal information';
+    dir ??= '${baseDir}PricingReports/ZonalInformation/Raw/';
     this.dir = dir;
   }
-  @override
-  String reportName = 'Zonal information';
+
   File getFilename(int year) =>
-      File(dir + '${year.toString()}_smd_hourly.xlsx');
+      File('$dir${year.toString()}_smd_hourly.xlsx');
 
   /// not used
   @override
@@ -134,24 +134,27 @@ class ZonalDemandArchive extends IsoExpressReport {
   /// Remove data for existing day.  Input data should contain all zones for a
   /// given day, that is, don't try to insert one zone at a time.
   @override
-  Future insertData(List<Map<String, dynamic>> data) async {
+  Future<void> insertData(List<Map<String, dynamic>> data) async {
     /// group data by day
-    var dayData = groupBy(data, (Map x) => x['date']);
-    for (String? day in dayData.keys as Iterable<String?>) {
+    var dayData = groupBy(data, (Map x) => x['date'] as String);
+    for (var day in dayData.keys) {
       await dbConfig.coll.remove({'date': day});
       await dbConfig.coll.insertAll(dayData[day]!);
       print('Inserted day $day successfully in isoexpress/zonal_demand');
     }
   }
 
-  Future downloadYear(int year) async {
+  Future<void> downloadYear(int year) async {
     var url = _urls[year];
     await downloadUrl(url!, getFilename(year));
   }
 
+  ///
   final _urls = <int, String>{
+    2022:
+     'https://www.iso-ne.com/static-assets/documents/2022/02/2022_smd_hourly.xlsx',
     2021:
-        'https://www.iso-ne.com/static-assets/documents/2020/02/2021_smd_hourly.xlsx',
+        'https://www.iso-ne.com/static-assets/documents/2021/02/2021_smd_hourly.xlsx',
     2020:
         'https://www.iso-ne.com/static-assets/documents/2020/02/2020_smd_hourly.xlsx',
     2019:

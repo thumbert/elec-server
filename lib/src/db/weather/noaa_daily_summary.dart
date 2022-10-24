@@ -18,7 +18,7 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
             dbName: 'weather',
             collectionName: 'noaa_daily_summary');
 
-    dir = baseDir + 'Noaa/DailySummary/Raw/';
+    dir = '${baseDir}Noaa/DailySummary/Raw/';
   }
 
   mongo.Db get db => dbConfig.db;
@@ -30,14 +30,10 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
   /// https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
   /// https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMIN,TMAX&stations=USW00014739&startDate=2021-01-01&endDate=2021-12-31&format=csv&units=standard&options=includeAttributes:0
   String getUrl(String stationId, Date start, Date end) {
-    return 'https://www.ncei.noaa.gov/access/services/data/v1'
-            '?dataset=daily-summaries&dataTypes=TMIN,TMAX&stations=' +
-        stationId +
-        '&startDate=$start&endDate=$end&format=csv&units=standard'
-            '&includeStationName=false';
+    return 'https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMIN,TMAX&stations=$stationId&startDate=$start&endDate=$end&format=csv&units=standard&includeStationName=false';
   }
 
-  File getFilename(String stationId) => File(dir + stationId + '.csv');
+  File getFilename(String stationId) => File('$dir$stationId.csv');
 
   /// Insert/Update a list of documents into the db.
   /// Input [data] should contain entire years only except for current year
@@ -68,7 +64,7 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
       }
       print('--->  Inserted stationId $stationId successfully');
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return Future.value(1);
     }
     return Future.value(0);
@@ -77,15 +73,15 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var converter = CsvToListConverter();
-    var _lines = file.readAsLinesSync();
-    var columnNames = converter.convert(_lines.first).first;
+    var lines = file.readAsLinesSync();
+    var columnNames = converter.convert(lines.first).first;
     if (!ListEquality()
         .equals(columnNames, ['STATION', 'DATE', 'TMAX', 'TMIN'])) {
       throw StateError('File format has changed');
     }
-    var stationId = converter.convert(_lines[1]).first[0] as String;
+    var stationId = converter.convert(lines[1]).first[0] as String;
     var aux = <Map<String, dynamic>>[];
-    for (var line in _lines.skip(1)) {
+    for (var line in lines.skip(1)) {
       var data = converter.convert(line).first;
       var tMin = num.tryParse(data[3]);
       var tMax = num.tryParse(data[2]);
