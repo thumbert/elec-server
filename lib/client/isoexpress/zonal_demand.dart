@@ -11,9 +11,9 @@ import 'package:timeseries/timeseries.dart';
 class IsoneZonalDemand {
   final location = getLocation('America/New_York');
   String rootUrl;
-  final String servicePath = 'isone/zonal_demand/v1/';
+  final String servicePath = '/isone/zonal_demand/v1/';
 
-  IsoneZonalDemand(http.Client client, {this.rootUrl = 'http://localhost:8080/'});
+  IsoneZonalDemand(http.Client client, {this.rootUrl = 'http://localhost:8080'});
 
   static const _ptidMap = <int,String>{
     4001: 'me',
