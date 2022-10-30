@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
-import 'package:elec_server/src/db/nyiso/btm_solar_mw.dart';
+import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
+import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
 import 'package:http/http.dart';
@@ -53,11 +54,28 @@ import 'package:path/path.dart';
 
 var env = Platform.environment;
 
-Future<void> insertBtmSolarMwNyiso() async {
+Future<void> insertBtmSolarActualMwNyiso() async {
   var archive = NyisoBtmSolarActualArchive();
   await archive.setupDb();
   await archive.dbConfig.db.open();
-  var months = Month.utc(2022, 1).upTo(Month.utc(2022, 9));
+  var months = Month.utc(2020, 11).upTo(Month.utc(2022, 9));
+  for (var month in months) {
+    await archive.downloadMonth(month);
+    for (var date in month.days()) {
+      var file = archive.getCsvFile(date);
+      var data = archive.processFile(file);
+      // print(data.length);
+      await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
+Future<void> insertBtmSolarForecastMwNyiso() async {
+  var archive = NyisoBtmSolarForecastArchive();
+  // await archive.setupDb();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2020, 11).upTo(Month.utc(2022, 9));
   for (var month in months) {
     await archive.downloadMonth(month);
     for (var date in month.days()) {
@@ -509,8 +527,8 @@ void main() async {
 //   await insertFwdResAuctionResults();
 //   await insertIsoExpress();
 
-  var days = Date.utc(2020, 1, 1).upTo(Date.utc(2020, 1, 31));
-  await insertFuelMixIsone(days, setup: true, externalDownload: false);
+  // var days = Date.utc(2020, 1, 1).upTo(Date.utc(2020, 1, 31));
+  // await insertFuelMixIsone(days, setup: true, externalDownload: false);
   // await insertDaDemandBids();
 
   // await insertMaskedAssetIds();
@@ -527,7 +545,8 @@ void main() async {
   // await insertZonalDemand();
 
   /// ----------- Nyiso -----------
-  await insertBtmSolarMwNyiso();
+  // await insertBtmSolarActualMwNyiso();
+  await insertBtmSolarForecastMwNyiso();
   // await insertDaBindingConstraintsNyiso();
   // await insertDaCongestionCompactNyiso();
   // await insertDaEnergyOffersNyiso();

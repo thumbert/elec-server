@@ -1,7 +1,8 @@
 library test.db.nyiso.binding_constraints_test;
 
 import 'dart:convert';
-import 'package:elec_server/src/db/nyiso/btm_solar_mw.dart';
+import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
+import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
@@ -11,11 +12,13 @@ import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
+/// Tests both for actuals and for forecast!
+
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
   var archive = NyisoBtmSolarActualArchive();
-  var location = getLocation('America/New_York');
-  group('NYISO btm solar db tests:', () {
+  var archiveF = NyisoBtmSolarForecastArchive();
+  group('NYISO btm solar actuals db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('read file for 2020-11-17', () async {
@@ -28,20 +31,24 @@ Future<void> tests(String rootUrl) async {
       expect(data.first['type'], 'estimatedActual');
       expect(data.map((e) => e['ptid']).contains(-1), true);  // System
     });
-    // test('data gets properly sorted', () async {
-    //   var date = Date.utc(2019, 12, 19);
-    //   var file = archive.getCsvFile(date);
-    //   var data = archive.processFile(file);
-    //   var xs = data.firstWhere(
-    //           (e) => e['limitingFacility'] == 'E13THSTA 345 FARRAGUT 345 1');
-    //   var exp = List.from(xs['hours'])
-    //     ..sort((a, b) => a['hourBeginning'].compareTo(b['hourBeginning']));
-    //   expect(xs['hours'], exp);
-    //   // note: there can be multiple contingencies for the same hour!
-    //   // for this date hour beginning 2019-12-19 23:00:00
-    // });
   });
-  // group('Binding constraints API tests:', () {
+  group('NYISO btm solar forecast db tests:', () {
+    setUp(() async => await archiveF.db.open());
+    tearDown(() async => await archiveF.dbConfig.db.close());
+    test('read file for 2020-11-17', () async {
+      var date = Date.utc(2020, 11, 17);
+      var file = archiveF.getCsvFile(date);
+      var data = archiveF.processFile(file);
+      expect(data.length, 12);  // 11 zones + total system
+      expect(data.first.keys.toSet(), {'type', 'date', 'ptid', 'mw'});
+      expect((data.first['mw'] as List).length, 24);
+      expect(data.first['type'], 'forecast');
+      expect(data.map((e) => e['ptid']).contains(-1), true);  // System
+    });
+  });
+
+
+  // group('NYISO btm solar API tests:', () {
   //   var bc = api.BindingConstraints(
   //     archive.db,
   //   );

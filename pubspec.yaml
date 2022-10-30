@@ -18,7 +18,7 @@ dependencies:
   elec:
     git: https://github.com/thumbert/elec.git
   grpc: ^3.0.0
-  html: ^0.15.0
+  html: ^0.15.1
   http: ^0.13.4
   intl: ^0.17.0
   logging: ^1.0.1

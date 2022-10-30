@@ -25,9 +25,6 @@ class NyisoBtmSolarActualArchive extends DailyNysioCsvReport {
     dir ??= '${super.dir}BtmSolarActualMw/Raw/';
     this.dir = dir;
     reportName = 'NYISO BTM Solar actual MW Report';
-    // Iso.newYork.z
-    NewYorkIso().loadZoneNameToPtid;
-
   }
 
   Db get db => dbConfig.db;

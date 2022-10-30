@@ -1,4 +1,4 @@
-library elec_server.client.isone.zonal_demand.v1;
+library elec_server.client.isoexpress.zonal_demand;
 
 import 'dart:async';
 import 'dart:convert';

@@ -4,6 +4,7 @@
 - Add fuel mix for isone
 - Track StJohns port activity
 - Add archive for rt load nyiso and btm solar actuals
+- Download TCC clearing prices programmatically using auctionId 
 
 ## Release 2022-10-03
 - Fix api for isone zonal_demand, the documentation link, the server 
