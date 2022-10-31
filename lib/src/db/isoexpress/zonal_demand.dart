@@ -46,7 +46,7 @@ class ZonalDemandArchive extends IsoExpressReport {
       'RI',
       'SEMA',
       'WCMA',
-      'NEMA'
+      'NEMA',
     ];
     var data = <Map<String, dynamic>>[];
     for (var zoneName in canonicalTabs) {
@@ -56,9 +56,14 @@ class ZonalDemandArchive extends IsoExpressReport {
   }
 
   /// Return one document for each day.
-  /// {'date': '2011-01-01', 'zoneName': 'ISONE',
-  ///  'hourBeginning': [..24-element array..],
-  ///  'DA_Demand': [..24-element array..], ...}
+  /// ```
+  /// {
+  ///   'date': '2011-01-01',
+  ///   'zoneName': 'ISONE',
+  ///   'DA_Demand': <num>[..24-element array..],
+  ///   'RT_Demand': <num>[...],
+  /// }
+  /// ```
   List<Map<String, dynamic>> _processTab(
       SpreadsheetDecoder decoder, String zoneName) {
     /// tab names change from year to year, so normalize them
@@ -69,12 +74,9 @@ class ZonalDemandArchive extends IsoExpressReport {
     var table = decoder.tables[tabName]!;
     var keys = [
       'date',
-      'hourBeginning',
       'DA_Demand',
       'RT_Demand',
-      'DryBulb',
-      'DewPoint',
-      'zoneName'
+      'zoneName',
     ];
     var aux = <Map<String, dynamic>>[];
     table.rows.skip(1).forEach((List row) {
@@ -88,37 +90,36 @@ class ZonalDemandArchive extends IsoExpressReport {
       }
       aux.add(Map.fromIterables(keys, [
         date.toString(),
-        parseHourEndingStamp(mmddyyyy(date), stringHourEnding(row[1])!),
         row[2],
         row[3],
-        row[12],
-        row[13],
         zoneName,
       ]));
     });
 
-    /// group the data by date and zone
+    /// Group the data by date.
+    /// I'm correcting for the ISO data laziness.  See note below:
+    /// Note concerning Daylight Savings Time (DST): In March, the switch to DST
+    /// necessitates the averaging of the hour ending '01' data and the hour
+    /// ending '03' data to create the hour ending '02' data. In November,
+    /// the return to Standard Time is handled by averaging the data for the two
+    /// hour ending '02' observations.
     var byDay = groupBy(aux, (Map x) => x['date']);
     var out = <Map<String, dynamic>>[];
-    byDay.forEach((k, List<Map> v) {
-      var one = {
-        'date': v.first['date'],
-        'zoneName': v.first['zoneName'],
-        'hourBeginning': [],
-        'DA_Demand': [],
-        'RT_Demand': [],
-        'DryBulb': [],
-        'DewPoint': [],
-      };
-      for (var e in v) {
-        one['hourBeginning'].add(e['hourBeginning']);
-        one['DA_Demand'].add(e['DA_Demand']);
-        one['RT_Demand'].add(e['RT_Demand']);
-        one['DryBulb'].add(e['DryBulb']);
-        one['DewPoint'].add(e['DewPoint']);
+    for (var day in byDay.keys) {
+      var hours = Date.fromIsoString(day, location: location).hours();
+      var xs = byDay[day]!;
+      if (hours.length == 23) {
+        xs.removeAt(1);
+      } else if (hours.length == 25) {
+        xs.insert(1, xs[1]);
       }
-      out.add(one);
-    });
+      out.add({
+        'date': day,
+        'zoneName': zoneName,
+        'DA_Demand': xs.map((e) => e['DA_Demand']).toList(),
+        'RT_Demand': xs.map((e) => e['RT_Demand']).toList(),
+      });
+    }
 
     return out;
   }

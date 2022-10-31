@@ -2,6 +2,7 @@ library elec_server.client.isoexpress.zonal_demand;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:elec/risk_system.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
@@ -28,8 +29,8 @@ class IsoneZonalDemand {
 
   Future<TimeSeries<num>> getPoolDemand(
       Market market, Date start, Date end) async {
-    var url = '$rootUrl${servicePath}zone/isone/start/${start.toString()}/end/${end.toString()}';
-    return _process(Uri.parse(url), market);
+    var url = '$rootUrl${servicePath}market/${market.name}/zone/isone/start/${start.toString()}/end/${end.toString()}';
+    return _process(Uri.parse(url));
   }
 
 
@@ -39,27 +40,20 @@ class IsoneZonalDemand {
       throw ArgumentError('Wrong ptid $ptid.  Needs to be one of: ${_ptidMap.keys.join(', ')}');
     }
     var zone = _ptidMap[ptid]!;
-    var url = '$rootUrl${servicePath}zone/$zone/start/${start.toString()}/end/${end.toString()}';
-
-    return _process(Uri.parse(url), market);
+    var url = '$rootUrl${servicePath}market/${market.name}/zone/$zone/start/${start.toString()}/end/${end.toString()}';
+    return _process(Uri.parse(url));
   }
 
 
-  Future<TimeSeries<num>> _process(Uri url, Market market) async {
-    late String columnName;
-    if (market == Market.da) {
-      columnName = 'DA_Demand';
-    } else if (market == Market.rt) {
-      columnName = 'RT_Demand';
-    } else {
-      throw StateError('Unsupported market $market');
-    }
-
+  Future<TimeSeries<num>> _process(Uri url) async {
     var response = await http.get(url);
-    var data = json.decode(response.body) as List;
-    var ts = TimeSeries<double>.fromIterable(data.map((e) => IntervalTuple(
-        Hour.beginning(TZDateTime.parse(location, e['hourBeginning'])),
-        e[columnName])));
+    var data = json.decode(response.body) as Map;
+    var ts = TimeSeries<num>.fromIterable(data.entries.expand((e) {
+      var hours = Date.fromIsoString(e.key, location: location).hours();
+      var ys = e.value as List;
+      return hours.mapIndexed((index, hour) => IntervalTuple(hour, ys[index]));
+    }));
+
     return ts;
   }
 
