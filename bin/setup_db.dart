@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
+import 'package:elec_server/src/db/isoexpress/scc_report.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
+import 'package:elec_server/src/utils/convert_xls_to_xlsx.dart';
 import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
@@ -87,7 +89,6 @@ Future<void> insertBtmSolarForecastMwNyiso() async {
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> insertDaBindingConstraintsIsone() async {
   var archive = DaBindingConstraintsReportArchive();
@@ -425,7 +426,7 @@ Future<void> insertPtidTablePjm() async {
   await archive.db.close();
 }
 
-void insertRegulationRequirement() async {
+Future<void> insertRegulationRequirement() async {
   var archive = RegulationRequirementArchive();
   await archive.setupDb();
   await archive.downloadFile();
@@ -436,13 +437,37 @@ void insertRegulationRequirement() async {
   await archive.db!.close();
 }
 
+Future<void> insertSccReportIsone() async {
+  var archive = SccReportArchive();
+  // await archive.setupDb();
+
+  var months = Month.utc(2018, 1).upTo(Month.utc(2018, 1));
+  for (var month in months) {
+    var url = archive.makeUrl(month);
+    // await archive.downloadFile(url);
+    var fileIn = File(join(archive.dir, basename(url)));
+    await convertXlsToXlsx(fileIn);
+  }
+
+
+  // await archive.db.open();
+  // var files = Directory(archive.dir).listSync().whereType<File>().where((e) => e.path.endsWith('.xlsx'));
+  // for (var file in files) {
+  //   print('Working on file ${file.path}');
+  //   // var data = archive.readXlsx(file);
+  //   // await archive.insertData(data);
+  // }
+  // await archive.db.close();
+}
+
+
 Future<void> insertTccClearedPricesNyiso() async {
   var config = ComponentConfig(
       host: 'localhost:27017',
       dbName: 'nyiso',
       collectionName: 'tcc_clearing_prices');
   var dir =
-      env['HOME']! + '/Downloads/Archive/Nyiso/TCC/ClearingPrices/ToProcess/';
+      '${env['HOME']!}/Downloads/Archive/Nyiso/TCC/ClearingPrices/ToProcess/';
   var archive = nyiso_tcc_cp.NyisoTccClearingPrices(config: config)..dir = dir;
   // await archive.setupDb();
 
@@ -454,9 +479,7 @@ Future<void> insertTccClearedPricesNyiso() async {
     var data = archive.processFile(file);
     await archive.insertData(data);
     // move the files from the ToProcess folder to Raw
-    var newPath = env['HOME']! +
-        '/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/' +
-        path.basename(file.path);
+    var newPath = '${env['HOME']!}/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/${path.basename(file.path)}';
     file.copySync(newPath);
     file.deleteSync();
   }
@@ -538,15 +561,14 @@ void main() async {
   // insertMisReports();
   // await insertMonthlyAssetNcpc(download: false);
 
-//  await insertPtidTable();
-
+  //  await insertPtidTable();
+  await insertSccReportIsone();
   // await insertWholesaleLoadReports();
-
   // await insertZonalDemand();
 
   /// ----------- Nyiso -----------
   // await insertBtmSolarActualMwNyiso();
-  await insertBtmSolarForecastMwNyiso();
+  // await insertBtmSolarForecastMwNyiso();
   // await insertDaBindingConstraintsNyiso();
   // await insertDaCongestionCompactNyiso();
   // await insertDaEnergyOffersNyiso();

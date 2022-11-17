@@ -10,8 +10,75 @@ import 'package:elec_server/src/db/config.dart';
 import '../lib_iso_express.dart';
 
 /// Go to https://www.weather.gov/box/pastevents#
+/// Can get them by inspecting the html page.  Ideally you should have code that
+/// generates this list automatically, but there are only a few storms each
+/// year in New England.
+///
 List<String> winterStorms() {
   return [
+    'Feb_25_2022',
+    'Feb_13-14_2022',
+    'Feb_04-05_2022',
+    'Jan_28-29_2022',
+    'Jan_20_2022',
+    'Jan_16-17_2022',
+    'Jan_07_2022',
+    //
+    'Feb_18-19_2021',
+    'Feb_15-16_2021',
+    'Feb_09_2021',
+    'Feb_07_2021',
+    'Feb_01-02_2021',
+    'Jan_26-27_2021',
+    //
+    'Dec_24-25_2020',
+    'Dec_08_2020',
+    'Dec_04-05_2020',
+    'Apr_18_2020',
+    'Mar_23-24_2020',
+    'Mar_06-07_2020',
+    'Feb_13_2020',
+    'Feb_10_2020',
+    'Feb_07_2020',
+    'Feb_06_2020',
+    'Jan_18-19_2020',
+    'Jan_15-16_2020',
+    'Jan_11-12_2020',
+    'Jan_07-08_2020',
+    //
+    'Dec_29-30_2019',
+    'Dec_17-18_2019',
+    'Dec_13-14_2019',
+    'Dec_11_2019',
+    'Dec_09-10_2019',
+    'Dec_06_2019',
+    'Dec_01-03_2019',
+    'Nov_24_2019',
+    'Oct_31-Nov_01_2019',
+    'Oct_27_2019',
+    'Oct_16-17_2019',
+    'Oct_10-12_2019',
+    'Jun_13-14_2019',
+    'Jun_11_2019',
+    'Apr_26-27_2019',
+    'Apr_22-23_2019',
+    'Apr_15-16_2019',
+    'Apr_03-04_2019',
+    'Mar_22-23_2019',
+    'Mar_10_2019',
+    'Mar_03-04_2019',
+    'Mar_02_2019',
+    'Feb_27-28_2019',
+    'Feb_24-25_2019',
+    'Feb_20-21_2019',
+    'Feb_17-18_2019',
+    'Feb_12_2019',
+    'Feb_08-09_2019',
+    'Jan_29-30_2019',
+    'Jan_24_2019',
+    'Jan_19-20_2019',
+    'Jan_09_2019',
+    //
     'Apr_19_2018',
     'Apr_16-17_2018',
     'Apr_06_2018',
@@ -34,6 +101,7 @@ List<String> winterStorms() {
     'Jan_15_2018',
     'Jan_12-13_2018',
     'Jan_04_2018',
+    //
     'Dec_30_2017',
     'Dec_25_2017',
     'Dec_25_2017',
@@ -55,6 +123,7 @@ List<String> winterStorms() {
     'Jan_06_2017',
     'Jan_04_2017',
     'Dec_31-Jan_01_2016-2017',
+    //
     'Dec_29_2016',
     'Dec_27_2016',
     'Dec_22_2016',
@@ -89,6 +158,7 @@ List<String> winterStorms() {
     'Jan_12_2016',
     'Jan_10_2016',
     'Jan_04-05_2016',
+    //
     'Dec_28-29_2015',
     'Apr_04_2015',
     'Apr_04_2015',
@@ -117,6 +187,7 @@ List<String> winterStorms() {
     'Jan_09_2015',
     'Jan_05_2015',
     'Jan_03-04_2015',
+    //
     'Dec_20-21_2014',
     'Dec_10_2014',
     'Dec_10_2014',
@@ -139,6 +210,7 @@ List<String> winterStorms() {
     'Jan_21-22_2014',
     'Jan_18-19_2014',
     'Jan_02-03_2014',
+    //
     'Dec_17-18_2013',
     'Dec_14-15_2013',
     'Dec_10_2013',
@@ -152,7 +224,7 @@ class WinterStormsArchive extends IsoExpressReport {
   WinterStormsArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
           host: '127.0.0.1', dbName: 'weather', collectionName: 'winter_storms');
-    dir ??= Platform.environment['HOME']! + '/Downloads/Archive/Weather/WinterStorms/Raw/';
+    dir ??= '${Platform.environment['HOME']!}/Downloads/Archive/Weather/WinterStorms/Raw/';
     this.dir = dir;
   }
 
@@ -213,7 +285,7 @@ class WinterStormsArchive extends IsoExpressReport {
   /// date is ":4/19/2018", time is " 700 AM"
   TZDateTime parseTimestamp(String date, String time) {
     // need to add a : between hours and minutes!
-    time = time.substring(0, 3) + ':' + time.substring(3);
+    time = '${time.substring(0, 3)}:${time.substring(3)}';
     time = time.trimLeft();
     date = date.substring(1);
     var dt = _fmt.parse('$date $time');
@@ -261,7 +333,7 @@ class WinterStormsArchive extends IsoExpressReport {
   String _makeUrl(String stormId, {String? base}) {
     base ??=
         'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/';
-    return base + '$stormId/${stormId}_Text_Xml.xml';
+    return '$base$stormId/${stormId}_Text_Xml.xml';
   }
 }
 

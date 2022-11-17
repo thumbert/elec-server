@@ -10,9 +10,9 @@ import 'package:elec_server/src/db/config.dart';
 
 class SccReportArchive {
   late ComponentConfig config;
-  String? dir;
+  late String dir;
 
-  SccReportArchive({ComponentConfig? config, this.dir}) {
+  SccReportArchive({ComponentConfig? config, String? dir}) {
     Map env = Platform.environment;
     if (config == null) {
       this.config = ComponentConfig(
@@ -21,6 +21,7 @@ class SccReportArchive {
 
     dir ??= env['HOME'] +
         '/Downloads/Archive/IsoExpress/OperationsReports/SeasonalClaimedCapability/Raw/';
+    this.dir = dir!;
   }
 
   mongo.Db get db => config.db;
@@ -34,7 +35,10 @@ class SccReportArchive {
     return config.coll.insertAll(data).then((_) {
       print('--->  SUCCESS inserting SCC Report for $month');
       return 0;
-    }).catchError((e) => print(' XXXXX ' + e.toString()));
+    }).catchError((e) {
+      print(' XXXXX $e');
+      return -1;
+    });
   }
 
   /// Read an XLSX file.  Note that ISO files are xls, so you will need to
@@ -63,10 +67,13 @@ class SccReportArchive {
 
   List<Map<String, dynamic>> _readXlsxVersion1(
       SpreadsheetDecoder decoder, Month month) {
-    var res = <Map<String, dynamic>>[];
+    if (!decoder.tables.containsKey('SCC_Report_Current')) {
+      throw StateError('Spreadsheet format has changed.  Can\'t find tab SCC_Report_Current');
+    }
     var table = decoder.tables['SCC_Report_Current']!;
+    var res = <Map<String, dynamic>>[];
 
-    var yyyymm = convertXlsxDate(table.rows[0][8]).toString().substring(0, 7);
+    var yyyymm = Date.fromExcel(table.rows[0][8]).toString().substring(0, 7);
     if (yyyymm != month.toIso8601String()) {
       throw StateError('Month from filename doesn\'t match internal month');
     }
@@ -94,7 +101,7 @@ class SccReportArchive {
             if (indSummer.contains(i)) name = 'Summer $name';
             if (indWinter.contains(i)) name = 'Winter $name';
             var value = table.rows[r][i];
-            if (i == 23 || i == 28) value = convertXlsxDate(value).toString();
+            if (i == 23 || i == 28) value = Date.fromExcel(value as int).toString();
             aux[name] = value;
           }
         }
@@ -107,8 +114,8 @@ class SccReportArchive {
   /// Download an SCC report xls file from the ISO.  Save it with the same
   /// name in the xlsx format.
   Future downloadFile(String url) async {
-    String filename = path.basename(url);
-    File fileout = File(dir! + filename);
+    var filename = path.basename(url);
+    var fileout = File(dir + filename);
 
     if (fileout.existsSync()) {
       print("File $filename is already downloaded.");
@@ -121,16 +128,19 @@ class SccReportArchive {
             response.pipe(fileout.openWrite()));
   }
 
+  /// https://www.iso-ne.com/static-assets/documents/2022/08/scc_august_2022.xls
+  String makeUrl(Month month) {
+    return 'https://www.iso-ne.com/static-assets/documents/'
+        '${month.year}/${month.month.toString().padLeft(2, '0')}'
+        '/scc_${_name[month.month]}_${month.year}.xls';
+  }
+
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
   setup() async {
-    if (!Directory(dir!).existsSync()) {
-      Directory(dir!).createSync(recursive: true);
+    if (!Directory(dir).existsSync()) {
+      Directory(dir).createSync(recursive: true);
     }
-
-    await config.db.open();
-    List<String?> collections = await config.db.getCollectionNames();
-    if (collections.contains(config.collectionName)) await config.coll.drop();
 
     // this indexing assures that I don't insert the same data twice
     await config.db.createIndex(config.collectionName,
@@ -140,9 +150,18 @@ class SccReportArchive {
   }
 }
 
-Date convertXlsxDate(num x) {
-  var aux = DateTime.fromMillisecondsSinceEpoch(
-      ((x - 25569) * 86400000).round(),
-      isUtc: true);
-  return Date.utc(aux.year, aux.month, aux.day);
-}
+const _name = {
+  1: 'january',
+  2: 'february',
+  3: 'march',
+  4: 'april',
+  5: 'may',
+  6: 'june',
+  7: 'july',
+  8: 'august',
+  9: 'september',
+  10: 'october',
+  11: 'november',
+  12: 'december',
+};
+

@@ -14,17 +14,17 @@ import 'dart:io';
 /// Return 0 if successful, 1 if a fail.
 Future<int> convertXlsToXlsx(File fileIn, {Directory? pathToLibreOffice})
   async {
-  String exec;
+    pathToLibreOffice ??= Directory('');
+  late String exec;
+  late String cmd;
   if (Platform.isWindows) {
     exec = 'soffice';
+    cmd = '"${pathToLibreOffice.path}$exec" --convert-to xlsx "${fileIn.path}" --headless';
   } else if (Platform.isLinux) {
-    exec = 'libreoffice';
+    cmd = '${pathToLibreOffice.path}libreoffice --convert-to xlsx "${fileIn.path}" --headless';
   } else {
     throw 'Unsuported platform ${Platform.operatingSystem}';
   }
-  pathToLibreOffice ??= Directory('');
-  var cmd = '"${pathToLibreOffice.path}$exec" --convert-to xlsx "' +
-      fileIn.path + '" --headless';
 
   //print(cmd);
   var process = await Process.start(cmd, []);

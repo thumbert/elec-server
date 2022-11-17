@@ -52,6 +52,12 @@ Future<void> tests(String rootUrl) async {
       expect(id > 100, true);
     });
 
+    test('get all auctionIds from web', () async {
+      var ids = await archive.getAuctionIdsPosted();
+      expect(ids.length > 400, true);
+      expect(ids.contains(3366), true);
+    });
+
     // test('download auction results', () async {
     //   var auctionId = 3366;
     //   var file = File(join(archive.dir, 'clearingprices_$auctionId.csv'));
@@ -81,7 +87,7 @@ Future<void> tests(String rootUrl) async {
       expect(cpG22['clearingPriceHour'], 9.857217261904761);
     });
     test('Get all clearing prices several nodes', () async {
-      var url = rootUrl + '/nyiso/tcc_clearing_prices/v1/ptids/61752,61758';
+      var url = '$rootUrl/nyiso/tcc_clearing_prices/v1/ptids/61752,61758';
       var aux = await http.get(Uri.parse(url));
       var res = json.decode(aux.body) as List;
       expect(res.length > 10, true);
@@ -96,7 +102,7 @@ Future<void> tests(String rootUrl) async {
       expect(res.length, 358);
     });
     test('Get all the auction names', () async {
-      var url = rootUrl + '/nyiso/tcc_clearing_prices/v1/auctions';
+      var url = '$rootUrl/nyiso/tcc_clearing_prices/v1/auctions';
       var aux = await http.get(Uri.parse(url));
       var res = json.decode(aux.body) as List;
       expect(res.length > 10, true);

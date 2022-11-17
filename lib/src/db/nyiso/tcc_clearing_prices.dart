@@ -13,6 +13,7 @@ import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:csv/csv.dart';
 import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
+import 'package:html/parser.dart' show parse;
 
 class NyisoTccClearingPrices extends NyisoReport {
   NyisoTccClearingPrices(
@@ -59,9 +60,10 @@ class NyisoTccClearingPrices extends NyisoReport {
   }
 
   /// Download the data manually from http://tcc.nyiso.com/tcc/public/view_nodal_prices.do
-  /// Try to find a way to push the 'Download CSV' button with the auction of interest
   /// Each auction has an integer id, e.g. 3335 for G22-J22 auctions.
+  ///
   Future<int> downloadPrices(int auctionId) async {
+    // http://tcc.nyiso.com/tcc/public/view_nodal_prices.do
     var url = 'http://tcc.nyiso.com/tcc/public/view_nodal_prices_xls_view.do';
 
     var res = await post(Uri.parse(url), body: {
@@ -209,4 +211,24 @@ class NyisoTccClearingPrices extends NyisoReport {
     // TODO: implement converter
     throw UnimplementedError();
   }
+
+  /// Read the webpage to get the list of auction ids.  The list is not
+  /// incrementing by one!
+  Future<List<int>> getAuctionIdsPosted() async {
+    var url = 'http://tcc.nyiso.com/tcc/public/view_nodal_prices.do';
+    var contents = await get(Uri.parse(url));
+
+    var document = parse(contents.body);
+    var items = document.getElementsByTagName('option');
+    var ids = <int>[];
+    for (var item in items) {
+      var value = int.tryParse(item.attributes['value'] ?? '0');
+      if (value != null && value != 0) {
+        ids.add(value);
+      }
+    }
+
+    return ids;
+  }
+
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## Release 2022-11-17
+- Add a method to get public auctionIds for ny tcc's 
+- Update list of winter storms for NE
+
+## Release 2022-10-31
+- Extract names of most recent New England storms (not uploaded in the db)
+- Fix ISONE zonal demand client, issues with the DST data
+
 ## Release 2022-10-23
 - Add fuel mix for isone
 - Track StJohns port activity
