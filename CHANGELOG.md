@@ -1,5 +1,9 @@
 # Changelog
 
+## TODO:
+- Work on getting/comparing offers from energize CT
+
+
 ## Release 2022-11-17
 - Add a method to get public auctionIds for ny tcc's 
 - Update list of winter storms for NE

@@ -20,7 +20,7 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'ancillaries');
     this.dbConfig = dbConfig;
-    dir ??= super.dir + 'Ntac/Raw/';
+    dir ??= '${super.dir}Ntac/Raw/';
     this.dir = dir;
     reportName = 'TSC Rates and NTAC Report';
   }
