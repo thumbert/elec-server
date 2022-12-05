@@ -9,7 +9,6 @@ import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
-import 'package:elec_server/src/db/utilities/retail_offers/retail_supply_offer.dart';
 import 'package:elec_server/src/utils/convert_xls_to_xlsx.dart';
 import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';

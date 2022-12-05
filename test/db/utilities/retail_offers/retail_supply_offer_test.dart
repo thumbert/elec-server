@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
-import 'package:elec_server/src/db/utilities/retail_offers/retail_supply_offer.dart';
+import 'package:elec_server/client/utilities/retail_offers/retail_supply_offer.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 

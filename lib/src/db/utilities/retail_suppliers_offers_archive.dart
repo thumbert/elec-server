@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
-import 'package:elec_server/src/db/utilities/retail_offers/retail_supply_offer.dart';
+import 'package:elec_server/client/utilities/retail_offers/retail_supply_offer.dart';
 import 'package:http/http.dart';
 import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';

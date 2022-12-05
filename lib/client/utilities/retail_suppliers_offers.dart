@@ -3,7 +3,7 @@ library client.utilities.retail_suppliers_offers;
 import 'dart:convert';
 
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/utilities/retail_offers/retail_supply_offer.dart';
+import 'package:elec_server/client/utilities/retail_offers/retail_supply_offer.dart';
 import 'package:http/http.dart' as http;
 
 class RetailSuppliersOffers {
