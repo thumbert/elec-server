@@ -22,6 +22,7 @@
     <div>
         <h2>API</h2>
         <ul>
+            <li><a href="#competitive-suppliers-offers">Competitive retail suppliers energy offers</a></li>
             <li><a href="#customer-counts-ngrid">Customer counts for NGrid</a></li>
             <li><a href="#customer-counts-eversource">Customer counts for Eversource</a></li>
             <li><a href="#customer-counts-eversource-cs">Customer counts for Eversource competitive supply</a></li>
@@ -45,6 +46,18 @@
             <li><a href="#monthly-asset-ncpc">Monthly DA and RT NCPC credits by generator </a></li>
             <li><a href="#weather-noaa-daily-summary">NOAA daily summary report (temperature)</a></li>
         </ul>
+        <div id="competitive-suppliers-offers">
+            <h4>Competitive retail suppliers energy offers</h4>
+            Scrape offers from the utilities webpage and make them available as an API
+            <ul>
+                <li>
+                    Get the historical offers for a region (e.g. ISONE), posted between a start and end date.  Note
+                    that an offer can be out there for several months at a time.  Currently only CT offers are
+                    available.  More will be added over time.
+                    <div><a href="http://localhost:8080/retail_suppliers/v1/offers/region/isone/start/2022-01-01/end/2022-12-04">retail_suppliers/v1/offers/region/isone/start/2022-01-01/end/2022-12-04</a></div>
+                </li>
+            </ul>
+        </div>
         <div id="customer-counts-ngrid">
             <h4>Customer counts for NGrid</h4>
             <ul>

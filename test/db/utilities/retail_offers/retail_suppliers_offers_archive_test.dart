@@ -1,0 +1,60 @@
+library test.utilities.rate_board_test;
+
+import 'dart:convert';
+
+import 'package:date/date.dart';
+import 'package:elec_server/client/utilities/retail_suppliers_offers.dart';
+import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
+import 'package:http/http.dart';
+import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
+import 'package:timezone/timezone.dart';
+
+Future<void> tests(String rootUrl) async {
+  // var archive = RetailSuppliersOffersArchive();
+  // await archive.saveCurrentRatesToFile();
+
+  group('Api tests competitive offers', () {
+    test('get offers for region ISONE', () async {
+      var aux = await get(Uri.parse(
+          '$rootUrl/retail_suppliers/v1/offers/region/isone/start/2022-01-01/end/2022-12-04'));
+      var data = json.decode(aux.body) as List;
+      var x0 = data.firstWhere((e) => e['offerId'] == 'ct-49486')
+          as Map<String, dynamic>;
+      expect(x0.keys.toSet(), {
+        'offerId',
+        'region',
+        'state',
+        'utility',
+        'accountType',
+        'countOfBillingCycles',
+        'minimumRecs',
+        'offerType',
+        'rate',
+        'rateUnit',
+        'supplierName',
+        'offerPostedOnDate',
+      });
+      expect(x0['rate'], 0.1689);
+    });
+  });
+
+  ///
+  ///
+  group('Retail suppliers offers client tests', () {
+    var client = RetailSuppliersOffers(Client(), rootUrl: rootUrl);
+    test('get ISONE offers', () async {
+      var term = Term.parse('1Jan22-4Dec22', UTC);
+      var offers = await client.getOffersForRegionTerm('ISONE', term);
+      var x0 = offers.firstWhere((e) => e.offerId == 'ct-49486');
+      expect(x0.rate, 0.1689);
+      expect(x0.supplierName, 'NRG Business');
+    });
+  });
+}
+
+Future<void> main() async {
+  initializeTimeZones();
+  var rootUrl = 'http://127.0.0.1:8080';
+  await tests(rootUrl);
+}

@@ -8,6 +8,8 @@ import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
+import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
+import 'package:elec_server/src/db/utilities/retail_offers/retail_supply_offer.dart';
 import 'package:elec_server/src/utils/convert_xls_to_xlsx.dart';
 import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
@@ -89,6 +91,22 @@ Future<void> insertBtmSolarForecastMwNyiso() async {
   }
   await archive.dbConfig.db.close();
 }
+
+
+Future<void> insertCompetitiveOffers() async {
+  var archive = RetailSuppliersOffersArchive();
+  // await archive.setupDb();
+  // await archive.saveCurrentRatesToFile();
+  await archive.dbConfig.db.open();
+
+  var date = Date.utc(2022, 12, 4);
+  var file = File(join(archive.dir, '${date.toString()}_ct.json'));
+  var data = archive.processFile(file);
+  await archive.insertData(data);
+  await archive.dbConfig.db.close();
+}
+
+
 
 Future<void> insertDaBindingConstraintsIsone() async {
   var archive = DaBindingConstraintsReportArchive();
@@ -537,7 +555,7 @@ Future<void> insertZonalDemand() async {
 }
 
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
@@ -562,7 +580,7 @@ void main() async {
   // await insertMonthlyAssetNcpc(download: false);
 
   //  await insertPtidTable();
-  await insertSccReportIsone();
+  // await insertSccReportIsone();
   // await insertWholesaleLoadReports();
   // await insertZonalDemand();
 
@@ -582,4 +600,8 @@ void main() async {
   /// ----------- PJM --------------
   // await insertPtidTablePjm();
 
+  
+  /// ----------- Utility data ----------
+  await insertCompetitiveOffers();
+  
 }

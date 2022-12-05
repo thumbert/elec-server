@@ -3,6 +3,9 @@
 ## TODO:
 - Work on getting/comparing offers from energize CT
 
+## Release 2022-12-05
+- Create `retail_suppliers` db to store competitive suppliers offers.  
+  Insert CT offers.  Create API and client.  
 
 ## Release 2022-11-17
 - Add a method to get public auctionIds for ny tcc's 
