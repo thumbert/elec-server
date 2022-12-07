@@ -3,6 +3,9 @@
 ## TODO:
 - Work on getting/comparing offers from energize CT
 
+## Release 2022-12-07
+- Add a static method to RetailSuppliersOffers client to get the offers as of a given date
+
 ## Release 2022-12-05
 - Create `retail_suppliers` db to store competitive suppliers offers.  
   Insert CT offers.  Create API and client.  
