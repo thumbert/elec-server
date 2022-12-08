@@ -39,7 +39,7 @@ class CurveIdArchive {
         print('--->  Inserted curveId ${x['curveId']} successfully');
       }
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return Future.value(1);
     }
     return Future.value(0);

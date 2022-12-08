@@ -3,14 +3,11 @@ import 'package:elec_server/api/api_dacongestion.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/api/api_masked_ids.dart';
 import 'package:elec_server/api/isoexpress/api_fwdres_auction_results.dart';
-import 'package:elec_server/api/isoexpress/api_isone_dacongestion.dart'
-    as isone_dacong;
 import 'package:elec_server/api/isoexpress/api_isone_fuelmix.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
-import 'package:elec_server/api/isone/api_isone_masked_ids.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/api/mis/api_sd_arrawdsum.dart';
@@ -27,6 +24,7 @@ import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart'
     as nyiso_tcc_clearing_prices;
 import 'package:elec_server/api/pjm/api_pjm_ptids.dart' as pjm_ptids;
 import 'package:elec_server/api/risk_system/api_calculator.dart';
+import 'package:elec_server/api/utilities/api_retail_suppliers_offers.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
@@ -39,15 +37,6 @@ import 'package:elec_server/api/isoexpress/api_isone_rtlmp.dart';
 import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
 import 'package:elec_server/api/isoexpress/api_isone_demandbids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
-import 'package:elec_server/api/api_scc_report.dart';
-import 'package:elec_server/api/utilities/api_customer_counts_ngrid.dart'
-    as ngrid;
-import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart'
-    as eversource;
-import 'package:elec_server/api/utilities/api_competitive_suppliers_eversource.dart'
-    as eversourcecs;
-import 'package:elec_server/api/utilities/api_load_eversource.dart'
-    as eversourceLoad;
 import 'package:elec_server/api/isoexpress/api_system_demand.dart';
 import 'package:elec_server/api/isoexpress/api_isone_zonal_demand.dart';
 import 'package:elec_server/src/utils/cors_middleware.dart';
@@ -126,6 +115,10 @@ Future<Router> buildRouter() async {
   }.forEach((key, value) {
     router.mount(key, value);
   });
+
+  await DbProd.retailSuppliers.open();
+  router.mount(
+      '/retail_suppliers/v1/', ApiRetailSuppliersOffers(DbProd.retailSuppliers).router);
 
   await DbProd.weather.open();
   router.mount(

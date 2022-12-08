@@ -36,6 +36,8 @@ import 'db/nyiso/masked_ids_test.dart' as nyiso_masked_ids;
 import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
+import 'db/utilities/retail_offers/retail_supply_offer_test.dart' as retail_offer;
+import 'db/utilities/retail_offers/retail_suppliers_offers_archive_test.dart' as retail_offers;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
 import 'utils/env_file_test.dart' as env_file;
@@ -75,6 +77,7 @@ Future<void> main() async {
   await pjm_ptids.tests(rootUrl);
   ptids.tests(rootUrl);
   regulation_requirement.tests(rootUrl);
+  retail_offers.tests(rootUrl);
   sd_arrawdsum.tests(rootUrl);
   sd_rtload.tests();
   sr_dalocsum.tests(rootUrl);
@@ -89,6 +92,7 @@ Future<void> main() async {
   forward_marks.tests(rootUrl);
 //  sysdem.tests(rootUrl);
   mis.tests();
+  retail_offer.tests();
   wholesale_load_cost_report.tests();
 
   /// Utils tests
