@@ -16,35 +16,35 @@ import '../lib_iso_express.dart';
 ///
 List<String> winterStorms() {
   return [
-    'Feb_25_2022',
-    'Feb_13-14_2022',
-    'Feb_04-05_2022',
-    'Jan_28-29_2022',
-    'Jan_20_2022',
-    'Jan_16-17_2022',
-    'Jan_07_2022',
-    //
-    'Feb_18-19_2021',
-    'Feb_15-16_2021',
-    'Feb_09_2021',
-    'Feb_07_2021',
-    'Feb_01-02_2021',
-    'Jan_26-27_2021',
-    //
-    'Dec_24-25_2020',
-    'Dec_08_2020',
-    'Dec_04-05_2020',
-    'Apr_18_2020',
-    'Mar_23-24_2020',
-    'Mar_06-07_2020',
-    'Feb_13_2020',
-    'Feb_10_2020',
-    'Feb_07_2020',
-    'Feb_06_2020',
-    'Jan_18-19_2020',
-    'Jan_15-16_2020',
-    'Jan_11-12_2020',
-    'Jan_07-08_2020',
+    // 'Feb_25_2022',
+    // 'Feb_13-14_2022',
+    // 'Feb_04-05_2022',
+    // 'Jan_28-29_2022',
+    // 'Jan_20_2022',
+    // 'Jan_16-17_2022',
+    // 'Jan_07_2022',
+    // //
+    // 'Feb_18-19_2021',
+    // 'Feb_15-16_2021',
+    // 'Feb_09_2021',
+    // 'Feb_07_2021',
+    // 'Feb_01-02_2021',
+    // 'Jan_26-27_2021',
+    // //
+    // 'Dec_24-25_2020',
+    // 'Dec_08_2020',
+    // 'Dec_04-05_2020',
+    // 'Apr_18_2020',
+    // 'Mar_23-24_2020',
+    // 'Mar_06-07_2020',
+    // 'Feb_13_2020',
+    // 'Feb_10_2020',
+    // 'Feb_07_2020',
+    // 'Feb_06_2020',
+    // 'Jan_18-19_2020',
+    // 'Jan_15-16_2020',
+    // 'Jan_11-12_2020',
+    // 'Jan_07-08_2020',
     //
     'Dec_29-30_2019',
     'Dec_17-18_2019',
@@ -226,6 +226,7 @@ class WinterStormsArchive extends IsoExpressReport {
           host: '127.0.0.1', dbName: 'weather', collectionName: 'winter_storms');
     dir ??= '${Platform.environment['HOME']!}/Downloads/Archive/Weather/WinterStorms/Raw/';
     this.dir = dir;
+    this.dbConfig = dbConfig;
   }
 
   @override
@@ -244,8 +245,8 @@ class WinterStormsArchive extends IsoExpressReport {
     var lines = aux.split('\n').where((String line) => line.startsWith(':'));
     var converter = CsvToListConverter();
     var rows = lines.map((String row) => converter.convert(row).first).toList();
-    List<Map> out = [];
-    List keys = [
+    var out = <Map<String,dynamic>>[];
+    var keys = [
       'date',
       'timestamp',
       'state',
@@ -309,6 +310,8 @@ class WinterStormsArchive extends IsoExpressReport {
     }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'stormId': 1}, unique: true);
+    await dbConfig.db.createIndex(dbConfig.collectionName,
+        keys: {'startDate': 1});
     await dbConfig.db.close();
   }
 
@@ -316,7 +319,7 @@ class WinterStormsArchive extends IsoExpressReport {
   /// inserting them into the db.
   Future<void> updateDb() async {
     List stormIds = winterStorms();
-    for (String stormId in stormIds.take(3) as Iterable<String>) {
+    for (String stormId in stormIds.take(10) as Iterable<String>) {
       bool inDb = await isStormInserted(stormId);
       if (!inDb) {
         var url = _makeUrl(stormId);
@@ -333,9 +336,12 @@ class WinterStormsArchive extends IsoExpressReport {
   String _makeUrl(String stormId, {String? base}) {
     base ??=
         'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/';
-    return '$base$stormId/${stormId}_Text_Xml.xml';
+    return '$base$stormId/${stormId}_Text.xml';
   }
 }
 
 String url =
     'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/Jan_12-13_2018/Jan_12-13_2018_Text_Xml.xml';
+// changed the format
+String url2 =
+  'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/Jan_16-17_2022/Jan_16-17_2022_Text.xml';

@@ -1,5 +1,7 @@
 library test.db.weather.winter_storms_test;
 
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
+import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import 'package:timezone/standalone.dart';
@@ -55,6 +57,13 @@ void getStormNames() {
   }
 }
 
+Future<void> tests() async {
+  group('Winter storms tests', () {
+    var archive = WinterStormsArchive();
+
+  });
+}
+
 
 winterStormTests() async {
   var archive = WinterStormsArchive();
@@ -70,9 +79,10 @@ winterStormTests() async {
 
 Future<void> main() async {
   initializeTimeZones();
-  // await winterStormTests();
+  DbProd();
+  await winterStormTests();
 
-  getStormNames();
+  // getStormNames();
 
   
 //  var date = '4/19/2018';
