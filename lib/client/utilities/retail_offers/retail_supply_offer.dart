@@ -9,6 +9,7 @@ class RetailSupplyOffer {
   RetailSupplyOffer({
     required this.region,
     required this.state,
+    required this.loadZone,
     required this.utility,
     required String accountType,
     required this.countOfBillingCycles,
@@ -30,6 +31,7 @@ class RetailSupplyOffer {
 
   final String region;
   final String state;
+  final String loadZone;
   final String utility;
   late final String _accountType;
   final String? planType; // Load class
@@ -99,6 +101,7 @@ class RetailSupplyOffer {
       'offerId': offerId,
       'region': region,
       'state': state,
+      'loadZone': loadZone,
       'utility': utility,
       'accountType': accountType,
       'countOfBillingCycles': countOfBillingCycles,
@@ -120,6 +123,7 @@ class RetailSupplyOffer {
     var offer = RetailSupplyOffer(
         region: xs['region'],
         state: xs['state'],
+        loadZone: xs['loadZone'],
         utility: xs['utility'],
         accountType: xs['accountType'],
         countOfBillingCycles: xs['countOfBillingCycles'],

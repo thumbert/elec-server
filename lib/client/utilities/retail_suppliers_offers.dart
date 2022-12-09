@@ -16,7 +16,7 @@ class RetailSuppliersOffers {
   final String servicePath = '/retail_suppliers/v1/';
 
   /// Get the current offers as of a given date
-  static List<RetailSupplyOffer> getCurrentOffers(List<RetailSupplyOffer> xs, Date asOfDate) {
+  static List<RetailSupplyOffer> getCurrentOffers(Iterable<RetailSupplyOffer> xs, Date asOfDate) {
     /// keep only offers that are before asOfDate
     var aux = xs.whereNot((e) => e.offerPostedOnDate.isAfter(asOfDate));
     /// group by

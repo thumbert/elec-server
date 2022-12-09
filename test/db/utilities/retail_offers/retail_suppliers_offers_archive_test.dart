@@ -26,6 +26,7 @@ Future<void> tests(String rootUrl) async {
         'offerId',
         'region',
         'state',
+        'loadZone',
         'utility',
         'accountType',
         'countOfBillingCycles',

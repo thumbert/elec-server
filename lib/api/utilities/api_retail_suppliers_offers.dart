@@ -58,6 +58,7 @@ class ApiRetailSuppliersOffers {
         'offerId',
         'region',
         'state',
+        'loadZone',
         'utility',
         'accountType',
         'countOfBillingCycles',

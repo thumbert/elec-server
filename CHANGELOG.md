@@ -1,7 +1,10 @@
 # Changelog
 
 ## TODO:
-- Work on getting/comparing offers from energize CT
+- 
+
+## Release 2022-12-09
+- Add 'loadZone' to the retail suppliers offers API
 
 ## Release 2022-12-07
 - Add a static method to RetailSuppliersOffers client to get the offers as of a given date

@@ -4,6 +4,7 @@ class CtSupplyOffer extends RetailSupplyOffer {
   CtSupplyOffer({
     required super.region,
     required super.state,
+    required super.loadZone,
     required super.utility,
     required super.accountType,
     required super.countOfBillingCycles,
@@ -36,6 +37,7 @@ class CtSupplyOffer extends RetailSupplyOffer {
     return CtSupplyOffer(
       region: 'ISONE',
       state: 'CT',
+      loadZone: 'CT',
       utility: data['planTypeEdc'],  // 'Eversource' or 'United Illuminating'
       accountType: data['customerClass'],
       countOfBillingCycles: countOfBillingCycles,
