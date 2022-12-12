@@ -47,7 +47,9 @@ Future<void> tests(String rootUrl) async {
     var client = RetailSuppliersOffers(Client(), rootUrl: rootUrl);
     var term = Term.parse('1Jan22-4Dec22', UTC);
     late List<RetailSupplyOffer> offers;
-    setUp(() async {offers = await client.getOffersForRegionTerm('ISONE', term);});
+    setUp(() async {
+      offers = await client.getOffersForRegionTerm('ISONE', term);
+    });
     test('get ISONE offers', () async {
       var x0 = offers.firstWhere((e) => e.offerId == 'ct-49486');
       expect(x0.rate, 168.9);
@@ -55,17 +57,40 @@ Future<void> tests(String rootUrl) async {
     });
 
     test('get current offers as of a given date', () {
-      var o1 = RetailSuppliersOffers.getCurrentOffers(offers, Date.utc(2022, 11, 17));
-      expect(o1
-          .where((e) => e.supplierName == 'Constellation NewEnergy, Inc.')
-          .toList().length, 0);
+      var o1 = RetailSuppliersOffers.getCurrentOffers(
+          offers, Date.utc(2022, 11, 17));
+      expect(
+          o1
+              .where((e) => e.supplierName == 'Constellation NewEnergy, Inc.')
+              .toList()
+              .length,
+          0);
       // as of 2022-11-28 there are new offers
-      var o2 = RetailSuppliersOffers.getCurrentOffers(offers, Date.utc(2022, 11, 28));
-      expect(o2
-          .where((e) => e.supplierName == 'Constellation NewEnergy, Inc.')
-          .toList().length, 4);
+      var o2 = RetailSuppliersOffers.getCurrentOffers(
+          offers, Date.utc(2022, 11, 28));
+      expect(
+          o2
+              .where((e) => e.supplierName == 'Constellation NewEnergy, Inc.')
+              .toList()
+              .length,
+          4);
     });
 
+    test('XOOM offers for United Illuminating as of 2022-12-04', () {
+      var offersXoom = offers
+          .where((e) =>
+              e.utility == 'United Illuminating' &&
+              e.accountType == 'Residential' &&
+              e.countOfBillingCycles == 12 &&
+              e.supplierName == 'XOOM Energy CT, LLC')
+          .toList();
+
+      var xs = RetailSuppliersOffers.getCurrentOffers(
+          offersXoom, Date.utc(2022, 12, 4));
+      expect(xs.length, 2);
+      /// Two identical offers except for the incentive.  One offer gives you
+      /// airline miles.
+    });
   });
 }
 

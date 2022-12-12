@@ -95,10 +95,10 @@ Future<void> insertBtmSolarForecastMwNyiso() async {
 Future<void> insertCompetitiveOffers() async {
   var archive = RetailSuppliersOffersArchive();
   // await archive.setupDb();
-  // await archive.saveCurrentRatesToFile();
+  await archive.saveCurrentRatesToFile();
   await archive.dbConfig.db.open();
 
-  var date = Date.utc(2022, 12, 4);
+  var date = Date.today(location: UTC);
   var file = File(join(archive.dir, '${date.toString()}_ct.json'));
   var data = archive.processFile(file);
   await archive.insertData(data);

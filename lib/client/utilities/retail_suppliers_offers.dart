@@ -22,13 +22,15 @@ class RetailSuppliersOffers {
     /// group by
     var groups = groupBy(aux, (RetailSupplyOffer e) =>
         Tuple2(Tuple6(e.region, e.state, e.utility, e.accountType, e.offerType, e.supplierName),
-            Tuple3(e.countOfBillingCycles, e.minimumRecs, e.rate)));
+            Tuple3(e.countOfBillingCycles, e.minimumRecs, e.offerType)));
 
-    /// sort within the groups by offer posted date and pick the last one
+    /// Sort within the groups by offer posted date and pick the last one(s)
+    /// Note that there could be several offers with similar everything
+    /// except for the rate, but may have a different incentive or fees.
     var res = <RetailSupplyOffer>[];
     for (var es in groups.values) {
       es.sort((a,b) => -a.offerPostedOnDate.compareTo(b.offerPostedOnDate));
-      res.add(es.first);
+      res.addAll(es.where((e) => e.offerPostedOnDate == es.first.offerPostedOnDate));
     }
 
     return res;
