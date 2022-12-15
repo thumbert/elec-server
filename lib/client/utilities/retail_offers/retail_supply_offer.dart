@@ -27,7 +27,6 @@ class RetailSupplyOffer {
     required String accountType,
     required this.rateClass,
     required this.countOfBillingCycles,
-    this.feeTypes = const <String>[],
     required num minimumRecs,
     required offerType,
     required this.rate,
@@ -45,16 +44,21 @@ class RetailSupplyOffer {
     this.offerType = offerType;
 
   }
+  /// ISONE for now
   final String region;
+  /// Abbreviated name of US state, e.g. CT, MA
   final String state;
+  /// load zone name, e.g. NEMA, WCMA, CT
   final String loadZone;
+  /// utility name, e.g. 'United, Illuminating'
   final String utility;
+  /// ''
   late final String _accountType;
+  /// Customer rate class, e.g. 'R', 'RT', etc.
   final String rateClass;
   final List<String> planFeatures; // extra details about the plan
-  final List<String> planFees; // extra details about the fees associated with the plan
+  final List<String> planFees; // details about the fees associated with the plan
   final int countOfBillingCycles;
-  late final List<String> feeTypes;
 
   /// Type of the offer.  One of Fixed, Fixed-Tiered, Indexed
   late final String _offerType;
@@ -149,6 +153,26 @@ class RetailSupplyOffer {
     return offer;
   }
 
+  Map<String,dynamic> toMap() {
+    return <String,dynamic>{
+      'region': region,
+      'state': state,
+      'loadZone': loadZone,
+      'utility': utility,
+      'accountType': accountType,
+      'rateClass': rateClass,
+      'planFeatures': planFeatures,
+      'planFees': planFees,
+      'countOfBillingCycles': countOfBillingCycles,
+      'minimumRecs': minimumRecs,
+      'rate': rate,
+      'rateUnit': rateUnit,
+      'offerPostedOnDate': offerPostedOnDate,
+      'firstDateOnWebsite': firstDateOnWebsite,
+      'lastDateOnWebsite': lastDateOnWebsite,
+      'offerId': offerId,
+    };
+  }
 
   @override
   int get hashCode => offerId.hashCode;

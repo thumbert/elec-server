@@ -107,9 +107,19 @@ Future<void> tests(String rootUrl) async {
   // });
 
   group('Api tests competitive offers', () {
-    // var api = ApiRetailSuppliersOffers(archive.dbConfig.db);
-    // setUp(() async => await archive.dbConfig.db.open());
-    // tearDown(() async => await archive.dbConfig.db.close());
+    var archive = RetailSuppliersOffersArchive();
+    var api = ApiRetailSuppliersOffers(archive.dbConfig.db);
+    setUp(() async => await archive.dbConfig.db.open());
+    tearDown(() async => await archive.dbConfig.db.close());
+
+    test('get offers for state MA', () async {
+      var xs = await api.getOffersForRegionState(
+          'ISONE', 'MA', Date.utc(2022, 1, 1), Date.utc(2022, 12, 14));
+      var constellation = xs
+          .where((e) => e['supplierName'].startsWith('Constellation'))
+          .toList();
+      expect(constellation.length, 10);
+    });
 
     test('get offers for region ISONE', () async {
       // var xs = await api.getOffersForRegion(
@@ -120,7 +130,7 @@ Future<void> tests(String rootUrl) async {
       // expect(constellation.length, 4);
 
       var aux = await get(Uri.parse(
-          '$rootUrl/retail_suppliers/v1/offers/region/isone/start/2022-01-01/end/2022-12-14'));
+          '$rootUrl/retail_suppliers/v1/offers/region/isone/state/ct/start/2022-01-01/end/2022-12-14'));
       var data = json.decode(aux.body) as List;
       var x0 = data.firstWhere((e) => e['offerId'] == 'ct-47176')
           as Map<String, dynamic>;
@@ -155,7 +165,7 @@ Future<void> tests(String rootUrl) async {
     var term = Term.parse('1Jan22-14Dec22', UTC);
     late List<RetailSupplyOffer> offers;
     setUp(() async {
-      offers = await client.getOffersForRegionTerm('ISONE', term); // all states
+      offers = await client.getOffers(region: 'ISONE', state: 'CT', term: term); // all states
     });
     test('get ISONE offers', () async {
       var x0 = offers.firstWhere((e) => e.offerId == 'ct-47176');

@@ -25,25 +25,10 @@ class ApiRetailSuppliersOffers {
   Router get router {
     final router = Router();
 
-    /// Get all offers for a region
-    router.get('/offers/region/<region>',
-        (Request request, String region) async {
-      var aux = await getOffersForRegion(region, null, null, null);
-      return Response.ok(json.encode(aux), headers: headers);
-    });
-
-    /// Get all offers for a region between a start and end date
-    router.get('/offers/region/<region>/start/<start>/end/<end>',
-        (Request request, String region, String start, String end) async {
-      var aux = await getOffersForRegion(region, null,
-          Date.parse(start, location: UTC), Date.parse(end, location: UTC));
-      return Response.ok(json.encode(aux), headers: headers);
-    });
-
     /// Get all offers for a region between a start and end date
     router.get('/offers/region/<region>/state/<state>/start/<start>/end/<end>',
         (Request request, String region, String state, String start, String end) async {
-      var aux = await getOffersForRegion(region, state,
+      var aux = await getOffersForRegionState(region.toUpperCase(), state.toUpperCase(),
           Date.parse(start, location: UTC), Date.parse(end, location: UTC));
       return Response.ok(json.encode(aux), headers: headers);
     });
@@ -52,14 +37,15 @@ class ApiRetailSuppliersOffers {
   }
 
   /// Return offers for one region
-  Future<List<Map<String, dynamic>>> getOffersForRegion(
-      String region, String? state, Date? startDate, Date? endDate) async {
-    var query = where..eq('region', region.toUpperCase());
-    if (state != null) {
-      query = query.eq('state', state);
-    }
+  Future<List<Map<String, dynamic>>> getOffersForRegionState(
+      String region, String state, Date? startDate, Date? endDate) async {
+    var query = where
+      ..eq('region', region.toUpperCase())
+      ..eq('state', state.toUpperCase());
+
+    var variable = state == 'CT' ? 'offerPostedOnDate' : 'firstDateOnWebsite';
     if (startDate != null) {
-      query = query.lte('offerPostedOnDate', endDate.toString());
+      query = query.lte(variable, endDate.toString());
     }
     if (endDate != null) {
       query = query.gte('lastDateOnWebsite', startDate.toString());

@@ -47,10 +47,10 @@ class RetailSuppliersOffers {
   }
 
   /// Return the list of offers posted between a start/end date.
-  Future<List<RetailSupplyOffer>> getOffersForRegionTerm(
-      String region, Term term) async {
+  Future<List<RetailSupplyOffer>> getOffers(
+  {required String region, required String state, required Term term}) async {
     var url =
-        '$rootUrl${servicePath}offers/region/$region/start/${term.startDate}/end/${term.endDate}';
+        '$rootUrl${servicePath}offers/region/$region/state/$state/start/${term.startDate}/end/${term.endDate}';
 
     var response = await client.get(Uri.parse(url));
     var xs = json.decode(response.body) as List;
