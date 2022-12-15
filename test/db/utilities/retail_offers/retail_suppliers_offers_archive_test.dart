@@ -165,9 +165,9 @@ Future<void> tests(String rootUrl) async {
     var term = Term.parse('1Jan22-14Dec22', UTC);
     late List<RetailSupplyOffer> offers;
     setUp(() async {
-      offers = await client.getOffers(region: 'ISONE', state: 'CT', term: term); // all states
+      offers = await client.getOffers(region: 'ISONE', state: 'CT', term: term);
     });
-    test('get ISONE offers', () async {
+    test('get CT offers', () async {
       var x0 = offers.firstWhere((e) => e.offerId == 'ct-47176');
       expect(x0.rate, 209.9);
       expect(x0.supplierName, 'NRG Business');
@@ -179,6 +179,12 @@ Future<void> tests(String rootUrl) async {
               e.supplierName.startsWith('Constellation'))
           .toList();
       expect(constellation.length, 2);
+    });
+
+    test('get MA offers', () async {
+      var offers =
+          await client.getOffers(region: 'ISONE', state: 'MA', term: term);
+      expect(offers.length, 27);
     });
 
     test('get current offers as of a given date', () {
