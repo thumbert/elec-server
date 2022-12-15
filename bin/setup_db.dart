@@ -92,16 +92,31 @@ Future<void> insertBtmSolarForecastMwNyiso() async {
 }
 
 
-Future<void> insertCompetitiveOffers() async {
+Future<void> insertCompetitiveOffers({List<Date>? days, List<String>? states}) async {
+  states ??= ['CT', 'MA'];
+  days ??= [Date.today(location: UTC)];
+
   var archive = RetailSuppliersOffersArchive();
   // await archive.setupDb();
-  await archive.saveCurrentRatesToFile();
+  await archive.saveCurrentRatesToFile(states: states);
   await archive.dbConfig.db.open();
 
-  var date = Date.today(location: UTC);
-  var file = File(join(archive.dir, '${date.toString()}_ct.json'));
-  var data = archive.processFile(file);
-  await archive.insertData(data);
+  for (var date in days) {
+    if (states.contains('CT')) {
+      var file = File(join(archive.dir, '${date.toString()}_ct.json'));
+      if (file.existsSync()) {
+        var data = archive.processFile(file);
+        await archive.insertData(data);
+      }
+    }
+    if (states.contains('MA')) {
+      var file = File(join(archive.dir, '${date.toString()}_ma_residential.json'));
+      if (file.existsSync()) {
+        var data = archive.processFile(file);
+        await archive.insertData(data);
+      }
+    }
+  }
   await archive.dbConfig.db.close();
 }
 
@@ -601,6 +616,16 @@ Future<void> main() async {
 
   
   /// ----------- Utility data ----------
-  await insertCompetitiveOffers();
+  var days = [
+        // Date.utc(2022, 12, 4),
+        // Date.utc(2022, 12, 11),
+        // Date.utc(2022, 12, 13),
+        Date.utc(2022, 12, 14),
+      ];
+  // for (var e in days) {repairCtOfferFile(e);}
+
+
+  await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
   
 }
+// {state: 'CT', supplierName: 'XOOM Energy CT, LLC', accountType: 'Residential', utility: 'United Illuminating', countOfBillingCycles: 12}

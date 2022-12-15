@@ -15,28 +15,38 @@ class RetailSuppliersOffers {
   final String rootUrl;
   final String servicePath = '/retail_suppliers/v1/';
 
-  /// Get the current offers as of a given date
-  static List<RetailSupplyOffer> getCurrentOffers(Iterable<RetailSupplyOffer> xs, Date asOfDate) {
-    /// keep only offers that are before asOfDate
-    var aux = xs.whereNot((e) => e.offerPostedOnDate.isAfter(asOfDate));
-    /// group by
-    var groups = groupBy(aux, (RetailSupplyOffer e) =>
-        Tuple2(Tuple6(e.region, e.state, e.utility, e.accountType, e.offerType, e.supplierName),
-            Tuple3(e.countOfBillingCycles, e.minimumRecs, e.offerType)));
+  /// Get the current offers as of a given date.  All offers need to be for one
+  /// 'state' only e.g. 'CT' (don't mix states).
+  ///
+  static List<RetailSupplyOffer> getCurrentOffers(
+      Iterable<RetailSupplyOffer> xs, Date asOfDate) {
+    /// keep only offers that are between postedOnDate and lastDateOnWebsite
+    var aux = xs.where((e) =>
+        e.lastDateOnWebsite.value >= asOfDate.value &&
+        e.offerPostedOnDate.value <= asOfDate.value).toList();
 
-    /// Sort within the groups by offer posted date and pick the last one(s)
-    /// Note that there could be several offers with similar everything
-    /// except for the rate, but may have a different incentive or fees.
-    var res = <RetailSupplyOffer>[];
-    for (var es in groups.values) {
-      es.sort((a,b) => -a.offerPostedOnDate.compareTo(b.offerPostedOnDate));
-      res.addAll(es.where((e) => e.offerPostedOnDate == es.first.offerPostedOnDate));
-    }
+    // /// group by
+    // var groups = groupBy(
+    //     aux,
+    //     (RetailSupplyOffer e) => Tuple2(
+    //         Tuple6(e.region, e.state, e.utility, e.accountType, e.offerType,
+    //             e.supplierName),
+    //         Tuple2(e.countOfBillingCycles, e.minimumRecs)));
+    //
+    // /// Sort within the groups by offer posted date and pick the last one(s)
+    // /// Note that there could be several offers with all fields identical
+    // /// except for the rate, but may have a different incentive or fees.
+    // var res = <RetailSupplyOffer>[];
+    // for (var es in groups.values) {
+    //   es.sort((a, b) => -a.offerPostedOnDate.compareTo(b.offerPostedOnDate));
+    //   res.addAll(
+    //       es.where((e) => e.offerPostedOnDate == es.first.offerPostedOnDate));
+    // }
 
-    return res;
+    return aux;
   }
 
-  /// Return the list of offers for one region between a start/end date.
+  /// Return the list of offers posted between a start/end date.
   Future<List<RetailSupplyOffer>> getOffersForRegionTerm(
       String region, Term term) async {
     var url =

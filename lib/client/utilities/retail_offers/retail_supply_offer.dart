@@ -1,9 +1,22 @@
 library db.utilities.retail_supply_offer;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:date/date.dart';
+import 'package:http/http.dart';
 import 'package:timezone/timezone.dart';
+import 'package:puppeteer/puppeteer.dart';
+import 'package:html/parser.dart' show parse;
 
 part 'ct_supply_offer.dart';
+part 'ma_supply_offer.dart';
+
+// New Hampshire : https://www.energy.nh.gov/engyapps/ceps/shop.aspx
+// Rohde Island: https://www.ri.gov/app/dpuc/empowerri
+// Massachusetts: https://www.massenergyrates.com/compare-mass-electricity-rates
+// Maine: https://www.maine.gov/meopa/electricity/electricity-supply
+
 
 class RetailSupplyOffer {
   RetailSupplyOffer({
@@ -12,15 +25,19 @@ class RetailSupplyOffer {
     required this.loadZone,
     required this.utility,
     required String accountType,
+    required this.rateClass,
     required this.countOfBillingCycles,
     this.feeTypes = const <String>[],
     required num minimumRecs,
-    this.planType,
     required offerType,
     required this.rate,
     required this.rateUnit,
     required this.supplierName,
+    required this.planFeatures,
+    required this.planFees,
     required this.offerPostedOnDate,
+    required this.firstDateOnWebsite,
+    required this.lastDateOnWebsite,
     required this.offerId,
   }) {
     this.accountType = accountType;
@@ -28,13 +45,14 @@ class RetailSupplyOffer {
     this.offerType = offerType;
 
   }
-
   final String region;
   final String state;
   final String loadZone;
   final String utility;
   late final String _accountType;
-  final String? planType; // Load class
+  final String rateClass;
+  final List<String> planFeatures; // extra details about the plan
+  final List<String> planFees; // extra details about the fees associated with the plan
   final int countOfBillingCycles;
   late final List<String> feeTypes;
 
@@ -54,12 +72,14 @@ class RetailSupplyOffer {
   /// When has the offer been made, in UTC
   final Date offerPostedOnDate;
 
+  /// Date when the offer added to the db for the first time, in UTC
+  final Date firstDateOnWebsite;
+
+  /// Date when the offer added to the db for the last time, in UTC
+  final Date lastDateOnWebsite;
+
   /// A unique string id for this offer
   final String offerId;
-
-  /// What you get from the website.  This may or may not exist depending
-  /// on the website.
-  Map<String, dynamic>? rawOfferData;
 
   static Set<String> allowedAccountType = {'Residential', 'Business'};
   static Set<String> allowedOfferTypes = {'Fixed', 'Fixed-Tiered', 'Indexed'};
@@ -95,49 +115,37 @@ class RetailSupplyOffer {
 
   num get minimumRecs => _minimumRecs;
 
-  /// What to insert in the database
-  Map<String,dynamic> toMongo() {
-    var out = {
-      'offerId': offerId,
-      'region': region,
-      'state': state,
-      'loadZone': loadZone,
-      'utility': utility,
-      'accountType': accountType,
-      'countOfBillingCycles': countOfBillingCycles,
-      'minimumRecs': minimumRecs,
-      'offerType': offerType,
-      'rate': rate,
-      'rateUnit': rateUnit,
-      'supplierName': supplierName,
-      'offerPostedOnDate': offerPostedOnDate.toString(),
-    };
-    if (rawOfferData != null) {
-      out['rawOfferData'] = rawOfferData!;
-    }
-    return out;
-  }
-
   ///
   static RetailSupplyOffer fromMongo(Map<String,dynamic> xs) {
+    var planFeatures = <String>[];
+    if (xs['planFeatures'] is List) {
+      planFeatures = (xs['planFeatures'] as List).cast<String>();
+    }
+    var planFees = <String>[];
+    if (xs['planFees'] is List) {
+      planFees = (xs['planFees'] as List).cast<String>();
+    }
+
     var offer = RetailSupplyOffer(
         region: xs['region'],
         state: xs['state'],
         loadZone: xs['loadZone'],
         utility: xs['utility'],
         accountType: xs['accountType'],
+        rateClass: xs['rateClass'],
         countOfBillingCycles: xs['countOfBillingCycles'],
         minimumRecs: xs['minimumRecs'],
         offerType: xs['offerType'],
         rate: xs['rate'],
         rateUnit: xs['rateUnit'],
         supplierName: xs['supplierName'],
-        offerPostedOnDate: Date.fromIsoString(xs['offerPostedOnDate'], location: UTC),
+        planFeatures: planFeatures,
+        planFees: planFees,
+        offerPostedOnDate: Date.fromIsoString(xs['offerPostedOnDate'] ?? xs['firstDateOnWebsite'], location: UTC),
+        firstDateOnWebsite: Date.fromIsoString(xs['firstDateOnWebsite'], location: UTC),
+        lastDateOnWebsite: Date.fromIsoString(xs['lastDateOnWebsite'], location: UTC),
         offerId: xs['offerId'],
     );
-    if (xs.containsKey('rawOfferData')) {
-      offer.rawOfferData =  xs['rawOfferData'];
-    }
     return offer;
   }
 

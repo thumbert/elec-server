@@ -28,14 +28,22 @@ class ApiRetailSuppliersOffers {
     /// Get all offers for a region
     router.get('/offers/region/<region>',
         (Request request, String region) async {
-      var aux = await getOffersForRegion(region, null, null);
+      var aux = await getOffersForRegion(region, null, null, null);
       return Response.ok(json.encode(aux), headers: headers);
     });
 
     /// Get all offers for a region between a start and end date
     router.get('/offers/region/<region>/start/<start>/end/<end>',
         (Request request, String region, String start, String end) async {
-      var aux = await getOffersForRegion(region,
+      var aux = await getOffersForRegion(region, null,
+          Date.parse(start, location: UTC), Date.parse(end, location: UTC));
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get all offers for a region between a start and end date
+    router.get('/offers/region/<region>/state/<state>/start/<start>/end/<end>',
+        (Request request, String region, String state, String start, String end) async {
+      var aux = await getOffersForRegion(region, state,
           Date.parse(start, location: UTC), Date.parse(end, location: UTC));
       return Response.ok(json.encode(aux), headers: headers);
     });
@@ -45,13 +53,16 @@ class ApiRetailSuppliersOffers {
 
   /// Return offers for one region
   Future<List<Map<String, dynamic>>> getOffersForRegion(
-      String region, Date? startDate, Date? endDate) async {
+      String region, String? state, Date? startDate, Date? endDate) async {
     var query = where..eq('region', region.toUpperCase());
+    if (state != null) {
+      query = query.eq('state', state);
+    }
     if (startDate != null) {
-      query = query.gte('offerPostedOnDate', startDate.toString());
+      query = query.lte('offerPostedOnDate', endDate.toString());
     }
     if (endDate != null) {
-      query = query.lte('offerPostedOnDate', endDate.toString());
+      query = query.gte('lastDateOnWebsite', startDate.toString());
     }
     query = query
       ..fields([
@@ -61,13 +72,18 @@ class ApiRetailSuppliersOffers {
         'loadZone',
         'utility',
         'accountType',
+        'rateClass',
         'countOfBillingCycles',
         'minimumRecs',
         'offerType',
         'rate',
         'rateUnit',
         'supplierName',
+        'planFees',
+        'planFeatures',
         'offerPostedOnDate',
+        'firstDateOnWebsite',
+        'lastDateOnWebsite',
       ])
       ..excludeFields(['_id']);
     var xs = await coll.find(query).toList();

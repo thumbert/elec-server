@@ -46,6 +46,8 @@ db.sd_rtload.aggregate([
           }
  ]);
 
+use retail_suppliers;
+db.historical_offers.remove({'state': 'MA'});
 
 // db.forward_marks.remove({})
 //db.forward_marks.findOne();

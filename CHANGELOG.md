@@ -3,6 +3,9 @@
 ## TODO:
 - 
 
+## Release 2022-12-14
+- More work on retail offers.  Added MA residential offers.  Hope that the DB format has stabilized.
+
 ## Release 2022-12-09
 - Add 'loadZone' to the retail suppliers offers API
 
