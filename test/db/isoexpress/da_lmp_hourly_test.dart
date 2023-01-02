@@ -15,15 +15,18 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
+
 
 /// prepare data by downloading a few reports
 /// Missing 9/29/2018 and 9/30/2018 !!!
-void prepareData() async {
+Future<void> prepareData() async {
   var archive = DaLmpHourlyArchive();
   var days = [
     Date.utc(2018, 9, 26),
     Date.utc(2018, 9, 29),
     Date.utc(2018, 9, 30),
+    Date.utc(2022, 12, 22), // switched to json
   ];
   await archive.downloadDays(days);
 }
@@ -38,22 +41,30 @@ void tests(String rootUrl) async {
     tearDown(() async {
       await archive.dbConfig.db.close();
     });
+    test('read dam file, 2022-12-22 json format', () {
+      var file = archive.getFilename(Date.utc(2022, 12, 22));
+      var res = archive.processFile(file);
+      expect(res.first.keys.toSet(),
+          {'date', 'ptid', 'lmp', 'congestion', 'marginal_loss'});
+      var p321 = res.firstWhere((e) => e['ptid'] == 321);
+      expect(p321['lmp'].first, 96.86);
+    });
     test('process DA hourly lmp report, 2019-05-09', () {
       /// has duplicated data for ptid: 38206
       var file = archive.getFilename(Date.utc(2019, 5, 9));
       var res = archive.processFile(file);
       var p38206 = res.firstWhere((e) => e['ptid'] == 38206);
-      expect(p38206['hourBeginning'].length, 24);
+      expect(p38206['lmp'].length, 24);
     });
     test('DA hourly lmp report, DST day spring', () {
       var file = archive.getFilename(Date.utc(2017, 3, 12));
       var res = archive.processFile(file);
-      expect(res.first['hourBeginning'].length, 23);
+      expect(res.first['lmp'].length, 23);
     });
     test('DA hourly lmp report, DST day fall', () async {
       var file = archive.getFilename(Date.utc(2017, 11, 5));
       var res = archive.processFile(file);
-      expect(res.first['hourBeginning'].length, 25);
+      expect(res.first['lmp'].length, 25);
     });
     test('Insert one day', () async {
       var date = Date.utc(2017, 1, 1);
@@ -174,7 +185,7 @@ void tests(String rootUrl) async {
   });
 }
 
-Future speedTest(String rootUrl) async {
+Future<void> speedTest(String rootUrl) async {
   var location = getLocation('America/New_York');
   var daLmp =
       client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
@@ -183,17 +194,16 @@ Future speedTest(String rootUrl) async {
       4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
 }
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
+  dotenv.load('.env/prod.env');
+
   // await DaLmpHourlyArchive().setupDb();
   // await prepareData();
 
   DbProd();
-  // dotenv.load('.env/prod.env');
   tests('http://127.0.0.1:8080');
 
-//  Db db = new Db('mongodb://localhost/isoexpress');
-//  await new DaLmpHourlyArchive().updateDb(new DaLmp(db));
 
   // await soloTest();
 }

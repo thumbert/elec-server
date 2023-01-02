@@ -79,7 +79,7 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var aux = json.decode(file.readAsStringSync());
-    late var xs;
+    late List<Map<String,dynamic>> xs;
     if ((aux as Map).containsKey('DayAheadConstraints')) {
       if (aux['DayAheadConstraints'] == '') return <Map<String, dynamic>>[];
       xs = (aux['DayAheadConstraints']['DayAheadConstraint'] as List)

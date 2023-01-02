@@ -36,15 +36,10 @@ class DaLmp {
   Future<TimeSeries<double>> getHourlyLmp(
       int ptid, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'hourly/$cmp/ptid/${ptid.toString()}' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}';
+    var url = '$rootUrl${_isoMap[iso]!}${servicePath}hourly/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}';
 
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as Map;
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as Map;
     return TimeSeries.fromIterable(data.entries.expand((e) {
       var date = Date(int.parse(e.key.substring(0, 4)),
           int.parse(e.key.substring(5, 7)), int.parse(e.key.substring(8)),
@@ -62,16 +57,10 @@ class DaLmp {
   Future<TimeSeries<double>> getDailyLmpBucket(int ptid, LmpComponent component,
       Bucket bucket, Date start, Date end) async {
     var cmp = component.toString();
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'daily/$cmp/ptid/${ptid.toString()}' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}' +
-        '/bucket/${bucket.name}';
+    var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}/bucket/${bucket.name}';
 
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Date.parse(e['date'], location: iso.preferredTimeZoneLocation),
         e[cmp])));
@@ -82,15 +71,10 @@ class DaLmp {
   Future<Map<int, TimeSeries<num>>> getDailyPricesAllNodes(
       LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'daily/mean/$cmp' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}';
+    var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/mean/$cmp/start/${start.toString()}/end/${end.toString()}';
 
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     var grp = groupBy(data, (e) => (e as Map)['ptid'] as int);
 
     var out = <int, TimeSeries<num>>{};
@@ -107,16 +91,10 @@ class DaLmp {
   Future<TimeSeries<double>> getMonthlyLmpBucket(int ptid,
       LmpComponent component, Bucket bucket, Month start, Month end) async {
     var cmp = component.toString();
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'monthly/$cmp/ptid/${ptid.toString()}' +
-        '/start/${start.toIso8601String()}' +
-        '/end/${end.toIso8601String()}' +
-        '/bucket/${bucket.name}';
+    var url = '$rootUrl${_isoMap[iso]!}${servicePath}monthly/$cmp/ptid/${ptid.toString()}/start/${start.toIso8601String()}/end/${end.toIso8601String()}/bucket/${bucket.name}';
 
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     var ts = TimeSeries.fromIterable(data.map((e) => IntervalTuple<double>(
         Month.parse(e['month'], location: iso.preferredTimeZoneLocation),
         e[cmp])));

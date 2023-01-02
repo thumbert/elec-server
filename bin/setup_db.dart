@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:actors/actors.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/isoexpress/scc_report.dart';
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
@@ -38,6 +41,7 @@ import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart'
 import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
 
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
+import 'package:more/more.dart' hide Tuple2;
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
@@ -46,6 +50,7 @@ import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
+import 'package:tuple/tuple.dart';
 import '../test/db/marks/marks_special_days.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:path/path.dart';
@@ -577,7 +582,7 @@ Future<void> main() async {
 
   /// ------------- Isone -----------------
   // await insertDaBindingConstraintsIsone();
-  
+
 //  await insertForwardMarks();
 //   await insertFwdResAuctionResults();
 //   await insertIsoExpress();
@@ -616,16 +621,14 @@ Future<void> main() async {
 
   
   /// ----------- Utility data ----------
-  var days = [
-        // Date.utc(2022, 12, 4),
-        // Date.utc(2022, 12, 11),
-        // Date.utc(2022, 12, 13),
-        Date.utc(2022, 12, 14),
-      ];
-  // for (var e in days) {repairCtOfferFile(e);}
-
-
-  await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
+  // var days = [
+  //       // Date.utc(2022, 12, 4),
+  //       // Date.utc(2022, 12, 11),
+  //       // Date.utc(2022, 12, 13),
+  //       // Date.utc(2022, 12, 14),
+  //       Date.utc(2022, 12, 15),
+  //     ];
+  // await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
   
 }
-// {state: 'CT', supplierName: 'XOOM Energy CT, LLC', accountType: 'Residential', utility: 'United Illuminating', countOfBillingCycles: 12}
+

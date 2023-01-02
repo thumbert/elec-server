@@ -38,6 +38,14 @@ void tests(String rootUrl) async {
       expect(congestion.first.toList(),
           [8, -17.66, 1, -2.13, 1, -0.26, 1181, 0.03]);
     });
+    test('process DA hourly lmp report json format, 2022-12-22', () {
+      // amazing compression!
+      var file = archive.getFilename(Date.utc(2022, 12, 22));
+      var res = archive.processFile(file);
+      var congestion = res.first['congestion'] as List;
+      expect(congestion.length, 24);
+      expect(congestion.first.toList(), [1, -6.09, 1215, 0,]);
+    });
   });
   group('Isone DA Congestion compact api tests: ', () {
     var db = DbProd.isoexpress;
