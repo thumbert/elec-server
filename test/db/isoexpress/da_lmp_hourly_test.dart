@@ -31,9 +31,9 @@ Future<void> prepareData() async {
   await archive.downloadDays(days);
 }
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  group('DAM LMP db tests: ', () {
+  group('ISONE DAM LMP db tests: ', () {
     var archive = DaLmpHourlyArchive();
     setUp(() async {
       await archive.dbConfig.db.open();

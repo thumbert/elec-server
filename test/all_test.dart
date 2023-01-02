@@ -9,6 +9,7 @@ import 'db/isoexpress/da_energy_offer_test.dart' as energy_offers;
 import 'db/isoexpress/da_demand_bid_test.dart' as demand_bids;
 import 'db/isoexpress/da_congestion_compact_test.dart' as da_congestion;
 import 'db/isoexpress/da_lmp_hourly_test.dart' as dalmp;
+import 'db/isoexpress/rt_lmp_hourly_test.dart' as rtlmp;
 import 'db/isoexpress/fwdres_auction_results_test.dart' as fwdres;
 import 'db/isoexpress/monthly_asset_ncpc_test.dart' as monthly_asset_ncpc;
 import 'db/isoexpress/regulation_requirement_test.dart'
@@ -61,7 +62,7 @@ Future<void> main() async {
   bc.tests(rootUrl);
   calculators.tests(rootUrl);
   da_congestion.tests(rootUrl);
-  dalmp.tests(rootUrl);
+  await dalmp.tests(rootUrl);
   demand_bids.tests();
   energy_offers.tests(rootUrl);
   await fwdres.tests(rootUrl);
@@ -78,6 +79,8 @@ Future<void> main() async {
   ptids.tests(rootUrl);
   regulation_requirement.tests(rootUrl);
   retail_offers.tests(rootUrl);
+  await rtlmp.tests();
+
   sd_arrawdsum.tests(rootUrl);
   sd_rtload.tests();
   sr_dalocsum.tests(rootUrl);

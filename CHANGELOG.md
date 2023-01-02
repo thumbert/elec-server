@@ -8,6 +8,8 @@
 reliable enough.  Stop inserting the 'hourBeginning' field from the documents in the collection.  
 It is not needed as all hours in the day are published so the info is redundant.  Save on storage 
 too.  Modify da_congestion_compact to work with json files too
+- Switch rt_lmp_hourly in ISONE to the json webservices
+
 
 ## Release 2022-12-14
 - More work on retail offers.  Added MA residential offers.  Hope that the DB format has stabilized.
