@@ -3,6 +3,12 @@
 ## TODO:
 - 
 
+## Release 2023-01-08
+- Fix da_lmp_hourly to upload csv files if already downloaded.
+- Make an example of using actors for uploading files in the db concurrently.  
+  See `test/db//update_dbs_actors_test.dart` file.  A speedup of 5x was achieved when uploading 
+  one month of DAM hourly price files for ISONE. 
+
 ## Release 2023-01-02
 - Switch da_lmp_hourly in ISONE to the json webservices.  The public csv service is just not 
 reliable enough.  Stop inserting the 'hourBeginning' field from the documents in the collection.  

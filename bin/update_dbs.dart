@@ -7,6 +7,7 @@ import 'package:elec_server/src/db/isoexpress/ncpc_economic_report.dart';
 import 'package:elec_server/src/db/isoexpress/ncpc_generator_performance_audit_report.dart';
 import 'package:elec_server/src/db/isoexpress/ncpc_lscpr_report.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
@@ -50,7 +51,7 @@ Flags:
   }
   dotenv.load('.env/${results['env']}.env');
 
-  await initializeTimeZone();
+  initializeTimeZones();
   var days = Month.utc(2018, 1).days();
 
   await updateDailyArchive(NcpcEconomicReportArchive(), days);

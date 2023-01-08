@@ -109,7 +109,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }

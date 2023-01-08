@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
 import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';
@@ -35,11 +36,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
 
   @override
   File getFilename(Date asOfDate) {
-    if (asOfDate.isBefore(Date.utc(2022, 12, 21))) {
-      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv');
-    } else {
       return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json');
-    }
   }
 
 
@@ -64,6 +61,10 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     }
   }
 
+  /// Input [file] is always ending in json.  You can use older csv files for
+  /// compatibility but if a new download is initiated (after 2022-12-21),
+  /// the file will be json.
+  ///
   /// Return a Map with elements like this
   /// ```dart
   /// {
@@ -76,13 +77,16 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   /// ```
   @override
   List<Map<String, dynamic>> processFile(File file) {
-    if (file.path.endsWith('csv') && file.existsSync()) {
-      return _processFileCsv(file);
-    } else if (file.path.endsWith('json') && file.existsSync()) {
-      return _processFileJson(file);
-    } else {
-      throw ArgumentError('File $file does not exist!');
+    if (!file.existsSync()) {
+      // try and see if the csv file is there (support legacy format)
+      var fileCsv = File(file.path.replaceAll('json', 'csv'));
+      if (fileCsv.existsSync()) {
+        return _processFileCsv(file);
+      } else {
+        throw ArgumentError('Neither json or csv ${basename(file.path)} file exists!');
+      }
     }
+    return _processFileJson(file);
   }
 
   @override
@@ -190,7 +194,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     var request = await client.getUrl(Uri.parse(getUrl(day)));
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     var response = await request.close();
-    await response.pipe(getFilename(day).openWrite());
+    var file = File('${dir}WW_DALMP_ISO_${yyyymmdd(day)}.json');
+    await response.pipe(file.openWrite());
   }
 
 

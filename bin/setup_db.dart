@@ -587,9 +587,10 @@ Future<void> main() async {
 //   await insertFwdResAuctionResults();
 //   await insertIsoExpress();
 
-  // var days = Date.utc(2020, 1, 1).upTo(Date.utc(2020, 1, 31));
+  var days = Date.utc(2022, 9, 1).upTo(Date.utc(2022, 9, 30));
   // await insertFuelMixIsone(days, setup: true, externalDownload: false);
   // await insertDaDemandBids();
+  await insertDaEnergyOffers(days: days);
 
   // await insertMaskedAssetIds();
 
