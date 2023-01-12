@@ -3,9 +3,15 @@
 ## TODO:
 - 
 
+## Release 2023-01-12
+- Make sure dalmp prices are inserted in the db as doubles and not ints by some unhappy csv 
+  reading.  It is requested by the dalmp client.  Added an explict conversion in the 
+  `client/dalmp.dart`, `getHourlyLmp()` method.  Ideally, that should be needed.    
+- 
+
 ## Release 2023-01-08
 - Fix da_lmp_hourly to upload csv files if already downloaded.
-- Make an example of using actors for uploading files in the db concurrently.  
+- Make an example of using **actors** for uploading files in the db concurrently.  
   See `test/db//update_dbs_actors_test.dart` file.  A speedup of 5x was achieved when uploading 
   one month of DAM hourly price files for ISONE. 
 

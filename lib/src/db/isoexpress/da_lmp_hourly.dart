@@ -81,7 +81,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
       // try and see if the csv file is there (support legacy format)
       var fileCsv = File(file.path.replaceAll('json', 'csv'));
       if (fileCsv.existsSync()) {
-        return _processFileCsv(file);
+        return _processFileCsv(fileCsv);
       } else {
         throw ArgumentError('Neither json or csv ${basename(file.path)} file exists!');
       }
@@ -94,9 +94,9 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     var out = <String, dynamic>{
       'date': (rows.first['BeginDate'] as String).substring(0,10),
       'ptid': int.parse(rows.first['Location']['@LocId']),
-      'congestion': <num>[],
-      'lmp': <num>[],
-      'marginal_loss': <num>[],
+      'congestion': <double>[],
+      'lmp': <double>[],
+      'marginal_loss': <double>[],
     };
     var hours = <TZDateTime>{};
 
@@ -107,9 +107,9 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
       if (!hours.contains(hour)) {
         /// if duplicate, insert only once
         hours.add(hour);
-        out['lmp'].add(row['LmpTotal']);
-        out['congestion'].add(row['CongestionComponent']);
-        out['marginal_loss'].add(row['LossComponent']);
+        out['lmp'].add((row['LmpTotal'] as num).toDouble());
+        out['congestion'].add((row['CongestionComponent'] as num).toDouble());
+        out['marginal_loss'].add((row['LossComponent'] as num).toDouble());
       }
     }
 
@@ -156,9 +156,9 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     var out = <String, dynamic>{
       'date': formatDate(rows.first['Date']),
       'ptid': int.parse(rows.first['Location ID']),
-      'congestion': <num>[],
-      'lmp': <num>[],
-      'marginal_loss': <num>[],
+      'congestion': <double>[],
+      'lmp': <double>[],
+      'marginal_loss': <double>[],
     };
     var hours = <TZDateTime>{};
 
@@ -169,9 +169,9 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
       if (!hours.contains(hour)) {
         /// if duplicate, insert only once
         hours.add(hour);
-        out['lmp'].add(row['Locational Marginal Price']);
-        out['congestion'].add(row['Congestion Component']);
-        out['marginal_loss'].add(row['Marginal Loss Component']);
+        out['lmp'].add((row['Locational Marginal Price'] as num).toDouble());
+        out['congestion'].add((row['Congestion Component'] as num).toDouble());
+        out['marginal_loss'].add((row['Marginal Loss Component'] as num).toDouble());
       }
     }
 

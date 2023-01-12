@@ -47,7 +47,7 @@ class DaLmp {
       var hours = date.hours();
       var out = <IntervalTuple<double>>[];
       for (var i = 0; i < hours.length; ++i) {
-        out.add(IntervalTuple(hours[i], e.value[i]));
+        out.add(IntervalTuple(hours[i], (e.value[i] as num).toDouble()));
       }
       return out;
     }));
