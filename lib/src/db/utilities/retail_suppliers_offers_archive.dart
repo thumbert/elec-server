@@ -159,6 +159,7 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
 
   /// Get the CT offers from the website and write the offers as json file
   /// https://energizect.com/rate-board/compare-energy-supplier-rates?customerClass=1201&monthlyUsage=750&planTypeEdc=1191
+  /// https://energizect.com/ectr_search_api/offers?customerClass[]=1201&monthlyUsage=750&page=2&planTypeEdc[]=1191&
   /// https://energizect.com/ectr_search_api/offers?customerClass[]=1201&monthlyUsage=750&planTypeEdc[]=1196
   Future<void> _getRatesCt() async {
     var today = Date.today(location: UTC).toString();
@@ -166,27 +167,33 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     var queries =
         _config.firstWhere((e) => e['state'] == 'CT')['queries'] as List;
     for (Map<String,dynamic> query in queries) {
-      var url = Uri(
-          scheme: 'https',
-          host: 'energizect.com',
-          path: '/ectr_search_api/offers',
-          queryParameters: query);
-      var res = await get(url);
-      if (res.statusCode != 200) {
-        throw StateError('Error downloading data from $url');
-      }
-      var aux = json.decode(res.body);
-      var offers = (aux['results'] as List).cast<Map<String, dynamic>>();
+      for (var page = 1; page<10; page++) {
+        query['page'] = page.toString();
+        var url = Uri(
+            scheme: 'https',
+            host: 'energizect.com',
+            path: '/ectr_search_api/offers',
+            queryParameters: query);
+        var res = await get(url);
+        if (res.statusCode != 200) {
+          throw StateError('Error downloading data from $url');
+        }
+        var aux = json.decode(res.body);
+        var offers = (aux['results'] as List).cast<Map<String, dynamic>>();
+        if (offers.isEmpty) {
+          break;
+        }
 
-      var rateClass = '';
-      if (query.containsKey('planType')) {
-        rateClass = (query['planType'] as String).split(' ').last;
+        var rateClass = '';
+        if (query.containsKey('planType')) {
+          rateClass = (query['planType'] as String).split(' ').last;
+        }
+        for (var e in offers) {
+          e['asOfDate'] = today;
+          e['rateClass'] = rateClass;
+        }
+        allOffers.addAll(offers);
       }
-      for (var e in offers) {
-        e['asOfDate'] = today;
-        e['rateClass'] = rateClass;
-      }
-      allOffers.addAll(offers);
     }
 
     /// The offers downloaded are not unique.  Save only a unique set to file

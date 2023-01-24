@@ -3,10 +3,14 @@
 ## TODO:
 - 
 
+## Release 2023-01-24
+- Fix CT rates download.  I was downloading only the first page!  Duh.
+
+
 ## Release 2023-01-12
 - Make sure dalmp prices are inserted in the db as doubles and not ints by some unhappy csv 
   reading.  It is requested by the dalmp client.  Added an explict conversion in the 
-  `client/dalmp.dart`, `getHourlyLmp()` method.  Ideally, that should be needed.    
+  `client/dalmp.dart`, `getHourlyLmp()` method.  Ideally, that shouldn't be needed.    
 - 
 
 ## Release 2023-01-08

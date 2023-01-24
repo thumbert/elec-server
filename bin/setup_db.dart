@@ -587,10 +587,10 @@ Future<void> main() async {
 //   await insertFwdResAuctionResults();
 //   await insertIsoExpress();
 
-  var days = Date.utc(2022, 9, 1).upTo(Date.utc(2022, 9, 30));
+  // var days = Date.utc(2022, 9, 1).upTo(Date.utc(2022, 9, 30));
   // await insertFuelMixIsone(days, setup: true, externalDownload: false);
   // await insertDaDemandBids();
-  await insertDaEnergyOffers(days: days);
+  // await insertDaEnergyOffers(days: days);
 
   // await insertMaskedAssetIds();
 
@@ -622,14 +622,11 @@ Future<void> main() async {
 
   
   /// ----------- Utility data ----------
-  // var days = [
-  //       // Date.utc(2022, 12, 4),
-  //       // Date.utc(2022, 12, 11),
-  //       // Date.utc(2022, 12, 13),
-  //       // Date.utc(2022, 12, 14),
-  //       Date.utc(2022, 12, 15),
-  //     ];
-  // await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
+  var days = [
+        // Date.utc(2022, 12, 4),
+        Date.utc(2023, 1, 23),
+      ];
+  await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
   
 }
 
