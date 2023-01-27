@@ -76,13 +76,61 @@ class DaLmp {
       return Response.ok(json.encode(aux), headers: headers);
     });
 
-    /// get hourly prices for one ptid
+    /// Get hourly prices for one ptid
+    /// Return a Map in this form
+    /// ```
+    /// {
+    ///   '2021-01-01': <num>[45.67, 32.74, ...],
+    ///   '2021-01-02': <num>[42.83, 37.35, ...],
+    ///   ...
+    /// }
+    /// ```
     router.get('/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>',
         (Request request, String component, String ptid, String start,
             String end) async {
       var aux = await getHourlyPrices(component, int.parse(ptid), start, end);
       return Response.ok(json.encode(aux), headers: headers);
     });
+
+    /// Get hourly prices for multiple ptids
+    /// Return a list of maps with elements like
+    /// ```
+    /// {
+    ///   'hourBeginning': '2021-01-01 00:00:00-05:00', '61754': 19.14, '61757': 19.78
+    /// },
+    /// {
+    ///   'hourBeginning': '2021-01-01 01:00:00-05:00', '61754': 20.47, '61757': 20.92
+    /// }
+    /// ```
+    router.get(
+        '/hourly/<component>/ptids/<ptids>/start/<start>/end/<end>',
+            (Request request, String component, String ptids, String start, String end) async {
+          var ptids0 = ptids.split(',').map((e) => int.parse(e)).toList();
+          var startDate = Date.parse(start, location: UTC);
+          var endDate = Date.parse(end, location: UTC);
+
+          var aux = await getHourlyDataSeveral(ptids0, startDate, endDate, component);
+          var out = <Map<String, dynamic>>[];
+
+          var groups = groupBy(aux, (Map e) => e['date']);
+          for (var yyyymmdd in groups.keys) {
+            var date = Date.fromIsoString(yyyymmdd, location: IsoNewEngland.location);
+            var hours = date.hours();
+            var group = groups[yyyymmdd]!;
+            for (var i=0; i<hours.length; i++) {
+              var one = <String,dynamic>{
+                'hourBeginning': hours[i].start.toIso8601String(),
+              };
+              for (var e in group) {
+                one[e['ptid'].toString()] = e[component][i];
+              }
+              out.add(one);
+            }
+          }
+
+          return Response.ok(json.encode(out), headers: headers);
+        });
+
 
     /// Get all the existing ptids in the collection, sorted
     router.get('/ptids', (Request request) async {

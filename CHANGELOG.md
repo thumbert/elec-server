@@ -6,6 +6,7 @@
 ## Release 2023-01-26
 - Add rt_lmp_hourly for NYISO.  Get the api working and unify it with the one in ISONE.  
   Add tests. 
+- Add api to get hourly prices for multiple ptids in columnar format
 
 ## Release 2023-01-24
 - Fix CT rates download.  I was downloading only the first page!  Duh.

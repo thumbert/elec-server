@@ -153,31 +153,6 @@ class RtLmp {
     return router;
   }
 
-  // Future<void> booboo() async {
-  //   var aux = await getHourlyDataSeveral([61757, 61754], Date.utc(2021, 1, 1),
-  //       Date.utc(2021, 1, 2), 'lmp');
-  //   var out = <Map<String, dynamic>>[];
-  //
-  //   var groups = groupBy(aux, (Map e) => e['date']);
-  //   for (var yyyymmdd in groups.keys) {
-  //     var date = Date.fromIsoString(yyyymmdd, location: IsoNewEngland.location);
-  //     var hours = date.hours();
-  //     var group = groups[yyyymmdd]!;
-  //     for (var i=0; i<hours.length; i++) {
-  //       var one = <String,dynamic>{
-  //         'hourBeginning': hours[i].start.toIso8601String(),
-  //       };
-  //       for (var e in group) {
-  //         one[e['ptid'].toString()] = e['lmp'][i];
-  //       }
-  //       out.add(one);
-  //     }
-  //   }
-  //   print(out);
-  //
-  // }
-
-
 
   /// Return a list with elements:
   /// ```
