@@ -107,6 +107,15 @@ class RtLmp {
     /// Return a list of maps with elements like
     /// ```
     /// {
+    ///   'hourBeginning': '2021-01-01 00:00:00-05:00',
+    ///   'ptid': 61754,
+    ///   'lmp': 19.16,
+    /// }
+    /// ```
+    ///
+    /// Earlier proposal was for this format ...
+    /// ```
+    /// {
     ///   'hourBeginning': '2021-01-01 00:00:00-05:00', '61754': 19.14, '61757': 19.78
     /// },
     /// {
@@ -133,7 +142,9 @@ class RtLmp {
                 'hourBeginning': hours[i].start.toIso8601String(),
               };
               for (var e in group) {
-                one[e['ptid'].toString()] = e[component][i];
+                // one[e['ptid'].toString()] = e[component][i];
+                one['ptid'] = e['ptid'];
+                one[component] = e[component][i];
               }
               out.add(one);
             }

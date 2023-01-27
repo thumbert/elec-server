@@ -51,8 +51,11 @@ Future<Router> buildRouter() async {
         DaEnergyOffers(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
-    '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
-    '/rtlmp/v1/': RtLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
+    '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router, // <--- to be deprecated on 1/27/2024!
+    '/rtlmp/v1/': RtLmp(DbProd.isoexpress, iso: Iso.newEngland).router, // <--- to be deprecated on 1/27/2024!
+    '/isone/da/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
+    '/isone/rt/v1/': RtLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
+
     '/isone/fuelmix/v1/': ApiIsoneFuelMix(DbProd.isoexpress).router,
     '/fwdres_auction_results/v1/':
         ApiFwdResAuctionResults(DbProd.isoexpress).router,
@@ -80,8 +83,9 @@ Future<Router> buildRouter() async {
         DaCongestionCompact(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/da_energy_offers/v1/':
         DaEnergyOffers(DbProd.nyiso, iso: Iso.newYork).router,
-    '/nyiso/dalmp/v1/': DaLmp(DbProd.nyiso, iso: Iso.newYork).router,
-    '/nyiso/rtlmp/v1/': RtLmp(DbProd.nyiso, iso: Iso.newYork).router,
+    '/nyiso/dalmp/v1/': DaLmp(DbProd.nyiso, iso: Iso.newYork).router,  // <--- to be deprecated on 1/27/2024!
+    '/nyiso/da/v1/': DaLmp(DbProd.nyiso, iso: Iso.newYork).router,
+    '/nyiso/rt/v1/': RtLmp(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/masked_ids/v1/': ApiMaskedIds(DbProd.nyiso).router,
     '/nyiso/ptids/v1/': nyiso_ptids.ApiPtids(DbProd.nyiso).router,
     '/nyiso/tcc_clearing_prices/v1/':

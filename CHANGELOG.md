@@ -7,6 +7,8 @@
 - Add rt_lmp_hourly for NYISO.  Get the api working and unify it with the one in ISONE.  
   Add tests. 
 - Add api to get hourly prices for multiple ptids in columnar format
+- Unify the api for price information to be 'isone/da', 'isone/rt' from 'dalmp', 'rtlmp'.  
+  Will deprecate the existing routes in 2024-01-27
 
 ## Release 2023-01-24
 - Fix CT rates download.  I was downloading only the first page!  Duh.

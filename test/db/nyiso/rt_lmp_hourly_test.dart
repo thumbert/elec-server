@@ -40,7 +40,7 @@ Future<void> tests(String rootUrl) async {
           61757, Date.utc(2021, 1, 1), Date.utc(2021, 1, 2), 'lmp');
       expect(aux.length, 2);
       expect(aux['2021-01-01']!.take(3), [45.67, 32.74, 22.22]);
-      var url = '$rootUrl/nyiso/rtlmp/v1/hourly/lmp/'
+      var url = '$rootUrl/nyiso/rt/v1/hourly/lmp/'
           'ptid/61757/start/2021-01-01/end/2021-01-02';
       var res = await http
           .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
@@ -51,23 +51,24 @@ Future<void> tests(String rootUrl) async {
 
 
     test('get hourly lmp data for several ptids for several days', () async {
-      var url = '$rootUrl/nyiso/rtlmp/v1/hourly/lmp/'
+      var url = '$rootUrl/nyiso/rt/v1/hourly/lmp/'
           'ptids/61757,61754/start/2021-01-01/end/2021-01-02';
       var res = await http
           .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
       expect(data.length, 48);
-      expect(data.first, {
+      var x0 = data.firstWhere((e) => e['ptid'] == 61757);
+      expect(x0, {
         'hourBeginning': '2021-01-01T00:00:00.000-0500',
-        '61754': 8.49,
-        '61757': 45.67,
+        'ptid': 61757,
+        'lmp': 45.67,
       });
     });
 
 
     test('get daily lmp prices by peak bucket for one ptid', () async {
       var res = await http.get(
-          Uri.parse('$rootUrl/nyiso/rtlmp/v1/daily/lmp/'
+          Uri.parse('$rootUrl/nyiso/rt/v1/daily/lmp/'
               'ptid/61757/start/2021-01-01/end/2021-01-07/bucket/2x16H'),
           headers: {'Content-Type': 'application/json'});
       var aux = json.decode(res.body) as List;
@@ -85,7 +86,7 @@ Future<void> tests(String rootUrl) async {
       expect(n57,
           {'ptid': 61757, 'date': '2021-01-01', 'lmp': 45.218125});
       var res = await http.get(
-          Uri.parse('$rootUrl/nyiso/rtlmp/v1/daily/lmp/'
+          Uri.parse('$rootUrl/nyiso/rt/v1/daily/lmp/'
               'ptids/61757,61752/start/2021-01-01/end/2021-01-07/bucket/2x16H'),
           headers: {'Content-Type': 'application/json'});
       var aux = json.decode(res.body) as List;
@@ -112,7 +113,7 @@ Future<void> tests(String rootUrl) async {
         'congestion': -18.047916666666666,
       });
       expect(data.length, 62);
-      var url = '$rootUrl/nyiso/rtlmp/v1/daily/congestion/ptids/61752,61758/start/2021-01-01/end/2021-01-31/bucket/7x24';
+      var url = '$rootUrl/nyiso/rt/v1/daily/congestion/ptids/61752,61758/start/2021-01-01/end/2021-01-31/bucket/7x24';
       var aux = await http.get(Uri.parse(url));
       var res = json.decode(aux.body) as List;
       expect(res.length, 62);
