@@ -56,7 +56,7 @@ Future<void> tests(String rootUrl) async {
       var res = await http
           .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
-      expect(data.length, 48);
+      expect(data.length, 2*48);
       var x0 = data.firstWhere((e) => e['ptid'] == 61757);
       expect(x0, {
         'hourBeginning': '2021-01-01T00:00:00.000-0500',

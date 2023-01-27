@@ -112,16 +112,6 @@ class RtLmp {
     ///   'lmp': 19.16,
     /// }
     /// ```
-    ///
-    /// Earlier proposal was for this format ...
-    /// ```
-    /// {
-    ///   'hourBeginning': '2021-01-01 00:00:00-05:00', '61754': 19.14, '61757': 19.78
-    /// },
-    /// {
-    ///   'hourBeginning': '2021-01-01 01:00:00-05:00', '61754': 20.47, '61757': 20.92
-    /// }
-    /// ```
     router.get(
         '/hourly/<component>/ptids/<ptids>/start/<start>/end/<end>',
             (Request request, String component, String ptids, String start, String end) async {
@@ -138,15 +128,13 @@ class RtLmp {
             var hours = date.hours();
             var group = groups[yyyymmdd]!;
             for (var i=0; i<hours.length; i++) {
-              var one = <String,dynamic>{
-                'hourBeginning': hours[i].start.toIso8601String(),
-              };
               for (var e in group) {
-                // one[e['ptid'].toString()] = e[component][i];
-                one['ptid'] = e['ptid'];
-                one[component] = e[component][i];
+                out.add({
+                  'hourBeginning': hours[i].start.toIso8601String(),
+                  'ptid': e['ptid'],
+                  component:  e[component][i],
+                });
               }
-              out.add(one);
             }
           }
 

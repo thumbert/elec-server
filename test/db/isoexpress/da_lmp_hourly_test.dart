@@ -95,7 +95,7 @@ Future<void> tests(String rootUrl) async {
     var api = DaLmp(db, iso: Iso.newEngland);
     setUp(() async => await db.open());
     tearDown(() async => await db.close());
-    test('get lmp data for 2 days', () async {
+    test('get hourly lmp data for 2 days', () async {
       var aux = await api.getHourlyData(
           4000, Date.utc(2017, 1, 1), Date.utc(2017, 1, 2), 'lmp');
       expect(aux.length, 2);
@@ -108,6 +108,23 @@ Future<void> tests(String rootUrl) async {
       expect(data.length, 2);
       expect((data['2017-01-01'] as List).first, 35.12);
     });
+
+    test('get hourly lmp data for several ptids for several days', () async {
+      var url = '$rootUrl/isone/da/v1/hourly/lmp/'
+          'ptids/4000,4001/start/2017-01-01/end/2017-01-02';
+      var res = await http
+          .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
+      var data = json.decode(res.body) as List;
+      expect(data.length, 2*48);
+      var x0 = data.firstWhere((e) => e['ptid'] == 4000);
+      expect(x0, {
+        'hourBeginning': '2017-01-01T00:00:00.000-0500',
+        'ptid': 4000,
+        'lmp': 35.12,
+      });
+    });
+
+
     // test('get lmp data for 2 days (compact)', () async {
     //   var aux = await api.getHourlyPricesCompact(
     //       'lmp', 4000, '2017-01-01', '2017-01-02');

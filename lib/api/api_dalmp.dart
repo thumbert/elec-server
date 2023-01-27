@@ -96,10 +96,9 @@ class DaLmp {
     /// Return a list of maps with elements like
     /// ```
     /// {
-    ///   'hourBeginning': '2021-01-01 00:00:00-05:00', '61754': 19.14, '61757': 19.78
-    /// },
-    /// {
-    ///   'hourBeginning': '2021-01-01 01:00:00-05:00', '61754': 20.47, '61757': 20.92
+    ///   'hourBeginning': '2021-01-01 00:00:00-05:00',
+    ///   'ptid': 61754,
+    ///   'lmp': 19.16,
     /// }
     /// ```
     router.get(
@@ -118,13 +117,13 @@ class DaLmp {
             var hours = date.hours();
             var group = groups[yyyymmdd]!;
             for (var i=0; i<hours.length; i++) {
-              var one = <String,dynamic>{
-                'hourBeginning': hours[i].start.toIso8601String(),
-              };
               for (var e in group) {
-                one[e['ptid'].toString()] = e[component][i];
+                out.add({
+                  'hourBeginning': hours[i].start.toIso8601String(),
+                  'ptid': e['ptid'],
+                  component:  e[component][i],
+                });
               }
-              out.add(one);
             }
           }
 
