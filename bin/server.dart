@@ -1,7 +1,9 @@
 import 'package:elec/elec.dart';
 import 'package:elec_server/api/api_dacongestion.dart';
+import 'package:elec_server/api/api_dalmp.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/api/api_masked_ids.dart';
+import 'package:elec_server/api/api_rtlmp.dart';
 import 'package:elec_server/api/isoexpress/api_fwdres_auction_results.dart';
 import 'package:elec_server/api/isoexpress/api_isone_fuelmix.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
@@ -18,7 +20,6 @@ import 'package:elec_server/api/mis/api_tr_sch2tp.dart';
 import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart'
     as nyiso_bc;
-import 'package:elec_server/api/api_dalmp.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart' as nyiso_ptids;
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart'
     as nyiso_tcc_clearing_prices;
@@ -33,7 +34,6 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:timezone/data/latest.dart';
 
-import 'package:elec_server/api/isoexpress/api_isone_rtlmp.dart';
 import 'package:elec_server/api/isoexpress/api_isone_bindingconstraints.dart';
 import 'package:elec_server/api/isoexpress/api_isone_demandbids.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
@@ -52,6 +52,7 @@ Future<Router> buildRouter() async {
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
     '/dalmp/v1/': DaLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
+    '/rtlmp/v1/': RtLmp(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/isone/fuelmix/v1/': ApiIsoneFuelMix(DbProd.isoexpress).router,
     '/fwdres_auction_results/v1/':
         ApiFwdResAuctionResults(DbProd.isoexpress).router,
@@ -61,7 +62,6 @@ Future<Router> buildRouter() async {
     '/regulation_requirement/v1/':
         RegulationRequirement(DbProd.isoexpress).router,
     '/rt_load/v1/': WholesaleLoadCost(DbProd.isoexpress).router,
-    '/rtlmp/v1/': RtLmp(DbProd.isoexpress).router,
     '/system_demand/v1/': SystemDemand(DbProd.isoexpress).router,
     '/isone/zonal_demand/v1/': ZonalDemand(DbProd.isoexpress).router,
   }.forEach((key, value) {
@@ -81,6 +81,7 @@ Future<Router> buildRouter() async {
     '/nyiso/da_energy_offers/v1/':
         DaEnergyOffers(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/dalmp/v1/': DaLmp(DbProd.nyiso, iso: Iso.newYork).router,
+    '/nyiso/rtlmp/v1/': RtLmp(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/masked_ids/v1/': ApiMaskedIds(DbProd.nyiso).router,
     '/nyiso/ptids/v1/': nyiso_ptids.ApiPtids(DbProd.nyiso).router,
     '/nyiso/tcc_clearing_prices/v1/':

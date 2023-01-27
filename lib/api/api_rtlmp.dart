@@ -1,4 +1,4 @@
-library api.dalmp;
+library api.rtlmp;
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,14 +11,14 @@ import 'package:elec/elec.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-/// A generic API for DA LMP prices that support multiple regions
-class DaLmp {
+/// A generic API for RT LMP prices that support multiple regions
+class RtLmp {
   late mongo.DbCollection coll;
   final Iso iso;
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
-  String collectionName = 'da_lmp_hourly';
+  String collectionName = 'rt_lmp_hourly';
 
-  DaLmp(mongo.Db db, {required this.iso}) {
+  RtLmp(mongo.Db db, {required this.iso}) {
     coll = db.collection(collectionName);
   }
 
@@ -54,18 +54,18 @@ class DaLmp {
     });
 
     /// get daily price for bucket for several ptids
-    /// http://localhost:8080/nyiso/dalmp/v1/daily/lmp/ptids/61752,61758/start/20170101/end/20170101/bucket/5x16
+    /// http://localhost:8080/nyiso/rtlmp/v1/daily/lmp/ptids/61752,61758/start/20170101/end/20170101/bucket/5x16
     router.get(
         '/daily/<component>/ptids/<ptids>/start/<start>/end/<end>/bucket/<bucket>',
         (Request request, String component, String ptids, String start,
             String end, String bucket) async {
-      var _ptids = ptids.split(',').map((e) => int.parse(e)).toList();
-      var _start = Date.parse(start, location: UTC);
-      var _end = Date.parse(end, location: UTC);
-      var _bucket = Bucket.parse(bucket);
+      var ptids0 = ptids.split(',').map((e) => int.parse(e)).toList();
+      var startDate = Date.parse(start, location: UTC);
+      var endDate = Date.parse(end, location: UTC);
+      var bucket0 = Bucket.parse(bucket);
 
       var aux = await getDailyBucketPriceSeveral(
-          component, _ptids, _start, _end, _bucket);
+          component, ptids0, startDate, endDate, bucket0);
       return Response.ok(json.encode(aux), headers: headers);
     });
 
@@ -86,7 +86,7 @@ class DaLmp {
 
     /// Get all the existing ptids in the collection, sorted
     router.get('/ptids', (Request request) async {
-      var res = await (allPtids() as FutureOr<List<int>>);
+      var res = await allPtids();
       res.sort();
       return Response.ok(json.encode(res), headers: headers);
     });
@@ -203,9 +203,9 @@ class DaLmp {
   }
 
   /// Get all ptids in the database
-  Future<List<int>?> allPtids() async {
+  Future<List<int>> allPtids() async {
     Map res = await coll.distinct('ptid');
-    return res['values'] as List<int>?;
+    return res['values'] as List<int>;
   }
 
   /// Calculate the daily 7x24 price by ptid between start/end dates
