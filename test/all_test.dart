@@ -33,6 +33,7 @@ import 'db/nyiso/binding_constraints_test.dart' as nyiso_binding_constraints;
 import 'db/nyiso/da_congestion_compact_test.dart' as nyiso_dacongestion;
 import 'db/nyiso/da_energy_offer_test.dart' as nyiso_daenergyoffer;
 import 'db/nyiso/da_lmp_hourly_test.dart' as nyiso_dalmp;
+import 'db/nyiso/rt_lmp_hourly_test.dart' as nyiso_rtlmp;
 import 'db/nyiso/masked_ids_test.dart' as nyiso_masked_ids;
 import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
@@ -73,6 +74,7 @@ Future<void> main() async {
   await nyiso_dacongestion.tests(rootUrl);
   await nyiso_daenergyoffer.tests(rootUrl);
   await nyiso_dalmp.tests(rootUrl);
+  await nyiso_rtlmp.tests(rootUrl);
   await nyiso_masked_ids.tests(rootUrl);
   await nyiso_ptids.tests(rootUrl);
   await pjm_ptids.tests(rootUrl);

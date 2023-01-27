@@ -176,7 +176,7 @@ abstract class DailyNysioCsvReport extends NyisoReport {
         print('--->  Inserted $reportName for day $day');
         return 0;
       }).catchError((e) {
-        print('XXXX ' + e.toString());
+        print('XXXX $e');
         return 1;
       });
     } on mis.IncompleteReportException {
@@ -217,7 +217,39 @@ abstract class DailyNysioCsvReport extends NyisoReport {
 
     return out;
   }
+
+  /// Read one entire month at a time (the entire zip file)
+  List<Map<String, dynamic>> readReportMonth(Month month, {String eol = '\r\n'}) {
+    var out = <Map<String, dynamic>>[];
+    var converter = CsvToListConverter();
+
+    var zipFile = getZipFileForMonth(month);
+    final bytes = zipFile.readAsBytesSync();
+    var zipArchive = ZipDecoder().decodeBytes(bytes);
+    var days = month.days();
+    for (var day in days) {
+      var file = getCsvFile(day);
+      var dailyFile = zipArchive.findFile(basename(file.path));
+      if (dailyFile != null) {
+        var lines = dailyFile.content as List<int>;
+        var csv = utf8.decoder.convert(lines);
+        // print(csv);
+        var xs = converter.convert(csv, eol: eol);
+        if (xs.isNotEmpty) {
+          var header = xs.removeAt(0).cast<String>();
+          for (var x in xs) {
+            out.add(Map.fromIterables(header, x));
+          }
+        }
+      }
+    }
+
+    return out;
+  }
+
 }
+
+
 
 /// Format a date to the yyyymmdd format, e.g. 20170115.
 String yyyymmdd(Date date) => date.toString().replaceAll('-', '');

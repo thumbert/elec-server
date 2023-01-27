@@ -10,6 +10,7 @@ import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
+import 'package:elec_server/src/db/nyiso/rt_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 import 'package:elec_server/src/utils/convert_xls_to_xlsx.dart';
@@ -250,6 +251,24 @@ Future<void> insertDaLmpHourlyNyiso() async {
   // await archive.setupDb();
   await archive.dbConfig.db.open();
   var months = Month.utc(2022, 2).upTo(Month.utc(2022, 2));
+  for (var month in months) {
+    archive.nodeType = NodeType.zone;
+    await archive.downloadMonth(month);
+    archive.nodeType = NodeType.gen;
+    await archive.downloadMonth(month);
+    for (var date in month.days()) {
+      var data = archive.processDay(date); // both zone and gen nodes
+      await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
+Future<void> insertRtLmpHourlyNyiso() async {
+  var archive = NyisoRtLmpHourlyArchive();
+  // await archive.setupDb();
+  await archive.dbConfig.db.open();
+  var months = Month.utc(2021, 1).upTo(Month.utc(2022, 12));
   for (var month in months) {
     archive.nodeType = NodeType.zone;
     await archive.downloadMonth(month);
@@ -611,6 +630,8 @@ Future<void> main() async {
   // await insertDaCongestionCompactNyiso();
   // await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
+  await insertRtLmpHourlyNyiso();
+
   // await insertHourlyRtZonalLoadNyiso();
   // await insertMaskedAssetIdsNyiso();
   // await insertPtidTableNyiso();
@@ -622,11 +643,11 @@ Future<void> main() async {
 
   
   /// ----------- Utility data ----------
-  var days = [
-        // Date.utc(2022, 12, 4),
-        Date.utc(2023, 1, 23),
-      ];
-  await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
+  // var days = [
+  //       // Date.utc(2022, 12, 4),
+  //       Date.utc(2023, 1, 23),
+  //     ];
+  // await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
   
 }
 

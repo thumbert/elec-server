@@ -1,4 +1,4 @@
-library db.nyiso.da_lmp_hourly;
+library db.nyiso.rt_lmp_hourly;
 
 /// Data from http://mis.nyiso.com/public/
 
@@ -13,36 +13,94 @@ import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 
-class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
-  NyisoDaLmpHourlyArchive({ComponentConfig? dbConfig, String? dir}) {
+class NyisoRtLmpHourlyArchive extends DailyNysioCsvReport {
+  NyisoRtLmpHourlyArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-        host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_lmp_hourly');
+        host: '127.0.0.1', dbName: 'nyiso', collectionName: 'rt_lmp_hourly');
     this.dbConfig = dbConfig;
-    dir ??= '${super.dir}DaLmpHourly/Raw/';
+    dir ??= '${super.dir}RtLmpHourly/Raw/';
     this.dir = dir;
-    reportName = 'Day-Ahead Hourly LMP';
+    reportName = 'Real-Time Hourly LMP';
   }
 
   Db get db => dbConfig.db;
   late NodeType nodeType;
 
   /// Data available for the most 10 recent days only at this url.
-  /// http://mis.nyiso.com/public/csv/damlbmp/20220113damlbmp_zone.csv
+  /// http://mis.nyiso.com/public/csv/rtlbmp/20230126rtlbmp_zone.csv
   /// Entire month is at
-  /// http://mis.nyiso.com/public/csv/damlbmp/20211201damlbmp_zone_csv.zip
-  /// http://mis.nyiso.com/public/csv/damlbmp/20211201damlbmp_gen_csv.zip
+  /// http://mis.nyiso.com/public/csv/realtime/20230101realtime_zone_csv.zip
+  /// http://mis.nyiso.com/public/csv/realtime/20230101realtime_gen_csv.zip
   @override
   String getUrl(Date asOfDate) =>
-      'http://mis.nyiso.com/public/csv/damlbmp/${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv';
+      'http://mis.nyiso.com/public/csv/rtlbmp/${yyyymmdd(asOfDate)}rtlbmp_${nodeType.toString()}.csv';
 
   @override
   File getCsvFile(Date asOfDate) =>
-      File('$dir${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv');
+      File('$dir${yyyymmdd(asOfDate)}rtlbmp_${nodeType.toString()}.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     return <String, dynamic>{};
   }
+
+  /// Note: decided not to implement this.  The original implementation
+  /// is not bad.  One month is about 5.5 MB as a zip and 5.8 MB in Mongo.
+  ///
+  /// Return a list with each element of this form, ready for insertion
+  /// into the Db.
+  /// ```
+  /// {
+  ///   'month': '2020-01',
+  ///   'ptid': 61757,
+  ///   'congestion': [
+  ///     <num>[...],  // day 1,
+  ///     <num>[...],  // day 2,
+  ///     ...
+  ///     <num>[...],  // day 31,
+  ///   ],
+  ///   'lmp': [
+  ///      ...
+  ///   ],
+  ///   'losses': [
+  ///     ...
+  ///   ],
+  /// }
+  /// ```
+  List<Map<String, dynamic>> processMonth(Month month) {
+    var out = <Map<String, dynamic>>[];
+
+    // /// Get the both the zones and the gen nodes at once
+    // var nodeTypes = [NodeType.zone, NodeType.gen];
+    // for (var nType in nodeTypes) {
+    //   nodeType = nType;
+    //   var xs = readReportMonth(month);
+    //   if (xs.isEmpty) return out;
+    //   var asOfDate = parseMmddyyy(xs.first['Time Stamp']);
+    //
+    //   // takes care of DST dates automatically as each day will contain 23, 24, 25
+    //   // hours as needed for each ptid
+    //   var groups = groupBy(xs, (Map e) => e['PTID'] as int);
+    //   for (var group in groups.entries) {
+    //     out.add({
+    //       'date': asOfDate.toString(),
+    //       'ptid': group.key,
+    //       'lmp': group.value.map((e) => e['LBMP (\$/MWHr)']).toList(),
+    //       'congestion': group.value
+    //           .map((e) => e['Marginal Cost Congestion (\$/MWHr)'])
+    //           .toList(),
+    //       'losses': group.value
+    //           .map((e) => e['Marginal Cost Losses (\$/MWHr)'])
+    //           .toList(),
+    //     });
+    //   }
+    // }
+
+    return out;
+  }
+
+
+
 
   /// Return a list with each element of this form, ready for insertion
   /// into the Db.
@@ -101,7 +159,7 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
       for (var date in groups.keys) {
         await dbConfig.coll.remove({'date': date});
         await dbConfig.coll.insertAll(groups[date]!);
-        print('--->  Inserted NYISO DAM LMPs for day $date');
+        print('--->  Inserted NYISO RT LMPs for day $date');
       }
       return 0;
     } catch (e) {
@@ -141,10 +199,10 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
 
   @override
   String getUrlForMonth(Month month) =>
-      'http://mis.nyiso.com/public/csv/damlbmp/${month.startDate.toString().replaceAll('-', '')}damlbmp_${nodeType.toString()}_csv.zip';
+      'http://mis.nyiso.com/public/csv/rtlbmp/${month.startDate.toString().replaceAll('-', '')}rtlbmp_${nodeType.toString()}_csv.zip';
 
   @override
   File getZipFileForMonth(Month month) {
-    return File('$dir${month.startDate.toString().replaceAll('-', '')}damlbmp_${nodeType.toString()}.csv.zip');
+    return File('$dir${month.startDate.toString().replaceAll('-', '')}rtlbmp_${nodeType.toString()}.csv.zip');
   }
 }

@@ -3,9 +3,12 @@
 ## TODO:
 - 
 
+## Release 2023-01-26
+- Add rt_lmp_hourly for NYISO.  Get the api working and unify it with the one in ISONE.  
+  Add tests. 
+
 ## Release 2023-01-24
 - Fix CT rates download.  I was downloading only the first page!  Duh.
-
 
 ## Release 2023-01-12
 - Make sure dalmp prices are inserted in the db as doubles and not ints by some unhappy csv 
