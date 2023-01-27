@@ -1,4 +1,4 @@
-library elec_server.client.dalmp.v1;
+library elec_server.client.rtlmp.v1;
 
 import 'dart:async';
 import 'dart:convert';
@@ -12,15 +12,15 @@ import 'package:timeseries/timeseries.dart';
 
 /// A Dart client for pulling DA LMP prices from Mongo supporting several
 /// regions.
-class DaLmp {
+class RtLmp {
   String rootUrl;
   String servicePath;
   final Iso iso;
 
-  DaLmp(http.Client client,
+  RtLmp(http.Client client,
       {required this.iso,
       this.rootUrl = 'http://localhost:8000',
-      this.servicePath = '/da/v1/'}) {
+      this.servicePath = '/rt/v1/'}) {
     if (!_isoMap.keys.contains(iso)) {
       throw ArgumentError('Iso $iso is not supported');
     }
