@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
-import 'package:elec_server/api/api_dalmp.dart';
+import 'package:elec_server/api/api_lmp.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
@@ -37,7 +37,7 @@ Future<void> tests(String rootUrl) async {
     });
   });
   group('Nyiso DAM LMP api tests: ', () {
-    var api = DaLmp(DbProd.nyiso, iso: Iso.newYork);
+    var api = Lmp(DbProd.nyiso, iso: Iso.newYork, market: Market.da);
     setUp(() async => await DbProd.nyiso.open());
     tearDown(() async => await DbProd.nyiso.close());
     test('get lmp data for 2 days', () async {
@@ -99,9 +99,7 @@ Future<void> tests(String rootUrl) async {
         'congestion': -1.0204166666666667,
       });
       expect(data.length, 730);
-      var url = rootUrl +
-          '/nyiso/dalmp/v1/'
-              'daily/congestion/ptids/61752,61758/start/2019-01-01/end/2019-12-31/bucket/7x24';
+      var url = '$rootUrl/nyiso/dalmp/v1/daily/congestion/ptids/61752,61758/start/2019-01-01/end/2019-12-31/bucket/7x24';
       var aux = await http.get(Uri.parse(url));
       var res = json.decode(aux.body) as List;
       expect(res.length, 730);
@@ -133,7 +131,7 @@ Future<void> tests(String rootUrl) async {
     });
   });
   group('Nyiso DAM LMP speed tests: ', () {
-    var api = DaLmp(DbProd.nyiso, iso: Iso.newYork);
+    var api = Lmp(DbProd.nyiso, iso: Iso.newYork, market: Market.da);
     var sw = Stopwatch();
     setUp(() async => await DbProd.nyiso.open());
     tearDown(() async => await DbProd.nyiso.close());

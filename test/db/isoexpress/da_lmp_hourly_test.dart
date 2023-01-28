@@ -2,7 +2,7 @@ library test.db.isoexpress.da_lmp_hourly_test;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:elec_server/api/api_dalmp.dart';
+import 'package:elec_server/api/api_lmp.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
@@ -92,7 +92,7 @@ Future<void> tests(String rootUrl) async {
   });
   group('DAM LMP api tests: ', () {
     var db = DbProd.isoexpress;
-    var api = DaLmp(db, iso: Iso.newEngland);
+    var api = Lmp(db, iso: Iso.newEngland, market: Market.da);
     setUp(() async => await db.open());
     tearDown(() async => await db.close());
     test('get hourly lmp data for 2 days', () async {

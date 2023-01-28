@@ -3,6 +3,11 @@
 ## TODO:
 - 
 
+## Release 2023-01-28
+- Combine api_dalmp and api_rtlmp in one file, to abstract over the market.  Should 
+  probably do the same thing for the client.
+- 
+
 ## Release 2023-01-26
 - Add rt_lmp_hourly for NYISO.  Get the api working and unify it with the one in ISONE.  
   Add tests. 

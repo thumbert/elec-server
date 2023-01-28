@@ -1,8 +1,9 @@
-library api.dalmp;
+library api.lmp;
 
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
+import 'package:elec/risk_system.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
@@ -11,16 +12,18 @@ import 'package:elec/elec.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-/// A generic API for DA LMP prices that support multiple regions
-class DaLmp {
-  late mongo.DbCollection coll;
-  final Iso iso;
-  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
-  String collectionName = 'da_lmp_hourly';
-
-  DaLmp(mongo.Db db, {required this.iso}) {
+class Lmp {
+  /// A generic API for DA or RT LMP prices that support multiple regions
+  Lmp(mongo.Db db, {required this.iso, required this.market}) {
+    collectionName = '${market.toString().toLowerCase()}_lmp_hourly';
     coll = db.collection(collectionName);
   }
+
+  final Iso iso;
+  final Market market;
+  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
+  late final mongo.DbCollection coll;
+  late final String collectionName;
 
   final headers = {
     'Content-Type': 'application/json',

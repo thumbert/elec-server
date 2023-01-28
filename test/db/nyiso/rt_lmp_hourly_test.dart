@@ -1,7 +1,8 @@
 library test.db.nyiso.rt_lmp_hourly_test;
 
 import 'dart:convert';
-import 'package:elec_server/api/api_rtlmp.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec_server/api/api_lmp.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/rt_lmp_hourly.dart';
 import 'package:test/test.dart';
@@ -32,7 +33,7 @@ Future<void> tests(String rootUrl) async {
     });
   });
   group('Nyiso RT LMP api tests: ', () {
-    var api = RtLmp(DbProd.nyiso, iso: Iso.newYork);
+    var api = Lmp(DbProd.nyiso, iso: Iso.newYork, market: Market.rt);
     setUp(() async => await DbProd.nyiso.open());
     tearDown(() async => await DbProd.nyiso.close());
     test('get hourly lmp data for one ptid for 2 days', () async {
