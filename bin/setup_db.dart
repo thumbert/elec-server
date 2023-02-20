@@ -630,7 +630,7 @@ Future<void> main() async {
   // await insertDaCongestionCompactNyiso();
   // await insertDaEnergyOffersNyiso();
   // await insertDaLmpHourlyNyiso();
-  await insertRtLmpHourlyNyiso();
+  // await insertRtLmpHourlyNyiso();
 
   // await insertHourlyRtZonalLoadNyiso();
   // await insertMaskedAssetIdsNyiso();

@@ -295,6 +295,11 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     }
     await browser.close();
 
+    /// get rid of duplicate offerIds, need to investigate why we get them
+    /// in the first place
+    var xs = groupBy(allOffers, (Map e) => e['offerId'] as String);
+    allOffers = [...xs.values.map((e) => e.first)];
+
     var file =
         File(join(dir, '${Date.today(location: UTC)}_ma_residential.json'));
     final json = JsonEncoder.withIndent('  ');
