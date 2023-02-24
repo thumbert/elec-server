@@ -643,11 +643,11 @@ Future<void> main() async {
 
   
   /// ----------- Utility data ----------
-  // var days = [
-  //       // Date.utc(2022, 12, 4),
-  //       Date.utc(2023, 1, 23),
-  //     ];
-  // await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
+  var days = [
+        // Date.utc(2022, 12, 4),
+        Date.utc(2023, 2, 24),
+      ];
+  await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
   
 }
 

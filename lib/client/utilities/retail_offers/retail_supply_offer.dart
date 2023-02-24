@@ -17,7 +17,6 @@ part 'ma_supply_offer.dart';
 // Massachusetts: https://www.massenergyrates.com/compare-mass-electricity-rates
 // Maine: https://www.maine.gov/meopa/electricity/electricity-supply
 
-
 class RetailSupplyOffer {
   RetailSupplyOffer({
     required this.region,
@@ -28,7 +27,7 @@ class RetailSupplyOffer {
     required this.rateClass,
     required this.countOfBillingCycles,
     required num minimumRecs,
-    required offerType,
+    required this.offerType,
     required this.rate,
     required this.rateUnit,
     required this.supplierName,
@@ -41,27 +40,31 @@ class RetailSupplyOffer {
   }) {
     this.accountType = accountType;
     this.minimumRecs = minimumRecs;
-    this.offerType = offerType;
-
   }
+
   /// ISONE for now
   final String region;
+
   /// Abbreviated name of US state, e.g. CT, MA
   final String state;
+
   /// load zone name, e.g. NEMA, WCMA, CT
   final String loadZone;
+
   /// utility name, e.g. 'United, Illuminating'
   final String utility;
-  /// ''
+
   late final String _accountType;
+
   /// Customer rate class, e.g. 'R', 'RT', etc.
   final String rateClass;
   final List<String> planFeatures; // extra details about the plan
-  final List<String> planFees; // details about the fees associated with the plan
+  final List<String>
+      planFees; // details about the fees associated with the plan
   final int countOfBillingCycles;
 
-  /// Type of the offer.  One of Fixed, Fixed-Tiered, Indexed
-  late final String _offerType;
+  /// Type of the offer.  One of Fixed, Fixed-Tiered, Indexed, or something else!
+  late final String offerType;
 
   late final num _minimumRecs;
 
@@ -86,7 +89,11 @@ class RetailSupplyOffer {
   final String offerId;
 
   static Set<String> allowedAccountType = {'Residential', 'Business'};
-  static Set<String> allowedOfferTypes = {'Fixed', 'Fixed-Tiered', 'Indexed'};
+  static Set<String> allowedOfferTypes = {
+    'Fixed',
+    'Fixed-Tiered',
+    'Indexed',
+  };
 
   /// Residential or Business
   set accountType(String value) {
@@ -99,16 +106,6 @@ class RetailSupplyOffer {
 
   String get accountType => _accountType;
 
-  set offerType(String value) {
-    if (allowedOfferTypes.contains(value)) {
-      _offerType = value;
-    } else {
-      throw StateError('Unsupported offerType $value');
-    }
-  }
-
-  String get offerType => _offerType;
-
   /// Percent of Recs, a number between [0, 1]
   set minimumRecs(num value) {
     if (value > 1 || value < 0) {
@@ -120,7 +117,7 @@ class RetailSupplyOffer {
   num get minimumRecs => _minimumRecs;
 
   ///
-  static RetailSupplyOffer fromMongo(Map<String,dynamic> xs) {
+  static RetailSupplyOffer fromMongo(Map<String, dynamic> xs) {
     var planFeatures = <String>[];
     if (xs['planFeatures'] is List) {
       planFeatures = (xs['planFeatures'] as List).cast<String>();
@@ -131,30 +128,34 @@ class RetailSupplyOffer {
     }
 
     var offer = RetailSupplyOffer(
-        region: xs['region'],
-        state: xs['state'],
-        loadZone: xs['loadZone'],
-        utility: xs['utility'],
-        accountType: xs['accountType'],
-        rateClass: xs['rateClass'],
-        countOfBillingCycles: xs['countOfBillingCycles'],
-        minimumRecs: xs['minimumRecs'] ?? double.nan,
-        offerType: xs['offerType'],
-        rate: xs['rate'],
-        rateUnit: xs['rateUnit'],
-        supplierName: xs['supplierName'],
-        planFeatures: planFeatures,
-        planFees: planFees,
-        offerPostedOnDate: Date.fromIsoString(xs['offerPostedOnDate'] ?? xs['firstDateOnWebsite'], location: UTC),
-        firstDateOnWebsite: Date.fromIsoString(xs['firstDateOnWebsite'], location: UTC),
-        lastDateOnWebsite: Date.fromIsoString(xs['lastDateOnWebsite'], location: UTC),
-        offerId: xs['offerId'],
+      region: xs['region'],
+      state: xs['state'],
+      loadZone: xs['loadZone'],
+      utility: xs['utility'],
+      accountType: xs['accountType'],
+      rateClass: xs['rateClass'],
+      countOfBillingCycles: xs['countOfBillingCycles'],
+      minimumRecs: xs['minimumRecs'] ?? double.nan,
+      offerType: xs['offerType'],
+      rate: xs['rate'],
+      rateUnit: xs['rateUnit'],
+      supplierName: xs['supplierName'],
+      planFeatures: planFeatures,
+      planFees: planFees,
+      offerPostedOnDate: Date.fromIsoString(
+          xs['offerPostedOnDate'] ?? xs['firstDateOnWebsite'],
+          location: UTC),
+      firstDateOnWebsite:
+          Date.fromIsoString(xs['firstDateOnWebsite'], location: UTC),
+      lastDateOnWebsite:
+          Date.fromIsoString(xs['lastDateOnWebsite'], location: UTC),
+      offerId: xs['offerId'],
     );
     return offer;
   }
 
-  Map<String,dynamic> toMap() {
-    return <String,dynamic>{
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
       'region': region,
       'state': state,
       'loadZone': loadZone,

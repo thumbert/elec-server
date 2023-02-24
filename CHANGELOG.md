@@ -3,6 +3,10 @@
 ## TODO:
 - 
 
+## Release 2023-02-24
+- Be more lenient on Retail Offer types.  Don't panic if not one of the allowed offer types. 
+Data is dirty and for informational purposes only.
+
 ## Release 2023-01-28
 - Combine api_dalmp and api_rtlmp in one file, to abstract over the market.  Should 
   probably do the same thing for the client.

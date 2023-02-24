@@ -187,6 +187,13 @@ Future<void> tests(String rootUrl) async {
       expect(offers.length, 27);
     });
 
+    test('get MA current offers', () async {
+      var offers =
+      await client.getOffers(region: 'ISONE', state: 'MA', term: term);
+      expect(offers.length, 27);
+    });
+
+
     test('get current offers as of a given date', () {
       var o1 = RetailSuppliersOffers.getCurrentOffers(
           offers, Date.utc(2022, 11, 17));
