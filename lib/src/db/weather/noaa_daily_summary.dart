@@ -28,7 +28,9 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
   /// If units = 'metric', return the data in Celsius, if units = 'standard'
   /// return the data in Fahrenheit.
   /// https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
-  /// https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMIN,TMAX&stations=USW00014739&startDate=2021-01-01&endDate=2021-12-31&format=csv&units=standard&options=includeAttributes:0
+  /// An example of how to get temperature for BOS
+  /// https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMIN,TMAX&stations=USW00014739&startDate=2021-01-01&endDate=2021-12-31&format=csv&units=standard&includeStationName=false
+  /// https://www.ncei.noaa.gov/access/services/data/v1?dataset=global-summaries&dataTypes=TMIN,TMAX&stations=USW00014739&startDate=2021-01-01&endDate=2021-12-31&includeAttributes=true&format=json
   String getUrl(String stationId, Date start, Date end) {
     return 'https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMIN,TMAX&stations=$stationId&startDate=$start&endDate=$end&format=csv&units=standard&includeStationName=false';
   }

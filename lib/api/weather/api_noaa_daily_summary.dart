@@ -50,12 +50,12 @@ class ApiNoaaDailySummary {
     var aux = {for (var x in xs) x['year'] as int: x}; // for faster access
 
     var out = <Map<String, dynamic>>[];
-    var _startDate = Date.parse(startDate, location: UTC);
-    var _endDate = Date.parse(endDate, location: UTC);
+    var startDateD = Date.parse(startDate, location: UTC);
+    var endDateD = Date.parse(endDate, location: UTC);
 
-    var term = Term(_startDate, _endDate);
+    var term = Term(startDateD, endDateD);
     var days = term.days();
-    var currentYear = _startDate.year;
+    var currentYear = startDateD.year;
     var data = aux[currentYear];
     for (var day in days) {
       if (currentYear != day.year) {

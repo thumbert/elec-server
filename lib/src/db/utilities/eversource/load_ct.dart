@@ -26,7 +26,7 @@ class EversourceCtLoadArchive {
       this.dbConfig = ComponentConfig(
           host: '127.0.0.1', dbName: 'eversource', collectionName: 'load_ct');
     }
-    dir ??= env['HOME']! + '/Downloads/Archive/Utility/Eversource/CT/load/Raw/';
+    dir ??= '${env['HOME']!}/Downloads/Archive/Utility/Eversource/CT/load/Raw/';
 
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);

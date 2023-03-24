@@ -597,7 +597,7 @@ Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  // await insertNoaaTemperatures(download: true);
+  await insertNoaaTemperatures(download: true);
 
   /// ------------- Isone -----------------
   // await insertDaBindingConstraintsIsone();
@@ -643,11 +643,11 @@ Future<void> main() async {
 
   
   /// ----------- Utility data ----------
-  var days = [
-        // Date.utc(2022, 12, 4),
-        Date.utc(2023, 2, 24),
-      ];
-  await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
+  // var days = [
+  //       // Date.utc(2022, 12, 4),
+  //       Date.utc(2023, 2, 24),
+  //     ];
+  // await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
   
 }
 
