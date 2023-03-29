@@ -13,18 +13,10 @@ import 'package:timeseries/timeseries.dart';
 /// A Dart client for pulling DA LMP prices from Mongo supporting several
 /// regions.
 class DaLmp {
-  String rootUrl;
-  String servicePath;
-  final Iso iso;
+  DaLmp(http.Client client, {this.rootUrl = 'http://localhost:8000'});
 
-  DaLmp(http.Client client,
-      {required this.iso,
-      this.rootUrl = 'http://localhost:8000',
-      this.servicePath = '/da/v1/'}) {
-    if (!_isoMap.keys.contains(iso)) {
-      throw ArgumentError('Iso $iso is not supported');
-    }
-  }
+  String rootUrl;
+  final String servicePath = '/da/v1/';
 
   final _isoMap = <Iso, String>{
     Iso.newEngland: '/isone',
@@ -33,7 +25,7 @@ class DaLmp {
 
   /// Get hourly prices for a ptid between a start and end date.
   /// Return an hourly timeseries.
-  Future<TimeSeries<double>> getHourlyLmp(
+  Future<TimeSeries<double>> getHourlyLmp(Iso iso,
       int ptid, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
     var url = '$rootUrl${_isoMap[iso]!}${servicePath}hourly/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}';
@@ -54,7 +46,7 @@ class DaLmp {
   }
 
   /// Get daily prices for a ptid/bucket between a start and end date.
-  Future<TimeSeries<double>> getDailyLmpBucket(int ptid, LmpComponent component,
+  Future<TimeSeries<double>> getDailyLmpBucket(Iso iso, int ptid, LmpComponent component,
       Bucket bucket, Date start, Date end) async {
     var cmp = component.toString();
     var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}/bucket/${bucket.name}';
@@ -68,7 +60,7 @@ class DaLmp {
   }
 
   /// get the daily prices for all nodes in the db as calculated by mongo
-  Future<Map<int, TimeSeries<num>>> getDailyPricesAllNodes(
+  Future<Map<int, TimeSeries<num>>> getDailyPricesAllNodes(Iso iso,
       LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
     var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/mean/$cmp/start/${start.toString()}/end/${end.toString()}';
@@ -88,7 +80,7 @@ class DaLmp {
   }
 
   /// Get monthly prices for a ptid/bucket between a start and end date.
-  Future<TimeSeries<double>> getMonthlyLmpBucket(int ptid,
+  Future<TimeSeries<double>> getMonthlyLmpBucket(Iso iso, int ptid,
       LmpComponent component, Bucket bucket, Month start, Month end) async {
     var cmp = component.toString();
     var url = '$rootUrl${_isoMap[iso]!}${servicePath}monthly/$cmp/ptid/${ptid.toString()}/start/${start.toIso8601String()}/end/${end.toIso8601String()}/bucket/${bucket.name}';

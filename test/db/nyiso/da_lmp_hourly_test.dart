@@ -156,9 +156,9 @@ Future<void> tests(String rootUrl) async {
   });
 
   group('Nyiso DAM LMP client tests: ', () {
-    var daLmp = client.DaLmp(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
+    var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
     test('get daily peak price between two dates', () async {
-      var data = await daLmp.getDailyLmpBucket(61752, LmpComponent.lmp,
+      var data = await daLmp.getDailyLmpBucket(Iso.newYork, 61752, LmpComponent.lmp,
           Bucket.b5x16, Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
       expect(data.length, 3);
       expect(data.toList(), [
@@ -168,7 +168,7 @@ Future<void> tests(String rootUrl) async {
       ]);
     });
     test('get monthly peak price between two dates', () async {
-      var data = await daLmp.getMonthlyLmpBucket(61752, LmpComponent.congestion,
+      var data = await daLmp.getMonthlyLmpBucket(Iso.newYork, 61752, LmpComponent.congestion,
           IsoNewEngland.bucket5x16, Month.utc(2019, 1), Month.utc(2019, 12));
       expect(data.length, 12);
       expect(
@@ -177,7 +177,7 @@ Future<void> tests(String rootUrl) async {
               Month(2019, 1, location: location), -7.513068181818175));
     });
     test('get hourly price for 2017-01-01', () async {
-      var data = await daLmp.getHourlyLmp(
+      var data = await daLmp.getHourlyLmp(Iso.newYork,
           61752, LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 1, 1));
       expect(data.length, 24);
       expect(
@@ -186,7 +186,7 @@ Future<void> tests(String rootUrl) async {
               Hour.beginning(TZDateTime(location, 2019, 1, 1)), 11.83));
     });
     test('get daily prices all nodes', () async {
-      var data = await daLmp.getDailyPricesAllNodes(
+      var data = await daLmp.getDailyPricesAllNodes(Iso.newYork,
           LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 1, 3));
       expect(data.length, 570);
       var zA = data[61752]!;

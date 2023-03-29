@@ -8,12 +8,11 @@ import 'package:http/http.dart' as http;
 
 class NoaaDailySummary {
   NoaaDailySummary(this.client,
-      {this.rootUrl = 'http://localhost:8000',
-      this.servicePath = '/noaa_daily_summary/v1/'});
+      {this.rootUrl = 'http://localhost:8000'});
 
   final http.Client client;
   final String rootUrl;
-  final String servicePath;
+  final String servicePath = '/noaa_daily_summary/v1/';
 
   /// It is hard to find the stationId.
   /// Go to https://www.ncdc.noaa.gov/cdo-web/search

@@ -25,11 +25,11 @@ Future<void> oneByOneAsTimeseries(List<int> ptids,
   var start = Date.utc(2019, 1, 1);
   var end = Date.utc(2019, 12, 31);
   var daLmp =
-      client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
+      client.DaLmp(http.Client(), rootUrl: rootUrl);
   var sw = Stopwatch()..start();
   var out = <int, TimeSeries<double>>{};
   for (var ptid in ptids) {
-    out[ptid] = await daLmp.getHourlyLmp(ptid, LmpComponent.lmp, start, end);
+    out[ptid] = await daLmp.getHourlyLmp(Iso.newEngland, ptid, LmpComponent.lmp, start, end);
   }
   sw.stop();
   print(sw.elapsedMilliseconds);
@@ -39,12 +39,11 @@ Future<void> parallelGet(List<int> ptids,
     {String rootUrl = 'http://127.0.0.1:8080'}) async {
   var start = Date.utc(2019, 1, 1);
   var end = Date.utc(2019, 12, 31);
-  var daLmp =
-      client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
+  var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
   var sw = Stopwatch()..start();
   var out = <int, TimeSeries<double>>{};
   var futs = ptids.map(
-      (ptid) => daLmp.getHourlyLmp(ptid, LmpComponent.congestion, start, end));
+      (ptid) => daLmp.getHourlyLmp(Iso.newEngland, ptid, LmpComponent.congestion, start, end));
   var res = await Future.wait(futs);
   for (var i = 0; i < ptids.length; i++) {
     out[ptids[i]] = res[i];
@@ -72,7 +71,7 @@ Future<void> compactGet(List<int> ptids,
     {String rootUrl = 'http://127.0.0.1:8080'}) async {
   var sw = Stopwatch()..start();
   var url = Uri.parse(
-      rootUrl + '/da_congestion_compact/v1/start/2019-01-01/end/2019-01-31');
+      '$rootUrl/da_congestion_compact/v1/start/2019-01-01/end/2019-01-31');
   var aux = await http.get(url);
   var data = json.decode(aux.body);
   sw.stop();
@@ -83,7 +82,7 @@ Future<void> compactGet(List<int> ptids,
 Future<void> speedTest(String rootUrl) async {
   var location = getLocation('America/New_York');
   var daLmp =
-      client.DaLmp(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
+      client.DaLmp(http.Client(), rootUrl: rootUrl);
 
   // get all the list of all ptids
   var ptidApi = PtidsApi(http.Client(), rootUrl: rootUrl);

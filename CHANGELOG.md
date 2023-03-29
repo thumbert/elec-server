@@ -3,6 +3,9 @@
 ## TODO:
 - 
 
+## Release 2023-03-29
+- Change signature of DaLmp client.  Take out the iso from the constructor
+
 ## Release 2023-02-24
 - Be more lenient on Retail Offer types.  Don't panic if not one of the allowed offer types. 
 Data is dirty and for informational purposes only.

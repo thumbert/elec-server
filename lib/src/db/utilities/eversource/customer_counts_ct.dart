@@ -23,7 +23,7 @@ class EversourceCtCustomerCountsArchive {
           dbName: 'utility',
           collectionName: 'eversource_customer_counts');
     }
-    dir ??= env['HOME']! + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
+    dir ??= '${env['HOME']!}/Downloads/Archive/CustomerCounts/Eversource/CT/';
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
     }
