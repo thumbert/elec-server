@@ -21,7 +21,7 @@ dependencies:
     git: https://github.com/thumbert/elec.git
   grpc: ^3.0.0
   html: ^0.15.1
-  http: ^1.0.0
+  http: ^0.13.0
   intl: ^0.18.1
   logging: ^1.0.1
   mongo_dart: ^0.9.1
