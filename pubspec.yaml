@@ -4,7 +4,7 @@ version: 2.0.2
 publish_to: none
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: ^3.0.2
 
 dependencies:
   actors: ^0.8.4
@@ -36,14 +36,14 @@ dependencies:
     git: https://github.com/thumbert/table.git
   timeseries:
     git: https://github.com/thumbert/timeseries.git
-  timezone: ^0.8.0
+  timezone: ^0.9.2
   tuple: ^2.0.0
-  xml: ^6.1.0
+  xml: ^6.3.0
 
 
 dev_dependencies:
-  analyzer: ^1.5.0
-  build_runner: ^2.0.3
-  build_web_compilers: ^3.0.0
+  analyzer: ^5.13.0
+  build_runner: ^2.4.4
+  build_web_compilers: ^4.0.3
   lints: ^2.0.0
-  test: ^1.17.4
+  test: ^1.21.0

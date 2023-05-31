@@ -4,6 +4,7 @@ import 'package:elec_server/api/api_dacongestion.dart';
 import 'package:elec_server/api/api_lmp.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/api/api_masked_ids.dart';
+import 'package:elec_server/api/cme/api_cme.dart';
 import 'package:elec_server/api/isoexpress/api_fwdres_auction_results.dart';
 import 'package:elec_server/api/isoexpress/api_isone_fuelmix.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
@@ -43,6 +44,10 @@ import 'package:elec_server/src/utils/cors_middleware.dart';
 
 Future<Router> buildRouter() async {
   final router = Router();
+
+  await DbProd.cme.open();
+  router.mount('/forward_marks/v1', ApiCmeMarks(DbProd.cme).router);
+
 
   await DbProd.isoexpress.open();
   <String, Router>{

@@ -3,6 +3,15 @@
 ## TODO:
 - 
 
+## Release 2023-05-31
+- Bump lower version of sdk to 3.0.2
+- Bump up packages
+
+## Release 2023-05-29
+- Make a CME settlements database.  Set up a job in bin/jobs/download_cme_files to archive 
+  some settlement prices daily
+- Bump the sdk upper limit to 4.0.0
+
 ## Release 2023-03-29
 - Change signature of DaLmp client.  Take out the iso from the constructor
 
