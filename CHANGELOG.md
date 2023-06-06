@@ -3,6 +3,9 @@
 ## TODO:
 - 
 
+## Release 2023-06-05
+- Fix change in ISONE masked Demand Bids json format.  Thanks ISO.
+
 ## Release 2023-05-31
 - Bump lower version of sdk to 3.0.2
 - Bump up packages

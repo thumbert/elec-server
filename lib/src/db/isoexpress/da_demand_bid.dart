@@ -22,22 +22,21 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
         dbName: 'isoexpress',
         collectionName: 'da_demand_bid');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'PricingReports/DaDemandBid/Raw/';
+    dir ??= '${baseDir}PricingReports/DaDemandBid/Raw/';
     this.dir = dir;
     reportName = 'Day-Ahead Energy Market Demand Historical Demand Bid Report';
   }
 
   @override
   String getUrl(Date? asOfDate) =>
-      'https://webservices.iso-ne.com/api/v1.1/hbdayaheaddemandbid/day/' +
-      yyyymmdd(asOfDate);
+      'https://webservices.iso-ne.com/api/v1.1/hbdayaheaddemandbid/day/${yyyymmdd(asOfDate)}';
   // String getUrl(Date asOfDate) =>
   //     'https://www.iso-ne.com/static-transform/csv/histRpts/da-dmd-bid/' +
   //         'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.csv';
 
   @override
   File getFilename(Date? asOfDate) =>
-      File(dir + 'hbdayaheaddemandbid_' + yyyymmdd(asOfDate) + '.json');
+      File('${dir}hbdayaheaddemandbid_${yyyymmdd(asOfDate)}.json');
 
   /// The CSV parser, not used anymore
   /// [rows] has the data for all the hours of the day for one location id
@@ -93,7 +92,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     try {
       await dbConfig.coll.insertAll(data);
     } catch (e) {
-      print(' XXXX ' + e.toString());
+      print(' XXXX $e');
       return Future.value(1);
     }
     print('--->  SUCCESS inserting masked DA Demand Bids for $day');
@@ -120,26 +119,34 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
       // construct the hours with price quantity by segment
       var hours = [];
       for (var x in xs) {
-        var quantity = <num?>[];
-        var price = <num?>[];
+        var quantity = <num>[];
+        var price = <num>[];
         var segments = x['Segments'][0]['Segment']; // can be a Map or a List
-        if (segments is Map) {
-          // if you have only one segment (one value)
-          if (segments.containsKey('Price')) {
-            price.add(segments['Price'] as num?);
-          }
-          quantity.add(segments['Mw'] as num?);
-        } else if (segments is List) {
-          // if you have multiple segments
-          for (Map segment in segments) {
-            if (segment.containsKey('Price')) {
-              price.add(segment['Price'] as num?);
-            }
-            quantity.add(segment['Mw'] as num?);
-          }
-        } else {
-          throw StateError('Invalid state!');
+        var xs = <Map>[];
+        switch (segments) {
+          case (Map segments) : xs.add(segments);
+          case (List segments) : xs = [...segments];
+          case _ : throw StateError('Invalid state!');
         }
+        for (var segment in xs) {
+          if (segment.containsKey('Price')) {
+            var p = segment['Price'];
+            switch (p) {
+              case (String p) : price.add(num.parse(p));
+              case (num p) : quantity.add(p);
+              case _ : throw StateError('Don\'t know how to deal with $p');
+            }
+          }
+          /// Starting in 2023-02, ISO changed the file format and the
+          /// the Mw field is now quoted!
+          var mw  = segment['Mw'];
+          switch (mw) {
+            case (String mw) : quantity.add(num.parse(mw));
+            case (num mw) : quantity.add(mw);
+            case _ : throw StateError('Don\'t know how to deal with $mw');
+          }
+        }
+
         hours.add({
           'hourBeginning': _reformatDateTime(x['BeginDate']),
           'quantity': quantity,
@@ -148,21 +155,26 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
       }
 
       var x0 = xs.first;
+      if (!bidType.contains(x0['BidType'])) {
+        throw StateError('Unsupported bid type: ${x0['BidType']}');
+      }
       var one = <String, dynamic>{
         'date': (x0['BeginDate'] as String).substring(0, 10),
-        'Masked Lead Participant ID': x0['MaskedParticipantId'] as int?,
-        'Masked Location ID': x0['MaskedLocationId'] as int?,
-        'Location Type': x0['LocationType'] as String?,
-        'Bid Type': x0['BidType'] as String?,
-        'Bid ID': x0['BidId'],
+        'Masked Lead Participant ID': x0['MaskedParticipantId'] as int,
+        'Masked Location ID': x0['MaskedLocationId'] as int,
+        'Location Type': x0['LocationType'] as String,
+        'Bid Type': x0['BidType'] as String,
+        'Bid ID': x0['BidId'] as int,
         'hours': hours,
       };
-
       out.add(one);
     }
 
     return out;
   }
+
+
+
 
   /// old format
   List<Map<String, dynamic>> processCsvFile(File file) {
@@ -176,12 +188,12 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
 
   @override
   Future<void> downloadDay(Date? day) async {
-    var _user = dotenv.env['isone_ws_user']!;
-    var _pwd = dotenv.env['isone_ws_password']!;
+    var user = dotenv.env['isone_ws_user']!;
+    var pwd = dotenv.env['isone_ws_password']!;
 
     var client = HttpClient()
       ..addCredentials(
-          Uri.parse(getUrl(day)), '', HttpClientBasicCredentials(_user, _pwd))
+          Uri.parse(getUrl(day)), '', HttpClientBasicCredentials(user, pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');
@@ -203,11 +215,10 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
   /// Recreate the collection from scratch.
   @override
   Future<void> setupDb() async {
+    if (!Directory(dir).existsSync()) {
+      Directory(dir).createSync(recursive: true);
+    }
     await dbConfig.db.open();
-    // var collections = await dbConfig.db.getCollectionNames();
-    // if (collections.contains(dbConfig.collectionName)) {
-    //   await dbConfig.coll.drop();
-    // }
 
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
@@ -234,4 +245,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
     var n = input.length;
     return input.substring(0, n - 3) + input.substring(n - 2);
   }
+
+  static const bidType = <String>{'FIXED', 'INC', 'DEC', 'PRICE'};
+
 }

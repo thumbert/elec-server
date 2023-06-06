@@ -12,11 +12,11 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/api/isoexpress/api_isone_demandbids.dart';
 import 'package:timezone/timezone.dart';
 
-void tests() async {
-  group('DA demand bid report (masked bids)', () {
+Future<void> tests() async {
+  group('DA demand bid report (masked bids), 2019-02-28', () {
     var archive = DaDemandBidArchive();
     test('process file 2019-02-28.csv', () {
-      var file = File(archive.dir + 'hbdayaheaddemandbid_20190228.csv');
+      var file = File('${archive.dir}hbdayaheaddemandbid_20190228.csv');
       var aux = archive.processCsvFile(file);
       var aux0 = aux.first;
       expect(aux0.keys.toSet(), {
@@ -43,7 +43,7 @@ void tests() async {
       });
       expect(aux.length, 791);
     });
-    test('read 2020-09-01 from webservices', () async {
+    test('read 2020-09-01 json file', () async {
       var asOfDate = Date.utc(2020, 9, 1);
       var file = archive.getFilename(asOfDate);
       if (!file.existsSync()) {
@@ -82,6 +82,39 @@ void tests() async {
         'price': [-10, 0], // two segments
       });
     });
+    test('read 2023-02-01 json file', () async {
+      /// format changed!
+      var asOfDate = Date.utc(2023, 2, 1);
+      var file = archive.getFilename(asOfDate);
+      if (!file.existsSync()) {
+        await archive.downloadDay(asOfDate);
+      }
+      var data = archive.processFile(file);
+      expect(data.length, 881);
+      var aux0 = data.first;
+      expect(aux0.keys.toSet(), {
+        'date',
+        'Masked Lead Participant ID',
+        'Masked Location ID',
+        'Location Type',
+        'Bid Type',
+        'Bid ID',
+        'hours',
+      });
+      expect(aux0['date'], '2023-02-01');
+      expect(aux0['Masked Lead Participant ID'], 104136);
+      expect(aux0['Masked Location ID'], 28934);
+      expect(aux0['Location Type'], 'LOAD ZONE');
+      expect(aux0['Bid Type'], 'FIXED'); // can also be DEC, INC, PRICE
+      expect(aux0['Bid ID'], 784447620);
+      expect((aux0['hours'] as List).length, 24);
+      var h0 = (aux0['hours'] as List).first as Map<String, dynamic>;
+      expect(h0, {
+        'hourBeginning': '2023-02-01T00:00:00.000-0500', // correct ISO-8601
+        'quantity': [11.7], // only one segment therefore only one element
+        // 'price': [...],  // can have a price array too if bid type is not fixed
+      });
+    }, solo: true);
   });
   group('api tests for demand bids', () {
     var db = Db('mongodb://localhost/isoexpress');
@@ -208,7 +241,7 @@ Future<void> main() async {
 
   //await DaEnergyOffersTest();
 
-  tests();
+  await tests();
 
   // await insertDays();
 

@@ -27,7 +27,9 @@ Future<void> tests() async {
   // var days = Term.parse('Apr22', UTC).days();
   // await insertDays(DaLmpHourlyArchive(), days);
 
-  await updateCmeEnergySettlements(days, setUp: false);
+
+
+  // await updateCmeEnergySettlements(days, setUp: false);
 
 }
 

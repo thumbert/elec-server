@@ -178,6 +178,7 @@ Future<void> insertDaCongestionCompactNyiso() async {
 
 Future<void> insertDaDemandBids() async {
   var archive = DaDemandBidArchive();
+  // await archive.setupDb();
 
   // var days = [
   //   // Date.utc(2017, 1, 1),
@@ -194,7 +195,7 @@ Future<void> insertDaDemandBids() async {
   //   // Date.utc(2020, 9, 1),
   //   //   Date.utc(2020, 10, 1),
   // ];
-  var days = Term.parse('Mar22', UTC).days();
+  var days = Term.parse('Feb23', UTC).days();
   // await insertDays(archive, days, download: false);
   await archive.dbConfig.db.open();
   for (var day in days) {
@@ -203,7 +204,6 @@ Future<void> insertDaDemandBids() async {
   }
   await archive.dbConfig.db.close();
 
-  // await archive.setupDb();
 }
 
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
@@ -597,7 +597,7 @@ Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  await insertNoaaTemperatures(download: true);
+  // await insertNoaaTemperatures(download: true);
 
   /// ------------- Isone -----------------
   // await insertDaBindingConstraintsIsone();
@@ -608,7 +608,7 @@ Future<void> main() async {
 
   // var days = Date.utc(2022, 9, 1).upTo(Date.utc(2022, 9, 30));
   // await insertFuelMixIsone(days, setup: true, externalDownload: false);
-  // await insertDaDemandBids();
+  await insertDaDemandBids();
   // await insertDaEnergyOffers(days: days);
 
   // await insertMaskedAssetIds();
