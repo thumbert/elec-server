@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 
-void tests() async {
+Future<void> tests() async {
   group('NYISO report tests:', () {
     test('convert timestamp to UTC', () {
       expect(NyisoReport.parseTimestamp('01/01/2020 05:00', 'EST'),
@@ -35,7 +35,7 @@ void tests() async {
   });
 }
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
-  tests();
+  await tests();
 }

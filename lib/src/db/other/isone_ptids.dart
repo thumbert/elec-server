@@ -9,18 +9,16 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
 
 class PtidArchive {
-  late ComponentConfig config;
-  late String dir;
-
   PtidArchive({ComponentConfig? config, String? dir}) {
-    Map env = Platform.environment;
-    config ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
-    this.config = config;
-    dir ??= env['HOME']! + '/Downloads/Archive/PnodeTable/Raw/';
-    this.dir = dir!;
+    this.config = config ??
+        ComponentConfig(
+            host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
+    this.dir = dir ??
+        '${Platform.environment['HOME']!}/Downloads/Archive/PnodeTable/Raw/';
   }
 
+  late ComponentConfig config;
+  late String dir;
   Db get db => config.db;
 
   /// Insert one xlsx file into the collection.
@@ -44,7 +42,7 @@ class PtidArchive {
       throw 'Filename needs to be in the xlsx format';
     }
 
-    asOfDate ??= _getAsOfDate(filename);
+    asOfDate ??= getAsOfDate(filename);
 
     var bytes = file.readAsBytesSync();
     var decoder = SpreadsheetDecoder.decodeBytes(bytes);
@@ -205,7 +203,7 @@ class PtidArchive {
 
   /// Return the asOfDate in the yyyy-mm-dd format from the filename.
   /// Filename is usually just the basename, and in the form: 'pnode_table_2017_08_03.xlsx'
-  String _getAsOfDate(String filename) {
+  String getAsOfDate(String filename) {
     var regExp = RegExp(r'pnode_table_(\d{4})_(\d{2})_(\d{2})\.xlsx');
     var matches = regExp.allMatches(filename);
     var match = matches.elementAt(0);
@@ -233,7 +231,7 @@ class PtidArchive {
 
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
-  void setup() async {
+  Future<void> setupDb() async {
     if (!Directory(dir).existsSync()) {
       Directory(dir).createSync(recursive: true);
     }

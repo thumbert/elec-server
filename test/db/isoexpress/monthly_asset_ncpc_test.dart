@@ -10,8 +10,7 @@ import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/monthly_asset_ncpc.dart';
 
-/// See bin/setup_db.dart for setting the archive up to pass the tests
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   var archive = MonthlyAssetNcpcArchive();
   group('Monthly NCPC by asset db tests:', () {
     setUp(() async => await archive.db.open());
@@ -167,11 +166,11 @@ void tests(String rootUrl) async {
   });
 }
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
   DbProd();
   // await MonthlyAssetNcpcArchive().setupDb();
 
   var rootUrl = 'http://127.0.0.1:8080';
-  tests(rootUrl);
+  await tests(rootUrl);
 }

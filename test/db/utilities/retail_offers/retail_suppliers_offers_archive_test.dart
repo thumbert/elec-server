@@ -116,9 +116,11 @@ Future<void> tests(String rootUrl) async {
       var xs = await api.getOffersForRegionState(
           'ISONE', 'MA', Date.utc(2022, 1, 1), Date.utc(2022, 12, 14));
       var constellation = xs
-          .where((e) => e['supplierName'].startsWith('Constellation'))
+          .where((e) =>
+              e['supplierName'].startsWith('Constellation') &&
+              e['utility'] == 'Eversource')
           .toList();
-      expect(constellation.length, 10);
+      expect(constellation.length, 8);
     });
 
     test('get offers for region ISONE', () async {
@@ -184,15 +186,14 @@ Future<void> tests(String rootUrl) async {
     test('get MA offers', () async {
       var offers =
           await client.getOffers(region: 'ISONE', state: 'MA', term: term);
-      expect(offers.length, 27);
+      expect(offers.length, 51);
     });
 
     test('get MA current offers', () async {
       var offers =
-      await client.getOffers(region: 'ISONE', state: 'MA', term: term);
-      expect(offers.length, 27);
+          await client.getOffers(region: 'ISONE', state: 'MA', term: term);
+      expect(offers.length, 51);
     });
-
 
     test('get current offers as of a given date', () {
       var o1 = RetailSuppliersOffers.getCurrentOffers(
@@ -231,7 +232,7 @@ Future<void> tests(String rootUrl) async {
 
       /// Two identical offers except for the incentive.  One offer gives you
       /// airline miles.
-      expect(xs.length, 2);
+      expect(xs.length, 3);
     });
   });
 }

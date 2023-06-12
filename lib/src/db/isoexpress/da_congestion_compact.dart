@@ -40,8 +40,14 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/hourlylmp/da/final/day/${yyyymmdd(asOfDate)}';
 
   @override
-  File getFilename(Date asOfDate) => File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json');
+  File getFilename(Date asOfDate, {String extension = 'json'}) {
+    if (extension == 'csv') {
+      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv');
+    } else {
+      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json');
+    }
 
+  }
   /// Return one document for one day for all ptids in the pool.
   /// Use rle to encode most common values.
   ///

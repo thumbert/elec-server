@@ -10,7 +10,7 @@ import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_ng.dart'
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
     as isone;
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   group('CurveIds API tests:', () {
     var archive = CurveIdArchive();
     var api = CurveIds(archive.db);
@@ -102,8 +102,8 @@ Future<void> insertData() async {
 }
 
 void main() async {
-  await insertData();
+  // await insertData();
 
   // dotenv.load('.env/prod.env');
-  // tests('http://127.0.0.1:8080');
+  tests('http://127.0.0.1:8080');
 }

@@ -9,32 +9,33 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:timezone/timezone.dart';
 
 class RegulationRequirementArchive {
-  late ComponentConfig dbConfig;
-  String? dir;
-  final reportName = 'Regulation Requirement';
-
-  RegulationRequirementArchive({ComponentConfig? dbConfig, this.dir}) {
+  RegulationRequirementArchive({ComponentConfig? dbConfig, String? dir}) {
     var env = Platform.environment;
-    if (dbConfig == null) {
-      this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'regulation_requirement');
-    }
-    dir ??= env['HOME']! +
-        '/Downloads/Archive/IsoExpress/OperationsReports/DailyRegulationRequirement/Raw/';
+    this.dbConfig = dbConfig ??
+        ComponentConfig(
+            host: '127.0.0.1',
+            dbName: 'isoexpress',
+            collectionName: 'regulation_requirement');
+    this.dir = dir ??
+        '${env['HOME']!}/Downloads/Archive/IsoExpress/OperationsReports/DailyRegulationRequirement/Raw/';
   }
 
-  Db? get db => dbConfig.db;
+  late ComponentConfig dbConfig;
+  late String dir;
+  final reportName = 'Regulation Requirement';
+
+  Db get db => dbConfig.db;
 
   /// Always insert ALL available historical data
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(0);
     try {
       await dbConfig.coll.remove(<String, dynamic>{}); // empty the collection
       await dbConfig.coll.insertAll(data);
       print('---> Inserted $reportName successfully');
       return Future.value(0);
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return Future.value(1);
     }
   }
@@ -93,21 +94,21 @@ class RegulationRequirementArchive {
     var ind = sheetNames.where((e) => e.contains('Reg Cap Reqmnt')).first;
     var table = decoder.tables[ind]!;
     for (var r = 3; r < table.maxRows; r++) {
-      var day;
+      late List<int> day;
       var dayType = (table.rows[r][0] as String).trim().toLowerCase();
       if (dayType == 'week') {
         day = [1, 2, 3, 4, 5]; // Mon to Fri
       } else if (dayType == 'sat') {
-        day = 6;
+        day = [6];
       } else if (dayType == 'sun') {
-        day = 7;
+        day = [7];
       } else {
         throw ArgumentError('Unknown day: ${table.rows[r][0]}');
       }
       for (var m = 1; m <= 12; m++) {
         (res['regulation capacity'] as List).add({
           'month': m,
-          'weekday': day,
+          'weekday': day.length == 1 ? day.first : day,
           'hourBeginning': table.rows[r][1] - 1,
           'value': table.rows[r][m + 1],
         });
@@ -117,21 +118,21 @@ class RegulationRequirementArchive {
     ind = sheetNames.where((e) => e.contains('Reg Service Reqmnt')).first;
     table = decoder.tables[ind]!;
     for (var r = 3; r < table.maxRows; r++) {
-      var day;
+      late List<int> day;
       var dayType = (table.rows[r][0] as String).trim().toLowerCase();
       if (dayType == 'week') {
         day = [1, 2, 3, 4, 5]; // Mon to Fri
       } else if (dayType == 'sat') {
-        day = 6;
+        day = [6];
       } else if (dayType == 'sun') {
-        day = 7;
+        day = [7];
       } else {
         throw ArgumentError('Unknown day: ${table.rows[r][0]}');
       }
       for (var m = 1; m <= 12; m++) {
         (res['regulation service'] as List).add({
           'month': m,
-          'dayOfWeek': day,
+          'dayOfWeek': day.length == 1 ? day.first : day,
           'hourBeginning': table.rows[r][1] - 1,
           'value': table.rows[r][m + 1],
         });
@@ -145,7 +146,7 @@ class RegulationRequirementArchive {
   /// file, and a new from/to interval.
   Map<String, dynamic> readXlsx(Date asOfDate) {
     var file =
-        File(dir! + '${asOfDate.toString()}_daily_regulation_requirement.xlsx');
+        File('$dir${asOfDate.toString()}_daily_regulation_requirement.xlsx');
     return readFile(file);
   }
 
@@ -161,7 +162,7 @@ class RegulationRequirementArchive {
     url ??=
         'https://www.iso-ne.com/static-assets/documents/sys_ops/op_frcstng/dlyreg_req/daily_regulation_requirement.xlsx';
     var filename = path.basename(url);
-    var fileout = File(dir! + Date.today(location: UTC).toString() + '_' + filename);
+    var fileout = File('$dir${Date.today(location: UTC)}_$filename');
 
     await HttpClient()
         .getUrl(Uri.parse(url))
@@ -171,7 +172,7 @@ class RegulationRequirementArchive {
 
     var asOfDate = getAsOfDate(fileout);
     // Check that this file is in the archive.  If not, save it.
-    var lastFile = File(dir! + asOfDate.toString() + '_' + filename);
+    var lastFile = File('$dir${asOfDate}_$filename');
     if (!lastFile.existsSync()) {
       fileout.copySync(lastFile.path.toString());
     }
@@ -197,7 +198,7 @@ class RegulationRequirementArchive {
   }
 
   List<File> getAllFiles() {
-    return Directory(dir!)
+    return Directory(dir)
         .listSync()
         .whereType<File>()
         .where((f) => f.path.endsWith('_daily_regulation_requirement.xlsx'))
@@ -207,8 +208,8 @@ class RegulationRequirementArchive {
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
   Future<void> setupDb() async {
-    if (!Directory(dir!).existsSync()) {
-      Directory(dir!).createSync(recursive: true);
+    if (!Directory(dir).existsSync()) {
+      Directory(dir).createSync(recursive: true);
     }
 
     await dbConfig.db.open();

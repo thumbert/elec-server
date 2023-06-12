@@ -3,6 +3,9 @@
 ## TODO:
 - 
 
+## Release 2023-06-12
+- Recreate the mongo from scratch, bin/rebuild_mongo.dart
+  
 ## Release 2023-06-05
 - Fix change in ISONE masked Demand Bids json format.  Thanks ISO.
 

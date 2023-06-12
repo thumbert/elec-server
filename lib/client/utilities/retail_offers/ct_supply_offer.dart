@@ -61,7 +61,7 @@ class CtSupplyOffer extends RetailSupplyOffer {
       'loadZone': 'CT',
       'utility': data['planTypeEdc'], // 'Eversource' or 'United Illuminating'
       'accountType': data['customerClass'],
-      'rateClass': data['rateClass'],
+      'rateClass': data['rateClass'] ?? '',
       'countOfBillingCycles': countOfBillingCycles,
       'minimumRecs': minimumRecs,
       'offerType': data['offerType'],

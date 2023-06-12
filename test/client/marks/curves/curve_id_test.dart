@@ -6,7 +6,7 @@ import 'package:http/http.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   group('CurveIds client tests:', () {
     var client = CurveIdClient(Client(), rootUrl: rootUrl);
     test('get all curveIds', () async {

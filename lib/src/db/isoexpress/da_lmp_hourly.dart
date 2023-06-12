@@ -35,10 +35,15 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/hourlylmp/da/final/day/${yyyymmdd(asOfDate)}';
 
   @override
-  File getFilename(Date asOfDate) {
+  File getFilename(Date asOfDate, {String extension = 'json'}) {
+    if (extension == 'csv') {
+      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv');
+    } else if (extension == 'json') {
       return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json');
+    } else {
+      throw StateError('Unsupported extension $extension');
+    }
   }
-
 
   /// Insert data into db.  You can pass in several days at once.
   @override
@@ -77,16 +82,17 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   /// ```
   @override
   List<Map<String, dynamic>> processFile(File file) {
-    if (!file.existsSync()) {
-      // try and see if the csv file is there (support legacy format)
-      var fileCsv = File(file.path.replaceAll('json', 'csv'));
-      if (fileCsv.existsSync()) {
-        return _processFileCsv(fileCsv);
+    if (file.existsSync()) {
+      if (file.path.endsWith('.csv')) {
+        return _processFileCsv(file);
+      } else if (file.path.endsWith('.json')) {
+        return _processFileJson(file);
       } else {
         throw ArgumentError('Neither json or csv ${basename(file.path)} file exists!');
       }
+    } else {
+      throw ArgumentError('File $file does not exist!');
     }
-    return _processFileJson(file);
   }
 
   @override

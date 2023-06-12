@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:path/path.dart';
 
-void tests() async {
+Future<void> tests() async {
   var archive = SdRtloadArchive();
   group('RT Load archive tests: ', () {
     setUp(() async => await archive.dbConfig.db.open());

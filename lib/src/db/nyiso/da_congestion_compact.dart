@@ -24,7 +24,7 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
         dbName: 'nyiso',
         collectionName: 'da_congestion_compact');
     this.dbConfig = dbConfig;
-    dir ??= super.dir + 'DaLmpHourly/Raw/';
+    dir ??= '${super.dir}DaLmpHourly/Raw/';
     this.dir = dir;
     reportName = 'Day-Ahead Hourly Congestion';
   }
@@ -43,13 +43,11 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
   /// http://mis.nyiso.com/public/csv/damlbmp/20211201damlbmp_gen_csv.zip
   @override
   String getUrl(Date asOfDate) =>
-      'http://mis.nyiso.com/public/csv/damlbmp/' +
-      yyyymmdd(asOfDate) +
-      'damlbmp_${nodeType.toString()}.csv';
+      'http://mis.nyiso.com/public/csv/damlbmp/${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv';
 
   @override
   File getCsvFile(Date asOfDate) =>
-      File(dir + yyyymmdd(asOfDate) + 'damlbmp_${nodeType.toString()}.csv');
+      File('$dir${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
@@ -103,6 +101,7 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
       _congestion[i].insert(0, i);
     }
 
+    /// TODO: fix Ordering deprecation
     /// order the congestion data
     var ordering = Ordering.natural<num>()
         .onResultOf((List xs) => xs[1]) // sort by hour beginning 0
@@ -155,7 +154,7 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }
@@ -183,14 +182,11 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
 
   @override
   String getUrlForMonth(Month month) =>
-      'http://mis.nyiso.com/public/csv/damlbmp/' +
-      month.startDate.toString().replaceAll('-', '') +
-      'damlbmp_${nodeType.toString()}_csv.zip';
+      'http://mis.nyiso.com/public/csv/damlbmp/${month.startDate.toString().replaceAll('-', '')}damlbmp_${nodeType.toString()}_csv.zip';
 
   @override
   File getZipFileForMonth(Month month) {
-    return File(dir +
-        month.startDate.toString().replaceAll('-', '') +
-        'damlbmp_${nodeType.toString()}.csv.zip');
+    return File(
+        '$dir${month.startDate.toString().replaceAll('-', '')}damlbmp_${nodeType.toString()}.csv.zip');
   }
 }

@@ -102,6 +102,27 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
   /// New json format from web services
   @override
   List<Map<String, dynamic>> processFile(File file) {
+    if (file.path.endsWith('.csv')) {
+      return processCsvFile(file);
+    } else if (file.path.endsWith('.json')) {
+      return processJsonFile(file);
+    } else {
+      throw ArgumentError('File $file not supported');
+    }
+  }
+
+
+  /// old format
+  List<Map<String, dynamic>> processCsvFile(File file) {
+    var data = mis.readReportTabAsMap(file, tab: 0);
+    if (data.isEmpty) return <Map<String, dynamic>>[];
+    var dataByBidId = groupBy(data, (dynamic row) => row['Bid ID']);
+    return dataByBidId.keys
+        .map((ptid) => converter(dataByBidId[ptid]!))
+        .toList();
+  }
+
+  List<Map<String, dynamic>> processJsonFile(File file) {
     var aux = json.decode(file.readAsStringSync());
     late List<Map> xs;
     if ((aux as Map).containsKey('HbDayAheadDemandBids')) {
@@ -133,7 +154,7 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
             var p = segment['Price'];
             switch (p) {
               case (String p) : price.add(num.parse(p));
-              case (num p) : quantity.add(p);
+              case (num p) : price.add(p);
               case _ : throw StateError('Don\'t know how to deal with $p');
             }
           }
@@ -175,16 +196,6 @@ class DaDemandBidArchive extends DailyIsoExpressReport {
 
 
 
-
-  /// old format
-  List<Map<String, dynamic>> processCsvFile(File file) {
-    var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return <Map<String, dynamic>>[];
-    var dataByBidId = groupBy(data, (dynamic row) => row['Bid ID']);
-    return dataByBidId.keys
-        .map((ptid) => converter(dataByBidId[ptid]!))
-        .toList();
-  }
 
   @override
   Future<void> downloadDay(Date? day) async {

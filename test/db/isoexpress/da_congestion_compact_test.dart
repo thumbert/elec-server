@@ -11,7 +11,7 @@ import 'package:date/date.dart';
 import 'package:elec_server/client/dacongestion.dart' as client;
 import 'package:timezone/timezone.dart';
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   group('Isone DAM congestion compact archive tests: ', () {
     var archive = DaCongestionCompactArchive();
     setUp(() async {
@@ -22,7 +22,7 @@ void tests(String rootUrl) async {
     });
     test('process DA hourly lmp report, 2017-11-05', () {
       // this is DST fall back time, 25 hours
-      var file = archive.getFilename(Date.utc(2017, 11, 5));
+      var file = archive.getFilename(Date.utc(2017, 11, 5), extension: 'csv');
       var res = archive.processFile(file);
       var congestion = res.first['congestion'] as List;
       expect(congestion.length, 25);
@@ -31,7 +31,7 @@ void tests(String rootUrl) async {
     });
     test('process DA hourly lmp report, 2019-01-02', () {
       // excellent compression!
-      var file = archive.getFilename(Date.utc(2019, 1, 2));
+      var file = archive.getFilename(Date.utc(2019, 1, 2), extension: 'csv');
       var res = archive.processFile(file);
       var congestion = res.first['congestion'] as List;
       expect(congestion.length, 24);

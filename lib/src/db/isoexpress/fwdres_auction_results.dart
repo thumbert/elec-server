@@ -68,7 +68,6 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
           .split(' ')[1]
           .substring(0, 7)
           .split('/');
-      // var yyyymm = (row['Procurement Period Begin Month'] as String).split('/');
       var startMonth = Month.utc(int.parse(yyyymm[1]), int.parse(yyyymm[0]));
       out.add({
         'auctionName': auctionName(startMonth),

@@ -51,18 +51,18 @@ Future<void> tests(String rootUrl) async {
     });
     test('process DA hourly lmp report, 2019-05-09', () {
       /// has duplicated data for ptid: 38206
-      var file = archive.getFilename(Date.utc(2019, 5, 9));
+      var file = archive.getFilename(Date.utc(2019, 5, 9), extension: 'csv');
       var res = archive.processFile(file);
       var p38206 = res.firstWhere((e) => e['ptid'] == 38206);
       expect(p38206['lmp'].length, 24);
     });
     test('DA hourly lmp report, DST day spring', () {
-      var file = archive.getFilename(Date.utc(2017, 3, 12));
+      var file = archive.getFilename(Date.utc(2017, 3, 12), extension: 'csv');
       var res = archive.processFile(file);
       expect(res.first['lmp'].length, 23);
     });
     test('DA hourly lmp report, DST day fall', () async {
-      var file = archive.getFilename(Date.utc(2017, 11, 5));
+      var file = archive.getFilename(Date.utc(2017, 11, 5), extension: 'csv');
       var res = archive.processFile(file);
       expect(res.first['lmp'].length, 25);
     });

@@ -11,14 +11,13 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:collection/collection.dart';
 
 class NoaaDailySummaryArchive extends IsoExpressReport {
-  NoaaDailySummaryArchive({ComponentConfig? dbConfig}) {
+  NoaaDailySummaryArchive({ComponentConfig? dbConfig, String? dir}) {
     this.dbConfig = dbConfig ??
         ComponentConfig(
             host: '127.0.0.1',
             dbName: 'weather',
             collectionName: 'noaa_daily_summary');
-
-    dir = '${baseDir}Noaa/DailySummary/Raw/';
+    this.dir = dir ?? '${Platform.environment['HOME']}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
   }
 
   mongo.Db get db => dbConfig.db;

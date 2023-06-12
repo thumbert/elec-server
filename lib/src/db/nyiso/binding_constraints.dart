@@ -20,7 +20,7 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
         dbName: 'nyiso',
         collectionName: 'binding_constraints');
     this.dbConfig = dbConfig;
-    dir ??= super.dir + 'DaBindingConstraints/Raw/';
+    dir ??= '${super.dir}DaBindingConstraints/Raw/';
     this.dir = dir;
     reportName = 'Day-Ahead Binding Constraints Report';
   }
@@ -33,13 +33,11 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
   /// http://mis.nyiso.com/public/csv/DAMLimitingConstraints/20220101DAMLimitingConstraints_csv.zip
   @override
   String getUrl(Date asOfDate) =>
-      'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/' +
-      yyyymmdd(asOfDate) +
-      'DAMLimitingConstraints.csv';
+      'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/${yyyymmdd(asOfDate)}DAMLimitingConstraints.csv';
 
   @override
   File getCsvFile(Date asOfDate) =>
-      File(dir + yyyymmdd(asOfDate) + 'DAMLimitingConstraints.csv');
+      File('$dir${yyyymmdd(asOfDate)}DAMLimitingConstraints.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
@@ -120,7 +118,7 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }
@@ -144,14 +142,10 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
 
   @override
   String getUrlForMonth(Month month) =>
-      'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/' +
-      month.startDate.toString().replaceAll('-', '') +
-      'DAMLimitingConstraints_csv.zip';
+      'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints_csv.zip';
 
   @override
   File getZipFileForMonth(Month month) {
-    return File(dir +
-        month.startDate.toString().replaceAll('-', '') +
-        'DAMLimitingConstraints.csv.zip');
+    return File('$dir${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints.csv.zip');
   }
 }

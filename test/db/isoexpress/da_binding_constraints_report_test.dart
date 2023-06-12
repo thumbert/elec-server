@@ -10,7 +10,7 @@ import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart
 import 'package:timezone/timezone.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   var archive = DaBindingConstraintsReportArchive();
   group('Binding constraints db tests:', () {
@@ -118,12 +118,12 @@ void tests(String rootUrl) async {
   });
 }
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
   // await DaBindingConstraintsReportArchive().setupDb();
 
   // await prepareData();
 
   var rootUrl = 'http://127.0.0.1:8080';
-  tests(rootUrl);
+  await tests(rootUrl);
 }

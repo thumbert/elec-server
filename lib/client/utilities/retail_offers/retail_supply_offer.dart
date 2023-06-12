@@ -133,7 +133,7 @@ class RetailSupplyOffer {
       loadZone: xs['loadZone'],
       utility: xs['utility'],
       accountType: xs['accountType'],
-      rateClass: xs['rateClass'],
+      rateClass: xs['rateClass'] ?? '',
       countOfBillingCycles: xs['countOfBillingCycles'],
       minimumRecs: xs['minimumRecs'] ?? double.nan,
       offerType: xs['offerType'],

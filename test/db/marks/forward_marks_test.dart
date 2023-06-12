@@ -40,7 +40,7 @@ List<String> getMarkedCurveIds() {
   ]..sort();
 }
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   var archive = ForwardMarksArchive();
   var location = getLocation('America/New_York');
   group('ForwardMarks archive tests:', () {
@@ -559,12 +559,12 @@ void tests(String rootUrl) async {
 /// Some data for testing.
 void insertMarks() => insertForwardMarks();
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
 
   // await insertMarks();
 
   // dotenv.load('.env/prod.env');
   var rootUrl = 'http://127.0.0.1:8080';
-  tests(rootUrl);
+  await tests(rootUrl);
 }

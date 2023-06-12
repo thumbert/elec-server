@@ -36,12 +36,12 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
 
   @override
   Future downloadDay(Date day) async {
-    var _user = dotenv.env['isone_ws_user']!;
-    var _pwd = dotenv.env['isone_ws_password']!;
+    var user = dotenv.env['isone_ws_user']!;
+    var pwd = dotenv.env['isone_ws_password']!;
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(day)), '',
-          HttpClientBasicCredentials(_user, _pwd))
+          HttpClientBasicCredentials(user, pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');

@@ -22,6 +22,11 @@ Future<void> tests(String rootUrl) async {
       expect(wHub.keys.toSet(),
           {'asOfDate', 'ptid', 'name', 'type', 'subtype', 'zoneName',
             'voltageLevel', 'effectiveDate', 'terminationDate'});
+
+      /// issue with large ptids
+      var d1 = data.firstWhere((e) => e['ptid'] == 2155501806);
+      var e = json.encode(d1);
+      expect(e.length, 205);
     });
   });
   group('Ptid table API tests:', () {
@@ -35,6 +40,10 @@ Future<void> tests(String rootUrl) async {
     test('Get the current table', () async {
       var res = await api.ptidTableCurrent();
       expect(res.length > 13000, true);  // lots of nodes
+
+      var d1 = res.firstWhere((e) => e['ptid'] == 2155501806);
+      var e = json.encode(d1);
+      expect(e.length, 205);
     });
     test('Get the list of available dates (http)', () async {
       var res = await http.get(Uri.parse('$rootUrl/pjm/ptids/v1/dates'),

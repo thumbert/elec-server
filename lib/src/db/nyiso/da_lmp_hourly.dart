@@ -24,7 +24,7 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
   }
 
   Db get db => dbConfig.db;
-  late NodeType nodeType;
+  NodeType? nodeType;
 
   /// Data available for the most 10 recent days only at this url.
   /// http://mis.nyiso.com/public/csv/damlbmp/20220113damlbmp_zone.csv
@@ -32,12 +32,16 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
   /// http://mis.nyiso.com/public/csv/damlbmp/20211201damlbmp_zone_csv.zip
   /// http://mis.nyiso.com/public/csv/damlbmp/20211201damlbmp_gen_csv.zip
   @override
-  String getUrl(Date asOfDate) =>
-      'http://mis.nyiso.com/public/csv/damlbmp/${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv';
+  String getUrl(Date asOfDate) {
+    assert(nodeType != null);
+    return 'http://mis.nyiso.com/public/csv/damlbmp/${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv';
+  }
 
   @override
-  File getCsvFile(Date asOfDate) =>
-      File('$dir${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv');
+  File getCsvFile(Date asOfDate) {
+    assert(nodeType != null);
+    return File('$dir${yyyymmdd(asOfDate)}damlbmp_${nodeType.toString()}.csv');
+  }
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {

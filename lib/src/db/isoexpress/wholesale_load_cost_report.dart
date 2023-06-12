@@ -14,17 +14,15 @@ import '../lib_iso_express.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
 class WholesaleLoadCostReportArchive extends IsoExpressReport {
-  @override
-  final String reportName = 'Monthly Wholesale Load Cost Report';
-
   WholesaleLoadCostReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
           host: '127.0.0.1',
           dbName: 'isoexpress',
           collectionName: 'wholesale_load_cost');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'WholesaleLoadCost/Raw/';
+    dir ??= '${baseDir}WholesaleLoadCost/Raw/';
     this.dir = dir;
+    reportName = 'Monthly Wholesale Load Cost Report';
   }
 
   /// Data is also available as webservices, for example
@@ -36,10 +34,7 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/whlsecost/hourly/month/'
       '${month.toIso8601String().replaceAll('-', '')}/location/$ptid';
 
-  File getFilename(Month month, int ptid) => File(dir +
-      'whlsecost_hourly_$ptid' +
-      '_' +
-      '${month.toIso8601String().replaceAll('-', '')}.json');
+  File getFilename(Month month, int ptid) => File('${dir}whlsecost_hourly_${ptid}_${month.toIso8601String().replaceAll('-', '')}.json');
 
   Future<void> downloadFile(Month month, int ptid) async {
     var _user = dotenv.env['isone_ws_user']!;
@@ -61,6 +56,9 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
 
   @override
   List<Map<String, dynamic>> processFile(File file) {
+    if (!file.path.endsWith('.json')) {
+      throw ArgumentError('Only json file supported');
+    }
     var aux = json.decode(file.readAsStringSync());
     List? xs;
     if ((aux as Map).containsKey('WhlseCosts')) {
@@ -111,7 +109,7 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
       print('--->  Inserted $reportName for month '
           '$month, ptid ${data.first['ptid']}');
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
     }
   }
 

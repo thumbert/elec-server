@@ -61,13 +61,15 @@ class ApiPtids {
       ..sortBy('ptid')
       ..excludeFields(['_id', 'asOfDate']);
 
-    // Can't do the approach below because it returns only one document!
-    // var query = where
-    //   ..sortBy('asOfDate', descending: true)
-    //   ..limit(1)
-    //   ..excludeFields(['_id', 'asOfDate'])
-    //   ..sortBy('ptid');
-    return coll.find(query).toList();
+    /// After a given driver version, the 'ptid' field ended up being a mixture
+    /// of int and Int64.  For example this value 2155501806 is returned as
+    /// an Int64.  No idea why.  Correcting for it below otherwise the
+    /// json.encoding fails!
+    var xs = coll.find(query).map((e) {
+      e['ptid'] = e['ptid'].toInt();
+      return e;
+    });
+    return xs.toList();
   }
 
   Future<List<Map<String, dynamic>>> ptidTableAsOfDate(String asOfDate) async {

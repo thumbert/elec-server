@@ -103,7 +103,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
           await dbConfig.coll.update({
             'date': date,
             'Masked Asset ID': document['Masked Asset ID'],
-          }, document);
+          }, document, upsert: true);
         }
         print('--->  Inserted $reportName for day $date');
       }

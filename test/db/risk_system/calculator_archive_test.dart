@@ -22,7 +22,7 @@ Future<void> insertData(CalculatorArchive archive) async {
   }
 }
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = CalculatorArchive();
   group('CalculatorArchive api tests:', () {

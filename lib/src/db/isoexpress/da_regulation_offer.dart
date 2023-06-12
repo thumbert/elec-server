@@ -19,18 +19,18 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
     dbConfig ??= ComponentConfig(
           host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'regulation_offer');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'PricingReports/DaRegulationOffer/Raw/';
+    dir ??= '${baseDir}PricingReports/DaRegulationOffer/Raw/';
     this.dir = dir;
+    reportName = 'Historical Regulation Offer Data Report';
   }
-  @override
-  String reportName = 'Historical Regulation Offer Data Report';
+
+
   @override
   String getUrl(Date? asOfDate) =>
-      'https://www.iso-ne.com/transform/csv/hbregulationoffer?start=' +
-          yyyymmdd(asOfDate);
+      'https://www.iso-ne.com/transform/csv/hbregulationoffer?start=${yyyymmdd(asOfDate)}';
   @override
   File getFilename(Date? asOfDate) =>
-      File(dir + 'hbregulationoffer_' + yyyymmdd(asOfDate) + '.csv');
+      File('${dir}hbregulationoffer_${yyyymmdd(asOfDate)}.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
   @override
@@ -70,7 +70,7 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
   /// One report at a time.  Each element of the list is one Masked Asset ID.
   @override
   Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) return Future.value(null);
+    if (data.isEmpty) return Future.value(0);
     var days = data.map((e) => e['date']).toSet();
     if (days.length > 1) {
       throw ArgumentError('Only one date at a time allowed for insertion');
@@ -81,7 +81,7 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
       print('---> Inserted $reportName for ${data.first['date']} successfully');
       return Future.value(0);
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return Future.value(1);
     }
   }

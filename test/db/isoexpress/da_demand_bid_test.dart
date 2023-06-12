@@ -74,14 +74,19 @@ Future<void> tests() async {
         'quantity': [5.6], // only one segment therefore only one element
         // 'price': [...],  // can have a price array too if bid type is not fixed
       });
-      var aux46 = data[46];
-      h0 = (aux46['hours'] as List).first as Map<String, dynamic>;
-      expect(h0, {
+
+      /// An example of an INC, only certain hours
+      var x = data.firstWhere((e) =>
+          e['Masked Lead Participant ID'] == 179202 &&
+          e['Masked Location ID'] == 61109 &&
+          e['Bid ID'] == 538730658);
+      expect((x['hours'] as List).first, {
         'hourBeginning': '2020-09-01T13:00:00.000-0400',
-        'quantity': [0.9, 0.9], // two segments
-        'price': [-10, 0], // two segments
+        'quantity': [0.9, 0.9],
+        'price': [-10, 0],
       });
     });
+
     test('read 2023-02-01 json file', () async {
       /// format changed!
       var asOfDate = Date.utc(2023, 2, 1);
@@ -112,9 +117,8 @@ Future<void> tests() async {
       expect(h0, {
         'hourBeginning': '2023-02-01T00:00:00.000-0500', // correct ISO-8601
         'quantity': [11.7], // only one segment therefore only one element
-        // 'price': [...],  // can have a price array too if bid type is not fixed
       });
-    }, solo: true);
+    });
   });
   group('api tests for demand bids', () {
     var db = Db('mongodb://localhost/isoexpress');
@@ -200,20 +204,20 @@ Future<void> tests() async {
   });
 }
 
-Future insertDays() async {
-  var location = getLocation('America/New_York');
-  var archive = DaDemandBidArchive();
-  var days = Interval(
-          TZDateTime(location, 2019, 2, 1), TZDateTime(location, 2019, 2, 28))
-      .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
-  await archive.dbConfig.db.open();
-
-  for (var day in days) {
-    await archive.downloadDay(day);
-    await archive.insertDay(day);
-  }
-  await archive.dbConfig.db.close();
-}
+// Future insertDays() async {
+//   var location = getLocation('America/New_York');
+//   var archive = DaDemandBidArchive();
+//   var days = Interval(
+//           TZDateTime(location, 2019, 2, 1), TZDateTime(location, 2019, 2, 28))
+//       .splitLeft((dt) => Date.utc(dt.year, dt.month, dt.day));
+//   await archive.dbConfig.db.open();
+//
+//   for (var day in days) {
+//     await archive.downloadDay(day);
+//     await archive.insertDay(day);
+//   }
+//   await archive.dbConfig.db.close();
+// }
 
 /// Look at load data
 Future<void> analyzeData() async {

@@ -38,8 +38,10 @@ import 'db/nyiso/masked_ids_test.dart' as nyiso_masked_ids;
 import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
-import 'db/utilities/retail_offers/retail_supply_offer_test.dart' as retail_offer;
-import 'db/utilities/retail_offers/retail_suppliers_offers_archive_test.dart' as retail_offers;
+import 'db/utilities/retail_offers/retail_supply_offer_test.dart'
+    as retail_offer;
+import 'db/utilities/retail_offers/retail_suppliers_offers_archive_test.dart'
+    as retail_offers;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
 import 'utils/env_file_test.dart' as env_file;
@@ -60,27 +62,27 @@ Future<void> main() async {
   });
 
   /// db tests
-  bc.tests(rootUrl);
-  calculators.tests(rootUrl);
-  da_congestion.tests(rootUrl);
+  await bc.tests(rootUrl);
+  await da_congestion.tests(rootUrl);
   await dalmp.tests(rootUrl);
-  demand_bids.tests();
-  energy_offers.tests(rootUrl);
+  await demand_bids.tests();
+  await energy_offers.tests(rootUrl);
   await fwdres.tests(rootUrl);
   lib_nyiso_report.tests();
   await masked_ids.tests(rootUrl);
-  monthly_asset_ncpc.tests(rootUrl);
+  await monthly_asset_ncpc.tests(rootUrl);
   await nyiso_binding_constraints.tests(rootUrl);
+  await nyiso_dalmp.tests(rootUrl);
   await nyiso_dacongestion.tests(rootUrl);
   await nyiso_daenergyoffer.tests(rootUrl);
-  await nyiso_dalmp.tests(rootUrl);
+
   await nyiso_rtlmp.tests(rootUrl);
   await nyiso_masked_ids.tests(rootUrl);
   await nyiso_ptids.tests(rootUrl);
   await pjm_ptids.tests(rootUrl);
-  ptids.tests(rootUrl);
-  regulation_requirement.tests(rootUrl);
-  retail_offers.tests(rootUrl);
+  await ptids.tests(rootUrl);
+  await regulation_requirement.tests(rootUrl);
+  await retail_offers.tests(rootUrl);
   await rtlmp.tests();
 
   sd_arrawdsum.tests(rootUrl);
@@ -89,19 +91,17 @@ Future<void> main() async {
   sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();
-  noaa_daily_summary.tests(rootUrl);
-  zonal_demand.tests(rootUrl);
+
+  await noaa_daily_summary.tests(rootUrl);
 
   /// Client tests
-  curve_id.tests(rootUrl);
-  forward_marks.tests(rootUrl);
-//  sysdem.tests(rootUrl);
+  await curve_id.tests(rootUrl);
+  await forward_marks.tests(rootUrl);
+
   mis.tests();
-  retail_offer.tests();
   wholesale_load_cost_report.tests();
 
   /// Utils tests
-  env_file.tests();
   iso_timestamp.tests();
   parse_int_range.tests();
   term_cache.tests();

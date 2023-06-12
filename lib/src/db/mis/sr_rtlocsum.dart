@@ -54,7 +54,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
           '--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 0 successfully');
       return 0;
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return 1;
     }
   }
@@ -83,7 +83,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
           '--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 1 successfully');
       return 0;
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return 1;
     }
   }

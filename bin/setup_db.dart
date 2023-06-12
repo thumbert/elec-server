@@ -161,9 +161,10 @@ Future<void> insertDaCongestionCompactNyiso() async {
   /// get the list of ptids to ingest
   var client = FtrClearingPrices(Client(), iso: Iso.newYork);
   var cp = await client.getClearingPricesForAuction('X21-6M-R5Autumn21');
+  var ptids = cp.map((e) => e['ptid'] as int).toSet();
 
   var archive = NyisoDaCongestionCompactArchive()
-    ..ptids = cp.map((e) => e['ptid'] as int).toSet();
+    ..ptids = ptids;
   // await archive.setupDb();
   await archive.dbConfig.db.open();
   var months = Month.utc(2019, 2).upTo(Month.utc(2022, 2));
@@ -282,7 +283,7 @@ Future<void> insertRtLmpHourlyNyiso() async {
   await archive.dbConfig.db.close();
 }
 
-void insertForwardMarks() async {
+Future<void> insertForwardMarks() async {
   var archive = ForwardMarksArchive();
   await archive.db.open();
   await archive.dbConfig.coll.remove(<String, dynamic>{});
@@ -356,7 +357,7 @@ Future<void> insertIsoExpress() async {
   //     DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
 }
 
-Future<void> insertMaskedAssetIds() async {
+Future<void> insertMaskedAssetIdsIsone() async {
   var archive = IsoNeMaskedIdsArchive();
   await archive.db.open();
   await archive.setup();
@@ -440,7 +441,7 @@ Future<void> insertNoaaTemperatures({bool download = false}) async {
   await archive.dbConfig.db.close();
 }
 
-void insertPtidTable() async {
+Future<void> insertPtidTable() async {
   var archive = PtidArchive();
   var baseUrl = 'https://www.iso-ne.com/static-assets/documents/';
   var urls = [
@@ -488,9 +489,9 @@ Future<void> insertRegulationRequirement() async {
   await archive.downloadFile();
 
   var data = archive.readAllData();
-  await archive.db!.open();
+  await archive.db.open();
   await archive.insertData(data);
-  await archive.db!.close();
+  await archive.db.close();
 }
 
 Future<void> insertSccReportIsone() async {
@@ -608,7 +609,7 @@ Future<void> main() async {
 
   // var days = Date.utc(2022, 9, 1).upTo(Date.utc(2022, 9, 30));
   // await insertFuelMixIsone(days, setup: true, externalDownload: false);
-  await insertDaDemandBids();
+  // await insertDaDemandBids();
   // await insertDaEnergyOffers(days: days);
 
   // await insertMaskedAssetIds();
@@ -618,7 +619,7 @@ Future<void> main() async {
   // insertMisReports();
   // await insertMonthlyAssetNcpc(download: false);
 
-  //  await insertPtidTable();
+   // await insertPtidTable();
   // await insertSccReportIsone();
   // await insertWholesaleLoadReports();
   // await insertZonalDemand();

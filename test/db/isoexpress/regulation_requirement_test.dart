@@ -13,7 +13,7 @@ import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = RegulationRequirementArchive();
@@ -83,5 +83,5 @@ void main() async {
 //  await DailyRegulationRequirementArchive().setupDb();
 
   // dotenv.load('.env/prod.env');
-  tests('http://127.0.0.1:8080');
+  await tests('http://127.0.0.1:8080');
 }

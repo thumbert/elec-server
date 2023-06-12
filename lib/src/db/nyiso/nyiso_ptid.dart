@@ -62,7 +62,7 @@ class PtidArchive extends NyisoReport {
     }
 
     // add the generator nodes
-    var file = File(dir + '/generator_' + asOfDate.toString() + '.csv');
+    var file = File('$dir/generator_$asOfDate.csv');
     var content = file.readAsStringSync();
     var xs = converter.convert(content);
     if (xs.isEmpty) return out;

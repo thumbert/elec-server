@@ -11,7 +11,7 @@ import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 import 'package:http/http.dart' as http;
 
-void tests() async {
+Future<void> tests() async {
   var archive = WholesaleLoadCostReportArchive();
   var api = WholesaleLoadCost(archive.dbConfig.db);
   group('Wholesale load cost report db tests: ', () {
@@ -63,5 +63,5 @@ void main() async {
   initializeTimeZones();
   // await WholesaleLoadCostReportArchive().setupDb();
 
-  tests();
+  await tests();
 }

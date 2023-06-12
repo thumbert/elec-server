@@ -39,8 +39,7 @@ void ingestionTest() async {
   await archive.db.close();
 }
 
-void tests(String rootUrl) async {
-  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
+Future<void> tests(String rootUrl) async {
   var config = ComponentConfig(
       host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
   var dir = '${env['HOME']!}/Downloads/Archive/PnodeTable/Raw/';
@@ -95,7 +94,8 @@ void tests(String rootUrl) async {
           headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body);
       expect(data.length > 950, true);
-      expect(data.first['ptid'], 4000);
+      expect(data.where((e) => e['ptid'] == 4000).length, 1);
+      expect(data.where((e) => e['ptid'] == 321).length, 1);
       var me = data.firstWhere((e) => e['ptid'] == 4001);
       expect(me, {
         'ptid': 4001,
@@ -119,7 +119,8 @@ void tests(String rootUrl) async {
     test('get current ptid table for isone', () async {
       var data = await client.getPtidTable(region: 'isone');
       expect(data.length > 950, true);
-      expect(data.first['ptid'], 4000);
+      expect(data.where((e) => e['ptid'] == 4000).length, 1);
+      expect(data.where((e) => e['ptid'] == 321).length, 1);
       var me = data.firstWhere((e) => e['ptid'] == 4001);
       expect(me, {
         'ptid': 4001,
@@ -165,5 +166,5 @@ void main() async {
 //  await ingestionTest();
 
   DbProd();
-  tests('http://127.0.0.1:8080');
+  await tests('http://127.0.0.1:8080');
 }

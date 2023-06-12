@@ -10,19 +10,13 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
 
-void tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   var archive = DaEnergyOfferArchive();
 
   group('ISONE DA energy offers db tests: ', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
-    test('download 2018-02-01 and insert it', () async {
-      var date = Date.utc(2018, 2, 1);
-      //await archive.downloadDay(date);
-      var res = await archive.insertDay(date);
-      expect(res, 0);
-    });
     test('DA energy offers report, DST day spring', () {
       var file = archive.getFilename(Date.utc(2017, 3, 12));
       var res = archive.processFile(file);
@@ -137,5 +131,5 @@ void main() async {
   //await DaEnergyOfferArchive().setupDb();
 
   // dotenv.load('.env/prod.env');
-  tests('http://127.0.0.1:8080');
+  await tests('http://127.0.0.1:8080');
 }
