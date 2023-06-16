@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   actors: ^0.8.4
+  archive: ^3.3.7
   args: ^2.1.0
   collection: ^1.15.0
   crypto: ^3.0.2

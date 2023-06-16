@@ -3,6 +3,9 @@
 ## TODO:
 - 
 
+## Release 2023-06-16
+- Zip the daily cme text files
+
 ## Release 2023-06-12
 - Recreate the mongo from scratch, bin/rebuild_mongo.dart
   

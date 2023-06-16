@@ -63,7 +63,7 @@ class CmeSettlementsEnergyArchive {
     return File('${dir}energy_settlement_${asOfDate.toString()}.txt');
   }
 
-  ///
+  /// Save the file as a zip file
   Future<int> downloadDataToFile() async {
     var res = await get(
         Uri.parse('https://www.cmegroup.com/ftp/pub/settle/stlnymex_v2'));
