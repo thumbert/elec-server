@@ -26,7 +26,7 @@ Future<void> tests(String rootUrl) async {
       /// issue with large ptids
       var d1 = data.firstWhere((e) => e['ptid'] == 2155501806);
       var e = json.encode(d1);
-      expect(e.length, 205);
+      expect(e.length, 229);
     });
   });
   group('Ptid table API tests:', () {

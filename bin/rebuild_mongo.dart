@@ -469,38 +469,38 @@ Future<void> main() async {
 
   /// This creation order needs to be preserved!
   /// ISONE
-  // await recreateDaBindingConstraintsIsone();
-  // await recreateDaLmpHourlyIsone();
-  // await recreateRtLmpHourlyIsone();
-  // await recreateDaCongestionCompactIsone();
-  // await recreateDaDemandBid();
-  // await recreateDaEnergyOffersIsone();
-  // await recreateFwdResAuctionResults();
-  // await insertMaskedAssetIdsIsone();
-  // await recreatePtidTableIsone();
-  // await recreateRegulationRequirementIsone();
-  // await recreateCompetitiveOffersIsone();
-  // await recreateMisTemplateArchive();
+  await recreateDaBindingConstraintsIsone();
+  await recreateDaLmpHourlyIsone();
+  await recreateRtLmpHourlyIsone();
+  await recreateDaCongestionCompactIsone();
+  await recreateDaDemandBid();
+  await recreateDaEnergyOffersIsone();
+  await recreateFwdResAuctionResults();
+  await insertMaskedAssetIdsIsone();
+  await recreatePtidTableIsone();
+  await recreateRegulationRequirementIsone();
+  await recreateCompetitiveOffersIsone();
+  await recreateMisTemplateArchive();
   await recreateWholesaleLoadCostReportIsone();
 
   /// NYISO
-  // await insertMaskedAssetIdsNyiso();
-  // await recreateMonthlyAssetNcpc();
-  // await recreateDaBindingConstraintsNyiso();
-  // await recreateDaLmpHourlyNyiso();
-  // await recreateTccClearedPricesNyiso();
-  // await recreateDaCongestionCompactNyiso();
-  // await recreateDaEnergyOffersNyiso();
-  // await recreateRtLmpHourlyNyiso();
-  // await recreatePtidTableNyiso();
+  await insertMaskedAssetIdsNyiso();
+  await recreateMonthlyAssetNcpc();
+  await recreateDaBindingConstraintsNyiso();
+  await recreateDaLmpHourlyNyiso();
+  await recreateTccClearedPricesNyiso();
+  await recreateDaCongestionCompactNyiso();
+  await recreateDaEnergyOffersNyiso();
+  await recreateRtLmpHourlyNyiso();
+  await recreatePtidTableNyiso();
 
   /// PJM
-  // await recreatePtidTablePjm();
+  await recreatePtidTablePjm();
 
-  // await recreateNoaaTemperatures();
 
   /// Other
-  // await rebuildCurveIds();
-  // await insertForwardMarks();
+  await recreateNoaaTemperatures();
+  await rebuildCurveIds();
+  await insertForwardMarks();
 
 }
