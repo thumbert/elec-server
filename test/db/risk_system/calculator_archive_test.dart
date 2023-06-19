@@ -26,8 +26,8 @@ Future<void> tests(String rootUrl) async {
   // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = CalculatorArchive();
   group('CalculatorArchive api tests:', () {
-    setUp(() async => await archive.db!.open());
-    tearDown(() async => await archive.db!.close());
+    setUp(() async => await archive.db.open());
+    tearDown(() async => await archive.db.close());
     test('get all users', () async {
       var aux = await http.get(Uri.parse('$rootUrl/calculators/v1/users'),
           headers: {'Content-Type': 'application/json'});
@@ -99,12 +99,12 @@ Future<void> tests(String rootUrl) async {
 
 void repopulateDb() async {
   var archive = CalculatorArchive();
-  await archive.db!.open();
+  await archive.db.open();
   // await archive.db.dropCollection('calculators');
   // await archive.dbConfig.coll.remove(<String, dynamic>{});
   await insertData(archive);
   // await archive.setup();
-  await archive.db!.close();
+  await archive.db.close();
 }
 
 void main() async {

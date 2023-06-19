@@ -6,6 +6,7 @@
 ## Release 2023-06-19
 - Point FwdRes url for Summer23!
 - Minor fixes to tests
+- Fix CalculatorArchive dbConfig argument
 
 ## Release 2023-06-16
 - Zip the daily cme text files
