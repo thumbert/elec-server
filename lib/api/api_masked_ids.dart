@@ -1,4 +1,4 @@
-library api.isone.api_isone_masked_ids;
+library api.api_isone_masked_ids;
 
 import 'dart:async';
 import 'dart:convert';
@@ -81,8 +81,8 @@ class ApiMaskedIds {
       ..eq('type', 'participant')
       ..eq('Masked Participant ID', maskedParticipantId)
       ..excludeFields(['_id', 'type']);
-    var aux = await coll.find(query).toList();
-    return aux.first;
+    var aux = await coll.findOne(query);
+    return aux ?? {};
   }
 
   Future<Map<String, dynamic>> getMaskedLocationId(int maskedLocationId) async {
@@ -90,8 +90,8 @@ class ApiMaskedIds {
       ..eq('type', 'location')
       ..eq('Masked Location ID', maskedLocationId)
       ..excludeFields(['_id', 'type']);
-    var aux = await coll.find(query).toList();
-    return aux.first;
+    var aux = await coll.findOne(query);
+    return aux ?? {};
   }
 
   Future<Map<String, dynamic>> getMaskedAssetId(int maskedAssetId) async {
@@ -99,7 +99,7 @@ class ApiMaskedIds {
       ..eq('type', 'generator')
       ..eq('Masked Asset ID', maskedAssetId)
       ..excludeFields(['_id', 'type']);
-    var aux = await coll.find(query).toList();
-    return aux.first;
+    var aux = await coll.findOne(query);
+    return aux ?? {};
   }
 }
