@@ -21,6 +21,7 @@ Future<void> tests(String rootUrl) async {
           data.firstWhere((e) => e['name'] == 'NextEra Energy Power Marketing');
       expect(nxt['Masked Participant ID'], 206845);
     });
+
     test('get all masked locations', () async {
       var data = await api.getAssets(type: 'location');
       var hub = data.firstWhere((e) => e['ptid'] == 4000);

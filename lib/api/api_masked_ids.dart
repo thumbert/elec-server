@@ -51,7 +51,7 @@ class ApiMaskedIds {
 
     router.get('/masked_asset_id/<maskedAssetId>',
         (Request request, String maskedAssetId) async {
-      var res = await getMaskedLocationId(int.parse(maskedAssetId));
+      var res = await getMaskedAssetId(int.parse(maskedAssetId));
       return Response.ok(json.encode(res), headers: headers);
     });
 

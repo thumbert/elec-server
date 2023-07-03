@@ -18,8 +18,8 @@ Future<void> tests(String rootUrl) async {
   // var shelfRootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = RegulationRequirementArchive();
   group('Regulation requirements archive test:', () {
-    setUp(() async => await archive.db!.open());
-    tearDown(() async => await archive.db!.close());
+    setUp(() async => await archive.db.open());
+    tearDown(() async => await archive.db.close());
     test('read and insert all data', () async {
       var data = archive.readAllData();
       expect(data.length, 1);

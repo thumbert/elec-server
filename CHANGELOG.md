@@ -3,6 +3,9 @@
 ## TODO:
 - 
 
+## Release 2023-07-03
+- Fix minor bug in lib/api/api_masked_ids.dart
+
 ## Release 2023-06-19
 - Point FwdRes url for Summer23!
 - Minor fixes to tests

@@ -29,15 +29,15 @@ class MaskedIds {
   /// [type] - can be one of 'generator', 'location', 'participant'
   ///
   Future<List<Map<String, dynamic>>> getAssets({String? type}) async {
-    String _url;
+    late String url;
     if (type == null) {
-      _url = 'all';
+      url = 'all';
     } else {
-      _url = 'type/' + Uri.encodeComponent(type);
+      url = 'type/${Uri.encodeComponent(type)}';
     }
-    var _response =
-        await http.get(Uri.parse(rootUrl + _isoMap[iso]! + servicePath + _url));
-    var data = json.decode(_response.body);
+    var response =
+        await http.get(Uri.parse(rootUrl + _isoMap[iso]! + servicePath + url));
+    var data = json.decode(response.body);
     return (data as List).cast<Map<String, dynamic>>();
   }
 }
