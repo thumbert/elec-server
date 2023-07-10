@@ -22,6 +22,19 @@ Future<int> main() async {
     file.deleteSync();
   }
 
+  /// insert the last 3 files
+  files = Directory(archive.dir)
+      .listSync()
+      .whereType<File>()
+      .where((e) => e.path.endsWith('.zip'))
+      .toList();
+  await archive.dbConfig.db.open();
+  for (var file in files.reversed.take(3)) {
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+
   print('Exit code: $res');
   exit(res);
 }

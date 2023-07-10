@@ -39,11 +39,11 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
 }
 
 Future<void> tests() async {
-  var days = Date.today(location: UTC).next.previousN(4);
-  // var days = Term.parse('Apr22', UTC).days();
+  // var days = Date.today(location: UTC).next.previousN(4);
+  var days = Term.parse('Jul23', UTC).days();
   // await insertDays(DaLmpHourlyArchive(), days);
 
-  // await updateCmeEnergySettlements(days, setUp: false);
+  await updateCmeEnergySettlements(days, setUp: false);
 }
 
 void main() async {
@@ -52,12 +52,11 @@ void main() async {
   Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
-
   dotenv.load('.env/prod.env');
 
   ///
   /// See bin/setup_db.dart on how to update a database
   ///
 
-  // await tests();
+  await tests();
 }

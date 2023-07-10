@@ -1,13 +1,16 @@
 library lib.db.cme.cme_energy_settlements;
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
 
 class CmeSettlementsEnergyArchive {
@@ -57,13 +60,14 @@ class CmeSettlementsEnergyArchive {
   }
 
   /// The file may actually not exist because the date is not a trading day
-  /// or it was not downloaded at the time.  If file doesn't exist, return
-  /// [null].
-  File getFilename(Date asOfDate) {
-    return File('${dir}energy_settlement_${asOfDate.toString()}.txt');
+  /// or it was not downloaded at the time.
+  File getFilename(Date asOfDate, {String extension = 'zip'}) {
+    return File('${dir}energy_settlement_${asOfDate.toString()}.$extension');
   }
 
-  /// Save the file as a zip file
+  /// Save the data to a txt file.  It then gets archived into a zip file in the
+  /// daily job bin/jobs/download_cme_files.dart.
+  ///
   Future<int> downloadDataToFile() async {
     var res = await get(
         Uri.parse('https://www.cmegroup.com/ftp/pub/settle/stlnymex_v2'));
@@ -92,6 +96,7 @@ class CmeSettlementsEnergyArchive {
     return null;
   }
 
+  /// Process a daily file.  Either .zip or .txt accepted.
   /// Return a list of documents.  Each document is in this form:
   /// ```dart
   /// {
@@ -102,7 +107,22 @@ class CmeSettlementsEnergyArchive {
   /// }
   /// ```
   List<Map<String, dynamic>> processFile(File file) {
-    var xs = file.readAsLinesSync();
+    if (!file.existsSync()) {
+      return <Map<String,dynamic>>[];
+    }
+    late List<String> xs;
+    if (extension(file.path) == '.zip') {
+      final bytes = file.readAsBytesSync();
+      var zipArchive = ZipDecoder().decodeBytes(bytes);
+      var txtFile = zipArchive.first;
+      var lines = txtFile.content as List<int>;
+      var csv = utf8.decoder.convert(lines);
+      xs = csv.split('\n');
+    } else if (extension(file.path) == '.txt') {
+      xs = file.readAsLinesSync();
+    } else {
+      throw StateError('Unsupported file extension ${extension(file.path)}');
+    }
     var out = <Map<String, dynamic>>[];
     for (var entry in curveMapping.entries) {
       log.info('Working on ${entry.value}');

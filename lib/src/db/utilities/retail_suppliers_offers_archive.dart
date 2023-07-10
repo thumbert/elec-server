@@ -139,15 +139,15 @@ void repairCtOfferFile(Date date) {
 }
 
 class RetailSuppliersOffersArchive extends IsoExpressReport {
-  RetailSuppliersOffersArchive({ComponentConfig? dbConfig}) {
+  RetailSuppliersOffersArchive({ComponentConfig? dbConfig, String? dir}) {
     this.dbConfig = dbConfig ??
         ComponentConfig(
             host: '127.0.0.1',
             dbName: 'retail_suppliers',
             collectionName: 'historical_offers');
-    dir = '$baseDir../RateBoardOffers/Raw/';
-    if (!Directory(dir).existsSync()) {
-      Directory(dir).createSync(recursive: true);
+    this.dir = dir ?? '$baseDir../RateBoardOffers/Raw/';
+    if (!Directory(this.dir).existsSync()) {
+      Directory(this.dir).createSync(recursive: true);
     }
   }
 

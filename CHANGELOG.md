@@ -1,7 +1,11 @@
 # Changelog
 
 ## TODO:
-- 
+- Clean up all the lints, warnings
+
+## Release 2023-07-10
+- Archive the CME data every day.
+- Minor lints
 
 ## Release 2023-07-03
 - Fix minor bug in lib/api/api_masked_ids.dart.  Hardened up to not fail if some ids 

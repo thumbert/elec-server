@@ -13,28 +13,28 @@ class CurveIdClient {
 
   /// Get all curveIds in the database.
   Future<List<String>> curveIds({String? pattern}) async {
-    var _url = rootUrl + servicePath + 'curveIds';
+    var url = '$rootUrl${servicePath}curveIds';
     if (pattern != null) {
-      _url += '/pattern/$pattern';
+      url += '/pattern/$pattern';
     }
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     return data.cast<String>();
   }
 
   /// Get all commodities.
   Future<List<String>> commodities() async {
-    var _url = rootUrl + servicePath + 'commodities';
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var url = '$rootUrl${servicePath}commodities';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     return data.cast<String>();
   }
 
   /// Get all regions.
   Future<List<String>> regions(String commodity) async {
-    var _url = rootUrl + servicePath + 'commodity/$commodity/regions';
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var url = '$rootUrl${servicePath}commodity/$commodity/regions';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     return data.cast<String>();
   }
 
@@ -42,37 +42,32 @@ class CurveIdClient {
   /// As of 2021-05, some curves don't have serviceType specified, for example
   /// the hourlyShape curves.
   Future<List<String?>> serviceTypes(String commodity, String region) async {
-    var _url = rootUrl +
-        servicePath +
-        'commodity/$commodity/region/$region/serviceTypes';
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var url = '$rootUrl${servicePath}commodity/$commodity/region/$region/serviceTypes';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     return data.cast<String?>();
   }
 
   /// Get all electricity documents for a region, serviceType.
   Future<List<Map<String, dynamic>>> electricityDocuments(
       String region, String serviceType) async {
-    var _url = rootUrl +
-        servicePath +
-        'data/commodity/electricity/region'
-            '/$region/serviceType/$serviceType';
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var url = '$rootUrl${servicePath}data/commodity/electricity/region/$region/serviceType/$serviceType';
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get one curveId document.  If it doesn't exist return an empty Map.
   Future<Map<String, dynamic>> getCurveId(String curveId) async {
-    var _url = rootUrl + servicePath + 'data/curveId/$curveId';
-    var _response = await http.get(Uri.parse(_url));
-    return json.decode(_response.body) as Map<String, dynamic>;
+    var url = '$rootUrl${servicePath}data/curveId/$curveId';
+    var response = await http.get(Uri.parse(url));
+    return json.decode(response.body) as Map<String, dynamic>;
   }
 
   /// Get several curveId documents
   Future<List<Map<String, dynamic>>> getCurveIds(List<String> curveIds) async {
-    var _ids = curveIds.join('|');
-    var _url = rootUrl + servicePath + 'data/curveIds/$_ids';
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var ids = curveIds.join('|');
+    var url = '$rootUrl${servicePath}data/curveIds/$ids';
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 }

@@ -1,14 +1,17 @@
 library test.db.cme.cme_energy_settlements_test;
 
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:date/date.dart';
 import 'package:elec_server/api/cme/api_cme.dart';
+import 'package:elec_server/client/marks/forward_marks2.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:logging/logging.dart';
 
-Future<void> tests() async {
+Future<void> tests(String rootUrl) async {
   group('CME energy settlements db test:', () {
     var archive = CmeSettlementsEnergyArchive();
     test('get report date', () {
@@ -17,13 +20,9 @@ Future<void> tests() async {
       expect(date, Date.utc(2023, 4, 28));
     });
 
-    // test('download latest settlement file', () async {
-    //   var res = await archive.downloadDataToFile();
-    //   expect(res, 0);
-    // });
-
     test('read file from 2023-04-28', () {
-      var data = archive.processFile(archive.getFilename(Date.utc(2023, 4, 28)));
+      var file = archive.getFilename(Date.utc(2023, 4, 28));
+      var data = archive.processFile(file);
       expect(data.length > 1, true);
       var ttf = data.firstWhere((e) => e['curveId'] == 'NG_TTF_USD_CME');
       expect(ttf.keys.toSet(), {'fromDate', 'curveId', 'terms', 'values'});
@@ -58,7 +57,18 @@ Future<void> tests() async {
   });
 
   group('CME energy settlements client test:', () {
-
+    var client = ForwardMarks(rootUrl: rootUrl);
+    test('get all curve ids', () async {
+      var ids = await client.getCurveNames(asOfDate: Date.utc(2023, 7, 6),
+          markType: MarkType.price);
+      expect(ids.length > 3, true);
+    });
+    test('get price for one as of date', () async {
+      var ts = await client.getPriceCurveForAsOfDate(asOfDate: Date.utc(2023, 7, 6),
+          curveName: 'NG_HENRY_HUB_CME');
+      expect(ts.length, 149);
+      expect(ts.first, IntervalTuple<num>(Month.utc(2023, 8), 2.609));
+    });
   });
 }
 
@@ -70,5 +80,8 @@ Future<void> main() async {
   Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
-  await tests();
+
+  dotenv.load('.env/prod.env');
+  var rootUrl = dotenv.env['ROOT_URL']!;
+  await tests(rootUrl);
 }

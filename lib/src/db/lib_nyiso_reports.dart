@@ -205,7 +205,6 @@ abstract class DailyNysioCsvReport extends NyisoReport {
     if (dailyFile != null) {
       var lines = dailyFile.content as List<int>;
       var csv = utf8.decoder.convert(lines);
-      // print(csv);
       var xs = converter.convert(csv, eol: eol);
       if (xs.isNotEmpty) {
         var header = xs.removeAt(0).cast<String>();
