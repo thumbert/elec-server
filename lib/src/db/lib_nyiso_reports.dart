@@ -246,9 +246,9 @@ abstract class DailyNysioCsvReport extends NyisoReport {
     return out;
   }
 
+  /// Format a date to the yyyymmdd format, e.g. 20170115.
+  String yyyymmdd(Date date) => date.toString().replaceAll('-', '');
 }
 
 
 
-/// Format a date to the yyyymmdd format, e.g. 20170115.
-String yyyymmdd(Date date) => date.toString().replaceAll('-', '');

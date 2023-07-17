@@ -33,6 +33,7 @@ class CmeSettlementsEnergyArchive {
   final log = Logger('CME energy settlements');
 
 
+  /// Only curves that are currently processed
   final curveMapping = <String, String>{
     'OIL_WTI_CME': 'CL Light Sweet Crude Oil Futures',
     'OIL_HO_CME': 'HO NY Harbor ULSD Futures',
@@ -125,7 +126,7 @@ class CmeSettlementsEnergyArchive {
     }
     var out = <Map<String, dynamic>>[];
     for (var entry in curveMapping.entries) {
-      log.info('Working on ${entry.value}');
+      log.fine('Working on ${entry.value}');
       var indStart = xs.indexWhere((e) => e.startsWith(entry.value)) + 1;
       if (indStart == -1) {
         throw StateError('Can\'t find ${entry.value} in the file!');
