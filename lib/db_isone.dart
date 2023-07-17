@@ -14,6 +14,7 @@ export 'src/db/isoexpress/fwdres_auction_results.dart';
 export 'src/db/isoexpress/monthly_asset_ncpc.dart';
 export 'src/db/isoexpress/regulation_requirement.dart';
 export 'src/db/isoexpress/rt_system_demand_hourly.dart';
+export 'src/db/isoexpress/wholesale_load_cost_report.dart';
 
 export 'src/db/marks/curves/forward_marks.dart';
 
