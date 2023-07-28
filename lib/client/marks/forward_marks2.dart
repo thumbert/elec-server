@@ -20,13 +20,13 @@ enum MarkType {
   final String name;
 }
 
-class ForwardMarks {
-  ForwardMarks({required this.rootUrl, Client? client}) {
+class ForwardMarks2 {
+  ForwardMarks2({required this.rootUrl, Client? client}) {
     _client = client ?? Client();
   }
 
   final String rootUrl;
-  final String baseUrl = 'forward_marks/v1';
+  final String baseUrl = 'forward_marks/v2';
   late Client _client;
 
   Future<List<String>> getCurveNames(

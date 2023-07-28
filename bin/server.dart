@@ -28,6 +28,7 @@ import 'package:elec_server/api/pjm/api_pjm_ptids.dart' as pjm_ptids;
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/api/utilities/api_retail_suppliers_offers.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
+import 'package:elec_server/client/marks/forward_marks2.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
@@ -112,6 +113,7 @@ Future<Router> buildRouter() async {
   router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
   router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
   router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);
+  router.mount('/forward_marks/v2/', ApiCmeMarks(DbProd.cme).router);
   router.mount('/ptids/v1/', ApiPtids(DbProd.isone).router);
 
   await DbProd.mis.open();

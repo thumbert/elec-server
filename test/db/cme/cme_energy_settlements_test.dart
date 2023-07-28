@@ -57,7 +57,7 @@ Future<void> tests(String rootUrl) async {
   });
 
   group('CME energy settlements client test:', () {
-    var client = ForwardMarks(rootUrl: rootUrl);
+    var client = ForwardMarks2(rootUrl: rootUrl);
     test('get all curve ids', () async {
       var ids = await client.getCurveNames(asOfDate: Date.utc(2023, 7, 6),
           markType: MarkType.price);

@@ -3,6 +3,9 @@
 ## TODO:
 - Clean up all the lints, warnings
 
+## Release 2023-07-28
+- Add cme data to the server api
+
 ## Release 2023-07-17
 - Export files from the db folder
 
