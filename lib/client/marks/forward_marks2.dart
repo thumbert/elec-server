@@ -29,6 +29,15 @@ class ForwardMarks2 {
   final String baseUrl = 'forward_marks/v2';
   late Client _client;
 
+  /// A strategy to deduce the bucket from the [curveName].
+  Bucket getBucket(String curveName) {
+    if (curveName.startsWith('PWR')) {
+      throw ArgumentError('Electricity curves not supported yet');
+    } else {
+      return Bucket.atc;
+    }
+  }
+
   Future<List<String>> getCurveNames(
       {required Date asOfDate, required MarkType markType}) async {
     var url =
