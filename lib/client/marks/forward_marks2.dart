@@ -78,6 +78,7 @@ class ForwardMarks2 {
   /// Return the price for a strip between a start and end report dates.
   /// [strip] needs to be a month range
   /// Need the [location] info to get the correct price calculation.
+  /// Need the [bucket] info to do the correct aggregation.
   Future<TimeSeries<num>> getCurveStrip({
     required String curveName,
     required Term strip,
@@ -85,6 +86,7 @@ class ForwardMarks2 {
     required Date endDate,
     required MarkType markType,
     required Location location,
+    required Bucket bucket,
   }) async {
     if (!(strip.isMonthRange() || strip.isOneMonth())) {
       throw ArgumentError(
@@ -104,12 +106,10 @@ class ForwardMarks2 {
 
     var termTz = Term.fromInterval(strip.interval.withTimeZone(location));
     var ts = TimeSeries<num>();
-    for (int reportDay in groups.keys) {
-      var ymd = _ymd(reportDay);
-      var date = Date.utc(ymd[0], ymd[1], ymd[2]);
+    for (String reportDay in groups.keys) {
+      var date = Date.fromIsoString(reportDay, location: UTC);
       var ys = TimeSeries<num>.fromIterable(groups[reportDay]!.map((e) {
-        var ymd = _ymd(e[1]);
-        var month = Month(ymd[0], ymd[1], location: location);
+        var month = Month.fromIsoString(e[1], location: location);
         return IntervalTuple(month, e[2]);
       }));
       var price = MonthlyCurve(bucket, ys).aggregateMonths(termTz.interval);

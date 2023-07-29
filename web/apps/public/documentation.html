@@ -5,8 +5,8 @@
     <title>API documentation</title>
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" type="text/css" href="apps/public/assets/documentation.css">
-    <link rel="shortcut icon" type="image/png" href="apps/public/assets/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="assets/documentation.css">
+    <link rel="shortcut icon" type="image/png" href="assets/favicon.ico">
 </head>
 <body>
 <div class="wrapper">
@@ -191,13 +191,22 @@
             <h4>Forward marks</h4>
             <ul>
                 <li>
-                    Get one curve as of a given date (all buckets.)
-                    <div><a href="http://localhost:8080/forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/asOfDate/20180301">forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/fromDate/20180301</a></div>
+                    Get the list of all price curves for one date
+                    <div><a href="http://localhost:8080/forward_marks/v2/price/curvenames/asofdate/20230727">forward_marks/v2/price/curvenames/asofdate/20230727</a></div>
                 </li>
                 <li>
-                    Get one curve as of a given date, one bucket.
-                    <div><a href="http://localhost:8080/forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/asOfDate/20180301">forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/fromDate/20180301</a></div>
+                    Get one curve as of a given date
+                    <div><a href="http://localhost:8080/forward_marks/v2/price/curvename/NG_HENRY_HUB_CME/asofdate/20230727">forward_marks/v2/price/curvename/NG_HENRY_HUB_CME/asofdate/20230727</a></div>
                 </li>
+                <li>
+                    Get data needed for calculating a strip price.  In the example below, you want to calculate the
+                    price of the Jan24-Feb24 strip between the historical start date and end date of 1Jan23 and 27Jul23.
+                    <div><a href="http://localhost:8080/forward_marks/v2/price/curvename/OIL_WTI_CME/contract_start/2024-01/contract_end/2024-02/start/2023-01-01/end/2023-07-27">forward_marks/v2/price/curvename/OIL_WTI_CME/contract_start/2024-01/contract_end/2024-02/start/2023-01-01/end/2023-07-27</a></div>
+                </li>
+<!--                <li>-->
+<!--                    Get one curve as of a given date, one bucket.-->
+<!--                    <div><a href="http://localhost:8080/forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/asOfDate/20180301">forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/fromDate/20180301</a></div>-->
+<!--                </li>-->
             </ul>
         </div>
 
