@@ -64,7 +64,8 @@ Future<void> tests(String rootUrl) async {
       expect(x.keys.toSet(), {'terms', 'values'});
     });
     test('get the strip data', () async {
-      var x = await api.getStripData(curveName: 'NG_HENRY_HUB_CME',
+      var x = await api.getStripData(
+        curveName: 'NG_HENRY_HUB_CME',
         contractStart: Month.utc(2024, 1),
         contractEnd: Month.utc(2024, 2),
         start: Date.utc(2023, 1, 1),
@@ -93,7 +94,9 @@ Future<void> tests(String rootUrl) async {
     });
     test('get price for one as of date', () async {
       var ts = await client.getPriceCurveForAsOfDate(
-          asOfDate: Date.utc(2023, 7, 6), curveName: 'NG_HENRY_HUB_CME');
+          asOfDate: Date.utc(2023, 7, 6),
+          curveName: 'NG_HENRY_HUB_CME',
+          location: UTC);
       expect(ts.length, 149);
       expect(ts.first, IntervalTuple<num>(Month.utc(2023, 8), 2.609));
     });

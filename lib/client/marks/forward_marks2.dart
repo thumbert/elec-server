@@ -46,14 +46,23 @@ class ForwardMarks2 {
     return (json.decode(res.body) as List).cast<String>();
   }
 
+  /// Return the monthly forward price curve associated with a [curveName] as
+  /// of a given date.
+  ///
+  /// Return a [TimeSeries] in with intervals in the [location] specified.
+  ///
   Future<TimeSeries<num>> getPriceCurveForAsOfDate(
-      {required String curveName, required Date asOfDate}) async {
+      {required String curveName,
+      required Date asOfDate,
+      required Location location}) async {
     var url =
         '$rootUrl/$baseUrl/price/curvename/$curveName/asofdate/${asOfDate.toString()}';
     var res = await _client.get(Uri.parse(url));
-    var aux = json.decode(res.body) as Map<String,dynamic>;
-    var months = (aux['terms'] as List).map((e) =>
-        Month.utc(int.parse(e.substring(0,4)), int.parse(e.substring(5))));
+    var aux = json.decode(res.body) as Map<String, dynamic>;
+    var months = (aux['terms'] as List).map((e) => location == UTC
+        ? Month.utc(int.parse(e.substring(0, 4)), int.parse(e.substring(5)))
+        : Month(int.parse(e.substring(0, 4)), int.parse(e.substring(5)),
+            location: location));
     var values = (aux['values'] as List).cast<num>();
     return TimeSeries.from(months, values);
   }
@@ -72,9 +81,9 @@ class ForwardMarks2 {
   /// [curveNames] e.g. 'PWR_ISONE_HUB_DA_5x16_D_VOL', 'PWR_ISONE_HUB_DA_5x16_M_VOL'
   Future<Map<String, TimeSeries<num>>> getVolCurvesForAsOfDate(
       {required List<String> curveNames,
-        required CallPut callPut,
-        required num strikeRatio,
-        required Date asOfDate}) async {
+      required CallPut callPut,
+      required num strikeRatio,
+      required Date asOfDate}) async {
     var url =
         '$rootUrl/$baseUrl/vol/curvenames/${curveNames.join(',')}/option_type/${callPut.toString()}/strike_ratio/$strikeRatio/asofdate/${asOfDate.toString()}';
     var res = await _client.get(Uri.parse(url));
@@ -88,6 +97,7 @@ class ForwardMarks2 {
   /// [strip] needs to be a month range
   /// Need the [location] info to get the correct price calculation.
   /// Need the [bucket] info to do the correct aggregation.
+  /// Return a [TimeSeries] in with intervals in the [location] specified.
   Future<TimeSeries<num>> getCurveStrip({
     required String curveName,
     required Term strip,
