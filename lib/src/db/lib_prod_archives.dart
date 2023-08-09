@@ -10,6 +10,9 @@ CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'cme', collectionName: 'settlements');
   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Cme/Settlements/Energy/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
   return CmeSettlementsEnergyArchive(dbConfig: dbConfig, dir: dir);
 }
 
@@ -17,5 +20,8 @@ RetailSuppliersOffersArchive getRetailSuppliersOffersArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'retail_suppliers', collectionName: 'historical_offers');
   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/RateBoardOffers/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
   return RetailSuppliersOffersArchive(dbConfig: dbConfig, dir: dir);
 }
