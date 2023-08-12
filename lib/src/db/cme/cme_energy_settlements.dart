@@ -21,9 +21,6 @@ class CmeSettlementsEnergyArchive {
             dbName: 'cme',
             collectionName: 'settlements');
     this.dir = dir ?? '$baseDir../Cme/Settlements/Energy/Raw/';
-    if (!Directory(this.dir).existsSync()) {
-      Directory(this.dir).createSync(recursive: true);
-    }
   }
 
   final String reportName =

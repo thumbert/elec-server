@@ -43,7 +43,10 @@ Future<void> tests() async {
   var days = Term.parse('Jul23', UTC).days();
   // await insertDays(DaLmpHourlyArchive(), days);
 
-  await updateCmeEnergySettlements(days, setUp: false);
+  // await updateCmeEnergySettlements(days, setUp: false);
+
+  await updatePolygraphProjects(setUp: true);
+
 }
 
 void main() async {

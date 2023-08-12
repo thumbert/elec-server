@@ -25,6 +25,7 @@ import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart' as nyiso_ptids;
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart'
     as nyiso_tcc_clearing_prices;
 import 'package:elec_server/api/pjm/api_pjm_ptids.dart' as pjm_ptids;
+import 'package:elec_server/api/polygraph/api_polygraph.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/api/utilities/api_retail_suppliers_offers.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
@@ -108,6 +109,12 @@ Future<Router> buildRouter() async {
     router.mount(key, value);
   });
 
+  await DbProd.polygraph.open();
+  <String, Router>{
+    '/polygraph/v1/': ApiPolygraph(DbProd.polygraph).router,
+  }.forEach((key, value) {
+    router.mount(key, value);
+  });
 
   await DbProd.riskSystem.open();
   router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);

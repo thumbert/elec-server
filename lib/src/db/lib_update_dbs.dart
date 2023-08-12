@@ -1,5 +1,6 @@
 library lib.src.db.lib_update_dbs;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -80,3 +81,20 @@ Future<void> updateDailyArchive(
   await archive.dbConfig.db.close();
 }
 
+Future<void> updatePolygraphProjects({bool setUp = false}) async {
+  var archive = prod.getPolygraphArchive();
+  var files = archive.dir
+      .listSync()
+      .whereType<File>()
+      .where((e) => e.path.endsWith('.json'))
+      .toList();
+
+  var projects = [for (var file in files) archive.readFile(file)];
+
+  await archive.setupDb();
+  await archive.dbConfig.db.open();
+  for (var project in projects) {
+    await archive.insertData(project);
+  }
+  await archive.dbConfig.db.close();
+}
