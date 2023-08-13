@@ -24,17 +24,20 @@ class ApiPolygraph {
       return Response.ok(json.encode(users), headers: headers);
     });
 
-    router.get('/user/<userId>/project_names', (Request request, String userId) async {
+    router.get('/user/<userId>/project_names',
+        (Request request, String userId) async {
+      userId = Uri.decodeComponent(userId);
       var projects = await projectsForUserId(userId);
       return Response.ok(json.encode(projects), headers: headers);
     });
 
     router.get('/user/<userId>/project_name/<projectName>',
-            (Request request, String userId, String projectName) async {
-          projectName = Uri.decodeComponent(projectName);
-          var project = await getProject(userId, projectName);
-          return Response.ok(json.encode(project), headers: headers);
-        });
+        (Request request, String userId, String projectName) async {
+      userId = Uri.decodeComponent(userId);
+      projectName = Uri.decodeComponent(projectName);
+      var project = await getProject(userId, projectName);
+      return Response.ok(json.encode(project), headers: headers);
+    });
 
     /// If the calculator already exists in the collection, it will fail.
     router.post('/save_project', (Request request) async {
@@ -46,10 +49,12 @@ class ApiPolygraph {
     });
 
     router.delete('/user/<userId>/project_name/<projectName>',
-            (Request request, String userId, String projectName) async {
-          await removeProject(userId, projectName);
-          return Response.ok(json.encode({'ok': 1.0}), headers: headers);
-        });
+        (Request request, String userId, String projectName) async {
+      userId = Uri.decodeComponent(userId);
+      projectName = Uri.decodeComponent(projectName);
+      var out = await removeProject(userId, projectName);
+      return Response.ok(json.encode({'ok': out}), headers: headers);
+    });
 
     return router;
   }
@@ -62,29 +67,27 @@ class ApiPolygraph {
   }
 
   Future<List<String>> projectsForUserId(String userId) async {
-    var data =
-    await coll.distinct('calculatorName', where.eq('userId', userId));
+    var data = await coll.distinct('projectName', where.eq('userId', userId));
     var names = (data['values'] as List).cast<String>();
     names.sort((a, b) => a.compareTo(b));
     return names;
   }
 
-  Future<Map<String,dynamic>> getProject(
+  Future<Map<String, dynamic>> getProject(
       String userId, String projectName) async {
-    var res = await (coll
-        .findOne({'userId': userId, 'projectName': projectName}));
+    var res =
+        await (coll.findOne({'userId': userId, 'projectName': projectName}));
     if (res == null) {
-      return <String,dynamic>{};
+      return <String, dynamic>{};
     } else {
       res.remove('_id');
       return res;
     }
   }
 
-  Future<Map<String,dynamic>> removeProject(
+  Future<Map<String, dynamic>> removeProject(
       String userId, String projectName) async {
-    var res =
-    await coll.remove({'userId': userId, 'calculatorName': projectName});
+    var res = await coll.remove({'userId': userId, 'projectName': projectName});
     var out = <String, dynamic>{'err': res['err'], 'ok': res['ok']};
     return out;
   }
