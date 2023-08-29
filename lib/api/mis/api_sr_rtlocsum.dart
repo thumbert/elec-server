@@ -52,7 +52,22 @@ class SrRtLocSum {
             String columnName, String start, String end) async {
       columnName = Uri.decodeComponent(columnName);
       var aux = await apiGetTab0ByLocationColumn(
-          accountId, int.parse(locationId), columnName, start, end);
+          accountId, [int.parse(locationId)], columnName, start, end, null);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/accountId/<accountId>/locations/<locations>/column/<columnName>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String accountId, String locations, String columnName,
+            String start, String end, String settlement) async {
+      columnName = Uri.decodeComponent(columnName);
+      var aux = await apiGetTab0ByLocationColumn(
+          accountId,
+          locations.split(',').map((e) => int.parse(e)).toList(),
+          columnName,
+          start,
+          end,
+          int.parse(settlement));
       return Response.ok(json.encode(aux), headers: headers);
     });
 
@@ -74,6 +89,7 @@ class SrRtLocSum {
       return Response.ok(json.encode(aux), headers: headers);
     });
 
+    /// Get all columns for this location, all settlements
     router.get(
         '/accountId/<accountId>/subaccountId/<subaccountId>/locationId/<locationId>/start/<start>/end/<end>',
         (Request request, String accountId, String subaccountId,
@@ -110,6 +126,28 @@ class SrRtLocSum {
       columnName = Uri.decodeComponent(columnName);
       var aux = await apiGetTab1ByLocationColumnDaily(accountId, subaccountId,
           int.parse(locationId), columnName, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    router.get(
+        '/daily/accountId/<accountId>/subaccountId/<subaccountId>/locations/<locations>/column/<columnName>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request,
+            String accountId,
+            String subaccountId,
+            String locations,
+            String columnName,
+            String start,
+            String end,
+            String settlement) async {
+      columnName = Uri.decodeComponent(columnName);
+      var aux = await apiGetTab1ByLocationColumnDailySettlement(
+          accountId,
+          subaccountId,
+          locations.split(',').map((e) => int.parse(e)).toList(),
+          columnName,
+          start,
+          end,
+          int.parse(settlement));
       return Response.ok(json.encode(aux), headers: headers);
     });
 
@@ -178,41 +216,42 @@ class SrRtLocSum {
   }
 
   /// http://localhost:8080/sr_rtlocsum/v1/account/0000523477/start/20170101/end/20170101
-  /// Get all data in tab 0 for a given location.
+  /// Get all data in tab 0, all columns, locations, and settlements
   Future<List<Map<String, dynamic>>> apiGetTab0(
       String accountId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data =
-        await getHourlyData(accountId, null, null, null, startDate, endDate);
+    var data = await getHourlyData(
+        accountId, null, null, null, startDate, endDate, null);
     return _processStream(data);
   }
 
-  /// Get all data (all locations) for the account.
+  /// Get all columns for one location for the account.  All settlements.
   Future<List<Map<String, dynamic>>> apiGetTab0ByLocation(
       String accountId, int locationId, String start, String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
-        accountId, null, locationId, null, startDate, endDate);
+        accountId, null, [locationId], null, startDate, endDate, null);
     return _processStream(data, hasLocationId: false);
   }
 
   /// Get one location, one column for the account.
   Future<List<Map<String, dynamic>>> apiGetTab0ByLocationColumn(
       String accountId,
-      int locationId,
+      List<int> locations,
       String columnName,
       String start,
-      String end) async {
+      String end,
+      int? settlement) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
-        accountId, null, locationId, columnName, startDate, endDate);
+        accountId, null, locations, columnName, startDate, endDate, settlement);
     return _processStream(data, hasLocationId: false);
   }
 
-  /// Get one location, one column for the account.
+  /// Get one location, one column for the account, all settlements
   Future<List<Map<String, dynamic>>> apiGetTab0ByLocationColumnDaily(
       String accountId,
       int locationId,
@@ -222,7 +261,7 @@ class SrRtLocSum {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     return getDailyDataColumn(
-        accountId, null, locationId, columnName, startDate, endDate);
+        accountId, null, [locationId], columnName, startDate, endDate, null);
   }
 
   /// Get all data in tab 1 for all locations.
@@ -231,7 +270,7 @@ class SrRtLocSum {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
-        accountId, subaccountId, null, null, startDate, endDate);
+        accountId, subaccountId, null, null, startDate, endDate, null);
     return _processStream(data);
   }
 
@@ -241,7 +280,7 @@ class SrRtLocSum {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
     var data = await getHourlyData(
-        accountId, subaccountId, locationId, null, startDate, endDate);
+        accountId, subaccountId, [locationId], null, startDate, endDate, null);
     return _processStream(data, hasLocationId: false);
   }
 
@@ -255,12 +294,13 @@ class SrRtLocSum {
       String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    var data = await getHourlyData(
-        accountId, subaccountId, locationId, columnName, startDate, endDate);
+    var data = await getHourlyData(accountId, subaccountId, [locationId],
+        columnName, startDate, endDate, null);
     return _processStream(data, hasLocationId: false);
   }
 
-  /// Get all data for a subaccount for a given location, one column.
+  /// Get all data for a subaccount for a given location, one column,
+  /// all settlements
   Future<List<Map<String, dynamic>>> apiGetTab1ByLocationColumnDaily(
       String accountId,
       String subaccountId,
@@ -270,8 +310,23 @@ class SrRtLocSum {
       String end) async {
     var startDate = Date.parse(start);
     var endDate = Date.parse(end);
-    return getDailyDataColumn(
-        accountId, subaccountId, locationId, columnName, startDate, endDate);
+    return getDailyDataColumn(accountId, subaccountId, [locationId], columnName,
+        startDate, endDate, null);
+  }
+
+  /// Get all data for a subaccount for a given location, one column.
+  Future<List<Map<String, dynamic>>> apiGetTab1ByLocationColumnDailySettlement(
+      String accountId,
+      String subaccountId,
+      List<int> locationIds,
+      String columnName,
+      String start,
+      String end,
+      int settlement) async {
+    var startDate = Date.parse(start);
+    var endDate = Date.parse(end);
+    return getDailyDataColumn(accountId, subaccountId, locationIds, columnName,
+        startDate, endDate, settlement);
   }
 
   /// Get monthly total load for a subaccount for a given location, one settlement.
@@ -502,7 +557,7 @@ class SrRtLocSum {
     var aux = getNthSettlement(data, (e) => e['date'], n: settlement);
     var nest = Nest()
       ..key((e) => e['date'].substring(0, 7))
-      ..rollup((List xs) => -sum(xs.map(((e) => (e['value'] as num?)!) as num Function(dynamic))));
+      ..rollup((List xs) => -sum(xs.map(((e) => (e['value'] as num)))));
     var out = nest.map(aux);
     return Map<String, dynamic>.from(out);
   }
@@ -535,15 +590,18 @@ class SrRtLocSum {
   /// Extract data from the collection
   /// returns one element for each day
   /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
-  /// If [locationId] is [null] return all locations
+  /// If [locationIds] is null return all locations
   /// If [column] is [null] return all columns
+  /// If [settlement] is [null] return all settlements
+  ///
   Future<List<Map<String, dynamic>>> getHourlyData(
       String account,
       String? subaccountId,
-      int? locationId,
+      List<int>? locationIds,
       String? column,
       Date startDate,
-      Date endDate) async {
+      Date endDate,
+      int? settlement) async {
     var excludeFields = <String>['_id', 'account', 'tab', 'date'];
 
     var query = where;
@@ -557,8 +615,8 @@ class SrRtLocSum {
     }
     query.gte('date', startDate.toString());
     query.lte('date', endDate.toString());
-    if (locationId != null) {
-      query.eq('Location ID', locationId);
+    if (locationIds != null) {
+      query.oneFrom('Location ID', locationIds);
     }
 
     if (column == null) {
@@ -567,21 +625,27 @@ class SrRtLocSum {
       query.excludeFields(['_id']);
       query.fields(['hourBeginning', 'version', column]);
     }
-    return coll.find(query).toList();
+    var aux = coll.find(query).toList();
+    if (settlement != null) {
+      /// FIXME:  implement this
+    }
+
+    return aux;
   }
 
   /// Extract data from the collection
   /// returns one element for each day
   /// If [subaccountId] is [null] return data from tab 0 (the aggregated data)
-  /// If [locationId] is [null] return all locations
+  /// If [locationIds] is [null] return all locations
   /// If [column] is [null] return all columns
   Future<List<Map<String, dynamic>>> getDailyDataColumn(
       String account,
       String? subaccountId,
-      int locationId,
+      List<int> locationIds,
       String column,
       Date startDate,
-      Date endDate) async {
+      Date endDate,
+      int? settlement) async {
     var pipeline = [
       {
         '\$match': {
@@ -592,7 +656,7 @@ class SrRtLocSum {
           'account': {'\$eq': account},
           'tab': {'\$eq': (subaccountId == null) ? 0 : 1},
           if (subaccountId != null) 'Subaccount ID': {'\$eq': subaccountId},
-          if (locationId != null) 'Location ID': {'\$eq': locationId},
+          if (locationIds.isNotEmpty) 'Location ID': {'\$in': locationIds},
         }
       },
       {
@@ -600,7 +664,7 @@ class SrRtLocSum {
           '_id': 0,
           'date': '\$date',
           'version': {'\$toString': '\$version'},
-          if (locationId == null) 'Location ID': '\$Location ID',
+          if (locationIds.isNotEmpty) 'Location ID': '\$Location ID',
           column: {'\$sum': '\$$column'},
         }
       },
@@ -611,6 +675,10 @@ class SrRtLocSum {
       }
     ];
     var res = await coll.aggregateToStream(pipeline).toList();
+    if (settlement != null) {
+      /// FIXME:  return only the settlement you're interested in.
+    }
+
     return res;
   }
 }
