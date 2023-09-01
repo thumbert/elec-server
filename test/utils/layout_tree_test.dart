@@ -290,6 +290,14 @@ void main() {
       expect(x11.children.first.height(), 300);
     });
 
+    test('Split multiple times', () {
+      var root = SingleNode(900, 600);
+      var h2 = root.splitHorizontally(2);
+      var v3 = h2.splitVertically(0) as ColumnNode;
+      var v4 = v3.splitVertically(2);
+      expect(v4.flatten().length, 4);
+    });
+
     test('Tree traversal', () {
       var root = WindowNode.fromJson({
         'node': 'Row',
