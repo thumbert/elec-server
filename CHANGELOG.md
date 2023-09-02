@@ -10,6 +10,9 @@
   script.
 
 
+## Release 2023-08-13
+- Make API for polygraph projects.
+
 ## Release 2023-07-29
 - Improved tests for cme data api and client.
 - Moved the web documentation in web/apps/public folder for simple_web_server

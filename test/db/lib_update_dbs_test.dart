@@ -45,7 +45,7 @@ Future<void> tests() async {
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
-  await updatePolygraphProjects(setUp: true);
+  await updatePolygraphProjects(setUp: false);
 
 }
 

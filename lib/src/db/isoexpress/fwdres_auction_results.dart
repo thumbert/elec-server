@@ -151,6 +151,8 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
         'https://www.iso-ne.com/static-assets/documents/2017/04/fr_auction_sum2017.csv',
     'Summer 16':
         'https://www.iso-ne.com/static-assets/documents/2016/04/fr_auction_sum2016.csv',
+    'Winter 23-24':
+        'https://www.iso-ne.com/static-assets/documents/2023/08/forward_reserve_auction_results.csv',
     'Winter 22-23':
         'https://www.iso-ne.com/static-assets/documents/2022/08/forward_reserve_auction_results.csv',
     'Winter 21-22':

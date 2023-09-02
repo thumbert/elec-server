@@ -38,6 +38,7 @@ import 'db/nyiso/rt_lmp_hourly_test.dart' as nyiso_rtlmp;
 import 'db/nyiso/masked_ids_test.dart' as nyiso_masked_ids;
 import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
+import 'db/polygraph/polygraph_archive_test.dart' as polygraph;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
 import 'db/utilities/retail_offers/retail_supply_offer_test.dart'
     as retail_offer;
@@ -77,11 +78,12 @@ Future<void> main() async {
   await nyiso_dalmp.tests(rootUrl);
   await nyiso_dacongestion.tests(rootUrl);
   await nyiso_daenergyoffer.tests(rootUrl);
-
   await nyiso_rtlmp.tests(rootUrl);
   await nyiso_masked_ids.tests(rootUrl);
   await nyiso_ptids.tests(rootUrl);
+
   await pjm_ptids.tests(rootUrl);
+  await polygraph.tests(rootUrl);
   await ptids.tests(rootUrl);
   await regulation_requirement.tests(rootUrl);
   await retail_offers.tests(rootUrl);

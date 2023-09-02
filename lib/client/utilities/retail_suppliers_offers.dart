@@ -47,6 +47,9 @@ class RetailSuppliersOffers {
   }
 
   /// Return the list of offers posted between a start/end date.
+  /// [term] corresponds to when the offer was placed not the duration of the
+  /// contract.
+  ///
   Future<List<RetailSupplyOffer>> getOffers(
   {required String region, required String state, required Term term}) async {
     var url =

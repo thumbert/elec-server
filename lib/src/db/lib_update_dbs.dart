@@ -81,8 +81,10 @@ Future<void> updateDailyArchive(
   await archive.dbConfig.db.close();
 }
 
+
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();
+  /// currently, files are written by quiver/test/model/polygraph/other/serde_test.dart
   var files = archive.dir
       .listSync()
       .whereType<File>()
