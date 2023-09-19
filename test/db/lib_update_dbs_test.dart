@@ -40,12 +40,12 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
 
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
-  var days = Term.parse('Jul23', UTC).days();
-  // await insertDays(DaLmpHourlyArchive(), days);
+  var days = Term.parse('24May22-31May22', UTC).days();
+  await insertDays(DaLmpHourlyArchive(), days);
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
-  await updatePolygraphProjects(setUp: false);
+  // await updatePolygraphProjects(setUp: false);
 
 }
 

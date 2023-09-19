@@ -34,8 +34,8 @@ class MonthlyAssetNcpcArchive extends IsoExpressReport {
       File(dir + 'monthly_asset_ncpc_' + month.toIso8601String() + '.json');
 
   Future downloadMonth(Month month) async {
-    var _user = dotenv.env['isone_ws_user']!;
-    var _pwd = dotenv.env['isone_ws_password']!;
+    var _user = dotenv.env['ISONE_WS_USER']!;
+    var _pwd = dotenv.env['ISONE_WS_PASSWORD']!;
     await downloadUrl(getUrl(month), getFilename(month),
         username: _user, password: _pwd, acceptHeader: 'application/json');
   }

@@ -3,6 +3,9 @@
 ## TODO:
 - Clean up all the lints, warnings
 
+## Release 2023-09-19
+- .env variables capitalized.
+
 ## Release 2023-08-13
 - Make API for polygraph projects.
 
