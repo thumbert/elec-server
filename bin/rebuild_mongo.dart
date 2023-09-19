@@ -1,23 +1,29 @@
+
 import 'dart:io';
+import 'package:elec_server/src/db/lib_update_dbs.dart';
+import 'package:http/http.dart';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart';
+import 'package:timezone/data/latest.dart';
+import 'package:timezone/timezone.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
-import 'package:elec_server/api/mis/api_sd_rtload.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
+import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
-import 'package:elec_server/src/db/isoexpress/da_regulation_offer.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/isoexpress/monthly_asset_ncpc.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/marks/curves/curve_id.dart';
-import 'package:elec_server/src/db/mis/sd_arrawdsum.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/mis/sr_dalocsum.dart';
 import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
@@ -38,12 +44,22 @@ import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_ng.dart' as id
 import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart' as id_isone;
 
 
-import 'package:http/http.dart';
-import 'package:path/path.dart';
-import 'package:timezone/data/latest.dart';
-import 'package:timezone/timezone.dart';
+Future<void> recreateCmeMarks() async {
+  var archive = CmeSettlementsEnergyArchive();
+  await archive.setupDb();
+  var files = Directory(archive.dir)
+      .listSync()
+      .whereType<File>()
+      .where((e) => e.path.endsWith('.zip'))
+      .toList();
+  await archive.dbConfig.db.open();
+  for (var file in files) {
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
 
-import 'setup_db.dart';
 
 Future<void> recreateDaBindingConstraintsIsone() async {
   var archive = DaBindingConstraintsReportArchive();
@@ -460,47 +476,57 @@ Future<void> recreateWholesaleLoadCostReportIsone() async {
 
 
 
-/// If you have a fresh Mongo install, recreate the db from the
+/// If you have a fresh MongoDB install, recreate the db from the
 /// backup files in the archive folder.
 ///
+/// The Archive folder needs to be already populated with the files of interest.
 ///
 Future<void> main() async {
   initializeTimeZones();
+  Logger.root.level = Level.INFO;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+  dotenv.load('.env/prod.env');
+
+
+  /// NOTE:  the bin/server.dart needs to be running
 
   /// This creation order needs to be preserved!
   /// ISONE
-  await recreateDaBindingConstraintsIsone();
-  await recreateDaLmpHourlyIsone();
-  await recreateRtLmpHourlyIsone();
-  await recreateDaCongestionCompactIsone();
-  await recreateDaDemandBid();
-  await recreateDaEnergyOffersIsone();
-  await recreateFwdResAuctionResults();
-  await insertMaskedAssetIdsIsone();
-  await recreatePtidTableIsone();
-  await recreateRegulationRequirementIsone();
-  await recreateCompetitiveOffersIsone();
-  await recreateMisTemplateArchive();
-  await recreateWholesaleLoadCostReportIsone();
+  // await recreateDaBindingConstraintsIsone();
+  // await recreateDaLmpHourlyIsone();
+  // await recreateRtLmpHourlyIsone();
+  // await recreateDaCongestionCompactIsone();
+  // await recreateDaDemandBid();
+  // await recreateDaEnergyOffersIsone();
+  // await recreateFwdResAuctionResults();
+  // await insertMaskedAssetIdsIsone();
+  // await recreatePtidTableIsone();
+  // await recreateRegulationRequirementIsone();
+  // await recreateCompetitiveOffersIsone();
+  // await recreateMisTemplateArchive();
+  // await recreateWholesaleLoadCostReportIsone();
 
   /// NYISO
-  await insertMaskedAssetIdsNyiso();
-  await recreateMonthlyAssetNcpc();
-  await recreateDaBindingConstraintsNyiso();
-  await recreateDaLmpHourlyNyiso();
-  await recreateTccClearedPricesNyiso();
-  await recreateDaCongestionCompactNyiso();
-  await recreateDaEnergyOffersNyiso();
-  await recreateRtLmpHourlyNyiso();
-  await recreatePtidTableNyiso();
+  // await insertMaskedAssetIdsNyiso();
+  // await recreateMonthlyAssetNcpc();
+  // await recreateDaBindingConstraintsNyiso();
+  // await recreateDaLmpHourlyNyiso();
+  // await recreateTccClearedPricesNyiso();
+  // await recreateDaCongestionCompactNyiso();
+  // await recreateDaEnergyOffersNyiso();
+  // await recreateRtLmpHourlyNyiso();
+  // await recreatePtidTableNyiso();
 
   /// PJM
-  await recreatePtidTablePjm();
-
+  // await recreatePtidTablePjm();
 
   /// Other
-  await recreateNoaaTemperatures();
-  await rebuildCurveIds();
-  await insertForwardMarks();
+  // await recreateNoaaTemperatures();
+  // await rebuildCurveIds();
+  // await insertForwardMarks();
+  await recreateCmeMarks();
+  await updatePolygraphProjects(setUp: true);
 
 }

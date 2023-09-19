@@ -2,6 +2,13 @@
 
 ## TODO:
 - Clean up all the lints, warnings
+- Zip the json files for lower disk usage.  For daily archives, keep one 
+  zip file for a year worth of data.  
+
+## Release 2023-09-xx
+- Add the Polygraph projects db and the CME settlement data to the bin/rebuild_mongo 
+  script.
+
 
 ## Release 2023-09-19
 - .env variables capitalized.
