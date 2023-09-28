@@ -8,6 +8,7 @@
 ## Release 2023-09-xx
 - Add the Polygraph projects db and the CME settlement data to the bin/rebuild_mongo 
   script.
+- Started work on CT supliers backlog archive. 
 
 
 ## Release 2023-08-13

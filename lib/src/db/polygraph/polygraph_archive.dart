@@ -71,7 +71,7 @@ class PolygraphArchive {
         await dbConfig.coll
             .remove({'userName': userId, 'projectName': projectName});
         await dbConfig.coll.insertOne(data);
-        log.info('--->  Inserted project "$projectName" into database');
+        log.info('--->  Inserted project "$userId/$projectName" into database');
         return 0;
       } catch (e) {
         log.severe('xxxx ERROR xxxx $e');

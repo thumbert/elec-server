@@ -40,12 +40,17 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
 
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
-  var days = Term.parse('Jul23', UTC).days();
+  // var days = Term.parse('Cal21', UTC).days();
   // await insertDays(DaLmpHourlyArchive(), days);
 
   // await updateCmeEnergySettlements(days, setUp: false);
+  await updateCtSuplierBacklogRatesDb(months: [
+    Month.utc(2022, 12),
+    Month.utc(2023, 1),
+    Month.utc(2023, 2),
+  ]);
 
-  await updatePolygraphProjects(setUp: false);
+  // await updatePolygraphProjects(setUp: false);
 
 }
 
@@ -57,9 +62,9 @@ void main() async {
   });
   dotenv.load('.env/prod.env');
 
+  await tests();
+
   ///
   /// See bin/setup_db.dart on how to update a database
   ///
-
-  await tests();
 }
