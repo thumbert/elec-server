@@ -5,11 +5,18 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
-## Release 2023-09-xx
+## Release 2023-09-28
 - Add the Polygraph projects db and the CME settlement data to the bin/rebuild_mongo 
   script.
 - Started work on CT supliers backlog archive. 
 
+## Release 2023-09-27
+- Change Plotly.now arguments, require a file.  Add Plotly.exportJs. 
+
+## Release 2023-09-19
+- .env variables capitalized.
+- Add the Polygraph projects db and the CME settlement data to the bin/rebuild_mongo
+  script.
 
 ## Release 2023-08-13
 - Make API for polygraph projects.

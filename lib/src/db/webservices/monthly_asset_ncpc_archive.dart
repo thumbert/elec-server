@@ -34,8 +34,8 @@ class AssetNcpcArchive {
       File(dir! + 'asset_ncpc_' + month.toIso8601String() + '.json');
 
   Future downloadMonth(Month month) async {
-    var _user = Platform.environment['isone_ws_user']!;
-    var _pwd = Platform.environment['isone_ws_password']!;
+    var _user = Platform.environment['ISONE_WS_USER']!;
+    var _pwd = Platform.environment['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
       ..addCredentials(

@@ -144,8 +144,8 @@ class RtLmpHourlyArchive extends DailyIsoExpressReport {
 
   @override
   Future downloadDay(Date day) async {
-    var user = dotenv.env['isone_ws_user']!;
-    var pwd = dotenv.env['isone_ws_password']!;
+    var user = dotenv.env['ISONE_WS_USER']!;
+    var pwd = dotenv.env['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(day)), '',

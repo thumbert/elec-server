@@ -22,8 +22,9 @@ Future<void> tests(String rootUrl) async {
     // tearDown(() async => await archive.db.close());
     test('read current critical ids', () async {
       var uris = await archive.getUris(pipeline: 'AG', type: 'CRI');
-      // await archive.saveUrisToDisk(uris);
-      await archive.savePdfToDisk(Month.utc(2020,1).upTo(Month.utc(2022, 8)));
+      print(uris);
+      // await archive.saveUrisToDisk(uris); // not working correctly
+      await archive.savePdfToDisk(Month.utc(2023,7).upTo(Month.utc(2023, 8)));
       expect(uris.length > 12, true);
     });
   });
@@ -32,5 +33,5 @@ Future<void> tests(String rootUrl) async {
 Future<void> main() async {
   initializeTimeZones();
   var rootUrl = 'http://127.0.0.1:8080';
-  tests(rootUrl);
+  await tests(rootUrl);
 }

@@ -3,6 +3,7 @@ library test.utils.lib_plotly_test;
 import 'dart:io';
 
 import 'package:elec_server/src/utils/lib_plotly.dart';
+import 'package:test/test.dart';
 
 var page = """ 
 <!DOCTYPE html>
@@ -23,7 +24,8 @@ var page = """
 </html>
 """;
 
-void test1() {
+
+void test1a() {
   const traces = [
     {
       'x': [1, 2, 3, 4],
@@ -47,9 +49,27 @@ void test1() {
     'width': 800
   };
 
-  Plotly.now(traces, layout, cleanUp: true);
+  Plotly.now(traces, layout, file: File('${Platform.environment['HOME']}/Downloads/test_plot.html'));
 }
 
+void test1b() {
+  const traces = [
+    {
+      'x': [1, 2, 3, 4],
+      'y': [10, 15, 13, 17],
+      'mode': 'markers'
+    },
+  ];
+  const layout = {
+    'title': 'Scatter Plot',
+    'height': 650,
+    'width': 800
+  };
+  Plotly.exportJs(traces, layout, file: File('${Platform.environment['HOME']}/Downloads/test_plot.js'));
+}
+
+
 void main() {
-  test1();
+  // test1a();
+  test1b();
 }

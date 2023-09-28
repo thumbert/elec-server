@@ -37,8 +37,8 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
   File getFilename(Month month, int ptid) => File('${dir}whlsecost_hourly_${ptid}_${month.toIso8601String().replaceAll('-', '')}.json');
 
   Future<void> downloadFile(Month month, int ptid) async {
-    var _user = dotenv.env['isone_ws_user']!;
-    var _pwd = dotenv.env['isone_ws_password']!;
+    var _user = dotenv.env['ISONE_WS_USER']!;
+    var _pwd = dotenv.env['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(month, ptid)), '',
