@@ -1,4 +1,4 @@
-library elec_server.db;
+library elec_server.db_nyiso;
 
 export 'src/db/lib_nyiso_reports.dart';
 

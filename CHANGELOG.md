@@ -7,7 +7,7 @@
 
 ## Release 2023-10-01
 - IESO work.  Archive the rt_zonal_demand and rt_generation.  
-
+- Export db_ieso library
 
 ## Release 2023-09-28
 - Add the Polygraph projects db and the CME settlement data to the bin/rebuild_mongo 
