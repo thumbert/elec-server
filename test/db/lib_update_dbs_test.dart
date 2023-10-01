@@ -49,8 +49,17 @@ Future<void> tests() async {
 
   // var years = IntegerRange(2013, 2023);
   // await updateIesoRtZonalDemandArchive(years: [2023]);
+  // var days = Term.parse('Cal21', UTC).days();
+  // await insertDays(DaLmpHourlyArchive(), days);
+  var days = Term.parse('24May22-31May22', UTC).days();
+  await insertDays(DaLmpHourlyArchive(), days);
 
   // await updateCmeEnergySettlements(days, setUp: false);
+  await updateCtSuplierBacklogRatesDb(months: [
+    Month.utc(2022, 12),
+    Month.utc(2023, 1),
+    Month.utc(2023, 2),
+  ]);
 
   // await updatePolygraphProjects(setUp: false);
 
@@ -64,9 +73,9 @@ void main() async {
   });
   dotenv.load('.env/prod.env');
 
+  await tests();
+
   ///
   /// See bin/setup_db.dart on how to update a database
   ///
-
-  await tests();
 }

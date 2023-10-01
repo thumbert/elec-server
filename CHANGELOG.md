@@ -8,6 +8,12 @@
 ## Release 2023-10-01
 - IESO work.  Archive the rt_zonal_demand and rt_generation.  
 
+
+## Release 2023-09-28
+- Add the Polygraph projects db and the CME settlement data to the bin/rebuild_mongo 
+  script.
+- Started work on CT supliers backlog archive. 
+
 ## Release 2023-09-27
 - Change Plotly.now arguments, require a file.  Add Plotly.exportJs. 
 

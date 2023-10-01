@@ -7,6 +7,7 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
+import 'package:elec_server/src/db/utilities/eversource/supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 
 CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
@@ -34,12 +35,23 @@ IesoRtGenerationArchive getIesoRtGenerationArchive() {
 IesoRtZonalDemandArchive getIesoRtZonalDemandArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'ieso', collectionName: 'rt_zonal_demand');
-  var dir=Directory('${Platform.environment['HOME'] ?? ''}'
+  var dir = Directory('${Platform.environment['HOME'] ?? ''}'
       '/Downloads/Archive/Ieso/RtZonalDemand/Raw/');
   if (!dir.existsSync()) {
     dir.createSync(recursive: true);
   }
   return IesoRtZonalDemandArchive(dbConfig: dbConfig, dir: dir.path);
+}
+
+CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1', dbName: 'retail_suppliers',
+      collectionName: 'ct_backlog_rates');
+  var archive = CtSupplierBacklogRatesArchive(dbConfig: dbConfig);
+  if (!Directory(archive.dir).existsSync()) {
+    Directory(archive.dir).createSync(recursive: true);
+  }
+  return archive;
 }
 
 PolygraphArchive getPolygraphArchive() {

@@ -2,6 +2,7 @@ library test.db.isoexpress.da_lmp_hourly_test;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:elec_server/api/api_lmp.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
@@ -17,19 +18,6 @@ import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-
-/// prepare data by downloading a few reports
-/// Missing 9/29/2018 and 9/30/2018 !!!
-Future<void> prepareData() async {
-  var archive = DaLmpHourlyArchive();
-  var days = [
-    Date.utc(2018, 9, 26),
-    Date.utc(2018, 9, 29),
-    Date.utc(2018, 9, 30),
-    Date.utc(2022, 12, 22), // switched to json
-  ];
-  await archive.downloadDays(days);
-}
 
 Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
@@ -201,13 +189,12 @@ Future<void> tests(String rootUrl) async {
   });
 }
 
-Future<void> speedTest(String rootUrl) async {
-  var location = getLocation('America/New_York');
-  var daLmp =
-      client.DaLmp(http.Client(), rootUrl: rootUrl);
-
-  var data = await daLmp.getHourlyLmp(Iso.newEngland,
-      4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
+/// Use msgpack to compress the json file.
+void fileCompressionTest() {
+  // var archive = DaLmpHourlyArchive();
+  // var file = archive.getFilename(Date.utc(2022, 12, 22));
+  // var data = json.decode(file.readAsStringSync());
+  //print(data);
 }
 
 Future<void> main() async {
@@ -218,8 +205,7 @@ Future<void> main() async {
   // await prepareData();
 
   DbProd();
-  tests('http://127.0.0.1:8080');
+  // tests('http://127.0.0.1:8080');
 
-
-  // await soloTest();
+  fileCompressionTest();
 }

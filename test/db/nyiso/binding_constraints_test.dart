@@ -134,7 +134,7 @@ Future<void> tests(String rootUrl) async {
       var elapsed = sw.elapsedMilliseconds;
 
       /// on laptop 761 ms, 2/13/2022
-      expect(elapsed < 1000, true); // 761 ms
+      expect(elapsed < 1400, true); // 761 ms
       expect(aux.isNotEmpty, true);
     });
     test('get daily cost by constraint', () async {

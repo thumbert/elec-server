@@ -1,16 +1,16 @@
 library lib.src.db.lib_update_dbs;
 
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:elec_server/src/db/utilities/eversource/supplier_backlog_rates.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:timezone/timezone.dart';
 import 'lib_prod_archives.dart' as prod;
 
-
-Future<void> updateCmeEnergySettlements(List<Date> days, {bool setUp = false}) async {
+Future<void> updateCmeEnergySettlements(List<Date> days,
+    {bool setUp = false}) async {
   var archive = prod.getCmeEnergySettlementsArchive();
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
@@ -26,8 +26,8 @@ Future<void> updateCmeEnergySettlements(List<Date> days, {bool setUp = false}) a
 
 Future<int> updateCompetiveOffersDb(
     {List<Date>? days,
-      List<String>? states,
-      bool externalDownload = true}) async {
+    List<String>? states,
+    bool externalDownload = true}) async {
   days ??= [Date.today(location: UTC)];
   states ??= ['CT', 'MA'];
   var status = 0;
@@ -67,7 +67,34 @@ Future<int> updateCompetiveOffersDb(
   return status;
 }
 
+Future<int> updateCtSuplierBacklogRatesDb(
+    {required List<Month> months,
+    bool externalDownload = true,
+    bool setUp = false}) async {
+  var status = 0;
 
+  var archive = prod.getCtSupplierBacklogRatesArchive();
+  if (setUp) await archive.setupDb();
+  await archive.dbConfig.db.open();
+
+  for (var month in months) {
+    if (externalDownload) {
+      await archive.downloadFile(month, Utility.eversource);
+      await archive.downloadFile(month, Utility.ui);
+    }
+    // var file = archive.getFile(month, Utility.eversource);
+    // if (file.existsSync()) {
+    //   var data = archive.processFile(file);
+    //   await archive.insertData(data);
+    // } else {
+    //   print('No file for $month to process');
+    //   status = 1;
+    // }
+  }
+  await archive.dbConfig.db.close();
+
+  return status;
+}
 
 Future<void> updateDailyArchive(
     DailyIsoExpressReport archive, List<Date> days) async {
@@ -116,9 +143,9 @@ Future<void> updateIesoRtZonalDemandArchive({required List<int> years,
   await archive.dbConfig.db.close();
 }
 
-
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();
+
   /// currently, files are written by quiver/test/model/polygraph/other/serde_test.dart
   var files = archive.dir
       .listSync()

@@ -34,6 +34,10 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   String getUrl(Date asOfDate) =>
       'https://webservices.iso-ne.com/api/v1.1/hourlylmp/da/final/day/${yyyymmdd(asOfDate)}';
 
+  /// I encoded the json file using msgpack and got only a marginal improvement
+  /// to file size.  File size went down from 6.2 MB to 5.6 MB.  Zipping the
+  /// file reduces it to 0.5 MB.
+  ///
   @override
   File getFilename(Date asOfDate, {String extension = 'json'}) {
     if (extension == 'csv') {
@@ -82,17 +86,14 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   /// ```
   @override
   List<Map<String, dynamic>> processFile(File file) {
-    if (file.existsSync()) {
-      if (file.path.endsWith('.csv')) {
-        return _processFileCsv(file);
-      } else if (file.path.endsWith('.json')) {
-        return _processFileJson(file);
-      } else {
-        throw ArgumentError('Neither json or csv ${basename(file.path)} file exists!');
-      }
-    } else {
+    if (!file.existsSync()) {
       throw ArgumentError('File $file does not exist!');
     }
+    return switch (extension(file.path)) {
+      '.csv' => _processFileCsv(file),
+      '.json' => _processFileJson(file),
+      _ => throw ArgumentError('Unsupported file type'),
+    };
   }
 
   @override
