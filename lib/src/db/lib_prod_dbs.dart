@@ -13,6 +13,7 @@ class DbProd extends DbEnv {
 
   static final String mongoPort = '27017';
   static final cme = Db('mongodb://${DbProd._connection}/cme');
+  static final ieso = Db('mongodb://${DbProd._connection}/ieso');
   static final isoexpress = Db('mongodb://${DbProd._connection}/isoexpress');
   static final isone = Db('mongodb://${DbProd._connection}/isone');
   static final marks = Db('mongodb://${DbProd._connection}/marks');

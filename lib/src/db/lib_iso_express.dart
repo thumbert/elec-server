@@ -23,7 +23,7 @@ abstract class IsoExpressReport {
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.
-  Map<String, dynamic> converter(List<Map<String, dynamic>> rows);
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) => rows.first;
 
   /// Setup the database from scratch again, including the index
   Future<void> setupDb();
@@ -38,11 +38,15 @@ abstract class IsoExpressReport {
   /// Download this url to a file.
   /// Basic authentication is supported.
   /// [acceptHeader] can be set to 'application/json' if you need json output.
-  Future downloadUrl(String url, File fileout,
-      {bool overwrite = true,
-      String? username,
-      String? password,
-      String? acceptHeader}) async {
+  Future downloadUrl(
+    String url,
+    File fileout, {
+    bool overwrite = true,
+    String? username,
+    String? password,
+    String? acceptHeader,
+    bool zipFile = false,
+  }) async {
     if (fileout.existsSync() && !overwrite) {
       print('File ${fileout.path} was already downloaded.  Skipping.');
       return Future.value(1);
@@ -68,6 +72,15 @@ abstract class IsoExpressReport {
         await response.pipe(fileout.openWrite());
       } else {
         print('Error downloading, status code: ${response.statusCode}');
+      }
+      if (zipFile) {
+        var zipFilename =
+            basename(fileout.path).replaceAll(RegExp('\\.csv\$'), '.zip');
+        var res = Process.runSync('zip', [zipFilename, basename(fileout.path)],
+            workingDirectory: dir);
+        if (res.exitCode == 0) {
+          fileout.deleteSync();
+        }
       }
     }
   }

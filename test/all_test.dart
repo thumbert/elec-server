@@ -5,6 +5,8 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'client/marks/curves/curve_id_test.dart' as curve_id;
 import 'db/cme/cme_energy_settlements_test.dart' as cme;
+import 'db/ieso/rt_generation_test.dart' as ieso_rtgen;
+import 'db/ieso/rt_zonal_demand_test.dart' as ieso_rtzd;
 import 'db/isoexpress/da_binding_constraints_report_test.dart' as bc;
 import 'db/isoexpress/da_energy_offer_test.dart' as energy_offers;
 import 'db/isoexpress/da_demand_bid_test.dart' as demand_bids;
@@ -66,6 +68,8 @@ Future<void> main() async {
   /// db tests
   await bc.tests(rootUrl);
   await cme.tests(rootUrl);
+  await ieso_rtgen.tests(rootUrl);
+  await ieso_rtzd.tests(rootUrl);
   await da_congestion.tests(rootUrl);
   await dalmp.tests(rootUrl);
   await demand_bids.tests();

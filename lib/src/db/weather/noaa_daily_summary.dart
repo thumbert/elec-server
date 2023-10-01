@@ -115,7 +115,7 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
     await dbConfig.db.open();
     await dbConfig.db
         .createIndex(dbConfig.collectionName, keys: {'stationId': 1});
-    await dbConfig.db.open();
+    await dbConfig.db.close();
   }
 
   @override

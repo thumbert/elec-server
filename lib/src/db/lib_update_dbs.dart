@@ -82,6 +82,41 @@ Future<void> updateDailyArchive(
 }
 
 
+Future<void> updateIesoRtGenerationArchive({required List<Month> months,
+  bool setUp = false}) async {
+  var archive = prod.getIesoRtGenerationArchive();
+  if (setUp) await archive.setupDb();
+
+  await archive.dbConfig.db.open();
+  for (var month in months) {
+    var url = archive.getUrl(month);
+    var file = archive.getFilename(month, extension: 'csv');
+    await archive.downloadUrl(url, file, zipFile: true);
+    file = archive.getFilename(month, extension: 'zip');
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
+
+Future<void> updateIesoRtZonalDemandArchive({required List<int> years,
+  bool setUp = false}) async {
+  var archive = prod.getIesoRtZonalDemandArchive();
+  if (setUp) await archive.setupDb();
+
+  await archive.dbConfig.db.open();
+  for (var year in years) {
+    var url = archive.getUrl(year);
+    var file = archive.getFilename(year);
+    await archive.downloadUrl(url, file);
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
+
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();
   /// currently, files are written by quiver/test/model/polygraph/other/serde_test.dart

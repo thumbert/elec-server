@@ -1,5 +1,6 @@
 
 import 'dart:io';
+import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
@@ -267,6 +268,34 @@ Future<void> recreateDaEnergyOffersNyiso() async {
   await archive.dbConfig.db.close();
 }
 
+
+Future<void> recreateIesoRtGenerationArchive() async {
+  var archive = getIesoRtGenerationArchive();
+  await archive.setupDb();
+  await archive.dbConfig.db.open();
+
+  var files = Directory(archive.dir).listSync().whereType<File>();
+  for (var file in files) {
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
+Future<void> recreateIesoRtZonalDemandArchive() async {
+  var archive = getIesoRtZonalDemandArchive();
+  await archive.setupDb();
+  await archive.dbConfig.db.open();
+
+  var files = Directory(archive.dir).listSync().whereType<File>();
+  for (var file in files) {
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
+
 Future<void> recreateRtLmpHourlyNyiso() async {
   var archive = NyisoRtLmpHourlyArchive();
   await archive.dbConfig.db.open();
@@ -489,10 +518,13 @@ Future<void> main() async {
   });
   dotenv.load('.env/prod.env');
 
-
   /// NOTE:  the bin/server.dart needs to be running
-
   /// This creation order needs to be preserved!
+
+  /// IESO
+  // await recreateIesoRtGenerationArchive();
+  // await recreateIesoRtZonalDemandArchive();
+
   /// ISONE
   // await recreateDaBindingConstraintsIsone();
   // await recreateDaLmpHourlyIsone();
@@ -526,7 +558,7 @@ Future<void> main() async {
   // await recreateNoaaTemperatures();
   // await rebuildCurveIds();
   // await insertForwardMarks();
-  await recreateCmeMarks();
-  await updatePolygraphProjects(setUp: true);
+  // await recreateCmeMarks();
+  // await updatePolygraphProjects(setUp: true);
 
 }

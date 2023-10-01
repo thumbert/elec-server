@@ -20,6 +20,7 @@ import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
+import 'package:more/collection.dart';
 import 'package:path/path.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
@@ -40,8 +41,14 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
 
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
-  var days = Term.parse('24May22-31May22', UTC).days();
-  await insertDays(DaLmpHourlyArchive(), days);
+  // var days = Term.parse('24May22-31May22', UTC).days();
+  // await insertDays(DaLmpHourlyArchive(), days);
+
+  var months = Month.utc(2020, 1).upTo(Month.utc(2023, 9));
+  await updateIesoRtGenerationArchive(months: months);
+
+  // var years = IntegerRange(2013, 2023);
+  // await updateIesoRtZonalDemandArchive(years: [2023]);
 
   // await updateCmeEnergySettlements(days, setUp: false);
 

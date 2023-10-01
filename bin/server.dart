@@ -5,6 +5,8 @@ import 'package:elec_server/api/api_lmp.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/api/api_masked_ids.dart';
 import 'package:elec_server/api/cme/api_cme.dart';
+import 'package:elec_server/api/iemo/api_ieso_rtgeneration.dart';
+import 'package:elec_server/api/iemo/api_ieso_rtzonaldemand.dart';
 import 'package:elec_server/api/isoexpress/api_fwdres_auction_results.dart';
 import 'package:elec_server/api/isoexpress/api_isone_fuelmix.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
@@ -49,6 +51,10 @@ Future<Router> buildRouter() async {
 
   await DbProd.cme.open();
   router.mount('/forward_marks/v1', ApiCmeMarks(DbProd.cme).router);
+
+  await DbProd.ieso.open();
+  router.mount('/ieso/rt/generation/v1', ApiIesoRtGeneration(DbProd.ieso).router);
+  router.mount('/ieso/rt/zonal_demand/v1', ApiIesoRtZonalDemand(DbProd.ieso).router);
 
 
   await DbProd.isoexpress.open();
