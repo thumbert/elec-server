@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2023-10-02
+- Correct the IESO tz location.  Add one more method to the client.
+
 ## Release 2023-10-01
 - IESO work.  Archive the rt_zonal_demand and rt_generation.  
 - Export db_ieso library

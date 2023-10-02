@@ -30,11 +30,19 @@ class ApiIesoRtGeneration {
       return Response.ok(json.encode(res), headers: headers);
     });
 
-    /// Get one generator between a start/end date
+    /// Get all variables from one generator between a start/end date
+    router.get('/name/<name>/start/<start>/end/<end>',
+        (Request request, String name, String start, String end) async {
+      var aux = await getAllVariablesForName(
+          name, Date.parse(start).toString(), Date.parse(end).toString());
+      return Response.ok(json.encode(aux), headers: headers);
+    });
+
+    /// Get a variable from one generator between a start/end date
     router.get('/name/<name>/<variable>/start/<start>/end/<end>',
         (Request request, String name, String variable, String start,
             String end) async {
-      var aux = await getGeneration(name, variable.toLowerCase(),
+      var aux = await getVariableForName(name, variable.toLowerCase(),
           Date.parse(start).toString(), Date.parse(end).toString());
       return Response.ok(json.encode(aux), headers: headers);
     });
@@ -51,7 +59,7 @@ class ApiIesoRtGeneration {
     return router;
   }
 
-  Future<List<Map<String, dynamic>>> getGeneration(
+  Future<List<Map<String, dynamic>>> getVariableForName(
       String name, String variable, String startDate, String endDate) async {
     var query = where
       ..eq('name', name)
@@ -59,6 +67,16 @@ class ApiIesoRtGeneration {
       ..lte('date', endDate)
       ..fields(['date', variable])
       ..excludeFields(['_id']);
+    return coll.find(query).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getAllVariablesForName(
+      String name, String startDate, String endDate) async {
+    var query = where
+      ..eq('name', name)
+      ..gte('date', startDate)
+      ..lte('date', endDate)
+      ..excludeFields(['_id', 'name', 'fuel']);
     return coll.find(query).toList();
   }
 

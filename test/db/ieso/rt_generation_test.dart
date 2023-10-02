@@ -44,7 +44,7 @@ Future<void> tests(String rootUrl) async {
     });
 
     test('Get generation for one plant', () async {
-      var res = await api.getGeneration('BRUCEA-G1', 'output', '2019-05-01', '2019-05-03');
+      var res = await api.getVariableForName('BRUCEA-G1', 'output', '2019-05-01', '2019-05-03');
       expect(res.length, 3);
       var v0 = (res.first['output'] as List);
       expect(v0.first, 782);
@@ -73,16 +73,27 @@ Future<void> tests(String rootUrl) async {
       expect((data.first['output'] as List).first, 4349);
     });
   });
-  // group('IESO RT Zonal Demand client tests:', () {
-  //   var client = IesoClient(http.Client(), rootUrl: rootUrl);
-  //   test('get hourly rt demand', () async {
-  //     var term = Term.parse('1Jan23-15Jan23', Ieso.location);
-  //     var aux = await client.hourlyRtZonalDemand(IesoLoadZone.ontario, term);
-  //     expect(aux.length, 15*24);
-  //     expect(aux.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2023)));
-  //     expect(aux.first.value, 13514);
-  //   });
-  // });
+  //
+  //
+  group('IESO RT Generation client tests:', () {
+    var client = IesoClient(http.Client(), rootUrl: rootUrl);
+    test('get hourly rt generation one name', () async {
+      var term = Term.parse('1May19-10May19', Ieso.location);
+      var aux = await client.hourlyRtGeneration('ABKENORA', term, variable: 'output');
+      expect(aux.length, 10*24);
+      expect(aux.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2019, 5)));
+      expect(aux.first.value, 8);
+    });
+    test('get hourly rt generation one name', () async {
+      var term = Term.parse('1May19-10May19', Ieso.location);
+      var aux = await client.hourlyRtGenerationAll('ADELAIDE', term);
+      expect(aux.length, 3);
+      expect(aux.keys.toSet(), {'capacity', 'forecast', 'output'});
+      expect(aux['output']!.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2019, 5)));
+      expect(aux['output']!.first.value, 37);
+    });
+
+  });
 }
 
 void main() async {
