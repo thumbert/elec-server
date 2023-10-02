@@ -118,7 +118,8 @@ class ApiIesoRtGeneration {
     var query = where
       ..gte('date', startDate)
       ..lte('date', endDate)
-      ..excludeFields(['_id', 'fuel']);
+      ..excludeFields(['_id', 'fuel'])
+      ..sortBy('date');
     return coll.find(query).toList();
   }
 
