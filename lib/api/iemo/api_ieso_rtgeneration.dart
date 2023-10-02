@@ -23,10 +23,30 @@ class ApiIesoRtGeneration {
     final router = Router();
 
     /// Get all generators names
+    router.get('/last-date', (Request request) async {
+      var aux = await coll
+          .find(
+              where.fields(['date']).sortBy('date', descending: true).limit(1))
+          .toList();
+      return Response.ok(json.encode(aux.first['date']), headers: headers);
+    });
+
+    /// Get all generators names
     router.get('/names', (Request request) async {
       var aux = await coll.distinct('name');
       var res = <String>[...aux['values']];
       res.sort();
+      return Response.ok(json.encode(res), headers: headers);
+    });
+
+    /// return a map of name, list of variables, e.g.
+    /// {
+    ///   'BRUCEA-G1': ['capability', 'output'],
+    ///   ...
+    /// }
+    router.get('/names/variables/date/<date>',
+        (Request request, String date) async {
+      var res = await getNamesVariablesForDate(date);
       return Response.ok(json.encode(res), headers: headers);
     });
 
@@ -68,6 +88,21 @@ class ApiIesoRtGeneration {
       ..fields(['date', variable])
       ..excludeFields(['_id']);
     return coll.find(query).toList();
+  }
+
+  Future<Map<String, List<String>>> getNamesVariablesForDate(
+      String date) async {
+    var query = where
+      ..eq('date', Date.parse(date).toString())
+      ..excludeFields(['_id', 'fuel', 'date']);
+    var aux = await coll.find(query).toList();
+
+    var out = <String, List<String>>{};
+    for (var e in aux) {
+      var variables = e.keys.toList()..remove('name');
+      out[e['name']!] = variables;
+    }
+    return out;
   }
 
   Future<List<Map<String, dynamic>>> getAllVariablesForName(

@@ -36,11 +36,26 @@ Future<void> tests(String rootUrl) async {
     setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
 
+    test('Get last date', () async {
+      var url = '$rootUrl/ieso/rt/generation/v1/last-date';
+      var aux = await http.get(Uri.parse(url));
+      var data = json.decode(aux.body) as String;
+      expect(data.length, 10);
+    });
+
     test('Get all generators', () async {
       var url = '$rootUrl/ieso/rt/generation/v1/names';
       var aux = await http.get(Uri.parse(url));
       var data = json.decode(aux.body) as List;
       expect(data.contains('NAPANEE-G1'), true);
+    });
+
+    test('Get all generators/variables', () async {
+      var url = '$rootUrl/ieso/rt/generation/v1/names/variables/date/2023-09-01';
+      var aux = await http.get(Uri.parse(url));
+      var data = json.decode(aux.body) as Map;
+      expect(data.containsKey('ADELAIDE'), true);
+      expect(data['ADELAIDE'], ['capacity', 'forecast', 'output']);
     });
 
     test('Get generation for one plant', () async {

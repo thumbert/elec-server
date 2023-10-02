@@ -6,7 +6,7 @@
   zip file for a year worth of data.  
 
 ## Release 2023-10-02
-- Correct the IESO tz location.  Add one more method to the client.
+- Correct the IESO tz location.  Add several more api points and methods to the client.
 
 ## Release 2023-10-01
 - IESO work.  Archive the rt_zonal_demand and rt_generation.  
