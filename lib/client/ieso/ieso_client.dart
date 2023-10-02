@@ -113,7 +113,7 @@ class IesoClient {
     if (term.location.name != 'EST') {
       throw ArgumentError('Term needs to be in EST timezone.  Use Ieso.location');
     }
-    var url = '$rootUrl/ieso/rt/generation/v1/fuel/$fuel/$variable'
+    var url = '$rootUrl/ieso/rt/generation/v1/fuel/${fuel.name}/$variable'
         '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
     var aux = await http.get(Uri.parse(url));
     var data = json.decode(aux.body) as List;
@@ -124,7 +124,7 @@ class IesoClient {
       var hours =
           Date.fromIsoString(e['date'], location: Ieso.location).hours();
       for (var i = 0; i < hours.length; i++) {
-        out.add(IntervalTuple(hours[i], e['values'][i]));
+        out.add(IntervalTuple(hours[i], e[variable][i]));
       }
     }
     return out;

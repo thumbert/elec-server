@@ -118,6 +118,12 @@ Future<void> tests(String rootUrl) async {
       expect(aux['output']!.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2019, 5)));
       expect(aux['output']!.first.value, 37);
     });
+    test('get hourly rt generation by fuel', () async {
+      var term = Term.parse('1May19-10May19', Ieso.location);
+      var aux = await client.hourlyRtGenerationForType(IesoFuelType.nuclear, term);
+      expect(aux.length, 10*24);
+      expect(aux.first.value, 8420);
+    });
 
   });
 }
