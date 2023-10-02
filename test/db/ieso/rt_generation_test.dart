@@ -58,6 +58,17 @@ Future<void> tests(String rootUrl) async {
       expect(data['ADELAIDE'], ['capacity', 'forecast', 'output']);
     });
 
+    test('Get all generators between start/end', () async {
+      var url = '$rootUrl/ieso/rt/generation/v1/all'
+          '/start/20190501/end/20190503';
+      var aux = await http.get(Uri.parse(url));
+      var data = json.decode(aux.body) as List;
+      expect(data.length, 537);
+      var x0 = data.firstWhere((e) => e['date'] == '2019-05-01' && e['name'] == 'ABKENORA') as Map;
+      expect(x0.keys.toSet(), {'date', 'name', 'capability', 'output'});
+      expect((x0['output'] as List).first, 8);
+    });
+
     test('Get generation for one plant', () async {
       var res = await api.getVariableForName('BRUCEA-G1', 'output', '2019-05-01', '2019-05-03');
       expect(res.length, 3);
