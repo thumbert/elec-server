@@ -108,6 +108,24 @@ Future<void> updateDailyArchive(
   await archive.dbConfig.db.close();
 }
 
+Future<void> updateDaEnergyOffersIsone({required List<Month> months,
+  bool setUp = false}) async {
+  var archive = prod.getDaEnergyOfferArchive();
+  if (setUp) await archive.setupDb();
+
+  await archive.dbConfig.db.open();
+  for (var month in months) {
+    for (var day in month.days()) {
+      await archive.downloadDay(day);
+      var file = archive.getFilename(day);
+      var data = archive.processFile(file);
+      await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
+
 
 Future<void> updateIesoRtGenerationArchive({required List<Month> months,
   bool setUp = false}) async {

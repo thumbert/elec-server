@@ -44,8 +44,6 @@ class ApiIesoRtZonalDemand {
     return router;
   }
 
-  /// Return the tMin and tMax for a given stationId.  Temperatures are in
-  /// Celsius.
   Future<List<Map<String, dynamic>>> getZone(
       String zone, String startDate, String endDate) async {
     var query = where

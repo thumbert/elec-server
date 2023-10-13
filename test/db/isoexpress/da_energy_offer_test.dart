@@ -123,6 +123,17 @@ Future<void> tests(String rootUrl) async {
       expect(out.first.toString(),
           '[2018-04-01 00:00:00.000-0400, 2018-04-01 01:00:00.000-0400) -> {price: 16.59470909090909, quantity: 550}');
     });
+
+    test('get average energy offers price timeseries for asset 11515',
+        () async {
+      /// DOREEN, is unavailable for the entire term
+      var data = await client.getDaEnergyOffersForAsset(
+          11515, Date.utc(2023, 5, 1), Date.utc(2023, 5, 30));
+      var pqOffers = eo.priceQuantityOffers(data, iso: Iso.newEngland);
+      var out = eo.averageOfferPrice(pqOffers);
+      expect(out.isEmpty, true);
+    });
+
   });
 }
 

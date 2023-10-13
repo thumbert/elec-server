@@ -44,22 +44,30 @@ Future<void> tests() async {
   // var days = Term.parse('24May22-31May22', UTC).days();
   // await insertDays(DaLmpHourlyArchive(), days);
 
-  var months = Month.utc(2020, 1).upTo(Month.utc(2023, 9));
-  await updateIesoRtGenerationArchive(months: months);
+  // var months = Month.utc(2020, 1).upTo(Month.utc(2023, 9));
+  // await updateIesoRtGenerationArchive(months: months);
+
+  await updateDaEnergyOffersIsone(months: [
+    Month.utc(2023, 1),
+    Month.utc(2023, 2),
+    Month.utc(2023, 3),
+    Month.utc(2023, 4),
+  ]);
+
 
   // var years = IntegerRange(2013, 2023);
   // await updateIesoRtZonalDemandArchive(years: [2023]);
   // var days = Term.parse('Cal21', UTC).days();
   // await insertDays(DaLmpHourlyArchive(), days);
-  var days = Term.parse('24May22-31May22', UTC).days();
-  await insertDays(DaLmpHourlyArchive(), days);
+  // var days = Term.parse('24May22-31May22', UTC).days();
+  // await insertDays(DaLmpHourlyArchive(), days);
 
   // await updateCmeEnergySettlements(days, setUp: false);
-  await updateCtSuplierBacklogRatesDb(months: [
-    Month.utc(2022, 12),
-    Month.utc(2023, 1),
-    Month.utc(2023, 2),
-  ]);
+  // await updateCtSuplierBacklogRatesDb(months: [
+  //   Month.utc(2022, 12),
+  //   Month.utc(2023, 1),
+  //   Month.utc(2023, 2),
+  // ]);
 
   // await updatePolygraphProjects(setUp: false);
 

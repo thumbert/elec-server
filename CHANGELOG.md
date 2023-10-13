@@ -5,6 +5,10 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2023-10-12
+- Fix corner case in DA energy offer priceQuantityOffers calculation.  Don't crash 
+  if the unit is unavailable for the entire term. 
+
 ## Release 2023-10-02
 - Correct the IESO tz location.  Add several more api points and methods to the client.
 

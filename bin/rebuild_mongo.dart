@@ -531,7 +531,7 @@ Future<void> main() async {
   // await recreateRtLmpHourlyIsone();
   // await recreateDaCongestionCompactIsone();
   // await recreateDaDemandBid();
-  // await recreateDaEnergyOffersIsone();
+  await recreateDaEnergyOffersIsone();
   // await recreateFwdResAuctionResults();
   // await insertMaskedAssetIdsIsone();
   // await recreatePtidTableIsone();

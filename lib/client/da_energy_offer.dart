@@ -174,8 +174,9 @@ List<TimeSeries<Map<String, num>>> priceQuantityOffers(
 /// convenient way to compare energy offers accross different power plants.
 ///
 /// Input [pqOffers] is the output of the [priceQuantityOffers] function.
-TimeSeries<Map<String, num?>> averageOfferPrice(
-    List<TimeSeries<Map<String, num?>>> pqOffers) {
+TimeSeries<Map<String, num>> averageOfferPrice(
+    List<TimeSeries<Map<String, num>>> pqOffers) {
+  if (pqOffers.isEmpty) return TimeSeries();
   /// all pqOffers TimeSeries don't always have the same length need to merge
   var out = pqOffers.reduce((x, y) {
     var z = x.merge(y, joinType: JoinType.Outer, f: (a, dynamic b) {
