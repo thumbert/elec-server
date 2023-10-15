@@ -2,7 +2,7 @@ library lib.src.db.lib_update_dbs;
 
 import 'dart:io';
 
-import 'package:elec_server/src/db/utilities/eversource/supplier_backlog_rates.dart';
+import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
@@ -67,33 +67,29 @@ Future<int> updateCompetiveOffersDb(
   return status;
 }
 
-Future<int> updateCtSuplierBacklogRatesDb(
+Future<void> updateCtSupplierBacklogRatesDb(
     {required List<Month> months,
     bool externalDownload = true,
     bool setUp = false}) async {
-  var status = 0;
-
   var archive = prod.getCtSupplierBacklogRatesArchive();
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
 
   for (var month in months) {
-    if (externalDownload) {
-      await archive.downloadFile(month, Utility.eversource);
-      await archive.downloadFile(month, Utility.ui);
+    for (var utility in Utility.values) {
+      if (externalDownload) {
+        await archive.downloadFile(month, utility);
+      }
+      var file = archive.getFile(month, utility);
+      if (file.existsSync()) {
+        var data = archive.processFile(file);
+        await archive.insertData(data);
+      } else {
+        print('No file for $utility $month to process!');
+      }
     }
-    // var file = archive.getFile(month, Utility.eversource);
-    // if (file.existsSync()) {
-    //   var data = archive.processFile(file);
-    //   await archive.insertData(data);
-    // } else {
-    //   print('No file for $month to process');
-    //   status = 1;
-    // }
   }
   await archive.dbConfig.db.close();
-
-  return status;
 }
 
 Future<void> updateDailyArchive(
@@ -108,8 +104,8 @@ Future<void> updateDailyArchive(
   await archive.dbConfig.db.close();
 }
 
-Future<void> updateDaEnergyOffersIsone({required List<Month> months,
-  bool setUp = false}) async {
+Future<void> updateDaEnergyOffersIsone(
+    {required List<Month> months, bool setUp = false}) async {
   var archive = prod.getDaEnergyOfferArchive();
   if (setUp) await archive.setupDb();
 
@@ -125,10 +121,8 @@ Future<void> updateDaEnergyOffersIsone({required List<Month> months,
   await archive.dbConfig.db.close();
 }
 
-
-
-Future<void> updateIesoRtGenerationArchive({required List<Month> months,
-  bool setUp = false}) async {
+Future<void> updateIesoRtGenerationArchive(
+    {required List<Month> months, bool setUp = false}) async {
   var archive = prod.getIesoRtGenerationArchive();
   if (setUp) await archive.setupDb();
 
@@ -144,9 +138,8 @@ Future<void> updateIesoRtGenerationArchive({required List<Month> months,
   await archive.dbConfig.db.close();
 }
 
-
-Future<void> updateIesoRtZonalDemandArchive({required List<int> years,
-  bool setUp = false}) async {
+Future<void> updateIesoRtZonalDemandArchive(
+    {required List<int> years, bool setUp = false}) async {
   var archive = prod.getIesoRtZonalDemandArchive();
   if (setUp) await archive.setupDb();
 

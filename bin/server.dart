@@ -29,6 +29,7 @@ import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart'
 import 'package:elec_server/api/pjm/api_pjm_ptids.dart' as pjm_ptids;
 import 'package:elec_server/api/polygraph/api_polygraph.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
+import 'package:elec_server/api/utilities/api_ct_supplier_backlog_rates.dart';
 import 'package:elec_server/api/utilities/api_retail_suppliers_offers.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/client/marks/forward_marks2.dart';
@@ -143,11 +144,13 @@ Future<Router> buildRouter() async {
 
   await DbProd.retailSuppliers.open();
   router.mount(
-      '/retail_suppliers/v1/', ApiRetailSuppliersOffers(DbProd.retailSuppliers).router);
+      '/retail_suppliers/v1/ct/supplier_backlog_rates', ApiCtSupplierBacklogRates(DbProd.retailSuppliers).router);
+  router.mount(
+      '/retail_suppliers/v1', ApiRetailSuppliersOffers(DbProd.retailSuppliers).router);
 
   await DbProd.weather.open();
   router.mount(
-      '/noaa_daily_summary/v1/', ApiNoaaDailySummary(DbProd.weather).router);
+      '/noaa_daily_summary/v1', ApiNoaaDailySummary(DbProd.weather).router);
 
   return router;
 }

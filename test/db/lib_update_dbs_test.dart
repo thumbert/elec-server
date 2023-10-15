@@ -47,12 +47,12 @@ Future<void> tests() async {
   // var months = Month.utc(2020, 1).upTo(Month.utc(2023, 9));
   // await updateIesoRtGenerationArchive(months: months);
 
-  await updateDaEnergyOffersIsone(months: [
-    Month.utc(2023, 1),
-    Month.utc(2023, 2),
-    Month.utc(2023, 3),
-    Month.utc(2023, 4),
-  ]);
+  // await updateDaEnergyOffersIsone(months: [
+  //   Month.utc(2023, 1),
+  //   Month.utc(2023, 2),
+  //   Month.utc(2023, 3),
+  //   Month.utc(2023, 4),
+  // ]);
 
 
   // var years = IntegerRange(2013, 2023);
@@ -63,11 +63,10 @@ Future<void> tests() async {
   // await insertDays(DaLmpHourlyArchive(), days);
 
   // await updateCmeEnergySettlements(days, setUp: false);
-  // await updateCtSuplierBacklogRatesDb(months: [
-  //   Month.utc(2022, 12),
-  //   Month.utc(2023, 1),
-  //   Month.utc(2023, 2),
-  // ]);
+
+  var months = Month.utc(2022, 2).upTo(Month.utc(2023, 7));
+  await updateCtSupplierBacklogRatesDb(months: months, externalDownload: false);
+
 
   // await updatePolygraphProjects(setUp: false);
 

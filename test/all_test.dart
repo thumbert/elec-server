@@ -42,8 +42,7 @@ import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
 import 'db/polygraph/polygraph_archive_test.dart' as polygraph;
 import 'db/risk_system/calculator_archive_test.dart' as calculators;
-import 'db/utilities/retail_offers/retail_supply_offer_test.dart'
-    as retail_offer;
+import 'db/utilities/ct_supplier_backlog_rates_test.dart' as ct_retail_suppliers;
 import 'db/utilities/retail_offers/retail_suppliers_offers_archive_test.dart'
     as retail_offers;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
@@ -68,6 +67,7 @@ Future<void> main() async {
   /// db tests
   await bc.tests(rootUrl);
   await cme.tests(rootUrl);
+  await ct_retail_suppliers.tests(rootUrl);
   await ieso_rtgen.tests(rootUrl);
   await ieso_rtzd.tests(rootUrl);
   await da_congestion.tests(rootUrl);

@@ -8,7 +8,7 @@ import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
-import 'package:elec_server/src/db/utilities/eversource/supplier_backlog_rates.dart';
+import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 
 CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
@@ -62,7 +62,8 @@ CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'retail_suppliers',
       collectionName: 'ct_backlog_rates');
-  var archive = CtSupplierBacklogRatesArchive(dbConfig: dbConfig);
+  var dir = '${Platform.environment['HOME']}/Downloads/Archive/SupplierBacklogRates/CT/Raw/';
+  var archive = CtSupplierBacklogRatesArchive(dbConfig: dbConfig, dir: dir);
   if (!Directory(archive.dir).existsSync()) {
     Directory(archive.dir).createSync(recursive: true);
   }

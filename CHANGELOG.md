@@ -5,6 +5,11 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2023-10-15
+- Got CT supplier backlog rates implemented (db, api, client).  Data from 2022-01.  
+  Amazing how hard it is to publish correct data on the web (I'm looking at you, 
+  energizect).
+
 ## Release 2023-10-12
 - Fix corner case in DA energy offer priceQuantityOffers calculation.  Don't crash 
   if the unit is unavailable for the entire term. 
