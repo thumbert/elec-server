@@ -7,6 +7,26 @@ import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
+enum Utility {
+  eversource('Eversource'),
+  ui('UI');
+
+  const Utility(this._value);
+  final String _value;
+
+  static Utility parse(String x) {
+    return switch (x.toLowerCase()) {
+      'eversource' => eversource,
+      'ui' => ui,
+      _ => throw ArgumentError('Don\'t know how to parse $x'),
+    };
+  }
+
+  @override
+  String toString() => _value;
+}
+
+
 class CtSupplierBacklogRates {
   CtSupplierBacklogRates(http.Client client, {required this.rootUrl});
 

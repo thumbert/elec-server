@@ -3,6 +3,7 @@ library db.utilities.eversource.supplier_backlog_rates;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
@@ -21,25 +22,6 @@ import 'package:timezone/timezone.dart';
 
 /// See https://energizect.com/rate-board-residential-standard-service-generation-rates
 /// Each month has customer counts by competitive provider
-
-enum Utility {
-  eversource('Eversource'),
-  ui('UI');
-
-  const Utility(this._value);
-  final String _value;
-
-  static Utility parse(String x) {
-    return switch (x.toLowerCase()) {
-      'eversource' => eversource,
-      'ui' => ui,
-      _ => throw ArgumentError('Don\'t know how to parse $x'),
-    };
-  }
-
-  @override
-  String toString() => _value;
-}
 
 class CtSupplierBacklogRatesArchive {
   CtSupplierBacklogRatesArchive({ComponentConfig? dbConfig, String? dir}) {
