@@ -71,7 +71,7 @@ class CtSupplierBacklogRatesArchive {
       for (var row in table.rows.skip(1)) {
         data.add({
           'code': row[0] as String,
-          'supplierName': row[1] as String,
+          'supplierName': (row[1] as String).trim(),
           'price': row[2] as num,
           if (hasKwh) 'kWh': row[3] as num,
           'customerCount': (hasKwh) ? row[4] as int : row[3] as int,

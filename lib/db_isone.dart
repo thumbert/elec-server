@@ -35,6 +35,7 @@ export 'src/db/mis/tr_sch3p2.dart';
 
 export 'src/db/other/isone_ptids.dart';
 
+export 'src/db/utilities/ct_supplier_backlog_rates.dart';
 export 'src/db/utilities/eversource/load_ct.dart';
 export 'src/db/utilities/retail_suppliers_offers_archive.dart';
 

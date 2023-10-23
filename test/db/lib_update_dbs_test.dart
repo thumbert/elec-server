@@ -65,7 +65,9 @@ Future<void> tests() async {
   // await updateCmeEnergySettlements(days, setUp: false);
 
   var months = Month.utc(2022, 2).upTo(Month.utc(2023, 7));
-  await updateCtSupplierBacklogRatesDb(months: months, externalDownload: false);
+  await updateCtSupplierBacklogRatesDb(months: months,
+      // setUp: true,
+      externalDownload: false);
 
 
   // await updatePolygraphProjects(setUp: false);
