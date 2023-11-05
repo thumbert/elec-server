@@ -9,6 +9,7 @@ import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
+import 'package:elec_server/src/db/utilities/maine/load_cmp.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 
 CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
@@ -20,6 +21,16 @@ CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return CmeSettlementsEnergyArchive(dbConfig: dbConfig, dir: dir);
+}
+
+MaineCmpLoadArchive getCmpLoadArchive() {
+  final dbConfig = ComponentConfig(
+          host: '127.0.0.1', dbName: 'utilities', collectionName: 'load_cmp');
+  final dir =  '${Platform.environment['HOME']!}/Downloads/Archive/Utility/Maine/CMP/Load/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return MaineCmpLoadArchive(dbConfig: dbConfig, dir: dir);
 }
 
 DaEnergyOfferArchive getDaEnergyOfferArchive() {

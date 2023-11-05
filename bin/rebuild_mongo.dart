@@ -1,9 +1,12 @@
 
 import 'dart:io';
+import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
+import 'package:elec_server/src/db/utilities/maine/load_cmp.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
+import 'package:more/collection.dart';
 import 'package:path/path.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
@@ -60,6 +63,27 @@ Future<void> recreateCmeMarks() async {
   }
   await archive.dbConfig.db.close();
 }
+
+Future<void> recreateCmpLoadArchive({bool setUp = false}) async {
+  var years = IntegerRange(2019, DateTime.now().year+1);
+  var archive = getCmpLoadArchive();
+  if (setUp) await archive.setupDb();
+  await archive.dbConfig.db.open();
+  for (var year in years) {
+    for (var customerClass in CmpCustomerClass.values) {
+      var file = archive.getFile(year: year, customerClass: customerClass,
+          settlementType: 'final');
+      if (file.existsSync()) {
+        var data = archive.processFile(year: year, customerClass: customerClass,
+            settlementType: 'final');
+        print(data);
+        await archive.insertData(data);
+      }
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
 
 
 Future<void> recreateDaBindingConstraintsIsone() async {
@@ -561,4 +585,6 @@ Future<void> main() async {
   // await recreateCmeMarks();
   // await updatePolygraphProjects(setUp: true);
 
+  /// Utilities
+  await recreateCmpLoadArchive(setUp: true);
 }

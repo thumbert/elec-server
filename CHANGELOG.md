@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2023-11-05
+- Add historical CMP load data, expose API and Client
+
 ## Release 2023-10-15
 - Got CT supplier backlog rates implemented (db, api, client).  Data from 2022-01.  
   Amazing how hard it is to publish correct data on the web (I'm looking at you, 

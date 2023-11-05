@@ -2,8 +2,10 @@ library lib.src.db.lib_update_dbs;
 
 import 'dart:io';
 
+import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
+import 'package:elec_server/src/db/utilities/maine/load_cmp.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
@@ -20,6 +22,31 @@ Future<void> updateCmeEnergySettlements(List<Date> days,
     if (file.existsSync()) {
       var data = archive.processFile(file);
       await archive.insertData(data);
+    }
+  }
+  await archive.dbConfig.db.close();
+}
+
+/// Files need to be downloaded by hand from
+/// https://www.maine.gov/mpuc/regulated-utilities/electricity/rfps/standard-offer
+/// and saved as a csv file (see the archive.)
+///
+Future<void> updateCmpLoadArchive(List<int> years,
+    {bool setUp = false}) async {
+  var archive = prod.getCmpLoadArchive();
+  if (setUp) await archive.setupDb();
+  await archive.dbConfig.db.open();
+  for (var year in years) {
+    // for (var customerClass in CmpCustomerClass.values) {
+    for (var customerClass in [CmpCustomerClass.residentialAndSmallCommercial]) {
+      var file = archive.getFile(year: year, customerClass: customerClass,
+          settlementType: 'final');
+      if (file.existsSync()) {
+        var data = archive.processFile(year: year, customerClass: customerClass,
+            settlementType: 'final');
+        // print(data);
+        await archive.insertData(data);
+      }
     }
   }
   await archive.dbConfig.db.close();
