@@ -37,6 +37,7 @@ export 'src/db/other/isone_ptids.dart';
 
 export 'src/db/utilities/ct_supplier_backlog_rates.dart';
 export 'src/db/utilities/eversource/load_ct.dart';
+export 'src/db/utilities/maine/load_cmp.dart';
 export 'src/db/utilities/retail_suppliers_offers_archive.dart';
 
 

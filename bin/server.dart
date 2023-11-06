@@ -30,6 +30,7 @@ import 'package:elec_server/api/pjm/api_pjm_ptids.dart' as pjm_ptids;
 import 'package:elec_server/api/polygraph/api_polygraph.dart';
 import 'package:elec_server/api/risk_system/api_calculator.dart';
 import 'package:elec_server/api/utilities/api_ct_supplier_backlog_rates.dart';
+import 'package:elec_server/api/utilities/api_load_cmp.dart';
 import 'package:elec_server/api/utilities/api_retail_suppliers_offers.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
 import 'package:elec_server/client/marks/forward_marks2.dart';
@@ -147,6 +148,10 @@ Future<Router> buildRouter() async {
       '/retail_suppliers/v1/ct/supplier_backlog_rates', ApiCtSupplierBacklogRates(DbProd.retailSuppliers).router);
   router.mount(
       '/retail_suppliers/v1', ApiRetailSuppliersOffers(DbProd.retailSuppliers).router);
+
+  await DbProd.utilities.open();
+  router.mount('/utilities/v1/cmp/load', ApiLoadCmp(DbProd.utilities).router);
+
 
   await DbProd.weather.open();
   router.mount(

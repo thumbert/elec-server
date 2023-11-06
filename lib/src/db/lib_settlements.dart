@@ -4,6 +4,11 @@ import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:table/table.dart';
 
+enum SettlementType {
+  firstSettlement,
+  finalSettlement,
+}
+
 /// Get the nth settlement of some versioned data.
 ///
 /// <p>[n] the settlement version.  n=0, is the first settlement. n=1, is the
