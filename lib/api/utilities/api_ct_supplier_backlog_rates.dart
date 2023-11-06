@@ -2,7 +2,6 @@ library api.utilities.api_competitive_suppliers_eversource;
 
 import 'dart:convert';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
-import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:date/date.dart';
 import 'package:shelf/shelf.dart';

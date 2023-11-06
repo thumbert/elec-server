@@ -42,11 +42,13 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
   // var days = Term.parse('24May22-31May22', UTC).days();
-  // await insertDays(DaLmpHourlyArchive(), days);
 
   // var months = Month.utc(2020, 1).upTo(Month.utc(2023, 9));
   // await updateIesoRtGenerationArchive(months: months);
+  // await updateIesoRtZonalDemandArchive(years: [2023]);
 
+
+  // await insertDays(DaLmpHourlyArchive(), days);
   // await updateDaEnergyOffersIsone(months: [
   //   Month.utc(2023, 1),
   //   Month.utc(2023, 2),
@@ -56,7 +58,6 @@ Future<void> tests() async {
 
 
   // var years = IntegerRange(2013, 2023);
-  // await updateIesoRtZonalDemandArchive(years: [2023]);
   // var days = Term.parse('Cal21', UTC).days();
   // await insertDays(DaLmpHourlyArchive(), days);
   // var days = Term.parse('24May22-31May22', UTC).days();
@@ -64,10 +65,9 @@ Future<void> tests() async {
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
-  var months = Month.utc(2022, 2).upTo(Month.utc(2023, 7));
-  await updateCtSupplierBacklogRatesDb(months: months,
-      // setUp: true,
-      externalDownload: false);
+  // var months = Month.utc(2022, 2).upTo(Month.utc(2023, 7));
+  // await updateCtSupplierBacklogRatesDb(months: months,
+  //     externalDownload: false);
 
 
   // await updatePolygraphProjects(setUp: false);

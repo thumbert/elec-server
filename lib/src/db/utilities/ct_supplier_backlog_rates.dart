@@ -299,7 +299,6 @@ class CtSupplierBacklogRatesArchive {
     } else {
       throw StateError('Please run getAllUrls() first!');
     }
-    return null;
   }
 
   /// Filename is something like '2023-03_Eversource.xlsx'
