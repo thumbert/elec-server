@@ -23,7 +23,7 @@ class MaineCmpLoadArchive {
     var env = Platform.environment;
     this.dbConfig = dbConfig ??
         ComponentConfig(
-            host: '127.0.0.1', dbName: 'utilities', collectionName: 'load_cmp');
+            host: '127.0.0.1', dbName: 'utility', collectionName: 'load_cmp');
     this.dir =
         dir ??= '${env['HOME']!}/Downloads/Archive/Utility/Maine/CMP/Load/Raw/';
   }

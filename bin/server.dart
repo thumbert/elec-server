@@ -149,8 +149,8 @@ Future<Router> buildRouter() async {
   router.mount(
       '/retail_suppliers/v1', ApiRetailSuppliersOffers(DbProd.retailSuppliers).router);
 
-  await DbProd.utilities.open();
-  router.mount('/utilities/v1/cmp/load', ApiLoadCmp(DbProd.utilities).router);
+  await DbProd.utility.open();
+  router.mount('/utility/v1/cmp/load', ApiLoadCmp(DbProd.utility).router);
 
 
   await DbProd.weather.open();

@@ -25,7 +25,7 @@ CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
 
 MaineCmpLoadArchive getCmpLoadArchive() {
   final dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'utilities', collectionName: 'load_cmp');
+          host: '127.0.0.1', dbName: 'utility', collectionName: 'load_cmp');
   final dir =  '${Platform.environment['HOME']!}/Downloads/Archive/Utility/Maine/CMP/Load/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
