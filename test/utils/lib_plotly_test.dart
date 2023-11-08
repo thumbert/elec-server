@@ -5,24 +5,28 @@ import 'dart:io';
 import 'package:elec_server/src/utils/lib_plotly.dart';
 import 'package:test/test.dart';
 
-var page = """ 
+/// Example of an html document with plotly
+final page = """ 
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.plot.ly/plotly-2.11.1.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 </head>
 <body>
-  <div id="tester"></div>
+  <div id="chart1"></div>
+  <div id="chart2"></div>
   <script>
-  	TESTER = document.getElementById('tester');
-	  Plotly.newPlot( TESTER, [{
+  	let chart1 = document.getElementById('chart1');
+	  Plotly.newPlot(chart, [{
 	    x: [1, 2, 3, 4, 5],
 	    y: [1, 2, 4, 8, 16] }], {
 	    margin: { t: 0 } } );
-</script>
+  </script>
+  <script src="chart2.js" charset="utf-8"></script>
 </body>
 </html>
 """;
+
 
 
 void test1a() {
@@ -65,7 +69,23 @@ void test1b() {
     'height': 650,
     'width': 800
   };
-  Plotly.exportJs(traces, layout, file: File('${Platform.environment['HOME']}/Downloads/test_plot.js'));
+  // change the point color on hover
+  const eventHandlers = """
+  test_plot.on('plotly_hover', function(data){
+    let traceNumber = data.points[0].curveNumber;
+    let update = {'marker': {'color': '#ff9900', 'size': 12}};
+    Plotly.restyle('test_plot', update, [traceNumber]);
+  });
+  test_plot.on('plotly_unhover', function(data){
+    let traceNumber = data.points[0].curveNumber;
+    let update = {'marker': {}};
+    Plotly.restyle('test_plot', update, [traceNumber]);
+  });  
+  """;
+  Plotly.exportJs(traces, layout,
+      file: File('${Platform.environment['HOME']}/Downloads/test_plot.js'),
+    eventHandlers: eventHandlers,
+  );
 }
 
 

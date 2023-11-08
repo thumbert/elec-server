@@ -4,18 +4,9 @@ import 'dart:async';
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
-import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
-import 'package:tuple/tuple.dart';
-import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
-import 'package:date/date.dart';
-import 'package:timezone/timezone.dart';
-
-import 'package:elec_server/src/utils/iso_timestamp.dart';
-
 import 'package:elec_server/src/db/config.dart';
 
 class MaineCmpLoadArchive {
@@ -30,7 +21,6 @@ class MaineCmpLoadArchive {
 
   late final ComponentConfig dbConfig;
   late final String dir;
-  late SpreadsheetDecoder _decoder;
 
   /// insert data into Mongo
   Future<int> insertData(List<Map<String, dynamic>> data) async {
@@ -97,6 +87,7 @@ class MaineCmpLoadArchive {
     final fmt = DateFormat('M/d/yyyy');
     var out = <Map<String, dynamic>>[];
     for (String key in groups.keys) {
+      if (key == '') continue;  // you may get a stray eof line
       // key is in mm/dd/yyyy format
       var dt = fmt.parse(key.trim(), true);
       late List<num> mwh;

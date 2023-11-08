@@ -11,17 +11,22 @@ class Plotly {
   /// need.
   static void exportJs(
       List<Map<String, dynamic>> traces, Map<String, dynamic> layout,
-      {required File file, Map<String, dynamic>? config}) {
+      {required File file, Map<String, dynamic>? config, String? eventHandlers}) {
     if (extension(file.path) != '.js') {
       throw ArgumentError('Filename extension needs to be .js');
     }
     var name = basename(file.path);
     var divId = name.replaceAll(RegExp('\\.js\$'), '');
     config ??= {'displaylogo': false, 'responsive': true};
-    file.writeAsStringSync("""
-      $divId = document.getElementById("$divId");
-      Plotly.newPlot( $divId, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
-    """);
+    var out = """
+  let $divId = document.getElementById("$divId");
+  Plotly.newPlot( $divId, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
+    """;
+    if (eventHandlers != null) {
+      out = '$out\n'
+          '$eventHandlers';
+    }
+    file.writeAsStringSync(out);
   }
 
   /// Create a plotly chart in the browser by writing your data into a
@@ -57,7 +62,7 @@ class Plotly {
 <body>
   <div id="chart"></div>
   <script>
-  	div = document.getElementById("chart");
+  	let div = document.getElementById("chart");
 	  Plotly.newPlot( div, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
   </script>
 </body>
