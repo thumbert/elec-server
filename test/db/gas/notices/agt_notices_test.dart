@@ -1,17 +1,9 @@
 library test.db.gas.notices.agt_notices_test;
 
-import 'dart:convert';
 import 'package:elec_server/src/db/gas/notices/agt_notices.dart';
-import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
-import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
-import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:elec/elec.dart';
 import 'package:test/test.dart';
-import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
-import 'package:timezone/timezone.dart';
 
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests

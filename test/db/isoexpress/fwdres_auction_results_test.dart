@@ -2,14 +2,10 @@ library test.db.isoexpress.fwdres_auction_results_test;
 
 import 'dart:convert';
 
-import 'package:elec_server/api/isoexpress/api_fwdres_auction_results.dart'
-    as api;
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
-import 'package:date/date.dart';
-import 'package:timezone/timezone.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {

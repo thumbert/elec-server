@@ -9,7 +9,6 @@ import 'package:timezone/timezone.dart';
 
 Future<void> getGenerators(String rootUrl) async {
   var location = Iso.newYork.preferredTimeZoneLocation;
-  var month = Month.utc(2021, 1);
 
   var client = DaEnergyOffers(Client(), iso: Iso.newYork, rootUrl: rootUrl);
   var aux = await client

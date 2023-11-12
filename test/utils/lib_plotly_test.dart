@@ -3,7 +3,6 @@ library test.utils.lib_plotly_test;
 import 'dart:io';
 
 import 'package:elec_server/src/utils/lib_plotly.dart';
-import 'package:test/test.dart';
 
 /// Example of an html document with plotly
 final page = """ 

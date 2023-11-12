@@ -1,17 +1,9 @@
 @TestOn('chrome')
-
-///  pub run test -p "chrome" test/all_browser_test.dart
-
 import 'dart:math';
 import 'package:test/test.dart';
 import 'package:timezone/browser.dart';
-import 'package:date/date.dart';
-import 'package:http/browser_client.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:dama/dama.dart';
-import 'package:elec/src/common_enums.dart';
-import 'package:elec_server/client/dalmp.dart';
 
+///  pub run test -p "chrome" test/all_browser_test.dart
 void tests(String rootUrl) async {
   test('Add 2 numbers', () {
     expect(1 + 2, 3);

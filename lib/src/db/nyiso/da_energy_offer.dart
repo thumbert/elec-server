@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
-import 'package:timezone/timezone.dart';
 import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';

@@ -29,12 +29,8 @@ class EiaApi {
   /// If the used [http.Client] completes with an error when making a REST call,
   /// this method will complete with the same error.
   Future<Map<String, dynamic>> getSeries(String id) async {
-    if (id == null) {
-      throw ArgumentError('Parameter id is required.');
-    }
-
-    var _url = rootUrl + '?api_key=$apiKey&series_id=$id';
-    var aux = await http.get(Uri.parse(_url));
+    var url = '$rootUrl?api_key=$apiKey&series_id=$id';
+    var aux = await http.get(Uri.parse(url));
     var data = json.decode(aux.body) as Map;
     return (data['series'] as List).first;
   }

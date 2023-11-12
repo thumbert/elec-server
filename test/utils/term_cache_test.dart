@@ -2,14 +2,13 @@ library test.utils.term_cache_test;
 
 import 'package:date/date.dart';
 import 'package:elec_server/utils.dart';
-import 'package:intl/intl.dart';
 import 'package:test/test.dart';
 
 void tests() {
   group('TestCache tests:', () {
-    var loader = (Interval interval) {
+    loader(Interval interval) {
       var days =
-          interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
+          interval.splitLeft((dt) => Date.containing(dt)).cast<Date>();
       var out = <Map<String, dynamic>>[];
       for (var date in days) {
         out.add({
@@ -19,10 +18,10 @@ void tests() {
         });
       }
       return Future.value(out);
-    };
-    var keyAssign = (Map<String, dynamic> e) => e['date'] as Date?;
-    var keysFromInterval = (Interval interval) =>
-        interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
+    }
+    keyAssign(Map<String, dynamic> e) => e['date'] as Date?;
+    keysFromInterval(Interval interval) =>
+        interval.splitLeft((dt) => Date.containing(dt)).cast<Date>();
 
     test('domain test', () async {
       var cache = TermCache(loader, keyAssign, keysFromInterval);
@@ -46,8 +45,8 @@ void tests() {
     });
 
     test('a monthly cache', () async {
-      var loader = (Interval interval) {
-        var months = interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+      loader(Interval interval) {
+        var months = interval.splitLeft((dt) => Month.containing(dt));
         var out = <Map<String, dynamic>>[];
         for (var month in months) {
           out.add({
@@ -57,8 +56,8 @@ void tests() {
           });
         }
         return Future.value(out);
-      };
-      var keyAssign = (Map<String, dynamic> e) => e['month'] as Month?;
+      }
+      keyAssign(Map<String, dynamic> e) => e['month'] as Month?;
       var cache = MonthCache(loader, keyAssign);
       await cache.set(parseMonth('Oct19'));
       await cache.set(parseMonth('Nov19'));

@@ -95,8 +95,8 @@ class EversourceCtLoadArchive {
     ];
 
     /// TODO: Check that the column names haven't changed
-    var actualNames =
-        [2, 3, 4, 5, 6, 7, 8].map((i) => table.rows[3][i]).toList();
+    // var actualNames =
+    //     [2, 3, 4, 5, 6, 7, 8].map((i) => table.rows[3][i]).toList();
 
     for (int i = 4; i < n; i++) {
       var row = table.rows[i];
@@ -108,7 +108,7 @@ class EversourceCtLoadArchive {
         } else if (row[1] == '2*') {
           hE = '02X';
         } else {
-          if (date == Date.utc(2018, 3, 11) && hE == null) continue;
+          if (date == Date.utc(2018, 3, 11)) continue;
           throw ArgumentError('Unknown hour ending ${row[1]}');
         }
         var _hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);

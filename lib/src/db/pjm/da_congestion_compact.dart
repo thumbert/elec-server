@@ -4,12 +4,12 @@ import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:elec_server/src/db/lib_pjm_reports.dart';
+import 'package:more/comparator.dart';
 import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:dama/basic/rle.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
-import 'package:more/ordering.dart';
 
 class PjmDaCongestionCompactArchive extends DailyPjmCsvReport {
   /// A collection for storing congestion only prices to get fast access to
@@ -22,7 +22,7 @@ class PjmDaCongestionCompactArchive extends DailyPjmCsvReport {
         dbName: 'pjm',
         collectionName: 'da_congestion_compact');
     this.dbConfig = dbConfig;
-    dir ??= super.dir + 'Lmp/Dam/Raw/';
+    dir ??= '${super.dir}Lmp/Dam/Raw/';
     this.dir = dir;
     reportName = 'Hourly DA Congestion Compact';
   }
@@ -118,17 +118,17 @@ class PjmDaCongestionCompactArchive extends DailyPjmCsvReport {
     }
 
     /// order the congestion data
-    var ordering = Ordering.natural<num>()
+    var ordering = naturalComparable<num>
         .onResultOf((List xs) => xs[1]) // sort by hour beginning 0
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[2]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[3]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[4]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[6]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[9]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[12]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[15]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[18]))
-        .compound(Ordering.natural<num>().onResultOf((List xs) => xs[21]));
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[6]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[9]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[15]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[18]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[21]));
     ordering.sort(_congestion);
 
     /// Transpose the _congestion matrix into a

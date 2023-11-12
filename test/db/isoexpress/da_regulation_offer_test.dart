@@ -1,8 +1,6 @@
 library test.db.isoexpress.da_regulation_offer_test;
 
-import 'dart:io';
 import 'dart:async';
-import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
@@ -26,7 +24,6 @@ tests() async {
   });
   group('DA regulation offers API test', () {
     var db = Db('mongodb://localhost/isoexpress');
-    var api = DaRegulationOffers(db);
     setUp(() async => await db.open());
     tearDown(() async => await db.close());
   });
@@ -39,7 +36,7 @@ Future insertDays() async {
   //await archive.setupDb();
   var days = Interval(TZDateTime(location, 2019, 7),
       TZDateTime(location, 2019, 8))
-      .splitLeft((dt) => Date.fromTZDateTime(dt));
+      .splitLeft((dt) => Date.containing(dt));
   await archive.dbConfig.db.open();
   for (var day in days) {
     await archive.downloadDay(day);

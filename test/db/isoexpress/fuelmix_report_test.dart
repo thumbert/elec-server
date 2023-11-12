@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
-import 'package:elec_server/api/isoexpress/api_isone_fuelmix.dart';
 import 'package:elec_server/client/isoexpress/fuelmix.dart';
 import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -51,7 +50,6 @@ Future<void> tests(String rootUrl) async {
   });
 
   group('FuelMix Report API tests:', () {
-    var api = ApiIsoneFuelMix(DbProd.isoexpress);
     setUp(() async => await DbProd.isoexpress.open());
     tearDown(() async => await DbProd.isoexpress.close());
     test('Get all fuel types', () async {

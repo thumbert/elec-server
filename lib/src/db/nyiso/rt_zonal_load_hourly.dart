@@ -10,7 +10,6 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
-import 'package:tuple/tuple.dart';
 
 class NyisoHourlyRtZonalLoadReportArchive extends DailyNysioCsvReport {
   NyisoHourlyRtZonalLoadReportArchive(

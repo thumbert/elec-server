@@ -19,7 +19,6 @@ import 'db/isoexpress/regulation_requirement_test.dart'
     as regulation_requirement;
 import 'db/isoexpress/wholesale_load_cost_report_test.dart'
     as wholesale_load_cost_report;
-import 'db/isoexpress/zonal_demand_test.dart' as zonal_demand;
 import 'db/isone_ptids_test.dart' as ptids;
 import 'db/isone/masked_ids_test.dart' as masked_ids;
 
@@ -41,13 +40,12 @@ import 'db/nyiso/masked_ids_test.dart' as nyiso_masked_ids;
 import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
 import 'db/polygraph/polygraph_archive_test.dart' as polygraph;
-import 'db/risk_system/calculator_archive_test.dart' as calculators;
+import 'db/utilities/cmp/load_cmp_test.dart' as load_cmp;
 import 'db/utilities/ct_supplier_backlog_rates_test.dart' as ct_retail_suppliers;
 import 'db/utilities/retail_offers/retail_suppliers_offers_archive_test.dart'
     as retail_offers;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
-import 'utils/env_file_test.dart' as env_file;
 import 'utils/iso_timestamp_test.dart' as iso_timestamp;
 import 'utils/parse_custom_integer_range_test.dart' as parse_int_range;
 import 'utils/term_cache_test.dart' as term_cache;
@@ -76,6 +74,7 @@ Future<void> main() async {
   await energy_offers.tests(rootUrl);
   await fwdres.tests(rootUrl);
   lib_nyiso_report.tests();
+  await load_cmp.tests();
   await masked_ids.tests(rootUrl);
   await monthly_asset_ncpc.tests(rootUrl);
   await nyiso_binding_constraints.tests(rootUrl);

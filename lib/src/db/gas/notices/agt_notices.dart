@@ -3,7 +3,6 @@ library db.gas.notices.agt_notices;
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'package:elec/elec.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
 import 'package:path/path.dart';

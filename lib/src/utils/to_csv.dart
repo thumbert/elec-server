@@ -1,7 +1,6 @@
 library utils.to_csv;
 
 import 'package:csv/csv.dart';
-import 'package:dama/basic/null_policy.dart';
 
 String _nullToEmpty(dynamic x) {
   if (x == null) return '';
@@ -18,11 +17,11 @@ String listOfMapToCsv(List<Map> x,
   nullPolicy ??= _nullToEmpty;
 
   if (columnNames == null) {
-    var _cNames = <String>{};
+    var cNames = <String>{};
     for (var row in x) {
-      _cNames.addAll(row.keys.map((e) => e.toString()));
+      cNames.addAll(row.keys.map((e) => e.toString()));
     }
-    columnNames = _cNames.toList();
+    columnNames = cNames.toList();
   }
 
   var aux = <List>[];

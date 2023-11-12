@@ -2,8 +2,6 @@ library ui.selectable_list;
 
 import 'dart:html';
 
-import 'package:elec_server/ui.dart';
-
 enum SelectionType {
   multiple,
   single,

@@ -7,7 +7,6 @@ import 'package:elec_server/api/utilities/api_ct_supplier_backlog_rates.dart';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
-import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
 import 'package:http/http.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';

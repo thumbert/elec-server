@@ -6,7 +6,6 @@ import 'dart:html';
 
 class HtmlTable {
   Element? wrapper;
-  DivElement? _wrapper;
   List<Map<String, dynamic>> data;
   Map<String, dynamic>? options;
 

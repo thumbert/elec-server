@@ -16,7 +16,9 @@ class SccReportArchive {
     Map env = Platform.environment;
     if (config == null) {
       this.config = ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'scc_report');
+          host: '127.0.0.1',
+          dbName: 'isoexpress',
+          collectionName: 'scc_report');
     }
 
     dir ??= env['HOME'] +
@@ -68,7 +70,8 @@ class SccReportArchive {
   List<Map<String, dynamic>> _readXlsxVersion1(
       SpreadsheetDecoder decoder, Month month) {
     if (!decoder.tables.containsKey('SCC_Report_Current')) {
-      throw StateError('Spreadsheet format has changed.  Can\'t find tab SCC_Report_Current');
+      throw StateError(
+          'Spreadsheet format has changed.  Can\'t find tab SCC_Report_Current');
     }
     var table = decoder.tables['SCC_Report_Current']!;
     var res = <Map<String, dynamic>>[];
@@ -81,8 +84,8 @@ class SccReportArchive {
     // Summer and Winter SCC values have the same row names, need to distinguish
     // them.
     var rowNames = table.rows[1].cast<String>();
-    var mustHaveColumns = <dynamic>{}
-      ..addAll(['Asset ID', 'Generator Name', 'SCC (MW)']);
+    var mustHaveColumns = <dynamic>{}..addAll(
+        ['Asset ID', 'Generator Name', 'SCC (MW)', 'Fuel Type', 'Load Zone']);
     if (!rowNames.toSet().containsAll(mustHaveColumns)) {
       throw StateError('Column names of the report have changed too much!');
     }
@@ -101,7 +104,9 @@ class SccReportArchive {
             if (indSummer.contains(i)) name = 'Summer $name';
             if (indWinter.contains(i)) name = 'Winter $name';
             var value = table.rows[r][i];
-            if (i == 23 || i == 28) value = Date.fromExcel(value as int).toString();
+            if (i == 23 || i == 28) {
+              value = Date.fromExcel(value as int).toString();
+            }
             aux[name] = value;
           }
         }
@@ -164,4 +169,3 @@ const _name = {
   11: 'november',
   12: 'december',
 };
-

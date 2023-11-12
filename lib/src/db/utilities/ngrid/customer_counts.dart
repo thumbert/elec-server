@@ -65,9 +65,8 @@ class NGridCustomerCountsArchive {
     /// the first row is the months, starts in column 3
     List<Date> months = table.rows[0]
         .sublist(2)
-        .map((x) => Date.fromTZDateTime(
+        .map((x) => Date.containing(
             TZDateTime.from(convertXlsxDateTime(x), UTC)))
-        .where((Date d) => d != null)
         .toList();
 
     int nMonths = months.length;

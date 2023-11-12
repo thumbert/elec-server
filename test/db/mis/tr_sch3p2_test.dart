@@ -1,12 +1,9 @@
 library test.mis.tr_sch3p2_test;
 
-import 'dart:convert';
 import 'dart:io';
 import 'package:date/date.dart';
 import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
-import 'package:elec_server/src/db/mis/tr_sch2tp.dart';
-import 'package:elec_server/api/mis/api_tr_sch2tp.dart';
 import 'package:elec_server/src/db/mis/tr_sch3p2.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';

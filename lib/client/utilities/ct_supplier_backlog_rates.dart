@@ -2,10 +2,8 @@ library elec_server.utilities.eversource_competitive_suppliers.v1;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
-import 'package:timezone/timezone.dart';
 
 enum Utility {
   eversource('Eversource'),

@@ -2,7 +2,6 @@ library api.api_isone_masked_ids;
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:elec/elec.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';

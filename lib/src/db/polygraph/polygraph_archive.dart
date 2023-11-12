@@ -67,6 +67,7 @@ class PolygraphArchive {
           'projectName': String projectName,
           'tabs': List<Map<String,dynamic>> tabs,
         }) {
+      assert(tabs.isNotEmpty, true);
       try {
         await dbConfig.coll
             .remove({'userName': userId, 'projectName': projectName});

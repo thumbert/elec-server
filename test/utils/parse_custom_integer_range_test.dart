@@ -3,7 +3,6 @@ library test.utils.parse_custom_integer_range_test;
 import 'package:elec_server/src/utils/parse_custom_integer_range.dart';
 import 'package:test/test.dart';
 
-import 'package:elec_server/src/utils/to_csv.dart';
 
 void tests() {
   group('parseCustomIntegerRange tests', () {

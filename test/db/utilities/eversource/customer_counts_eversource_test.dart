@@ -1,12 +1,8 @@
 library test.utilities.eversource.customer_counts;
 
-import 'dart:async';
 import 'dart:io';
-import 'package:date/date.dart';
 import 'package:elec_server/src/db/utilities/eversource/customer_counts_ct.dart';
-import 'package:elec_server/src/db/config.dart';
 
-import 'package:elec_server/api/utilities/api_customer_counts_eversource.dart';
 import 'package:timezone/standalone.dart';
 
 //updateDb() async {

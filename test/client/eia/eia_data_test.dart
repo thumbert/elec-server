@@ -5,7 +5,6 @@ import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
-import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/client/eia/eia_data.dart';
 
 /// retrieve the key from the environment variables

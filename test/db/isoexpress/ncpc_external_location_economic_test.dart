@@ -2,7 +2,6 @@ library test.db.isoexpress.ncpc_rapid_response_report_test;
 
 import 'package:test/test.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/db/isoexpress/ncpc_rapid_response_pricing_report.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';

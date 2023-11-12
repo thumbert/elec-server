@@ -2,9 +2,7 @@ library test.db.marks.marks_20200529;
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
-import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
@@ -14,7 +12,7 @@ List<Map<String, dynamic>> marks20200529() {
   var location = getLocation('America/New_York');
   var months = Term.parse('May20-Dec26', location)
       .interval
-      .splitLeft((dt) => Month.fromTZDateTime(dt))
+      .splitLeft((dt) => Month.containing(dt))
       .map((e) => e.toIso8601String())
       .toList();
 

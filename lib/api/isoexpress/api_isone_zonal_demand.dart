@@ -5,33 +5,18 @@ import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 
 class ZonalDemand {
   ZonalDemand(this.db) {
     coll = db.collection(collectionName);
-    _location = getLocation('America/New_York');
   }
 
   late Db db;
   late DbCollection coll;
-  late Location _location;
   final DateFormat fmt = DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
   String collectionName = 'zonal_demand';
-
-  static final List<String> _canonicalZones = [
-    'ISONE',
-    'ME',
-    'NH',
-    'VT',
-    'CT',
-    'RI',
-    'SEMA',
-    'WCMA',
-    'NEMA',
-  ];
 
   final headers = {
     'Content-Type': 'application/json',

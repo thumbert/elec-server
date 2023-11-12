@@ -202,10 +202,6 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
   @override
   Future<void> setupDb() async {
     await dbConfig.db.open();
-    var collections = await dbConfig.db.getCollectionNames();
-    // if (collections.contains(dbConfig.collectionName)) {
-    //   await dbConfig.coll.drop();
-    // }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
           'account': 1,

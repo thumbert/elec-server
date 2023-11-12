@@ -2,12 +2,10 @@ library test.utilities.retail_offers.retail_supply_offer_rate_test;
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:collection/collection.dart';
-import 'package:html/parser.dart' show parse;
 
-import 'package:date/date.dart';
-import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
+import 'package:collection/collection.dart';
 import 'package:elec_server/client/utilities/retail_offers/retail_supply_offer.dart';
+import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
@@ -17,15 +15,13 @@ Future<void> tests() async {
     var aux = json.decode(File('${archive.dir}/2022-12-04_ct.json').readAsStringSync()) as List;
     var allData = aux.cast<Map<String,dynamic>>();
 
-    // test('Process all CT offers as of 2022-12-04', () {
-    //   var offers = allData.map((e) => CtSupplyOffer.toMongo(e)).toList();
-    //   expect(offers.length, 41);
-    //   var groups = groupBy(offers, (Map e) => e['offerId']);
-    //   print(groups.keys.length);
-    //   print('here');
-    //
-    //
-    // });
+    test('Process all CT offers as of 2022-12-04', () {
+      var offers = allData.map((e) => CtSupplyOffer.toMongo(e)).toList();
+      expect(offers.length, 41);
+      var groups = groupBy(offers, (Map e) => e['offerId']);
+      print(groups.keys.length);
+      print('here');
+    });
 
     // test('Eversource CT', () {
     //   var offer0 = CtSupplyOffer.fromRawData(allData[0]);

@@ -7,8 +7,6 @@ import 'package:elec_server/src/db/mis/sd_arrawdsum.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
-import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 
 Future<void> tests(String rootUrl) async {
   var db = DbProd.mis;

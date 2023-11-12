@@ -238,8 +238,8 @@ void main() {
   var ac = TypeAhead(wrapper as DivElement?, countries, placeholder: 'Country name');
   ac.onSelect((e) => message!.text = 'You selected ${ac.value}');
 
-  var bs = TypeAhead(querySelector('#wrapper-ta2') as DivElement?,
-    ['Buy', 'Sell'], placeholder: 'Buy/Sell');
+  // var bs = TypeAhead(querySelector('#wrapper-ta2') as DivElement?,
+  //   ['Buy', 'Sell'], placeholder: 'Buy/Sell');
 
 
 }

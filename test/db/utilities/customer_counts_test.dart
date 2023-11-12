@@ -16,7 +16,7 @@ String? dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
 updateDb() async {
 
   var archive = NGridCustomerCountsArchive(dbConfig: config, dir: dir);
-  String url = 'https://www9.nationalgridus.com/energysupply/current/20170811/Monthly_Aggregation_customer count and usage.xlsx';
+  // String url = 'https://www9.nationalgridus.com/energysupply/current/20170811/Monthly_Aggregation_customer count and usage.xlsx';
   //await archive.downloadFile(url);
 
 //  File file = archive.getLatestFile();

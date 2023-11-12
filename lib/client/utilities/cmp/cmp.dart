@@ -22,7 +22,7 @@ class Cmp {
 
   Future<TimeSeries<num>> getHourlyLoad(Term term, CmpCustomerClass customerClass,
       {String settlementType = 'final'}) async {
-    var url = '${rootUrl}utility/v1/cmp/load/class/${customerClass.name}'
+    var url = '$rootUrl/utility/v1/cmp/load/class/${customerClass.name}'
         '/start/${term.startDate}/end/${term.endDate}'
         '/settlement/$settlementType';
     var res = await get(Uri.parse(url));

@@ -5,7 +5,6 @@ import 'package:elec_server/src/db/mis/sr_rsvcharge.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 
 void tests() async {
   group('MIS report SR_RSVCHARGE archive', () {

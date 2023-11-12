@@ -5,8 +5,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class DaDemandBids {
   static final location = getLocation('America/New_York');
@@ -19,14 +17,10 @@ class DaDemandBids {
 
   Future<List<Map<String, dynamic>>> getDailyDemandBidsForParticipant(
       int participantId, Date start, Date end) async {
-    var _url = rootUrl +
-        servicePath +
-        'daily/mwh/demandbid/participantId/${participantId.toString()}' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}';
-    var _response = await http.get(Uri.parse(_url));
+    var url = '$rootUrl${servicePath}daily/mwh/demandbid/participantId/${participantId.toString()}/start/${start.toString()}/end/${end.toString()}';
+    var response = await http.get(Uri.parse(url));
     var out =
-        (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+        (json.decode(response.body) as List).cast<Map<String, dynamic>>();
     for (var e in out) {
       e['hours'] = json.decode(e['hours']);
     }

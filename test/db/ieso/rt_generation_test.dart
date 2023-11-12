@@ -3,7 +3,6 @@ library test.db.ieso.rt_zonal_demand_test;
 import 'dart:convert';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/api/iemo/api_ieso_rtgeneration.dart';
-import 'package:elec_server/api/iemo/api_ieso_rtzonaldemand.dart';
 import 'package:elec_server/client/ieso/ieso_client.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec/elec.dart';

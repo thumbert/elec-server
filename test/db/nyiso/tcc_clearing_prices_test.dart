@@ -9,7 +9,6 @@ import 'package:elec/ftr.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart';
-import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';

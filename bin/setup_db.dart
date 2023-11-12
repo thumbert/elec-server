@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:actors/actors.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/isoexpress/scc_report.dart';
-import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
@@ -16,13 +14,10 @@ import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dar
 import 'package:elec_server/src/utils/convert_xls_to_xlsx.dart';
 import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
-import 'package:elec_server/src/db/archive.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
-import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
 import 'package:elec_server/src/db/isoexpress/da_demand_bid.dart';
 import 'package:elec_server/src/db/isoexpress/monthly_asset_ncpc.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
@@ -30,7 +25,6 @@ import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:elec_server/src/db/isone/masked_ids.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
-import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
 import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
@@ -42,7 +36,6 @@ import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart'
 import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
 
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
-import 'package:more/more.dart' hide Tuple2;
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
@@ -51,7 +44,6 @@ import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 import '../test/db/marks/marks_special_days.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:path/path.dart';
@@ -405,7 +397,7 @@ Future<void> insertMonthlyAssetNcpc({bool download = false}) async {
   // ];
   var months = Term.parse('Jan19-Jun21', UTC)
       .interval
-      .splitLeft((dt) => Month.fromTZDateTime(dt));
+      .splitLeft((dt) => Month.containing(dt));
   var archive = MonthlyAssetNcpcArchive();
   await archive.dbConfig.db.open();
   for (var month in months) {

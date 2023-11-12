@@ -2,20 +2,11 @@ library db.isoexpress.da_congestion_compact;
 
 import 'dart:io';
 import 'dart:async';
-import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
-import 'package:elec_server/src/db/lib_prod_dbs.dart';
-import 'package:elec_server/src/db/webservices/da_lmp_hourly.dart';
-import 'package:more/comparator.dart';
-import 'package:more/ordering.dart';
-import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
-import '../lib_mis_reports.dart' as mis;
+import 'package:more/more.dart';
 import '../lib_iso_express.dart';
-import '../converters.dart';
-import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:dama/basic/rle.dart';
 
 class DaCongestionCompactArchive extends DailyIsoExpressReport {
@@ -30,10 +21,6 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
     reportName = 'Day-Ahead Congestion Compact Archive';
   }
   final keys = {0, 0.01, 0.02};
-
-  // @override
-  // String getUrl(Date? asOfDate) =>
-  //     'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv';
 
   @override
   String getUrl(Date asOfDate) =>
@@ -84,50 +71,19 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
       i++;
     }
 
-
-    // var _data = mis.readReportTabAsMap(file, tab: 0);
-    // if (_data.isEmpty) return <Map<String, dynamic>>[];
-    // var date = parseMmddyyy(_data.first['Date']);
-    //
-    // // On some days, ISO duplicates the data for one (ptid, HE).  Make sure
-    // // you only keep one!  See 2019-01-02 for example.
-    // var aux = groupBy(
-    //         _data,
-    //         (Map row) =>
-    //             Tuple2(int.parse(row['Location ID']), row['Hour Ending']))
-    //     .map((key, value) => MapEntry(key, value.first));
-    // var dataByPtids =
-    //     groupBy(aux.values, (Map row) => int.parse(row['Location ID']));
-    // var _ptids = dataByPtids.keys.toList();
-    //
-    // // Initially, store the congestion in a List<List<num>> [ptid][hour].
-    // // It gets transposed after the sorting.
-    // var _congestion = <List<num>>[];
-    // for (var ptid in dataByPtids.keys) {
-    //   _congestion.add(dataByPtids[ptid]!
-    //       .map((e) => e['Congestion Component'] as num)
-    //       .toList());
-    // }
-
-    // /// insert the ptid index at position 0, so you can keep track of the
-    // /// ptid after you do the sorting.
-    // for (var i = 0; i < _ptids.length; i++) {
-    //   _congestion[i].insert(0, i);
-    // }
-
     /// order the congestion data
-    var ordering = naturalComparator<num>()
+    var ordering = naturalComparable<num>
         .onResultOf((List xs) => xs[1])
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[2]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[3]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[4]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[6]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[9]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[12]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[12]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[15]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[18]))
-      .thenCompare(naturalComparator<num>().onResultOf((List xs) => xs[21]));
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[6]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[9]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[15]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[18]))
+      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[21]));
     ordering.sort(congestion);
 
     /// Transpose the _congestion matrix into a

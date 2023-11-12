@@ -78,7 +78,7 @@ Future<void> tests() async {
   });
   group('CMP load api tests', () {
     test('get load', () async {
-      var url = '${dotenv.env['ROOT_URL']}utilities/v1/cmp/load/class'
+      var url = '${dotenv.env['ROOT_URL']}/utility/v1/cmp/load/class'
           '/residentialAndSmallCommercial/start/2022-01-01/end/2022-01-10'
           '/settlement/final';
       var res = await get(Uri.parse(url));

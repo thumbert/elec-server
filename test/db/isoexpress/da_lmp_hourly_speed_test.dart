@@ -1,27 +1,19 @@
 library test.db.isoexpress.da_lmp_hourly_speed_test;
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
-import 'package:elec_server/client/other/ptids.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
-import 'package:elec_server/api/isoexpress/api_isone_dalmp.dart';
 import 'package:elec_server/client/dalmp.dart' as client;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
-import 'package:dama/basic/count.dart';
 
 Future<void> oneByOneAsTimeseries(List<int> ptids,
     {String rootUrl = 'http://127.0.0.1:8080'}) async {
-  var futs = [];
   var start = Date.utc(2019, 1, 1);
   var end = Date.utc(2019, 12, 31);
   var daLmp =
@@ -76,24 +68,25 @@ Future<void> compactGet(List<int> ptids,
   var data = json.decode(aux.body);
   sw.stop();
   print(sw.elapsedMilliseconds);
-  var traces = <Map<String, dynamic>>[];
+  print(data.toString().substring(0,10));
+  // var traces = <Map<String, dynamic>>[];
 }
 
-Future<void> speedTest(String rootUrl) async {
-  var location = getLocation('America/New_York');
-  var daLmp =
-      client.DaLmp(http.Client(), rootUrl: rootUrl);
-
-  // get all the list of all ptids
-  var ptidApi = PtidsApi(http.Client(), rootUrl: rootUrl);
-  var _data = await ptidApi.getPtidTable();
-  var ptids = _data.map((e) => e['ptid'] as int).toList();
-  print('ptid count: ${ptids.length}');
-
-  // await oneByOneAsTimeseries(ptids);
-  // await parallelGet(ptids);
-  await compactGet(ptids);
-}
+// Future<void> speedTest(String rootUrl) async {
+//   var location = getLocation('America/New_York');
+//   var daLmp =
+//       client.DaLmp(http.Client(), rootUrl: rootUrl);
+//
+//   // get all the list of all ptids
+//   var ptidApi = PtidsApi(http.Client(), rootUrl: rootUrl);
+//   var _data = await ptidApi.getPtidTable();
+//   var ptids = _data.map((e) => e['ptid'] as int).toList();
+//   print('ptid count: ${ptids.length}');
+//
+//   // await oneByOneAsTimeseries(ptids);
+//   // await parallelGet(ptids);
+//   await compactGet(ptids);
+// }
 
 void main() async {
   initializeTimeZones();

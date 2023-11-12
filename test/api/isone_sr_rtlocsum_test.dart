@@ -4,11 +4,10 @@ library test.api.isone_sr_rtlocsum;
 import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
-import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 
 
 SrRtLocSumTest(Db db) async {
-  var api = SrRtLocSum(db);
+  // var api = SrRtLocSum(db);
   test('get testing data', () async {
     await db.open();
 //    var data = await api('0', 401, 'Real Time Load Obligation',

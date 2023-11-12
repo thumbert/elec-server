@@ -12,6 +12,7 @@ build/
 packages
 pubspec.lock
 .dart_tool/
+.local-chrome/
 
 out
 docs

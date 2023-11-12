@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:elec_server/src/db/mis/sd_rsvastdtl.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
-import 'package:elec_server/src/db/mis/sd_rtncpcpymt.dart';
 
 void tests() async {
   var archive = SdRsvAstDtlArchive();

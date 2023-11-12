@@ -6,27 +6,29 @@ import 'package:collection/collection.dart';
 import 'package:elec/elec.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:intl/intl.dart';
-import 'package:more/ordering.dart';
+import 'package:more/more.dart';
 import 'package:date/date.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class DaEnergyOffers {
-  late DbCollection coll;
-  final Iso iso;
-  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
-  String collectionName = 'da_energy_offer';
-  late Ordering ordering;
-
   DaEnergyOffers(Db db, {required this.iso}) {
     coll = db.collection(collectionName);
 
     /// create an ordering by price and assetId to use when sorting the stack
-    var natural = Ordering.natural<num>();
+    var natural = naturalComparable<num>;
     var byPrice = natural.onResultOf<Map>((Map e) => e['price']);
     var byAssetId = natural.onResultOf<Map>((Map e) => e['assetId']);
-    ordering = byPrice.compound(byAssetId);
+    ordering = byPrice.thenCompare(byAssetId);
   }
+
+  late DbCollection coll;
+  final Iso iso;
+  final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
+  String collectionName = 'da_energy_offer';
+
+  late int Function(Map<String,dynamic>, Map<String,dynamic>) ordering;
+
 
   final headers = {
     'Content-Type': 'application/json',

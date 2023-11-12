@@ -3,7 +3,6 @@ library test.api.mis.sd_rtncpcpymt;
 import 'dart:io';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/mis/sd_rtncpcpymt.dart';
 
 void tests() async {

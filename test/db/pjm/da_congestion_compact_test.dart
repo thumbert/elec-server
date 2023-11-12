@@ -1,15 +1,10 @@
 library test.db.pjm.da_congestion_compact_test;
 
-import 'dart:convert';
-import 'package:elec_server/api/api_dacongestion.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/pjm/da_congestion_compact.dart';
 import 'package:test/test.dart';
-import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
-import 'package:elec/elec.dart';
-import 'package:elec_server/client/dacongestion.dart' as client;
 
 Future<void> tests(String rootUrl) async {
   group('Pjm DAM congestion compact db tests: ', () {
