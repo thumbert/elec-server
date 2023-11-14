@@ -17,10 +17,14 @@ class Plotly {
     }
     var name = basename(file.path);
     var divId = name.replaceAll(RegExp('\\.js\$'), '');
+    var tracesV = '${divId}_traces';
+    var layoutV = '${divId}_layout';
     config ??= {'displaylogo': false, 'responsive': true};
     var out = """
   let $divId = document.getElementById("$divId");
-  Plotly.newPlot( $divId, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
+  let $tracesV = ${json.encode(traces)};
+  let $layoutV = ${json.encode(layout)};
+  Plotly.newPlot( $divId, $tracesV, $layoutV, ${json.encode(config)} );
     """;
     if (eventHandlers != null) {
       out = '$out\n'
