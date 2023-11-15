@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2023-11-15
+- Add a partition extension to an Iterable
+
 ## Release 2023-11-12
 - Fix lints, bump dependencies up
 

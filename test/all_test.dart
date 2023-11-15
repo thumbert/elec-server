@@ -47,6 +47,7 @@ import 'db/utilities/retail_offers/retail_suppliers_offers_archive_test.dart'
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
 
 import 'utils/iso_timestamp_test.dart' as iso_timestamp;
+import 'utils/iterable_extensions_test.dart' as iterable_ext;
 import 'utils/parse_custom_integer_range_test.dart' as parse_int_range;
 import 'utils/term_cache_test.dart' as term_cache;
 import 'utils/to_csv_test.dart' as to_csv;
@@ -109,6 +110,7 @@ Future<void> main() async {
   wholesale_load_cost_report.tests();
 
   /// Utils tests
+  iterable_ext.tests();
   iso_timestamp.tests();
   parse_int_range.tests();
   term_cache.tests();

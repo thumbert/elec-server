@@ -1,6 +1,7 @@
 library test.elec.iso_parsetime;
 
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
@@ -90,7 +91,7 @@ void tests() {
 }
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
 
   tests();
 }
