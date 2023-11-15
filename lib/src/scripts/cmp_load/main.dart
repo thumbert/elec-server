@@ -8,7 +8,6 @@ import 'package:elec/elec.dart';
 import 'package:elec/time.dart';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/utils.dart';
-import 'package:path/path.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:html_template/html_template.dart';
@@ -138,6 +137,35 @@ class _Analysis {
             '$dir/median_shape_${key.toLowerCase().replaceAll('-', '')}.js'),
       );
     }
+  }
+
+  /// Try to see if there is any benefit in doing a regression
+  void regressShapes() {
+    var term = Term.parse('Apr23-May23', location);
+    var days = term.days().where((e) => Calendar.nerc.isBusinessDate(e)).toSet();
+    var traces = makeShapeTraces(groups: {term: days}, bucket: Bucket.atc);
+
+    for (var trace in traces) {
+      List<num> x = trace['x'];
+      List<num> x2 = x.map((e) => e * e).toList();
+      List<num> x3 = x.map((e) => e * e * e).toList();
+      List<num> x4 = x2.map((e) => e * e).toList();
+      var X = DoubleMatrix(x, x.length, 1)
+          .cbind(DoubleMatrix(x2, x.length, 1))
+          .cbind(DoubleMatrix(x3, x.length, 1))
+          .cbind(DoubleMatrix(x4, x.length, 1));
+      var y = ColumnMatrix(trace['y']);
+      var lm = LinearModel(X, y);
+      print(lm.summary());
+      trace['lm'] = lm;
+
+    }
+    print(traces);
+
+
+
+
+
   }
 
   List<Map<String, dynamic>> makeShapeTraces(
@@ -315,7 +343,10 @@ Future<void> main() async {
 
   var analysis = _Analysis();
   await analysis.getLoad();
-  analysis.makeReport();
+  // analysis.makeReport();
+  analysis.regressShapes();
+
+
 }
 
 
