@@ -7,6 +7,7 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
+import 'package:elec_server/src/db/isone/historical_btm_solar.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/utilities/maine/load_cmp.dart';
@@ -43,9 +44,7 @@ DaEnergyOfferArchive getDaEnergyOfferArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return DaEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
-
 }
-
 
 IesoRtGenerationArchive getIesoRtGenerationArchive() {
   var dbConfig = ComponentConfig(
@@ -67,6 +66,17 @@ IesoRtZonalDemandArchive getIesoRtZonalDemandArchive() {
     dir.createSync(recursive: true);
   }
   return IesoRtZonalDemandArchive(dbConfig: dbConfig, dir: dir.path);
+}
+
+IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isone', collectionName: 'hourly_btm_solar');
+  var dir = Directory('${Platform.environment['HOME'] ?? ''}'
+      '/Downloads/Archive/Isone/Solar/BTM/Raw');
+  if (!dir.existsSync()) {
+    dir.createSync(recursive: true);
+  }
+  return IsoneBtmSolarArchive(dbConfig: dbConfig, dir: dir.path);
 }
 
 CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {

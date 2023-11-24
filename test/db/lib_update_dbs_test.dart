@@ -35,6 +35,8 @@ Future<void> tests() async {
   //   Month.utc(2023, 4),
   // ]);
 
+  /// ISONE
+  await updateIsoneHistoricalBtmSolarArchive(Date.utc(2023, 10, 13), setUp: false);
 
   // var years = IntegerRange(2013, 2023);
   // var days = Term.parse('Cal21', UTC).days();
@@ -49,8 +51,8 @@ Future<void> tests() async {
   //     // setUp: true,
   //     externalDownload: false);
 
-  var years = IntegerRange(2020, 2024);
-  await updateCmpLoadArchive(years, setUp: true);
+  // var years = IntegerRange(2020, 2024);
+  // await updateCmpLoadArchive(years, setUp: true);
 
   // await updatePolygraphProjects(setUp: false);
 

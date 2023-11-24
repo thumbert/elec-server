@@ -13,6 +13,7 @@ import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulation_requirement.dart';
 import 'package:elec_server/api/isoexpress/api_isone_regulationoffers.dart';
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
+import 'package:elec_server/api/isone/api_isone_btm_solar.dart';
 import 'package:elec_server/api/marks/curves/curve_ids.dart';
 import 'package:elec_server/api/marks/forward_marks.dart';
 import 'package:elec_server/api/mis/api_sd_arrawdsum.dart';
@@ -82,11 +83,12 @@ Future<Router> buildRouter() async {
     '/system_demand/v1/': SystemDemand(DbProd.isoexpress).router,
     '/isone/zonal_demand/v1/': ZonalDemand(DbProd.isoexpress).router,
   }.forEach((key, value) {
-    router.mount(key, value);
+    router.mount(key, value.call);
   });
 
   await DbProd.isone.open();
-  router.mount('/isone/masked_ids/v1/', ApiMaskedIds(DbProd.isone).router);
+  router.mount('/isone/btm/solar/v1/', ApiIsoneBtmSolar(DbProd.isone).router.call);
+  router.mount('/isone/masked_ids/v1/', ApiMaskedIds(DbProd.isone).router.call);
 
   await DbProd.marks.open();
 
@@ -106,21 +108,21 @@ Future<Router> buildRouter() async {
         nyiso_tcc_clearing_prices.ApiNyisoTccClearingPrices(DbProd.nyiso)
             .router,
   }.forEach((key, value) {
-    router.mount(key, value);
+    router.mount(key, value.call);
   });
 
   await DbProd.pjm.open();
   <String, Router>{
     '/pjm/ptids/v1/': pjm_ptids.ApiPtids(DbProd.pjm).router,
   }.forEach((key, value) {
-    router.mount(key, value);
+    router.mount(key, value.call);
   });
 
   await DbProd.polygraph.open();
   <String, Router>{
     '/polygraph/v1/': ApiPolygraph(DbProd.polygraph).router,
   }.forEach((key, value) {
-    router.mount(key, value);
+    router.mount(key, value.call);
   });
 
   await DbProd.riskSystem.open();
@@ -128,7 +130,7 @@ Future<Router> buildRouter() async {
   router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
   router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);
   router.mount('/forward_marks/v2/', ApiCmeMarks(DbProd.cme).router);
-  router.mount('/ptids/v1/', ApiPtids(DbProd.isone).router);
+  router.mount('/ptids/v1/', ApiPtids(DbProd.isone).router.call);
 
   await DbProd.mis.open();
   <String, Router>{
@@ -139,22 +141,22 @@ Future<Router> buildRouter() async {
     '/tr_sch2tp/v1/': TrSch2tp(DbProd.mis).router,
     '/tr_sch3p2/v1/': TrSch3p2(DbProd.mis).router,
   }.forEach((key, value) {
-    router.mount(key, value);
+    router.mount(key, value.call);
   });
 
   await DbProd.retailSuppliers.open();
   router.mount(
-      '/retail_suppliers/v1/ct/supplier_backlog_rates', ApiCtSupplierBacklogRates(DbProd.retailSuppliers).router);
+      '/retail_suppliers/v1/ct/supplier_backlog_rates', ApiCtSupplierBacklogRates(DbProd.retailSuppliers).router.call);
   router.mount(
-      '/retail_suppliers/v1', ApiRetailSuppliersOffers(DbProd.retailSuppliers).router);
+      '/retail_suppliers/v1', ApiRetailSuppliersOffers(DbProd.retailSuppliers).router.call);
 
   await DbProd.utility.open();
-  router.mount('/utility/v1/cmp/load', ApiLoadCmp(DbProd.utility).router);
+  router.mount('/utility/v1/cmp/load', ApiLoadCmp(DbProd.utility).router.call);
 
 
   await DbProd.weather.open();
   router.mount(
-      '/noaa_daily_summary/v1', ApiNoaaDailySummary(DbProd.weather).router);
+      '/noaa_daily_summary/v1', ApiNoaaDailySummary(DbProd.weather).router.call);
 
   return router;
 }

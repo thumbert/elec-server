@@ -22,6 +22,7 @@
     <div>
         <h2>API</h2>
         <ul>
+            <li><a href="#btm-solar">Behind the meter (BTM) solar data</a></li>
             <li><a href="#competitive-suppliers-offers">Competitive retail suppliers energy offers</a></li>
             <li><a href="#customer-counts-ngrid">Customer counts for NGrid</a></li>
             <li><a href="#customer-counts-eversource">Customer counts for Eversource</a></li>
@@ -46,6 +47,20 @@
             <li><a href="#monthly-asset-ncpc">Monthly DA and RT NCPC credits by generator </a></li>
             <li><a href="#weather-noaa-daily-summary">NOAA daily summary report (temperature)</a></li>
         </ul>
+        <div id="btm-solar">
+            <h4>Behind the meter (BTM) solar data</h4>
+            Historical hourly BTM zonal data for ISONE.  Data is updated every few months.
+            <ul>
+                <li>
+                    Get all available zones
+                    <div><a href="http://localhost:8080/isone/btm/solar/v1/zones">isone/btm/solar/v1/zones</a></div>
+                </li>
+                <li>
+                    Get data for one zone
+                    <div><a href="http://localhost:8080/isone/btm/solar/v1/start/2022-01-01/end/2022-01-31">isone/btm/solar/v1/start/2022-01-01/end/2022-01-31</a></div>
+                </li>
+            </ul>
+        </div>
         <div id="competitive-suppliers-offers">
             <h4>Competitive retail suppliers energy offers</h4>
             Scrape offers from the utilities webpage and make them available as an API

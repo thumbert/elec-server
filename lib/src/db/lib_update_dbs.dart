@@ -180,6 +180,18 @@ Future<void> updateIesoRtZonalDemandArchive(
   await archive.dbConfig.db.close();
 }
 
+/// File need to be downloaded by hand
+Future<void> updateIsoneHistoricalBtmSolarArchive(Date asOfDate,
+    {bool setUp = false}) async {
+  var archive = prod.getIsoneHistoricalBtmSolarArchive();
+  if (setUp) await archive.setupDb();
+  await archive.dbConfig.db.open();
+  final data = archive.processFile(asOfDate);
+  await archive.insertData(data);
+  await archive.dbConfig.db.close();
+}
+
+
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();
 
