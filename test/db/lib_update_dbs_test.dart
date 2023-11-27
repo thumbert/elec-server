@@ -36,7 +36,7 @@ Future<void> tests() async {
   // ]);
 
   /// ISONE
-  await updateIsoneHistoricalBtmSolarArchive(Date.utc(2023, 10, 13), setUp: false);
+  // await updateIsoneHistoricalBtmSolarArchive(Date.utc(2023, 10, 13), setUp: false);
 
   // var years = IntegerRange(2013, 2023);
   // var days = Term.parse('Cal21', UTC).days();
@@ -46,10 +46,9 @@ Future<void> tests() async {
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
-  // var months = Month.utc(2022, 2).upTo(Month.utc(2023, 7));
-  // await updateCtSupplierBacklogRatesDb(months: months,
-  //     // setUp: true,
-  //     externalDownload: false);
+  var months = Month.utc(2023, 8).upTo(Month.utc(2023, 10));
+  await updateCtSupplierBacklogRatesDb(months: months,
+      externalDownload: true);
 
   // var years = IntegerRange(2020, 2024);
   // await updateCmpLoadArchive(years, setUp: true);

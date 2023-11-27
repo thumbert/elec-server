@@ -42,6 +42,7 @@ class ApiCtSupplierBacklogRates {
       ..eq('utility', utility.toString())
       ..lte('month', endMonth.toIso8601String())
       ..gte('month', startMonth.toIso8601String())
+      ..sortBy('month')
       ..excludeFields(['_id']);
     var xs = await coll.find(query).toList();
     return xs;

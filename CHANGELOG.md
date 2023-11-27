@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2023-11-27
+- Sort by month the API response from api/utilities/api_ct_supplier_backlog.dart
+
 ## Release 2023-11-24
 - Add Isone historical behind the meter solar data to the DB, etc. 
 

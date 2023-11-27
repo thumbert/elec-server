@@ -129,6 +129,19 @@ Future<void> tests(String rootUrl) async {
         'summary',
       });
     });
+    test('get Eversource data Jan22-Oct23', () async {
+      var data = await client.getBacklogForUtility(
+          utility: Utility.eversource,
+          start: Month.utc(2022, 1),
+          end: Month.utc(2023, 10));
+      var x0 = data
+          .where((e) =>
+              e['supplierName'] == 'CONSTELLATION NEWENERGY RES' &&
+              e['customerClass'] == 'Residential')
+          .toList();
+      expect(x0.length, 22);
+      expect(x0.last['month'], '2023-10');
+    });
   });
 }
 

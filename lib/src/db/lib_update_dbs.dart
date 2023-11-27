@@ -101,6 +101,7 @@ Future<void> updateCtSupplierBacklogRatesDb(
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
 
+  await archive.getAllUrls();
   for (var month in months) {
     for (var utility in Utility.values) {
       if (externalDownload) {
