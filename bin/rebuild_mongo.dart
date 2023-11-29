@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
+import 'package:elec_server/src/db/lib_update_dbs.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
@@ -176,6 +177,18 @@ Future<void> recreateFwdResAuctionResults() async {
     await archive.insertData(data);
   }
   await archive.dbConfig.db.close();
+}
+
+Future<void> recreateIsoneHistoricalBtmSolar() async {
+  var archive = getIsoneHistoricalBtmSolarArchive();
+  await archive.setupDb();
+  var files = Directory(archive.dir).listSync().whereType<File>().toList();
+  files.sort((a, b) => a.path.compareTo(b.path));
+  /// import only the latest file
+  var file = files.last;
+  var yyyymmdd = basename(file.path).substring(12,22);
+  var asOfDate = Date.fromIsoString(yyyymmdd);
+  await updateIsoneHistoricalBtmSolarArchive(asOfDate, setUp: true);
 }
 
 Future<void> recreateMonthlyAssetNcpc() async {
@@ -548,17 +561,18 @@ Future<void> main() async {
   // await recreateIesoRtZonalDemandArchive();
 
   /// ISONE
+  // await recreateCompetitiveOffersIsone();
   // await recreateDaBindingConstraintsIsone();
   // await recreateDaLmpHourlyIsone();
-  // await recreateRtLmpHourlyIsone();
   // await recreateDaCongestionCompactIsone();
   // await recreateDaDemandBid();
   // await recreateDaEnergyOffersIsone();
   // await recreateFwdResAuctionResults();
+  await recreateIsoneHistoricalBtmSolar();
   // await insertMaskedAssetIdsIsone();
   // await recreatePtidTableIsone();
   // await recreateRegulationRequirementIsone();
-  // await recreateCompetitiveOffersIsone();
+  // await recreateRtLmpHourlyIsone();
   // await recreateMisTemplateArchive();
   // await recreateWholesaleLoadCostReportIsone();
 
@@ -584,5 +598,5 @@ Future<void> main() async {
   // await updatePolygraphProjects(setUp: true);
 
   /// Utilities
-  await recreateCmpLoadArchive(setUp: true);
+  // await recreateCmpLoadArchive(setUp: true);
 }
