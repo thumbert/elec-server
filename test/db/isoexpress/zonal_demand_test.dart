@@ -83,7 +83,5 @@ Future<void> main() async {
   var rootUrl = 'http://127.0.0.1:8080';
   await tests(rootUrl);
 
-  /// recreate the database (3 min)
-  // await insertZonalDemand();
 
 }

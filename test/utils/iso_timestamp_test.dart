@@ -88,6 +88,22 @@ void tests() {
     expect(isFallBackDate(Date.utc(2020, 3, 8)), false);
     expect(isFallBackDate(Date.utc(2020, 11, 1)), true);
   });
+
+  test('offset minutes since midnight in spring', () {
+    var midnight = TZDateTime(location, 2015, 3, 8);
+    for (var i = 1; i < 4; i++) {
+      var dt = midnight.add(Duration(hours: i));
+      expect(dt.difference(midnight).inMinutes, 60 * i);
+    }
+  });
+
+  test('offset minutes since midnight in fall', () {
+    var midnight = TZDateTime(location, 2015, 11, 2);
+    for (var i = 1; i < 4; i++) {
+      var dt = midnight.add(Duration(hours: i));
+      expect(dt.difference(midnight).inMinutes, 60 * i);
+    }
+  });
 }
 
 void main() async {

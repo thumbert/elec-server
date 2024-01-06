@@ -148,6 +148,8 @@ class ZonalDemandArchive extends IsoExpressReport {
 
   ///
   final _urls = <int, String>{
+    2023:
+     'https://www.iso-ne.com/static-assets/documents/2023/02/2023_smd_hourly.xlsx',
     2022:
      'https://www.iso-ne.com/static-assets/documents/2022/02/2022_smd_hourly.xlsx',
     2021:

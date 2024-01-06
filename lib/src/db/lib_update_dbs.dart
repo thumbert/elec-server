@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
+import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
+import 'package:more/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
@@ -17,6 +19,7 @@ Future<void> updateCmeEnergySettlements(List<Date> days,
   await archive.dbConfig.db.open();
   for (var asOfDate in days) {
     var file = archive.getFilename(asOfDate);
+    // downloading the file and zipping it handled separately
     if (file.existsSync()) {
       var data = archive.processFile(file);
       await archive.insertData(data);
@@ -29,19 +32,20 @@ Future<void> updateCmeEnergySettlements(List<Date> days,
 /// https://www.maine.gov/mpuc/regulated-utilities/electricity/rfps/standard-offer
 /// and saved as a csv file (see the archive.)
 ///
-Future<void> updateCmpLoadArchive(List<int> years,
-    {bool setUp = false}) async {
+Future<void> updateCmpLoadArchive(List<int> years, {bool setUp = false}) async {
   var archive = prod.getCmpLoadArchive();
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
   for (var year in years) {
     // for (var customerClass in CmpCustomerClass.values) {
-    for (var customerClass in [CmpCustomerClass.residentialAndSmallCommercial]) {
-      var file = archive.getFile(year: year, customerClass: customerClass,
-          settlementType: 'final');
+    for (var customerClass in [
+      CmpCustomerClass.residentialAndSmallCommercial
+    ]) {
+      var file = archive.getFile(
+          year: year, customerClass: customerClass, settlementType: 'final');
       if (file.existsSync()) {
-        var data = archive.processFile(year: year, customerClass: customerClass,
-            settlementType: 'final');
+        var data = archive.processFile(
+            year: year, customerClass: customerClass, settlementType: 'final');
         // print(data);
         await archive.insertData(data);
       }
@@ -181,6 +185,34 @@ Future<void> updateIesoRtZonalDemandArchive(
   await archive.dbConfig.db.close();
 }
 
+Future<void> updateIsoneRtSystemLoad5minArchive(
+    {required List<Date> days,
+    bool setUp = false,
+    bool download = true}) async {
+  var archive = prod.getRtSystemLoad5minArchive();
+  if (setUp) await archive.setupDb();
+
+  await archive.dbConfig.db.open();
+  for (var day in days) {
+    if (download) {
+      await archive.downloadDay(day);
+      final jsonFile =
+          '${archive.dir}/${day.year}/isone_systemload_5min_$day.json';
+      if (!File(jsonFile).existsSync()) {
+        throw StateError('Download failed for $day');
+      }
+      var res =
+          Process.runSync('gzip', [jsonFile], workingDirectory: archive.dir);
+      if (res.exitCode != 0) {
+        throw StateError('GZipping the file for $day has failed!');
+      }
+    }
+    var data = archive.processFile(archive.getFilename(day));
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
 /// File need to be downloaded by hand
 Future<void> updateIsoneHistoricalBtmSolarArchive(Date asOfDate,
     {bool setUp = false}) async {
@@ -192,6 +224,29 @@ Future<void> updateIsoneHistoricalBtmSolarArchive(Date asOfDate,
   await archive.dbConfig.db.close();
 }
 
+Future<void> updateIsoneZonalDemand(List<int> years,
+    {bool setUp = false, bool download = false}) async {
+  var archive = ZonalDemandArchive();
+  if (setUp) {
+    await ZonalDemandArchive().setupDb();
+  }
+
+  if (download) {
+    for (var year in years) {
+      // download the files and convert to xlsx before 2017
+      await archive.downloadYear(year);
+    }
+  }
+
+  await archive.dbConfig.db.open();
+  for (var year in years) {
+    print('Year: $year');
+    var file = archive.getFilename(year);
+    var data = archive.processFile(file);
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
 
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();

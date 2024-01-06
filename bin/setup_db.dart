@@ -551,40 +551,6 @@ Future<void> insertWholesaleLoadReports() async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> insertZonalDemand() async {
-  var archive = ZonalDemandArchive();
-  // await ZonalDemandArchive().setupDb();
-
-  var years = [
-    2011,
-    2012,
-    2013,
-    2014,
-    2015,
-    2016,
-    2017,
-    2018,
-    2019,
-    2020,
-    2021,
-    2022,
-  ];
-  // for (var year in years) {
-  //   // download the files and convert to xlsx before 2017
-  //   await archive.downloadYear(year);
-  // }
-
-  await archive.dbConfig.db.open();
-  for (var year in years) {
-    print('Year: $year');
-    var file = archive.getFilename(year);
-    var data = archive.processFile(file);
-    // data.take(5).forEach(print);
-    await archive.insertData(data);
-  }
-  await archive.dbConfig.db.close();
-}
-
 
 Future<void> main() async {
   initializeTimeZones();

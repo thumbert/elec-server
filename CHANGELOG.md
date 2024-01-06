@@ -5,6 +5,11 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-01-06
+- Add ISONE's RtSystemLoad5min data to Mongo.  Archive files are gzipped and split by year.  
+  Looks cleaner.
+- Add more demand data to the archive for ISONE and IESO  
+
 ## Release 2023-11-27
 - Sort by month the API response from api/utilities/api_ct_supplier_backlog.dart
 

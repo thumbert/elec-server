@@ -7,6 +7,7 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
+import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
 import 'package:elec_server/src/db/isone/historical_btm_solar.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
@@ -27,7 +28,7 @@ CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
 MaineCmpLoadArchive getCmpLoadArchive() {
   final dbConfig = ComponentConfig(
           host: '127.0.0.1', dbName: 'utility', collectionName: 'load_cmp');
-  final dir =  '${Platform.environment['HOME']!}/Downloads/Archive/Utility/Maine/CMP/Load/Raw/';
+  final dir = '${Platform.environment['HOME']!}/Downloads/Archive/Utility/Maine/CMP/Load/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
@@ -38,8 +39,8 @@ DaEnergyOfferArchive getDaEnergyOfferArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'da_energy_offer');
   var dir =
-      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Downloads/'
-      'Archive/IsoExpress/DaEnergyOffer/Raw/';
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/DaEnergyOffer/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
@@ -67,6 +68,19 @@ IesoRtZonalDemandArchive getIesoRtZonalDemandArchive() {
   }
   return IesoRtZonalDemandArchive(dbConfig: dbConfig, dir: dir.path);
 }
+
+RtSystemLoad5minArchive getRtSystemLoad5minArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'rt_systemload_5min');
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/Demand/SystemDemand5min/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return RtSystemLoad5minArchive(dbConfig: dbConfig, dir: dir);
+}
+
 
 IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   var dbConfig = ComponentConfig(

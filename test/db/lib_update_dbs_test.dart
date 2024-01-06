@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:timezone/timezone.dart';
 
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
   await archive.dbConfig.db.open();
@@ -20,12 +21,18 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days) async {
 
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
-  // var days = Term.parse('24May22-31May22', UTC).days();
+  // var days = Term.parse('1Jan24-4Jan24', UTC).days();
 
-  // var months = Month.utc(2020, 1).upTo(Month.utc(2023, 9));
+  ///---------------------------------------------------------------
+  /// IESO
+  // var months = Month.utc(2023, 9).upTo(Month.utc(2023, 12));
   // await updateIesoRtGenerationArchive(months: months);
-  // await updateIesoRtZonalDemandArchive(years: [2023]);
+  // await updateIesoRtZonalDemandArchive(years: [2023, 2024]);
 
+  ///---------------------------------------------------------------
+  /// ISONE
+  // await updateIsoneHistoricalBtmSolarArchive(Date.utc(2023, 10, 13), setUp: false);
+  // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days);
   // await updateDaEnergyOffersIsone(months: [
@@ -35,14 +42,8 @@ Future<void> tests() async {
   //   Month.utc(2023, 4),
   // ]);
 
-  /// ISONE
-  // await updateIsoneHistoricalBtmSolarArchive(Date.utc(2023, 10, 13), setUp: false);
-
-  // var years = IntegerRange(2013, 2023);
-  // var days = Term.parse('Cal21', UTC).days();
-  // await insertDays(DaLmpHourlyArchive(), days);
-  // var days = Term.parse('24May22-31May22', UTC).days();
-  // await insertDays(DaLmpHourlyArchive(), days);
+  // await updateIsoneZonalDemand([2011, 2012], setUp: true);
+  await updateIsoneZonalDemand(IntegerRange(2011, 2021), setUp: true);
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
@@ -54,7 +55,6 @@ Future<void> tests() async {
   // await updateCmpLoadArchive(years, setUp: true);
 
   // await updatePolygraphProjects(setUp: false);
-
 }
 
 void main() async {
@@ -66,8 +66,4 @@ void main() async {
   dotenv.load('.env/prod.env');
 
   await tests();
-
-  ///
-  /// See bin/setup_db.dart on how to update a database
-  ///
 }
