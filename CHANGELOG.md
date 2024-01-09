@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-01-09
+- Fixed type bug in api_sd_rtload.
+
 ## Release 2024-01-06
 - Add ISONE's RtSystemLoad5min data to Mongo.  Archive files are gzipped and split by year.  
   Looks cleaner.

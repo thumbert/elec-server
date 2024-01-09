@@ -200,7 +200,7 @@ class SdRtload {
   //http://127.0.0.1:8080/sd_rtload/v1/start/20171201/end/20171201
   // @ApiMethod(path: 'start/{start}/end/{end}')
   Future<List<Map<String, dynamic>>> rtloadAll(String start, String end) async {
-    var pipeline = [];
+    var pipeline = <Map<String,Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -214,7 +214,7 @@ class SdRtload {
         '_id': 0,
       }
     });
-    var res = coll.aggregateToStream(pipeline as List<Map<String, Object>>);
+    var res = coll.aggregateToStream(pipeline);
     return _format2(res);
   }
 
@@ -370,7 +370,7 @@ class SdRtload {
     return out;
   }
 
-  Future<List<Map<String, dynamic>>> _format2(Stream<Map> data) async {
+  Future<List<Map<String, dynamic>>> _format2(Stream<Map<String,dynamic>> data) async {
     var out = <Map<String, dynamic>>[];
     var keys = <String>[
       'version',

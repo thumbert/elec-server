@@ -42,8 +42,8 @@ Future<void> tests() async {
   //   Month.utc(2023, 4),
   // ]);
 
-  // await updateIsoneZonalDemand([2011, 2012], setUp: true);
-  await updateIsoneZonalDemand(IntegerRange(2011, 2021), setUp: true);
+  await updateIsoneZonalDemand([2021], download: false);
+  // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
