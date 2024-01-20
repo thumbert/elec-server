@@ -89,6 +89,6 @@ void test1b() {
 
 
 void main() {
-  // test1a();
+  test1a();
   test1b();
 }

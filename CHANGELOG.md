@@ -5,6 +5,10 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-01-19
+- Plotly.now names the html div with the filename to prevent conflicts if when 
+  included into other html files.  
+
 ## Release 2024-01-09
 - Fixed type bug in api_sd_rtload.
 

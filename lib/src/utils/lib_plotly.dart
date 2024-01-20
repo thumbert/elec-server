@@ -52,11 +52,7 @@ class Plotly {
     if (extension(file.path) != '.html') {
       throw ArgumentError('Filename extension needs to be .html');
     }
-    file.writeAsStringSync(_makePage(traces, layout, config));
-  }
-
-  static String _makePage(List<Map<String, dynamic>> traces,
-      Map<String, dynamic> layout, Map<String, dynamic> config) {
+    var divId = basename(file.path).replaceAll(RegExp('\\.html\$'), '');
     var out = """ 
 <!DOCTYPE html>
 <html>
@@ -64,14 +60,15 @@ class Plotly {
   <script src="https://cdn.plot.ly/plotly-2.26.0.min.js" charset="utf-8"></script>
 </head>
 <body>
-  <div id="chart"></div>
+  <div id="$divId"></div>
   <script>
-  	let div = document.getElementById("chart");
-	  Plotly.newPlot( div, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
+  	let $divId = document.getElementById("$divId");
+	  Plotly.newPlot( $divId, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
   </script>
 </body>
 </html>
 """;
-    return out;
+    file.writeAsStringSync(out);
   }
+
 }
