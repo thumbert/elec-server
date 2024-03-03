@@ -3,9 +3,11 @@ library db.isoexpress.da_lmp_hourly;
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:more/collection.dart';
 import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
 import '../lib_mis_reports.dart' as mis;
@@ -35,15 +37,15 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/hourlylmp/da/final/day/${yyyymmdd(asOfDate)}';
 
   /// I encoded the json file using msgpack and got only a marginal improvement
-  /// to file size.  File size went down from 6.2 MB to 5.6 MB.  Zipping the
+  /// to file size.  File size went down from 6.2 MB to 5.6 MB.  GZipping the
   /// file reduces it to 0.5 MB.
   ///
   @override
   File getFilename(Date asOfDate, {String extension = 'json'}) {
     if (extension == 'csv') {
-      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv');
+      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv.gz');
     } else if (extension == 'json') {
-      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json');
+      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json.gz');
     } else {
       throw StateError('Unsupported extension $extension');
     }
@@ -89,9 +91,12 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     if (!file.existsSync()) {
       throw ArgumentError('File $file does not exist!');
     }
-    return switch (extension(file.path)) {
-      '.csv' => _processFileCsv(file),
-      '.json' => _processFileJson(file),
+    if (extension(file.path) != '.gz') {
+      throw ArgumentError('File $file needs to be a gzip archive!');
+    }
+    return switch (extension(file.path, 2)) {
+      '.csv.gz' => _processFileCsv(file),
+      '.json.gz' => _processFileJson(file),
       _ => throw ArgumentError('Unsupported file type'),
     };
   }
@@ -99,7 +104,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var out = <String, dynamic>{
-      'date': (rows.first['BeginDate'] as String).substring(0,10),
+      'date': (rows.first['BeginDate'] as String).substring(0, 10),
       'ptid': int.parse(rows.first['Location']['@LocId']),
       'congestion': <double>[],
       'lmp': <double>[],
@@ -123,17 +128,20 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     return out;
   }
 
-
   List<Map<String, dynamic>> _processFileJson(File file) {
-    var aux = json.decode(file.readAsStringSync()) as Map;
-    late List<Map<String,dynamic>> xs;
-    if (aux.containsKey('HourlyLmps')) {
-      if (aux['HourlyLmps'] == '') return <Map<String,dynamic>>[];
-      xs = (aux['HourlyLmps']['HourlyLmp'] as List).cast<Map<String,dynamic>>();
-    } else {
-      throw ArgumentError('Can\'t find key HourlyLmps in file $file');
-    }
+    final bytes = file.readAsBytesSync();
+    var content = GZipDecoder().decodeBytes(bytes);
+    var data = utf8.decoder.convert(content);
 
+    var aux = json.decode(data) as Map;
+    late List<Map<String, dynamic>> xs;
+    if (aux.containsKey('HourlyLmps')) {
+      if (aux['HourlyLmps'] == '') return <Map<String, dynamic>>[];
+      xs =
+          (aux['HourlyLmps']['HourlyLmp'] as List).cast<Map<String, dynamic>>();
+    } else {
+      throw ArgumentError('Can\'t find key HourlyLmps, file: ${file.path}');
+    }
     var dataByPtids = groupBy(xs, (Map row) => row['Location']['@LocId']);
     return dataByPtids.keys
         .map((ptid) => converter(dataByPtids[ptid]!))
@@ -178,7 +186,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
         hours.add(hour);
         out['lmp'].add((row['Locational Marginal Price'] as num).toDouble());
         out['congestion'].add((row['Congestion Component'] as num).toDouble());
-        out['marginal_loss'].add((row['Marginal Loss Component'] as num).toDouble());
+        out['marginal_loss']
+            .add((row['Marginal Loss Component'] as num).toDouble());
       }
     }
 
@@ -191,8 +200,8 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     var pwd = dotenv.env['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
-      ..addCredentials(Uri.parse(getUrl(day)), '',
-          HttpClientBasicCredentials(user, pwd))
+      ..addCredentials(
+          Uri.parse(getUrl(day)), '', HttpClientBasicCredentials(user, pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');
@@ -201,12 +210,12 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     var request = await client.getUrl(Uri.parse(getUrl(day)));
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     var response = await request.close();
-    var file = File('${dir}WW_DALMP_ISO_${yyyymmdd(day)}.json');
-    await response.pipe(file.openWrite());
+    var fileName = getFilename(day).path.removeSuffix('.gz');
+    if (!Directory(dirname(fileName)).existsSync()) {
+      Directory(dirname(fileName)).createSync(recursive: true);
+    }
+    await response.pipe(File(fileName).openWrite());
   }
-
-
-
 
   /// Check if this date is in the db already
   Future<bool> hasDay(Date date) async {
@@ -249,5 +258,4 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     Map res = await dbConfig.coll.aggregate(pipeline);
     return {'lastDay': res['result'][0]['lastDay']};
   }
-
 }

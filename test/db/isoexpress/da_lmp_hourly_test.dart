@@ -188,23 +188,11 @@ Future<void> tests(String rootUrl) async {
   });
 }
 
-/// Use msgpack to compress the json file.
-void fileCompressionTest() {
-  // var archive = DaLmpHourlyArchive();
-  // var file = archive.getFilename(Date.utc(2022, 12, 22));
-  // var data = json.decode(file.readAsStringSync());
-  //print(data);
-}
+/// Use msgpack to compress the json file does not provide good improvement.
 
 Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
-
-  // await DaLmpHourlyArchive().setupDb();
-  // await prepareData();
-
   DbProd();
-  // tests('http://127.0.0.1:8080');
-
-  fileCompressionTest();
+  tests(dotenv.env['ROOT_URL']!);
 }

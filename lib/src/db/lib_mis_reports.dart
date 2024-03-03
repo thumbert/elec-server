@@ -3,6 +3,7 @@ library iso.isone.lib_mis_reports;
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
+import 'package:archive/archive.dart';
 import 'package:path/path.dart';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
@@ -200,8 +201,14 @@ class MisReport {
   /// [tab] the tab number to parse.  If the report changes and the tab
   /// doesn't exist return an empty list.
   List<List> _readReport({int tab = 0}) {
+    if (extension(file.path) == '.gz') {
+      final bytes = file.readAsBytesSync();
+      var content = GZipDecoder().decodeBytes(bytes);
+      _lines ??= utf8.decoder.convert(content).split('\n');
+    } else {
+      _lines ??= file.readAsLinesSync();
+    }
     var converter = CsvToListConverter();
-    _lines ??= file.readAsLinesSync();
     if (_lines!.isEmpty ||
         !(_lines!.last.startsWith('"T"') || _lines!.last.startsWith('T'))) {
       throw IncompleteReportException('Incomplete CSV file ${file.path}');

@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:archive/archive.dart';
-import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -31,7 +30,7 @@ class RtSystemLoad5minArchive extends DailyIsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/fiveminutesystemload/day/${yyyymmdd(asOfDate)}';
 
   /// I encoded the json file using msgpack and got only a marginal improvement
-  /// to file size.  File size went down from 6.2 MB to 5.6 MB.  Zipping the
+  /// to file size.  File size went down from 6.2 MB to 5.6 MB.  GZipping the
   /// file reduces it to 0.5 MB.
   ///
   @override

@@ -5,7 +5,11 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
-## Release 2024-01-19
+## Release 2024-03-03
+- In lib_mis_reports.dart, allow MIS reports to be gzipped. 
+- Reworked ISONE hourly DA LMP archive to be gzipped and split by year 
+
+## Release 2024-01-20
 - Plotly.now names the html div with the filename to prevent conflicts if when 
   included into other html files.  
 
