@@ -10,6 +10,8 @@ import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/timezone.dart';
 
+import '../../bin/setup_db.dart';
+
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     {bool gzip = false}) async {
   await archive.dbConfig.db.open();
@@ -34,7 +36,7 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
 
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
-  var days = Term.parse('1Jan24-29Feb24', UTC).days();
+  // var days = Term.parse('1Jan24-29Feb24', UTC).days();
 
   ///---------------------------------------------------------------
   /// IESO
@@ -47,7 +49,7 @@ Future<void> tests() async {
   // await updateIsoneHistoricalBtmSolarArchive(Date.utc(2023, 10, 13), setUp: false);
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
-  await insertDays(DaLmpHourlyArchive(), days, gzip: true);
+  // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
   // await updateDaEnergyOffersIsone(months: [
   //   Month.utc(2023, 1),
   //   Month.utc(2023, 2),
@@ -68,6 +70,11 @@ Future<void> tests() async {
   // await updateCmpLoadArchive(years, setUp: true);
 
   // await updatePolygraphProjects(setUp: false);
+
+  ///------------------------------------------------------------------
+  /// Weather
+  await insertNoaaTemperatures(download: true);
+
 }
 
 void main() async {

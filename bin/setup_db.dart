@@ -556,7 +556,6 @@ Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
 
-  // await insertNoaaTemperatures(download: true);
 
   /// ------------- Isone -----------------
   // await insertDaBindingConstraintsIsone();
