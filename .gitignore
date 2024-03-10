@@ -13,6 +13,7 @@ packages
 pubspec.lock
 .dart_tool/
 .local-chrome/
+.vscode/
 
 out
 docs

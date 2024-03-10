@@ -1,11 +1,9 @@
 library test.db.isoexpress.da_lmp_hourly_test;
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
