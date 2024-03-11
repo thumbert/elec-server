@@ -13,6 +13,7 @@ import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/utilities/maine/load_cmp.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
+import 'package:elec_server/src/db/weather/normal_temperature.dart';
 
 CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
   var dbConfig = ComponentConfig(
@@ -104,6 +105,19 @@ CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {
   }
   return archive;
 }
+
+NormalTemperatureArchive getNormalTemperatureArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1', dbName: 'weather',
+      collectionName: 'normal_temperature');
+  var dir = '${Platform.environment['HOME']}/Downloads/Archive/Weather/NormalTemperature';
+  var archive = NormalTemperatureArchive(dbConfig: dbConfig, dir: dir);
+  if (!Directory(archive.dir).existsSync()) {
+    Directory(archive.dir).createSync(recursive: true);
+  }
+  return archive;
+}
+
 
 PolygraphArchive getPolygraphArchive() {
   var dbConfig = ComponentConfig(

@@ -5,6 +5,11 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-03-11
+- Add NormalTemperatureArchive, api, client
+- Fix issue with ISONE DaCongestionCompactArchive because of gzipped storage introduced on 3/3.  
+  Run your tests! 
+
 ## Release 2024-03-03
 - In lib_mis_reports.dart, allow MIS reports to be gzipped. 
 - Reworked ISONE hourly DA LMP archive to be gzipped and split by year 

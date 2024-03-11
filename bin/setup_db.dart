@@ -5,6 +5,7 @@ import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/isoexpress/scc_report.dart';
+import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:elec_server/src/db/nyiso/masked_ids.dart';
@@ -89,8 +90,8 @@ Future<void> insertBtmSolarForecastMwNyiso() async {
   await archive.dbConfig.db.close();
 }
 
-
-Future<void> insertCompetitiveOffers({List<Date>? days, List<String>? states}) async {
+Future<void> insertCompetitiveOffers(
+    {List<Date>? days, List<String>? states}) async {
   states ??= ['CT', 'MA'];
   days ??= [Date.today(location: UTC)];
 
@@ -108,7 +109,8 @@ Future<void> insertCompetitiveOffers({List<Date>? days, List<String>? states}) a
       }
     }
     if (states.contains('MA')) {
-      var file = File(join(archive.dir, '${date.toString()}_ma_residential.json'));
+      var file =
+          File(join(archive.dir, '${date.toString()}_ma_residential.json'));
       if (file.existsSync()) {
         var data = archive.processFile(file);
         await archive.insertData(data);
@@ -117,8 +119,6 @@ Future<void> insertCompetitiveOffers({List<Date>? days, List<String>? states}) a
   }
   await archive.dbConfig.db.close();
 }
-
-
 
 Future<void> insertDaBindingConstraintsIsone() async {
   var archive = DaBindingConstraintsReportArchive();
@@ -155,8 +155,7 @@ Future<void> insertDaCongestionCompactNyiso() async {
   var cp = await client.getClearingPricesForAuction('X21-6M-R5Autumn21');
   var ptids = cp.map((e) => e['ptid'] as int).toSet();
 
-  var archive = NyisoDaCongestionCompactArchive()
-    ..ptids = ptids;
+  var archive = NyisoDaCongestionCompactArchive()..ptids = ptids;
   // await archive.setupDb();
   await archive.dbConfig.db.open();
   var months = Month.utc(2019, 2).upTo(Month.utc(2022, 2));
@@ -196,7 +195,6 @@ Future<void> insertDaDemandBids() async {
     await archive.insertDay(day);
   }
   await archive.dbConfig.db.close();
-
 }
 
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
@@ -301,7 +299,6 @@ Future<void> insertFuelMixIsone(List<Date> days,
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> insertFwdResAuctionResults() async {
   var archive = FwdResAuctionResultsArchive();
@@ -413,7 +410,8 @@ Future<void> insertMonthlyAssetNcpc({bool download = false}) async {
 
 Future<void> insertNoaaTemperatures({bool download = false}) async {
   var archive = NoaaDailySummaryArchive()
-    ..dir = '${env['HOME'] ?? ''}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
+    ..dir =
+        '${env['HOME'] ?? ''}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
   await archive.dbConfig.db.open();
 
   /// what stations get inserted in the database
@@ -430,6 +428,20 @@ Future<void> insertNoaaTemperatures({bool download = false}) async {
     await archive.insertData(data);
   }
 
+  await archive.dbConfig.db.close();
+}
+
+Future<void> insertNormalTemperatures() async {
+  var archive = getNormalTemperatureArchive();
+  await archive.dbConfig.db.open();
+  var files = Directory(archive.dir)
+      .listSync()
+      .whereType<File>()
+      .where((e) => path.extension(e.path) == '.json');
+  for (var file in files) {
+    var data = archive.processFile(file);
+    await archive.insertData([data]);
+  }
   await archive.dbConfig.db.close();
 }
 
@@ -468,7 +480,7 @@ Future<void> insertPtidTableNyiso() async {
 Future<void> insertPtidTablePjm() async {
   var archive = pjm_ptid.PtidArchive();
   await archive.setupDb();
-  
+
   var data = archive.processData(Date.utc(2022, 3, 25));
   await archive.db.open();
   await archive.insertData(data);
@@ -498,7 +510,6 @@ Future<void> insertSccReportIsone() async {
     await convertXlsToXlsx(fileIn);
   }
 
-
   // await archive.db.open();
   // var files = Directory(archive.dir).listSync().whereType<File>().where((e) => e.path.endsWith('.xlsx'));
   // for (var file in files) {
@@ -508,7 +519,6 @@ Future<void> insertSccReportIsone() async {
   // }
   // await archive.db.close();
 }
-
 
 Future<void> insertTccClearedPricesNyiso() async {
   var config = ComponentConfig(
@@ -528,7 +538,8 @@ Future<void> insertTccClearedPricesNyiso() async {
     var data = archive.processFile(file);
     await archive.insertData(data);
     // move the files from the ToProcess folder to Raw
-    var newPath = '${env['HOME']!}/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/${path.basename(file.path)}';
+    var newPath =
+        '${env['HOME']!}/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/${path.basename(file.path)}';
     file.copySync(newPath);
     file.deleteSync();
   }
@@ -551,11 +562,9 @@ Future<void> insertWholesaleLoadReports() async {
   await archive.dbConfig.db.close();
 }
 
-
 Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
-
 
   /// ------------- Isone -----------------
   // await insertDaBindingConstraintsIsone();
@@ -576,7 +585,7 @@ Future<void> main() async {
   // insertMisReports();
   // await insertMonthlyAssetNcpc(download: false);
 
-   // await insertPtidTable();
+  // await insertPtidTable();
   // await insertSccReportIsone();
   // await insertWholesaleLoadReports();
   // await insertZonalDemand();
@@ -595,17 +604,13 @@ Future<void> main() async {
   // await insertPtidTableNyiso();
   // await insertTccClearedPricesNyiso();
 
-
   /// ----------- PJM --------------
   // await insertPtidTablePjm();
 
-  
   /// ----------- Utility data ----------
   // var days = [
   //       // Date.utc(2022, 12, 4),
   //       Date.utc(2023, 2, 24),
   //     ];
   // await insertCompetitiveOffers(days: days, states: ['CT', 'MA']);
-  
 }
-

@@ -34,6 +34,7 @@ import 'package:elec_server/api/utilities/api_ct_supplier_backlog_rates.dart';
 import 'package:elec_server/api/utilities/api_load_cmp.dart';
 import 'package:elec_server/api/utilities/api_retail_suppliers_offers.dart';
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
+import 'package:elec_server/api/weather/api_normal_temperature.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
@@ -157,6 +158,8 @@ Future<Router> buildRouter() async {
   await DbProd.weather.open();
   router.mount(
       '/noaa_daily_summary/v1', ApiNoaaDailySummary(DbProd.weather).router.call);
+  router.mount(
+      '/normal_temperature/v1', ApiNormalTemperature(DbProd.weather).router.call);
 
   return router;
 }

@@ -23,8 +23,8 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
       if (!File(fileName).existsSync()) {
         throw StateError('Download failed for $day');
       }
-      var res =
-          Process.runSync('gzip', ['-f', fileName], workingDirectory: archive.dir);
+      var res = Process.runSync('gzip', ['-f', fileName],
+          workingDirectory: archive.dir);
       if (res.exitCode != 0) {
         throw StateError('GZipping the file for $day has failed!');
       }
@@ -73,8 +73,8 @@ Future<void> tests() async {
 
   ///------------------------------------------------------------------
   /// Weather
-  await insertNoaaTemperatures(download: true);
-
+  // await insertNoaaTemperatures(download: true);
+  await insertNormalTemperatures();
 }
 
 void main() async {

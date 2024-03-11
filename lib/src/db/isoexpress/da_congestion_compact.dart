@@ -29,12 +29,14 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
   @override
   File getFilename(Date asOfDate, {String extension = 'json'}) {
     if (extension == 'csv') {
-      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv');
+      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv.gz');
+    } else if (extension == 'json') {
+      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json.gz');
     } else {
-      return File('${dir}WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json');
+      throw StateError('Unsupported extension $extension');
     }
-
   }
+
   /// Return one document for one day for all ptids in the pool.
   /// Use rle to encode most common values.
   ///
@@ -52,7 +54,6 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
   /// ```
   @override
   List<Map<String, dynamic>> processFile(File file) {
-
     /// use the file processor from the DaLmpHourlyArchive
     var damArchive = DaLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
     var docs = damArchive.processFile(file);
@@ -72,18 +73,17 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
     }
 
     /// order the congestion data
-    var ordering = naturalComparable<num>
-        .onResultOf((List xs) => xs[1])
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[6]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[9]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[15]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[18]))
-      .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[21]));
+    var ordering = naturalComparable<num>.onResultOf((List xs) => xs[1])
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[6]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[9]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[15]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[18]))
+        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[21]));
     ordering.sort(congestion);
 
     /// Transpose the _congestion matrix into a
@@ -105,7 +105,6 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
 
     return [out];
   }
-
 
   /// Recreate the collection from scratch.
   @override

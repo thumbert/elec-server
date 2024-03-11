@@ -41,10 +41,12 @@ import 'db/nyiso/nyiso_ptid_test.dart' as nyiso_ptids;
 import 'db/pjm/pjm_ptid_test.dart' as pjm_ptids;
 import 'db/polygraph/polygraph_archive_test.dart' as polygraph;
 import 'db/utilities/cmp/load_cmp_test.dart' as load_cmp;
-import 'db/utilities/ct_supplier_backlog_rates_test.dart' as ct_retail_suppliers;
+import 'db/utilities/ct_supplier_backlog_rates_test.dart'
+    as ct_retail_suppliers;
 import 'db/utilities/retail_offers/retail_suppliers_offers_archive_test.dart'
     as retail_offers;
 import 'db/weather/noaa_daily_summary_test.dart' as noaa_daily_summary;
+import 'db/weather/normal_temperature_test.dart' as normal_temperature;
 
 import 'utils/iso_timestamp_test.dart' as iso_timestamp;
 import 'utils/iterable_extensions_test.dart' as iterable_ext;
@@ -101,6 +103,7 @@ Future<void> main() async {
   trsch3.tests();
 
   await noaa_daily_summary.tests(rootUrl);
+  await normal_temperature.tests(rootUrl);
 
   /// Client tests
   await curve_id.tests(rootUrl);

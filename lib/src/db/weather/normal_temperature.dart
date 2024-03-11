@@ -1,5 +1,6 @@
 library src.weather.weather_norm;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -7,9 +8,65 @@ import 'package:dama/analysis/interpolation/multi_linear_interpolator.dart';
 import 'package:dama/basic/linear_filter.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
+import 'package:elec_server/src/db/config.dart';
+import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/utils.dart';
-import 'package:more/collection.dart';
 import 'package:timeseries/timeseries.dart';
+
+class NormalTemperatureArchive {
+  NormalTemperatureArchive({ComponentConfig? dbConfig, String? dir}) {
+    this.dbConfig = dbConfig ??
+        ComponentConfig(
+            host: '127.0.0.1',
+            dbName: 'weather',
+            collectionName: 'normal_temperature');
+    this.dir = dir ??
+        '${Platform.environment['HOME']}/Downloads/Archive/Weather/NormalTemperature';
+  }
+
+  late final ComponentConfig dbConfig;
+  late final String dir;
+
+  /// Insert/Update a list of documents into the db.
+  /// ```
+  ///   {
+  ///     'airportCode': 'BOS',
+  ///     'asOfDate': '2024-03-01',
+  ///     'normalTemperature': <double>[...],
+  ///   }
+  /// ```
+  Future<int> insertData(List<Map<String, dynamic>> data) async {
+    if (data.isEmpty) return Future.value(0);
+    try {
+      for (var x in data) {
+        await dbConfig.coll.remove({
+          'airportCode': x['airportCode'],
+        });
+        await dbConfig.coll.insert(x);
+        print(
+            '--->  Inserted normal temperature for airport ${x['airportCode']} successfully');
+      }
+    } catch (e) {
+      print('XXX $e');
+      return Future.value(1);
+    }
+    return Future.value(0);
+  }
+
+  /// json file input
+  Map<String, dynamic> processFile(File file) {
+    var contents = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    return switch (contents) {
+      {
+        'airportCode': String _,
+        'asOfDate': String _,
+        'normalTemperature': List<dynamic> _,
+      } =>
+        contents,
+      _ => throw StateError('Invalid file format!'),
+    };
+  }
+}
 
 class NormalTemperatureAnalysis {
   NormalTemperatureAnalysis(this.ts, {required this.dir});
@@ -35,17 +92,17 @@ class NormalTemperatureAnalysis {
 
   /// Make sure that the temperature adjustor function is consistent
   /// with the baseline values.
-  /// Assume linear departure from the baseline 
+  /// Assume linear departure from the baseline
   final allAdjustors = <String, MultiLinearInterpolator>{
     'BOS': MultiLinearInterpolator([
-      0.0,                         // a point very back in the past
-      Date.utc(2010, 1, 1).value,  // when baseline starts shifting
-      Date.utc(2024, 1, 1).value,  // when no more adjustment is needed
+      0.0, // a point very back in the past
+      Date.utc(2010, 1, 1).value, // when baseline starts shifting
+      Date.utc(2024, 1, 1).value, // when no more adjustment is needed
       double.maxFinite
     ], [
       2.5, // adjust values by this much (up)
       2.5, // adjust values by linear interpolation between this and zero
-      0.0, // no more adjustment is needed 
+      0.0, // no more adjustment is needed
       0.0
     ]),
   };
@@ -226,9 +283,19 @@ class NormalTemperatureAnalysis {
       Plotly.now(traces, layout, file: file);
     }
 
-    plotYearAvg();
-    plotPartialYearAvg();
-    plotAvgTvsDayOfYear();
+    // plotYearAvg();
+    // plotPartialYearAvg();
+    // plotAvgTvsDayOfYear();
+
+    var jsonFile = File('${getNormalTemperatureArchive().dir}/$airport.json');
+    jsonFile.writeAsStringSync(json.encode({
+      'airportCode': airport,
+      'asOfDate': ts.last.interval.toString(),
+      'normalTemperature': _normalTemperature!
+          .map((e) => num.parse(e.toStringAsFixed(1)))
+          .toList(),
+    }));
+    print('Wrote file ${jsonFile.path}');
   }
 
   /// A procedure to smooth the input 366 values.
