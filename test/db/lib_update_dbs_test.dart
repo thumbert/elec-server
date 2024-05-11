@@ -59,6 +59,9 @@ Future<void> tests() async {
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
+  final months = Month.utc(2023, 1).upTo(Month.utc(2024, 1));
+  // final months = [Month.utc(2023, 1)];
+  await updateIsoneMraCapacityBidOffer(months: months, download: false);
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
@@ -74,14 +77,14 @@ Future<void> tests() async {
   ///------------------------------------------------------------------
   /// Weather
   // await insertNoaaTemperatures(download: true);
-  await insertNormalTemperatures();
+  // await insertNormalTemperatures();
 }
 
 void main() async {
   initializeTimeZones();
   Logger.root.level = Level.INFO;
   Logger.root.onRecord.listen((record) {
-    print('${record.level.name}: ${record.time}: ${record.message}');
+    print('${record.level.name} (${record.time.toString().substring(0,19)}) ${record.message}');
   });
   dotenv.load('.env/prod.env');
 

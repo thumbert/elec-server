@@ -2,9 +2,12 @@ library lib.src.db.lib_update_dbs;
 
 import 'dart:io';
 
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
+import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
@@ -221,6 +224,32 @@ Future<void> updateIsoneHistoricalBtmSolarArchive(Date asOfDate,
   final data = archive.processFile(asOfDate);
   await archive.insertData(data);
   await archive.dbConfig.db.close();
+}
+
+Future<void> updateIsoneMraCapacityBidOffer(
+    {required List<Month> months, bool download = true}) async {
+  final log = Logger('update ISONE MRA Capacity bids/offers');
+  var archive = MraCapacityBidOfferArchive();
+
+  for (var month in months) {
+    log.info('Working on month ${month.toIso8601String()}');
+    var file = archive.getFilename(month);
+    var url = archive.getUrl(month);
+    if (download) {
+      await baseDownloadUrl(url, file,
+          acceptHeader: 'application/json',
+          username: dotenv.env['ISONE_WS_USER'],
+          password: dotenv.env['ISONE_WS_PASSWORD']);
+      log.info('   Downloaded JSON file for ${month.toIso8601String()}');
+    }
+    try {
+      archive.makeCsvFileForDuckDb(month);
+      log.info('   Created CSV file for ${month.toIso8601String()}');
+    } catch (e) {
+      log.severe(e.toString());
+    }
+    // insert it into DuckDb
+  }
 }
 
 Future<void> updateIsoneZonalDemand(List<int> years,

@@ -12,6 +12,55 @@ var _env = Platform.environment;
 String baseDir = '${_env['HOME'] ?? ''}/Downloads/Archive/IsoExpress/';
 void setBaseDir(String dirName) => baseDir = dirName;
 
+Future<int> baseDownloadUrl(
+  String url,
+  File fileout, {
+  bool overwrite = true,
+  String? username,
+  String? password,
+  String? acceptHeader,
+  String? workingDirectory,
+  bool zipFile = false,
+}) async {
+  if (fileout.existsSync() && !overwrite) {
+    print('File ${fileout.path} was already downloaded.  Skipping.');
+    return Future.value(1);
+  } else {
+    if (!Directory(dirname(fileout.path)).existsSync()) {
+      Directory(dirname(fileout.path)).createSync(recursive: true);
+      print('Created directory ${dirname(fileout.path)}');
+    }
+    var client = HttpClient()
+      ..userAgent =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3419.0 Safari/537.36'
+      ..badCertificateCallback = (cert, host, port) => true;
+    if (username != null && password != null) {
+      client.addCredentials(
+          Uri.parse(url), '', HttpClientBasicCredentials(username, password));
+    }
+    var request = await client.getUrl(Uri.parse(url));
+    if (acceptHeader != null) {
+      request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+    }
+    var response = await request.close();
+    if (response.statusCode == 200) {
+      await response.pipe(fileout.openWrite());
+    } else {
+      print('Error downloading, status code: ${response.statusCode}');
+    }
+    if (zipFile) {
+      var zipFilename =
+          basename(fileout.path).replaceAll(RegExp('\\.csv\$'), '.zip');
+      var res = Process.runSync('zip', [zipFilename, basename(fileout.path)],
+          workingDirectory: workingDirectory);
+      if (res.exitCode == 0) {
+        fileout.deleteSync();
+      }
+    }
+  }
+  return 0;
+}
+
 /// An generic ISO Express Report class.
 abstract class IsoExpressReport {
   late String reportName;
@@ -38,7 +87,7 @@ abstract class IsoExpressReport {
   /// Download this url to a file.
   /// Basic authentication is supported.
   /// [acceptHeader] can be set to 'application/json' if you need json output.
-  Future downloadUrl(
+  Future<int> downloadUrl(
     String url,
     File fileout, {
     bool overwrite = true,
@@ -47,42 +96,13 @@ abstract class IsoExpressReport {
     String? acceptHeader,
     bool zipFile = false,
   }) async {
-    if (fileout.existsSync() && !overwrite) {
-      print('File ${fileout.path} was already downloaded.  Skipping.');
-      return Future.value(1);
-    } else {
-      if (!Directory(dirname(fileout.path)).existsSync()) {
-        Directory(dirname(fileout.path)).createSync(recursive: true);
-        print('Created directory ${dirname(fileout.path)}');
-      }
-      var client = HttpClient()
-        ..userAgent =
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3419.0 Safari/537.36'
-        ..badCertificateCallback = (cert, host, port) => true;
-      if (username != null && password != null) {
-        client.addCredentials(
-            Uri.parse(url), '', HttpClientBasicCredentials(username, password));
-      }
-      var request = await client.getUrl(Uri.parse(url));
-      if (acceptHeader != null) {
-        request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      }
-      var response = await request.close();
-      if (response.statusCode == 200) {
-        await response.pipe(fileout.openWrite());
-      } else {
-        print('Error downloading, status code: ${response.statusCode}');
-      }
-      if (zipFile) {
-        var zipFilename =
-            basename(fileout.path).replaceAll(RegExp('\\.csv\$'), '.zip');
-        var res = Process.runSync('zip', [zipFilename, basename(fileout.path)],
-            workingDirectory: dir);
-        if (res.exitCode == 0) {
-          fileout.deleteSync();
-        }
-      }
-    }
+    return baseDownloadUrl(url, fileout,
+        overwrite: overwrite,
+        username: username,
+        password: password,
+        acceptHeader: acceptHeader,
+        workingDirectory: dir,
+        zipFile: zipFile);
   }
 
   /// Insert this data into the database.

@@ -5,6 +5,8 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-05-11
+- Implement mra_capacity_bidoffer archive.  Started to experiment with DuckDb 
 
 ## Release 2024-03-11
 - Add NormalTemperatureArchive, api, client
