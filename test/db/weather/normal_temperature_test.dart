@@ -1,10 +1,12 @@
 library test.weather.dual_strike_option_test;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:date/date.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
 import 'package:elec_server/client/weather/normal_temperature.dart';
+import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/weather/normal_temperature.dart';
 import 'package:http/http.dart';
 import 'package:test/test.dart';
@@ -37,6 +39,18 @@ Future<void> analysis() async {
       'presentations/energy/temperature/$airport/src/assets');
   final wn = NormalTemperatureAnalysis(ts, dir: dir);
   wn.makeReport(airport);
+
+  /// Write the results in the archive folder
+  var jsonFile = File('${getNormalTemperatureArchive().dir}/$airport.json');
+  jsonFile.writeAsStringSync(json.encode({
+    'airportCode': airport,
+    'asOfDate': ts.last.interval.toString(),
+    'normalTemperature': wn
+        .normalTemperature()
+        .map((e) => num.parse(e.toStringAsFixed(1)))
+        .toList(),
+  }));
+  print('Wrote file ${jsonFile.path}');
 }
 
 Future<void> main() async {

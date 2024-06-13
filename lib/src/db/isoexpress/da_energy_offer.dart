@@ -3,7 +3,11 @@ library db.isoexpress.da_energy_offer;
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
+import 'package:csv/csv.dart';
+import 'package:elec_server/client/isoexpress/energy_offer.dart';
+import 'package:logging/logging.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
+import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -25,22 +29,22 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
         dbName: 'isoexpress',
         collectionName: 'da_energy_offer');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'PricingReports/DaEnergyOffer/Raw/';
+    dir ??= '${baseDir}PricingReports/DaEnergyOffer/Raw/';
     this.dir = dir;
     reportName = 'Day-Ahead Energy Market Historical Offer Report';
   }
 
   mongo.Db get db => dbConfig.db;
 
+  static final log = Logger('DA Energy Offers');
+
   @override
-  String getUrl(Date? asOfDate) =>
-      'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/'
-          'hbdayaheadenergyoffer_' +
-      yyyymmdd(asOfDate) +
-      '.csv';
+  String getUrl(Date asOfDate) =>
+      'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/hbdayaheadenergyoffer_${yyyymmdd(asOfDate)}.csv';
+
   @override
-  File getFilename(Date? asOfDate) =>
-      File(dir + 'hbdayaheadenergyoffer_' + yyyymmdd(asOfDate) + '.csv');
+  File getFilename(Date asOfDate) =>
+      File('${dir}hbdayaheadenergyoffer_${yyyymmdd(asOfDate)}.csv');
 
   /// [rows] has the data for all the hours of the day for one asset
   @override
@@ -98,7 +102,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     }
     var groups = groupBy(data, (dynamic e) => e['date']);
     try {
-      for (var date in groups.keys){
+      for (var date in groups.keys) {
         for (var document in groups[date]!) {
           await dbConfig.coll.update({
             'date': date,
@@ -123,6 +127,54 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
         .map((ptid) => converter(dataByAssetId[ptid]!))
         .toList();
     return out;
+  }
+
+  /// Aggregate all the days of the month in
+  ///
+  List<EnergyOfferSegment> aggregateDays(List<Date> days) {
+    var out = <EnergyOfferSegment>[];
+    for (var date in days) {
+      log.info('...  Working on $date');
+      final file = getFilename(date);
+      if (file.existsSync()) {
+        var rows = file
+            .readAsLinesSync()
+            .map((e) => const CsvToListConverter().convert(e).first);
+        var offers = rows
+            .where((row) => row.first == 'D')
+            .expand((row) => EnergyOfferSegment.fromRow(row));
+        out.addAll(offers);
+        log.info('...  Added ${rows.length} rows');
+      } else {
+        throw StateError('Missing file for $date');
+      }
+    }
+    log.info('aggregated data has ${out.length} rows!');
+    return out;
+  }
+
+  /// File is in the long format, ready for duckdb to upload
+  ///
+  int makeGzFileForMonth(Month month) {
+    var days = month.days();
+    var rows = aggregateDays(days);
+    final file =
+        File('$dir../month/da_energy_offers_${month.toIso8601String()}.csv');
+    var sb = StringBuffer();
+    sb.writeln(EnergyOfferSegment.columns.join(','));
+    for (var row in rows) {
+      sb.writeln(row.toCsv());
+    }
+    file.writeAsStringSync(sb.toString());
+
+    // gzip it!
+    var res = Process.runSync('gzip', ['-f', file.path], workingDirectory: dir);
+    if (res.exitCode != 0) {
+      throw StateError('Gzipping ${basename(file.path)} has failed');
+    }
+    log.info('Gzipped file ${basename(file.path)}');
+
+    return 0;
   }
 
   /// Check if this date is in the db already

@@ -283,19 +283,9 @@ class NormalTemperatureAnalysis {
       Plotly.now(traces, layout, file: file);
     }
 
-    // plotYearAvg();
-    // plotPartialYearAvg();
-    // plotAvgTvsDayOfYear();
-
-    var jsonFile = File('${getNormalTemperatureArchive().dir}/$airport.json');
-    jsonFile.writeAsStringSync(json.encode({
-      'airportCode': airport,
-      'asOfDate': ts.last.interval.toString(),
-      'normalTemperature': _normalTemperature!
-          .map((e) => num.parse(e.toStringAsFixed(1)))
-          .toList(),
-    }));
-    print('Wrote file ${jsonFile.path}');
+    plotYearAvg();
+    plotPartialYearAvg();
+    plotAvgTvsDayOfYear();
   }
 
   /// A procedure to smooth the input 366 values.

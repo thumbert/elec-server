@@ -27,6 +27,14 @@ Future<void> tests(String rootUrl) async {
       var res = archive.processFile(file);
       expect(res.first['hours'].length, 25);
     });
+    test('aggregate days', () {
+      var out = archive.aggregateDays([Date.utc(2023, 5, 31)]);
+      expect(out.length, 21813);
+      expect(out.first.hour.start,
+          TZDateTime(IsoNewEngland.location, 2023, 5, 31));
+      expect(out.first.toCsv(),
+          '2023-05-31T00:00:00.000-0400,20720,40320,0.0,93.5,93.5,7782.75,7782.75,7782.75,1648.49,0,49.07,93.5,0.0,87.0,ECONOMIC');
+    });
   });
 
   group('ISONE DA energy offers API tests: ', () {
@@ -133,7 +141,6 @@ Future<void> tests(String rootUrl) async {
       var out = eo.averageOfferPrice(pqOffers);
       expect(out.isEmpty, true);
     });
-
   });
 }
 

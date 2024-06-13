@@ -41,7 +41,7 @@ DaEnergyOfferArchive getDaEnergyOfferArchive() {
       host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'da_energy_offer');
   var dir =
       '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
-      '/IsoExpress/DaEnergyOffer/Raw/';
+      '/IsoExpress/PricingReports/DaEnergyOffer/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }

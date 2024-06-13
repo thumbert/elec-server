@@ -150,6 +150,8 @@ Future<void> updateDaEnergyOffersIsone(
       var data = archive.processFile(file);
       await archive.insertData(data);
     }
+    archive.makeGzFileForMonth(month);
+    
   }
   await archive.dbConfig.db.close();
 }
