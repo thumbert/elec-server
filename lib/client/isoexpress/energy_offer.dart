@@ -61,6 +61,7 @@ class EnergyOfferSegment {
   final num intermediateStartupPrice;
   final num hotStartupPrice;
   final num noLoadPrice;
+  // starting at zero
   final int segment;
   final num price;
   final num quantity;
@@ -111,6 +112,59 @@ class EnergyOfferSegment {
     ]);
   }
 
+  /// Input is an element of the list 'HbRealTimeEnergyOffer' corresponding to a
+  /// unit (with multiple segments)
+  ///
+  static List<EnergyOfferSegment> fromJson(Map<String, dynamic> xs) {
+    var out = <EnergyOfferSegment>[];
+    var aux =
+        ((xs['Segments'] as List).first as Map<String, dynamic>)['Segment'];
+    var segments = aux is List ? aux : [aux];
+    for (Map<String, dynamic> segment in segments) {
+      final start = TZDateTime.parse(IsoNewEngland.location, xs['BeginDate']);
+      final segmentIdx = int.parse(segment['@Number']) - 1;
+      assert(segmentIdx >= 0);
+      final price = segment['Price'] is String
+          ? num.parse(segment['Price'])
+          : segment['Price'];
+      final mw =
+          segment['Mw'] is String ? num.parse(segment['Mw']) : segment['Mw'];
+      out.add(EnergyOfferSegment(
+          hour: Hour.beginning(start),
+          maskedParticipantId: xs['MaskedParticipantId'],
+          maskedAssetId: xs['MaskedAssetId'],
+          mustTakeEnergy: xs['MustTakeEnergy'],
+          maxDailyEnergyAvailable: xs['MaxDailyEnergy'] is String
+              ? num.parse(xs['MaxDailyEnergy'])
+              : xs['MaxDailyEnergy'],
+          ecoMax: xs['EconomicMax'] is String
+              ? num.parse(xs['EconomicMax'])
+              : xs['EconomicMax'],
+          ecoMin: xs['EconomicMin'] is String
+              ? num.parse(xs['EconomicMin'])
+              : xs['EconomicMin'],
+          coldStartupPrice: xs['ColdStartPrice'] is String
+              ? num.parse(xs['ColdStartPrice'])
+              : xs['ColdStartPrice'],
+          intermediateStartupPrice: xs['IntermediateStartPrice'] is String
+              ? num.parse(xs['IntermediateStartPrice'])
+              : xs['IntermediateStartPrice'],
+          hotStartupPrice: xs['HotStartPrice'] is String
+              ? num.parse(xs['HotStartPrice'])
+              : xs['HotStartPrice'],
+          noLoadPrice: xs['NoLoadPrice'] is String
+              ? num.parse(xs['NoLoadPrice'])
+              : xs['NoLoadPrice'],
+          segment: segmentIdx,
+          price: price,
+          quantity: mw,
+          claim10: num.parse(xs['Claim10Mw']),
+          claim30: num.parse(xs['Claim30Mw']),
+          unitStatus: UnitStatus.parse(xs['UnitStatus'])));
+    }
+    return out;
+  }
+
   /// From the CSV file row, create several EnergyOfferSegments
   static List<EnergyOfferSegment> fromRow(List<dynamic> row) {
     var out = <EnergyOfferSegment>[];
@@ -142,4 +196,28 @@ class EnergyOfferSegment {
     }
     return out;
   }
+
+
+  Map<String,dynamic> toJson() {
+    return <String,dynamic> {
+      'hourBeginning': hour.start.toIso8601String(),
+      'maskedParticipantId': maskedParticipantId,
+      'maskedAssetId': maskedAssetId,
+      'mustTakeEnergy': mustTakeEnergy,
+      'maxDailyEnergyAvailable': maxDailyEnergyAvailable,
+      'ecoMax': ecoMax,
+      'ecoMin': ecoMin,
+      'coldStartupPrice': coldStartupPrice,
+      'intermediateStartupPrice': intermediateStartupPrice,
+      'hotStartupPrice': hotStartupPrice,
+      'noLoadPrice': noLoadPrice,
+      'segment': segment,
+      'price': price,
+      'quantity': quantity,
+      'claim10': claim10,
+      'claim30': claim30,
+      'unitStatus': unitStatus.toString(),
+    };
+  }
+
 }

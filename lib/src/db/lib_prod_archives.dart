@@ -7,7 +7,10 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
+import 'package:elec_server/src/db/isoexpress/morning_report.dart';
+import 'package:elec_server/src/db/isoexpress/rt_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
+import 'package:elec_server/src/db/isoexpress/sevenday_capacity_forecast.dart';
 import 'package:elec_server/src/db/isone/historical_btm_solar.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
@@ -28,19 +31,35 @@ CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
 
 MaineCmpLoadArchive getCmpLoadArchive() {
   final dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'utility', collectionName: 'load_cmp');
-  final dir = '${Platform.environment['HOME']!}/Downloads/Archive/Utility/Maine/CMP/Load/Raw/';
+      host: '127.0.0.1', dbName: 'utility', collectionName: 'load_cmp');
+  final dir =
+      '${Platform.environment['HOME']!}/Downloads/Archive/Utility/Maine/CMP/Load/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
   return MaineCmpLoadArchive(dbConfig: dbConfig, dir: dir);
 }
 
+CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1',
+      dbName: 'retail_suppliers',
+      collectionName: 'ct_backlog_rates');
+  var dir =
+      '${Platform.environment['HOME']}/Downloads/Archive/SupplierBacklogRates/CT/Raw/';
+  var archive = CtSupplierBacklogRatesArchive(dbConfig: dbConfig, dir: dir);
+  if (!Directory(archive.dir).existsSync()) {
+    Directory(archive.dir).createSync(recursive: true);
+  }
+  return archive;
+}
+
 DaEnergyOfferArchive getDaEnergyOfferArchive() {
   var dbConfig = ComponentConfig(
-      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'da_energy_offer');
-  var dir =
-      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      host: '127.0.0.1',
+      dbName: 'isoexpress',
+      collectionName: 'da_energy_offer');
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
       '/IsoExpress/PricingReports/DaEnergyOffer/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
@@ -51,7 +70,7 @@ DaEnergyOfferArchive getDaEnergyOfferArchive() {
 IesoRtGenerationArchive getIesoRtGenerationArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'ieso', collectionName: 'rt_generation');
-  var dir=Directory('${Platform.environment['HOME'] ?? ''}'
+  var dir = Directory('${Platform.environment['HOME'] ?? ''}'
       '/Downloads/Archive/Ieso/RtGeneration/Raw/');
   if (!dir.existsSync()) {
     dir.createSync(recursive: true);
@@ -72,16 +91,16 @@ IesoRtZonalDemandArchive getIesoRtZonalDemandArchive() {
 
 RtSystemLoad5minArchive getRtSystemLoad5minArchive() {
   var dbConfig = ComponentConfig(
-      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'rt_systemload_5min');
-  var dir =
-      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      host: '127.0.0.1',
+      dbName: 'isoexpress',
+      collectionName: 'rt_systemload_5min');
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
       '/IsoExpress/Demand/SystemDemand5min/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
   return RtSystemLoad5minArchive(dbConfig: dbConfig, dir: dir);
 }
-
 
 IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   var dbConfig = ComponentConfig(
@@ -94,23 +113,22 @@ IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   return IsoneBtmSolarArchive(dbConfig: dbConfig, dir: dir.path);
 }
 
-CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {
-  var dbConfig = ComponentConfig(
-      host: '127.0.0.1', dbName: 'retail_suppliers',
-      collectionName: 'ct_backlog_rates');
-  var dir = '${Platform.environment['HOME']}/Downloads/Archive/SupplierBacklogRates/CT/Raw/';
-  var archive = CtSupplierBacklogRatesArchive(dbConfig: dbConfig, dir: dir);
-  if (!Directory(archive.dir).existsSync()) {
-    Directory(archive.dir).createSync(recursive: true);
+MorningReportArchive getMorningReportArchive() {
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/MorningReport';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
   }
-  return archive;
+  return MorningReportArchive(dir: dir);
 }
 
 NormalTemperatureArchive getNormalTemperatureArchive() {
   var dbConfig = ComponentConfig(
-      host: '127.0.0.1', dbName: 'weather',
+      host: '127.0.0.1',
+      dbName: 'weather',
       collectionName: 'normal_temperature');
-  var dir = '${Platform.environment['HOME']}/Downloads/Archive/Weather/NormalTemperature';
+  var dir =
+      '${Platform.environment['HOME']}/Downloads/Archive/Weather/NormalTemperature';
   var archive = NormalTemperatureArchive(dbConfig: dbConfig, dir: dir);
   if (!Directory(archive.dir).existsSync()) {
     Directory(archive.dir).createSync(recursive: true);
@@ -118,11 +136,10 @@ NormalTemperatureArchive getNormalTemperatureArchive() {
   return archive;
 }
 
-
 PolygraphArchive getPolygraphArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'polygraph', collectionName: 'projects');
-  var dir =Directory('${Platform.environment['HOME'] ?? ''}'
+  var dir = Directory('${Platform.environment['HOME'] ?? ''}'
       '/Downloads/Archive/Polygraph/Projects/Raw/');
   if (!dir.existsSync()) {
     dir.createSync(recursive: true);
@@ -141,4 +158,22 @@ RetailSuppliersOffersArchive getRetailSuppliersOffersArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return RetailSuppliersOffersArchive(dbConfig: dbConfig, dir: dir);
+}
+
+RtEnergyOfferArchive getRtEnergyOfferArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/PricingReports/RtEnergyOffer';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return RtEnergyOfferArchive(dir: dir);
+}
+
+SevenDayCapacityForecastArchive getSevenDayCapacityForecastArchive() {
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/7dayCapacityForecast';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return SevenDayCapacityForecastArchive(dir: dir);
 }

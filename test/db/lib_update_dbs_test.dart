@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
 import 'package:logging/logging.dart';
@@ -59,9 +60,14 @@ Future<void> tests() async {
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
-  final months = Month.utc(2023, 2).upTo(Month.utc(2023, 5));
+  final months = Month(2023, 6, location: IsoNewEngland.location)
+      .upTo(Month(2023, 12, location: IsoNewEngland.location));
   // final months = [Month.utc(2023, 1)];
-  await updateDaEnergyOffersIsone(months: months);
+  // await updateDaEnergyOffersIsone(months: months);
+  await updateRtEnergyOffersIsone(months: months, download: true);
+  // await updateMorningReport(months: months, download: true);
+  // await updateSevenDayCapacityForecast(months: months);
+
 
   // await updateIsoneMraCapacityBidOffer(months: months, download: false);
 
