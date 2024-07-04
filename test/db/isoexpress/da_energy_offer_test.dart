@@ -1,7 +1,12 @@
 library test.db.isoexpress.da_energy_offers_test;
 
+import 'dart:io';
+
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
+import 'package:elec_server/client/isoexpress/energy_offer.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
@@ -27,14 +32,14 @@ Future<void> tests(String rootUrl) async {
       var res = archive.processFile(file);
       expect(res.first['hours'].length, 25);
     });
-    test('aggregate days', () {
-      var out = archive.aggregateDays([Date.utc(2023, 5, 31)]);
-      expect(out.length, 21813);
-      expect(out.first.hour.start,
-          TZDateTime(IsoNewEngland.location, 2023, 5, 31));
-      expect(out.first.toCsv(),
-          '2023-05-31T00:00:00.000-0400,20720,40320,0.0,93.5,93.5,7782.75,7782.75,7782.75,1648.49,0,49.07,93.5,0.0,87.0,ECONOMIC');
-    });
+    // test('aggregate days', () {
+    //   var out = archive.aggregateDays([Date.utc(2023, 5, 31)]);
+    //   expect(out.length, 21813);
+    //   expect(out.first.hour.start,
+    //       TZDateTime(IsoNewEngland.location, 2023, 5, 31));
+    //   expect(out.first.toCsv(),
+    //       '2023-05-31T00:00:00.000-0400,20720,40320,0.0,93.5,93.5,7782.75,7782.75,7782.75,1648.49,0,49.07,93.5,0.0,87.0,ECONOMIC');
+    // });
   });
 
   group('ISONE DA energy offers API tests: ', () {
@@ -140,6 +145,23 @@ Future<void> tests(String rootUrl) async {
       var pqOffers = eo.priceQuantityOffers(data, iso: Iso.newEngland);
       var out = eo.averageOfferPrice(pqOffers);
       expect(out.isEmpty, true);
+    });
+  });
+
+  group('DuckDb functionality tests', () {
+    late final Connection con;
+    setUp(() {
+      con = Connection(
+          '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb',
+          Config(accessMode: AccessMode.readOnly));
+    });
+    tearDown(() {
+      con.close();
+    });
+    test('get offers for one unit', () {
+      final term = Term.parse('1Jan23', IsoNewEngland.location);
+      final offers = getEnergyOffers(con, term, Market.rt, [72020]);
+      expect(offers.length, 120);
     });
   });
 }

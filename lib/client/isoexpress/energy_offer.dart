@@ -2,9 +2,128 @@ library client.isoexpress.energy_offer;
 
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:timezone/timezone.dart';
+
+// ignore: unused_element
+final _queries = '''
+
+SELECT MIN(HourBeginning) FROM rt_energy_offers;
+
+-- one asset for one hour using America/New_York time stamp
+SELECT * FROM rt_energy_offers
+WHERE MaskedAssetId = 72020
+AND HourBeginning = strptime('2023-01-01T00:00:00.000-05:00', '%Y-%m-%dT%H:%M:%S.000%z');
+
+SELECT * FROM rt_energy_offers
+WHERE MaskedAssetId = 72020
+AND HourBeginning >= epoch('2023-01-01T00:00:00.000-05:00'::TIMESTAMPTZ)
+AND HourBeginning < epoch_ms('2023-01-02T00:00:00.000-05:00'::TIMESTAMPTZ);
+
+-- Because the data in DucDb is stored in UTC, it is best to use UTC timestamp
+SELECT * FROM rt_energy_offers
+WHERE MaskedAssetId = 72020
+AND HourBeginning >= strptime('2023-01-01T05:00:00.000', '%Y-%m-%dT%H:%M:%S.000')
+AND HourBeginning < strptime('2023-01-02T05:00:00.000', '%Y-%m-%dT%H:%M:%S.000');
+
+-- one asset for one day
+SELECT * FROM rt_energy_offers
+WHERE MaskedAssetId = 72020
+AND HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
+AND HourBeginning < epoch_ms(1672531200000 + 29*3600000);
+
+-- , strftime(HourBeginning, '%Y-%m-%d') As Date
+
+-- Get the distinct assetIds and unit status
+SELECT DISTINCT MaskedAssetId, UnitStatus  
+FROM da_energy_offers
+WHERE HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
+AND HourBeginning < epoch_ms(1672531200000 + 29*3600000)
+ORDER BY MaskedAssetId;
+
+--- Get the units unavailable in RT
+SELECT DISTINCT MaskedAssetId, UnitStatus  
+FROM da_energy_offers
+WHERE HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
+AND HourBeginning < epoch_ms(1672531200000 + 29*3600000)
+AND UnitStatus = 'UNAVAILABLE'
+ORDER BY MaskedAssetId;
+
+
+
+--- Get the units that changed their status on this day  
+SELECT DISTINCT da.MaskedAssetId, da.UnitStatus as DaStatus, rt.UnitStatus AS RtStatus
+FROM rt_energy_offers AS rt
+INNER JOIN da_energy_offers AS da
+ON da.MaskedAssetId = rt.MaskedAssetId
+WHERE da.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
+AND da.HourBeginning < epoch_ms(1672531200000 + 29*3600000)
+AND rt.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
+AND rt.HourBeginning < epoch_ms(1672531200000 + 29*3600000)
+AND DaStatus != RtStatus;
+
+
+--- Get the units that became unavailable in RT when they were available in DA  
+--- between 1/1/2023 and 2/1/2023
+SELECT DISTINCT 
+  strftime(da.HourBeginning, '%Y-%m-%d') As Date, 
+  da.MaskedAssetId, 
+  da.UnitStatus as DaStatus, 
+  rt.UnitStatus AS RtStatus
+FROM rt_energy_offers AS rt
+INNER JOIN da_energy_offers AS da
+ON da.MaskedAssetId = rt.MaskedAssetId
+WHERE da.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
+AND da.HourBeginning < epoch_ms(1675227600000 + 5*3600000)
+AND rt.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
+AND rt.HourBeginning < epoch_ms(1675227600000 + 5*3600000)
+AND DaStatus != RtStatus
+AND RtStatus = 'UNAVAILABLE'
+ORDER BY Date, da.MaskedAssetId;
+
+
+
+
+
+
+
+
+-- 1/1/2023 00:00:00 UTC
+select epoch_ms(1672531200000);  
+
+SET TimeZone = 'UTC'
+
+SELECT * FROM rt_energy_offers
+WHERE MaskedAssetId = 72020
+AND HourBeginning >= strptime('2023-06-01T00:00:00.000-04:00', '%Y-%m-%dT%H:%M:%S.000%z')
+AND HourBeginning < strptime('2023-06-02T00:00:00.000-04:00', '%Y-%m-%dT%H:%M:%S.000%z')
+LIMIT 1;
+
+''';
+
+
+/// Get historical offers
+List<EnergyOfferSegment> getEnergyOffers(
+    Connection con, Term term, Market market, List<int> maskedAssetIds) {
+  final query = '''
+SELECT * FROM ${market.toString().toLowerCase()}_energy_offers
+WHERE MaskedAssetId = 72020
+AND HourBeginning >= epoch_ms(${term.interval.start.millisecondsSinceEpoch})
+AND HourBeginning < epoch_ms(${term.interval.end.millisecondsSinceEpoch});
+''';
+  var res = con.fetch(query);
+  return EnergyOfferSegment.fromDuckDb(res);
+}
+
+
+
+getNewUnits() {}
+
+/// Find the units that tripped (became unavailable in RT when they were available in DA)
+getUnitsUnavailableInRt() {}
 
 enum UnitStatus {
   economic,
@@ -68,49 +187,6 @@ class EnergyOfferSegment {
   final num claim10;
   final num claim30;
   final UnitStatus unitStatus;
-
-  static const List<String> columns = [
-    'HourBeginning',
-    'MaskedParticipantId',
-    'MaskedAssetId',
-    'MaxDailyEnergyAvailable',
-    'EcoMax',
-    'EcoMin',
-    'ColdStartupPrice',
-    'IntermediateStartupPrice',
-    'HotStartupPrice',
-    'NoLoadPrice',
-    'Segment',
-    'Price',
-    'Quantity',
-    'Claim10',
-    'Claim30',
-    'UnitStatus',
-  ];
-
-  ///
-  String toCsv() {
-    return ListToCsvConverter().convert([
-      [
-        hour.start.toIso8601String(),
-        maskedParticipantId,
-        maskedAssetId,
-        maxDailyEnergyAvailable,
-        ecoMax,
-        ecoMin,
-        coldStartupPrice,
-        intermediateStartupPrice,
-        hotStartupPrice,
-        noLoadPrice,
-        segment,
-        price,
-        quantity,
-        claim10,
-        claim30,
-        unitStatus.toString(),
-      ]
-    ]);
-  }
 
   /// Input is an element of the list 'HbRealTimeEnergyOffer' corresponding to a
   /// unit (with multiple segments)
@@ -197,9 +273,57 @@ class EnergyOfferSegment {
     return out;
   }
 
+  static List<EnergyOfferSegment> fromDuckDb(Map<String, List<Object?>> ys) {
+    final hbs = ys['HourBeginning']!.cast<DateTime>();
+    final participantIds = ys['MaskedParticipantId']!.cast<int>();
+    final assetIds = ys['AssetId']!.cast<int>();
+    final mustTakeEnergys = ys['MustTakeEnergy']!.cast<num>();
+    final maxDailyEnergyAvailables = ys['MaxDailyEnergyAvailable']!.cast<num>();
+    final ecoMaxs = ys['EcoMax']!.cast<num>();
+    final ecoMins = ys['EcoMin']!.cast<num>();
+    final coldStartupPrices = ys['ColdStartupPrice']!.cast<num>();
+    final intermediateStartupPrices =
+        ys['IntermediateStartupPrice']!.cast<num>();
+    final hotStartupPrices = ys['HotStartupPrice']!.cast<num>();
+    final noLoadPrices = ys['NoLoadPrice']!.cast<num>();
+    final segments = ys['Segment']!.cast<int>();
+    final prices = ys['Price']!.cast<num>();
+    final mws = ys['Quantity']!.cast<num>();
+    final claim10s = ys['Claim10']!.cast<num>();
+    final claim30s = ys['Claim30']!.cast<num>();
+    final unitStatus = ys['UnitStatus']!
+        .cast<String>()
+        .map((e) => UnitStatus.parse(e))
+        .toList();
 
-  Map<String,dynamic> toJson() {
-    return <String,dynamic> {
+    final n = ys['HourBeginning']!.length;
+    var out = <EnergyOfferSegment>[];
+    for (var i = 0; i < n; i++) {
+      out.add(EnergyOfferSegment(
+          hour: Hour.beginning(TZDateTime.fromMillisecondsSinceEpoch(
+              IsoNewEngland.location, hbs[i].millisecondsSinceEpoch)),
+          maskedParticipantId: participantIds[i],
+          maskedAssetId: assetIds[i],
+          mustTakeEnergy: mustTakeEnergys[i],
+          maxDailyEnergyAvailable: maxDailyEnergyAvailables[i],
+          ecoMax: ecoMaxs[i],
+          ecoMin: ecoMins[i],
+          coldStartupPrice: coldStartupPrices[i],
+          intermediateStartupPrice: intermediateStartupPrices[i],
+          hotStartupPrice: hotStartupPrices[i],
+          noLoadPrice: noLoadPrices[i],
+          segment: segments[i],
+          price: prices[i],
+          quantity: mws[i],
+          claim10: claim10s[i],
+          claim30: claim30s[i],
+          unitStatus: unitStatus[i]));
+    }
+    return out;
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
       'hourBeginning': hour.start.toIso8601String(),
       'maskedParticipantId': maskedParticipantId,
       'maskedAssetId': maskedAssetId,
@@ -219,5 +343,4 @@ class EnergyOfferSegment {
       'unitStatus': unitStatus.toString(),
     };
   }
-
 }

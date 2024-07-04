@@ -2,7 +2,6 @@ library db.isoexpress.rt_energy_offer;
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
 import 'package:csv/csv.dart';
 import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/elec.dart';
@@ -144,13 +143,16 @@ class RtEnergyOfferArchive {
     var converter = const ListToCsvConverter();
 
     var sb = StringBuffer();
-    sb.writeln(EnergyOfferSegment.columns.join(','));
     for (final day in days) {
       log.info('Working on day $day');
       var file = getFilename(day);
       var offers = processFile(file);
       if (offers.isEmpty) {
         log.info('--------->  EMPTY json file for $day');
+      }
+      if (offers.isEmpty) continue;
+      if (day == days.first) {
+        sb.writeln(converter.convert([offers.first.toJson().keys.toList()]));
       }
       for (final offer in offers) {
         sb.writeln(converter.convert([offer.toJson().values.toList()]));
@@ -171,7 +173,7 @@ class RtEnergyOfferArchive {
   }
 
   ///
-  int updateDuckDb(List<Month>? months) {
+  int updateDuckDb([List<Month>? months]) {
     final home = Platform.environment['HOME'];
     final con =
         Connection('$home/Downloads/Archive/IsoExpress/energy_offers.duckdb');
@@ -180,6 +182,7 @@ CREATE TABLE IF NOT EXISTS rt_energy_offers (
     HourBeginning TIMESTAMP_S NOT NULL,
     MaskedParticipantId UINTEGER NOT NULL,
     MaskedAssetId UINTEGER NOT NULL,
+    MustTakeEnergy FLOAT NOT NULL,
     MaxDailyEnergyAvailable FLOAT NOT NULL,
     EcoMax FLOAT NOT NULL,
     EcoMin FLOAT NOT NULL,
@@ -206,6 +209,7 @@ FROM read_csv(
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 ''');
     }
+    con.close();
 
     return 0;
   }

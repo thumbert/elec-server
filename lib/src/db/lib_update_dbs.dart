@@ -9,6 +9,7 @@ import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:logging/logging.dart';
+import 'package:more/more.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
@@ -139,16 +140,21 @@ Future<void> updateDailyArchive(
 }
 
 Future<void> updateDaEnergyOffersIsone(
-    {required List<Month> months, bool setUp = false}) async {
+    {required List<Month> months,
+    bool setUp = false,
+    bool download = false}) async {
+  assert(months.first.location == IsoNewEngland.location);
   var archive = prod.getDaEnergyOfferArchive();
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
   for (var month in months) {
     for (var day in month.days()) {
-      await archive.downloadDay(day);
-      var file = archive.getFilename(day);
-      var data = archive.processFile(file);
-      await archive.insertData(data);
+      if (download) {
+        await archive.downloadDay(day);
+      }
+      // var file = archive.getFilename(day);
+      // var data = archive.processFile(file);
+      // await archive.insertData(data);
     }
     archive.makeGzFileForMonth(month);
   }
@@ -321,6 +327,7 @@ Future<void> updatePolygraphProjects({bool setUp = false}) async {
 Future<void> updateRtEnergyOffersIsone(
     {required List<Month> months, bool download = false}) async {
   var archive = prod.getRtEnergyOfferArchive();
+  assert(months.first.location == IsoNewEngland.location);
   for (var month in months) {
     for (var day in month.days()) {
       print('Working on $day');

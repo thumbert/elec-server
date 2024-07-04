@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-07-04
+- Small improvements to the ISONE DA and RT energy offers DuckDB 
+
 ## Release 2024-06-26
 - Add ISONE MorningReport archive using DuckDb
 - Add ISONE 7DayCapacity archive using DuckDb

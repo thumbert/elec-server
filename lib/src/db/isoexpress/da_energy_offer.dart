@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/client/isoexpress/energy_offer.dart';
 import 'package:logging/logging.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
@@ -157,13 +158,14 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   ///
   int makeGzFileForMonth(Month month) {
     var days = month.days();
-    var rows = aggregateDays(days);
+    final offers = aggregateDays(days);
     final file =
         File('$dir../month/da_energy_offers_${month.toIso8601String()}.csv');
     var sb = StringBuffer();
-    sb.writeln(EnergyOfferSegment.columns.join(','));
-    for (var row in rows) {
-      sb.writeln(row.toCsv());
+    var converter = const ListToCsvConverter();
+    sb.writeln(converter.convert([offers.first.toJson().keys.toList()]));
+    for (var offer in offers) {
+      sb.writeln(converter.convert([offer.toJson().values.toList()]));
     }
     file.writeAsStringSync(sb.toString());
 
@@ -234,5 +236,47 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
         !_unitStates.contains(row['Unit Status'])) {
       throw StateError('Invalid unit state: ${row['Unit State']}.');
     }
+  }
+
+  ///
+  int updateDuckDb([List<Month>? months]) {
+    final home = Platform.environment['HOME'];
+    final con =
+        Connection('$home/Downloads/Archive/IsoExpress/energy_offers.duckdb');
+    con.execute('''
+CREATE TABLE IF NOT EXISTS da_energy_offers (
+    HourBeginning TIMESTAMP_S NOT NULL,
+    MaskedParticipantId UINTEGER NOT NULL,
+    MaskedAssetId UINTEGER NOT NULL,
+    MustTakeEnergy FLOAT NOT NULL,
+    MaxDailyEnergyAvailable FLOAT NOT NULL,
+    EcoMax FLOAT NOT NULL,
+    EcoMin FLOAT NOT NULL,
+    ColdStartupPrice FLOAT NOT NULL,
+    IntermediateStartupPrice FLOAT NOT NULL,
+    HotStartupPrice FLOAT NOT NULL,
+    NoLoadPrice FLOAT NOT NULL,
+    Segment UTINYINT NOT NULL,
+    Price FLOAT NOT NULL,
+    Quantity FLOAT NOT NULL,
+    Claim10 FLOAT NOT NULL,
+    Claim30 FLOAT NOT NULL,
+    UnitStatus ENUM('ECONOMIC', 'UNAVAILABLE', 'MUST_RUN') NOT NULL,
+);  
+  ''');
+    if (months != null) {
+      /// TODO!
+    } else {
+      con.execute('''
+INSERT INTO da_energy_offers
+FROM read_csv(
+    '$dir/../month/da_energy_offers_*.csv.gz', 
+    header = true, 
+    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
+''');
+    }
+    con.close();
+
+    return 0;
   }
 }
