@@ -1,5 +1,6 @@
 library client.isoexpress.energy_offer;
 
+
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
@@ -143,3 +144,5 @@ class EnergyOfferSegment {
     return out;
   }
 }
+
+

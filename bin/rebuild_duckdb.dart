@@ -8,9 +8,9 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 void rebuildIsoneEnergyOffers() {
   final home = Platform.environment['HOME'];
   final con =
-      Connection('$home/Downloads/Archive/IsoExpress/da_energy_offers.duckdb');
+      Connection('$home/Downloads/Archive/IsoExpress/energy_offers.duckdb');
   con.execute('''
-CREATE TABLE IF NOT EXISTS offers (
+CREATE TABLE IF NOT EXISTS da_offers (
     HourBeginning TIMESTAMP_S NOT NULL,
     MaskedParticipantId UINTEGER NOT NULL,
     MaskedAssetId UINTEGER NOT NULL,
@@ -30,12 +30,13 @@ CREATE TABLE IF NOT EXISTS offers (
 );  
   ''');
   con.execute('''
-INSERT INTO offers
+INSERT INTO da_offers
 FROM read_csv(
     'da_energy_offers_2023-01.csv.gz', 
     header = true, 
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 ''');
+
 }
 //     '$home/Downloads/Archive/IsoExpress/PricingReports/DaEnergyOffer/month/da_energy_offers_2023-01.csv.gz', 
 

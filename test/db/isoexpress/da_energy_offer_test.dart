@@ -1,7 +1,12 @@
 library test.db.isoexpress.da_energy_offers_test;
 
+import 'dart:io';
+
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
+import 'package:elec_server/client/isoexpress/energy_offer.dart';
+import 'package:elec_server/src/utils/lib_plotly.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
@@ -9,6 +14,8 @@ import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
+
+import '../utilities/customer_counts_test.dart';
 
 Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
@@ -147,6 +154,9 @@ Future<void> tests(String rootUrl) async {
 void main() async {
   initializeTimeZones();
   //await DaEnergyOfferArchive().setupDb();
+
+  print(
+      '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
 
   // dotenv.load('.env/prod.env');
   await tests('http://127.0.0.1:8080');
