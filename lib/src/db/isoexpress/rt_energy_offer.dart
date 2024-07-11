@@ -1,54 +1,36 @@
-library db.isoexpress.da_energy_offer;
+library db.isoexpress.rt_energy_offer;
 
+import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
-import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import 'package:duckdb_dart/duckdb_dart.dart';
+import 'package:elec/elec.dart';
 import 'package:elec_server/client/isoexpress/energy_offer.dart';
 import 'package:logging/logging.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/config.dart';
-import '../lib_mis_reports.dart' as mis;
 import '../lib_iso_express.dart';
 import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
-class DaEnergyOfferArchive extends DailyIsoExpressReport {
-  static final List<String> _unitStates = [
-    'UNAVAILABLE',
-    'MUST_RUN',
-    'ECONOMIC'
-  ];
+class RtEnergyOfferArchive {
+  RtEnergyOfferArchive({required this.dir});
 
-  DaEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
-    dbConfig ??= ComponentConfig(
-        host: '127.0.0.1',
-        dbName: 'isoexpress',
-        collectionName: 'da_energy_offer');
-    this.dbConfig = dbConfig;
-    dir ??= '${baseDir}PricingReports/DaEnergyOffer/Raw/';
-    this.dir = dir;
-    reportName = 'Day-Ahead Energy Market Historical Offer Report';
-  }
+  final String dir;
+  static final log = Logger('RT Energy Offers');
+  static final reportName = 'Real-Time Energy Market Historical Offer Report';
 
-  mongo.Db get db => dbConfig.db;
+  /// ISO has not published data for these days
+  static final missingDays = <Date>{};
 
-  static final log = Logger('DA Energy Offers');
-
-  @override
   String getUrl(Date asOfDate) =>
-      'https://www.iso-ne.com/static-transform/csv/histRpts/da-energy-offer/hbdayaheadenergyoffer_${yyyymmdd(asOfDate)}.csv';
+      'https://webservices.iso-ne.com/api/v1.1/hbrealtimeenergyoffer/day/${yyyymmdd(asOfDate)}';
 
-  @override
   File getFilename(Date asOfDate) =>
-      File('${dir}hbdayaheadenergyoffer_${yyyymmdd(asOfDate)}.csv');
+      File('$dir/Raw/hbrealtimeenergyoffer_${yyyymmdd(asOfDate)}.json');
 
   /// [rows] has the data for all the hours of the day for one asset
-  @override
   Map<String, dynamic> converter(List<Map> rows) {
     var row = <String, dynamic>{};
 
@@ -70,7 +52,7 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       var aux = <String, dynamic>{};
       var utc = parseHourEndingStamp(hour['Day'], hour['Trading Interval']);
       aux['hourBeginning'] = TZDateTime.fromMicrosecondsSinceEpoch(
-              location, utc.microsecondsSinceEpoch)
+              IsoNewEngland.location, utc.microsecondsSinceEpoch)
           .toIso8601String();
       aux['Economic Maximum'] = hour['Economic Maximum'];
       aux['Economic Minimum'] = hour['Economic Minimum'];
@@ -91,43 +73,43 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
       aux['quantity'] = quantitiesHour;
       row['hours'].add(aux);
     }
-    validateDocument(row);
     return row;
   }
 
-  @override
-  Future insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) {
-      print('--->  No data to insert');
-      return Future.value(-1);
-    }
-    var groups = groupBy(data, (dynamic e) => e['date']);
-    try {
-      for (var date in groups.keys) {
-        for (var document in groups[date]!) {
-          await dbConfig.coll.update({
-            'date': date,
-            'Masked Asset ID': document['Masked Asset ID'],
-          }, document, upsert: true);
-        }
-        print('--->  Inserted $reportName for day $date');
-      }
-      return 0;
-    } catch (e) {
-      print('xxxx ERROR xxxx $e');
-      return 1;
+  List<EnergyOfferSegment> processFile(File file,
+      {String extension = '.json'}) {
+    if (extension == '.csv') {
+      return _processFileCsv(file);
+    } else if (extension == '.json') {
+      return _processFileJson(file);
+    } else {
+      throw ArgumentError('File type $extension not supported');
     }
   }
 
-  @override
-  List<Map<String, dynamic>> processFile(File file) {
-    var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return [];
-    var dataByAssetId = groupBy(data, (dynamic row) => row['Masked Asset ID']);
-    var out = dataByAssetId.keys
-        .map((ptid) => converter(dataByAssetId[ptid]!))
-        .toList();
+  List<EnergyOfferSegment> _processFileJson(File file) {
+    final aux = file.readAsStringSync();
+    final data = json.decode(aux) as Map<String, dynamic>;
+    var out = <EnergyOfferSegment>[];
+    if (data['HbRealTimeEnergyOffers'] == '') return out;
+
+    final offers =
+        data['HbRealTimeEnergyOffers']['HbRealTimeEnergyOffer'] as List;
+    for (Map<String, dynamic> offer in offers) {
+      out.addAll(EnergyOfferSegment.fromJson(offer));
+    }
+
     return out;
+  }
+
+  List<EnergyOfferSegment> _processFileCsv(File file) {
+    // var data = mis.readReportTabAsMap(file, tab: 0);
+    // if (data.isEmpty) return [];
+    // var dataByAssetId = groupBy(data, (dynamic row) => row['Masked Asset ID']);
+    // var out = dataByAssetId.keys
+    //     .map((ptid) => converter(dataByAssetId[ptid]!))
+    //     .toList();
+    return <EnergyOfferSegment>[];
   }
 
   /// Aggregate all the days of the month in
@@ -154,19 +136,30 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     return out;
   }
 
-  /// File is in the long format, ready for duckdb to upload
+  /// File is in the long format, ready to upload into DuckDb
   ///
   int makeGzFileForMonth(Month month) {
     var days = month.days();
-    final offers = aggregateDays(days);
-    final file =
-        File('$dir../month/da_energy_offers_${month.toIso8601String()}.csv');
-    var sb = StringBuffer();
     var converter = const ListToCsvConverter();
-    sb.writeln(converter.convert([offers.first.toJson().keys.toList()]));
-    for (var offer in offers) {
-      sb.writeln(converter.convert([offer.toJson().values.toList()]));
+
+    var sb = StringBuffer();
+    for (final day in days) {
+      log.info('Working on day $day');
+      var file = getFilename(day);
+      var offers = processFile(file);
+      if (offers.isEmpty) {
+        log.info('--------->  EMPTY json file for $day');
+      }
+      if (offers.isEmpty) continue;
+      if (day == days.first) {
+        sb.writeln(converter.convert([offers.first.toJson().keys.toList()]));
+      }
+      for (final offer in offers) {
+        sb.writeln(converter.convert([offer.toJson().values.toList()]));
+      }
     }
+    final file =
+        File('$dir/month/rt_energy_offers_${month.toIso8601String()}.csv');
     file.writeAsStringSync(sb.toString());
 
     // gzip it!
@@ -179,72 +172,13 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
     return 0;
   }
 
-  /// Check if this date is in the db already
-  Future<bool> hasDay(Date date) async {
-    var res = await dbConfig.coll.findOne({'date': date.toString()});
-    if (res == null || res.isEmpty) return false;
-    return true;
-  }
-
-  /// Recreate the collection from scratch.
-  @override
-  Future<void> setupDb() async {
-    await dbConfig.db.open();
-    var collections = await dbConfig.db.getCollectionNames();
-    if (collections.contains(dbConfig.collectionName)) {
-      await dbConfig.coll.drop();
-    }
-
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {
-          'date': 1,
-          'Masked Asset ID': 1,
-          'Masked Lead Participant ID': 1,
-        },
-        unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1});
-    await dbConfig.db.close();
-  }
-
-  Future<Map<String, String?>> lastDay() async {
-    var pipeline = [];
-    pipeline.add({
-      '\$group': {
-        '_id': 0,
-        'lastDay': {'\$max': '\$date'}
-      }
-    });
-    Map res = await dbConfig.coll.aggregate(pipeline);
-    return {'lastDay': res['result'][0]['lastDay']};
-  }
-
-  /// return the last day of the fourth month before the current month.
-  Date lastDayAvailable() {
-    var m3 = Month.current().subtract(3);
-    return Date.utc(m3.year, m3.month, 1).previous;
-  }
-
-  // Future<void> deleteDay(Date day) async {
-  //   return await (dbConfig.coll.remove(mongo.where.eq('date', day.toString()))
-  //       as FutureOr<void>);
-  // }
-
-  /// Check if this document is OK.  Throws otherwise.  May not catch all
-  /// issues.
-  void validateDocument(Map row) {
-    if (row.containsKey('Unit Status') &&
-        !_unitStates.contains(row['Unit Status'])) {
-      throw StateError('Invalid unit state: ${row['Unit State']}.');
-    }
-  }
-
   ///
   int updateDuckDb([List<Month>? months]) {
     final home = Platform.environment['HOME'];
     final con =
         Connection('$home/Downloads/Archive/IsoExpress/energy_offers.duckdb');
     con.execute('''
-CREATE TABLE IF NOT EXISTS da_energy_offers (
+CREATE TABLE IF NOT EXISTS rt_energy_offers (
     HourBeginning TIMESTAMP_S NOT NULL,
     MaskedParticipantId UINTEGER NOT NULL,
     MaskedAssetId UINTEGER NOT NULL,
@@ -268,9 +202,9 @@ CREATE TABLE IF NOT EXISTS da_energy_offers (
       /// TODO!
     } else {
       con.execute('''
-INSERT INTO da_energy_offers
+INSERT INTO rt_energy_offers
 FROM read_csv(
-    '$dir/../month/da_energy_offers_*.csv.gz', 
+    '$dir/month/rt_energy_offers_*.csv.gz', 
     header = true, 
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 ''');

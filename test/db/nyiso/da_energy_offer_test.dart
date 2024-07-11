@@ -56,6 +56,12 @@ Future<void> tests(String rootUrl) async {
       ]);
     });
 
+    test('make gz file for 2023-03', () {
+      var res = archive.makeGzFileForMonth(Month.utc(2023, 3));
+      expect(res, 0);
+      // ' 01MAR2023:05:00:00';
+    });
+
     /// Athens 1,2,3: 98347750, 28347750, 38347750
     /// 35855750 self-commits in DAM on 1/1/2021, 175 MW for a few hours in the middle of the day ...
     ///
@@ -178,6 +184,12 @@ Future<void> tests(String rootUrl) async {
 void main() async {
   initializeTimeZones();
 
-  var rootUrl = 'http://127.0.0.1:8080';
-  tests(rootUrl);
+  // var rootUrl = 'http://127.0.0.1:8080';
+  // tests(rootUrl);
+
+  // print(NyisoDaEnergyOfferArchive.columns.entries
+  //     .map((e) => '    "${e.key}" ${e.value},')
+  //     .join('\n'));
+
+  NyisoDaEnergyOfferArchive().updateDuckDb();
 }

@@ -7,7 +7,10 @@ library db.nyiso.da_energy_offer;
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
+import 'package:csv/csv.dart';
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
+import 'package:logging/logging.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:path/path.dart';
 import 'package:date/date.dart';
@@ -19,12 +22,74 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_energy_offer');
     this.dbConfig = dbConfig;
-    dir ??= super.dir + 'DaEnergyOffer/Raw/';
+    dir ??= '${super.dir}DaEnergyOffer/Raw/';
     this.dir = dir;
     reportName = 'NYISO DAM Energy Offers';
   }
 
   mongo.Db get db => dbConfig.db;
+  static final log = Logger('DA Energy Offers');
+
+  /// for DuckDb
+  static final columns = <String, String>{
+    'Masked Gen ID': 'INTEGER NOT NULL',
+    'Date Time': 'TIMESTAMP_S',
+    'Duration': 'TINYINT',
+    'Market': "ENUM ('DAM', 'HAM')",
+    'Expiration': 'TIMESTAMP_S',
+    'Upper Oper Limit': 'FLOAT NOT NULL',
+    'Emer Oper Limit': 'FLOAT NOT NULL',
+    'Zero Start-Up Cost': "ENUM ('Y', 'N')",
+    'On Dispatch': "ENUM ('Y', 'N')",
+    'Bid SCHD Type Id': 'TINYINT NOT NULL',
+    'Fixed Min Gen MW': 'FLOAT',
+    'Fixed Min Gen Cost': 'FLOAT',
+    'Bid Curve Format': "ENUM ('CURVE') NOT NULL",
+    'Dispatch MW1': 'FLOAT',
+    'Dispatch MW2': 'FLOAT',
+    'Dispatch MW3': 'FLOAT',
+    'Dispatch MW4': 'FLOAT',
+    'Dispatch MW5': 'FLOAT',
+    'Dispatch MW6': 'FLOAT',
+    'Dispatch MW7': 'FLOAT',
+    'Dispatch MW8': 'FLOAT',
+    'Dispatch MW9': 'FLOAT',
+    'Dispatch MW10': 'FLOAT',
+    'Dispatch MW11': 'FLOAT',
+    'Dispatch MW12': 'FLOAT',
+    'Dispatch \$/MW1': 'FLOAT',
+    'Dispatch \$/MW2': 'FLOAT',
+    'Dispatch \$/MW3': 'FLOAT',
+    'Dispatch \$/MW4': 'FLOAT',
+    'Dispatch \$/MW5': 'FLOAT',
+    'Dispatch \$/MW6': 'FLOAT',
+    'Dispatch \$/MW7': 'FLOAT',
+    'Dispatch \$/MW8': 'FLOAT',
+    'Dispatch \$/MW9': 'FLOAT',
+    'Dispatch \$/MW10': 'FLOAT',
+    'Dispatch \$/MW11': 'FLOAT',
+    'Dispatch \$/MW12': 'FLOAT',
+    'Self Commit Timestamp1': 'TIMESTAMP_S',
+    'Self Commit Timestamp2': 'TIMESTAMP_S',
+    'Self Commit Timestamp3': 'TIMESTAMP_S',
+    'Self Commit Timestamp4': 'TIMESTAMP_S',
+    'Self Commit MW1': 'FLOAT',
+    'Self Commit MW2': 'FLOAT',
+    'Self Commit MW3': 'FLOAT',
+    'Self Commit MW4': 'FLOAT',
+    '10 Min Non-Synch MW': 'FLOAT',
+    '10 Min Non-Synch Cost': 'FLOAT',
+    '10 Min Spin MW': 'FLOAT',
+    '10 Min Spin Cost': 'FLOAT',
+    '30 Min Non-Synch MW': 'FLOAT',
+    '30 Min Non-Synch Cost': 'FLOAT',
+    '30 Min Spin MW': 'FLOAT',
+    '30 Min Spin Cost': 'FLOAT',
+    'Regulation MW': 'FLOAT',
+    'Regulation Cost': 'FLOAT',
+    'Masked Bidder ID': 'INTEGER NOT NULL',
+    'Regulation Movement Cost': 'FLOAT',
+  };
 
   /// Insert data into db
   @override
@@ -42,7 +107,7 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }
@@ -173,6 +238,255 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
     return row;
   }
 
+  /// Get the ISO data and get it ready for DuckDb by removing inconsistencies.
+  /// Check types.
+  Map<String, dynamic> cleanRow(Map<String, dynamic> row) {
+    return <String, dynamic>{
+      'Masked Gen ID': row['Masked Gen ID'] as int,
+      'Date Time':
+          NyisoReport.parseTimestamp2((row['Date Time'] as String).trim())
+              .toIso8601String(),
+      'Duration': row['Duration'] as int,
+      'Market': (row['Market'] as String).trim(), // DAM or HAM
+      'Expiration': row['Expiration'] == ' '
+          ? null
+          : NyisoReport.parseTimestamp2((row['Expiration'] as String).trim())
+              .toIso8601String(),
+      'Upper Oper Limit': row['Upper Oper Limit'] == ' '
+          ? null
+          : row['Upper Oper Limit'] as num,
+      'Emer Oper Limit':
+          row['Emer Oper Limit'] == ' ' ? null : row['Emer Oper Limit'] as num,
+      'Zero Start-Up Cost': (row['Zero Start-Up Cost'] as String).trim(),
+      'On Dispatch': (row['On Dispatch'] as String).trim(),
+      'Bid SCHD Type Id': (row['Bid SCHD Type Id'] as num).toInt(),
+      'Fixed Min Gen MW': row['Fixed Min Gen MW'] == ' '
+          ? null
+          : row['Fixed Min Gen MW'] as num,
+      'Fixed Min Gen Cost': row['Fixed Min Gen Cost'] == ' '
+          ? null
+          : row['Fixed Min Gen Cost'] as num,
+      'Bid Curve Format': (row['Bid Curve Format'] as String).trim(),
+      'Dispatch MW1':
+          row['Dispatch MW1'] == ' ' ? null : row['Dispatch MW1'] as num,
+      'Dispatch MW2':
+          row['Dispatch MW2'] == ' ' ? null : row['Dispatch MW2'] as num,
+      'Dispatch MW3':
+          row['Dispatch MW3'] == ' ' ? null : row['Dispatch MW3'] as num,
+      'Dispatch MW4':
+          row['Dispatch MW4'] == ' ' ? null : row['Dispatch MW4'] as num,
+      'Dispatch MW5':
+          row['Dispatch MW5'] == ' ' ? null : row['Dispatch MW5'] as num,
+      'Dispatch MW6':
+          row['Dispatch MW6'] == ' ' ? null : row['Dispatch MW6'] as num,
+      'Dispatch MW7':
+          row['Dispatch MW7'] == ' ' ? null : row['Dispatch MW7'] as num,
+      'Dispatch MW8':
+          row['Dispatch MW8'] == ' ' ? null : row['Dispatch MW8'] as num,
+      'Dispatch MW9':
+          row['Dispatch MW9'] == ' ' ? null : row['Dispatch MW9'] as num,
+      'Dispatch MW10':
+          row['Dispatch MW10'] == ' ' ? null : row['Dispatch MW10'] as num,
+      'Dispatch MW11':
+          row['Dispatch MW11'] == ' ' ? null : row['Dispatch MW11'] as num,
+      'Dispatch MW12':
+          row['Dispatch MW12'] == ' ' ? null : row['Dispatch MW12'] as num,
+      'Dispatch \$/MW1':
+          row['Dispatch \$/MW1'] == ' ' ? null : row['Dispatch \$/MW1'] as num,
+      'Dispatch \$/MW2':
+          row['Dispatch \$/MW2'] == ' ' ? null : row['Dispatch \$/MW2'] as num,
+      'Dispatch \$/MW3':
+          row['Dispatch \$/MW3'] == ' ' ? null : row['Dispatch \$/MW3'] as num,
+      'Dispatch \$/MW4':
+          row['Dispatch \$/MW4'] == ' ' ? null : row['Dispatch \$/MW4'] as num,
+      'Dispatch \$/MW5':
+          row['Dispatch \$/MW5'] == ' ' ? null : row['Dispatch \$/MW5'] as num,
+      'Dispatch \$/MW6':
+          row['Dispatch \$/MW6'] == ' ' ? null : row['Dispatch \$/MW6'] as num,
+      'Dispatch \$/MW7':
+          row['Dispatch \$/MW7'] == ' ' ? null : row['Dispatch \$/MW7'] as num,
+      'Dispatch \$/MW8':
+          row['Dispatch \$/MW8'] == ' ' ? null : row['Dispatch \$/MW8'] as num,
+      'Dispatch \$/MW9':
+          row['Dispatch \$/MW9'] == ' ' ? null : row['Dispatch \$/MW9'] as num,
+      'Dispatch \$/MW10': row['Dispatch \$/MW10'] == ' '
+          ? null
+          : row['Dispatch \$/MW10'] as num,
+      'Dispatch \$/MW11': row['Dispatch \$/MW11'] == ' '
+          ? null
+          : row['Dispatch \$/MW11'] as num,
+      'Dispatch \$/MW12': row['Dispatch \$/MW12'] == ' '
+          ? null
+          : row['Dispatch \$/MW12'] as num,
+      'Self Commit Timestamp1': row['Self Commit Timestamp1'] == ' '
+          ? null
+          : NyisoReport.parseTimestamp2(
+                  (row['Self Commit Timestamp1'] as String).trim())
+              .toIso8601String(),
+      'Self Commit Timestamp2': row['Self Commit Timestamp2'] == ' '
+          ? null
+          : NyisoReport.parseTimestamp2(
+                  (row['Self Commit Timestamp2'] as String).trim())
+              .toIso8601String(),
+      'Self Commit Timestamp3': row['Self Commit Timestamp3'] == ' '
+          ? null
+          : NyisoReport.parseTimestamp2(
+                  (row['Self Commit Timestamp3'] as String).trim())
+              .toIso8601String(),
+      'Self Commit Timestamp4': row['Self Commit Timestamp4'] == ' '
+          ? null
+          : NyisoReport.parseTimestamp2(
+                  (row['Self Commit Timestamp4'] as String).trim())
+              .toIso8601String(),
+      'Self Commit MW1':
+          row['Self Commit MW1'] == ' ' ? null : row['Self Commit MW1'] as num,
+      'Self Commit MW2':
+          row['Self Commit MW2'] == ' ' ? null : row['Self Commit MW2'] as num,
+      'Self Commit MW3':
+          row['Self Commit MW3'] == ' ' ? null : row['Self Commit MW3'] as num,
+      'Self Commit MW4':
+          row['Self Commit MW4'] == ' ' ? null : row['Self Commit MW4'] as num,
+      '10 Min Non-Synch MW': row['10 Min Non-Synch MW'] == ' '
+          ? null
+          : row['10 Min Non-Synch MW'] as num,
+      '10 Min Non-Synch Cost': row['10 Min Non-Synch Cost'] == ' '
+          ? null
+          : row['10 Min Non-Synch Cost'] as num,
+      '10 Min Spin MW':
+          row['10 Min Spin MW'] == ' ' ? null : row['10 Min Spin MW'] as num,
+      '10 Min Spin Cost': row['10 Min Spin Cost'] == ' '
+          ? null
+          : row['10 Min Spin Cost'] as num,
+      '30 Min Non-Synch MW': row['30 Min Non-Synch MW'] == ' '
+          ? null
+          : row['30 Min Non-Synch MW'] as num,
+      '30 Min Non-Synch Cost': row['30 Min Non-Synch Cost'] == ' '
+          ? null
+          : row['30 Min Non-Synch Cost'] as num,
+      '30 Min Spin MW':
+          row['30 Min Spin MW'] == ' ' ? null : row['30 Min Spin MW'] as num,
+      '30 Min Spin Cost': row['30 Min Spin Cost'] == ' '
+          ? null
+          : row['30 Min Spin Cost'] as num,
+      'Regulation MW':
+          row['Regulation MW'] == ' ' ? null : row['Regulation MW'] as num,
+      'Regulation Cost':
+          row['Regulation Cost'] == ' ' ? null : row['Regulation Cost'] as num,
+      'Masked Bidder ID': row['Masked Bidder ID'] as int,
+      'Regulation Movement Cost': row['Regulation Movement Cost'] == ' '
+          ? null
+          : row['Regulation Movement Cost'] as num,
+    };
+  }
+
+  /// Create a monthly file for DuckDb.  Cleanup a bit the ISO file.
+  int makeGzFileForMonth(Month month) {
+    var file = getZipFileForMonth(month);
+    var rows = readReport(getReportDate(file), eol: '\n');
+
+    var sb = StringBuffer();
+    var converter = const ListToCsvConverter(convertNullTo: '');
+    sb.writeln(converter.convert([columns.keys.toList()]));
+    for (var row in rows) {
+      sb.writeln(converter.convert([cleanRow(row).values.toList()]));
+    }
+    final fileOut =
+        File('$dir../month/da_energy_offers_${month.toIso8601String()}.csv');
+    fileOut.writeAsStringSync(sb.toString());
+
+    // gzip it!
+    var res = Process.runSync('gzip', ['-f', fileOut.path],
+        workingDirectory: fileOut.parent.path);
+    if (res.exitCode != 0) {
+      throw StateError('Gzipping ${basename(file.path)} has failed');
+    }
+    log.info('Gzipped file ${basename(file.path)}');
+
+    return 0;
+  }
+
+  ///
+  int updateDuckDb([List<Month>? months]) {
+    final home = Platform.environment['HOME'];
+    final con =
+        Connection('$home/Downloads/Archive/Nyiso/energy_offers.duckdb');
+    con.execute(r'''
+CREATE TABLE IF NOT EXISTS da_energy_offers (
+    "Masked Gen ID" INTEGER NOT NULL,
+    "Date Time" TIMESTAMPTZ,
+    "Duration" TINYINT,
+    "Market" ENUM ('DAM', 'HAM'),
+    "Expiration" TIMESTAMPTZ,
+    "Upper Oper Limit" FLOAT,
+    "Emer Oper Limit" FLOAT,
+    "Zero Start-Up Cost" ENUM ('Y', 'N'),
+    "On Dispatch" ENUM ('Y', 'N'),
+    "Bid SCHD Type Id" TINYINT NOT NULL,
+    "Fixed Min Gen MW" FLOAT,
+    "Fixed Min Gen Cost" FLOAT,
+    "Bid Curve Format" ENUM ('CURVE') NOT NULL,
+    "Dispatch MW1" FLOAT,
+    "Dispatch MW2" FLOAT,
+    "Dispatch MW3" FLOAT,
+    "Dispatch MW4" FLOAT,
+    "Dispatch MW5" FLOAT,
+    "Dispatch MW6" FLOAT,
+    "Dispatch MW7" FLOAT,
+    "Dispatch MW8" FLOAT,
+    "Dispatch MW9" FLOAT,
+    "Dispatch MW10" FLOAT,
+    "Dispatch MW11" FLOAT,
+    "Dispatch MW12" FLOAT,
+    "Dispatch $/MW1" FLOAT,
+    "Dispatch $/MW2" FLOAT,
+    "Dispatch $/MW3" FLOAT,
+    "Dispatch $/MW4" FLOAT,
+    "Dispatch $/MW5" FLOAT,
+    "Dispatch $/MW6" FLOAT,
+    "Dispatch $/MW7" FLOAT,
+    "Dispatch $/MW8" FLOAT,
+    "Dispatch $/MW9" FLOAT,
+    "Dispatch $/MW10" FLOAT,
+    "Dispatch $/MW11" FLOAT,
+    "Dispatch $/MW12" FLOAT,
+    "Self Commit Timestamp1" TIMESTAMP_S,
+    "Self Commit Timestamp2" TIMESTAMP_S,
+    "Self Commit Timestamp3" TIMESTAMP_S,
+    "Self Commit Timestamp4" TIMESTAMP_S,
+    "Self Commit MW1" FLOAT,
+    "Self Commit MW2" FLOAT,
+    "Self Commit MW3" FLOAT,
+    "Self Commit MW4" FLOAT,
+    "10 Min Non-Synch MW" FLOAT,
+    "10 Min Non-Synch Cost" FLOAT,
+    "10 Min Spin MW" FLOAT,
+    "10 Min Spin Cost" FLOAT,
+    "30 Min Non-Synch MW" FLOAT,
+    "30 Min Non-Synch Cost" FLOAT,
+    "30 Min Spin MW" FLOAT,
+    "30 Min Spin Cost" FLOAT,
+    "Regulation MW" FLOAT,
+    "Regulation Cost" FLOAT,
+    "Masked Bidder ID" INTEGER NOT NULL,
+    "Regulation Movement Cost" FLOAT,
+);  
+  ''');
+    if (months != null) {
+      /// TODO!
+    } else {
+      con.execute('''
+INSERT INTO da_energy_offers
+FROM read_csv(
+    '$dir../month/da_energy_offers_*.csv.gz', 
+    header = true, 
+    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
+''');
+    }
+    con.close();
+
+    return 0;
+  }
+
   /// Recreate the collection from scratch.
   @override
   Future<void> setupDb() async {
@@ -199,14 +513,12 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
 
   @override
   File getZipFileForMonth(Month month) =>
-      File(dir + yyyymmdd(month.startDate) + 'biddata_genbids_csv.zip');
+      File('$dir${yyyymmdd(month.startDate)}biddata_genbids_csv.zip');
 
   ///http://mis.nyiso.com/public/csv/biddata/20211001biddata_genbids_csv.zip
   @override
   String getUrlForMonth(Month month) =>
-      'http://mis.nyiso.com/public/csv/biddata/' +
-      yyyymmdd(month.startDate) +
-      'biddata_genbids_csv.zip';
+      'http://mis.nyiso.com/public/csv/biddata/${yyyymmdd(month.startDate)}biddata_genbids_csv.zip';
 
   @override
   File getCsvFile(Date asOfDate) {

@@ -3,11 +3,13 @@ library lib.src.db.lib_update_dbs;
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:elec/elec.dart';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:logging/logging.dart';
+import 'package:more/more.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
@@ -138,23 +140,45 @@ Future<void> updateDailyArchive(
 }
 
 Future<void> updateDaEnergyOffersIsone(
-    {required List<Month> months, bool setUp = false}) async {
+    {required List<Month> months,
+    bool setUp = false,
+    bool download = false}) async {
+  assert(months.first.location == IsoNewEngland.location);
   var archive = prod.getDaEnergyOfferArchive();
   if (setUp) await archive.setupDb();
-
   await archive.dbConfig.db.open();
   for (var month in months) {
     for (var day in month.days()) {
-      await archive.downloadDay(day);
+      if (download) {
+        await archive.downloadDay(day);
+      }
       var file = archive.getFilename(day);
       var data = archive.processFile(file);
       await archive.insertData(data);
     }
     archive.makeGzFileForMonth(month);
-    
   }
   await archive.dbConfig.db.close();
 }
+
+Future<void> updateDaEnergyOffersNyiso(
+    {required List<Month> months,
+    bool setUp = false,
+    bool download = false}) async {
+  assert(months.first.location == IsoNewEngland.location);
+  var archive = prod.getNyisoDaEnergyOfferArchive();
+  if (setUp) await archive.setupDb();
+  await archive.dbConfig.db.open();
+  for (var month in months) {
+    // await archive.downloadMonth(month);
+    // var file = archive.getCsvFile(month.startDate);
+    // var data = archive.processFile(file);
+    // await archive.insertData(data);
+    archive.makeGzFileForMonth(month);
+  }
+  await archive.dbConfig.db.close();
+}
+
 
 Future<void> updateIesoRtGenerationArchive(
     {required List<Month> months, bool setUp = false}) async {
@@ -278,6 +302,27 @@ Future<void> updateIsoneZonalDemand(List<int> years,
   await archive.dbConfig.db.close();
 }
 
+Future<void> updateMorningReport(
+    {required List<Month> months, bool download = false}) async {
+  var today = Date.today(location: IsoNewEngland.location);
+  var archive = prod.getMorningReportArchive();
+  for (var month in months) {
+    for (var day in month.days()) {
+      print('Working on $day');
+      if (day.isAfter(today)) continue;
+      var file = archive.getFilename(day);
+      if (!file.existsSync() || download) {
+        var res = await baseDownloadUrl(archive.getUrl(day), file,
+            username: dotenv.env['ISONE_WS_USER'],
+            password: dotenv.env['ISONE_WS_PASSWORD'],
+            acceptHeader: 'application/json');
+        if (res != 0) throw StateError('Failed to download');
+      }
+    }
+    archive.makeGzFileForMonth(month);
+  }
+}
+
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();
 
@@ -296,4 +341,45 @@ Future<void> updatePolygraphProjects({bool setUp = false}) async {
     await archive.insertData(project);
   }
   await archive.dbConfig.db.close();
+}
+
+Future<void> updateRtEnergyOffersIsone(
+    {required List<Month> months, bool download = false}) async {
+  var archive = prod.getRtEnergyOfferArchive();
+  assert(months.first.location == IsoNewEngland.location);
+  for (var month in months) {
+    for (var day in month.days()) {
+      print('Working on $day');
+      var file = archive.getFilename(day);
+      if (!file.existsSync()) {
+        var res = await baseDownloadUrl(archive.getUrl(day), file,
+            username: dotenv.env['ISONE_WS_USER'],
+            password: dotenv.env['ISONE_WS_PASSWORD'],
+            acceptHeader: 'application/json');
+        if (res != 0) throw StateError('Failed to download day $day');
+      }
+    }
+    archive.makeGzFileForMonth(month);
+  }
+}
+
+Future<void> updateSevenDayCapacityForecast(
+    {required List<Month> months}) async {
+  var today = Date.today(location: IsoNewEngland.location);
+  var archive = prod.getSevenDayCapacityForecastArchive();
+  for (var month in months) {
+    for (var day in month.days()) {
+      print('Working on $day');
+      if (day.isAfter(today)) continue;
+      var file = archive.getFilename(day);
+      if (!file.existsSync()) {
+        var res = await baseDownloadUrl(archive.getUrl(day), file,
+            username: dotenv.env['ISONE_WS_USER'],
+            password: dotenv.env['ISONE_WS_PASSWORD'],
+            acceptHeader: 'application/json');
+        if (res != 0) throw StateError('Failed to download');
+      }
+    }
+    archive.makeGzFileForMonth(month);
+  }
 }

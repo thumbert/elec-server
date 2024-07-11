@@ -53,7 +53,7 @@ abstract class NyisoReport {
     return res.toUtc();
   }
 
-  static final _fmt = DateFormat('ddMMMyyyy:HH:00:00');
+  static final _fmt = DateFormat('ddMMMyyyy:HH:mm:00');
 
   /// Parse other timestamp formats used by Nyiso.  The format below is used in
   /// the masked energy bid data reports.

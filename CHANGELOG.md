@@ -5,6 +5,18 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-07-10
+- Export several ISONE dbs
+- Upload NYISO energy offers into DuckDb.  Experiment with some queries in lib/client/nyiso/energy_offers.sql
+
+## Release 2024-07-04
+- Small improvements to the ISONE DA and RT energy offers DuckDB 
+
+## Release 2024-06-26
+- Add ISONE MorningReport archive using DuckDb
+- Add ISONE 7DayCapacity archive using DuckDb
+- Add ISONE RT Energy Offers archive using DuckDb
+
 ## Release 2024-05-11
 - Implement mra_capacity_bidoffer archive.  Started to experiment with DuckDb 
 
