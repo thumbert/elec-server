@@ -363,6 +363,28 @@ Future<void> updateRtEnergyOffersIsone(
   }
 }
 
+Future<void> updateRtReservePrices(
+    {required List<Month> months, required bool download}) async {
+  var today = Date.today(location: IsoNewEngland.location);
+  var archive = prod.getRtReservePriceArchive();
+  for (var month in months) {
+    for (var day in month.days()) {
+      print('Working on $day');
+      if (day.isAfter(today)) continue;
+      var file = archive.getFilename(day);
+      if (!file.existsSync() || download) {
+        var res = await baseDownloadUrl(archive.getUrl(day), file,
+            username: dotenv.env['ISONE_WS_USER'],
+            password: dotenv.env['ISONE_WS_PASSWORD'],
+            acceptHeader: 'application/json');
+        if (res != 0) throw StateError('Failed to download');
+      }
+    }
+    // archive.makeGzFileForMonth(month);
+  }
+}
+
+
 Future<void> updateSevenDayCapacityForecast(
     {required List<Month> months}) async {
   var today = Date.today(location: IsoNewEngland.location);

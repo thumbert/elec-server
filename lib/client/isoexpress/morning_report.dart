@@ -334,20 +334,20 @@ class MorningReport {
       highTemperatureBoston: weather
           .firstWhere((e) => e['CityName'] == 'Boston')['HighTemperature'],
       weatherConditionsBoston: weather
-          .firstWhere((e) => e['CityName'] == 'Boston')['WeatherConditions'],
+          .firstWhere((e) => e['CityName'] == 'Boston')['WeatherConditions'].toString(),
       windDirSpeedBoston:
           weather.firstWhere((e) => e['CityName'] == 'Boston')['WindDirSpeed'],
       highTemperatureHartford: weather
           .firstWhere((e) => e['CityName'] == 'Hartford')['HighTemperature'],
       weatherConditionsHartford: weather
-          .firstWhere((e) => e['CityName'] == 'Hartford')['WeatherConditions'],
+          .firstWhere((e) => e['CityName'] == 'Hartford')['WeatherConditions'].toString(),
       windDirSpeedHartford: weather
           .firstWhere((e) => e['CityName'] == 'Hartford')['WindDirSpeed'],
       //
       nonCommUnitsCapMw: x['NonCommUnitsCapMw'],
       unitsCommMinOrrCount: x['UnitCommMinOrrCount'],
       unitsCommMinOrrMw: x['UnitCommMinOrrMw'],
-      geoMagDistIsoAction: x['GeoMagDistIsoAction'],
+      geoMagDistIsoAction: x['GeoMagDistIsoAction'] ?? '',
       geoMagDistOtherCentralAction: x['GeoMagDistOthCntrAction'] ?? '',
       geoMagDistIntensity: x['GeoMagDistIntensity'],
       geoMagDistObsActivity: x['GeoMagDistObsActivity'] is int

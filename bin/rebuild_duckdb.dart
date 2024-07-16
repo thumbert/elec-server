@@ -23,7 +23,7 @@ Future<void> main() async {
   });
   dotenv.load('.env/prod.env');
 
-  // rebuildMorningReport();
-  rebuildIsoneEnergyOffers();
+  rebuildMorningReport();
+  // rebuildIsoneEnergyOffers();
 
 }

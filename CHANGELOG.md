@@ -5,8 +5,12 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-07-16
+- Added ISONE rt_reserve_prices archive.  Not done yet
+- Worked on nyiso stack.  Create a query that constructs the stack.  
+
 ## Release 2024-07-10
-- Export several ISONE dbs
+- Export ISONE morning report, 7 day capacity report dbs
 - Upload NYISO energy offers into DuckDb.  Experiment with some queries in lib/client/nyiso/energy_offers.sql
 
 ## Release 2024-07-04

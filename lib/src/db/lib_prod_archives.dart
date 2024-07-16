@@ -10,6 +10,7 @@ import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/morning_report.dart';
 import 'package:elec_server/src/db/isoexpress/rt_energy_offer.dart';
+import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
 import 'package:elec_server/src/db/isoexpress/sevenday_capacity_forecast.dart';
 import 'package:elec_server/src/db/isone/historical_btm_solar.dart';
@@ -184,6 +185,17 @@ RtEnergyOfferArchive getRtEnergyOfferArchive() {
   }
   return RtEnergyOfferArchive(dir: dir);
 }
+
+
+RtReservePriceArchive getRtReservePriceArchive() {
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/EnergyReports/RtReservePrice';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return RtReservePriceArchive(dir: dir);
+}
+
 
 SevenDayCapacityForecastArchive getSevenDayCapacityForecastArchive() {
   var dir =
