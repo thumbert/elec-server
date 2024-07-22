@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-07-22
+- More work on nyiso energy offers SQL queries
+
 ## Release 2024-07-16
 - Added ISONE rt_reserve_prices archive.  Not done yet
 - Worked on nyiso stack.  Create a query that constructs the stack.  

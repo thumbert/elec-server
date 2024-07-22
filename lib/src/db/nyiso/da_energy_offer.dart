@@ -406,12 +406,9 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
   }
 
   ///
-  int updateDuckDb([List<Month>? months]) {
-    final home = Platform.environment['HOME'];
-    final con =
-        Connection('$home/Downloads/Archive/Nyiso/energy_offers.duckdb');
+  int updateDuckDb({required List<Month> months, required Connection con}) {
     con.execute(r'''
-CREATE TABLE IF NOT EXISTS da_energy_offers (
+CREATE TABLE IF NOT EXISTS da_offers (
     "Masked Gen ID" INTEGER NOT NULL,
     "Date Time" TIMESTAMPTZ,
     "Duration" TINYINT,
@@ -471,18 +468,24 @@ CREATE TABLE IF NOT EXISTS da_energy_offers (
     "Regulation Movement Cost" FLOAT,
 );  
   ''');
-    if (months != null) {
-      /// TODO!
-    } else {
+    for (var month in months) {
+      log.info('Inserting month ${month.toIso8601String()}...');
+      // remove the data if it's already there
       con.execute('''
-INSERT INTO da_energy_offers
+DELETE FROM da_offers 
+WHERE "Date Time" >= '${month.start.toIso8601String()}'
+AND "Date Time" < '${month.end.toIso8601String()}';
+      ''');
+      // reinsert the data
+      con.execute('''
+INSERT INTO da_offers
 FROM read_csv(
-    '$dir../month/da_energy_offers_*.csv.gz', 
+    '$dir../month/da_energy_offers_${month.toIso8601String()}.csv.gz', 
     header = true, 
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 ''');
     }
-    con.close();
+    // con.close();
 
     return 0;
   }

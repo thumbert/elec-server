@@ -60,13 +60,13 @@ Future<void> tests() async {
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
-  final months = Month(2021, 1, location: IsoNewEngland.location)
-      .upTo(Month(2021, 1, location: IsoNewEngland.location));
+  final months = Month(2022, 1, location: IsoNewEngland.location)
+      .upTo(Month(2022, 12, location: IsoNewEngland.location));
   // final months = [Month.utc(2023, 1)];
   // await updateDaEnergyOffersIsone(months: months, download: false);
   // await updateRtEnergyOffersIsone(months: months, download: false);
   // await updateMorningReport(months: months, download: true);
-  await updateRtReservePrices(months: months, download: true);
+  // await updateRtReservePrices(months: months, download: true);
   // await updateSevenDayCapacityForecast(months: months);
 
   // await updateIsoneMraCapacityBidOffer(months: months, download: false);
@@ -84,7 +84,7 @@ Future<void> tests() async {
 
   ///------------------------------------------------------------------
   /// NYISO
-  // await updateDaEnergyOffersNyiso(months: months);
+  await updateDaEnergyOffersNyiso(months: months, download: true);
 
 
   ///------------------------------------------------------------------

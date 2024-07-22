@@ -1,10 +1,13 @@
 library test.db.nyiso.da_energy_offer_test;
 
 import 'dart:convert';
+import 'dart:io';
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec/elec.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
@@ -183,6 +186,11 @@ Future<void> tests(String rootUrl) async {
 
 void main() async {
   initializeTimeZones();
+  Logger.root.level = Level.INFO;
+  Logger.root.onRecord.listen((record) {
+    print(
+        '${record.level.name} (${record.time.toString().substring(0, 19)}) ${record.message}');
+  });
 
   // var rootUrl = 'http://127.0.0.1:8080';
   // tests(rootUrl);
@@ -191,5 +199,10 @@ void main() async {
   //     .map((e) => '    "${e.key}" ${e.value},')
   //     .join('\n'));
 
-  NyisoDaEnergyOfferArchive().updateDuckDb();
+  final home = Platform.environment['HOME'];
+  final con = Connection('$home/Downloads/Archive/Nyiso/nyiso_energy_offers.duckdb');
+  final months = Month(2024, 2, location: IsoNewEngland.location)
+      .upTo(Month(2024, 3, location: IsoNewEngland.location));
+  NyisoDaEnergyOfferArchive().updateDuckDb(months: months, con: con);
+  con.close();
 }

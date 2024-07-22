@@ -9,12 +9,13 @@ import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
 import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:logging/logging.dart';
-import 'package:more/more.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:timezone/timezone.dart';
 import 'lib_prod_archives.dart' as prod;
+
+final log = Logger('Update dbs');
 
 Future<void> updateCmeEnergySettlements(List<Date> days,
     {bool setUp = false}) async {
@@ -170,7 +171,10 @@ Future<void> updateDaEnergyOffersNyiso(
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
   for (var month in months) {
-    // await archive.downloadMonth(month);
+    log.info('Working on month ${month.toIso8601String()}');
+    if (download) {
+      await archive.downloadMonth(month);
+    }
     // var file = archive.getCsvFile(month.startDate);
     // var data = archive.processFile(file);
     // await archive.insertData(data);
@@ -178,7 +182,6 @@ Future<void> updateDaEnergyOffersNyiso(
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> updateIesoRtGenerationArchive(
     {required List<Month> months, bool setUp = false}) async {
@@ -383,7 +386,6 @@ Future<void> updateRtReservePrices(
     // archive.makeGzFileForMonth(month);
   }
 }
-
 
 Future<void> updateSevenDayCapacityForecast(
     {required List<Month> months}) async {
