@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-07-26
+- More work on nyiso energy offers
+
 ## Release 2024-07-22
 - More work on nyiso energy offers SQL queries
 

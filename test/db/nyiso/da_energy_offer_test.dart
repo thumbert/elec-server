@@ -2,9 +2,11 @@ library test.db.nyiso.da_energy_offer_test;
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec/elec.dart';
 import 'package:logging/logging.dart';
@@ -116,6 +118,29 @@ Future<void> tests(String rootUrl) async {
     });
   });
 
+  group('NYISO energy offers, Rust API', () {
+    test('get offers', () async {
+      final ids = [35537750, 55537750, 67537750, 75537750];
+      final url = [
+        dotenv.env['RUST_SERVER'],
+        '/nyiso/energy_offers/dam/energy_offers',
+        '/start/2024-03-01',
+        '/end/2024-03-01',
+        '?masked_asset_ids=${ids.join(',')}'
+      ].join();
+      var res = await http.get(Uri.parse(url));
+      var data = json.decode(res.body) as List;
+      expect(data.length, 672);
+      expect(data.first, {
+        'masked_asset_id': 35537750,
+        'timestamp_s': 1709269200,
+        'segment': 0,
+        'price': 15.6,
+        'quantity': 150.0
+      });
+    });
+  });
+
   group('NYISO energy offers client tests: ', () {
     var client =
         eo.DaEnergyOffers(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
@@ -191,18 +216,20 @@ void main() async {
     print(
         '${record.level.name} (${record.time.toString().substring(0, 19)}) ${record.message}');
   });
-
-  // var rootUrl = 'http://127.0.0.1:8080';
-  // tests(rootUrl);
+  DbProd();
+  dotenv.load('.env/prod.env');
+  var rootUrl = dotenv.env['ROOT_URL']!;
+  tests(rootUrl);
 
   // print(NyisoDaEnergyOfferArchive.columns.entries
   //     .map((e) => '    "${e.key}" ${e.value},')
   //     .join('\n'));
 
-  final home = Platform.environment['HOME'];
-  final con = Connection('$home/Downloads/Archive/Nyiso/nyiso_energy_offers.duckdb');
-  final months = Month(2024, 2, location: IsoNewEngland.location)
-      .upTo(Month(2024, 3, location: IsoNewEngland.location));
-  NyisoDaEnergyOfferArchive().updateDuckDb(months: months, con: con);
-  con.close();
+  // final home = Platform.environment['HOME'];
+  // final con =
+  //     Connection('$home/Downloads/Archive/Nyiso/nyiso_energy_offers.duckdb');
+  // final months = Month(2024, 2, location: IsoNewEngland.location)
+  //     .upTo(Month(2024, 3, location: IsoNewEngland.location));
+  // NyisoDaEnergyOfferArchive().updateDuckDb(months: months, con: con);
+  // con.close();
 }
