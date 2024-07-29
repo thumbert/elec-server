@@ -1,4 +1,4 @@
-library test.db.isoexpress.mra_capacity_results_test;
+library test.db.isoexpress.rt_reserve_price_test;
 
 import 'dart:io';
 
@@ -10,8 +10,8 @@ import 'package:timezone/data/latest.dart';
 
 Future<void> tests() async {
   final archive = getIsoneRtReservePriceArchive();
-  group('ISONE MRA results tests:', () {
-    test('read file for 2024-01-01', () async {
+  group('ISONE RT reserve price tests:', () {
+    test('read file for 2021-01-01', () async {
       var file = archive.getFilename(Date.utc(2021, 1, 1));
       var data = archive.processFile(file);
       expect(data.length, 288); // = 24 hours * 12 observations

@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
 Future<void> tests() async {
-  final archive = getRtEnergyOfferArchive();
+  final archive = getIsoneRtEnergyOfferArchive();
   group('ISONE RT energy offer tests:', () {
     test('read file for 2023-01-01', () async {
       var file = archive.getFilename(Date.utc(2023, 1, 1));
@@ -30,9 +30,6 @@ Future<void> tests() async {
       final query = '''
 SELECT * FROM rt_energy_offers
 ''';
-
-
-
 
       con.close();
     }

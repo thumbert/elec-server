@@ -199,8 +199,6 @@ DROP TABLE ts;
 CREATE TABLE ts (timestamp TIMESTAMPTZ);
 INSERT INTO ts VALUES ('2024-03-01T00:00:00.000-05:00');
 INSERT INTO ts VALUES ('2024-03-01T00:00:00.000Z');
-SELECT * FROM ts;
-
 SELECT timestamp, epoch_ms(timestamp) FROM ts;
 ┌──────────────────────────┬───────────────────────┐
 │        timestamp         │ epoch_ms("timestamp") │

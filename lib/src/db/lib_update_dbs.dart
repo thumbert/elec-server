@@ -6,7 +6,7 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec/elec.dart';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
-import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
+// import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
@@ -255,11 +255,13 @@ Future<void> updateIsoneHistoricalBtmSolarArchive(Date asOfDate,
   await archive.dbConfig.db.close();
 }
 
-Future<void> updateIsoneMraCapacityBidOffer(
-    {required List<Month> months, bool download = true}) async {
-  final log = Logger('update ISONE MRA Capacity bids/offers');
-  var archive = MraCapacityBidOfferArchive();
 
+Future<void> updateIsoneMraCapacityBidOffer(
+    {required List<Month> months, required bool download}) async {
+  final log = Logger('update ISONE MRA Capacity bids/offers');
+  final archive = prod.getIsoneMraBidOfferArchive();
+
+  log.info('Updating ISONE MRA bids/offers');
   for (var month in months) {
     log.info('Working on month ${month.toIso8601String()}');
     var file = archive.getFilename(month);
@@ -273,13 +275,44 @@ Future<void> updateIsoneMraCapacityBidOffer(
     }
     try {
       archive.makeCsvFileForDuckDb(month);
-      log.info('   Created CSV file for ${month.toIso8601String()}');
+      log.info('   Created CSV file for month ${month.toIso8601String()}');
     } catch (e) {
       log.severe(e.toString());
     }
-    // insert it into DuckDb
+    archive
+        .updateDuckDb(months: [month], pathDbFile: '${archive.dir}/mra.duckdb');
   }
 }
+
+//
+Future<void> updateIsoneMraCapacityResults(
+    {required List<Month> months, required bool download}) async {
+  final log = Logger('update ISONE MRA capacity results');
+  final archive = prod.getIsoneMraResultsArchive();
+
+  log.info('Updating ISONE MRA results');
+  for (var month in months) {
+    log.info('Working on month ${month.toIso8601String()}');
+    var file = archive.getFilename(month);
+    var url = archive.getUrl(month);
+    if (download) {
+      await baseDownloadUrl(url, file,
+          acceptHeader: 'application/json',
+          username: dotenv.env['ISONE_WS_USER'],
+          password: dotenv.env['ISONE_WS_PASSWORD']);
+      log.info('   Downloaded JSON file for ${month.toIso8601String()}');
+    }
+    // try {
+    //   archive.makeCsvFileForDuckDb(month);
+    //   log.info('   Created CSV file for month ${month.toIso8601String()}');
+    // } catch (e) {
+    //   log.severe(e.toString());
+    // }
+    // archive
+    //     .updateDuckDb(months: [month], pathDbFile: '${archive.dir}/mra.duckdb');
+  }
+}
+
 
 Future<void> updateIsoneZonalDemand(List<int> years,
     {bool setUp = false, bool download = false}) async {
@@ -348,7 +381,7 @@ Future<void> updatePolygraphProjects({bool setUp = false}) async {
 
 Future<void> updateRtEnergyOffersIsone(
     {required List<Month> months, bool download = false}) async {
-  var archive = prod.getRtEnergyOfferArchive();
+  var archive = prod.getIsoneRtEnergyOfferArchive();
   assert(months.first.location == IsoNewEngland.location);
   for (var month in months) {
     for (var day in month.days()) {
@@ -366,13 +399,15 @@ Future<void> updateRtEnergyOffersIsone(
   }
 }
 
-Future<void> updateRtReservePrices(
+Future<void> updateIsoneRtReservePrices(
     {required List<Month> months, required bool download}) async {
   var today = Date.today(location: IsoNewEngland.location);
-  var archive = prod.getRtReservePriceArchive();
+  var archive = prod.getIsoneRtReservePriceArchive();
+
   for (var month in months) {
+    log.info('Working on month ${month.toIso8601String()}');
     for (var day in month.days()) {
-      print('Working on $day');
+      log.info('   Working on $day');
       if (day.isAfter(today)) continue;
       var file = archive.getFilename(day);
       if (!file.existsSync() || download) {
@@ -383,14 +418,17 @@ Future<void> updateRtReservePrices(
         if (res != 0) throw StateError('Failed to download');
       }
     }
-    // archive.makeGzFileForMonth(month);
+    archive.makeGzFileForMonth(month);
+    log.info('   Created CSV file for month ${month.toIso8601String()}');
+    archive.updateDuckDb(
+        months: [month], pathDbFile: '${archive.dir}/rt_reserve_price.duckdb');
   }
 }
 
 Future<void> updateSevenDayCapacityForecast(
     {required List<Month> months}) async {
   var today = Date.today(location: IsoNewEngland.location);
-  var archive = prod.getSevenDayCapacityForecastArchive();
+  var archive = prod.getIsoneSevenDayCapacityForecastArchive();
   for (var month in months) {
     for (var day in month.days()) {
       print('Working on $day');

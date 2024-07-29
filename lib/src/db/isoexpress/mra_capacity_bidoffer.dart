@@ -4,30 +4,23 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/client/isoexpress/mra_capacity_bidoffer.dart';
-import '../lib_iso_express.dart';
+import 'package:logging/logging.dart';
 
 class MraCapacityBidOfferArchive {
-  MraCapacityBidOfferArchive({String? dir}) {
-    this.dir = dir ?? '${baseDir}Capacity/HistoricalBidsOffers/MonthlyAuction';
-  }
+  MraCapacityBidOfferArchive({required this.dir});
 
-  late final String dir;
+  final String dir;
   final String report =
       'Forward Capacity Market Monthly Reconfiguration Auction Historical Bid Report';
+  static final log = Logger('ISONE MRA bids/offers');
 
   String getUrl(Month month) =>
       'https://webservices.iso-ne.com/api/v1.1/hbfcmmra/month/${month.toIso8601String().replaceAll('-', '')}';
 
   File getFilename(Month month) =>
       File('$dir/Raw/hbfcmmra_${month.toIso8601String()}.json');
-
-  // Future insertData(List<Map<String, dynamic>> data) async {
-  //   if (data.isEmpty) {
-  //     print('--->  No data to insert');
-  //     return Future.value(-1);
-  //   }
-  // }
 
   int makeCsvFileForDuckDb(Month month) {
     final file = getFilename(month);
@@ -41,7 +34,7 @@ class MraCapacityBidOfferArchive {
       ...rs.map((e) => e.toJson().values.toList())
     ];
     String csv = const ListToCsvConverter().convert(ls);
-    final duckFile = File('$dir/tmp/mra_duck_${month.toIso8601String()}.csv');
+    final duckFile = File('$dir/month/mra_duck_${month.toIso8601String()}.csv');
     duckFile.writeAsStringSync(csv);
     return 0;
   }
@@ -59,5 +52,41 @@ class MraCapacityBidOfferArchive {
     } else {
       throw const FormatException('Wrong json input!');
     }
+  }
+
+  int updateDuckDb({required List<Month> months, required String pathDbFile}) {
+    final con = Connection(pathDbFile);
+    con.execute(r'''
+CREATE TABLE IF NOT EXISTS mra (
+  month UINTEGER, 
+  maskedResourceId UINTEGER, 
+  maskedParticipantId UINTEGER, 
+  maskedCapacityZoneId UINTEGER, 
+  resourceType ENUM('generating', 'demand', 'import'), 
+  maskedExternalInterfaceId UINTEGER, 
+  bidOffer ENUM('bid', 'offer'), 
+  segment UTINYINT, 
+  quantity FLOAT, 
+  price FLOAT
+);
+''');
+    for (var month in months) {
+      // remove the data if it's already there
+      con.execute('''
+DELETE FROM mra 
+WHERE month == ${month.toInt()};
+      ''');
+      // reinsert the data
+      con.execute('''
+INSERT INTO mra
+FROM read_csv(
+    '$dir/month/mra_duck_${month.toIso8601String()}.csv', 
+    header = true, 
+    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
+''');
+      log.info('   Inserted month ${month.toIso8601String()} into DuckDb');
+    }
+    con.close();
+    return 0;
   }
 }

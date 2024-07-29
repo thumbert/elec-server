@@ -5,6 +5,10 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-07-29
+- Work on ISONE MRA capacity bid offers and results archive
+- Work on ISONE rt reserve price archive
+
 ## Release 2024-07-26
 - More work on nyiso energy offers
 

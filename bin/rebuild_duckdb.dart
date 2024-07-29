@@ -1,4 +1,3 @@
-
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
@@ -6,14 +5,13 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 
 void rebuildIsoneEnergyOffers() {
   getDaEnergyOfferArchive().updateDuckDb();
-  getRtEnergyOfferArchive().updateDuckDb();
+  getIsoneRtEnergyOfferArchive().updateDuckDb();
 }
 
 void rebuildMorningReport() {
   final archive = getMorningReportArchive();
   archive.rebuildDuckDb();
 }
-
 
 Future<void> main() async {
   initializeTimeZones();
@@ -25,5 +23,4 @@ Future<void> main() async {
 
   rebuildMorningReport();
   // rebuildIsoneEnergyOffers();
-
 }

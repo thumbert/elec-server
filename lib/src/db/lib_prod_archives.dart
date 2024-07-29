@@ -9,6 +9,8 @@ import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/morning_report.dart';
+import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
+import 'package:elec_server/src/db/isoexpress/mra_capacity_results.dart';
 import 'package:elec_server/src/db/isoexpress/rt_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
@@ -115,6 +117,54 @@ IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   return IsoneBtmSolarArchive(dbConfig: dbConfig, dir: dir.path);
 }
 
+MraCapacityBidOfferArchive getIsoneMraBidOfferArchive() {
+  final dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/Capacity/HistoricalBidsOffers/MonthlyAuction';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return MraCapacityBidOfferArchive(dir: dir);
+}
+
+MraCapacityResultsArchive getIsoneMraResultsArchive() {
+  final dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/Capacity/Results/MonthlyAuction';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return MraCapacityResultsArchive(dir: dir);
+}
+
+
+RtEnergyOfferArchive getIsoneRtEnergyOfferArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/PricingReports/RtEnergyOffer';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return RtEnergyOfferArchive(dir: dir);
+}
+
+RtReservePriceArchive getIsoneRtReservePriceArchive() {
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/PricingReports/RtReservePrice';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return RtReservePriceArchive(dir: dir);
+}
+
+SevenDayCapacityForecastArchive getIsoneSevenDayCapacityForecastArchive() {
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/7dayCapacityForecast';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return SevenDayCapacityForecastArchive(dir: dir);
+}
+
+
+
 MorningReportArchive getMorningReportArchive() {
   var dir =
       '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/MorningReport';
@@ -140,9 +190,7 @@ NormalTemperatureArchive getNormalTemperatureArchive() {
 
 NyisoDaEnergyOfferArchive getNyisoDaEnergyOfferArchive() {
   var dbConfig = ComponentConfig(
-      host: '127.0.0.1',
-      dbName: 'nyiso',
-      collectionName: 'da_energy_offer');
+      host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_energy_offer');
   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
       '/Nyiso/DaEnergyOffer/Raw/';
   if (!Directory(dir).existsSync()) {
@@ -150,8 +198,6 @@ NyisoDaEnergyOfferArchive getNyisoDaEnergyOfferArchive() {
   }
   return NyisoDaEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
 }
-
-
 
 PolygraphArchive getPolygraphArchive() {
   var dbConfig = ComponentConfig(
@@ -177,31 +223,3 @@ RetailSuppliersOffersArchive getRetailSuppliersOffersArchive() {
   return RetailSuppliersOffersArchive(dbConfig: dbConfig, dir: dir);
 }
 
-RtEnergyOfferArchive getRtEnergyOfferArchive() {
-  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
-      '/IsoExpress/PricingReports/RtEnergyOffer';
-  if (!Directory(dir).existsSync()) {
-    Directory(dir).createSync(recursive: true);
-  }
-  return RtEnergyOfferArchive(dir: dir);
-}
-
-
-RtReservePriceArchive getRtReservePriceArchive() {
-  var dir =
-      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/EnergyReports/RtReservePrice';
-  if (!Directory(dir).existsSync()) {
-    Directory(dir).createSync(recursive: true);
-  }
-  return RtReservePriceArchive(dir: dir);
-}
-
-
-SevenDayCapacityForecastArchive getSevenDayCapacityForecastArchive() {
-  var dir =
-      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/7dayCapacityForecast';
-  if (!Directory(dir).existsSync()) {
-    Directory(dir).createSync(recursive: true);
-  }
-  return SevenDayCapacityForecastArchive(dir: dir);
-}

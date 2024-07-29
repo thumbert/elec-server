@@ -32,21 +32,6 @@ class RtReservePrice {
   final num tmnsrClearingPrice;
   final num tmorClearingPrice;
 
-  // static const columns = <String, String>{
-  //   '5MinIntervalBeginning': '',
-  //   'reserveZoneId': '',
-  //   'reserveZoneName': '',
-  //   'tenMinSpinRequirementMw': '',
-  //   'total10MinRequirementMw': '',
-  //   'total30MinRequirementMw': '',
-  //   'tmsrDesignatedMw': '',
-  //   'tmnsrDesignatedMw': '',
-  //   'tmorDesignatedMw': '',
-  //   'tmsrClearingPrice': '',
-  //   'tmnsrClearingPrice': '',
-  //   'tmorClearingPrice': '',
-  // };
-
   /// A file contains a list of entries in this form:
   /// ```
   ///   {
@@ -70,15 +55,15 @@ class RtReservePrice {
             TZDateTime.parse(IsoNewEngland.location, x['BeginDate']),
         reserveZoneId: x['ReserveZoneId'],
         reserveZoneName: x['ReserveZoneName'],
-        tenMinSpinRequirementMw: x['tenMinSpinRequirementMw'],
-        total10MinRequirementMw: x['total10MinRequirementMw'],
-        total30MinRequirementMw: x['total30MinRequirementMw'],
-        tmsrDesignatedMw: x['tmsrDesignatedMw'],
-        tmnsrDesignatedMw: x['tmnsrDesignatedMw'],
-        tmorDesignatedMw: x['tmorDesignatedMw'],
-        tmsrClearingPrice: x['tmsrClearingPrice'],
-        tmnsrClearingPrice: x['tmnsrClearingPrice'],
-        tmorClearingPrice: x['tmorClearingPrice']);
+        tenMinSpinRequirementMw: x['TenMinSpinRequirement'],
+        total10MinRequirementMw: x['Total10MinRequirement'],
+        total30MinRequirementMw: x['Total30MinRequirement'],
+        tmsrDesignatedMw: x['TmsrDesignatedMw'],
+        tmnsrDesignatedMw: x['TmnsrDesignatedMw'],
+        tmorDesignatedMw: x['TmorDesignatedMw'],
+        tmsrClearingPrice: x['TmsrClearingPrice'],
+        tmnsrClearingPrice: x['TmnsrClearingPrice'],
+        tmorClearingPrice: x['TmorClearingPrice']);
   }
 
   Map<String, dynamic> toJson() {
