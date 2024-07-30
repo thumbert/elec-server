@@ -255,7 +255,6 @@ Future<void> updateIsoneHistoricalBtmSolarArchive(Date asOfDate,
   await archive.dbConfig.db.close();
 }
 
-
 Future<void> updateIsoneMraCapacityBidOffer(
     {required List<Month> months, required bool download}) async {
   final log = Logger('update ISONE MRA Capacity bids/offers');
@@ -279,8 +278,10 @@ Future<void> updateIsoneMraCapacityBidOffer(
     } catch (e) {
       log.severe(e.toString());
     }
-    archive
-        .updateDuckDb(months: [month], pathDbFile: '${archive.dir}/mra.duckdb');
+    archive.updateDuckDb(
+        months: [month],
+        pathDbFile:
+            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/mra.duckdb');
   }
 }
 
@@ -293,26 +294,27 @@ Future<void> updateIsoneMraCapacityResults(
   log.info('Updating ISONE MRA results');
   for (var month in months) {
     log.info('Working on month ${month.toIso8601String()}');
-    var file = archive.getFilename(month);
-    var url = archive.getUrl(month);
-    if (download) {
-      await baseDownloadUrl(url, file,
-          acceptHeader: 'application/json',
-          username: dotenv.env['ISONE_WS_USER'],
-          password: dotenv.env['ISONE_WS_PASSWORD']);
-      log.info('   Downloaded JSON file for ${month.toIso8601String()}');
-    }
+    // var file = archive.getFilename(month);
+    // var url = archive.getUrl(month);
+    // if (download) {
+    //   await baseDownloadUrl(url, file,
+    //       acceptHeader: 'application/json',
+    //       username: dotenv.env['ISONE_WS_USER'],
+    //       password: dotenv.env['ISONE_WS_PASSWORD']);
+    //   log.info('   Downloaded JSON file for ${month.toIso8601String()}');
+    // }
     // try {
     //   archive.makeCsvFileForDuckDb(month);
-    //   log.info('   Created CSV file for month ${month.toIso8601String()}');
+    //   log.info('   Created CSV files for month ${month.toIso8601String()}');
     // } catch (e) {
     //   log.severe(e.toString());
     // }
-    // archive
-    //     .updateDuckDb(months: [month], pathDbFile: '${archive.dir}/mra.duckdb');
+    archive.updateDuckDb(
+        months: [month],
+        pathDbFile:
+            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/mra.duckdb');
   }
 }
-
 
 Future<void> updateIsoneZonalDemand(List<int> years,
     {bool setUp = false, bool download = false}) async {

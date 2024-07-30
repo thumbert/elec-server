@@ -6,7 +6,8 @@
   zip file for a year worth of data.  
 
 ## Release 2024-07-29
-- Work on ISONE MRA capacity bid offers and results archive
+- Work on ISONE MRA capacity bid offers and results archive.  Put them 
+  both in the same db. 
 - Work on ISONE rt reserve price archive
 
 ## Release 2024-07-26

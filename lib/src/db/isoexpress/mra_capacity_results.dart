@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
 import 'package:duckdb_dart/duckdb_dart.dart';
-import 'package:elec_server/client/isoexpress/mra_capacity_bidoffer.dart';
+import 'package:elec_server/client/isoexpress/mra_capacity_results.dart';
 import 'package:logging/logging.dart';
 
 class MraCapacityResultsArchive {
@@ -28,37 +28,50 @@ class MraCapacityResultsArchive {
   File getFilename(Month month) =>
       File('$dir/Raw/fcmmra_${month.toIso8601String()}.json');
 
+  /// Create two files, one for zones, one for interfaces
   int makeCsvFileForDuckDb(Month month) {
-    final file = getFilename(month);
-    if (!file.existsSync()) {
+    final fileIn = getFilename(month);
+    if (!fileIn.existsSync()) {
       throw StateError(
           'ISO file for month $month has not been downloaded.  Download that file first!');
     }
-    final rs = processJsonFile(file);
-    var ls = [
-      rs.first.toJson().keys.toList(),
-      ...rs.map((e) => e.toJson().values.toList())
+    final rs = processFile(fileIn);
+    // write the zones
+    final zs = rs.whereType<MraCapacityZoneRecord>();
+    var list = [
+      zs.first.toJson().keys.toList(),
+      ...zs.map((e) => e.toJson().values.toList())
     ];
-    String csv = const ListToCsvConverter().convert(ls);
-    final duckFile = File('$dir/month/mra_duck_${month.toIso8601String()}.csv');
-    duckFile.writeAsStringSync(csv);
+    var csv = const ListToCsvConverter().convert(list);
+    var fileOut = File('$dir/month/mra_zone_${month.toIso8601String()}.csv');
+    fileOut.writeAsStringSync(csv);
+
+    // write the interfaces
+    final faces = rs.whereType<MraCapacityInterfaceRecord>();
+    list = [
+      faces.first.toJson().keys.toList(),
+      ...faces.map((e) => e.toJson().values.toList())
+    ];
+    csv = const ListToCsvConverter().convert(list);
+    fileOut = File('$dir/month/mra_interface_${month.toIso8601String()}.csv');
+    fileOut.writeAsStringSync(csv);
+
     return 0;
   }
 
   ///
-  List<MraCapacityRecord> processJsonFile(File file) {
+  List<MraCapacityRecord> processFile(File file) {
     var aux = json.decode(file.readAsStringSync());
     if (aux
         case {
-          'FCMRAResultss': {
-            'FCMRAResult': {
-              'Auction': Map<String, dynamic> _,
-              'ClearedCapacityZones': List ccz,
-              'SystemResults': Map<String, dynamic> _,
-            },
+          'FCMRAResults': {
+            'FCMRAResult': Map<String, dynamic> data,
           }
         }) {
-      return ccz.expand((e) => MraCapacityRecord.fromJson(e)).toList();
+      return [
+        ...MraCapacityZoneRecord.fromJson(data),
+        ...MraCapacityInterfaceRecord.fromJson(data),
+      ];
     } else {
       throw const FormatException('Wrong json input!');
     }
@@ -66,36 +79,72 @@ class MraCapacityResultsArchive {
 
   int updateDuckDb({required List<Month> months, required String pathDbFile}) {
     final con = Connection(pathDbFile);
+
+    ///
+    /// Zones
+    ///
     con.execute(r'''
-CREATE TABLE IF NOT EXISTS mra (
-  month UINTEGER, 
-  maskedResourceId UINTEGER, 
-  maskedParticipantId UINTEGER, 
-  maskedCapacityZoneId USMALLINT, 
-  resourceType ENUM('generating', 'demand', 'import'), 
-  maskedExternalInterfaceId USMALLINT, 
-  bidOffer ENUM('bid', 'offer'), 
-  segment UTINYINT, 
-  quantity FLOAT, 
-  price FLOAT
+CREATE TABLE IF NOT EXISTS results_zone (
+  month UINTEGER NOT NULL, 
+  capacityZoneId UINTEGER NOT NULL, 
+  capacityZoneType ENUM('ROP', 'Export', 'Import') NOT NULL,
+  capacityZoneName VARCHAR NOT NULL,
+  supplyOffersSubmitted FLOAT NOT NULL, 
+  demandBidsSubmitted FLOAT NOT NULL, 
+  supplyOffersCleared FLOAT NOT NULL, 
+  demandBidsCleared FLOAT NOT NULL, 
+  netCapacityCleared FLOAT NOT NULL,
+  clearingPrice FLOAT NOT NULL
 );
 ''');
     for (var month in months) {
       log.info('Inserting month ${month.toIso8601String()}...');
       // remove the data if it's already there
       con.execute('''
-DELETE FROM mra 
+DELETE FROM results_zone 
 WHERE month == ${month.toInt()};
       ''');
       // reinsert the data
       con.execute('''
-INSERT INTO mra
+INSERT INTO results_zone
 FROM read_csv(
-    '$dir/month/mra_duck_${month.toIso8601String()}.csv', 
-    header = true, 
-    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
+    '$dir/month/mra_zone_${month.toIso8601String()}.csv', 
+    header = true);
 ''');
     }
+
+    ///
+    /// Interfaces
+    ///
+    con.execute(r'''
+CREATE TABLE IF NOT EXISTS results_interface (
+  month UINTEGER NOT NULL, 
+  externalInterfaceId UINTEGER NOT NULL, 
+  externalInterfaceName VARCHAR NOT NULL,
+  supplyOffersSubmitted FLOAT NOT NULL, 
+  demandBidsSubmitted FLOAT NOT NULL, 
+  supplyOffersCleared FLOAT NOT NULL, 
+  demandBidsCleared FLOAT NOT NULL, 
+  netCapacityCleared FLOAT NOT NULL,
+  clearingPrice FLOAT NOT NULL
+);
+''');
+    for (var month in months) {
+      log.info('Inserting month ${month.toIso8601String()}...');
+      // remove the data if it's already there
+      con.execute('''
+DELETE FROM results_interface 
+WHERE month == ${month.toInt()};
+      ''');
+      // reinsert the data
+      con.execute('''
+INSERT INTO results_interface
+FROM read_csv(
+    '$dir/month/mra_interface_${month.toIso8601String()}.csv', 
+    header = true);
+''');
+    }
+
     con.close();
     return 0;
   }

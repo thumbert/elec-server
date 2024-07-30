@@ -57,7 +57,7 @@ class MraCapacityBidOfferArchive {
   int updateDuckDb({required List<Month> months, required String pathDbFile}) {
     final con = Connection(pathDbFile);
     con.execute(r'''
-CREATE TABLE IF NOT EXISTS mra (
+CREATE TABLE IF NOT EXISTS bids_offers (
   month UINTEGER, 
   maskedResourceId UINTEGER, 
   maskedParticipantId UINTEGER, 
@@ -73,12 +73,12 @@ CREATE TABLE IF NOT EXISTS mra (
     for (var month in months) {
       // remove the data if it's already there
       con.execute('''
-DELETE FROM mra 
+DELETE FROM bids_offers 
 WHERE month == ${month.toInt()};
       ''');
       // reinsert the data
       con.execute('''
-INSERT INTO mra
+INSERT INTO bids_offers
 FROM read_csv(
     '$dir/month/mra_duck_${month.toIso8601String()}.csv', 
     header = true, 
