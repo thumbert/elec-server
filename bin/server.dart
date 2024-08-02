@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/api_dacongestion.dart';
@@ -129,10 +127,10 @@ Future<Router> buildRouter() async {
   });
 
   await DbProd.riskSystem.open();
-  router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router);
-  router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router);
-  router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router);
-  router.mount('/forward_marks/v2/', ApiCmeMarks(DbProd.cme).router);
+  router.mount('/calculators/v1/', ApiCalculators(DbProd.riskSystem).router.call);
+  router.mount('/curve_ids/v1/', CurveIds(DbProd.marks).router.call);
+  router.mount('/forward_marks/v1/', ForwardMarks(DbProd.marks).router.call);
+  router.mount('/forward_marks/v2/', ApiCmeMarks(DbProd.cme).router.call);
   router.mount('/ptids/v1/', ApiPtids(DbProd.isone).router.call);
 
   await DbProd.mis.open();
@@ -186,7 +184,7 @@ void main() async {
   app.get('/', (Request request) {
     return Response.ok('Hello!  This is a Dart server.');
   });
-  final handler = Pipeline().addMiddleware(cors()).addHandler(app);
+  final handler = Pipeline().addMiddleware(cors()).addHandler(app.call);
   await io.serve(handler, host, port);
   // await io.serve(handler, InternetAddress.anyIPv4, port);
   print('Shelf server started on port $port');

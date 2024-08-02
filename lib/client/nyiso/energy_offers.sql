@@ -118,7 +118,7 @@ SELECT "Masked Gen ID",
     CAST("Segment" as UTINYINT) AS Segment, 
     "MW", "Price", 
 FROM unpivot_alias
-ORDER BY "Masked Gen ID", "Date Time", "Price" LIMIT 3;
+ORDER BY "Masked Gen ID", "Date Time", "Price";
 
 
 

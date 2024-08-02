@@ -104,18 +104,18 @@ LIMIT 1;
 ''';
 
 
-/// Get historical offers
-List<EnergyOfferSegment> getEnergyOffers(
-    Connection con, Term term, Market market, List<int> maskedAssetIds) {
-  final query = '''
-SELECT * FROM ${market.toString().toLowerCase()}_energy_offers
-WHERE MaskedAssetId = 72020
-AND HourBeginning >= epoch_ms(${term.interval.start.millisecondsSinceEpoch})
-AND HourBeginning < epoch_ms(${term.interval.end.millisecondsSinceEpoch});
-''';
-  var res = con.fetch(query);
-  return EnergyOfferSegment.fromDuckDb(res);
-}
+// /// Get historical offers
+// List<EnergyOfferSegment> getEnergyOffers(
+//     Connection con, Term term, Market market, List<int> maskedAssetIds) {
+//   final query = '''
+// SELECT * FROM ${market.toString().toLowerCase()}_energy_offers
+// WHERE MaskedAssetId = 72020
+// AND HourBeginning >= epoch_ms(${term.interval.start.millisecondsSinceEpoch})
+// AND HourBeginning < epoch_ms(${term.interval.end.millisecondsSinceEpoch});
+// ''';
+//   var res = con.fetch(query);
+//   return EnergyOfferSegment.fromDuckDb(res);
+// }
 
 
 
@@ -272,54 +272,54 @@ class EnergyOfferSegment {
     return out;
   }
 
-  static List<EnergyOfferSegment> fromDuckDb(Map<String, List<Object?>> ys) {
-    final hbs = ys['HourBeginning']!.cast<DateTime>();
-    final participantIds = ys['MaskedParticipantId']!.cast<int>();
-    final assetIds = ys['AssetId']!.cast<int>();
-    final mustTakeEnergys = ys['MustTakeEnergy']!.cast<num>();
-    final maxDailyEnergyAvailables = ys['MaxDailyEnergyAvailable']!.cast<num>();
-    final ecoMaxs = ys['EcoMax']!.cast<num>();
-    final ecoMins = ys['EcoMin']!.cast<num>();
-    final coldStartupPrices = ys['ColdStartupPrice']!.cast<num>();
-    final intermediateStartupPrices =
-        ys['IntermediateStartupPrice']!.cast<num>();
-    final hotStartupPrices = ys['HotStartupPrice']!.cast<num>();
-    final noLoadPrices = ys['NoLoadPrice']!.cast<num>();
-    final segments = ys['Segment']!.cast<int>();
-    final prices = ys['Price']!.cast<num>();
-    final mws = ys['Quantity']!.cast<num>();
-    final claim10s = ys['Claim10']!.cast<num>();
-    final claim30s = ys['Claim30']!.cast<num>();
-    final unitStatus = ys['UnitStatus']!
-        .cast<String>()
-        .map((e) => UnitStatus.parse(e))
-        .toList();
+  // static List<EnergyOfferSegment> fromDuckDb(Map<String, List<Object?>> ys) {
+  //   final hbs = ys['HourBeginning']!.cast<DateTime>();
+  //   final participantIds = ys['MaskedParticipantId']!.cast<int>();
+  //   final assetIds = ys['AssetId']!.cast<int>();
+  //   final mustTakeEnergys = ys['MustTakeEnergy']!.cast<num>();
+  //   final maxDailyEnergyAvailables = ys['MaxDailyEnergyAvailable']!.cast<num>();
+  //   final ecoMaxs = ys['EcoMax']!.cast<num>();
+  //   final ecoMins = ys['EcoMin']!.cast<num>();
+  //   final coldStartupPrices = ys['ColdStartupPrice']!.cast<num>();
+  //   final intermediateStartupPrices =
+  //       ys['IntermediateStartupPrice']!.cast<num>();
+  //   final hotStartupPrices = ys['HotStartupPrice']!.cast<num>();
+  //   final noLoadPrices = ys['NoLoadPrice']!.cast<num>();
+  //   final segments = ys['Segment']!.cast<int>();
+  //   final prices = ys['Price']!.cast<num>();
+  //   final mws = ys['Quantity']!.cast<num>();
+  //   final claim10s = ys['Claim10']!.cast<num>();
+  //   final claim30s = ys['Claim30']!.cast<num>();
+  //   final unitStatus = ys['UnitStatus']!
+  //       .cast<String>()
+  //       .map((e) => UnitStatus.parse(e))
+  //       .toList();
 
-    final n = ys['HourBeginning']!.length;
-    var out = <EnergyOfferSegment>[];
-    for (var i = 0; i < n; i++) {
-      out.add(EnergyOfferSegment(
-          hour: Hour.beginning(TZDateTime.fromMillisecondsSinceEpoch(
-              IsoNewEngland.location, hbs[i].millisecondsSinceEpoch)),
-          maskedParticipantId: participantIds[i],
-          maskedAssetId: assetIds[i],
-          mustTakeEnergy: mustTakeEnergys[i],
-          maxDailyEnergyAvailable: maxDailyEnergyAvailables[i],
-          ecoMax: ecoMaxs[i],
-          ecoMin: ecoMins[i],
-          coldStartupPrice: coldStartupPrices[i],
-          intermediateStartupPrice: intermediateStartupPrices[i],
-          hotStartupPrice: hotStartupPrices[i],
-          noLoadPrice: noLoadPrices[i],
-          segment: segments[i],
-          price: prices[i],
-          quantity: mws[i],
-          claim10: claim10s[i],
-          claim30: claim30s[i],
-          unitStatus: unitStatus[i]));
-    }
-    return out;
-  }
+  //   final n = ys['HourBeginning']!.length;
+  //   var out = <EnergyOfferSegment>[];
+  //   for (var i = 0; i < n; i++) {
+  //     out.add(EnergyOfferSegment(
+  //         hour: Hour.beginning(TZDateTime.fromMillisecondsSinceEpoch(
+  //             IsoNewEngland.location, hbs[i].millisecondsSinceEpoch)),
+  //         maskedParticipantId: participantIds[i],
+  //         maskedAssetId: assetIds[i],
+  //         mustTakeEnergy: mustTakeEnergys[i],
+  //         maxDailyEnergyAvailable: maxDailyEnergyAvailables[i],
+  //         ecoMax: ecoMaxs[i],
+  //         ecoMin: ecoMins[i],
+  //         coldStartupPrice: coldStartupPrices[i],
+  //         intermediateStartupPrice: intermediateStartupPrices[i],
+  //         hotStartupPrice: hotStartupPrices[i],
+  //         noLoadPrice: noLoadPrices[i],
+  //         segment: segments[i],
+  //         price: prices[i],
+  //         quantity: mws[i],
+  //         claim10: claim10s[i],
+  //         claim30: claim30s[i],
+  //         unitStatus: unitStatus[i]));
+  //   }
+  //   return out;
+  // }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{

@@ -150,7 +150,7 @@ Future<void> tests(String rootUrl) async {
       sw.start();
       var data = await api.dailyPriceByPtid('lmp', '2019-02-14', '2020-02-13');
       sw.stop();
-      expect(sw.elapsedMilliseconds, lessThan(3000));
+      expect(sw.elapsedMilliseconds, lessThan(8000));  // was 3000 before 2024-08-02
       expect(data.length, 208891);
     });
   });

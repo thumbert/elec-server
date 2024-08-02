@@ -33,6 +33,7 @@
             <li><a href="#dam-binding-constraints">DAM binding constraints</a></li>
             <li><a href="#epa-emission-data">EPA emission data</a></li>
             <li><a href="#forward-marks">Forward marks</a></li>
+            <li><a href="#isone-capacity-mra">ISONE Capacity: monthly reconfiguration auction (MRA)</a></li>
             <li><a href="#masked-da-demand-bids">Masked DA demand bids</a></li>
             <li><a href="#masked-da-energy-offers">Masked DA energy offers</a></li>
             <li><a href="#ptid-table">Ptid table</a></li>
@@ -214,6 +215,22 @@
                     <div><a href="http://localhost:8080/forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/asOfDate/20180301">forward_marks/v1/curveId/elec|iso:ne|hub|lmp|da/bucket/5x16/fromDate/20180301</a></div>
                 </li>
             </ul>
+        </div>
+        <div id="isone-capacity-mra">
+            <h4>ISONE Capacity: monthly reconfiguration auction (MRA)</h4>
+            <ul>
+                <li>
+                    Get masked bids/offers for all zones between a start/end month
+                    <div><a href="http://127.0.0.1:8111/isone/capacity/mra/bids_offers/start/2024-03/end/2024-03">isone/capacity/mra/bids_offers/start/2024-03/end/2024-03</a></div>
+                </li>
+                <li>
+                    Get the MRA results including clearing prices, and quantities, offered quantities, etc. between a start/end month
+                    <div><a href="http://127.0.0.1:8111/isone/capacity/mra/results/zone/start/2024-01/end/2024-03">isone/capacity/mra/results/zone/start/2024-01/end/2024-03</a></div>
+                    <div><a href="http://127.0.0.1:8111/isone/capacity/mra/results/interface/start/2024-01/end/2024-03">isone/capacity/mra/results/interface/start/2024-01/end/2024-03</a></div>
+                </li>
+
+            </ul>
+
         </div>
 
         <div id="masked-da-demand-bids">

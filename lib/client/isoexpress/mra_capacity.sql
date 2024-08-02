@@ -29,13 +29,34 @@ ORDER BY month;
 
 SELECT * FROM results_interface LIMIT 5;
 
+--- get the stack for one zone one month
+--- not worth having an api for that.  Just grab the data directly.
+SELECT *, row_number() OVER (PARTITION BY bidOffer) as Idx,
+FROM (
+    SELECT bidOffer, maskedResourceId, segment, quantity, price 
+    FROM bids_offers
+    WHERE month == 202403
+    AND maskedCapacityZoneId == 8506
+    AND bidOffer == 'bid'
+    ORDER BY bidOffer, price DESC
+)
+UNION ALL
+SELECT *, row_number() OVER (PARTITION BY bidOffer) as Idx,
+FROM (
+    SELECT bidOffer, maskedResourceId, segment, quantity, price 
+    FROM bids_offers
+    WHERE month == 202403
+    AND maskedCapacityZoneId == 8506
+    AND bidOffer == 'offer'
+    ORDER BY bidOffer, price
+)
+;
 
 
-CREATE TABLE stats (
-    name ENUM('CA', 'NY'),
-    value INTEGER,
-);
-INSERT INTO stats VALUES ('CA', 10), ('CA', 20), ('NY', 4);
+
+
+
+
 
 
 

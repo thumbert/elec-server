@@ -5,6 +5,10 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-08-02
+- Update dependencies
+
+
 ## Release 2024-07-29
 - Work on ISONE MRA capacity bid offers and results archive.  Put them 
   both in the same db. 

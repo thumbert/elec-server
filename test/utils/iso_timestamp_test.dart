@@ -11,7 +11,7 @@ void tests() {
 
   var dts = <List>[
     ['03/08/2015', '01', TZDateTime.utc(2015, 3, 8, 6)],
-    ['03/08/2015', '03', TZDateTime.utc(2015, 3, 8, 7)],
+    ['03/08/2015', '02', TZDateTime.utc(2015, 3, 8, 7)],
     ['03/08/2015', '04', TZDateTime.utc(2015, 3, 8, 8)],
     ['03/08/2015', '05', TZDateTime.utc(2015, 3, 8, 9)],
     ['11/01/2015', '01', TZDateTime.utc(2015, 11, 1, 5)],
@@ -24,11 +24,17 @@ void tests() {
     ['11/02/2015', '03', TZDateTime.utc(2015, 11, 2, 8)],
   ];
 
+  // 2015-03-08 00:00:00.000-0500 = 2015-03-08 05:00:00.000Z
+  // 2015-03-08 01:00:00.000-0500 = 2015-03-08 06:00:00.000Z
+  // 2015-03-08 03:00:00.000-0400 = 2015-03-08 07:00:00.000Z
+  // 2015-03-08 04:00:00.000-0400 = 2015-03-08 08:00:00.000Z
   test('Parse ISO timestamp', () {
     var res = dts.map((List inp) {
       var hb = parseHourEndingStamp(inp[0], inp[1]);
       return {'input': inp.take(2).join(' '), 'utc_HB': hb, 'utc_HE': inp[2]};
     }).toList();
+    // print(res.join('\n'));
+    expect(res.length, 12);
     expect(dts.map((e) => e[2]).toList(),
         res.map((e) => e['utc_HB'].add(Duration(hours: 1))).toList());
   });
@@ -108,6 +114,13 @@ void tests() {
 
 void main() async {
   initializeTimeZones();
+
+  // final location = getLocation('America/New_York');
+  // var dt = TZDateTime(location, 2015, 3, 8, 0);
+  // for (var i = 0; i < 4; i++) {
+  //   print('$dt = ${dt.toUtc()}');
+  //   dt = dt.add(Duration(hours: 1));
+  // }
 
   tests();
 }

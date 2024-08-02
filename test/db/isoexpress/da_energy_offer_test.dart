@@ -150,22 +150,22 @@ Future<void> tests(String rootUrl) async {
     });
   });
 
-  group('DuckDb functionality tests', () {
-    late final Connection con;
-    setUp(() {
-      con = Connection(
-          '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb',
-          Config(accessMode: AccessMode.readOnly));
-    });
-    tearDown(() {
-      con.close();
-    });
-    test('get offers for one unit', () {
-      final term = Term.parse('1Jan23', IsoNewEngland.location);
-      final offers = getEnergyOffers(con, term, Market.rt, [72020]);
-      expect(offers.length, 120);
-    });
-  });
+  // group('DuckDb functionality tests', () {
+  //   late final Connection con;
+  //   setUp(() {
+  //     con = Connection(
+  //         '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb',
+  //         Config(accessMode: AccessMode.readOnly));
+  //   });
+  //   tearDown(() {
+  //     con.close();
+  //   });
+  //   test('get offers for one unit', () {
+  //     final term = Term.parse('1Jan23', IsoNewEngland.location);
+  //     final offers = getEnergyOffers(con, term, Market.rt, [72020]);
+  //     expect(offers.length, 120);
+  //   });
+  // });
 }
 
 void main() async {

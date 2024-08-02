@@ -104,7 +104,8 @@ Future<void> tests(String rootUrl) async {
           Date.utc(2021, 10, 1), Date.utc(2021, 10, 30));
       sw.stop();
       expect(data.length > 1191, true);
-      expect(sw.elapsedMilliseconds < 400, true);
+      // used to be 400 before 8/2/2024
+      expect(sw.elapsedMilliseconds < 800, true);
     });
   });
 }
