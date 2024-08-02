@@ -13,6 +13,8 @@ export 'src/db/isoexpress/da_energy_offer.dart';
 export 'src/db/isoexpress/fwdres_auction_results.dart';
 export 'src/db/isoexpress/monthly_asset_ncpc.dart';
 export 'src/db/isoexpress/morning_report.dart';
+export 'src/db/isoexpress/mra_capacity_bidoffer.dart';
+export 'src/db/isoexpress/mra_capacity_results.dart';
 export 'src/db/isoexpress/regulation_requirement.dart';
 export 'src/db/isoexpress/rt_system_demand_hourly.dart';
 export 'src/db/isoexpress/sevenday_capacity_forecast.dart';
