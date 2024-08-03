@@ -153,11 +153,15 @@ Future<void> updateDaEnergyOffersIsone(
       if (download) {
         await archive.downloadDay(day);
       }
-      var file = archive.getFilename(day);
-      var data = archive.processFile(file);
-      await archive.insertData(data);
+      // var file = archive.getFilename(day);
+      // var data = archive.processFile(file);
+      // await archive.insertData(data);
     }
     archive.makeGzFileForMonth(month);
+    archive.updateDuckDb(
+        months: [month],
+        pathDbFile:
+            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
   }
   await archive.dbConfig.db.close();
 }
@@ -175,9 +179,9 @@ Future<void> updateDaEnergyOffersNyiso(
     if (download) {
       await archive.downloadMonth(month);
     }
-    // var file = archive.getCsvFile(month.startDate);
-    // var data = archive.processFile(file);
-    // await archive.insertData(data);
+    var file = archive.getCsvFile(month.startDate);
+    var data = archive.processFile(file);
+    await archive.insertData(data);
     archive.makeGzFileForMonth(month);
   }
   await archive.dbConfig.db.close();
@@ -387,9 +391,8 @@ Future<void> updateRtEnergyOffersIsone(
   assert(months.first.location == IsoNewEngland.location);
   for (var month in months) {
     for (var day in month.days()) {
-      print('Working on $day');
-      var file = archive.getFilename(day);
-      if (!file.existsSync()) {
+      if (download) {
+        var file = archive.getFilename(day);
         var res = await baseDownloadUrl(archive.getUrl(day), file,
             username: dotenv.env['ISONE_WS_USER'],
             password: dotenv.env['ISONE_WS_PASSWORD'],
@@ -398,6 +401,10 @@ Future<void> updateRtEnergyOffersIsone(
       }
     }
     archive.makeGzFileForMonth(month);
+    archive.updateDuckDb(
+        months: [month],
+        pathDbFile:
+            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
   }
 }
 

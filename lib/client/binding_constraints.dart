@@ -33,21 +33,16 @@ class BindingConstraints {
   ///
   Future<Map<String, TimeSeries<num>>> getDaBindingConstraints(
       Interval interval) async {
-    var start = Date.fromTZDateTime(interval.start);
+    var start = Date.containing(interval.start);
     Date end;
     if (isBeginningOfDay(interval.end)) {
-      end = Date.fromTZDateTime(interval.end.subtract(Duration(seconds: 1)));
+      end = Date.containing(interval.end.subtract(Duration(seconds: 1)));
     } else {
-      end = Date.fromTZDateTime(interval.end);
+      end = Date.containing(interval.end);
     }
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'market/da' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}/timeseries';
-    var _response = await http.get(Uri.parse(_url));
-    var xs = json.decode(_response.body) as List;
+    var url = '$rootUrl${_isoMap[iso]!}${servicePath}market/da/start/${start.toString()}/end/${end.toString()}/timeseries';
+    var response = await http.get(Uri.parse(url));
+    var xs = json.decode(response.body) as List;
     var out = <String, TimeSeries<num>>{};
     for (var x in xs) {
       // loop over the constraints

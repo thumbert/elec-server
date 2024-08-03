@@ -3,10 +3,10 @@ import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-void rebuildIsoneEnergyOffers() {
-  getDaEnergyOfferArchive().updateDuckDb();
-  getIsoneRtEnergyOfferArchive().updateDuckDb();
-}
+// void rebuildIsoneEnergyOffers() {
+//   getDaEnergyOfferArchive().updateDuckDb();
+//   getIsoneRtEnergyOfferArchive().updateDuckDb();
+// }
 
 void rebuildMorningReport() {
   final archive = getMorningReportArchive();

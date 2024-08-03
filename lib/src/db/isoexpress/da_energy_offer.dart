@@ -239,13 +239,11 @@ class DaEnergyOfferArchive extends DailyIsoExpressReport {
   }
 
   ///
-  int updateDuckDb([List<Month>? months]) {
-    final home = Platform.environment['HOME'];
-    final con =
-        Connection('$home/Downloads/Archive/IsoExpress/energy_offers.duckdb');
+  int updateDuckDb({required List<Month> months, required String pathDbFile}) {
+    final con = Connection(pathDbFile);
     con.execute('''
-CREATE TABLE IF NOT EXISTS da_energy_offers (
-    HourBeginning TIMESTAMP_S NOT NULL,
+CREATE TABLE IF NOT EXISTS da_offers (
+    HourBeginning TIMESTAMPTZ NOT NULL,
     MaskedParticipantId UINTEGER NOT NULL,
     MaskedAssetId UINTEGER NOT NULL,
     MustTakeEnergy FLOAT NOT NULL,
@@ -264,16 +262,22 @@ CREATE TABLE IF NOT EXISTS da_energy_offers (
     UnitStatus ENUM('ECONOMIC', 'UNAVAILABLE', 'MUST_RUN') NOT NULL,
 );  
   ''');
-    if (months != null) {
-      /// TODO!
-    } else {
+    for (var month in months) {
+      // remove the data if it's already there
       con.execute('''
-INSERT INTO da_energy_offers
+DELETE FROM da_offers 
+WHERE HourBeginning >= '${month.startDate}'
+AND HourBeginning < '${month.next.startDate}';
+      ''');
+      // reinsert the data
+      con.execute('''
+INSERT INTO da_offers
 FROM read_csv(
-    '$dir/../month/da_energy_offers_*.csv.gz', 
+    '$dir/../month/da_energy_offers_${month.toIso8601String()}.csv.gz', 
     header = true, 
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 ''');
+      log.info('   Inserted month ${month.toIso8601String()} into DuckDb');
     }
     con.close();
 

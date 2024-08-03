@@ -7,10 +7,10 @@ import 'package:elec_server/src/db/mis/sd_arrawdsum.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 Future<void> tests(String rootUrl) async {
   var db = DbProd.mis;
-  // var rootUrl = dotenv.env['SHELF_ROOT_URL'];
   var archive = SdArrAwdSumArchive();
   var api = SdArrAwdSum(db);
 
@@ -38,6 +38,7 @@ Future<void> tests(String rootUrl) async {
     setUp(() async => await db.open());
     tearDown(() async => await db.close());
     test('get monthly arr dollars for one month', () async {
+      print(dotenv.env['ROOT_URL']);
       var data = await api.arrDollars('000000001', '2012-06', '2012-06', 0);
       expect(data.length, 4);
       var x = data
@@ -60,6 +61,6 @@ Future<void> tests(String rootUrl) async {
 void main() async {
   initializeTimeZones();
   DbProd();
-  // dotenv.load('.env/prod.env');
-  await tests('http://127.0.0.1:8080');
+  dotenv.load('.env/prod.env');
+  await tests(dotenv.env['ROOT_URL']!);
 }
