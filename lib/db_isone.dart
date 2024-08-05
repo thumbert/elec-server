@@ -16,6 +16,7 @@ export 'src/db/isoexpress/morning_report.dart';
 export 'src/db/isoexpress/mra_capacity_bidoffer.dart';
 export 'src/db/isoexpress/mra_capacity_results.dart';
 export 'src/db/isoexpress/regulation_requirement.dart';
+export 'src/db/isoexpress/rt_energy_offer.dart';
 export 'src/db/isoexpress/rt_system_demand_hourly.dart';
 export 'src/db/isoexpress/sevenday_capacity_forecast.dart';
 export 'src/db/isoexpress/wholesale_load_cost_report.dart';
