@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
   
 
+## Release 2024-08-xx
+- Created folder notes/sql/ to keep examples of queries, etc.
+
 ## Release 2024-08-03
 - Cleanup ISONE DA/RT energy offers DuckDB process
 
