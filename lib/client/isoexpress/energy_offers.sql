@@ -62,3 +62,12 @@ FROM da_offers
 WHERE UnitStatus <> 'UNAVAILABLE'
 AND HourBeginning in ('2024-02-01 00:00:00.000-05:00', '2024-03-01 00:00:00.000-05:00')
 ORDER BY HourBeginning, Price;
+
+
+--- Get the units & participants for one month
+SELECT DISTINCT MaskedAssetId, MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMON,
+FROM da_offers
+WHERE HourBeginning >= '2024-01-01'
+AND HourBeginning < '2024-02-01';
+
+

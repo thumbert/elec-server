@@ -4,6 +4,7 @@
 - Clean up all the lints, warnings
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
+  
 
 ## Release 2024-08-03
 - Cleanup ISONE DA/RT energy offers DuckDB process
