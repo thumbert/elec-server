@@ -1,21 +1,17 @@
 library test.db.isoexpress.da_energy_offers_test;
 
-import 'dart:io';
-
-import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/elec.dart';
-import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
-import 'package:elec_server/client/isoexpress/energy_offer.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
+import 'package:dotenv/dotenv.dart' as dotenv;
 
-import '../utilities/customer_counts_test.dart';
 
 Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
@@ -34,14 +30,6 @@ Future<void> tests(String rootUrl) async {
       var res = archive.processFile(file);
       expect(res.first['hours'].length, 25);
     });
-    // test('aggregate days', () {
-    //   var out = archive.aggregateDays([Date.utc(2023, 5, 31)]);
-    //   expect(out.length, 21813);
-    //   expect(out.first.hour.start,
-    //       TZDateTime(IsoNewEngland.location, 2023, 5, 31));
-    //   expect(out.first.toCsv(),
-    //       '2023-05-31T00:00:00.000-0400,20720,40320,0.0,93.5,93.5,7782.75,7782.75,7782.75,1648.49,0,49.07,93.5,0.0,87.0,ECONOMIC');
-    // });
   });
 
   group('ISONE DA energy offers API tests: ', () {
@@ -148,6 +136,26 @@ Future<void> tests(String rootUrl) async {
       var out = eo.averageOfferPrice(pqOffers);
       expect(out.isEmpty, true);
     });
+
+    test('get offers from DuckDb, make timeseries', () async {
+      final term = Term.parse('1Apr24-2Apr24', IsoNewEngland.location);
+      var offers = await eo.getEnergyOffers(
+          iso: Iso.newEngland,
+          term: term,
+          maskedAssetIds: [77459],
+          rootUrl: dotenv.env['RUST_SERVER']!);
+      expect(offers.length, 192); // 2 days * 4 segments * 24 hours = 192
+
+      var xts = eo.makeTimeSeriesFromOffers(offers, Iso.newEngland);
+      expect(xts.length, 4); // 4 segments
+      var ts0 = xts.first;
+      expect(
+          ts0.first,
+          IntervalTuple<({num quantity, num price})>(
+              Hour.beginning(TZDateTime(IsoNewEngland.location, 2024, 4)),
+              (price: 67.04, quantity: 404.0)));
+      expect(ts0.length, 24); // on 2Apr24 the unit became unavailable
+    });
   });
 
   // group('DuckDb functionality tests', () {
@@ -170,11 +178,6 @@ Future<void> tests(String rootUrl) async {
 
 void main() async {
   initializeTimeZones();
-  //await DaEnergyOfferArchive().setupDb();
-
-  print(
-      '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
-
-  // dotenv.load('.env/prod.env');
+  dotenv.load('.env/prod.env');
   await tests('http://127.0.0.1:8080');
 }

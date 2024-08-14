@@ -1,128 +1,15 @@
 library client.isoexpress.energy_offer;
 
 import 'package:date/date.dart';
-import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/elec.dart';
-import 'package:elec/risk_system.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:timezone/timezone.dart';
-
-// ignore: unused_element
-final _queries = '''
-
-SELECT MIN(HourBeginning) FROM rt_energy_offers;
-
--- one asset for one hour using America/New_York time stamp
-SELECT * FROM rt_energy_offers
-WHERE MaskedAssetId = 72020
-AND HourBeginning = strptime('2023-01-01T00:00:00.000-05:00', '%Y-%m-%dT%H:%M:%S.000%z');
-
-SELECT * FROM rt_energy_offers
-WHERE MaskedAssetId = 72020
-AND HourBeginning >= epoch('2023-01-01T00:00:00.000-05:00'::TIMESTAMPTZ)
-AND HourBeginning < epoch_ms('2023-01-02T00:00:00.000-05:00'::TIMESTAMPTZ);
-
--- Because the data in DucDb is stored in UTC, it is best to use UTC timestamp
-SELECT * FROM rt_energy_offers
-WHERE MaskedAssetId = 72020
-AND HourBeginning >= strptime('2023-01-01T05:00:00.000', '%Y-%m-%dT%H:%M:%S.000')
-AND HourBeginning < strptime('2023-01-02T05:00:00.000', '%Y-%m-%dT%H:%M:%S.000');
-
--- one asset for one day
-SELECT * FROM rt_energy_offers
-WHERE MaskedAssetId = 72020
-AND HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
-AND HourBeginning < epoch_ms(1672531200000 + 29*3600000);
-
--- , strftime(HourBeginning, '%Y-%m-%d') As Date
-
--- Get the distinct assetIds and unit status
-SELECT DISTINCT MaskedAssetId, UnitStatus  
-FROM da_energy_offers
-WHERE HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
-AND HourBeginning < epoch_ms(1672531200000 + 29*3600000)
-ORDER BY MaskedAssetId;
-
---- Get the units unavailable in RT
-SELECT DISTINCT MaskedAssetId, UnitStatus  
-FROM da_energy_offers
-WHERE HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
-AND HourBeginning < epoch_ms(1672531200000 + 29*3600000)
-AND UnitStatus = 'UNAVAILABLE'
-ORDER BY MaskedAssetId;
-
-
-
---- Get the units that changed their status on this day  
-SELECT DISTINCT da.MaskedAssetId, da.UnitStatus as DaStatus, rt.UnitStatus AS RtStatus
-FROM rt_energy_offers AS rt
-INNER JOIN da_energy_offers AS da
-ON da.MaskedAssetId = rt.MaskedAssetId
-WHERE da.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
-AND da.HourBeginning < epoch_ms(1672531200000 + 29*3600000)
-AND rt.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
-AND rt.HourBeginning < epoch_ms(1672531200000 + 29*3600000)
-AND DaStatus != RtStatus;
-
-
---- Get the units that became unavailable in RT when they were available in DA  
---- between 1/1/2023 and 2/1/2023
-SELECT DISTINCT 
-  strftime(da.HourBeginning, '%Y-%m-%d') As Date, 
-  da.MaskedAssetId, 
-  da.UnitStatus as DaStatus, 
-  rt.UnitStatus AS RtStatus
-FROM rt_energy_offers AS rt
-INNER JOIN da_energy_offers AS da
-ON da.MaskedAssetId = rt.MaskedAssetId
-WHERE da.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
-AND da.HourBeginning < epoch_ms(1675227600000 + 5*3600000)
-AND rt.HourBeginning >= epoch_ms(1672531200000 + 5*3600000)
-AND rt.HourBeginning < epoch_ms(1675227600000 + 5*3600000)
-AND DaStatus != RtStatus
-AND RtStatus = 'UNAVAILABLE'
-ORDER BY Date, da.MaskedAssetId;
-
-
-
-
-
-
-
-
--- 1/1/2023 00:00:00 UTC
-select epoch_ms(1672531200000);  
-
-SET TimeZone = 'UTC'
-
-SELECT * FROM rt_energy_offers
-WHERE MaskedAssetId = 72020
-AND HourBeginning >= strptime('2023-06-01T00:00:00.000-04:00', '%Y-%m-%dT%H:%M:%S.000%z')
-AND HourBeginning < strptime('2023-06-02T00:00:00.000-04:00', '%Y-%m-%dT%H:%M:%S.000%z')
-LIMIT 1;
-
-''';
-
-
-// /// Get historical offers
-// List<EnergyOfferSegment> getEnergyOffers(
-//     Connection con, Term term, Market market, List<int> maskedAssetIds) {
-//   final query = '''
-// SELECT * FROM ${market.toString().toLowerCase()}_energy_offers
-// WHERE MaskedAssetId = 72020
-// AND HourBeginning >= epoch_ms(${term.interval.start.millisecondsSinceEpoch})
-// AND HourBeginning < epoch_ms(${term.interval.end.millisecondsSinceEpoch});
-// ''';
-//   var res = con.fetch(query);
-//   return EnergyOfferSegment.fromDuckDb(res);
-// }
-
-
 
 getNewUnits() {}
 
 /// Find the units that tripped (became unavailable in RT when they were available in DA)
 getUnitsUnavailableInRt() {}
+
 
 enum UnitStatus {
   economic,
@@ -343,5 +230,3 @@ class EnergyOfferSegment {
     };
   }
 }
-
-

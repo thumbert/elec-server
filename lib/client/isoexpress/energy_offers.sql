@@ -14,7 +14,7 @@ FROM read_csv(
 
 --- Which months are in the table 
 SELECT strftime("HourBeginning", '%Y-%m') AS YEARMON, COUNT(*) 
-FROM rt_offers
+FROM da_offers
 GROUP BY YEARMON
 ORDER BY YEARMON;
 
@@ -66,8 +66,67 @@ ORDER BY HourBeginning, Price;
 
 --- Get the units & participants for one month
 SELECT DISTINCT MaskedAssetId, MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMON,
-FROM da_offers
+FROM da_offers 
 WHERE HourBeginning >= '2024-01-01'
 AND HourBeginning < '2024-02-01';
+
+
+--- Find the assets that changed hands between two months (Jan24 and Feb24).  
+--- It does not show any 'new' assets!
+SELECT  a.MaskedAssetId, a.MaskedParticipantId AS Participant1,  a.YEARMON AS Month1, 
+    b.MaskedParticipantId AS Participant2, b.YEARMON AS Month2
+FROM (
+        SELECT DISTINCT MaskedAssetId, MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMON,
+        FROM da_offers 
+        WHERE HourBeginning >= '2024-03-01'
+        AND HourBeginning < '2024-04-01'
+    ) as a,
+    (
+        SELECT DISTINCT MaskedAssetId, MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMON,
+        FROM da_offers 
+        WHERE HourBeginning >= '2024-04-01'
+        AND HourBeginning < '2024-05-01' 
+    ) as b 
+WHERE a.MaskedAssetId = b.MaskedAssetId
+AND a.MaskedParticipantId != b.MaskedParticipantId;
+
+
+--- Find the assets that have changed ownership in a period (here the 4 months Jan24-Apr24)
+--- Note that assets sometimes change hands in the middle of the month!
+SELECT * FROM (
+    SELECT COUNT(*) AS Total, MaskedAssetId FROM (
+        SELECT DISTINCT MaskedAssetId, MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMON,
+        FROM da_offers 
+        WHERE HourBeginning >= '2024-01-01'
+        AND HourBeginning < '2024-05-01'
+        ORDER BY MaskedAssetId, YEARMON
+    )
+    GROUP BY MaskedAssetId
+)
+WHERE Total != 4;
+
+
+--- Find the ownership of a given asset by month
+SELECT DISTINCT MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMON,
+FROM da_offers 
+WHERE HourBeginning >= '2022-01-01'
+AND HourBeginning < '2024-05-01'
+AND MaskedAssetId = 75431
+ORDER BY YEARMON;
+
+SELECT * FROM da_offers
+WHERE MaskedAssetId = 77459
+AND HourBeginning >= '2024-01-01'
+AND HourBeginning < '2024-05-01'
+AND UnitStatus = 'UNAVAILABLE'
+LIMIT 5;
+
+--- Get all the units for a market participant
+SELECT DISTINCT MaskedAssetId, strftime(HourBeginning, '%Y-%m') as YEARMON,
+FROM da_offers 
+WHERE HourBeginning >= '2022-01-01'
+AND HourBeginning < '2024-05-01'
+AND MaskedParticipantId = 962908
+ORDER BY YEARMON, MaskedAssetId;
 
 

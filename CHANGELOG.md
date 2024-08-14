@@ -6,8 +6,10 @@
   zip file for a year worth of data.  
   
 
-## Release 2024-08-xx
-- Created folder notes/sql/ to keep examples of queries, etc.
+## Release 2024-08-14
+- Create folder notes/sql/ to keep examples of queries, etc.  In particular, made 
+  an example on how to extract MIS versions from a table in notes/sql/mis_version.sql
+- Add functionality to lib/client/da_energy_offer.dart to use DuckDB output.  
 
 ## Release 2024-08-03
 - Cleanup ISONE DA/RT energy offers DuckDB process

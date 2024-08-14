@@ -2,12 +2,87 @@ library elec_server.da_energy_offer.v1;
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:elec/elec.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import 'package:timeseries/timeseries.dart';
 
+/// Get the data from the server that uses DuckDB.
+///
+/// Each element of returned [offers] is in this form:
+/// ```dart
+/// {
+///   'masked_asset_id': 75431,
+///   'unit_status': 'Economic',
+///   'timestamp_s': 1672549200,
+///   'segment': 0,
+///   'quantity': 21.3,
+///   'price': -120.0,
+/// }
+/// ```
+Future<List<Map<String, dynamic>>> getEnergyOffers(
+    {required Iso iso,
+    required Term term,
+    required List<int> maskedAssetIds,
+    required String rootUrl}) async {
+  final url = [
+    '$rootUrl/${iso.name.toLowerCase()}',
+    '/energy_offers/da/start/${term.startDate}/end/${term.endDate}',
+    if (maskedAssetIds.isNotEmpty)
+      '?masked_asset_ids=${maskedAssetIds.join(',')}'
+  ].join();
+  var aux = await http.get(Uri.parse(url));
+  var offers = (json.decode(aux.body) as List).cast<Map<String, dynamic>>();
+  return offers;
+}
+
+/// Given the offers from ONE unit, create a list of timeseries associated
+/// with each offer segment.  So, first element of the list is the timeseries
+/// from segment 0 offers, etc.
+///
+/// Each element of [offers] is in this form:
+/// ```dart
+/// {
+///   'masked_asset_id': 75431,
+///   'unit_status': 'Economic',
+///   'timestamp_s': 1672549200,
+///   'segment': 0,
+///   'quantity': 21.3,
+///   'price': -120.0,
+/// }
+/// ```
+/// Skip over elements with 'unit_status' == 'Unavailable'.
+///
+///
+List<TimeSeries<({num quantity, num price})>> makeTimeSeriesFromOffers(
+    List<Map<String, dynamic>> offers, Iso iso) {
+  var out = <TimeSeries<({num quantity, num price})>>[];
+  if (iso == Iso.newEngland) {
+    var groups = groupBy(offers, (e) => e['segment']);
+    for (var segment in groups.keys) {
+      var one = TimeSeries<({num quantity, num price})>();
+      for (var e in groups[segment]!) {
+        if (e['unit_status'] == 'Unavailable') continue;
+        int millis = e['timestamp_s'] * 1000;
+        var start = TZDateTime.fromMillisecondsSinceEpoch(
+            IsoNewEngland.location, millis);
+        one.add(IntervalTuple(Hour.beginning(start),
+            (quantity: e['quantity'], price: e['price'])));
+      }
+      out.add(one);
+    }
+  } else {
+    throw ArgumentError('$iso is not supported yet');
+  }
+  return out;
+}
+
+
+
+
+@Deprecated('Please use the functionality built around DuckDb')
 class DaEnergyOffers {
   static final location = getLocation('America/New_York');
   final Iso iso;
