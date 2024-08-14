@@ -56,20 +56,20 @@ Future<List<Map<String, dynamic>>> getEnergyOffers(
 /// Skip over elements with 'unit_status' == 'Unavailable'.
 ///
 ///
-List<TimeSeries<({num quantity, num price})>> makeTimeSeriesFromOffers(
+List<TimeSeries<Map<String, dynamic>>> makeTimeSeriesFromOffers(
     List<Map<String, dynamic>> offers, Iso iso) {
-  var out = <TimeSeries<({num quantity, num price})>>[];
+  var out = <TimeSeries<Map<String, dynamic>>>[];
   if (iso == Iso.newEngland) {
     var groups = groupBy(offers, (e) => e['segment']);
     for (var segment in groups.keys) {
-      var one = TimeSeries<({num quantity, num price})>();
+      var one = TimeSeries<Map<String, dynamic>>();
       for (var e in groups[segment]!) {
         if (e['unit_status'] == 'Unavailable') continue;
         int millis = e['timestamp_s'] * 1000;
         var start = TZDateTime.fromMillisecondsSinceEpoch(
             IsoNewEngland.location, millis);
         one.add(IntervalTuple(Hour.beginning(start),
-            (quantity: e['quantity'], price: e['price'])));
+            {'quantity': e['quantity'], 'price': e['price']}));
       }
       out.add(one);
     }
@@ -78,9 +78,6 @@ List<TimeSeries<({num quantity, num price})>> makeTimeSeriesFromOffers(
   }
   return out;
 }
-
-
-
 
 @Deprecated('Please use the functionality built around DuckDb')
 class DaEnergyOffers {
@@ -252,6 +249,7 @@ List<TimeSeries<Map<String, num>>> priceQuantityOffers(
 TimeSeries<Map<String, num>> averageOfferPrice(
     List<TimeSeries<Map<String, num>>> pqOffers) {
   if (pqOffers.isEmpty) return TimeSeries();
+
   /// all pqOffers TimeSeries don't always have the same length need to merge
   var out = pqOffers.reduce((x, y) {
     var z = x.merge(y, joinType: JoinType.Outer, f: (a, dynamic b) {

@@ -12,7 +12,6 @@ import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-
 Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   var archive = DaEnergyOfferArchive();
@@ -149,11 +148,10 @@ Future<void> tests(String rootUrl) async {
       var xts = eo.makeTimeSeriesFromOffers(offers, Iso.newEngland);
       expect(xts.length, 4); // 4 segments
       var ts0 = xts.first;
-      expect(
-          ts0.first,
-          IntervalTuple<({num quantity, num price})>(
-              Hour.beginning(TZDateTime(IsoNewEngland.location, 2024, 4)),
-              (price: 67.04, quantity: 404.0)));
+      expect(ts0.first.interval,
+          Hour.beginning(TZDateTime(IsoNewEngland.location, 2024, 4)));
+      expect(ts0.first.value, {'quantity': 404.0, 'price': 67.04});
+
       expect(ts0.length, 24); // on 2Apr24 the unit became unavailable
     });
   });
