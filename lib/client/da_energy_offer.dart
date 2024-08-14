@@ -56,13 +56,13 @@ Future<List<Map<String, dynamic>>> getEnergyOffers(
 /// Skip over elements with 'unit_status' == 'Unavailable'.
 ///
 ///
-List<TimeSeries<Map<String, dynamic>>> makeTimeSeriesFromOffers(
+List<TimeSeries<Map<String, num>>> makeTimeSeriesFromOffers(
     List<Map<String, dynamic>> offers, Iso iso) {
-  var out = <TimeSeries<Map<String, dynamic>>>[];
+  var out = <TimeSeries<Map<String, num>>>[];
   if (iso == Iso.newEngland) {
     var groups = groupBy(offers, (e) => e['segment']);
     for (var segment in groups.keys) {
-      var one = TimeSeries<Map<String, dynamic>>();
+      var one = TimeSeries<Map<String, num>>();
       for (var e in groups[segment]!) {
         if (e['unit_status'] == 'Unavailable') continue;
         int millis = e['timestamp_s'] * 1000;
