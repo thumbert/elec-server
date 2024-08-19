@@ -290,7 +290,7 @@ Future<void> recreateTccClearedPricesNyiso() async {
 }
 
 Future<void> recreateDaEnergyOffersNyiso() async {
-  var archive = NyisoEnergyOfferArchive.NyisoEnergyOfferArchive();
+  var archive = NyisoEnergyOfferArchive();
   await archive.setupDb();
   await archive.dbConfig.db.open();
 

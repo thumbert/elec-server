@@ -1,9 +1,7 @@
 library test.db.nyiso.da_energy_offer_test;
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -19,7 +17,7 @@ import 'package:path/path.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
-  var archive = NyisoEnergyOfferArchive.NyisoEnergyOfferArchive();
+  var archive = NyisoEnergyOfferArchive();
   group('NYISO energy offer db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
