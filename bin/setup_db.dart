@@ -224,7 +224,7 @@ Future<void> insertDaEnergyOffers({List<Date>? days}) async {
 }
 
 Future<void> insertDaEnergyOffersNyiso() async {
-  var archive = NyisoDaEnergyOfferArchive();
+  var archive = NyisoEnergyOfferArchive.NyisoEnergyOfferArchive();
   await archive.setupDb();
   await archive.dbConfig.db.open();
   var months = Month.utc(2020, 2).upTo(Month.utc(2020, 3));

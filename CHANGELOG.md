@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
   
+## Release 2024-08-19
+- Rename NyisoDaEnergyOfferArchive to NyisoEnergyOfferArchive as it contains both 
+  the DAM and the HAM markets!
 
 ## Release 2024-08-14
 - Create folder notes/sql/ to keep examples of queries, etc.  In particular, made 

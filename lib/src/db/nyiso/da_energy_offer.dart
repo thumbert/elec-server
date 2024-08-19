@@ -1,8 +1,8 @@
-library db.nyiso.da_energy_offer;
+library db.nyiso.energy_offer;
 
 /// All data from ...
-/// http://mis.nyiso.com/public/P-27list.htm
-///
+///   http://mis.nyiso.com/public/P-27list.htm
+/// contains both the DAM and the HAM market (RT)
 
 import 'dart:io';
 import 'dart:async';
@@ -17,18 +17,18 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:tuple/tuple.dart';
 
-class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
-  NyisoDaEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
+class NyisoEnergyOfferArchive extends DailyNysioCsvReport {
+  NyisoEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_energy_offer');
     this.dbConfig = dbConfig;
-    dir ??= '${super.dir}DaEnergyOffer/Raw/';
+    dir ??= '${super.dir}EnergyOffer/Raw/';
     this.dir = dir;
-    reportName = 'NYISO DAM Energy Offers';
+    reportName = 'NYISO DAM/HAM Energy Offers';
   }
 
   mongo.Db get db => dbConfig.db;
-  static final log = Logger('DA Energy Offers');
+  static final log = Logger('NYISO Energy Offers');
 
   /// for DuckDb
   static final columns = <String, String>{
@@ -391,7 +391,7 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
       sb.writeln(converter.convert([cleanRow(row).values.toList()]));
     }
     final fileOut =
-        File('$dir../month/da_energy_offers_${month.toIso8601String()}.csv');
+        File('$dir../month/energy_offers_${month.toIso8601String()}.csv');
     fileOut.writeAsStringSync(sb.toString());
 
     // gzip it!
@@ -406,7 +406,8 @@ class NyisoDaEnergyOfferArchive extends DailyNysioCsvReport {
   }
 
   ///
-  int updateDuckDb({required List<Month> months, required Connection con}) {
+  int updateDuckDb({required List<Month> months, required String pathDbFile}) {
+    final con = Connection(pathDbFile);
     con.execute(r'''
 CREATE TABLE IF NOT EXISTS da_offers (
     "Masked Gen ID" INTEGER NOT NULL,
@@ -472,20 +473,20 @@ CREATE TABLE IF NOT EXISTS da_offers (
       log.info('Inserting month ${month.toIso8601String()}...');
       // remove the data if it's already there
       con.execute('''
-DELETE FROM da_offers 
+DELETE FROM offers 
 WHERE "Date Time" >= '${month.start.toIso8601String()}'
 AND "Date Time" < '${month.end.toIso8601String()}';
       ''');
       // reinsert the data
       con.execute('''
-INSERT INTO da_offers
+INSERT INTO offers
 FROM read_csv(
-    '$dir../month/da_energy_offers_${month.toIso8601String()}.csv.gz', 
+    '$dir../month/energy_offers_${month.toIso8601String()}.csv.gz', 
     header = true, 
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 ''');
     }
-    // con.close();
+    con.close();
 
     return 0;
   }

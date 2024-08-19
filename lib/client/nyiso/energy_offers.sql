@@ -195,59 +195,6 @@ ORDER BY "Date Time", "Idx";
 
 
 
-DROP TABLE ts;
-CREATE TABLE ts (timestamp TIMESTAMPTZ);
-INSERT INTO ts VALUES ('2024-03-01T00:00:00.000-05:00');
-INSERT INTO ts VALUES ('2024-03-01T00:00:00.000Z');
-SELECT timestamp, epoch_ms(timestamp) FROM ts;
-┌──────────────────────────┬───────────────────────┐
-│        timestamp         │ epoch_ms("timestamp") │
-│ timestamp with time zone │         int64         │
-├──────────────────────────┼───────────────────────┤
-│ 2024-03-01 00:00:00-05   │         1709269200000 │
-│ 2024-02-29 19:00:00-05   │         1709251200000 │
-└──────────────────────────┴───────────────────────┘
-SELECT * FROM (
-    SELECT timestamp, epoch_ms(timestamp)
-    FROM ts
-)
-WHERE timestamp == '2024-03-01T00:00:00.000-05:00';
-
-
-
--- If you do the same thing with a TIMESTAMP column
-DROP TABLE ts2;
-CREATE TABLE ts2 (timestamp TIMESTAMP);
-INSERT INTO ts2 VALUES ('2024-03-01T00:00:00.000-05:00');
-INSERT INTO ts2 VALUES ('2024-03-01T00:00:00.000Z');
-SELECT timestamp, epoch_ms(timestamp) FROM ts2;
-┌─────────────────────┬───────────────────────┐
-│      timestamp      │ epoch_ms("timestamp") │
-│      timestamp      │         int64         │
-├─────────────────────┼───────────────────────┤
-│ 2024-03-01 05:00:00 │         1709269200000 │
-│ 2024-03-01 00:00:00 │         1709251200000 │
-└─────────────────────┴───────────────────────┘
-SELECT * FROM (
-    SELECT timestamp, epoch_ms(timestamp)
-    FROM ts2
-)
-WHERE timestamp == '2024-03-01T00:00:00.000-05:00';
--- correctly selects the hour zero in America/New_York
-┌─────────────────────┬───────────────────────┐
-│      timestamp      │ epoch_ms("timestamp") │
-│      timestamp      │         int64         │
-├─────────────────────┼───────────────────────┤
-│ 2024-03-01 05:00:00 │         1709269200000 │
-└─────────────────────┴───────────────────────┘
-
-
-
-
-
-
-
-
 
 
 

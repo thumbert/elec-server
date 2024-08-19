@@ -4,7 +4,6 @@ import 'package:elec/elec.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
-import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';

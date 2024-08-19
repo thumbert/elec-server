@@ -135,7 +135,6 @@ MraCapacityResultsArchive getIsoneMraResultsArchive() {
   return MraCapacityResultsArchive(dir: dir);
 }
 
-
 RtEnergyOfferArchive getIsoneRtEnergyOfferArchive() {
   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
       '/IsoExpress/PricingReports/RtEnergyOffer';
@@ -163,8 +162,6 @@ SevenDayCapacityForecastArchive getIsoneSevenDayCapacityForecastArchive() {
   return SevenDayCapacityForecastArchive(dir: dir);
 }
 
-
-
 MorningReportArchive getMorningReportArchive() {
   var dir =
       '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/MorningReport';
@@ -188,15 +185,15 @@ NormalTemperatureArchive getNormalTemperatureArchive() {
   return archive;
 }
 
-NyisoDaEnergyOfferArchive getNyisoDaEnergyOfferArchive() {
+NyisoEnergyOfferArchive getNyisoEnergyOfferArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_energy_offer');
   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
-      '/Nyiso/DaEnergyOffer/Raw/';
+      '/Nyiso/EnergyOffer/Raw/';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
-  return NyisoDaEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
+  return NyisoEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
 }
 
 PolygraphArchive getPolygraphArchive() {
@@ -222,4 +219,3 @@ RetailSuppliersOffersArchive getRetailSuppliersOffersArchive() {
   }
   return RetailSuppliersOffersArchive(dbConfig: dbConfig, dir: dir);
 }
-

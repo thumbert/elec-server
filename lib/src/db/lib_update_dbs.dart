@@ -166,12 +166,12 @@ Future<void> updateDaEnergyOffersIsone(
   await archive.dbConfig.db.close();
 }
 
-Future<void> updateDaEnergyOffersNyiso(
+Future<void> updateEnergyOffersNyiso(
     {required List<Month> months,
     bool setUp = false,
     bool download = false}) async {
   assert(months.first.location == IsoNewEngland.location);
-  var archive = prod.getNyisoDaEnergyOfferArchive();
+  var archive = prod.getNyisoEnergyOfferArchive();
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
   for (var month in months) {
@@ -182,7 +182,14 @@ Future<void> updateDaEnergyOffersNyiso(
     var file = archive.getCsvFile(month.startDate);
     var data = archive.processFile(file);
     await archive.insertData(data);
-    archive.makeGzFileForMonth(month);
+    final res = archive.makeGzFileForMonth(month);
+    archive.updateDuckDb(
+        months: [month],
+        pathDbFile:
+            '${Platform.environment['HOME']}/Downloads/Archive/Nyiso/nyiso_energy_offers.duckdb');
+    if (res != 0) {
+      throw StateError("Failed to update DuckDB for month $month");
+    }
   }
   await archive.dbConfig.db.close();
 }

@@ -19,7 +19,7 @@ import 'package:path/path.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
-  var archive = NyisoDaEnergyOfferArchive();
+  var archive = NyisoEnergyOfferArchive.NyisoEnergyOfferArchive();
   group('NYISO energy offer db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());

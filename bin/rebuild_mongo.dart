@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
@@ -43,9 +42,10 @@ import 'package:elec_server/src/db/other/isone_ptids.dart' as isone_ptid;
 import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
-import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_ng.dart' as id_ng;
-import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart' as id_isone;
-
+import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_ng.dart'
+    as id_ng;
+import 'package:elec_server/src/db/marks/curves/curve_id/curve_id_isone.dart'
+    as id_isone;
 
 Future<void> recreateCmeMarks() async {
   var archive = CmeSettlementsEnergyArchive();
@@ -64,17 +64,17 @@ Future<void> recreateCmeMarks() async {
 }
 
 Future<void> recreateCmpLoadArchive({bool setUp = false}) async {
-  var years = IntegerRange(2019, DateTime.now().year+1);
+  var years = IntegerRange(2019, DateTime.now().year + 1);
   var archive = getCmpLoadArchive();
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
   for (var year in years) {
     for (var customerClass in CmpCustomerClass.values) {
-      var file = archive.getFile(year: year, customerClass: customerClass,
-          settlementType: 'final');
+      var file = archive.getFile(
+          year: year, customerClass: customerClass, settlementType: 'final');
       if (file.existsSync()) {
-        var data = archive.processFile(year: year, customerClass: customerClass,
-            settlementType: 'final');
+        var data = archive.processFile(
+            year: year, customerClass: customerClass, settlementType: 'final');
         print(data);
         await archive.insertData(data);
       }
@@ -82,8 +82,6 @@ Future<void> recreateCmpLoadArchive({bool setUp = false}) async {
   }
   await archive.dbConfig.db.close();
 }
-
-
 
 Future<void> recreateDaBindingConstraintsIsone() async {
   var archive = DaBindingConstraintsReportArchive();
@@ -184,9 +182,10 @@ Future<void> recreateIsoneHistoricalBtmSolar() async {
   await archive.setupDb();
   var files = Directory(archive.dir).listSync().whereType<File>().toList();
   files.sort((a, b) => a.path.compareTo(b.path));
+
   /// import only the latest file
   var file = files.last;
-  var yyyymmdd = basename(file.path).substring(12,22);
+  var yyyymmdd = basename(file.path).substring(12, 22);
   var asOfDate = Date.fromIsoString(yyyymmdd);
   await updateIsoneHistoricalBtmSolarArchive(asOfDate, setUp: true);
 }
@@ -291,7 +290,7 @@ Future<void> recreateTccClearedPricesNyiso() async {
 }
 
 Future<void> recreateDaEnergyOffersNyiso() async {
-  var archive = NyisoDaEnergyOfferArchive();
+  var archive = NyisoEnergyOfferArchive.NyisoEnergyOfferArchive();
   await archive.setupDb();
   await archive.dbConfig.db.open();
 
@@ -302,7 +301,6 @@ Future<void> recreateDaEnergyOffersNyiso() async {
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> recreateIesoRtGenerationArchive() async {
   var archive = getIesoRtGenerationArchive();
@@ -329,7 +327,6 @@ Future<void> recreateIesoRtZonalDemandArchive() async {
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> recreateRtLmpHourlyNyiso() async {
   var archive = NyisoRtLmpHourlyArchive();
@@ -527,7 +524,9 @@ Future<void> recreateWholesaleLoadCostReportIsone() async {
   var archive = WholesaleLoadCostReportArchive();
   await archive.setupDb();
   await archive.dbConfig.db.open();
-  var files = Directory(archive.dir).listSync().whereType<File>()
+  var files = Directory(archive.dir)
+      .listSync()
+      .whereType<File>()
       .where((e) => e.path.endsWith('.json'))
       .toList();
   files.sort((a, b) => a.path.compareTo(b.path));
@@ -537,8 +536,6 @@ Future<void> recreateWholesaleLoadCostReportIsone() async {
   }
   await archive.dbConfig.db.close();
 }
-
-
 
 /// If you have a fresh MongoDB install, recreate the db from the
 /// backup files in the archive folder.

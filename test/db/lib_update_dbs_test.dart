@@ -83,7 +83,7 @@ Future<void> tests() async {
 
   ///------------------------------------------------------------------
   /// NYISO
-  // await updateDaEnergyOffersNyiso(months: months, download: true);
+  await updateEnergyOffersNyiso(months: months, download: true);
 
   ///------------------------------------------------------------------
   /// Weather
