@@ -111,7 +111,7 @@ SELECT DISTINCT MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMO
 FROM da_offers 
 WHERE HourBeginning >= '2022-01-01'
 AND HourBeginning < '2024-05-01'
-AND MaskedAssetId = 75431
+AND MaskedAssetId = 57986
 ORDER BY YEARMON;
 
 SELECT * FROM da_offers
@@ -126,7 +126,7 @@ SELECT DISTINCT MaskedAssetId, strftime(HourBeginning, '%Y-%m') as YEARMON,
 FROM da_offers 
 WHERE HourBeginning >= '2022-01-01'
 AND HourBeginning < '2024-05-01'
-AND MaskedParticipantId = 962908
+AND MaskedParticipantId = 953967
 ORDER BY YEARMON, MaskedAssetId;
 
 

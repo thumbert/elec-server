@@ -156,10 +156,9 @@ WITH unpivot_alias AS (
             ROUND("Dispatch MW10" - "Dispatch MW9", 1) AS MW10, 
             ROUND("Dispatch MW11" - "Dispatch MW10", 1) AS MW11, 
             ROUND("Dispatch MW12" - "Dispatch MW11", 1) AS MW12,  
-        FROM da_offers
-        WHERE "Date Time" >= '2024-03-01 00:00:00-05:00'
-        AND "Date Time" < '2024-03-01 23:00:00-05:00'
-        AND "Market" == 'DAM'
+        FROM offers
+        WHERE "MARKET" == 'DAM' 
+        AND "Date Time" == '2024-03-01 00:00:00-05:00'
     )
     ON  ("MW1", "Dispatch $/MW1") AS "0", 
         ("MW2", "Dispatch $/MW2") AS "1", 
@@ -177,8 +176,7 @@ WITH unpivot_alias AS (
         NAME Segment
         VALUE MW, Price
 )
-SELECT *, 
-    ROUND(SUM("MW") OVER (PARTITION BY "Date Time" ORDER BY "Idx"), 1) AS "cum_MW"   
+SELECT *
 FROM (
     SELECT *,
         row_number() OVER (PARTITION BY "Date Time") AS "Idx",

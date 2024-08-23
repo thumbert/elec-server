@@ -259,9 +259,36 @@
                 </li>
             </ul>
         </div>
+
+
+
         <div id="masked-da-energy-offers">
             <h4>Masked DA energy offers</h4>
+            New (DuckDb)
             <ul>
+                <li>
+                    Get the energy offers between a start and end date.  Multiple masked asset ids are separated by commas.  
+                    If no asset ids are specified, return ALL of them.  Be mindful, it's a lot of data.  
+                    Note that the format is slightly different between the isos.  ISONE has the 'da' and 'rt' market.  
+                    NYISO has the 'dam' and 'ham' market.  
+                    <div><a href="http://127.0.0.1:8111/isone/energy_offers/da/start/2024-01-01/end/2024-01-03/?masked_asset_ids=77459,86083,31662">isone/energy_offers/da/start/2024-01-01/end/2024-01-03/?masked_asset_ids=77459,86083,31662</a></div>
+                    <div><a href="http://127.0.0.1:8111/nyiso/energy_offers/dam/start/2024-01-01/end/2024-01-03/?masked_asset_ids=77459,86083,31662">nyiso/energy_offers/dam/start/2024-01-01/end/2024-01-03/?masked_asset_ids=77459,86083,31662</a></div>
+                </li>
+                <li>
+                    Get stack for a list of UTC timestamps.  Multiple timestamps are separated by commas.  Note that the format is 
+                    slightly different between the isos. ISONE has the 'da' and 'rt' market.  NYISO has the 'dam' and 'ham' market.  
+                    <div><a href="http://127.0.0.1:8111/isone/energy_offers/da/stack/timestamps=1709269200">/isone/energy_offers/da/stack/timestamps=1709269200</a></div>
+                    <div><a href="http://127.0.0.1:8111/nyiso/energy_offers/dam/stack/timestamps=1709269200">/nyiso/energy_offers/dam/stack/timestamps=1709269200</a></div>
+                </li>
+            </ul>
+
+            Old (Mongo)
+            <ul>
+                <li>
+                    Get stack for a given date and hour ending.  For the extra hour in the fall, enter '02X' same as the ISONE.
+                    Only the offers of the units that are available are returned, sorted by price.
+                    <div><a href="http://localhost:8080/da_energy_offers/v1/stack/date/20170701/hourending/16">da_energy_offers/v1/date/stack/20170701/hourending/16</a></div>
+                </li>
                 <li>
                     Get stack for a given date and hour ending.  For the extra hour in the fall, enter '02X' same as the ISONE.
                     Only the offers of the units that are available are returned, sorted by price.

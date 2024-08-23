@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
@@ -11,7 +12,7 @@ import 'package:timeseries/timeseries.dart';
 
 /// Get the data from the server that uses DuckDB.
 ///
-/// Each element of returned [offers] is in this form:
+/// Each element of returned [offers] is in this form for ISONE:
 /// ```dart
 /// {
 ///   'masked_asset_id': 75431,
@@ -22,14 +23,42 @@ import 'package:timeseries/timeseries.dart';
 ///   'price': -120.0,
 /// }
 /// ```
+/// 
+/// 
+/// and this for NYISO:
+/// ```dart
+/// {
+///   "masked_asset_id": 35537750,
+///   "timestamp_s": 1709269200,
+///   "segment": 0,
+///   "price": 15.6,
+///   "quantity": 150
+/// },
+/// ```
+///
 Future<List<Map<String, dynamic>>> getEnergyOffers(
     {required Iso iso,
+    required Market market,
     required Term term,
     required List<int> maskedAssetIds,
     required String rootUrl}) async {
+  final mkt = switch (iso.name) {
+    'ISONE' => switch (market) {
+        Market.da => '/da',
+        Market.rt => '/rt',
+        _ => throw StateError('Market $market is not supported'),
+      },
+    'NYISO' => switch (market) {
+        Market.da => '/dam',
+        Market.rt => '/ham',
+        _ => throw StateError('Market $market is not supported'),
+      },
+    _ => throw ArgumentError('ISO $iso not supported yet!')
+  };
   final url = [
     '$rootUrl/${iso.name.toLowerCase()}',
-    '/energy_offers/da/start/${term.startDate}/end/${term.endDate}',
+    '/energy_offers/$mkt',
+    '/start/${term.startDate}/end/${term.endDate}',
     if (maskedAssetIds.isNotEmpty)
       '?masked_asset_ids=${maskedAssetIds.join(',')}'
   ].join();

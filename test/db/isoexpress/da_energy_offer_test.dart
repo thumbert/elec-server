@@ -1,6 +1,7 @@
 library test.db.isoexpress.da_energy_offers_test;
 
 import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
@@ -139,6 +140,7 @@ Future<void> tests(String rootUrl) async {
       final term = Term.parse('1Apr24-2Apr24', IsoNewEngland.location);
       var offers = await eo.getEnergyOffers(
           iso: Iso.newEngland,
+          market: Market.da,
           term: term,
           maskedAssetIds: [77459],
           rootUrl: dotenv.env['RUST_SERVER']!);
