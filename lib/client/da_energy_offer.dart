@@ -44,13 +44,13 @@ Future<List<Map<String, dynamic>>> getEnergyOffers(
     required String rootUrl}) async {
   final mkt = switch (iso.name) {
     'ISONE' => switch (market) {
-        Market.da => '/da',
-        Market.rt => '/rt',
+        Market.da => 'da',
+        Market.rt => 'rt',
         _ => throw StateError('Market $market is not supported'),
       },
     'NYISO' => switch (market) {
-        Market.da => '/dam',
-        Market.rt => '/ham',
+        Market.da => 'dam',
+        Market.rt => 'ham',
         _ => throw StateError('Market $market is not supported'),
       },
     _ => throw ArgumentError('ISO $iso not supported yet!')
