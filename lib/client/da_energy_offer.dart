@@ -23,8 +23,8 @@ import 'package:timeseries/timeseries.dart';
 ///   'price': -120.0,
 /// }
 /// ```
-/// 
-/// 
+///
+///
 /// and this for NYISO:
 /// ```dart
 /// {
@@ -67,6 +67,60 @@ Future<List<Map<String, dynamic>>> getEnergyOffers(
   return offers;
 }
 
+/// Each element looks something like this for ISONE:
+/// ```dart
+///{
+///   "masked_asset_id": 42103,
+///   "unit_status": "MustRun",
+///   "timestamp_s": 1709269200,
+///   "segment": 0,
+///   "price": -150,
+///   "quantity": 8
+/// },
+///```
+/// 
+/// And like this for NYISO:
+/// ```dart
+///{
+///   "masked_asset_id": 90926750,
+///   "timestamp_s": 1709269200,
+///   "segment": 0,
+///   "price": -1000,
+///   "quantity": 9
+/// },
+///```
+///   
+Future<List<Map<String, dynamic>>> getStack(
+    {required Iso iso,
+    required Market market,
+    required List<TZDateTime> hourBeginning,
+    required String rootUrl}) async {
+  final mkt = switch (iso.name) {
+    'ISONE' => switch (market) {
+        Market.da => 'da',
+        Market.rt => 'rt',
+        _ => throw StateError('Market $market is not supported'),
+      },
+    'NYISO' => switch (market) {
+        Market.da => 'dam',
+        Market.rt => 'ham',
+        _ => throw StateError('Market $market is not supported'),
+      },
+    _ => throw ArgumentError('ISO $iso not supported yet!')
+  };
+  final timestamps = hourBeginning.map((e) => (e.millisecondsSinceEpoch / 1000).round()).join(',');
+  final url = [
+    '$rootUrl/${iso.name.toLowerCase()}',
+    '/energy_offers/$mkt',
+    '/stack/timestamps/$timestamps',
+  ].join();
+  var aux = await http.get(Uri.parse(url));
+  var stack = (json.decode(aux.body) as List).cast<Map<String, dynamic>>();
+  return stack;
+}
+
+
+
 /// Given the offers from ONE unit, create a list of timeseries associated
 /// with each offer segment.  So, first element of the list is the timeseries
 /// from segment 0 offers, etc.
@@ -102,6 +156,23 @@ List<TimeSeries<Map<String, num>>> makeTimeSeriesFromOffers(
       }
       out.add(one);
     }
+    //
+    //
+  } else if (iso == Iso.newYork) {
+    var groups = groupBy(offers, (e) => e['segment']);
+    for (var segment in groups.keys) {
+      var one = TimeSeries<Map<String, num>>();
+      for (var e in groups[segment]!) {
+        int millis = e['timestamp_s'] * 1000;
+        var start = TZDateTime.fromMillisecondsSinceEpoch(
+            IsoNewEngland.location, millis);
+        one.add(IntervalTuple(Hour.beginning(start),
+            {'quantity': e['quantity'], 'price': e['price']}));
+      }
+      out.add(one);
+    }
+    //
+    //
   } else {
     throw ArgumentError('$iso is not supported yet');
   }
@@ -182,6 +253,7 @@ class DaEnergyOffers {
   }
 
   /// Get the generation stack for this hour.
+  @Deprecated('Use getStack() from the same library!')
   Future<List<Map<String, dynamic>>> getGenerationStack(Hour hour) async {
     var date = Date.fromTZDateTime(hour.start);
     var hours = date.hours();

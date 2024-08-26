@@ -155,6 +155,27 @@ Future<void> tests(String rootUrl) async {
 
       expect(ts0.length, 24); // on 2Apr24 the unit became unavailable
     });
+
+    test('get stack from DuckDb', () async {
+      var stack = await eo.getStack(
+          iso: Iso.newEngland,
+          market: Market.da,
+          hourBeginning: [
+            TZDateTime(IsoNewEngland.location, 2024, 3, 1, 16),
+            TZDateTime(IsoNewEngland.location, 2024, 4, 1, 16),
+          ],
+          rootUrl: dotenv.env['RUST_SERVER']!);
+      expect(stack.length, 1553);
+      final s0 = stack.first;
+      expect(s0.keys.toSet(), {
+        'masked_asset_id',
+        'unit_status',
+        'timestamp_s',
+        'segment',
+        'quantity',
+        'price'
+      });
+    });
   });
 
   // group('DuckDb functionality tests', () {

@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
   
+## Release 2024-08-26
+- Create a getStack() function for the energy offers using the DuckDb infra.  
+
 ## Release 2024-08-19
 - Rename NyisoDaEnergyOfferArchive to NyisoEnergyOfferArchive as it contains both 
   the DAM and the HAM markets!
