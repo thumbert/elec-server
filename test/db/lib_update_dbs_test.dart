@@ -9,9 +9,6 @@ import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:timezone/timezone.dart';
-
-import '../../bin/setup_db.dart';
 
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     {bool gzip = false}) async {
@@ -47,10 +44,14 @@ Future<void> tests() async {
 
   ///---------------------------------------------------------------
   /// ISONE
+  // await update
   // await updateIsoneHistoricalBtmSolarArchive(Date.utc(2023, 10, 13), setUp: false);
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
+  final months = Month(2023, 1, location: IsoNewEngland.location)
+      .upTo(Month(2023, 12, location: IsoNewEngland.location));
+  await updateIsoneDaLmp(months: months, download: false);
   // await updateDaEnergyOffersIsone(months: [
   //   Month.utc(2023, 1),
   //   Month.utc(2023, 2),
@@ -60,9 +61,9 @@ Future<void> tests() async {
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
-  final months = Month(2022, 2, location: IsoNewEngland.location)
-      .upTo(Month(2022, 12, location: IsoNewEngland.location));
-  await updateDaEnergyOffersIsone(months: months, download: true);
+  // final months = Month(2022, 2, location: IsoNewEngland.location)
+  //     .upTo(Month(2022, 12, location: IsoNewEngland.location));
+  // await updateDaEnergyOffersIsone(months: months, download: true);
   // await updateRtEnergyOffersIsone(months: months, download: true);
   // await updateMorningReport(months: months, download: true);
   // await updateIsoneRtReservePrices(months: months, download: true);
@@ -83,7 +84,7 @@ Future<void> tests() async {
 
   ///------------------------------------------------------------------
   /// NYISO
-  await updateEnergyOffersNyiso(months: months, download: true);
+  // await updateEnergyOffersNyiso(months: months, download: true);
 
   ///------------------------------------------------------------------
   /// Weather

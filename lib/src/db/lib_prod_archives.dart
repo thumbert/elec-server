@@ -8,6 +8,7 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
+import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/morning_report.dart';
 import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/mra_capacity_results.dart';
@@ -105,6 +106,20 @@ RtSystemLoad5minArchive getRtSystemLoad5minArchive() {
   }
   return RtSystemLoad5minArchive(dbConfig: dbConfig, dir: dir);
 }
+
+DaLmpHourlyArchive getIsoneDaLmpArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1',
+      dbName: 'isoexpress',
+      collectionName: 'da_lmp_hourly');
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/PricingReports/DaLmpHourly/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return DaLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
+}
+
 
 IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   var dbConfig = ComponentConfig(

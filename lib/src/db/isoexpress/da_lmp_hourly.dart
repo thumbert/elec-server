@@ -5,8 +5,11 @@ import 'dart:io';
 import 'dart:async';
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
+import 'package:csv/csv.dart';
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:path/path.dart';
 import 'package:timezone/timezone.dart';
@@ -28,9 +31,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   }
 
-  // @override
-  // String getUrl(Date? asOfDate) =>
-  //     'https://www.iso-ne.com/static-transform/csv/histRpts/da-lmp/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv';
+  static final log = Logger('DA Energy Offers');
 
   @override
   String getUrl(Date asOfDate) =>
@@ -43,9 +44,11 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
   @override
   File getFilename(Date asOfDate, {String extension = 'json'}) {
     if (extension == 'csv') {
-      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv.gz');
+      return File(
+          '$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv.gz');
     } else if (extension == 'json') {
-      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json.gz');
+      return File(
+          '$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json.gz');
     } else {
       throw StateError('Unsupported extension $extension');
     }
@@ -155,6 +158,78 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     return dataByPtids.keys
         .map((ptid) => _converterCsv(dataByPtids[ptid]!))
         .toList();
+  }
+
+  /// Aggregate a list of days into a csv.gz file.  Each row of the file
+  /// looks like:
+  ///
+  /// ```dart
+  /// {
+  ///   'ptid': 321,
+  ///   'date': '2022-12-22',
+  ///   'hour': 0,
+  ///   'extraHourDst': false,
+  ///   'lmp': <num>,
+  ///   'mcc': <num>,
+  ///   'mlc: <num>,
+  /// }
+  /// ```
+  List<Map<String, dynamic>> aggregateDays(List<Date> days) {
+    assert(days.first.location == IsoNewEngland.location);
+    var out = <Map<String, dynamic>>[];
+    for (var date in days) {
+      log.info('...  Working on $date');
+      final hours = date.hours();
+      final file = getFilename(date, extension: 'json');
+      if (file.existsSync()) {
+        var rows = processFile(file);
+        for (var row in rows) {
+          for (var i = 0; i < hours.length; i++) {
+            var extraHourDst = false;
+            var hour = hours[i];
+            if (hour.start.hour == hour.previous.start.hour) {
+              extraHourDst = true;
+            }
+            var one = {
+              'ptid': row['ptid'],
+              'date': row['date'],
+              'hour': hour.start.hour,
+              'extraHourDst': extraHourDst,
+              'lmp': row['lmp'][i],
+              'mcc': row['congestion'][i],
+              'mlc': row['marginal_loss'][i],
+            };
+            out.add(one);
+          }
+        }
+      } else {
+        throw StateError('Missing file for $date');
+      }
+    }
+    log.info('aggregated data has ${out.length} rows!');
+    return out;
+  }
+
+  int makeGzFileForMonth(Month month) {
+    var days = month.days();
+    final xs = aggregateDays(days);
+    final file = File('$dir../month/da_lmp_${month.toIso8601String()}.csv');
+    var converter = const ListToCsvConverter();
+    var sb = StringBuffer();
+    sb.writeln(converter.convert([xs.first.keys.toList()]));
+    for (var offer in xs) {
+      sb.writeln(converter.convert([offer.values.toList()]));
+    }
+    file.writeAsStringSync(sb.toString());
+
+    // gzip it!
+    var res = Process.runSync('gzip', ['-f', file.path], workingDirectory: dir);
+    if (res.exitCode != 0) {
+      throw StateError('Gzipping ${basename(file.path)} has failed');
+    }
+    log.info('Gzipped file ${basename(file.path)}');
+
+    return 0;
   }
 
   /// Return a Map with elements like this

@@ -11,8 +11,13 @@ Future<int> main() async {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 
+  /// NOTE:  CME has started to charge for the data on 4/1/2024!
+  ///
   var archive = prod.getCmeEnergySettlementsArchive();
   var res = await archive.downloadDataToFile();
+  if (res == -1) {
+    throw StateError('Download failed!');
+  }
 
   /// zip any txt files left in the directory
   var files = Directory(archive.dir)
@@ -34,7 +39,7 @@ Future<int> main() async {
       .whereType<File>()
       .where((e) => e.path.endsWith('.zip'))
       .toList();
-  files.sort((a,b) => basename(a.path).compareTo(basename(b.path)));
+  files.sort((a, b) => basename(a.path).compareTo(basename(b.path)));
   await archive.dbConfig.db.open();
   for (var file in files.reversed.take(3)) {
     // print('working on ${basename(file.path)}');

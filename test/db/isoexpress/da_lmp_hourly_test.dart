@@ -17,7 +17,6 @@ import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-
 Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   group('ISONE DAM LMP db tests: ', () {
@@ -76,6 +75,22 @@ Future<void> tests(String rootUrl) async {
       res = await archive.hasDay(d2);
       expect(res, false);
     });
+    test('aggregate days', () {
+      var days = [
+        Date(2023, 11, 5, location: IsoNewEngland.location),
+        Date(2023, 11, 6, location: IsoNewEngland.location),
+      ];
+      var rows = archive.aggregateDays(days);
+      expect(rows.first.keys.toList(), [
+        'ptid',
+        'date',
+        'hour',
+        'extraHourDst',
+        'lmp',
+        'mcc',
+        'mlc',
+      ]);
+    });
   });
   group('DAM LMP api tests: ', () {
     var db = DbProd.isoexpress;
@@ -102,7 +117,7 @@ Future<void> tests(String rootUrl) async {
       var res = await http
           .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
-      expect(data.length, 2*48);
+      expect(data.length, 2 * 48);
       var x0 = data.firstWhere((e) => e['ptid'] == 4000);
       expect(x0, {
         'hourBeginning': '2017-01-01T00:00:00.000-0500',
@@ -110,7 +125,6 @@ Future<void> tests(String rootUrl) async {
         'lmp': 35.12,
       });
     });
-
 
     // test('get lmp data for 2 days (compact)', () async {
     //   var aux = await api.getHourlyPricesCompact(
@@ -153,8 +167,13 @@ Future<void> tests(String rootUrl) async {
   group('DAM LMP client tests: ', () {
     var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
     test('get daily peak price between two dates', () async {
-      var data = await daLmp.getDailyLmpBucket(Iso.newEngland, 4000, LmpComponent.lmp,
-          IsoNewEngland.bucket5x16, Date.utc(2017, 1, 1), Date.utc(2017, 1, 5));
+      var data = await daLmp.getDailyLmpBucket(
+          Iso.newEngland,
+          4000,
+          LmpComponent.lmp,
+          IsoNewEngland.bucket5x16,
+          Date.utc(2017, 1, 1),
+          Date.utc(2017, 1, 5));
       expect(data.length, 3);
       expect(data.toList(), [
         IntervalTuple(Date(2017, 1, 3, location: location), 45.64124999999999),
@@ -163,15 +182,20 @@ Future<void> tests(String rootUrl) async {
       ]);
     });
     test('get monthly peak price between two dates', () async {
-      var data = await daLmp.getMonthlyLmpBucket(Iso.newEngland,4000, LmpComponent.lmp,
-          IsoNewEngland.bucket5x16, Month.utc(2017, 1), Month.utc(2017, 8));
+      var data = await daLmp.getMonthlyLmpBucket(
+          Iso.newEngland,
+          4000,
+          LmpComponent.lmp,
+          IsoNewEngland.bucket5x16,
+          Month.utc(2017, 1),
+          Month.utc(2017, 8));
       expect(data.length, 8);
       expect(data.first,
           IntervalTuple(Month(2017, 1, location: location), 42.55883928571426));
     });
     test('get hourly price for 2017-01-01', () async {
-      var data = await daLmp.getHourlyLmp(Iso.newEngland,
-          4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
+      var data = await daLmp.getHourlyLmp(Iso.newEngland, 4000,
+          LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
       expect(data.length, 24);
       expect(
           data.first,
