@@ -5,10 +5,12 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:timezone/timezone.dart';
 
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     {bool gzip = false}) async {
@@ -49,9 +51,9 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  final months = Month(2023, 1, location: IsoNewEngland.location)
-      .upTo(Month(2023, 12, location: IsoNewEngland.location));
-  await updateIsoneDaLmp(months: months, download: false);
+  // final months = Month(2023, 1, location: IsoNewEngland.location)
+  //     .upTo(Month(2023, 12, location: IsoNewEngland.location));
+  // await updateIsoneDaLmp(months: months, download: false);
   // await updateDaEnergyOffersIsone(months: [
   //   Month.utc(2023, 1),
   //   Month.utc(2023, 2),

@@ -140,11 +140,13 @@ SELECT Date,
 FROM emissions
 WHERE "Facility Name" = 'Independence'
     AND Date = '2022-03-13'
+    AND "Unit ID" = '1'
 GROUP BY Date,
     Hour
 ORDER BY Date,
     Hour;
 LIMIT 100;
+
 
 
 
