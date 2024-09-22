@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
 Future<void> tests() async {
-  final archive = getMorningReportArchive();
+  final archive = getIsoneMorningReportArchive();
   group('ISONE morning report tests:', () {
     test('read file for 2024-01-01', () async {
       var file = archive.getFilename(Date.utc(2024, 1, 1));
@@ -18,7 +18,7 @@ Future<void> tests() async {
       print(columns.map((e) => "$e ,").join('\n'));
     });
     test('read file for 2024-05-31', () async {
-      // two new fields for geo magnetic disturbance 
+      // two new fields for geo magnetic disturbance
       var file = archive.getFilename(Date.utc(2024, 5, 31));
       var data = archive.processFile(file);
       expect(data.length, 2);
@@ -39,7 +39,6 @@ Future<void> tests() async {
       var columns = data.first.toJson().keys.toList();
       expect(columns.length, MorningReport.colnames.length);
     });
-
   });
   //
   //

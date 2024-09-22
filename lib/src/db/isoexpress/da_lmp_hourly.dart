@@ -31,7 +31,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   }
 
-  static final log = Logger('DA Energy Offers');
+  static final log = Logger('ISONE DA LMP');
 
   @override
   String getUrl(Date asOfDate) =>

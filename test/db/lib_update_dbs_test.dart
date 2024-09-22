@@ -5,7 +5,6 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:timezone/data/latest.dart';
@@ -51,15 +50,10 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  // final months = Month(2023, 1, location: IsoNewEngland.location)
-  //     .upTo(Month(2023, 12, location: IsoNewEngland.location));
+  final months = Month(2022, 1, location: IsoNewEngland.location)
+      .upTo(Month(2023, 12, location: IsoNewEngland.location));
   // await updateIsoneDaLmp(months: months, download: false);
-  // await updateDaEnergyOffersIsone(months: [
-  //   Month.utc(2023, 1),
-  //   Month.utc(2023, 2),
-  //   Month.utc(2023, 3),
-  //   Month.utc(2023, 4),
-  // ]);
+  await updateIsoneRtLmp(months: months, download: true);
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));

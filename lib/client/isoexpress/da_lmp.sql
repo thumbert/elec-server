@@ -17,7 +17,11 @@ FROM read_csv(
     dateformat = '%Y-%m-%d');
 
 --- As of 9/1/2024 I've ingested years 2022-2023.  21M rows.
+SELECT DISTINCT strftime(date, '%Y-%m') as month
+FROM rt_lmp
+ORDER BY month;
 
+SELECT COUNT(*) FROM rt_lmp;
 
 --- 
 CREATE TABLE nerc_holidays (

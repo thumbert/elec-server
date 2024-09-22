@@ -8,11 +8,6 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 //   getIsoneRtEnergyOfferArchive().updateDuckDb();
 // }
 
-void rebuildMorningReport() {
-  final archive = getMorningReportArchive();
-  archive.rebuildDuckDb();
-}
-
 Future<void> main() async {
   initializeTimeZones();
   Logger.root.level = Level.INFO;
@@ -21,6 +16,8 @@ Future<void> main() async {
   });
   dotenv.load('.env/prod.env');
 
-  rebuildMorningReport();
+  // getIsoneMorningReportArchive().rebuildDuckDb();
+  getIsoneRtLmpArchive().rebuildDuckDb();
+
   // rebuildIsoneEnergyOffers();
 }
