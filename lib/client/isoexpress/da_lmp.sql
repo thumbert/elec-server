@@ -88,4 +88,5 @@ SELECT ptid, date, hour, extraDstHour, lmp
 FROM da_lmp
 WHERE date >= '2022-01-01'
 AND date <= '2022-01-31'
-AND ptid in ('4000', '4001');
+AND ptid in ('4000', '4001')
+ORDER BY ptid, date, hour, extraDstHour;

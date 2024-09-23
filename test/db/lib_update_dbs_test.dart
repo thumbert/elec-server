@@ -51,9 +51,9 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  // final months = Month(2023, 1, location: IsoNewEngland.location)
-  //     .upTo(Month(2023, 12, location: IsoNewEngland.location));
-  // await updateIsoneDaLmp(months: months, download: false);
+  final months = Month(2021, 1, location: IsoNewEngland.location)
+      .upTo(Month(2021, 12, location: IsoNewEngland.location));
+  await updateIsoneDaLmp(months: months, download: false);
   // await updateDaEnergyOffersIsone(months: [
   //   Month.utc(2023, 1),
   //   Month.utc(2023, 2),
