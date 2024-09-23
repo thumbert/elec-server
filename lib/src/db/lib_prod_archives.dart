@@ -2,6 +2,7 @@ library lib.src.db.lib_prod_archives;
 
 import 'dart:io';
 
+import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/db_nyiso.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -109,9 +110,7 @@ RtSystemLoad5minArchive getRtSystemLoad5minArchive() {
 
 DaLmpHourlyArchive getIsoneDaLmpArchive() {
   var dbConfig = ComponentConfig(
-      host: '127.0.0.1',
-      dbName: 'isoexpress',
-      collectionName: 'da_lmp_hourly');
+      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'da_lmp_hourly');
   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
       '/IsoExpress/PricingReports/DaLmpHourly/Raw/';
   if (!Directory(dir).existsSync()) {
@@ -119,7 +118,6 @@ DaLmpHourlyArchive getIsoneDaLmpArchive() {
   }
   return DaLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
 }
-
 
 IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   var dbConfig = ComponentConfig(
@@ -159,6 +157,17 @@ RtEnergyOfferArchive getIsoneRtEnergyOfferArchive() {
   return RtEnergyOfferArchive(dir: dir);
 }
 
+RtLmpHourlyArchive getIsoneRtLmpArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'rt_lmp_hourly');
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/PricingReports/RtLmpHourly/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return RtLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
+}
+
 RtReservePriceArchive getIsoneRtReservePriceArchive() {
   var dir =
       '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/PricingReports/RtReservePrice';
@@ -177,7 +186,7 @@ SevenDayCapacityForecastArchive getIsoneSevenDayCapacityForecastArchive() {
   return SevenDayCapacityForecastArchive(dir: dir);
 }
 
-MorningReportArchive getMorningReportArchive() {
+MorningReportArchive getIsoneMorningReportArchive() {
   var dir =
       '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/MorningReport';
   if (!Directory(dir).existsSync()) {

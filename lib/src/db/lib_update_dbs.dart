@@ -348,6 +348,27 @@ Future<void> updateIsoneMraCapacityResults(
   }
 }
 
+Future<void> updateIsoneRtLmp(
+    {required List<Month> months, required bool download}) async {
+  assert(months.first.location == IsoNewEngland.location);
+  var archive = prod.getIsoneRtLmpArchive();
+  for (var month in months) {
+    for (var day in month.days()) {
+      if (download) {
+        await archive.downloadDay(day);
+      }
+      // var file = archive.getFilename(day);
+      // var data = archive.processFile(file);
+      // await archive.insertData(data);
+    }
+    archive.makeGzFileForMonth(month);
+    // archive.updateDuckDb(
+    //     months: [month],
+    //     pathDbFile:
+    //         '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
+  }
+}
+
 Future<void> updateIsoneZonalDemand(List<int> years,
     {bool setUp = false, bool download = false}) async {
   var archive = ZonalDemandArchive();
@@ -375,7 +396,7 @@ Future<void> updateIsoneZonalDemand(List<int> years,
 Future<void> updateMorningReport(
     {required List<Month> months, bool download = false}) async {
   var today = Date.today(location: IsoNewEngland.location);
-  var archive = prod.getMorningReportArchive();
+  var archive = prod.getIsoneMorningReportArchive();
   for (var month in months) {
     for (var day in month.days()) {
       print('Working on $day');

@@ -7,8 +7,10 @@ import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:path/path.dart';
@@ -31,7 +33,7 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     reportName = 'Day-Ahead Energy Market Hourly LMP Report';
   }
 
-  static final log = Logger('DA Energy Offers');
+  static final log = Logger('ISONE DA LMP');
 
   @override
   String getUrl(Date asOfDate) =>
@@ -232,6 +234,55 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
     return 0;
   }
 
+  /// Create the Db from scratch
+  int rebuildDuckDb() {
+    final dbPath = '$baseDir/da_lmp.duckdb';
+    if (File(dbPath).existsSync()) File(dbPath).deleteSync();
+    final con = Connection(dbPath);
+    con.execute('''
+CREATE TABLE IF NOT EXISTS da_lmp (
+    ptid UINTEGER NOT NULL,
+    date DATE NOT NULL,
+    hour UTINYINT NOT NULL,
+    extraDstHour BOOL NOT NULL,
+    lmp DECIMAL(9,4) NOT NULL,
+    mcc DECIMAL(9,4) NOT NULL,
+    mcl DECIMAL(9,4) NOT NULL,
+);
+''');
+    con.execute('''
+INSERT INTO da_lmp
+FROM read_csv(
+    '${dirname(dir)}/month/da_lmp_*.csv.gz', 
+    header = true, 
+    columns = {
+      'ptid': 'UINTEGER',
+      'date': 'DATE',
+      'hour': 'UTINYINT',
+      'extraDstHour': 'BOOL',
+      'lmp': 'DECIMAL(9,4)', 
+      'mcc': 'DECIMAL(9,4)', 
+      'mcl': 'DECIMAL(9,4)', 
+    },
+    dateformat = '%Y-%m-%d');
+''');
+
+    // add the NERC holidays for convenience
+    con.execute('''
+CREATE TABLE nerc_holidays (
+    date DATE NOT NULL,
+);
+INSERT INTO nerc_holidays
+FROM read_csv(
+    '${DuckDbProd.base}/Calendars/nerc_holidays.csv', 
+    header = true, 
+    dateformat = '%Y-%m-%d');
+''');
+    con.close();
+
+    return 0;
+  }
+
   /// Return a Map with elements like this
   /// ```dart
   /// {
@@ -290,6 +341,12 @@ class DaLmpHourlyArchive extends DailyIsoExpressReport {
       Directory(dirname(fileName)).createSync(recursive: true);
     }
     await response.pipe(File(fileName).openWrite());
+    // gzip it
+    var res = Process.runSync('gzip', ['-f', fileName], workingDirectory: dir);
+    if (res.exitCode != 0) {
+      throw StateError('Gzipping ${basename(fileName)} has failed');
+    }
+    log.info('Downloaded and gzipped file ${basename(fileName)}');
   }
 
   /// Check if this date is in the db already

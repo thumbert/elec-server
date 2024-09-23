@@ -1,5 +1,7 @@
 library db.lib_prod_dbs;
 
+import 'dart:io';
+
 import 'package:mongo_dart/mongo_dart.dart';
 
 abstract class DbEnv {}
@@ -21,10 +23,14 @@ class DbProd extends DbEnv {
   static final nyiso = Db('mongodb://${DbProd._connection}/nyiso');
   static final pjm = Db('mongodb://${DbProd._connection}/pjm');
   static final polygraph = Db('mongodb://${DbProd._connection}/polygraph');
-  static final retailSuppliers = Db('mongodb://${DbProd._connection}/retail_suppliers');
+  static final retailSuppliers =
+      Db('mongodb://${DbProd._connection}/retail_suppliers');
   static final riskSystem = Db('mongodb://${DbProd._connection}/risk_system');
   static final utility = Db('mongodb://${DbProd._connection}/utility');
   static final weather = Db('mongodb://${DbProd._connection}/weather');
 }
 
-
+class DuckDbProd {
+  static final base = '${Platform.environment['HOME']}/Downloads/Archive';
+  static final isoneLmpDa = '$base/IsoExpress/da_lmp.duckdb';
+}
