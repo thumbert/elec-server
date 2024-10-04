@@ -1,7 +1,6 @@
 library test.db.isoexpress.mra_capacity_bidoffer_test;
 
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';

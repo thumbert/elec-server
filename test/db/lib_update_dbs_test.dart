@@ -50,10 +50,15 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  final months = Month(2020, 12, location: IsoNewEngland.location)
-      .upTo(Month(2020, 12, location: IsoNewEngland.location));
-  await updateIsoneDaLmp(months: months, download: true);
-  await updateIsoneRtLmp(months: months, download: true);
+  final months = Month(2023, 1, location: IsoNewEngland.location)
+      .upTo(Month(2024, 8, location: IsoNewEngland.location));
+  // await updateIsoneDaLmp(months: months, download: true);
+  // await updateIsoneRtLmp(months: months, download: true);
+  await updateIsoneRtLmp5Min(
+      months: months, ptids: [4000], reportType: 'prelim', download: false);
+  await updateIsoneRtLmp5Min(
+      months: months, ptids: [4000], reportType: 'final', download: false);
+
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));

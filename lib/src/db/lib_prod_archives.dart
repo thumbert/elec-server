@@ -14,6 +14,7 @@ import 'package:elec_server/src/db/isoexpress/morning_report.dart';
 import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/mra_capacity_results.dart';
 import 'package:elec_server/src/db/isoexpress/rt_energy_offer.dart';
+import 'package:elec_server/src/db/isoexpress/rt_lmp_5min.dart';
 import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
 import 'package:elec_server/src/db/isoexpress/sevenday_capacity_forecast.dart';
@@ -166,6 +167,15 @@ RtLmpHourlyArchive getIsoneRtLmpArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return RtLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
+}
+
+RtLmp5MinArchive getIsoneRtLmp5MinArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/PricingReports/RtLmp5Min';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return RtLmp5MinArchive(dir: dir);
 }
 
 RtReservePriceArchive getIsoneRtReservePriceArchive() {

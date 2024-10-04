@@ -369,6 +369,31 @@ Future<void> updateIsoneRtLmp(
   }
 }
 
+Future<void> updateIsoneRtLmp5Min(
+    {required List<Month> months,
+    required List<int> ptids,
+    required String reportType,
+    required bool download}) async {
+  assert(months.first.location == IsoNewEngland.location);
+  var archive = prod.getIsoneRtLmp5MinArchive();
+  for (var ptid in ptids) {
+    for (var month in months) {
+      for (var day in month.days()) {
+        if (download) {
+          await archive.downloadDay(day, type: reportType, ptid: ptid);
+        }
+      }
+      archive.makeGzFileForMonth(month, type: reportType, ptid: ptid);
+    }
+    archive.updateDuckDb(
+        ptid: ptid,
+        reportType: reportType,
+        months: months,
+        pathDbFile:
+            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/rt_lmp5min.duckdb');
+  }
+}
+
 Future<void> updateIsoneZonalDemand(List<int> years,
     {bool setUp = false, bool download = false}) async {
   var archive = ZonalDemandArchive();
