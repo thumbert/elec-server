@@ -131,6 +131,8 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
 
   /// The ISO is clearly not very consistent with the naming conventions
   final urls = <String, String>{
+    'Summer 24':
+        'https://www.iso-ne.com/static-assets/documents/100010/forward_reserve_auction_results.csv',
     'Summer 23':
         'https://www.iso-ne.com/static-assets/documents/2023/04/forward_reserve_auction_results_2023.csv',
     'Summer 22':
@@ -147,6 +149,8 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
         'https://www.iso-ne.com/static-assets/documents/2017/04/fr_auction_sum2017.csv',
     'Summer 16':
         'https://www.iso-ne.com/static-assets/documents/2016/04/fr_auction_sum2016.csv',
+    'Winter 24-25':
+        'https://www.iso-ne.com/static-assets/documents/100014/forward_reserve_auction_results.csv',    
     'Winter 23-24':
         'https://www.iso-ne.com/static-assets/documents/2023/08/forward_reserve_auction_results.csv',
     'Winter 22-23':

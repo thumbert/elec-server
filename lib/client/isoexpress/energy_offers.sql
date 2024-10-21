@@ -130,3 +130,21 @@ AND MaskedParticipantId = 953967
 ORDER BY YEARMON, MaskedAssetId;
 
 
+--- Find new assets and assets that changed hands
+SELECT * FROM (
+    SELECT MaskedAssetId, MaskedParticipantId, MIN(HourBeginning) as StartDate, MAX(EcoMax) as EcoMax
+    FROM da_offers
+    GROUP BY MaskedAssetId, MaskedParticipantId
+) 
+WHERE StartDate > '2024-01-01'
+ORDER BY StartDate;
+
+
+--- Find start date for an asset
+SELECT * FROM (
+    SELECT MaskedAssetId, MIN(HourBeginning) as StartDate, MAX(EcoMax) as EcoMax
+    FROM da_offers
+    GROUP BY MaskedAssetId
+) 
+WHERE StartDate > '2024-01-01'
+ORDER BY StartDate;
