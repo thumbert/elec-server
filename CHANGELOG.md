@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
   
+## Release 2024-10-23
+- Download ISONE sevenday solar forecast with puppeteer or python. 
+
 ## Release 2024-09-22
 - Add ISONE RT prices to a duckdb database.
 
