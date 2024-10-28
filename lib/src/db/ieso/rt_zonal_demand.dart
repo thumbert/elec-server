@@ -22,6 +22,11 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
 
   final log = Logger('IESO RT Zonal Demand');
 
+  /// days with missing data
+  static Set<String> problemDays = {
+    '2024-10-18',
+  };
+
   ///
   String getUrl(int year) {
     return 'http://reports.ieso.ca/public/DemandZonal/PUB_DemandZonal_$year.csv';
@@ -48,7 +53,6 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
     }
     return Future.value(0);
   }
-
 
   @override
   List<Map<String, dynamic>> processFile(File file) {
@@ -78,9 +82,7 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
 
     var aux = <Map<String, dynamic>>[];
     for (var line in lines.skip(4)) {
-      var data = converter
-          .convert(line)
-          .first;
+      var data = converter.convert(line).first;
       if (data.length != 15) continue;
       aux.add(Map.fromIterables(keys, data));
     }
@@ -90,9 +92,11 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
     var out = <Map<String, dynamic>>[];
     for (var date in groups.keys) {
       var xs = groups[date]!;
-      if (xs.length != 24) {
-        throw StateError('Every day should have 24 hours.  '
-            '${xs.first['Date']} doesn\'t.');
+      if (!problemDays.contains(date)) {
+        if (xs.length != 24) {
+          throw StateError('Every day should have 24 hours.  '
+              '${xs.first['Date']} doesn\'t.');
+        }
       }
       for (var key in keys.skip(2)) {
         if (key == 'Diff') continue;

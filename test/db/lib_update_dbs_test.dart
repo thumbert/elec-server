@@ -39,9 +39,9 @@ Future<void> tests() async {
 
   ///---------------------------------------------------------------
   /// IESO
-  // var months = Month.utc(2023, 9).upTo(Month.utc(2023, 12));
-  // await updateIesoRtGenerationArchive(months: months);
-  // await updateIesoRtZonalDemandArchive(years: [2023, 2024]);
+  var months = Month.utc(2024, 1).upTo(Month.utc(2024, 10));
+  await updateIesoRtGenerationArchive(months: months);
+  // await updateIesoRtZonalDemandArchive(years: [2024]);
 
   ///---------------------------------------------------------------
   /// ISONE
@@ -50,8 +50,8 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  final months = Month(2024, 6, location: IsoNewEngland.location)
-      .upTo(Month(2024, 6, location: IsoNewEngland.location));
+  // final months = Month(2024, 6, location: IsoNewEngland.location)
+  //     .upTo(Month(2024, 6, location: IsoNewEngland.location));
   // await updateIsoneDaLmp(months: months, download: true);
   // await updateIsoneRtLmp(months: months, download: true);
   // await updateIsoneRtLmp5Min(
@@ -64,8 +64,8 @@ Future<void> tests() async {
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
   // final months = Month(2022, 2, location: IsoNewEngland.location)
   //     .upTo(Month(2022, 12, location: IsoNewEngland.location));
-  await updateDaEnergyOffersIsone(months: months, download: true);
-  await updateRtEnergyOffersIsone(months: months, download: true);
+  // await updateDaEnergyOffersIsone(months: months, download: true);
+  // await updateRtEnergyOffersIsone(months: months, download: true);
   // await updateMorningReport(months: months, download: true);
   // await updateIsoneRtReservePrices(months: months, download: true);
   // await updateSevenDayCapacityForecast(months: months);

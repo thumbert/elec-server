@@ -4,7 +4,10 @@
 - Clean up all the lints, warnings
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
-  
+
+## Release 2024-10-28
+- Escape checks for 2024-10-18 for IESO RT demand data.  It's incomplete. 
+
 ## Release 2024-10-23
 - Download ISONE sevenday solar forecast with puppeteer or python. 
 
