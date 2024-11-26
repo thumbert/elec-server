@@ -13,9 +13,9 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 class WholesaleLoadCostReportArchive extends IsoExpressReport {
   WholesaleLoadCostReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'isoexpress',
-          collectionName: 'wholesale_load_cost');
+        host: '127.0.0.1',
+        dbName: 'isoexpress',
+        collectionName: 'wholesale_load_cost');
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}WholesaleLoadCost/Raw/';
     this.dir = dir;
@@ -31,7 +31,8 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/whlsecost/hourly/month/'
       '${month.toIso8601String().replaceAll('-', '')}/location/$ptid';
 
-  File getFilename(Month month, int ptid) => File('${dir}whlsecost_hourly_${ptid}_${month.toIso8601String().replaceAll('-', '')}.json');
+  File getFilename(Month month, int ptid) => File(
+      '${dir}whlsecost_hourly_${ptid}_${month.toIso8601String().replaceAll('-', '')}.json');
 
   Future<void> downloadFile(Month month, int ptid) async {
     var _user = dotenv.env['ISONE_WS_USER']!;
@@ -63,10 +64,16 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
       xs = aux['WhlseCosts']['WhlseCost'] as List?;
     }
     var data = xs!.map((e) {
+      late num rtlo;
+      if (e['RTLO'] is String) {
+        rtlo = num.parse(e['RTLO']);
+      } else {
+        rtlo = e['RTLO'];
+      }
       return <String, dynamic>{
         'date': (e['BeginDate'] as String).substring(0, 10),
         'hourBeginning': e['BeginDate'] as String,
-        'rtLoad': e['RTLO'] as num?,
+        'rtLoad': rtlo,
       };
     }).toList();
     data.sortBy<String>((e) => e['hourBeginning']);

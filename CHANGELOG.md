@@ -5,6 +5,9 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2024-11-26
+- ISONE Wholesale Load Cost report publishes RTLO data that is sometimes a string. 
+
 ## Release 2024-10-28
 - Escape checks for 2024-10-18 for IESO RT demand data.  It's incomplete. 
 

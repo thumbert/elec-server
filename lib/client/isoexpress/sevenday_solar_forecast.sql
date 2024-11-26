@@ -2,6 +2,8 @@
 
 SELECT * FROM forecast LIMIT 5;
 
+SUMMARIZE FROM forecast;
+
 --- Which months are in the table 
 SELECT strftime("forecast_hour_beginning", '%Y-%m') AS YEARMON, COUNT(*) 
 FROM forecast

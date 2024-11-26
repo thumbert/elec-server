@@ -41,7 +41,7 @@ Future<void> tests() async {
   /// IESO
   var months = Month.utc(2024, 1).upTo(Month.utc(2024, 10));
   await updateIesoRtGenerationArchive(months: months);
-  // await updateIesoRtZonalDemandArchive(years: [2024]);
+  await updateIesoRtZonalDemandArchive(years: [2024]);
 
   ///---------------------------------------------------------------
   /// ISONE
@@ -78,8 +78,8 @@ Future<void> tests() async {
   // await updateCtSupplierBacklogRatesDb(months: months,
   //     externalDownload: true);
 
-  // var years = IntegerRange(2020, 2024);
-  // await updateCmpLoadArchive(years, setUp: true);
+  var years = IntegerRange(2020, 2024);
+  await updateCmpLoadArchive(years, setUp: true);
 
   // await updatePolygraphProjects(setUp: false);
 
