@@ -3,7 +3,6 @@ library db.lib_mis_reports_test;
 import 'dart:io';
 
 import 'package:date/date.dart';
-import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart';
 import 'package:test/test.dart';
 
@@ -21,19 +20,6 @@ void tests() {
     });
   });
 }
-
-/// Explore using DuckDb for MIS reports and extracting a given version
-///
-// void exploreMisDuckDb() {
-//   // final con = Connection.inMemory();
-//   final con = Connection.inMemory();
-//   con.execute('CREATE TABLE tbl (state VARCHAR, population INTEGER, version TIMESTAMPTZ);');
-//   con.execute("INSERT INTO tbl VALUES ('CA', 39539223, ), ('VA', 8631393);");
-//   var result = con.fetch('SELECT * FROM tbl;');
-
-
-//   con.close(); // close the connection to release resources
-// }
 
 void main() {
   tests();
