@@ -62,6 +62,7 @@ class CtSupplierBacklogRatesArchive {
     var out = <Map<String, dynamic>>[];
     for (var tabName in decoder.tables.keys) {
       var table = decoder.tables[tabName]!;
+
       /// starting in 2022-11, Eversource started to publish the kWhs
       var hasKwh = table.rows.first.length == 5;
       var data = <Map<String, dynamic>>[];
@@ -87,17 +88,18 @@ class CtSupplierBacklogRatesArchive {
           'summary': {
             'customerCount': totalCustomerCount,
             'averagePriceWeightedByCustomerCount':
-              sum(xs.map((e) => e['customerCount'] * e['price']))/totalCustomerCount,
+                sum(xs.map((e) => e['customerCount'] * e['price'])) /
+                    totalCustomerCount,
           }
         };
         if (hasKwh) {
           one['kWh'] = xs.map((e) => e['kWh']).toList();
           var totalKWh = sum(xs.map((e) => e['kWh']));
-          one['summary'] = <String,dynamic>{
+          one['summary'] = <String, dynamic>{
             ...one['summary'] as Map,
             'kWh': totalKWh,
             'averagePriceWeightedByVolume':
-             sum(xs.map((e) => e['kWh'] * e['price']))/totalKWh,
+                sum(xs.map((e) => e['kWh'] * e['price'])) / totalKWh,
           };
         }
         out.add(one);
@@ -125,17 +127,20 @@ class CtSupplierBacklogRatesArchive {
     var out = <Map<String, dynamic>>[];
     for (var tabName in decoder.tables.keys) {
       var table = decoder.tables[tabName]!;
+
       /// starting in 2022-10, UI started to publish the kWhs
       var hasKwh = month.isBefore(Month.utc(2022, 10)) ? false : true;
       var data = <Map<String, dynamic>>[];
       for (var row in table.rows.skip(1)) {
         if (row[1] is! num) continue;
-        if (tabName == 'Residential ' && month == Month.utc(2022, 10) && row[3] is! num) {
+        if (tabName == 'Residential ' &&
+            month == Month.utc(2022, 10) &&
+            row[3] is! num) {
           /// data is messed up for this month, at the bottom of the tab!
           data.add({
             'supplierName': row[0] as String,
             'price': row[1] as num,
-            'kWh': row[2] * 350.0,  // making this up!
+            'kWh': row[2] * 350.0, // making this up!
             'customerCount': row[2] as int,
           });
         } else {
@@ -162,15 +167,14 @@ class CtSupplierBacklogRatesArchive {
             'customerCount': sum(xs.map((e) => e['customerCount'])),
             if (hasKwh) 'kWh': sum(xs.map((e) => e['kWh'])),
             'averagePriceWeightedByCustomerCount':
-            mean(xs.map((e) => e['customerCount'] * e['price'])),
+                mean(xs.map((e) => e['customerCount'] * e['price'])),
             if (hasKwh)
               'averagePriceWeightedByVolume':
-              mean(xs.map((e) => e['kWh'] * e['price'])),
+                  mean(xs.map((e) => e['kWh'] * e['price'])),
           },
         });
       }
     }
-
 
     return out;
   }
@@ -178,14 +182,15 @@ class CtSupplierBacklogRatesArchive {
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(0);
     try {
-      var groups = groupBy(data, (e) => (e['month'], e['utility'], e['customerClass']));
+      var groups =
+          groupBy(data, (e) => (e['month'], e['utility'], e['customerClass']));
       for (var entry in groups.entries) {
         await dbConfig.coll.remove({
           'month': entry.key.$1,
           'utility': entry.key.$2,
           'customerClass': entry.key.$3,
         });
-        await dbConfig.coll.insertAll(entry.value);  // insert all suppliers
+        await dbConfig.coll.insertAll(entry.value); // insert all suppliers
         print('--->  Inserted ${entry.key} successfully');
       }
     } catch (e) {
@@ -193,7 +198,6 @@ class CtSupplierBacklogRatesArchive {
       return Future.value(1);
     }
     return Future.value(0);
-
   }
 
   /// Download an xlsx file
@@ -246,12 +250,16 @@ class CtSupplierBacklogRatesArchive {
           utility = 'UI';
         }
         if (utility != null) {
-          var month = Month.parse(monthName, location: UTC);
-          res.add({
-            'month': month.toIso8601String(),
-            'utility': utility,
-            'url': href,
-          });
+          try {
+            var month = Month.parse(monthName, location: UTC);
+            res.add({
+              'month': month.toIso8601String(),
+              'utility': utility,
+              'url': href,
+            });
+          } catch (e) {
+            print('monthName: $monthName, href: $href');
+          }
         }
       }
     }
@@ -306,23 +314,24 @@ class CtSupplierBacklogRatesArchive {
 
   Future<void> setupDb() async {
     await dbConfig.db.open();
-    await dbConfig.db
-        .createIndex(dbConfig.collectionName, keys: {
-          'month': 1,
-          'utility': 1,
-          'customerClass': 1,
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {
+      'month': 1,
+      'utility': 1,
+      'customerClass': 1,
     });
     await dbConfig.db.close();
   }
 }
 
 /// Broken urls!  They look like links on the page, but they are not correct.
+/// Reports have not been published for these months!
 final exceptions = [
   (Utility.eversource, Month.utc(2018, 1)),
   (Utility.eversource, Month.utc(2018, 8)),
   (Utility.eversource, Month.utc(2018, 9)),
   (Utility.eversource, Month.utc(2018, 10)),
   (Utility.eversource, Month.utc(2019, 12)),
+  //
   (Utility.ui, Month.utc(2021, 8)),
   (Utility.ui, Month.utc(2022, 4)),
 ];
@@ -403,10 +412,28 @@ final specialUrls = [
         "https://energizeconn.prod.acquia-sites.com/sites/default/files/documents/Supplier%20Billed%20Rates%20-%20January%202022%20UR_0.xlsx",
   },
   {
+    "month": "2022-01",
+    "utility": "Eversource",
+    "url":
+        "https://energizeconn.prod.acquia-sites.com/sites/default/files/documents/Supplier%20Billed%20Rates-%20January%202022%20ER.xlsx",
+  },
+  {
     "month": "2022-02",
     "utility": "UI",
     "url":
         "https://energizeconn.prod.acquia-sites.com/sites/default/files/documents/Supplier%20Billed%20Rates%20-%20February%202022%20UR_0.xlsx",
+  },
+  {
+    "month": "2022-02",
+    "utility": "Eversource",
+    "url":
+        "https://energizeconn.prod.acquia-sites.com/sites/default/files/documents/Supplier%20Billed%20Rates-%20February%202022%20ER.xlsx",
+  },
+  {
+    "month": "2022-03",
+    "utility": "Eversource",
+    "url":
+        "https://energizeconn.prod.acquia-sites.com/sites/default/files/documents/Supplier%20Billed%20Rates-%20March%202022%20ER.xlsx",
   },
   {
     "month": "2022-04",

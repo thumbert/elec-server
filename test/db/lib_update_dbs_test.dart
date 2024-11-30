@@ -39,9 +39,9 @@ Future<void> tests() async {
 
   ///---------------------------------------------------------------
   /// IESO
-  var months = Month.utc(2024, 1).upTo(Month.utc(2024, 10));
-  await updateIesoRtGenerationArchive(months: months);
-  await updateIesoRtZonalDemandArchive(years: [2024]);
+  // var months = Month.utc(2024, 1).upTo(Month.utc(2024, 10));
+  // await updateIesoRtGenerationArchive(months: months);
+  // await updateIesoRtZonalDemandArchive(years: [2024]);
 
   ///---------------------------------------------------------------
   /// ISONE
@@ -74,13 +74,13 @@ Future<void> tests() async {
 
   // await updateCmeEnergySettlements(days, setUp: false);
 
-  // var months = Month.utc(2023, 8).upTo(Month.utc(2023, 10));
-  // await updateCtSupplierBacklogRatesDb(months: months,
-  //     externalDownload: true);
+  var months = Month.utc(2024, 2).upTo(Month.utc(2024, 10));
+  await updateCtSupplierBacklogRatesDb(months: months,
+      externalDownload: true);
 
-  var years = IntegerRange(2020, 2024);
-  await updateCmpLoadArchive(years, setUp: true);
 
+  // var years = IntegerRange(2020, 2024);
+  // await updateCmpLoadArchive(years, setUp: true);
   // await updatePolygraphProjects(setUp: false);
 
   ///------------------------------------------------------------------
