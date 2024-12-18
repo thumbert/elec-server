@@ -21,6 +21,7 @@ Future<int> baseDownloadUrl(
   String? acceptHeader,
   String? workingDirectory,
   bool zipFile = false,
+  Duration timeout = const Duration(seconds: 60),
 }) async {
   if (fileout.existsSync() && !overwrite) {
     print('File ${fileout.path} was already downloaded.  Skipping.');
@@ -31,9 +32,11 @@ Future<int> baseDownloadUrl(
       print('Created directory ${dirname(fileout.path)}');
     }
     var client = HttpClient()
+      ..connectionTimeout = timeout
       ..userAgent =
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3419.0 Safari/537.36'
       ..badCertificateCallback = (cert, host, port) => true;
+
     if (username != null && password != null) {
       client.addCredentials(
           Uri.parse(url), '', HttpClientBasicCredentials(username, password));
@@ -42,20 +45,28 @@ Future<int> baseDownloadUrl(
     if (acceptHeader != null) {
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     }
-    var response = await request.close();
-    if (response.statusCode == 200) {
-      await response.pipe(fileout.openWrite());
-    } else {
-      print('Error downloading, status code: ${response.statusCode}');
-    }
-    if (zipFile) {
-      var zipFilename =
-          basename(fileout.path).replaceAll(RegExp('\\.csv\$'), '.zip');
-      var res = Process.runSync('zip', [zipFilename, basename(fileout.path)],
-          workingDirectory: workingDirectory);
-      if (res.exitCode == 0) {
-        fileout.deleteSync();
+    try {
+      var response = await request.close().timeout(timeout);
+      if (response.statusCode == 200) {
+        await response.pipe(fileout.openWrite());
+      } else {
+        print('Error downloading, status code: ${response.statusCode}');
       }
+      if (zipFile) {
+        var zipFilename =
+            basename(fileout.path).replaceAll(RegExp('\\.csv\$'), '.zip');
+        var res = Process.runSync('zip', [zipFilename, basename(fileout.path)],
+            workingDirectory: workingDirectory);
+        if (res.exitCode == 0) {
+          fileout.deleteSync();
+        }
+      }
+    } catch (e) {
+      print(e);
+      request.abort();
+      return -1;
+    } finally {
+      client.close();
     }
   }
   return 0;

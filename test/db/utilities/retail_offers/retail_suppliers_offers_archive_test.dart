@@ -9,9 +9,11 @@ import 'package:elec_server/client/utilities/retail_suppliers_offers.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 import 'package:http/http.dart';
+import 'package:puppeteer/puppeteer.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
 Future<void> tests(String rootUrl) async {
   // var dbConfig = ComponentConfig(
@@ -155,6 +157,17 @@ Future<void> tests(String rootUrl) async {
       });
       expect(x0['rate'], 209.9);
     });
+
+    test('Eversource MA, zip 01128 page changed 2024-12-18', () async {
+      var browser = await puppeteer.launch();
+      var page = await browser.newPage();
+
+      var offers = await archive.getOnePageResidentialRatesMa(
+          page: page, utilityId: '51', zip: '01128');
+      expect(offers.length, 0);
+
+      await browser.close();
+    }, skip: true);
   });
 
   ///
@@ -236,8 +249,9 @@ Future<void> tests(String rootUrl) async {
 
 Future<void> main() async {
   initializeTimeZones();
+  dotenv.load('.env/prod.env');
   DbProd();
-  var rootUrl = 'http://127.0.0.1:8080';
+  var rootUrl = dotenv.env['ROOT_URL']!;
   await tests(rootUrl);
 
   // var archive = RetailSuppliersOffersArchive();

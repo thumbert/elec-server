@@ -10,7 +10,7 @@ AS
     FROM read_csv('/home/adrian/Downloads/Archive/NRC/ReactorStatus/Raw/*powerstatus.txt', 
         delim = '|', 
         header = true, 
-        ignore_errors = true, 
+        ignore_errors = true, -- need this because the last row of file is wrong format!
         columns = {
             'ReportDt': 'DATETIME',
             'Unit': 'VARCHAR',

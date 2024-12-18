@@ -17,7 +17,7 @@ part of 'retail_supply_offer.dart';
 // <option value="small_commercial"> Commercial (under 20,000 kWh/mo)</option>
 // <option value="large_commercial"> Large Commercial (over 20,000 kWh/mo)</option>
 
-final zipToLoadzone = {
+final zipToLoadZone = {
   '01128': 'WCMA', // Springfield (Eversource)
   '01450': 'WCMA', // Groton (NGrid)
   '01462': 'WCMA', // Lunenburg (Unitil)
@@ -29,11 +29,10 @@ final zipToLoadzone = {
 
 final utilityIdToUtility = {
   '51': 'Eversource', // NStar
-  '52': 'NGrid',  // MECO
-  '59': 'NGrid',  // WMECO
+  '52': 'NGrid', // MECO
+  '59': 'NGrid', // WMECO
   '60': 'Unitil',
 };
-
 
 class MaSupplyOffer extends RetailSupplyOffer {
   MaSupplyOffer({
@@ -56,7 +55,6 @@ class MaSupplyOffer extends RetailSupplyOffer {
     required super.lastDateOnWebsite,
     required super.offerId,
   });
-
 
   /// Input is the json that gets saved on the file
   // static MaSupplyOffer fromRawData(Map<String, dynamic> data) {

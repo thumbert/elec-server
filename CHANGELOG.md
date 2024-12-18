@@ -5,6 +5,13 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+
+## Release 2024-12-18
+- Stop pulling utility rates for Springfield, MA -- they are no longer published
+
+## Release 2024-12-02
+- Add a timeout to downloadUrl from lib_iso_express
+
 ## Release 2024-11-30
 - Fix issue with Supplier backlog rates
 

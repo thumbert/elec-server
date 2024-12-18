@@ -79,12 +79,13 @@ final _config = <Map<String, dynamic>>[
         'type': 'residential',
         'zip': '02740', // New Bedford
       },
-      {
-        'stateId': '23', // MA
-        'utilityId': '51', // Eversource WCMA
-        'type': 'residential',
-        'zip': '01128', // Springfield
-      },
+      // removed on 2024-12-18, probably because of Municipal Aggregation
+      // {
+      //   'stateId': '23', // MA
+      //   'utilityId': '51', // Eversource WCMA
+      //   'type': 'residential',
+      //   'zip': '01128', // Springfield
+      // },
       {
         'stateId': '23', // MA
         'utilityId': '52', // NGrid NEMA
@@ -166,8 +167,8 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     var allOffers = <Map<String, dynamic>>[];
     var queries =
         _config.firstWhere((e) => e['state'] == 'CT')['queries'] as List;
-    for (Map<String,dynamic> query in queries) {
-      for (var page = 1; page<10; page++) {
+    for (Map<String, dynamic> query in queries) {
+      for (var page = 1; page < 10; page++) {
         query['page'] = page.toString();
         var url = Uri(
             scheme: 'https',
@@ -205,12 +206,68 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     var file = File(join(dir, '${Date.today(location: UTC)}_ct.json'));
     final js = JsonEncoder.withIndent('  ');
     file.writeAsStringSync(js.convert(res));
-
   }
 
   Future<void> _getRatesMa() async {
     await _getResidentialRatesMa();
     await _getSmallCommercialRatesMa();
+  }
+
+  /// Get all the offers associated with one utility and zip
+  /// The zip is only needed for the utilities that span several zones.
+  ///
+  Future<List<Map<String, dynamic>>> getOnePageResidentialRatesMa(
+      {required Page page,
+      required String utilityId,
+      required String zip}) async {
+    await page.goto('https://www.massenergyrates.com');
+    await page.select('select#utility_id', [utilityId]);
+    await page.select('select#type', ['residential']);
+    await page.type('input#zip', zip);
+    await page.clickAndWaitForNavigation('.search-form-btn');
+    var content = await page.content;
+    var document = parse(content);
+
+    var today = Date.today(location: UTC).toString();
+    var offers = <Map<String, dynamic>>[];
+    var table = document.querySelector('.energy-provider-table');
+    var tbody = table!.querySelector('tbody');
+    var rows = tbody!.querySelectorAll('tr');
+
+    for (var row in rows) {
+      var xs = row.querySelectorAll('td');
+      var supplier = xs[0].querySelector('img')!.attributes['title'];
+      var termDetails = xs[1].querySelector('span')!.text;
+      var countOfCycles = int.parse(termDetails.split(' ').first);
+      var planFeatures = xs[2]
+          .children
+          .expand((e) => e.text.trim().split('\n'))
+          .where((e) => e != '')
+          .toList();
+      var rate =
+          num.parse(xs[3].querySelector('span')!.text.split(' ').first) * 10;
+      var one = {
+        'region': 'ISONE',
+        'state': 'MA',
+        'utility': utilityIdToUtility[utilityId],
+        'loadZone': zipToLoadZone[zip],
+        'accountType': 'Residential',
+        'rateClass': '',
+        'countOfBillingCycles': countOfCycles,
+        'offerType':
+            termDetails.toLowerCase().contains('fixed') ? 'Fixed' : '?',
+        'rate': rate,
+        'rateUnit': '\$/MWh',
+        'supplierName': supplier,
+        'termDetails': termDetails,
+        'planFeatures': planFeatures,
+      };
+      one['offerId'] = 'ma-${sha1.convert(one.toString().codeUnits)}';
+      one['asOfDate'] = today;
+      offers.add(one);
+    }
+
+    return offers;
   }
 
   /// Get residential rates in MA.
@@ -223,18 +280,13 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     var page = await browser.newPage();
 
     for (var query in queries) {
+      final utilityId = query['utilityId']! as String;
+      final zip = query['zip']! as String;
       print('Working on MA residential customers, utilityId: '
-          '${utilityIdToUtility[query['utilityId']]}, zip: ${query['zip']}');
-      await page.goto('https://www.massenergyrates.com');
-      await page.select('select#utility_id', [query['utilityId']]);
-      await page.select('select#type', ['residential']);
-      await page.type('input#zip', query['zip']);
-      await page.clickAndWaitForNavigation('.search-form-btn');
-      var content = await page.content;
-      var document = parse(content);
-
-      var today = Date.today(location: UTC).toString();
-      var offers = <Map<String, dynamic>>[];
+          '${utilityIdToUtility[utilityId]}, zip: $zip');
+      var offers = await getOnePageResidentialRatesMa(
+          page: page, utilityId: utilityId, zip: zip);
+      allOffers.addAll(offers);
 
       // /// Get the utility prevailing rate
       // var rate = document.querySelectorAll('input').first.attributes['value']!;
@@ -252,46 +304,6 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
       // utilityPlan['offerId'] =
       //     'ma-${sha1.convert(utilityPlan.toString().codeUnits)}';
       // offers.add(utilityPlan);
-
-      /// Get the competitive providers
-      var table = document.querySelector('.energy-provider-table');
-      var tbody = table!.querySelector('tbody');
-      var rows = tbody!.querySelectorAll('tr');
-
-      for (var row in rows) {
-        var xs = row.querySelectorAll('td');
-        var supplier = xs[0].querySelector('img')!.attributes['title'];
-        var termDetails = xs[1].querySelector('span')!.text;
-        var countOfCycles = int.parse(termDetails.split(' ').first);
-        var planFeatures = xs[2]
-            .children
-            .expand((e) => e.text.trim().split('\n'))
-            .where((e) => e != '')
-            .toList();
-        var rate =
-            num.parse(xs[3].querySelector('span')!.text.split(' ').first) * 10;
-        var one = {
-          'region': 'ISONE',
-          'state': 'MA',
-          'utility': utilityIdToUtility[query['utilityId']],
-          'loadZone': zipToLoadzone[query['zip']],
-          'accountType': 'Residential',
-          'rateClass': '',
-          'countOfBillingCycles': countOfCycles,
-          'offerType':
-              termDetails.toLowerCase().contains('fixed') ? 'Fixed' : '?',
-          'rate': rate,
-          'rateUnit': '\$/MWh',
-          'supplierName': supplier,
-          'termDetails': termDetails,
-          'planFeatures': planFeatures,
-        };
-        one['offerId'] = 'ma-${sha1.convert(one.toString().codeUnits)}';
-        one['asOfDate'] = today;
-        offers.add(one);
-      }
-
-      allOffers.addAll(offers);
     }
     await browser.close();
 

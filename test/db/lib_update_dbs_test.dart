@@ -11,6 +11,8 @@ import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/timezone.dart';
 
+import '../../bin/setup_db.dart';
+
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     {bool gzip = false}) async {
   await archive.dbConfig.db.open();
@@ -73,10 +75,9 @@ Future<void> tests() async {
   // await updateIsoneMraCapacityResults(months: months, download: false);
 
   // await updateCmeEnergySettlements(days, setUp: false);
-
-  var months = Month.utc(2024, 2).upTo(Month.utc(2024, 10));
-  await updateCtSupplierBacklogRatesDb(months: months,
-      externalDownload: true);
+  // var months = Month.utc(2024, 2).upTo(Month.utc(2024, 10));
+  // await updateCtSupplierBacklogRatesDb(months: months,
+  //     externalDownload: true);
 
 
   // var years = IntegerRange(2020, 2024);
@@ -89,7 +90,7 @@ Future<void> tests() async {
 
   ///------------------------------------------------------------------
   /// Weather
-  // await insertNoaaTemperatures(download: true);
+  await insertNoaaTemperatures(download: true);
   // await insertNormalTemperatures();
 }
 
