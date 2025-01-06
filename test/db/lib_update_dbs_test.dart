@@ -41,9 +41,9 @@ Future<void> tests() async {
 
   ///---------------------------------------------------------------
   /// IESO
-  // var months = Month.utc(2024, 1).upTo(Month.utc(2024, 10));
+  // var months = Month.utc(2025, 1).upTo(Month.utc(2025, 1));
   // await updateIesoRtGenerationArchive(months: months);
-  // await updateIesoRtZonalDemandArchive(years: [2024]);
+  await updateIesoRtZonalDemandArchive(years: [2025]);
 
   ///---------------------------------------------------------------
   /// ISONE
@@ -90,7 +90,7 @@ Future<void> tests() async {
 
   ///------------------------------------------------------------------
   /// Weather
-  await insertNoaaTemperatures(download: true);
+  // await insertNoaaTemperatures(download: true);
   // await insertNormalTemperatures();
 }
 

@@ -26,7 +26,7 @@ class IesoRtGenerationArchive extends IsoExpressReport {
   ///
   String getUrl(Month month) {
     var yyyymm = month.toIso8601String().replaceAll('-', '');
-    return 'http://reports-public.ieso.ca/public/GenOutputCapabilityMonth/'
+    return 'https://reports-public.ieso.ca/public/GenOutputCapabilityMonth/'
         'PUB_GenOutputCapabilityMonth_$yyyymm.csv';
   }
 
