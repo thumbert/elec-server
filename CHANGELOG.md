@@ -5,6 +5,8 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 
+## Release 2025-01-06
+- Change IESO public urls
 
 ## Release 2024-12-18
 - Stop pulling utility rates for Springfield, MA -- they are no longer published
