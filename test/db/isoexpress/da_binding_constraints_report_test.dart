@@ -88,7 +88,7 @@ Future<void> tests(String rootUrl) async {
   group('Binding constraints client tests:', () {
     var client = BindingConstraints(http.Client(),
         iso: Iso.newEngland, rootUrl: rootUrl);
-    test('get da binding contraints', () async {
+    test('get da binding constraints', () async {
       var term = Term.parse('1Jan17-2Jan17', location);
       var res = await client.getDaBindingConstraints(term.interval);
       var nyne = res['NYNE']!;

@@ -5,39 +5,21 @@ import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
-import 'package:mongo_dart/mongo_dart.dart' hide Month;
-import 'package:elec_server/src/db/config.dart';
 import '../lib_iso_express.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
 class MonthlyAssetNcpcArchive extends IsoExpressReport {
-  MonthlyAssetNcpcArchive({ComponentConfig? dbConfig, String? dir}) {
-    dbConfig ??= ComponentConfig(
-        host: '127.0.0.1',
-        dbName: 'isoexpress',
-        collectionName: 'monthly_asset_ncpc');
-    this.dbConfig = dbConfig;
-    dir ??= baseDir + 'GridReports/MonthlyAssetNcpc/Raw/';
-    this.dir = dir;
-  }
-
-  Db get db => dbConfig.db;
-
-  @override
-  final reportName = 'Monthly NCPC credits by Asset Report';
-
   String getUrl(Month month) =>
-      'https://webservices.iso-ne.com/api/v1.1/monthlyassetncpc/month/' +
-      month.toIso8601String().replaceAll('-', '');
+      'https://webservices.iso-ne.com/api/v1.1/monthlyassetncpc/month/${month.toIso8601String().replaceAll('-', '')}';
 
   File getFilename(Month month) =>
-      File(dir + 'monthly_asset_ncpc_' + month.toIso8601String() + '.json');
+      File('$dir/Raw/monthly_asset_ncpc_${month.toIso8601String()}.json');
 
   Future downloadMonth(Month month) async {
-    var _user = dotenv.env['ISONE_WS_USER']!;
-    var _pwd = dotenv.env['ISONE_WS_PASSWORD']!;
+    var user = dotenv.env['ISONE_WS_USER']!;
+    var pwd = dotenv.env['ISONE_WS_PASSWORD']!;
     await downloadUrl(getUrl(month), getFilename(month),
-        username: _user, password: _pwd, acceptHeader: 'application/json');
+        username: user, password: pwd, acceptHeader: 'application/json');
   }
 
   @override
@@ -59,7 +41,10 @@ class MonthlyAssetNcpcArchive extends IsoExpressReport {
     var aux = json.decode(file.readAsStringSync());
     late List<Map<String, dynamic>> xs;
     if ((aux as Map).containsKey('NCPCMonthlyAssets')) {
-      if (aux['NCPCMonthlyAssets'] == '') return <Map<String, dynamic>>[];
+      if (aux['NCPCMonthlyAssets'] == '' ||
+          (aux['NCPCMonthlyAssets'] as Map).isEmpty) {
+        return <Map<String, dynamic>>[];
+      }
       xs = (aux['NCPCMonthlyAssets']['NCPCMonthlyAsset'] as List)
           .cast<Map<String, dynamic>>();
     } else {
@@ -89,7 +74,7 @@ class MonthlyAssetNcpcArchive extends IsoExpressReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }

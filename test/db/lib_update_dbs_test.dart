@@ -43,7 +43,7 @@ Future<void> tests() async {
   /// IESO
   // var months = Month.utc(2025, 1).upTo(Month.utc(2025, 1));
   // await updateIesoRtGenerationArchive(months: months);
-  await updateIesoRtZonalDemandArchive(years: [2025]);
+  // await updateIesoRtZonalDemandArchive(years: [2025]);
 
   ///---------------------------------------------------------------
   /// ISONE
@@ -52,15 +52,16 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  // final months = Month(2024, 6, location: IsoNewEngland.location)
-  //     .upTo(Month(2024, 6, location: IsoNewEngland.location));
+  final months = Month(2024, 8, location: IsoNewEngland.location)
+      .upTo(Month(2024, 9, location: IsoNewEngland.location));
   // await updateIsoneDaLmp(months: months, download: true);
+  await updateIsoneMonthlyAssetNcpc(months: months, download: true);
+
   // await updateIsoneRtLmp(months: months, download: true);
   // await updateIsoneRtLmp5Min(
   //     months: months, ptids: [4000], reportType: 'prelim', download: false);
   // await updateIsoneRtLmp5Min(
   //     months: months, ptids: [4000], reportType: 'final', download: false);
-
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
@@ -78,7 +79,6 @@ Future<void> tests() async {
   // var months = Month.utc(2024, 2).upTo(Month.utc(2024, 10));
   // await updateCtSupplierBacklogRatesDb(months: months,
   //     externalDownload: true);
-
 
   // var years = IntegerRange(2020, 2024);
   // await updateCmpLoadArchive(years, setUp: true);

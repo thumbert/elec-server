@@ -4,6 +4,11 @@
 - Clean up all the lints, warnings
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
+- Move ISONE Monthly Asset NCPC to DuckDB
+
+
+## Release 2025-01-07
+- Fix ISONE Monthly Asset NCPC files with no data for the entire month.  
 
 ## Release 2025-01-06
 - Change IESO public urls

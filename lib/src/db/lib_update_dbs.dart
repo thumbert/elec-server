@@ -317,6 +317,19 @@ Future<void> updateIsoneDaLmp(
   }
 }
 
+Future<void> updateIsoneMonthlyAssetNcpc(
+    {required List<Month> months, required bool download}) async {
+  assert(months.first.location == IsoNewEngland.location);
+  var archive = prod.getIsoneMonthlyAssetNcpcArchive();
+  await archive.dbConfig.db.open();
+  for (var month in months) {
+    await archive.downloadMonth(month);
+    var data = archive.processFile(archive.getFilename(month));
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
 //
 Future<void> updateIsoneMraCapacityResults(
     {required List<Month> months, required bool download}) async {
