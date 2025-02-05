@@ -121,6 +121,18 @@ DaLmpHourlyArchive getIsoneDaLmpArchive() {
   return DaLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
 }
 
+DaDemandBidArchive getIsoneDemandBidsArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/PricingReports/DaDemandBid';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return DaDemandBidArchive()
+    ..dir = dir
+    ..duckdbPath =
+        '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone_demand_bids.duckdb';
+}
+
 IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'isone', collectionName: 'hourly_btm_solar');
@@ -149,7 +161,6 @@ MonthlyAssetNcpcArchive getIsoneMonthlyAssetNcpcArchive() {
     ..dir = dir
     ..reportName = 'Monthly NCPC credits by Asset Report';
 }
-
 
 MraCapacityBidOfferArchive getIsoneMraBidOfferArchive() {
   final dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'

@@ -52,10 +52,11 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  final months = Month(2024, 8, location: IsoNewEngland.location)
+  final months = Month(2022, 3, location: IsoNewEngland.location)
       .upTo(Month(2024, 9, location: IsoNewEngland.location));
   // await updateIsoneDaLmp(months: months, download: true);
-  await updateIsoneMonthlyAssetNcpc(months: months, download: true);
+  await updateIsoneDemandBids(months: months, download: false);
+  // await updateIsoneMonthlyAssetNcpc(months: months, download: true);
 
   // await updateIsoneRtLmp(months: months, download: true);
   // await updateIsoneRtLmp5Min(

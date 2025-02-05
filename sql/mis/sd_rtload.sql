@@ -1,3 +1,37 @@
+
+SELECT * FROM tab0 LIMIT 3;
+
+
+
+-- How to get different settlement versions
+--=========================================
+-- You need 3 selects.  This is what they do starting from the inner most one:
+-- 1. get the variables you want and make sure the rows are ordered by (asset_id, hour_beginning, version)
+-- 2. construct a list of share_of_load_reading for each (asset_id, hour_beginning).  The list elements 
+--    are ordered by version
+-- 3. get the share_of_load_reading for the version you want.  The version is determined by the variable
+SET VARIABLE settlement = 1;
+SELECT asset_id, hour_beginning, 
+    versions[LEAST(len(versions), getvariable('settlement') + 1)] as version,
+    slr[LEAST(len(slr), getvariable('settlement') + 1)] as share_of_load_reading
+FROM (
+    SELECT report_date, asset_id, hour_beginning, 
+      array_agg(version) as versions,
+      array_agg(share_of_load_reading) as slr
+    FROM (
+        SELECT report_date, asset_id, hour_beginning, version, share_of_load_reading,
+        FROM tab0
+        WHERE report_date == '2024-08-01'
+        AND asset_id = 2481
+        ORDER BY report_date, asset_id, hour_beginning, version
+    )
+    GROUP BY report_date, asset_id, hour_beginning
+)
+ORDER BY asset_id, hour_beginning;
+
+
+
+--===============================================================================================
 CREATE TABLE IF NOT EXISTS tab0 (
     account_id UINTEGER NOT NULL,
     report_date DATE NOT NULL,
@@ -40,39 +74,8 @@ FROM read_csv(
     timestampformat = '%Y-%m-%dT%H:%M:%SZ'
 );
 
-SELECT * FROM tab0 LIMIT 3;
 
 
 
 
 
-
-INSERT INTO tab0
-FROM read_csv(
-    '/home/adrian/Downloads/Archive/Mis/SD_RTLOAD/tmp/tab0_*.CSV', 
-    header = true, 
-    timestampformat = '%Y-%m-%dT%H:%M:%SZ'
-);
-
-
-CREATE TEMP TABLE tbl AS
-SELECT * 
-FROM read_csv(
-    '/home/adrian/Downloads/Archive/Mis/SD_RTLOAD/tmp/tab0_*.CSV', 
-    header = true, 
-    timestampformat = '%Y-%m-%dT%H:%M:%SZ'
-);
-
-
-.mode line  
-.mode duckbox
-SELECT * FROM tbl LIMIT 2; 
-
-
-
-CREATE TEMP TABLE tbl2 AS
-
-
-
-
-LIMIT 2;
