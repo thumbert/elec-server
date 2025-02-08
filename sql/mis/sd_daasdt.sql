@@ -8,8 +8,64 @@ SUMMARIZE tab7;
 
 SELECT * FROM tab0 LIMIT 3;
 
+
 .mode line
 SELECT * FROM tab6 LIMIT 1;
+
+-- Get daily FRS credits to assets by type
+SET VARIABLE settlement = 0;
+SELECT report_date, 
+    versions[LEAST(len(versions), getvariable('settlement') + 1)] as version,
+    asset_id, product_type,
+    credit[LEAST(len(credit), getvariable('settlement') + 1)] as customer_share_of_product_credit,
+    closeout_charge[LEAST(len(closeout_charge), getvariable('settlement') + 1)] as customer_share_of_product_closeout_charge,
+FROM (
+    SELECT report_date, asset_id, product_type,
+    array_agg(version) as versions,
+    array_agg(customer_share_of_product_credit) as credit,
+    array_agg(customer_share_of_product_closeout_charge) as closeout_charge,
+    FROM (
+        SELECT report_date, version, asset_id, product_type,  
+            sum(customer_share_of_product_credit) as customer_share_of_product_credit,
+            sum(customer_share_of_product_closeout_charge) as customer_share_of_product_closeout_charge,
+        FROM tab0
+        WHERE report_date >= '2024-11-15'
+        AND report_date <= '2024-11-15'
+        AND account_id = 2
+        GROUP BY report_date, version, asset_id, product_type
+        ORDER BY report_date, version
+    )
+    GROUP BY report_date, asset_id, product_type
+)
+ORDER BY report_date;
+
+-- Get daily FER credit to assets
+SET VARIABLE settlement = 0;
+SELECT report_date, 
+    versions[LEAST(len(versions), getvariable('settlement') + 1)] as version,
+    asset_id, 
+    credit[LEAST(len(credit), getvariable('settlement') + 1)] as customer_share_of_product_credit,
+FROM (
+    SELECT report_date, asset_id, 
+    array_agg(version) as versions,
+    array_agg(customer_share_of_product_credit) as credit,
+    FROM (
+        SELECT report_date, version, asset_id,  
+            sum(customer_share_of_asset_fer_credit) as customer_share_of_product_credit,
+        FROM tab1
+        WHERE report_date >= '2024-11-15'
+        AND report_date <= '2024-11-15'
+        AND account_id = 2
+        GROUP BY report_date, version, asset_id
+        ORDER BY report_date, version
+    )
+    GROUP BY report_date, asset_id
+)
+ORDER BY report_date;
+
+
+
+
 
 
 -- Get the daily FRS charges to load by type
@@ -62,6 +118,38 @@ UNPIVOT (
         NAME name
         VALUE value;
 
+-- Get FER and EIR charges
+UNPIVOT (
+    SELECT report_date, 
+        versions[LEAST(len(versions), getvariable('settlement') + 1)] as version,
+        eir[LEAST(len(eir), getvariable('settlement') + 1)] as fer_and_da_eir_charge,
+        eir_co[LEAST(len(eir_co), getvariable('settlement') + 1)] as da_eir_closeout_credit,
+    FROM (
+        SELECT report_date, 
+        array_agg(version) as versions,
+        array_agg(fer_and_da_eir_charge) as eir,
+        array_agg(da_eir_closeout_credit) as eir_co,
+        FROM (
+            SELECT report_date, version,  
+                sum(fer_and_da_eir_charge) as fer_and_da_eir_charge,
+                sum(da_eir_closeout_credit) as da_eir_closeout_credit,
+            FROM tab7
+            WHERE report_date >= '2024-11-15'
+            AND report_date <= '2024-11-15'
+            AND account_id = 2
+            GROUP BY report_date, version
+            ORDER BY report_date, version
+        )
+        GROUP BY report_date
+    )
+    ORDER BY report_date
+)
+    ON
+        fer_and_da_eir_charge,
+        da_eir_closeout_credit,
+    INTO
+        NAME name
+        VALUE value;
 
 
 

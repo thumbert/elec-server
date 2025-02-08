@@ -3,6 +3,7 @@ library db.mis.sd_rsvastdtl;
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:table/table.dart';
@@ -20,6 +21,9 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
         collectionName: reportName.toLowerCase());
     this.dbConfig = dbConfig;
   }
+
+  @override
+  Month get lastMonth => Month(2025, 2, location: IsoNewEngland.location);
 
   /// Add the index labels, remove unneeded columns.
   List<Map<String, dynamic>> addLabels(Iterable<Map<String, dynamic>> rows,
@@ -50,9 +54,13 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
       'version': version,
     };
     var x1 = mis.readReportTabAsMap(file, tab: 1);
+
     /// keep only the rows when you have something assigned
-    x1 = x1.where((e) => e['Forward Reserve TMOR Assigned MWs'] != 0 ||
-        e['Forward Reserve TMNSR Assigned MWs'] != 0).toList();
+    x1 = x1
+        .where((e) =>
+            e['Forward Reserve TMOR Assigned MWs'] != 0 ||
+            e['Forward Reserve TMNSR Assigned MWs'] != 0)
+        .toList();
     var grp1 = groupBy(x1, (dynamic e) => e['Asset ID']);
     var tab1 = <Map<String, dynamic>>[];
     for (var entry in grp1.entries) {
@@ -72,7 +80,6 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
             'Asset Type',
           ]));
     }
-
 
     /// tab 4, Asset detail RT reserves hourly
     labels = <String, dynamic>{
@@ -107,7 +114,6 @@ class SdRsvAstDtlArchive extends mis.MisReportArchive {
       4: tab4,
     };
   }
-
 
   @override
   Map<int, List<Map<String, dynamic>>> processFile(File file) {

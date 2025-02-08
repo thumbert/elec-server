@@ -1,4 +1,14 @@
 
+SELECT * from ssc LIMIT 3;
+
+SELECT InterfaceName, LocalTime, ActualMargin
+FROM ssc
+WHERE LocalTime >= '2025-01-10 00:00:00'
+AND LocalTime < '2025-01-11'
+AND InterfaceName = 'PJM West';
+
+
+
 
 CREATE TABLE ssc (
     InterfaceName VARCHAR,
