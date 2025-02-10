@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS da_bids (
     hourBeginning TIMESTAMPTZ NOT NULL,
     maskedParticipantId UINTEGER NOT NULL,
     maskedAssetId UINTEGER NOT NULL,
-    locationType ENUM('LOAD ZONE', 'NETWORK NODE') NOT NULL,
+    locationType ENUM('HUB', 'LOAD ZONE', 'NETWORK NODE', 'DRR AGGREGATION ZONE') NOT NULL,
     bidType ENUM('FIXED', 'INC', 'DEC', 'PRICE') NOT NULL,
     bidID UINTEGER NOT NULL,
     segment UTINYINT NOT NULL,
@@ -178,9 +178,17 @@ FROM read_csv(
     var aux = json.decode(data) as Map;
     late List<Map<String, dynamic>> xs;
     if (aux.containsKey('HbDayAheadDemandBids')) {
-      if (aux['HbDayAheadDemandBids'] == '') return <DemandBidSegment>[];
-      xs = (aux['HbDayAheadDemandBids']['HbDayAheadDemandBid'] as List)
-          .cast<Map<String, dynamic>>();
+      if (aux['HbDayAheadDemandBids'] == '') {
+        return <DemandBidSegment>[];
+      }
+      var bids = aux['HbDayAheadDemandBids'];
+      if (bids is Map) {
+        xs = (aux['HbDayAheadDemandBids']['HbDayAheadDemandBid'] as List)
+            .cast<Map<String, dynamic>>();
+      } else {
+        xs = (aux['HbDayAheadDemandBids']['HbDayAheadDemandBid'] as List)
+            .cast<Map<String, dynamic>>();
+      }
     } else {
       throw StateError('File $file not in proper format');
     }
@@ -202,7 +210,12 @@ FROM read_csv(
       } else if (segments is List) {
         ///
         /// old format before 2023-01-01
-        segment = segments[0]['Segment'] as List;
+        var s = segments[0]['Segment'];
+        if (s is Map) {
+          segment.add(segments[0]['Segment']);
+        } else {
+          segment = segments[0]['Segment'];
+        }
       } else {
         throw StateError('Unsupported: $segments');
       }

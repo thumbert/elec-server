@@ -322,15 +322,15 @@ Future<void> updateIsoneDemandBids(
   assert(months.first.location == IsoNewEngland.location);
   var archive = prod.getIsoneDemandBidsArchive();
   for (var month in months) {
-    // var days = month.days();
-    // for (var day in days) {
-    //   if (download) {
-    //     if (!archive.skipDays.contains(day)) {
-    //       await archive.downloadDay(day);
-    //     }
-    //   }
-    // }
-    // archive.makeGzFileForMonth(month);
+    var days = month.days();
+    for (var day in days) {
+      if (download) {
+        if (!archive.skipDays.contains(day)) {
+          await archive.downloadDay(day);
+        }
+      }
+    }
+    archive.makeGzFileForMonth(month);
     archive.updateDuckDb(
         months: [month],
         pathDbFile:

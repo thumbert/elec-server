@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+## Release 2025-02-10
+- Fix masked demand bids DuckDB enum
+
 ## Release 2025-02-08
 - Add firstMonth/lastMonth to the MisReportArchive class to skip ingestion once 
   the reports have been retired.
