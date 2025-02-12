@@ -163,7 +163,7 @@ FROM read_csv(
     header = true, 
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 ''');
-      log.info('   Inserted month ${month.toIso8601String()} into DuckDb');
+      log.info('   Inserted month ${month.toIso8601String()} into DuckDB');
     }
     con.close();
 

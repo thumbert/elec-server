@@ -6,6 +6,10 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+## Release 2025-02-12
+- Make a simple mailtrap email client
+- Fix masked isone rt energy offers yet again
+
 ## Release 2025-02-10
 - Fix masked demand bids DuckDB enum
 

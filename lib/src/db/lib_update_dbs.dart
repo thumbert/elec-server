@@ -153,9 +153,6 @@ Future<void> updateDaEnergyOffersIsone(
       if (download) {
         await archive.downloadDay(day);
       }
-      // var file = archive.getFilename(day);
-      // var data = archive.processFile(file);
-      // await archive.insertData(data);
     }
     archive.makeGzFileForMonth(month);
     archive.updateDuckDb(
@@ -493,19 +490,14 @@ Future<void> updatePolygraphProjects({bool setUp = false}) async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> updateRtEnergyOffersIsone(
+Future<void> updateIsoneRtEnergyOffers(
     {required List<Month> months, bool download = false}) async {
   var archive = prod.getIsoneRtEnergyOfferArchive();
   assert(months.first.location == IsoNewEngland.location);
   for (var month in months) {
     for (var day in month.days()) {
       if (download) {
-        var file = archive.getFilename(day);
-        var res = await baseDownloadUrl(archive.getUrl(day), file,
-            username: dotenv.env['ISONE_WS_USER'],
-            password: dotenv.env['ISONE_WS_PASSWORD'],
-            acceptHeader: 'application/json');
-        if (res != 0) throw StateError('Failed to download day $day');
+        await archive.downloadDay(day);
       }
     }
     archive.makeGzFileForMonth(month);
