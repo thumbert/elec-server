@@ -18,6 +18,8 @@ pubspec.lock
 out
 docs
 
+venv/
+
 .env/
 ms_graph_*
 

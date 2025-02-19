@@ -25,6 +25,47 @@ AS
 ;
 
 
+SELECT * FROM Status;
+
+SELECT DISTINCT Unit FROM Status
+WHERE Unit LIKE 'S%'
+ORDER BY Unit;
+
+SELECT * FROM Status
+WHERE Unit = 'Turkey Point 3';
+-- WHERE Unit = 'Beaver Valley 1'
+-- WHERE Unit = 'FitzPatrick'
+-- WHERE Unit = 'Nine Mile Point 2'
+-- WHERE Unit = 'Seabrook 1'
+
+
+-- Get the day on day non zero changes in percent online
+SELECT ReportDt, Unit, Power, Prev_Power, Change
+FROM( 
+    SELECT ReportDt, 
+      Unit, 
+      Power,
+      LAG(Power) OVER (PARTITION BY Unit ORDER BY ReportDt) as Prev_Power,
+      Power - Prev_Power as Change, 
+    FROM Status 
+    WHERE ReportDt > current_date - 10
+    ) AS a
+WHERE Change != 0
+AND ReportDt = (SELECT MAX(ReportDt) FROM Status)
+ORDER BY Unit;
+
+
+
+-- Get average % 
+SELECT Unit, ROUND(MEAN(Power), 1) as Avg
+FROM Status
+GROUP BY Unit
+ORDER BY Avg;
+
+
+
+
+
 
 
 
