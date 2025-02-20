@@ -168,34 +168,34 @@ Future<void> insertDaCongestionCompactNyiso() async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> insertDaDemandBids() async {
-  var archive = DaDemandBidArchive();
-  // await archive.setupDb();
+// Future<void> insertDaDemandBids() async {
+//   var archive = DaDemandBidArchive();
+//   // await archive.setupDb();
 
-  // var days = [
-  //   // Date.utc(2017, 1, 1),
-  //   Date.utc(2017, 1, 2),
-  //   Date.utc(2017, 1, 3),
-  //   Date.utc(2017, 1, 4),
-  //   Date.utc(2017, 1, 5),
-  //   //   Date.utc(2017, 7, 1),
-  //   //   Date.utc(2017, 7, 2),
-  //   //   Date.utc(2017, 7, 3),
-  //   //   Date.utc(2017, 7, 4),
-  //   //   Date.utc(2017, 7, 5),
-  //   //   Date.utc(2019, 2, 28),
-  //   // Date.utc(2020, 9, 1),
-  //   //   Date.utc(2020, 10, 1),
-  // ];
-  var days = Term.parse('Feb23', UTC).days();
-  // await insertDays(archive, days, download: false);
-  await archive.dbConfig.db.open();
-  for (var day in days) {
-    await archive.downloadDay(day);
-    await archive.insertDay(day);
-  }
-  await archive.dbConfig.db.close();
-}
+//   // var days = [
+//   //   // Date.utc(2017, 1, 1),
+//   //   Date.utc(2017, 1, 2),
+//   //   Date.utc(2017, 1, 3),
+//   //   Date.utc(2017, 1, 4),
+//   //   Date.utc(2017, 1, 5),
+//   //   //   Date.utc(2017, 7, 1),
+//   //   //   Date.utc(2017, 7, 2),
+//   //   //   Date.utc(2017, 7, 3),
+//   //   //   Date.utc(2017, 7, 4),
+//   //   //   Date.utc(2017, 7, 5),
+//   //   //   Date.utc(2019, 2, 28),
+//   //   // Date.utc(2020, 9, 1),
+//   //   //   Date.utc(2020, 10, 1),
+//   // ];
+//   var days = Term.parse('Feb23', UTC).days();
+//   // await insertDays(archive, days, download: false);
+//   await archive.dbConfig.db.open();
+//   for (var day in days) {
+//     await archive.downloadDay(day);
+//     await archive.insertDay(day);
+//   }
+//   await archive.dbConfig.db.close();
+// }
 
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     {bool download = true}) async {

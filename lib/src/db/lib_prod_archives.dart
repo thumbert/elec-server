@@ -2,6 +2,7 @@ library lib.src.db.lib_prod_archives;
 
 import 'dart:io';
 
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/db_nyiso.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
@@ -120,6 +121,18 @@ DaLmpHourlyArchive getIsoneDaLmpArchive() {
   return DaLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
 }
 
+DaDemandBidArchive getIsoneDemandBidsArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/PricingReports/DaDemandBid';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return DaDemandBidArchive()
+    ..dir = dir
+    ..duckdbPath =
+        '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone_demand_bids.duckdb';
+}
+
 IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'isone', collectionName: 'hourly_btm_solar');
@@ -129,6 +142,24 @@ IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {
     dir.createSync(recursive: true);
   }
   return IsoneBtmSolarArchive(dbConfig: dbConfig, dir: dir.path);
+}
+
+MonthlyAssetNcpcArchive getIsoneMonthlyAssetNcpcArchive() {
+  var config = ComponentConfig(
+      host: dotenv.env['MONGO_CONNECTION']!,
+      dbName: 'isoexpress',
+      collectionName: 'monthly_asset_ncpc');
+  final dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/GridReports/MonthlyAssetNcpc';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+
+  /// data starts on 4/1/2019
+  return MonthlyAssetNcpcArchive()
+    ..dbConfig = config
+    ..dir = dir
+    ..reportName = 'Monthly NCPC credits by Asset Report';
 }
 
 MraCapacityBidOfferArchive getIsoneMraBidOfferArchive() {

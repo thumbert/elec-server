@@ -29,7 +29,7 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
 
   ///
   String getUrl(int year) {
-    return 'http://reports.ieso.ca/public/DemandZonal/PUB_DemandZonal_$year.csv';
+    return 'https://reports-public.ieso.ca/public/DemandZonal/PUB_DemandZonal_$year.csv';
   }
 
   File getFilename(int year) => File('$dir${basename(getUrl(year))}');

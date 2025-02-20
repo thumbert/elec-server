@@ -4,7 +4,27 @@
 - Clean up all the lints, warnings
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
+- Move ISONE Monthly Asset NCPC to DuckDB
 
+## Release 2025-02-20
+- Some work on mailtrap
+
+## Release 2025-02-12
+- Make a simple mailtrap email client
+- Fix masked isone rt energy offers yet again
+
+## Release 2025-02-10
+- Fix masked demand bids DuckDB enum
+
+## Release 2025-02-08
+- Add firstMonth/lastMonth to the MisReportArchive class to skip ingestion once 
+  the reports have been retired.
+
+## Release 2025-01-07
+- Fix ISONE Monthly Asset NCPC files with no data for the entire month.  
+
+## Release 2025-01-06
+- Change IESO public urls
 
 ## Release 2024-12-18
 - Stop pulling utility rates for Springfield, MA -- they are no longer published

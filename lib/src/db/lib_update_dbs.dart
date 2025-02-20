@@ -153,9 +153,6 @@ Future<void> updateDaEnergyOffersIsone(
       if (download) {
         await archive.downloadDay(day);
       }
-      // var file = archive.getFilename(day);
-      // var data = archive.processFile(file);
-      // await archive.insertData(data);
     }
     archive.makeGzFileForMonth(month);
     archive.updateDuckDb(
@@ -317,6 +314,40 @@ Future<void> updateIsoneDaLmp(
   }
 }
 
+Future<void> updateIsoneDemandBids(
+    {required List<Month> months, required bool download}) async {
+  assert(months.first.location == IsoNewEngland.location);
+  var archive = prod.getIsoneDemandBidsArchive();
+  for (var month in months) {
+    var days = month.days();
+    for (var day in days) {
+      if (download) {
+        if (!archive.skipDays.contains(day)) {
+          await archive.downloadDay(day);
+        }
+      }
+    }
+    archive.makeGzFileForMonth(month);
+    archive.updateDuckDb(
+        months: [month],
+        pathDbFile:
+            '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone_demand_bids.duckdb');
+  }
+}
+
+Future<void> updateIsoneMonthlyAssetNcpc(
+    {required List<Month> months, required bool download}) async {
+  assert(months.first.location == IsoNewEngland.location);
+  var archive = prod.getIsoneMonthlyAssetNcpcArchive();
+  await archive.dbConfig.db.open();
+  for (var month in months) {
+    await archive.downloadMonth(month);
+    var data = archive.processFile(archive.getFilename(month));
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
 //
 Future<void> updateIsoneMraCapacityResults(
     {required List<Month> months, required bool download}) async {
@@ -459,19 +490,14 @@ Future<void> updatePolygraphProjects({bool setUp = false}) async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> updateRtEnergyOffersIsone(
+Future<void> updateIsoneRtEnergyOffers(
     {required List<Month> months, bool download = false}) async {
   var archive = prod.getIsoneRtEnergyOfferArchive();
   assert(months.first.location == IsoNewEngland.location);
   for (var month in months) {
     for (var day in month.days()) {
       if (download) {
-        var file = archive.getFilename(day);
-        var res = await baseDownloadUrl(archive.getUrl(day), file,
-            username: dotenv.env['ISONE_WS_USER'],
-            password: dotenv.env['ISONE_WS_PASSWORD'],
-            acceptHeader: 'application/json');
-        if (res != 0) throw StateError('Failed to download day $day');
+        await archive.downloadDay(day);
       }
     }
     archive.makeGzFileForMonth(month);

@@ -12,6 +12,12 @@ import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 
+
+/// ISO-NE rolled out improvements to the Morning Report, including a “next day”
+/// operational capacity report.  Starting December 19, 2024 for the December 20 
+/// operating day, ISO-NE began posting three “Morning Reports” for an 
+/// operating day: by 4pm on the day before and by 8 am and noon of the 
+/// operating day.
 class MorningReportArchive {
   MorningReportArchive({required this.dir});
 

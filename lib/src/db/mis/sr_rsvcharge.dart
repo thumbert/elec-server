@@ -3,6 +3,7 @@ library db.mis.sr_rsvcharge;
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:table/table.dart';
@@ -11,7 +12,6 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:tuple/tuple.dart';
 
 class SrRsvChargeArchive extends mis.MisReportArchive {
-  final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
   SrRsvChargeArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RSVCHARGE';
@@ -21,6 +21,11 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
         collectionName: reportName.toLowerCase());
     this.dbConfig = dbConfig;
   }
+
+  @override
+  Month get lastMonth => Month(2025, 2, location: IsoNewEngland.location);
+
+  final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
   Map<int, List<Map<String, dynamic>>> _processFile_21000101(File file) {
     var report = mis.MisReport(file);

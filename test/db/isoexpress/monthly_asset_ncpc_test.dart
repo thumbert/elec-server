@@ -3,17 +3,19 @@ library test.db.isoexpress.monthly_ncpc_asset_test;
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/client/isoexpress/monthly_asset_ncpc.dart';
+import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/isoexpress/monthly_asset_ncpc.dart';
 
 Future<void> tests(String rootUrl) async {
-  var archive = MonthlyAssetNcpcArchive();
+  final archive = getIsoneMonthlyAssetNcpcArchive();
   group('Monthly NCPC by asset db tests:', () {
-    setUp(() async => await archive.db.open());
+    setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
     test('read file for 2019-01', () async {
       var file = archive.getFilename(Month.utc(2019, 1));
@@ -28,11 +30,16 @@ Future<void> tests(String rootUrl) async {
         'rtNcpc': 628.87,
       });
     });
+    test('read empty file for 2022-12', () {
+      var file = archive.getFilename(Month.utc(2022, 12));
+      var data = archive.processFile(file);
+      expect(data.isEmpty, true);
+    });
   });
   group('Monthly NCPC by asset API tests:', () {
-    var api = ApiMonthlyAssetNcpc(archive.db);
-    setUp(() async => await archive.db.open());
-    tearDown(() async => await archive.db.close());
+    var api = ApiMonthlyAssetNcpc(archive.dbConfig.db);
+    setUp(() async => await archive.dbConfig.db.open());
+    tearDown(() async => await archive.dbConfig.db.close());
     test('Get NCPC for all assets Jan19-Mar19', () async {
       var res = await api.apiGetAllAssets('2019-01', '2019-03');
       expect(res.length, 1435);
@@ -169,8 +176,15 @@ Future<void> tests(String rootUrl) async {
 Future<void> main() async {
   initializeTimeZones();
   DbProd();
+  dotenv.load('.env/prod.env');
+  var rootUrl = dotenv.env['ROOT_URL']!;
+
+  Logger.root.level = Level.WARNING;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+
   // await MonthlyAssetNcpcArchive().setupDb();
 
-  var rootUrl = 'http://127.0.0.1:8080';
   await tests(rootUrl);
 }

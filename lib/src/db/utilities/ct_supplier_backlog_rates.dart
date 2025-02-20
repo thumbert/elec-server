@@ -59,26 +59,54 @@ class CtSupplierBacklogRatesArchive {
       '$monthName StLgt': 'StreetLights',
     };
 
+    /// starting in 2022-11, Eversource started to publish the kWhs
+    final hasKwh = month.isAfter(Month.utc(2022, 10));
+
     var out = <Map<String, dynamic>>[];
     for (var tabName in decoder.tables.keys) {
+      final hasHardshipStatus =
+          month.isAfter(Month.utc(2024, 11)) && tabName.contains('Residential');
+
       var table = decoder.tables[tabName]!;
 
-      /// starting in 2022-11, Eversource started to publish the kWhs
-      var hasKwh = table.rows.first.length == 5;
       var data = <Map<String, dynamic>>[];
       for (var row in table.rows.skip(1)) {
+        num count = (hasKwh) ? row[4] : row[3];
+        late bool hardship;
+        if (hasHardshipStatus) {
+          var r5 = (row[5] as String).trim();
+          hardship = r5 == 'Y'
+              ? true
+              : r5 == 'N'
+                  ? false
+                  : throw StateError(
+                      'Hardship status ${row[5]} not supported!');
+        }
         data.add({
           'code': row[0] as String,
           'supplierName': (row[1] as String).trim(),
           'price': row[2] as num,
           if (hasKwh) 'kWh': row[3] as num,
-          'customerCount': (hasKwh) ? row[4] as int : row[3] as int,
+          'customerCount': count.round(),
+          if (hasHardshipStatus) 'hardship': hardship,
         });
       }
+
+      // aggregate data by supplier
       var groups = groupBy(data, (e) => e['supplierName']);
       for (var supplierName in groups.keys) {
         var xs = groups[supplierName]!;
         var totalCustomerCount = sum(xs.map((e) => e['customerCount']));
+        late num avgPriceHardship;
+        if (hasHardshipStatus) {
+          avgPriceHardship = sum(xs
+                  .where((e) => e['hardship'])
+                  .map((e) => e['customerCount'] * e['price'])) /
+              sum(xs
+                  .where((e) => e['hardship'])
+                  .map((e) => e['customerCount']));
+        }
+
         var one = {
           'month': month.toIso8601String(),
           'utility': 'Eversource',
@@ -87,9 +115,16 @@ class CtSupplierBacklogRatesArchive {
           'price': xs.map((e) => e['price']).toList(),
           'summary': {
             'customerCount': totalCustomerCount,
+            if (hasHardshipStatus)
+              'hardshipCustomerCount': sum(xs
+                  .where((e) => e['hardship'])
+                  .map((e) => e['customerCount'])),
             'averagePriceWeightedByCustomerCount':
                 sum(xs.map((e) => e['customerCount'] * e['price'])) /
                     totalCustomerCount,
+            if (hasHardshipStatus && avgPriceHardship.isFinite)
+              'averagePriceWeightedByCustomerCountForHardshipCustomers':
+                  avgPriceHardship,
           }
         };
         if (hasKwh) {
@@ -105,9 +140,9 @@ class CtSupplierBacklogRatesArchive {
         out.add(one);
       }
     }
-
     return out;
   }
+
 
   List<Map<String, dynamic>> _processFileUi(File file) {
     var bytes = file.readAsBytesSync();

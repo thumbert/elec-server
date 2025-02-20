@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import 'package:archive/archive.dart';
+import 'package:elec/elec.dart';
 import 'package:path/path.dart';
 import 'package:csv/csv.dart';
 import 'package:date/date.dart';
@@ -58,6 +59,10 @@ abstract class MisReportArchive {
   late String reportName;
   late ComponentConfig dbConfig;
   final Location location = getLocation('America/New_York');
+
+  Month get firstMonth => Month(2002, 1, location: IsoNewEngland.location);
+
+  Month get lastMonth => Month(2199, 12, location: IsoNewEngland.location);
 
   /// A function to convert each row (or possibly a group of rows) of the
   /// report to a Map for insertion in a MongoDb document.

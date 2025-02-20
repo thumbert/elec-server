@@ -10,7 +10,6 @@ getNewUnits() {}
 /// Find the units that tripped (became unavailable in RT when they were available in DA)
 getUnitsUnavailableInRt() {}
 
-
 enum UnitStatus {
   economic,
   unavailable,
@@ -79,18 +78,40 @@ class EnergyOfferSegment {
   ///
   static List<EnergyOfferSegment> fromJson(Map<String, dynamic> xs) {
     var out = <EnergyOfferSegment>[];
-    var aux =
-        ((xs['Segments'] as List).first as Map<String, dynamic>)['Segment'];
-    var segments = aux is List ? aux : [aux];
+    var segments = <Map<String, dynamic>>[];
+    var aux = xs['Segments'];
+    if (aux is Map) {
+      var segment = aux['Segment'];
+      if (segment is List) {
+        segments.add(segment.first as Map<String, dynamic>);
+      } else {
+        segments.add(segment as Map<String, dynamic>);
+      }
+    } else if (aux is List) {
+      var s = (aux.first as Map)['Segment'];
+      if (s is List) {
+        segments = s.cast<Map<String, dynamic>>();
+      } else {
+        segments = [s];
+      }
+    }
+    final claim10 = xs['Claim10Mw'] is String
+        ? num.parse(xs['Claim10Mw'])
+        : xs['Claim10Mw'] as num;
+    final claim30 = xs['Claim30Mw'] is String
+        ? num.parse(xs['Claim30Mw'])
+        : xs['Claim30Mw'] as num;
+    final start = TZDateTime.parse(IsoNewEngland.location, xs['BeginDate']);
     for (Map<String, dynamic> segment in segments) {
-      final start = TZDateTime.parse(IsoNewEngland.location, xs['BeginDate']);
-      final segmentIdx = int.parse(segment['@Number']) - 1;
+      var s = segment['@Number'] ?? segment['Number'];
+      final segmentIdx = (s is String) ? int.parse(s) - 1 : s;
       assert(segmentIdx >= 0);
       final price = segment['Price'] is String
           ? num.parse(segment['Price'])
           : segment['Price'];
       final mw =
           segment['Mw'] is String ? num.parse(segment['Mw']) : segment['Mw'];
+
       out.add(EnergyOfferSegment(
           hour: Hour.beginning(start),
           maskedParticipantId: xs['MaskedParticipantId'],
@@ -120,8 +141,8 @@ class EnergyOfferSegment {
           segment: segmentIdx,
           price: price,
           quantity: mw,
-          claim10: num.parse(xs['Claim10Mw']),
-          claim30: num.parse(xs['Claim30Mw']),
+          claim10: claim10,
+          claim30: claim30,
           unitStatus: UnitStatus.parse(xs['UnitStatus'])));
     }
     return out;
