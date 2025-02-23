@@ -8,6 +8,24 @@ WHERE Unit = 'Turkey Point 3';
 
 
 -- Get the day on day non zero changes in percent online
+SET VARIABLE asof_date = DATE '2025-02-19';
+CREATE TEMP TABLE Changes AS
+SELECT ReportDt, Unit, Power, Prev_Power, Change
+FROM( 
+    SELECT ReportDt, 
+      Unit, 
+      Power,
+      LAG(Power) OVER (PARTITION BY Unit ORDER BY ReportDt) as Prev_Power,
+      Power - Prev_Power as Change, 
+    FROM Status 
+    WHERE ReportDt > getvariable('asof_date') - 10
+    ) AS a
+WHERE Change != 0
+AND ReportDt = getvariable('asof_date')
+ORDER BY Unit;
+
+
+
 SELECT ReportDt, Unit, Power, Prev_Power, Change
 FROM( 
     SELECT ReportDt, 
@@ -30,7 +48,10 @@ FROM Status
 GROUP BY Unit
 ORDER BY Avg;
 
-
+SELECT DISTINCT(Unit)
+FROM Status
+WHERE Unit LIKE 'M%'
+ORDER BY Unit;
 
 
 ----####################################################
@@ -70,36 +91,6 @@ AS
 ;
 
 
-----------------------------------------------------------------------------------
-
--- SELECT * FROM Status LIMIT 5;
-
-
--- CREATE TEMPORARY TABLE tmp 
--- AS 
---     SELECT * 
---     FROM read_csv('/home/adrian/Downloads/Archive/NRC/ReactorStatus/Raw/2024powerstatus.txt.gz', 
---         delim = '|', 
---         header = true, 
---         ignore_errors = true, -- need this because the last row of file is wrong format!
---         columns = {
---             'ReportDt': 'VARCHAR',
---             'Unit': 'VARCHAR',
---             'Power': 'INT',
---         }
---     );
-
--- DELETE FROM Status
--- WHERE ReportDt >= '2024-01-01'
--- AND ReportDt <= '2024-12-31';
-
--- INSERT INTO Status
---     SELECT strptime(split_part(ReportDt, ' ', 1), '%m/%d/%Y')::DATE AS ReportDt, Unit, Power 
---     FROM tmp
---     ORDER BY ReportDt, Unit
--- ;
-
-
 -- Get the unique units
 SELECT DISTINCT Unit FROM Status
 ORDER BY Unit;
@@ -118,4 +109,12 @@ AND Unit in ('Byron 1', 'Calvert Cliffs 1')
 ORDER BY Unit, ReportDt;
 
 
+CREATE TABLE Groups AS
+    FROM '/home/adrian/Documents/config/update_nrc_generator_status/groups.csv';
 
+CREATE TABLE Emails AS
+    FROM '/home/adrian/Documents/config/update_nrc_generator_status/emails.csv';
+
+SELECT * FROM Changes c
+JOIN Groups g
+ON c.Unit = g.unit_name;
