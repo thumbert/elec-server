@@ -6,7 +6,7 @@ export 'src/utils/iterable_extensions.dart';
 export 'src/utils/layout_tree.dart';
 export 'src/utils/lib_plotly.dart';
 export 'src/utils/parse_custom_integer_range.dart';
-export 'src/utils/mailtrap.dart';
+// export 'src/utils/mailtrap.dart';
 export 'src/utils/string_extensions.dart';
 export 'src/utils/term_cache.dart';
 export 'src/utils/to_csv.dart';

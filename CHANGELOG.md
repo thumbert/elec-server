@@ -8,6 +8,7 @@
 
 ## Release 2025-02-28
 - Deal with empty DA binding constraints file, failed on 2/27/2025 
+- Don't export mailtrap in utils library
 
 ## Release 2025-02-20
 - Some work on mailtrap
