@@ -6,6 +6,7 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec/elec.dart';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';
+import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 // import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/zonal_demand.dart';
 import 'package:logging/logging.dart';
@@ -223,6 +224,21 @@ Future<void> updateIesoRtZonalDemandArchive(
   }
   await archive.dbConfig.db.close();
 }
+
+
+Future<void> updateIsoneDaBindingConstraints(List<Date> days,
+    {bool setup = false, bool externalDownload = true}) async {
+  var archive = DaBindingConstraintsReportArchive();
+  if (setup) await archive.setupDb();
+  await archive.dbConfig.db.open();
+  for (var day in days) {
+    if (externalDownload) await archive.downloadDay(day);
+    var data = archive.processFile(archive.getFilename(day));
+    await archive.insertData(data);
+  }
+  await archive.dbConfig.db.close();
+}
+
 
 Future<void> updateIsoneRtSystemLoad5minArchive(
     {required List<Date> days,

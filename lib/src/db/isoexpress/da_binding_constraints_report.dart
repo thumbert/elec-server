@@ -31,8 +31,8 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/dayaheadconstraints/day/${yyyymmdd(asOfDate)}';
 
   @override
-  File getFilename(Date asOfDate) => File(
-      '${dir}da_binding_constraints_final_${yyyymmdd(asOfDate)}.json');
+  File getFilename(Date asOfDate) =>
+      File('${dir}da_binding_constraints_final_${yyyymmdd(asOfDate)}.json');
 
   @override
   Future downloadDay(Date day) async {
@@ -40,8 +40,8 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
     var pwd = dotenv.env['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
-      ..addCredentials(Uri.parse(getUrl(day)), '',
-          HttpClientBasicCredentials(user, pwd))
+      ..addCredentials(
+          Uri.parse(getUrl(day)), '', HttpClientBasicCredentials(user, pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');
@@ -79,9 +79,11 @@ class DaBindingConstraintsReportArchive extends DailyIsoExpressReport {
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var aux = json.decode(file.readAsStringSync());
-    late List<Map<String,dynamic>> xs;
+    late List<Map<String, dynamic>> xs;
     if ((aux as Map).containsKey('DayAheadConstraints')) {
-      if (aux['DayAheadConstraints'] == '') return <Map<String, dynamic>>[];
+      var cs = aux['DayAheadConstraints'];
+      if (cs == '') return <Map<String, dynamic>>[];
+      if (cs is Map && cs.isEmpty) return <Map<String, dynamic>>[];
       xs = (aux['DayAheadConstraints']['DayAheadConstraint'] as List)
           .cast<Map<String, dynamic>>();
     } else {

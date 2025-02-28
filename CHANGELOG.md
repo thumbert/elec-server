@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+## Release 2025-02-28
+- Deal with empty DA binding constraints file, failed on 2/27/2025 
+
 ## Release 2025-02-20
 - Some work on mailtrap
 

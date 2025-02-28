@@ -36,6 +36,11 @@ Future<void> tests(String rootUrl) async {
       var data = archive.processFile(file);
       expect(data.isEmpty, true);
     });
+    test('empty file for 2025-02-27', () async {
+      var file = archive.getFilename(Date.utc(2025, 2, 27));
+      var data = archive.processFile(file);
+      expect(data.isEmpty, true);
+    });
     test('DA Binding Constraints Report for 2018-07-10 has duplicates',
         () async {
       var file = archive.getFilename(Date.utc(2018, 7, 10));

@@ -37,7 +37,9 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
 
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
-  // var days = Term.parse('1Jan24-29Feb24', UTC).days();
+  var days = Term.parse('27Feb25', UTC).days();
+
+  await updateIsoneDaBindingConstraints(days, externalDownload: true);
 
   ///---------------------------------------------------------------
   /// IESO
@@ -52,12 +54,12 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  final months = Month(2024, 7, location: IsoNewEngland.location)
-      .upTo(Month(2024, 7, location: IsoNewEngland.location));
+  // final months = Month(2024, 7, location: IsoNewEngland.location)
+  //     .upTo(Month(2024, 7, location: IsoNewEngland.location));
   // await updateIsoneDaLmp(months: months, download: true);
   // await updateIsoneMonthlyAssetNcpc(months: months, download: true);
   // await updateIsoneDemandBids(months: months, download: false);
-  await updateIsoneRtEnergyOffers(months: months, download: false);
+  // await updateIsoneRtEnergyOffers(months: months, download: false);
 
   // await updateIsoneRtLmp(months: months, download: true);
   // await updateIsoneRtLmp5Min(
