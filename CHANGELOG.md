@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+## Release 2025-03-09
+- Fix MRA results file format break
+
 ## Release 2025-02-28
 - Deal with empty DA binding constraints file, failed on 2/27/2025 
 - Don't export mailtrap in utils library

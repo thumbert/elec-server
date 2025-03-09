@@ -62,20 +62,19 @@ class MraCapacityResultsArchive {
   ///
   List<MraCapacityRecord> processFile(File file) {
     var aux = json.decode(file.readAsStringSync());
-    if (aux
-        case {
-          'FCMRAResults': {
-            'FCMRAResult': Map<String, dynamic> data,
-          }
-        }) {
-      return [
-        ...MraCapacityZoneRecord.fromJson(data),
-        ...MraCapacityInterfaceRecord.fromJson(data),
-      ];
+    var results = aux['FCMRAResults']['FCMRAResult'];
+    late Map<String, dynamic> data;
+    if (results is List) {
+      data = results.first;
     } else {
-      throw const FormatException('Wrong json input!');
+      data = results;
     }
+    return [
+      ...MraCapacityZoneRecord.fromJson(data),
+      ...MraCapacityInterfaceRecord.fromJson(data),
+    ];
   }
+
 
   int updateDuckDb({required List<Month> months, required String pathDbFile}) {
     final con = Connection(pathDbFile);

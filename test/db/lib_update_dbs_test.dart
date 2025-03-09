@@ -37,9 +37,8 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
 
 Future<void> tests() async {
   // var days = Date.today(location: UTC).next.previousN(4);
-  var days = Term.parse('27Feb25', UTC).days();
-
-  await updateIsoneDaBindingConstraints(days, externalDownload: true);
+  // var days = Term.parse('27Feb25', UTC).days();
+  // await updateIsoneDaBindingConstraints(days, externalDownload: true);
 
   ///---------------------------------------------------------------
   /// IESO
@@ -69,15 +68,15 @@ Future<void> tests() async {
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
-  // final months = Month(2022, 2, location: IsoNewEngland.location)
-  //     .upTo(Month(2022, 12, location: IsoNewEngland.location));
+  final months = Month(2024, 8, location: IsoNewEngland.location)
+      .upTo(Month(2025, 4, location: IsoNewEngland.location));
   // await updateDaEnergyOffersIsone(months: months, download: true);
   // await updateRtEnergyOffersIsone(months: months, download: true);
   // await updateMorningReport(months: months, download: true);
   // await updateIsoneRtReservePrices(months: months, download: true);
   // await updateSevenDayCapacityForecast(months: months);
   // await updateIsoneMraCapacityBidOffer(months: months, download: false);
-  // await updateIsoneMraCapacityResults(months: months, download: false);
+  await updateIsoneMraCapacityResults(months: months, download: true);
 
   // await updateCmeEnergySettlements(days, setUp: false);
   // var months = Month.utc(2024, 2).upTo(Month.utc(2024, 10));

@@ -12,12 +12,13 @@ import 'package:timezone/data/latest.dart';
 Future<void> tests() async {
   final archive = getIsoneMraResultsArchive();
   group('ISONE MRA results tests:', () {
-    test('read file for 2024-01-01', () async {
+    test('read file for 2024-01', () async {
       var file = archive.getFilename(Month.utc(2024, 1));
       var data = archive.processFile(file);
       expect(data.length, 9); // 4 zones + 5 interfaces
-      final sene = data
-          .whereType<MraCapacityZoneRecord>()
+      final zones = data.whereType<MraCapacityZoneRecord>().toList();
+      expect(zones.length, 4);
+      final sene = zones
           .firstWhere((e) => e.capacityZoneName == 'Southeast New England');
       expect(sene.clearingPrice, 3.938);
       expect(sene.supplyOffersSubmitted, 428.687);
@@ -33,7 +34,20 @@ Future<void> tests() async {
       expect(nb.netCapacityCleared, -72);
 
       // to json
-      print(sene.toJson().keys.join(',\n'));
+      // print(sene.toJson().keys.join(',\n'));
+    });
+    test('read 2024-08 (new format)', () {
+      var file = archive.getFilename(Month.utc(2024, 8));
+      var data = archive.processFile(file);
+      expect(data.length, 9); // 4 zones + 5 interfaces
+      final zones = data.whereType<MraCapacityZoneRecord>().toList();
+      expect(zones.length, 4);
+      final sene = zones
+          .firstWhere((e) => e.capacityZoneName == 'Southeast New England');
+      expect(sene.clearingPrice, 10.0);
+      expect(sene.supplyOffersSubmitted, 173.028);
+      expect(sene.demandBidsSubmitted, 1779.517);
+      expect(sene.netCapacityCleared, 0);
     });
   });
   //

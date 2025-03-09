@@ -97,6 +97,7 @@ class MraCapacityZoneRecord extends MraCapacityRecord {
     return out;
   }
 
+
   Map<String, dynamic> toJson() {
     return {
       'month': month.toInt(),
@@ -149,6 +150,8 @@ class MraCapacityInterfaceRecord extends MraCapacityRecord {
   final num clearingPrice;
 
   /// Input is the Map from ['FCMRAResults']['FCMRAResult'] 
+  /// 
+  /// Input is the Map from ['FCMRAResults']['FCMRAResult']
   static List<MraCapacityInterfaceRecord> fromJson(Map<String, dynamic> x) {
     final month =
         Month.parse((x['Auction']['Description'] as String), location: UTC);
@@ -164,6 +167,8 @@ class MraCapacityInterfaceRecord extends MraCapacityRecord {
         interfaceData = [interfaces];
       } else if (interfaces is List) {
         interfaceData = interfaces;
+      } else if (interfaces == null) {
+        continue;
       } else {
         throw StateError('Problem parsing interface data $interfaces');
       }
@@ -183,6 +188,8 @@ class MraCapacityInterfaceRecord extends MraCapacityRecord {
 
     return out;
   }
+
+
 
   Map<String, dynamic> toJson() {
     return {
