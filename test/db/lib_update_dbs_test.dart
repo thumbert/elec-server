@@ -68,20 +68,20 @@ Future<void> tests() async {
 
   // await updateIsoneZonalDemand([2021], download: false);
   // await updateIsoneZonalDemand(IntegerRange(2011, 2021));
-  final months = Month(2024, 8, location: IsoNewEngland.location)
-      .upTo(Month(2025, 4, location: IsoNewEngland.location));
+  // final months = Month(2024, 8, location: IsoNewEngland.location)
+  //     .upTo(Month(2025, 4, location: IsoNewEngland.location));
   // await updateDaEnergyOffersIsone(months: months, download: true);
   // await updateRtEnergyOffersIsone(months: months, download: true);
   // await updateMorningReport(months: months, download: true);
   // await updateIsoneRtReservePrices(months: months, download: true);
   // await updateSevenDayCapacityForecast(months: months);
   // await updateIsoneMraCapacityBidOffer(months: months, download: false);
-  await updateIsoneMraCapacityResults(months: months, download: true);
+  // await updateIsoneMraCapacityResults(months: months, download: true);
 
   // await updateCmeEnergySettlements(days, setUp: false);
-  // var months = Month.utc(2024, 2).upTo(Month.utc(2024, 10));
-  // await updateCtSupplierBacklogRatesDb(months: months,
-  //     externalDownload: true);
+  var months = Month.utc(2025, 1).upTo(Month.utc(2025, 1));
+  await updateCtSupplierBacklogRatesDb(months: months,
+      externalDownload: true);
 
   // var years = IntegerRange(2020, 2024);
   // await updateCmpLoadArchive(years, setUp: true);

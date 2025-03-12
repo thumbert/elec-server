@@ -9,3 +9,6 @@ A web server built using [Shelf](https://pub.dartlang.org/packages/shelf).
   start in the ~/Documents/apps directory
   static-web-server --host 127.0.0.1 --port 9000 --log-level info 
   navigate to http://127.0.0.1:9000/documentation.html and you should be able to see it
+
+
+cp ~/Documents/repos/git/thumbert/rascal/html/docs/index.html ~/Software/Apps/public/docs   
