@@ -4,10 +4,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:date/date.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec/elec.dart';
 import 'package:elec/ftr.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
+import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
@@ -69,7 +71,6 @@ Future<void> tests(String rootUrl) async {
     //     'clearingPriceHour': 43.19801664355062,
     //   });
     // }, solo: true);
-
   });
   group('TCC clearing prices API tests:', () {
     var api = ApiNyisoTccClearingPrices(
@@ -163,6 +164,8 @@ Future<void> tests(String rootUrl) async {
 
 void main() async {
   initializeTimeZones();
-  var rootUrl = 'http://127.0.0.1:8080';
+  DbProd();
+  dotenv.load('.env/test.env');
+  var rootUrl = dotenv.env['ROOT_URL']!;
   tests(rootUrl);
 }

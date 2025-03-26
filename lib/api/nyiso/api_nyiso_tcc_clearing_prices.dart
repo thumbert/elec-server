@@ -32,8 +32,8 @@ class ApiNyisoTccClearingPrices {
 
     //http://localhost:8080/nyiso/tcc_clearing_prices/v1/ptids/61752,61758
     router.get('/ptids/<ptids>', (Request request, String ptids) async {
-      var _ptids = ptids.split(',').map((e) => int.parse(e)).toList();
-      var res = await clearingPricesSeveralPtids(_ptids);
+      var ptidSplit = ptids.split(',').map((e) => int.parse(e)).toList();
+      var res = await clearingPricesSeveralPtids(ptidSplit);
       return Response.ok(json.encode(res), headers: headers);
     });
 

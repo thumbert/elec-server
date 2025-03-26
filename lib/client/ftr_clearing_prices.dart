@@ -39,10 +39,9 @@ class FtrClearingPrices {
   /// ```
   /// The clearing price is in $/MWh
   Future<List<Map<String, dynamic>>> getClearingPricesForPtid(int ptid) async {
-    var _url = rootUrl + _isoMap[iso]! + '/ptid/$ptid';
-
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var url = '$rootUrl${_isoMap[iso]!}/ptid/$ptid';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     return data.cast<Map<String, dynamic>>();
   }
 
@@ -62,10 +61,9 @@ class FtrClearingPrices {
   /// The clearing price is in $/MWh
   Future<List<Map<String, dynamic>>> getClearingPricesForPtids(
       List<int> ptids) async {
-    var _url = rootUrl + _isoMap[iso]! + '/ptids/${ptids.join(',')}';
-
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var url = '$rootUrl${_isoMap[iso]!}/ptids/${ptids.join(',')}';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     return data.cast<Map<String, dynamic>>();
   }
 
@@ -82,10 +80,9 @@ class FtrClearingPrices {
   /// The clearing price is in $/MWh
   Future<List<Map<String, dynamic>>> getClearingPricesForAuction(
       String auctionName) async {
-    var _url = rootUrl + _isoMap[iso]! + '/auction/$auctionName';
-
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var url = '$rootUrl${_isoMap[iso]!}/auction/$auctionName';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     return data.cast<Map<String, dynamic>>();
   }
 
@@ -93,9 +90,9 @@ class FtrClearingPrices {
   /// If [startDate] is specified, return all auctions that are live on
   /// [startDate] or start after it.
   Future<List<FtrAuction>> getAuctions({Date? startDate}) async {
-    var _url = rootUrl + _isoMap[iso]! + '/auctions';
-    var _response = await http.get(Uri.parse(_url));
-    var data = json.decode(_response.body) as List;
+    var url = '$rootUrl${_isoMap[iso]!}/auctions';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
     var res = data.map((e) => FtrAuction.parse(e, iso: iso));
     if (startDate == null) {
       return res.toList();

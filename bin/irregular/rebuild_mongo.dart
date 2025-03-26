@@ -191,7 +191,7 @@ Future<void> recreateIsoneHistoricalBtmSolar() async {
 }
 
 Future<void> recreateMonthlyAssetNcpc() async {
-  var archive = MonthlyAssetNcpcArchive();
+  var archive = getIsoneMonthlyAssetNcpcArchive();
   await archive.setupDb();
   var files = Directory(archive.dir).listSync().whereType<File>().toList();
   files.sort((a, b) => a.path.compareTo(b.path));
@@ -557,43 +557,39 @@ Future<void> main() async {
   // await recreateIesoRtGenerationArchive();
   // await recreateIesoRtZonalDemandArchive();
 
-  /// ISONE
+  // /// ISONE
   // await recreateCompetitiveOffersIsone();
-  await recreateDaBindingConstraintsIsone();
+  // await recreateDaBindingConstraintsIsone();
   // await recreateDaLmpHourlyIsone();
   // await recreateDaCongestionCompactIsone();
-  // await recreateDaDemandBid();
-  // await recreateDaEnergyOffersIsone();
   // await recreateFwdResAuctionResults();
   // await recreateIsoneHistoricalBtmSolar();
-  // await insertMaskedAssetIdsIsone();
+  // // await insertMaskedAssetIdsIsone();
   // await recreatePtidTableIsone();
   // await recreateRegulationRequirementIsone();
   // await recreateRtLmpHourlyIsone();
   // await recreateMisTemplateArchive();
   // await recreateWholesaleLoadCostReportIsone();
 
-  /// NYISO
-  // await insertMaskedAssetIdsNyiso();
+  // /// NYISO
+  // // await insertMaskedAssetIdsNyiso();
   // await recreateMonthlyAssetNcpc();
   // await recreateDaBindingConstraintsNyiso();
   // await recreateDaLmpHourlyNyiso();
   // await recreateTccClearedPricesNyiso();
   // await recreateDaCongestionCompactNyiso();
-  // await recreateDaEnergyOffersNyiso();
   // await recreateRtLmpHourlyNyiso();
   // await recreatePtidTableNyiso();
 
   /// PJM
-  // await recreatePtidTablePjm();
+  await recreatePtidTablePjm();
 
   /// Other
-  // await recreateNoaaTemperatures();
-  // await rebuildCurveIds();
-  // await insertForwardMarks();
-  // await recreateCmeMarks();
-  // await updatePolygraphProjects(setUp: true);
+  await recreateNoaaTemperatures();
+  await rebuildCurveIds();
+  await recreateCmeMarks();
+  await updatePolygraphProjects(setUp: true);
 
-  /// Utilities
+  // /// Utilities
   // await recreateCmpLoadArchive(setUp: true);
 }

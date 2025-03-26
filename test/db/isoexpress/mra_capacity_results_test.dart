@@ -1,9 +1,7 @@
 library test.db.isoexpress.mra_capacity_results_test;
 
-import 'dart:io';
 
 import 'package:date/date.dart';
-import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/client/isoexpress/mra_capacity_results.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:test/test.dart';
