@@ -225,7 +225,6 @@ Future<void> updateIesoRtZonalDemandArchive(
   await archive.dbConfig.db.close();
 }
 
-
 Future<void> updateIsoneDaBindingConstraints(List<Date> days,
     {bool setup = false, bool externalDownload = true}) async {
   var archive = DaBindingConstraintsReportArchive();
@@ -238,7 +237,6 @@ Future<void> updateIsoneDaBindingConstraints(List<Date> days,
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> updateIsoneRtSystemLoad5minArchive(
     {required List<Date> days,
@@ -382,12 +380,8 @@ Future<void> updateIsoneMraCapacityResults(
           password: dotenv.env['ISONE_WS_PASSWORD']);
       log.info('   Downloaded JSON file for ${month.toIso8601String()}');
     }
-    try {
-      archive.makeCsvFileForDuckDb(month);
-      log.info('   Created CSV files for month ${month.toIso8601String()}');
-    } catch (e) {
-      log.severe(e.toString());
-    }
+    archive.makeCsvFileForDuckDb(month);
+    log.info('   Created CSV files for month ${month.toIso8601String()}');
     archive.updateDuckDb(
         months: [month],
         pathDbFile:

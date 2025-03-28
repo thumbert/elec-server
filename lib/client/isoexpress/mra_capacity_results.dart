@@ -79,7 +79,13 @@ class MraCapacityZoneRecord extends MraCapacityRecord {
   static List<MraCapacityZoneRecord> fromJson(Map<String, dynamic> x) {
     final month =
         Month.parse((x['Auction']['Description'] as String), location: UTC);
-    final zs = x['ClearedCapacityZones']['ClearedCapacityZone'] as List;
+    final auction = x['Auction'] as Map;
+    late List<dynamic> zs;
+    if (auction.containsKey('ClearedCapacityZones')) {
+      zs = auction['ClearedCapacityZones']['ClearedCapacityZone'];
+    } else {
+      zs = x['ClearedCapacityZones']['ClearedCapacityZone'];
+    }
     var out = <MraCapacityZoneRecord>[];
     for (Map<String, dynamic> zoneData in zs) {
       out.add(MraCapacityZoneRecord(
@@ -96,7 +102,6 @@ class MraCapacityZoneRecord extends MraCapacityRecord {
     }
     return out;
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -149,13 +154,21 @@ class MraCapacityInterfaceRecord extends MraCapacityRecord {
   /// in $/kW-month
   final num clearingPrice;
 
-  /// Input is the Map from ['FCMRAResults']['FCMRAResult'] 
-  /// 
+  /// Input is the Map from ['FCMRAResults']['FCMRAResult']
+  ///
   /// Input is the Map from ['FCMRAResults']['FCMRAResult']
   static List<MraCapacityInterfaceRecord> fromJson(Map<String, dynamic> x) {
     final month =
         Month.parse((x['Auction']['Description'] as String), location: UTC);
-    final zs = x['ClearedCapacityZones']['ClearedCapacityZone'] as List;
+    final auction = x['Auction'] as Map;
+    // In 2025-04, the ISO changed the format by nesting the field 'ClearedCapacityZones' 
+    // under 'Auction'. 
+    late List<dynamic> zs;
+    if (auction.containsKey('ClearedCapacityZones')) {
+      zs = auction['ClearedCapacityZones']['ClearedCapacityZone'];
+    } else {
+      zs = x['ClearedCapacityZones']['ClearedCapacityZone'];
+    }
     var out = <MraCapacityInterfaceRecord>[];
     for (Map<String, dynamic> zoneData in zs) {
       var interfaces = zoneData['ClearedExternalInterfaces'];
@@ -188,8 +201,6 @@ class MraCapacityInterfaceRecord extends MraCapacityRecord {
 
     return out;
   }
-
-
 
   Map<String, dynamic> toJson() {
     return {

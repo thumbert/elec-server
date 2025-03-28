@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+## Release 2025-03-28
+- Fix MRA results file format break
+
 ## Release 2025-03-26
 - Don't delete all documents from Mongo collections on archive.setup() method!  Bad design! 
 
