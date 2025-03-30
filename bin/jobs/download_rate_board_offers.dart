@@ -13,7 +13,7 @@ Future<int> main() async {
   var archive = prod.getRetailSuppliersOffersArchive();
   await archive.saveCurrentRatesToFile();
 
-  var status = await updateCompetiveOffersDb(
+  var status = await updateCompetitiveOffersDb(
       days: [Date.today(location: UTC)],
       states: ['CT', 'MA'],
       externalDownload: false);

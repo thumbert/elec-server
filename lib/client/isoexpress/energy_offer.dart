@@ -88,11 +88,11 @@ class EnergyOfferSegment {
         segments.add(segment as Map<String, dynamic>);
       }
     } else if (aux is List) {
-      var s = (aux.first as Map)['Segment'];
-      if (s is List) {
-        segments = s.cast<Map<String, dynamic>>();
+      var s = aux.map((e) => e['Segment']).toList();
+      if (s.first is List) {
+        segments = (s.first as List).cast<Map<String, dynamic>>();
       } else {
-        segments = [s];
+        segments = [...s.cast<Map<String,dynamic>>()];
       }
     }
     final claim10 = xs['Claim10Mw'] is String

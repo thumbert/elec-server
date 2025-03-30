@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+## Release 2025-03-30
+- Convert ISONE energy offers to json format and support DuckDB only
+
 ## Release 2025-03-28
 - Fix MRA results file format break
 

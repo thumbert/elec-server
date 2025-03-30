@@ -85,6 +85,16 @@ Flags:
     errors.add(e.toString());
   }
 
+  /// regulation
+  // var days = focusMonth.days();
+  // try {
+  //   await updateDaRegulationOffersDb(days);
+  // } catch (e) {
+  //   errors.add('=======================================================');
+  //   errors.add('Failed to update ISONE regulation offers for $focusMonth');
+  //   errors.add(e.toString());
+  // }
+
   /// MRA bids/offers
   try {
     await updateIsoneMraCapacityBidOffer(months: [focusMonth], download: true);

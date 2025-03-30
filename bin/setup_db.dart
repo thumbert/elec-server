@@ -210,18 +210,6 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
   await archive.dbConfig.db.close();
 }
 
-Future<void> insertDaEnergyOffers({List<Date>? days}) async {
-  /// What I need to pass the tests
-  days ??= Term.parse('Jan17-Dec17', UTC).days();
-
-  var archive = DaEnergyOfferArchive();
-  await archive.dbConfig.db.open();
-  for (var day in days) {
-    await archive.downloadDay(day);
-    await archive.insertDay(day);
-  }
-  await archive.dbConfig.db.close();
-}
 
 Future<void> insertDaEnergyOffersNyiso() async {
   var archive = NyisoEnergyOfferArchive();
