@@ -277,7 +277,7 @@ Future<void> recreateDaLmpHourlyNyiso() async {
 }
 
 Future<void> recreateTccClearedPricesNyiso() async {
-  var archive = NyisoTccClearingPrices();
+  var archive = getNyisoTccClearingPriceArchive();
   await archive.setupDb();
   await archive.db.open();
   var files = Directory(archive.dir).listSync().whereType<File>();

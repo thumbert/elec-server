@@ -17,15 +17,9 @@ import 'package:html/parser.dart' show parse;
 
 class NyisoTccClearingPrices extends NyisoReport {
   NyisoTccClearingPrices(
-      {ComponentConfig? config, String? dir, String? outDir}) {
-    Map env = Platform.environment;
-    config ??= ComponentConfig(
-        host: '127.0.0.1',
-        dbName: 'nyiso',
-        collectionName: 'tcc_clearing_prices');
+      {required ComponentConfig config, required String dir, String? outDir}) {
     dbConfig = config;
-    dir ??= env['HOME']! + '/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/';
-    this.dir = dir!;
+    this.dir = dir;
     reportName = 'NYISO TCC clearing prices';
   }
 
@@ -38,14 +32,15 @@ class NyisoTccClearingPrices extends NyisoReport {
   /// no files are saved on the file system yet.
   int lastAuctionId() {
     var regex = RegExp(r'clearingprices_(\d+).csv');
-    
+
     var files = Directory(dir)
         .listSync()
         .whereType<File>()
         .where((e) => regex.hasMatch(basename(e.path)))
         .toList();
     if (files.isEmpty) {
-      throw StateError('There are no files with TTC clearing prices downloaded.\n'
+      throw StateError(
+          'There are no files with TTC clearing prices downloaded.\n'
           'Use archive.downloadPrices() to get some files.');
     }
 
@@ -230,5 +225,4 @@ class NyisoTccClearingPrices extends NyisoReport {
 
     return ids;
   }
-
 }

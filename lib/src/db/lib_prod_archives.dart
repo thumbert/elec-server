@@ -257,6 +257,20 @@ NyisoEnergyOfferArchive getNyisoEnergyOfferArchive() {
   return NyisoEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
 }
 
+NyisoTccClearingPrices getNyisoTccClearingPriceArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1',
+      dbName: 'nyiso',
+      collectionName: 'tcc_clearing_prices');
+  var dir =
+      '${Platform.environment['HOME']!}/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/';
+
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return NyisoTccClearingPrices(config: dbConfig, dir: dir);
+}
+
 PolygraphArchive getPolygraphArchive() {
   var dbConfig = ComponentConfig(
       host: '127.0.0.1', dbName: 'polygraph', collectionName: 'projects');
