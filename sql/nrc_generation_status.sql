@@ -6,8 +6,24 @@ WHERE Unit = 'Turkey Point 3';
 -- WHERE Unit = 'Nine Mile Point 2'
 -- WHERE Unit = 'Seabrook 1'
 
+-- Get the change as of last day in the database
+CREATE TEMP TABLE Changes AS
+    SELECT ReportDt, Unit, Power, Prev_Power, Change
+    FROM( 
+        SELECT ReportDt, 
+        Unit, 
+        Power,
+        LAG(Power) OVER (PARTITION BY Unit ORDER BY ReportDt) as Prev_Power,
+        Power - Prev_Power as Change, 
+        FROM Status 
+        WHERE ReportDt > current_date - 10
+        ) AS a
+    WHERE Change != 0
+    AND ReportDt = (SELECT MAX(ReportDt) FROM Status)
+    ORDER BY Unit;
 
--- Get the day on day non zero changes in percent online
+
+-- Get the day on day non zero changes in percent online as of a given date
 SET VARIABLE asof_date = DATE '2025-02-19';
 CREATE TEMP TABLE Changes AS
 SELECT ReportDt, Unit, Power, Prev_Power, Change
@@ -24,21 +40,6 @@ WHERE Change != 0
 AND ReportDt = getvariable('asof_date')
 ORDER BY Unit;
 
-
-
-SELECT ReportDt, Unit, Power, Prev_Power, Change
-FROM( 
-    SELECT ReportDt, 
-      Unit, 
-      Power,
-      LAG(Power) OVER (PARTITION BY Unit ORDER BY ReportDt) as Prev_Power,
-      Power - Prev_Power as Change, 
-    FROM Status 
-    WHERE ReportDt > current_date - 10
-    ) AS a
-WHERE Change != 0
-AND ReportDt = (SELECT MAX(ReportDt) FROM Status)
-ORDER BY Unit;
 
 
 
@@ -109,12 +110,14 @@ AND Unit in ('Byron 1', 'Calvert Cliffs 1')
 ORDER BY Unit, ReportDt;
 
 
-CREATE TABLE Groups AS
+CREATE TEMP TABLE Groups AS
     FROM '/home/adrian/Documents/config/update_nrc_generator_status/groups.csv';
 
-CREATE TABLE Emails AS
+CREATE TEMP TABLE Emails AS
     FROM '/home/adrian/Documents/config/update_nrc_generator_status/emails.csv';
 
-SELECT * FROM Changes c
+
+SELECT c.*, g.group FROM Changes c
 JOIN Groups g
 ON c.Unit = g.unit_name;
+

@@ -62,17 +62,13 @@ CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {
   return archive;
 }
 
-DaEnergyOfferArchive getDaEnergyOfferArchive() {
-  var dbConfig = ComponentConfig(
-      host: '127.0.0.1',
-      dbName: 'isoexpress',
-      collectionName: 'da_energy_offer');
+DaEnergyOfferArchive getIsoneDaEnergyOfferArchive() {
   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
-      '/IsoExpress/PricingReports/DaEnergyOffer/Raw/';
+      '/IsoExpress/PricingReports/DaEnergyOffer';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
-  return DaEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
+  return DaEnergyOfferArchive(dir: dir);
 }
 
 IesoRtGenerationArchive getIesoRtGenerationArchive() {
@@ -259,6 +255,20 @@ NyisoEnergyOfferArchive getNyisoEnergyOfferArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return NyisoEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
+}
+
+NyisoTccClearingPrices getNyisoTccClearingPriceArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1',
+      dbName: 'nyiso',
+      collectionName: 'tcc_clearing_prices');
+  var dir =
+      '${Platform.environment['HOME']!}/Downloads/Archive/Nyiso/TCC/ClearingPrices/Raw/';
+
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return NyisoTccClearingPrices(config: dbConfig, dir: dir);
 }
 
 PolygraphArchive getPolygraphArchive() {

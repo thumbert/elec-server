@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS results_zone (
 );
 ''');
     for (var month in months) {
-      log.info('Inserting month ${month.toIso8601String()}...');
+      log.info('Inserting zone results for month ${month.toIso8601String()}...');
       // remove the data if it's already there
       con.execute('''
 DELETE FROM results_zone 
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS results_interface (
 );
 ''');
     for (var month in months) {
-      log.info('Inserting month ${month.toIso8601String()}...');
+      log.info('Inserting interface results for month ${month.toIso8601String()}...');
       // remove the data if it's already there
       con.execute('''
 DELETE FROM results_interface 

@@ -6,6 +6,12 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-04-06
+- Change NYISO TCC clearing price archive constructor
+
+## Release 2025-03-30
+- Convert ISONE energy offers to json format and support DuckDB only
+
 ## Release 2025-03-28
 - Fix MRA results file format break
 

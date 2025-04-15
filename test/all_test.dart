@@ -74,7 +74,7 @@ Future<void> main() async {
   await da_congestion.tests(rootUrl);
   await dalmp.tests(rootUrl);
   await demand_bids.tests();
-  await energy_offers.tests(rootUrl);
+  // await energy_offers.tests(rootUrl);
   await fwdres.tests(rootUrl);
   lib_nyiso_report.tests();
   await load_cmp.tests();

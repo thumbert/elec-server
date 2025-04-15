@@ -210,18 +210,6 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
   await archive.dbConfig.db.close();
 }
 
-Future<void> insertDaEnergyOffers({List<Date>? days}) async {
-  /// What I need to pass the tests
-  days ??= Term.parse('Jan17-Dec17', UTC).days();
-
-  var archive = DaEnergyOfferArchive();
-  await archive.dbConfig.db.open();
-  for (var day in days) {
-    await archive.downloadDay(day);
-    await archive.insertDay(day);
-  }
-  await archive.dbConfig.db.close();
-}
 
 Future<void> insertDaEnergyOffersNyiso() async {
   var archive = NyisoEnergyOfferArchive();
@@ -521,15 +509,7 @@ Future<void> insertSccReportIsone() async {
 }
 
 Future<void> insertTccClearedPricesNyiso() async {
-  var config = ComponentConfig(
-      host: 'localhost:27017',
-      dbName: 'nyiso',
-      collectionName: 'tcc_clearing_prices');
-  var dir =
-      '${env['HOME']!}/Downloads/Archive/Nyiso/TCC/ClearingPrices/ToProcess/';
-  var archive = nyiso_tcc_cp.NyisoTccClearingPrices(config: config)..dir = dir;
-  // await archive.setupDb();
-
+  var archive = getNyisoTccClearingPriceArchive();
   await archive.db.open();
   var files = Directory(archive.dir).listSync().whereType<File>();
   // var files = Directory(archive.dir).listSync().whereType<File>();

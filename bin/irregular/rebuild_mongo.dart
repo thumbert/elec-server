@@ -151,18 +151,18 @@ Future<void> recreateDaCongestionCompactIsone() async {
 //   await archive.dbConfig.db.close();
 // }
 
-Future<void> recreateDaEnergyOffersIsone() async {
-  var archive = DaEnergyOfferArchive();
-  await archive.setupDb();
-  var files = Directory(archive.dir).listSync().whereType<File>().toList();
-  files.sort((a, b) => a.path.compareTo(b.path));
-  await archive.dbConfig.db.open();
-  for (var file in files) {
-    var data = archive.processFile(file);
-    await archive.insertData(data);
-  }
-  await archive.dbConfig.db.close();
-}
+// Future<void> recreateDaEnergyOffersIsone() async {
+//   var archive = DaEnergyOfferArchive();
+//   await archive.setupDb();
+//   var files = Directory(archive.dir).listSync().whereType<File>().toList();
+//   files.sort((a, b) => a.path.compareTo(b.path));
+//   await archive.dbConfig.db.open();
+//   for (var file in files) {
+//     var data = archive.processFile(file);
+//     await archive.insertData(data);
+//   }
+//   await archive.dbConfig.db.close();
+// }
 
 Future<void> recreateFwdResAuctionResults() async {
   var archive = FwdResAuctionResultsArchive();
@@ -277,7 +277,7 @@ Future<void> recreateDaLmpHourlyNyiso() async {
 }
 
 Future<void> recreateTccClearedPricesNyiso() async {
-  var archive = NyisoTccClearingPrices();
+  var archive = getNyisoTccClearingPriceArchive();
   await archive.setupDb();
   await archive.db.open();
   var files = Directory(archive.dir).listSync().whereType<File>();
