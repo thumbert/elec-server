@@ -9,14 +9,14 @@ import 'package:elec/elec.dart';
 import 'package:elec/ftr.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
+import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
-import 'package:elec_server/src/db/nyiso/tcc_clearing_prices.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
 
 Future<void> tests(String rootUrl) async {
-  var archive = NyisoTccClearingPrices();
+  var archive = getNyisoTccClearingPriceArchive();
   group('NYISO Tcc clearing prices db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());

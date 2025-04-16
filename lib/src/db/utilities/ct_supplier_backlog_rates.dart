@@ -106,6 +106,8 @@ class CtSupplierBacklogRatesArchive {
                   .where((e) => e['hardship'])
                   .map((e) => e['customerCount']));
         }
+        var avgPrice = sum(xs.map((e) => e['customerCount'] * e['price'])) /
+            totalCustomerCount;
 
         var one = {
           'month': month.toIso8601String(),
@@ -119,9 +121,8 @@ class CtSupplierBacklogRatesArchive {
               'hardshipCustomerCount': sum(xs
                   .where((e) => e['hardship'])
                   .map((e) => e['customerCount'])),
-            'averagePriceWeightedByCustomerCount':
-                sum(xs.map((e) => e['customerCount'] * e['price'])) /
-                    totalCustomerCount,
+            if (avgPrice.isFinite)
+              'averagePriceWeightedByCustomerCount': avgPrice,
             if (hasHardshipStatus && avgPriceHardship.isFinite)
               'averagePriceWeightedByCustomerCountForHardshipCustomers':
                   avgPriceHardship,
@@ -130,11 +131,13 @@ class CtSupplierBacklogRatesArchive {
         if (hasKwh) {
           one['kWh'] = xs.map((e) => e['kWh']).toList();
           var totalKWh = sum(xs.map((e) => e['kWh']));
+          var avgPriceWeightedByVolume =
+              sum(xs.map((e) => e['kWh'] * e['price'])) / totalKWh;
           one['summary'] = <String, dynamic>{
             ...one['summary'] as Map,
             'kWh': totalKWh,
-            'averagePriceWeightedByVolume':
-                sum(xs.map((e) => e['kWh'] * e['price'])) / totalKWh,
+            if (avgPriceWeightedByVolume.isFinite)
+              'averagePriceWeightedByVolume': avgPriceWeightedByVolume,
           };
         }
         out.add(one);
@@ -142,7 +145,6 @@ class CtSupplierBacklogRatesArchive {
     }
     return out;
   }
-
 
   List<Map<String, dynamic>> _processFileUi(File file) {
     var bytes = file.readAsBytesSync();

@@ -26,7 +26,7 @@ class NyisoMaskedIdsArchive {
       await config!.coll.remove(<String, dynamic>{});
       await config!.coll.insertAll(data);
     } catch (e) {
-      print('XXXX ' + e.toString());
+      print('XXXX $e');
       return Future.value(1);
     }
     print('--->  Updated NYISO masked ids successfully');
@@ -36,7 +36,7 @@ class NyisoMaskedIdsArchive {
   /// Read the master xlsx file.
   ///
   List<Map<String, dynamic>> readXlsx({File? file}) {
-    file ??= File(dir! + 'unmasked_nyiso.xlsx');
+    file ??= File('${dir!}unmasked_nyiso.xlsx');
     if (!file.existsSync()) throw 'File ${file.path} does not exist!';
 
     var res = <Map<String, dynamic>>[];

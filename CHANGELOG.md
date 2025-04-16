@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-04-16
+- Fix CT suppliers backlog, had some issues with division by zero
+
 # Release 2025-04-06
 - Change NYISO TCC clearing price archive constructor
 

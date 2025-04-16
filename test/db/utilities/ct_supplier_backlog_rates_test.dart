@@ -108,6 +108,27 @@ Future<void> tests(String rootUrl) async {
         'summary',
       });
     });
+    
+    test('get Eversource data Feb25 had some NaN', () async {
+      var res = await api.getAllDataForOneUtility(
+          Utility.eversource, Month.utc(2025, 2), Month.utc(2025, 2));
+      expect(res.length, 62);
+      var url =
+          '$rootUrl/retail_suppliers/v1/ct/supplier_backlog_rates/utility/Eversource/start/2025-02/end/2025-02';
+      var aux = await get(Uri.parse(url));
+      var data = json.decode(aux.body) as List;
+      var x0 = data.first as Map<String, dynamic>;
+      expect(x0.keys.toSet(), {
+        'month',
+        'utility',
+        'customerClass',
+        'supplierName',
+        'price',
+        'kWh',
+        'summary',
+      });
+    });
+
   });
 
   group('Supplier backlog rates Client tests:', () {

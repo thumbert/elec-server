@@ -564,7 +564,7 @@ Future<void> main() async {
   // await recreateDaCongestionCompactIsone();
   // await recreateFwdResAuctionResults();
   // await recreateIsoneHistoricalBtmSolar();
-  // // await insertMaskedAssetIdsIsone();
+  // await insertMaskedAssetIdsIsone();
   // await recreatePtidTableIsone();
   // await recreateRegulationRequirementIsone();
   // await recreateRtLmpHourlyIsone();
@@ -572,7 +572,7 @@ Future<void> main() async {
   // await recreateWholesaleLoadCostReportIsone();
 
   // /// NYISO
-  // // await insertMaskedAssetIdsNyiso();
+  // await insertMaskedAssetIdsNyiso();
   // await recreateMonthlyAssetNcpc();
   // await recreateDaBindingConstraintsNyiso();
   // await recreateDaLmpHourlyNyiso();
