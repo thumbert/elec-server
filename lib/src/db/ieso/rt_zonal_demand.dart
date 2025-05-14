@@ -25,6 +25,7 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
   /// days with missing data
   static Set<String> problemDays = {
     '2024-10-18',
+    '2025-05-01',
   };
 
   ///
@@ -100,11 +101,19 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
       }
       for (var key in keys.skip(2)) {
         if (key == 'Diff') continue;
-        out.add({
-          'date': xs.first['Date'],
-          'zone': key.replaceAll(' Demand', ''),
-          'values': xs.map((e) => e[key]).toList(),
-        });
+        if (date == '2025-05-01') {
+          out.add({
+            'date': xs.first['Date'],
+            'zone': key.replaceAll(' Demand', ''),
+            'values': [null, ...xs.map((e) => e[key])],
+          });
+        } else {
+          out.add({
+            'date': xs.first['Date'],
+            'zone': key.replaceAll(' Demand', ''),
+            'values': xs.map((e) => e[key]).toList(),
+          });
+        }
       }
     }
 

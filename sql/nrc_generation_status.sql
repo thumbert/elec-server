@@ -1,4 +1,11 @@
 
+
+-- Get the last few days in the database
+SELECT DISTINCT ReportDt FROM Status    
+ORDER BY ReportDt DESC
+LIMIT 10;
+
+
 SELECT * FROM Status
 WHERE Unit = 'Turkey Point 3';
 -- WHERE Unit = 'Beaver Valley 1'
@@ -21,6 +28,7 @@ CREATE TEMP TABLE Changes AS
     WHERE Change != 0
     AND ReportDt = (SELECT MAX(ReportDt) FROM Status)
     ORDER BY Unit;
+SELECT * FROM Changes;    
 
 
 -- Get the day on day non zero changes in percent online as of a given date
@@ -110,11 +118,9 @@ AND Unit in ('Byron 1', 'Calvert Cliffs 1')
 ORDER BY Unit, ReportDt;
 
 
-CREATE TEMP TABLE Groups AS
-    FROM '/home/adrian/Documents/config/update_nrc_generator_status/groups.csv';
-
-CREATE TEMP TABLE Emails AS
-    FROM '/home/adrian/Documents/config/update_nrc_generator_status/emails.csv';
+CREATE TEMP TABLE Groups AS 
+    FROM read_csv('/home/adrian/Documents/config/update_nrc_generator_status/groups.csv', 
+        ignore_errors = true);
 
 
 SELECT c.*, g.group FROM Changes c

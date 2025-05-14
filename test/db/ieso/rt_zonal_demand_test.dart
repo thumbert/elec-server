@@ -23,9 +23,18 @@ Future<void> tests(String rootUrl) async {
       var data = archive.processFile(file);
       expect(data.length, 2940);
       expect(data.first.keys.toSet(), {'date', 'zone', 'values'});
-      var c0 = data.firstWhere((e) => e['zone'] == 'Ontario' && e['date'] == '2003-05-01');
+      var c0 = data.firstWhere(
+          (e) => e['zone'] == 'Ontario' && e['date'] == '2003-05-01');
       expect(c0['values'].length, 24);
       expect(c0['values'].first, 13702);
+    });
+    test('read file for year 2025 -- missing hour for 5/1/2025', () async {
+      var file = archive.getFilename(2025);
+      var data = archive.processFile(file);
+      var x0 = data.firstWhere(
+          (e) => e['zone'] == 'Ontario' && e['date'] == '2025-05-01');
+      expect(x0['values'].length, 24);
+      expect(x0['values'].first, null);
     });
   });
   group('IESO rt zonal demand API tests:', () {
@@ -60,8 +69,9 @@ Future<void> tests(String rootUrl) async {
     test('get hourly rt demand', () async {
       var term = Term.parse('1Jan23-15Jan23', Ieso.location);
       var aux = await client.hourlyRtZonalDemand(IesoLoadZone.ontario, term);
-      expect(aux.length, 15*24);
-      expect(aux.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2023)));
+      expect(aux.length, 15 * 24);
+      expect(
+          aux.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2023)));
       expect(aux.first.value, 13514);
     });
   });

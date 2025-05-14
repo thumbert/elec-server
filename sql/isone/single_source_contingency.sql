@@ -1,6 +1,16 @@
 
 SELECT * from ssc LIMIT 3;
 
+-- What months are in the table
+-- SELECT DISTINCT DATE_TRUNC('month', LocalTime) as month
+SELECT DISTINCT strftime(LocalTime, '%Y-%m') as month
+FROM ssc
+ORDER BY month;
+
+SELECT min(LocalTime) as min_date, max(LocalTime) as max_date
+FROM ssc; 
+
+
 SELECT InterfaceName, LocalTime, ActualMargin
 FROM ssc
 WHERE LocalTime >= '2025-01-10 00:00:00'
@@ -8,72 +18,48 @@ AND LocalTime < '2025-01-11'
 AND InterfaceName = 'PJM West';
 
 
-
-
-CREATE TABLE ssc (
-    InterfaceName VARCHAR,
-    LocalTime DATETIME,
-    ActualMargin FLOAT,
-    AuthorizedMargin FLOAT,
-    BaseLimit FLOAT,
-    SingleSourceContingency FLOAT,
-    LowestLimit FLOAT,
-    Phase2RtFlow FLOAT,
+CREATE TABLE IF NOT EXISTS ssc (
+        BeginDate TIMESTAMPTZ NOT NULL,
+        RtFlowMw DOUBLE NOT NULL,
+        LowestLimitMw DOUBLE NOT NULL,
+        DistributionFactor DOUBLE NOT NULL,
+        InterfaceName VARCHAR NOT NULL,
+        ActualMarginMw DOUBLE NOT NULL,
+        AuthorizedMarginMw DOUBLE NOT NULL,
+        BaseLimitMw DOUBLE NOT NULL,
+        SingleSourceContingencyLimitMw DOUBLE NOT NULL,
 );
 
-DROP TABLE tmp;
 
--- Wow!  This is slick! 
-CREATE TEMPORARY TABLE tmp
-AS
+CREATE TEMPORARY TABLE tmp AS
     SELECT unnest(SingleSrcContingencyLimits.SingleSrcContingencyLimit, recursive := true)
-    FROM read_json('~/Downloads/Archive/IsoExpress/SingleSourceContingency/Raw/2025/ssc_2025-01-10.json.gz')
+    FROM read_json('~/Downloads/Archive/IsoExpress/SingleSourceContingency/Raw/2025/ssc_2025-*.json.gz')
 ;
 SELECT * from tmp;
 
 
+INSERT INTO ssc
+    SELECT 
+        BeginDate::TIMESTAMPTZ as LocalTime,
+        RtFlowMw::DOUBLE,
+        LowestLimitMw::DOUBLE,
+        DistributionFactor::DOUBLE,
+        InterfaceName::VARCHAR,
+        ActMarginMw::DOUBLE as ActualMarginMw,
+        AuthorizedMarginMw::DOUBLE,
+        BaseLimitMw::DOUBLE,
+        SingleSrcContingencyMw::DOUBLE as SingleSourceContingencyLimitMw,
+    FROM tmp
+EXCEPT 
+    SELECT * FROM ssc;        
 
 
-DESCRIBE TABLE tmp;
-
-SELECT tmp.* 
-FROM tmp;
-
-
-SELECT a.* FROM (SELECT {'x':1, 'y':2, 'z':3} as a);
-
-
-CREATE TEMPORARY TABLE limits
-AS 
-SELECT tmp.SingleSrcContingencyLimits FROM tmp
-;
 
 
 
 
- 
-CREATE TEMPORARY TABLE tmp
-AS
-    SELECT InterfaceName, LocalTime, ActualMargin, AuthorizedMargin, BaseLimit, 
-        SingleSourceContingency, LowestLimit, Phase2RtFlow  
-    FROM read_csv(
-        '~/Downloads/Archive/IsoExpress/SingleSourceContingency/Raw/ssc_20250110.csv', 
-        header = true, 
-        timestampformat = '%m/%d/%Y %H:%M:%S', 
-        skip = 6,
-        ignore_errors = true,
-        columns = {
-            'H': 'VARCHAR',
-            'InterfaceName': 'VARCHAR',
-            'LocalTime': 'DATETIME',
-            'ActualMargin': 'FLOAT',
-            'AuthorizedMargin': 'FLOAT',
-            'BaseLimit': 'FLOAT',
-            'SingleSourceContingency': 'FLOAT',
-            'LowestLimit': 'FLOAT',
-            'Phase2RtFlow': 'FLOAT',
-        } 
-    );
+
+
 
 -- need to delete the data if it already exists for the day
 DELETE FROM ssc
