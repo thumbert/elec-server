@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-05-27
+- Some work on HQ water data
+
 # Release 2025-05-14
 - Fix IESO data break on 5/1/2025.  They won't fix it.
 

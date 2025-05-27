@@ -7,6 +7,7 @@ import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/db_nyiso.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/config.dart';
+import 'package:elec_server/src/db/hq/hq_water.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
 import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
@@ -60,6 +61,16 @@ CtSupplierBacklogRatesArchive getCtSupplierBacklogRatesArchive() {
     Directory(archive.dir).createSync(recursive: true);
   }
   return archive;
+}
+
+HqWaterArchive getHqWaterArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return HqWaterArchive(
+    duckDbPath: '$dir/hq_water_level.duckdb',
+  );
 }
 
 DaEnergyOfferArchive getIsoneDaEnergyOfferArchive() {
@@ -267,8 +278,6 @@ NyisoEnergyOfferArchive getNyisoEnergyOfferArchive() {
 //   }
 //   return NyisoEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
 // }
-
-
 
 NyisoTccClearingPrices getNyisoTccClearingPriceArchive() {
   var dbConfig = ComponentConfig(
