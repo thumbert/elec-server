@@ -18,7 +18,7 @@ dependencies:
   date:
     git: https://github.com/thumbert/date.git
   dotenv: ^3.0.0
-  duckdb_dart: ^0.3.3
+  duckdb_dart: ^0.3.9
   elec:
     git: https://github.com/thumbert/elec.git
   grpc: ^4.0.0

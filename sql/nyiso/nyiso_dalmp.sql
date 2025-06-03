@@ -1,9 +1,14 @@
 
 SELECT min(day), max(day) FROM dalmp;
 
-SELECT COUNT(*) FROM dalmp WHERE day = '2020-01-01'; -- 574 nodes 
+SELECT COUNT(DISTINCT(ptid)) FROM dalmp WHERE day = '2020-01-01'; -- 574 nodes 
 
-
+SELECT ptid, day, idx, lmp
+FROM dalmp
+WHERE day >= '2025-01-01'
+AND day <= '2025-01-03'
+AND ptid IN (61757, 61758, 61759)
+ORDER BY ptid, day, idx;
 
 
 SELECT day, ptid, lmp 
@@ -13,11 +18,113 @@ ORDER BY day;
 
 
 
+--- =========================================================================================
+--- Create and update the table (version 2) -- Active
+--- Data from 2020-01 to 2025-05 was 935 MB on disk
+--- =========================================================================================
+CREATE TABLE IF NOT EXISTS dalmp (
+    hour_beginning TIMESTAMPTZ NOT NULL,
+    ptid INTEGER NOT NULL,
+    lmp DECIMAL(9,2) NOT NULL,
+    mlc DECIMAL(9,2) NOT NULL,
+    mcc DECIMAL(9,2) NOT NULL,
+);
 
 
---- ====================================================================================
---- Create and update the table
---- ====================================================================================
+LOAD zipfs;    
+CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_zone_csv.zip/*.csv';
+CREATE TEMPORARY TABLE tmp2 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_gen_csv.zip/*.csv';
+
+CREATE TEMPORARY TABLE tmp AS
+(SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
+FROM (
+    SELECT 
+    strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
+    ptid::INTEGER AS ptid,
+    row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
+    "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+    "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+    "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+FROM tmp1))
+UNION
+(SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
+FROM (SELECT 
+    strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
+    ptid::INTEGER AS ptid,
+    row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
+    "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+    "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+    "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+FROM tmp2));
+
+
+INSERT INTO dalmp
+SELECT hour_beginning, ptid, lmp, mlc, mcc FROM tmp
+EXCEPT 
+    SELECT * FROM dalmp            
+ORDER BY hour_beginning, ptid;
+
+
+
+SELECT * FROM dalmp 
+WHERE ptid = 61752
+AND hour_beginning >= '2024-11-03 00:00:00' 
+AND hour_beginning < '2024-11-04 00:00:00' 
+ORDER BY hour_beginning;
+
+SELECT *
+FROM dalmp 
+WHERE ptid = 61752
+AND hour_beginning >= '2024-11-03' 
+AND hour_beginning < '2024-11-04' 
+ORDER BY hour_beginning;
+
+
+
+    SELECT ptid, day, idx, lmp
+    FROM dalmp 
+    WHERE day >= '2024-11-03'
+    AND day <= '2024-11-04'
+    AND ptid in (61752)
+    ORDER BY ptid, day, idx;
+
+CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_zone_csv.zip/*.csv';
+SELECT * from tmp1
+WHERE ptid = 61752
+and "Time Stamp" like '11/03/2024 %';
+
+--- FIRE !!! ---
+SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
+FROM (
+    SELECT 
+        strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
+        ptid::INTEGER AS ptid,
+        row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
+        "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+        "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+        "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+    FROM tmp1
+    WHERE ptid = 61752
+    AND day = '2024-11-03'
+);
+
+
+
+SELECT * from tmp
+WHERE ptid = 61752
+AND day = '2024-11-03';
+
+SELECT *, dt + INTERVAL 1 HOUR AS dt2, dt + INTERVAL 2 HOUR AS dt3
+FROM (
+    SELECT '2024-11-03'::TIMESTAMPTZ as dt
+);
+
+
+
+--- =========================================================================================
+--- Create and update the table (version 1) -- Abandoned because Rust/Dart can't read arrays
+--- Data from 2020-01 to 2025-05 was 187 MB on disk
+--- =========================================================================================
 CREATE TABLE IF NOT EXISTS dalmp (
     day DATE NOT NULL,
     ptid INTEGER NOT NULL,

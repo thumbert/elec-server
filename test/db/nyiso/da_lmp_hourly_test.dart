@@ -1,6 +1,7 @@
 library test.db.nyiso.da_lmp_hourly_test;
 
 import 'dart:convert';
+import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/client/dalmp.dart' as client;
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
@@ -99,7 +100,8 @@ Future<void> tests(String rootUrl) async {
         'congestion': -1.0204166666666667,
       });
       expect(data.length, 730);
-      var url = '$rootUrl/nyiso/dalmp/v1/daily/congestion/ptids/61752,61758/start/2019-01-01/end/2019-12-31/bucket/7x24';
+      var url =
+          '$rootUrl/nyiso/dalmp/v1/daily/congestion/ptids/61752,61758/start/2019-01-01/end/2019-12-31/bucket/7x24';
       var aux = await http.get(Uri.parse(url));
       var res = json.decode(aux.body) as List;
       expect(res.length, 730);
@@ -150,7 +152,8 @@ Future<void> tests(String rootUrl) async {
       sw.start();
       var data = await api.dailyPriceByPtid('lmp', '2019-02-14', '2020-02-13');
       sw.stop();
-      expect(sw.elapsedMilliseconds, lessThan(8000));  // was 3000 before 2024-08-02
+      expect(
+          sw.elapsedMilliseconds, lessThan(8000)); // was 3000 before 2024-08-02
       expect(data.length, 208891);
     });
   });
@@ -158,8 +161,13 @@ Future<void> tests(String rootUrl) async {
   group('Nyiso DAM LMP client tests: ', () {
     var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
     test('get daily peak price between two dates', () async {
-      var data = await daLmp.getDailyLmpBucket(Iso.newYork, 61752, LmpComponent.lmp,
-          Bucket.b5x16, Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
+      var data = await daLmp.getDailyLmpBucket(
+          Iso.newYork,
+          61752,
+          LmpComponent.lmp,
+          Bucket.b5x16,
+          Date.utc(2019, 1, 1),
+          Date.utc(2019, 1, 5));
       expect(data.length, 3);
       expect(data.toList(), [
         IntervalTuple(Date(2019, 1, 2, location: location), 31.678124999999998),
@@ -168,8 +176,13 @@ Future<void> tests(String rootUrl) async {
       ]);
     });
     test('get monthly peak price between two dates', () async {
-      var data = await daLmp.getMonthlyLmpBucket(Iso.newYork, 61752, LmpComponent.congestion,
-          IsoNewEngland.bucket5x16, Month.utc(2019, 1), Month.utc(2019, 12));
+      var data = await daLmp.getMonthlyLmpBucket(
+          Iso.newYork,
+          61752,
+          LmpComponent.congestion,
+          IsoNewEngland.bucket5x16,
+          Month.utc(2019, 1),
+          Month.utc(2019, 12));
       expect(data.length, 12);
       expect(
           data.first,
@@ -177,8 +190,8 @@ Future<void> tests(String rootUrl) async {
               Month(2019, 1, location: location), -7.513068181818175));
     });
     test('get hourly price for 2017-01-01', () async {
-      var data = await daLmp.getHourlyLmp(Iso.newYork,
-          61752, LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 1, 1));
+      var data = await daLmp.getHourlyLmp(Iso.newYork, 61752, LmpComponent.lmp,
+          Date.utc(2019, 1, 1), Date.utc(2019, 1, 1));
       expect(data.length, 24);
       expect(
           data.first,
@@ -203,10 +216,18 @@ Future<void> tests(String rootUrl) async {
 //       4000, LmpComponent.lmp, Date.utc(2017, 1, 1), Date.utc(2017, 1, 1));
 // }
 
+readDuckDb() {
+  final conn = Connection('/home/adrian/Downloads/Archive/DuckDB/nyiso/dalmp.duckdb');
+  final result = conn.fetch('SELECT * FROM dalmp WHERE ptid = 61752 '
+  'and hour_beginning >= \'2024-11-03\' and hour_beginning < \'2024-11-04\'');
+  print(result); // not working
+}
+
 void main() async {
   initializeTimeZones();
+  readDuckDb();
 
-  DbProd();
-  // dotenv.load('.env/prod.env');
-  tests('http://127.0.0.1:8080');
+  // DbProd();
+  // // dotenv.load('.env/prod.env');
+  // tests('http://127.0.0.1:8080');
 }
