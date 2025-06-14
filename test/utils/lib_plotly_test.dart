@@ -3,9 +3,11 @@ library test.utils.lib_plotly_test;
 import 'dart:io';
 
 import 'package:elec_server/src/utils/lib_plotly.dart';
+import 'package:http/http.dart';
+import 'package:test/test.dart';
 
 /// Example of an html document with plotly
-final page = """ 
+final page = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -772,8 +774,26 @@ void testHeatmap() {
   );
 }
 
-void main() {
+Future<void> tests() async{
+  group('Plotly tests', () {
+    test('make traces from csv', () async {
+      final response = await get(Uri.parse(
+          'http://127.0.0.1:8111/ttc/start/2024-01-01/end/2024-12-31?columns=hq_phase2_import,ny_north_import&format=csv'));
+
+      final traces = Plotly.makeTracesFromCsv(response.body);
+      expect(traces.length, 2);
+
+      Plotly.now(traces, {'height': 600},
+          file: File(
+              '${Platform.environment['HOME']}/Downloads/test_plot_from_csv.html'));
+    });
+  });
+}
+
+Future<void> main() async{
   // test1a();
   // test1b();
-  testHeatmap();
+  // testHeatmap();
+
+  await tests();
 }

@@ -3,6 +3,7 @@ library utils.lib_plotly;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:csv/csv.dart';
 import 'package:path/path.dart';
 
 class Plotly {
@@ -11,7 +12,9 @@ class Plotly {
   /// need.
   static void exportJs(
       List<Map<String, dynamic>> traces, Map<String, dynamic> layout,
-      {required File file, Map<String, dynamic>? config, String? eventHandlers}) {
+      {required File file,
+      Map<String, dynamic>? config,
+      String? eventHandlers}) {
     if (extension(file.path) != '.js') {
       throw ArgumentError('Filename extension needs to be .js');
     }
@@ -53,7 +56,7 @@ class Plotly {
       throw ArgumentError('Filename extension needs to be .html');
     }
     var divId = basename(file.path).replaceAll(RegExp('\\.html\$'), '');
-    var out = """ 
+    var out = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,4 +74,41 @@ class Plotly {
     file.writeAsStringSync(out);
   }
 
+  /// Create Plotly traces from a CSV string.
+  /// The CSV should have a header row with the column names, and the first
+  /// column should be a timestamp in ISO 8601 format.  For example:
+  /// "hour_beginning,hq_phase2_import,ny_north_import\n2024-01-01 00:00:00-05:00,2000,1600\n2024-01-01 01:00:00-05:00,2000,1600\n2024-01-01 02:00:00-05:00,2000,1600\n2024-01-01 03:00:00-05:00,2000,1600\n2024-01-01 04:00:00-05:00,2000,1600\n"
+  static List<Map<String, dynamic>> makeTracesFromCsv(String csv,
+      {String? mode, String? type}) {
+    var lines = CsvToListConverter(
+      eol: '\n',
+      fieldDelimiter: ',',
+      shouldParseNumbers: true,
+    ).convert(csv);
+    var names = lines[0].map((e) => e.toString()).toList();
+    var x = <String>[];
+    var series = List.generate(
+      names.length - 1,
+      (index) => <num>[],
+    );
+    for (var i = 1; i < lines.length; i++) {
+      var row = lines[i];
+      x.add(row[0].toString());
+      for (var j = 1; j < row.length; j++) {
+        series[j - 1].add(row[j]);
+      }
+    }
+
+    var traces = <Map<String, dynamic>>[];
+    for (var i = 0; i < series.length; i++) {
+      traces.add({
+        'x': [...x],
+        'y': series[i],
+        'name': names[i + 1],
+        'type': type ?? 'scatter',
+        'mode': mode ?? 'lines',
+      });
+    }
+    return traces;
+  }
 }
