@@ -43,7 +43,7 @@ class Plotly {
     Map<String, dynamic> layout, {
     Map<String, dynamic>? config,
     bool displayLogo = false,
-    required File file,
+    File? file,
   }) {
     config ??= {'displaylogo': false, 'responsive': true};
     if (!config.containsKey('displaylogo')) {
@@ -52,26 +52,41 @@ class Plotly {
     if (!config.containsKey('responsive')) {
       config['responsive'] = true;
     }
-    if (extension(file.path) != '.html') {
+    bool openInBrowser = file == null;
+    if (file != null && extension(file.path) != '.html') {
       throw ArgumentError('Filename extension needs to be .html');
     }
-    var divId = basename(file.path).replaceAll(RegExp('\\.html\$'), '');
+    file ??= File(
+        '${Directory.systemTemp.path}/plotly_${DateTime.now().millisecondsSinceEpoch}.html');
+    // var divId = basename(file.path).replaceAll(RegExp('\\.html\$'), '');
+    var divId = 'plotly-html-element';
     var out = """
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js" charset="utf-8"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.3.min.js" charset="utf-8"></script>
 </head>
 <body>
   <div id="$divId"></div>
-  <script>
-  	let $divId = document.getElementById("$divId");
-	  Plotly.newPlot( $divId, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
+  <script type="module">
+  	let graph_div = document.getElementById("$divId");
+	  await Plotly.newPlot( graph_div, ${json.encode(traces)}, ${json.encode(layout)}, ${json.encode(config)} );
   </script>
 </body>
 </html>
 """;
     file.writeAsStringSync(out);
+
+    if (openInBrowser) {
+      if (Platform.isWindows) {
+        // On Windows, we can use the start command to open the file in the default browser.
+        Process.run('start', [file.path]);
+      } else if (Platform.isLinux || Platform.isMacOS) {
+        // On Linux and macOS, we can use xdg-open or open command respectively.
+        var command = Platform.isLinux ? 'xdg-open' : 'open';
+        Process.run(command, [file.path]);
+      }
+    }
   }
 
   /// Create Plotly traces from a CSV string.

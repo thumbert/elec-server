@@ -12,3 +12,14 @@ A web server built using [Shelf](https://pub.dartlang.org/packages/shelf).
 
 
 cp ~/Documents/repos/git/thumbert/rascal/html/docs/index.html ~/Software/Apps/public/docs   
+
+```
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/isone/ttc.duckdb';
+SELECT hour_beginning, hq_phase2_import, ny_north_import, nb_import
+FROM ttc.ttc_limits 
+WHERE hour_beginning >= '2024-01-01'
+AND hour_beginning < '2024-01-05'
+ORDER BY hour_beginning;
+" | qplot 
+```

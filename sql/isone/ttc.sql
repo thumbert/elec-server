@@ -2,9 +2,21 @@ SELECT * FROM ttc_limits;
 
 SELECT hour_beginning, hq_phase2_import
 FROM ttc_limits 
-WHERE hour_beginning >= '2024-01-01 00:00:00-05:00'
-AND hour_beginning < '2024-01-05 00:00:00-05:00'
+WHERE hour_beginning >= '2024-01-01'
+AND hour_beginning < '2024-01-05'
 ORDER BY hour_beginning;
+
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/isone/ttc.duckdb' AS ttc;
+SELECT hour_beginning, hq_phase2_import
+FROM ttc.ttc_limits 
+WHERE hour_beginning >= '2024-01-01'
+AND hour_beginning < '2024-01-05'
+ORDER BY hour_beginning;
+"
+
+
 
 
 
