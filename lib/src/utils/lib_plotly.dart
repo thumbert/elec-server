@@ -27,7 +27,7 @@ class Plotly {
   let $divId = document.getElementById("$divId");
   let $tracesV = ${json.encode(traces)};
   let $layoutV = ${json.encode(layout)};
-  Plotly.newPlot( $divId, $tracesV, $layoutV, ${json.encode(config)} );
+  await Plotly.newPlot( $divId, $tracesV, $layoutV, ${json.encode(config)} );
     """;
     if (eventHandlers != null) {
       out = '$out\n'

@@ -9,6 +9,7 @@
 # Release 2025-06-15
 - First release of qplot.  Let's see if this is as useful as I hope it will be.
 - Modify Plotly.now() to launch the default browser if file path is not specified.
+  Added an await in front of the js Plotly.newPlot() invocation.
 
 # Release 2025-05-27
 - Some work on HQ water data
