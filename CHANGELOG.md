@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-06-18
+- Revert Plotly.exportJs() to not use await, because it's not allowed.  
+
 # Release 2025-06-15
 - First release of qplot.  Let's see if this is as useful as I hope it will be.
 - Modify Plotly.now() to launch the default browser if file path is not specified.

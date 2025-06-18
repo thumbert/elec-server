@@ -1,20 +1,15 @@
 
-SELECT min(day), max(day) FROM dalmp;
+SELECT min(hour_beginning), max(hour_beginning) FROM dalmp;
 
 SELECT COUNT(DISTINCT(ptid)) FROM dalmp WHERE day = '2020-01-01'; -- 574 nodes 
 
-SELECT ptid, day, idx, lmp
+SELECT *
 FROM dalmp
-WHERE day >= '2025-01-01'
-AND day <= '2025-01-03'
-AND ptid IN (61757, 61758, 61759)
-ORDER BY ptid, day, idx;
+WHERE hour_beginning >= '2025-06-17'
+AND hour_beginning < '2025-06-18'
+AND ptid = 61757
+ORDER BY hour_beginning;
 
-
-SELECT day, ptid, lmp 
-FROM dalmp
-WHERE ptid = 61757
-ORDER BY day;
 
 
 
