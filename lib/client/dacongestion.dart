@@ -59,7 +59,7 @@ class DaCongestion {
         var hours = day
             .withTimeZone(location)
             .splitLeft((dt) => Hour.beginning(dt))
-            .map((e) => e.start);
+            .map((e) => e.start.toIso8601String());
         var ptids = data!.keys.toList();
         for (var i = 0; i < ptids.length; ++i) {
           var ptid = ptids[i];

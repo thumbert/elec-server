@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-06-21
+- Fix Plotly traces in dacongestion.dart.
+
 # Release 2025-06-18
 - Revert Plotly.exportJs() to not use await, because it's not allowed.  
 
