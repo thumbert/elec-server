@@ -51,10 +51,10 @@ void main(List<String> args) {
     ..addOption('config',
         help:
             'Plotly config options as a JSON string.  For example: {"height": 800}.')
-    ..addOption('mode', 
+    ..addOption('mode',
         defaultsTo: 'lines',
         help:
-            'Plot mode. Default is "lines". Other options are "markers", "lines+markers", "text", etc.')        
+            'Plot mode. Default is "lines". Other options are "markers", "lines+markers", "text", etc.')
     ..addOption('type',
         defaultsTo: 'scatter',
         help:
@@ -87,6 +87,18 @@ Flags:
 --type
   Specify the type of the plot. Default is 'scatter'. Other options are 'bar', 
   'box', etc.  
+
+Example usage:
+    echo "date,price
+    2023-01-01,100
+    2023-01-02,150
+    2023-01-03,200
+    2023-01-04,175
+    2023-01-05,225
+    " | qplot
+
+    cat data.csv | qplot --mode=markers --type=scatter --config='{"height": 800}'  
+
 ''');
     exit(0);
   }
@@ -94,12 +106,17 @@ Flags:
     print('0.0.1');
     exit(0);
   }
+  File? file;
+  if (results['file'] != null) {
+    file = File(results['file'] as String);
+    file.createSync(recursive: true);
+  }
+
   final config = results['config'] != null
       ? json.decode(results['config'] as String)
       : <String, dynamic>{};
   final mode = results['mode'] as String;
   final type = results['type'] as String;
-
 
   List<String> lines = [];
   while (true) {
@@ -113,5 +130,6 @@ Flags:
   Plotly.now(
     traces,
     config,
+    file: file,
   );
 }

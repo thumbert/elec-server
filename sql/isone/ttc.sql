@@ -14,7 +14,7 @@ FROM ttc.ttc_limits
 WHERE hour_beginning >= '2024-01-01'
 AND hour_beginning < '2024-01-05'
 ORDER BY hour_beginning;
-"
+" | qplot
 
 
 
