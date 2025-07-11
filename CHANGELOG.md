@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-07-11
+- Fix CT backlog ingestion.  They broke the file format again!
+
 # Release 2025-06-23
 - Add better help and examples to qplot. 
 

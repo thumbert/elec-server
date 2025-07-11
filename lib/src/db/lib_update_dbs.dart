@@ -111,14 +111,21 @@ Future<void> updateCtSupplierBacklogRatesDb(
   if (setUp) await archive.setupDb();
   await archive.dbConfig.db.open();
 
-  await archive.getAllUrls();
-  for (var month in months) {
-    for (var utility in Utility.values) {
-      if (externalDownload) {
+  if (externalDownload) {
+    await archive.getAllUrls();
+    for (var month in months) {
+      for (var utility in Utility.values) {
         await archive.downloadFile(month, utility);
       }
+    }
+    print('Xlsx files downloaded');
+  }
+
+  for (var month in months) {
+    for (var utility in Utility.values) {
       var file = archive.getFile(month, utility);
       if (file.existsSync()) {
+        print('Processing file for $utility $month');
         var data = archive.processFile(file);
         await archive.insertData(data);
       } else {
@@ -142,8 +149,7 @@ Future<void> updateDailyArchive(
 }
 
 Future<void> updateIsoneDaEnergyOffers(
-    {required List<Month> months,
-    bool download = false}) async {
+    {required List<Month> months, bool download = false}) async {
   assert(months.first.location == IsoNewEngland.location);
   var archive = prod.getIsoneDaEnergyOfferArchive();
   for (var month in months) {
@@ -540,7 +546,6 @@ Future<void> updateNyisoEnergyOffers(
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();

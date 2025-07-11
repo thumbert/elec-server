@@ -71,7 +71,10 @@ class CtSupplierBacklogRatesArchive {
 
       var data = <Map<String, dynamic>>[];
       for (var row in table.rows.skip(1)) {
-        num count = (hasKwh) ? row[4] : row[3];
+        num? count = (hasKwh) ? row[4] : row[3];
+        if (count == 0 || count == null) {
+          continue;
+        }
         late bool hardship;
         if (hasHardshipStatus) {
           var r5 = (row[5] as String).trim();

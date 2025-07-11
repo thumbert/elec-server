@@ -142,7 +142,7 @@ Future<void> tests() async {
 
 class Row {}
 
-/// Look at load data
+/// Look at Calpine load data
 void analyzeData() {
   final archive = getIsoneDemandBidsArchive();
   final conn = Connection(archive.duckdbPath);

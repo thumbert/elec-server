@@ -1,5 +1,14 @@
 SELECT * FROM offers;
 
+SELECT * FROM offers
+WHERE hour_beginning >= '2025-03-02 00:00:00'
+AND hour_beginning < '2025-03-03 00:00:00'
+-- AND masked_lead_participant_id = 353795
+AND masked_asset_id = 98805
+ORDER BY hour_beginning, masked_lead_participant_id, masked_asset_id;
+
+
+
 
 -- ========================================================
 CREATE TABLE IF NOT EXISTS offers (
@@ -12,7 +21,6 @@ CREATE TABLE IF NOT EXISTS offers (
     tmor_offer_price DECIMAL(9,2) NOT NULL,
     eir_offer_price DECIMAL(9,2) NOT NULL,
 );
-
 
 CREATE TEMPORARY TABLE tmp
 AS

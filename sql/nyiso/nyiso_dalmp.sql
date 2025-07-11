@@ -5,18 +5,33 @@ SELECT COUNT(DISTINCT(ptid)) FROM dalmp WHERE day = '2020-01-01'; -- 574 nodes
 
 SELECT *
 FROM dalmp
-WHERE hour_beginning >= '2025-06-17'
-AND hour_beginning < '2025-06-18'
-AND ptid = 61757
+WHERE hour_beginning >= '2025-06-27'
+AND hour_beginning < '2025-06-28'
+AND ptid IN (61754, 23575)
+ORDER BY hour_beginning;
+
+--- Check DST. The first 3 LMP values should be [29.27, 27.32, 27.14]
+SELECT * FROM dalmp
+WHERE hour_beginning >= '2024-11-03'
+AND hour_beginning < '2024-11-04'
+AND ptid = 61752
 ORDER BY hour_beginning;
 
 
+
+SELECT 
+    '2024-11-03 00:00:00-04:00'::TIMESTAMPTZ AS H0, 
+    '2024-11-03 00:00:00-04:00'::TIMESTAMPTZ  + INTERVAL(1) HOUR AS H1, 
+    '2024-11-03 00:00:00-04:00'::TIMESTAMPTZ  + INTERVAL(2) HOUR AS H2, 
+    '2024-11-03 00:00:00-04:00'::TIMESTAMPTZ  + INTERVAL(3) HOUR AS H3, 
+;
 
 
 --- =========================================================================================
 --- Create and update the table (version 2) -- Active
 --- Data from 2020-01 to 2025-05 was 935 MB on disk
 --- =========================================================================================
+DROP TABLE IF EXISTS dalmp;
 CREATE TABLE IF NOT EXISTS dalmp (
     hour_beginning TIMESTAMPTZ NOT NULL,
     ptid INTEGER NOT NULL,
@@ -25,71 +40,13 @@ CREATE TABLE IF NOT EXISTS dalmp (
     mcc DECIMAL(9,2) NOT NULL,
 );
 
-
 LOAD zipfs;    
 CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_zone_csv.zip/*.csv';
 CREATE TEMPORARY TABLE tmp2 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_gen_csv.zip/*.csv';
 
+DROP TABLE IF EXISTS tmp;
 CREATE TEMPORARY TABLE tmp AS
 (SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
-FROM (
-    SELECT 
-    strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
-    ptid::INTEGER AS ptid,
-    row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
-    "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
-    "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
-    "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
-FROM tmp1))
-UNION
-(SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
-FROM (SELECT 
-    strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
-    ptid::INTEGER AS ptid,
-    row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
-    "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
-    "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
-    "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
-FROM tmp2));
-
-
-INSERT INTO dalmp
-SELECT hour_beginning, ptid, lmp, mlc, mcc FROM tmp
-EXCEPT 
-    SELECT * FROM dalmp            
-ORDER BY hour_beginning, ptid;
-
-
-
-SELECT * FROM dalmp 
-WHERE ptid = 61752
-AND hour_beginning >= '2024-11-03 00:00:00' 
-AND hour_beginning < '2024-11-04 00:00:00' 
-ORDER BY hour_beginning;
-
-SELECT *
-FROM dalmp 
-WHERE ptid = 61752
-AND hour_beginning >= '2024-11-03' 
-AND hour_beginning < '2024-11-04' 
-ORDER BY hour_beginning;
-
-
-
-    SELECT ptid, day, idx, lmp
-    FROM dalmp 
-    WHERE day >= '2024-11-03'
-    AND day <= '2024-11-04'
-    AND ptid in (61752)
-    ORDER BY ptid, day, idx;
-
-CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_zone_csv.zip/*.csv';
-SELECT * from tmp1
-WHERE ptid = 61752
-and "Time Stamp" like '11/03/2024 %';
-
---- FIRE !!! ---
-SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
 FROM (
     SELECT 
         strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
@@ -99,20 +56,51 @@ FROM (
         "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
         "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
     FROM tmp1
-    WHERE ptid = 61752
-    AND day = '2024-11-03'
-);
-
-
-
-SELECT * from tmp
-WHERE ptid = 61752
-AND day = '2024-11-03';
-
-SELECT *, dt + INTERVAL 1 HOUR AS dt2, dt + INTERVAL 2 HOUR AS dt3
+    )
+)
+UNION 
+(SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
 FROM (
-    SELECT '2024-11-03'::TIMESTAMPTZ as dt
-);
+    SELECT 
+        strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
+        ptid::INTEGER AS ptid,
+        row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
+        "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+        "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+        "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+    FROM tmp2
+    )
+)
+ORDER BY hour_beginning, ptid;
+
+
+INSERT INTO dalmp
+(SELECT hour_beginning, ptid, lmp, mlc, mcc FROM tmp
+WHERE NOT EXISTS (
+    SELECT * FROM dalmp d
+    WHERE d.hour_beginning = tmp.hour_beginning
+    AND d.ptid = tmp.ptid
+))
+ORDER BY hour_beginning, ptid;
+
+
+SELECT * FROM dalmp 
+WHERE ptid = 61752
+AND hour_beginning >= '2024-11-03 00:00:00' 
+AND hour_beginning < '2024-11-04 00:00:00' 
+ORDER BY hour_beginning;
+
+
+
+
+SELECT *
+FROM dalmp 
+WHERE ptid = 61752
+AND hour_beginning >= '2024-11-03' 
+AND hour_beginning < '2024-11-04' 
+ORDER BY hour_beginning;
+
+
 
 
 
