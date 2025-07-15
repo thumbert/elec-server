@@ -294,7 +294,7 @@ Future<void> updateIsoneDaLmp(
       // var data = archive.processFile(file);
       // await archive.insertData(data);
     }
-    archive.makeGzFileForMonth(month);
+    // archive.makeGzFileForMonth(month);
     // archive.updateDuckDb(
     //     months: [month],
     //     pathDbFile:
