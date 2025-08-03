@@ -26,6 +26,7 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
   static Set<String> problemDays = {
     '2024-10-18',
     '2025-05-01',
+    '2025-07-24',
   };
 
   ///

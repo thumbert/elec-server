@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-08-03
+- exclude 2025-07-24 from IESO 24h check.  They messed up again. 
+
 # Release 2025-07-11
 - Fix CT backlog ingestion.  They broke the file format again!
 

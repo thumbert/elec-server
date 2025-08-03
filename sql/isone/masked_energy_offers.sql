@@ -1,17 +1,3 @@
-
-
---- Delete one month of data (Mar24)
-DELETE FROM da_energy_offers 
-WHERE HourBeginning >= '2024-03-01'
-AND HourBeginning < '2024-04-01';
-
---- Insert one month of data (Mar24)
-INSERT INTO da_energy_offers
-FROM read_csv(
-    '/home/adrian/Downloads/Archive/IsoExpress/PricingReports/DaEnergyOffer/month/da_energy_offers_2024-03.csv.gz', 
-    header = true, 
-    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
-
 --- Which months are in the table 
 SELECT strftime("HourBeginning", '%Y-%m') AS YEARMON, COUNT(*) 
 FROM da_offers
@@ -105,13 +91,41 @@ SELECT * FROM (
 )
 WHERE Total != 4;
 
+--- Get all the participants with one asset and the first day they were active
+SELECT *
+FROM (
+    SELECT MaskedParticipantId, MaskedAssetId, MIN(HourBeginning) as FirstHour
+    FROM da_offers
+    GROUP BY MaskedParticipantId, MaskedAssetId
+)
+WHERE FirstHour >= '2023-09-01'
+AND FirstHour < '2024-02-01'
+AND MaskedParticipantId IN (
+    SELECT MaskedParticipantId 
+    FROM (
+        SELECT MaskedParticipantId, COUNT(DISTINCT MaskedAssetId) AS asset_count
+        FROM da_offers
+        GROUP BY MaskedParticipantId
+    )
+    WHERE asset_count = 1
+)
+ORDER BY MaskedParticipantId, MaskedAssetId;
 
---- Find the ownership of a given asset by month
+
+
+
+
+
+
+
 SELECT DISTINCT MaskedParticipantId,  strftime(HourBeginning, '%Y-%m') as YEARMON,
 FROM da_offers 
 WHERE HourBeginning >= '2022-01-01'
-AND HourBeginning < '2024-05-01'
-AND MaskedAssetId = 57986
+AND HourBeginning < '2025-04-01'
+-- AND MaskedAssetId = 15082  
+AND MaskedAssetId = 41265  
+-- AND MaskedAssetId = 54750 -- Merrimack 2 
+-- AND MaskedAssetId = 54465 -- Salem 5 
 ORDER BY YEARMON;
 
 SELECT * FROM da_offers
@@ -125,9 +139,30 @@ LIMIT 5;
 SELECT DISTINCT MaskedAssetId, strftime(HourBeginning, '%Y-%m') as YEARMON,
 FROM da_offers 
 WHERE HourBeginning >= '2022-01-01'
-AND HourBeginning < '2024-05-01'
-AND MaskedParticipantId = 953967
+AND HourBeginning < '2025-05-01'
+AND MaskedParticipantId = 315408
 ORDER BY YEARMON, MaskedAssetId;
+
+SELECT HourBeginning, EcoMax, UnitStatus FROM da_offers
+WHERE MaskedAssetId = 33938
+AND HourBeginning >= '2023-01-01'
+AND HourBeginning < '2025-03-01'
+-- AND UnitStatus != 'UNAVAILABLE'
+ORDER BY HourBeginning;
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/IsoExpress/energy_offers.duckdb' AS eo;
+SELECT HourBeginning, EcoMax FROM eo.rt_offers
+WHERE MaskedAssetId = 33938
+AND HourBeginning >= '2023-01-01'
+AND HourBeginning < '2025-03-01'
+AND UnitStatus != 'UNAVAILABLE'
+ORDER BY HourBeginning;
+" | qplot
+
+
+
+
 
 
 --- Find new assets and assets that changed hands
@@ -136,15 +171,35 @@ SELECT * FROM (
     FROM da_offers
     GROUP BY MaskedAssetId, MaskedParticipantId
 ) 
-WHERE StartDate > '2024-01-01'
+WHERE StartDate > '2023-12-01'
 ORDER BY StartDate;
 
 
---- Find start date for an asset
+--- Find start date and the EcoMax for an asset
 SELECT * FROM (
     SELECT MaskedAssetId, MIN(HourBeginning) as StartDate, MAX(EcoMax) as EcoMax
     FROM da_offers
     GROUP BY MaskedAssetId
 ) 
-WHERE StartDate > '2024-01-01'
+WHERE StartDate > '2023-10-01'
 ORDER BY StartDate;
+
+
+
+
+
+
+---##############################################################################################
+
+--- Delete one month of data (Mar24)
+DELETE FROM da_offers 
+WHERE HourBeginning >= '2024-03-01'
+AND HourBeginning < '2024-04-01';
+
+--- Insert one month of data (Mar24)
+INSERT INTO da_offers
+FROM read_csv(
+    '/home/adrian/Downloads/Archive/IsoExpress/PricingReports/DaEnergyOffer/month/da_energy_offers_2024-03.csv.gz', 
+    header = true, 
+    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
+

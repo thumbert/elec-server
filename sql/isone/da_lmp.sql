@@ -4,7 +4,52 @@ SELECT *
 FROM da_lmp 
 WHERE ptid = 4000
 AND hour_beginning >= '2025-07-01'
-AND hour_beginning < '2025-07-15';
+AND hour_beginning < '2025-07-2';
+
+
+--- get only several locations as different columns
+SELECT * FROM da_lmp
+PIVOT (
+    min(lmp),
+    FOR ptid IN (4000, 4001)
+    GROUP BY hour_beginning    
+)
+WHERE hour_beginning >= '2025-01-01'
+AND hour_beginning < '2025-07-15'
+ORDER BY hour_beginning;
+
+--- same thing, using DuckDB PIVOT syntax
+CREATE TEMPORARY TABLE tmp
+AS (
+    SELECT 
+        hour_beginning,
+        ptid,
+        lmp,
+    FROM da_lmp
+    WHERE hour_beginning >= '2025-07-01'    
+    AND hour_beginning < '2025-07-12'
+    AND ptid IN (4000, 4001)
+);
+PIVOT tmp ON ptid USING min(lmp);
+
+
+
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/isone/dalmp.duckdb' AS dalmp;
+SELECT hour_beginning, lmp
+FROM dalmp.da_lmp 
+WHERE hour_beginning >= '2025-01-01'
+AND hour_beginning < '2025-12-31'
+AND ptid = 4000
+ORDER BY hour_beginning;
+" | qplot
+
+
+curl 'http://localhost:8111/isone/dalmp/hourly/start/2025-07-01/end/2025-07-14?ptids=4000&components=lmp'
+
+
+
 
 WITH unpivot_alias AS (
     UNPIVOT da_lmp
