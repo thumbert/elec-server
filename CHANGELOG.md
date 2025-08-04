@@ -8,6 +8,7 @@
 
 # Release 2025-08-03
 - exclude 2025-07-24 from IESO 24h check.  They messed up again. 
+  Do populate the missing hour with the average of the values for the hour previous and after.
 
 # Release 2025-07-11
 - Fix CT backlog ingestion.  They broke the file format again!

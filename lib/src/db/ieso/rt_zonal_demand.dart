@@ -106,7 +106,15 @@ class IesoRtZonalDemandArchive extends IsoExpressReport {
           out.add({
             'date': xs.first['Date'],
             'zone': key.replaceAll(' Demand', ''),
-            'values': [null, ...xs.map((e) => e[key])],
+            'values': [(14459 + 12352) / 2, ...xs.map((e) => e[key])],
+          });
+        } else if (date == '2025-07-24') {
+          var vs = xs.map((e) => e[key]).toList();
+          vs.insert(18, (14303 + 15497) / 2);
+          out.add({
+            'date': xs.first['Date'],
+            'zone': key.replaceAll(' Demand', ''),
+            'values': vs,
           });
         } else {
           out.add({
