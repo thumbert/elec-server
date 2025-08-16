@@ -6,8 +6,8 @@ extension HtmlExtension on List<List<String>> {
   Table toHtml() {
     var table = Table();
     var header = TableRow();
-    for (var colNames in first) {
-      header.addCell(TableCell(TableCellType.header)..withRaw(colNames));
+    for (var colName in first) {
+      header.addCell(TableCell(TableCellType.header)..withRaw(colName));
     }
     for (var cells in skip(1)) {
       var row = TableRow();
