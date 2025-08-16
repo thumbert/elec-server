@@ -10,6 +10,8 @@ dependencies:
   actors: ^0.11.0
   archive: ^3.4.9
   args: ^2.5.0
+  build_html: 
+    git: https://github.com/thumbert/build_html.git
   collection: ^1.15.0
   crypto: ^3.0.2
   csv: ^6.0.0
@@ -23,7 +25,6 @@ dependencies:
     git: https://github.com/thumbert/elec.git
   grpc: ^4.0.0
   html: ^0.15.1
-  html_template: ^0.3.0
   http: ^1.2.0
   intl: ^0.19.0
   logging: ^1.0.1
@@ -48,7 +49,7 @@ dependency_overrides:
   decimal: ^3.0.0
 
 dev_dependencies:
-  analyzer: ^6.5.0
+  analyzer: ^7.7.0
   build_runner: ^2.4.11
   build_web_compilers: ^4.0.3
   lints: ^4.0.0

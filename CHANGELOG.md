@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-08-16
+- Add extension method toHtml() to List<List<String>>
+
 # Release 2025-08-03
 - exclude 2025-07-24 from IESO 24h check.  They messed up again. 
   Do populate the missing hour with the average of the values for the hour previous and after.

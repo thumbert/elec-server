@@ -10,9 +10,6 @@ import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/utils.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:html_template/html_template.dart';
-
-part 'main.g.dart';
 
 class _Analysis {
   final dir = '${Platform.environment['HOME']}/Downloads/Archive/Analysis/CMP';
@@ -235,7 +232,8 @@ class _Analysis {
   void makeReport() {
     makeShapePlots();
 
-    var html = pageTemplate(this);
+    // var html = pageTemplate(this);
+    var html = StringBuffer();
     File('$dir/index.html').writeAsStringSync(html.toString());
   }
 
@@ -254,7 +252,6 @@ class _Analysis {
 
 }
 
-@template
 void _pageTemplate(_Analysis analysis) {
   // final scripts = Directory(analysis.dir).listSync().where((e) => e.path.endsWith('.js'))
   //     .map((e) => basename(e.path))
@@ -324,7 +321,7 @@ void _pageTemplate(_Analysis analysis) {
     <div id="shape_aprmay"></div>
 
     
-    ${TrustedHtml(analysis.getTable())}
+    ${analysis.getTable()}
 
     
     Comparison of median hourly load shape year over year
