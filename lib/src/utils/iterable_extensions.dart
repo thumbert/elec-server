@@ -9,6 +9,7 @@ extension HtmlExtension on List<List<String>> {
     for (var colName in first) {
       header.addCell(TableCell(TableCellType.header)..withRaw(colName));
     }
+    table.addCustomHeaderRow(header);
     for (var cells in skip(1)) {
       var row = TableRow();
       for (var cell in cells) {
