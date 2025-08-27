@@ -44,7 +44,7 @@ Future<void> tests() async {
   /// IESO
   // var months = Month.utc(2025, 1).upTo(Month.utc(2025, 1));
   // await updateIesoRtGenerationArchive(months: months);
-  await updateIesoRtZonalDemandArchive(years: [2025]);
+  // await updateIesoRtZonalDemandArchive(years: [2025]);
 
   ///---------------------------------------------------------------
   /// ISONE
@@ -80,9 +80,9 @@ Future<void> tests() async {
   // await updateIsoneMraCapacityResults(months: months, download: true);
 
   // await updateCmeEnergySettlements(days, setUp: false);
-  // var months = Month.utc(2025, 5).upTo(Month.utc(2025, 5));
-  // await updateCtSupplierBacklogRatesDb(months: months,
-  //     externalDownload: false);
+  var months = Month.utc(2025, 6).upTo(Month.utc(2025, 6));
+  await updateCtSupplierBacklogRatesDb(months: months,
+      externalDownload: true);
 
   // var years = IntegerRange(2020, 2024);
   // await updateCmpLoadArchive(years, setUp: true);
@@ -98,7 +98,7 @@ Future<void> tests() async {
   // await insertNormalTemperatures();
 }
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
   Logger.root.level = Level.INFO;
   Logger.root.onRecord.listen((record) {

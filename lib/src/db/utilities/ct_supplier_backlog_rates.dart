@@ -164,6 +164,8 @@ class CtSupplierBacklogRatesArchive {
       'Reversals Residential': 'Reversals Residential',
     };
 
+    final hasHardshipStatus = month.isAfter(Month.utc(2025, 5));
+
     var out = <Map<String, dynamic>>[];
     for (var tabName in decoder.tables.keys) {
       var table = decoder.tables[tabName]!;
@@ -184,17 +186,44 @@ class CtSupplierBacklogRatesArchive {
             'customerCount': row[2] as int,
           });
         } else {
-          data.add({
-            'supplierName': row[0] as String,
-            'price': row[1] as num,
-            if (hasKwh) 'kWh': row[4] as num,
-            'customerCount': (hasKwh) ? row[3] as int : row[2] as int,
-          });
+          if (hasHardshipStatus) {
+            data.add({
+              'supplierName': row[0] as String,
+              'price': row[1] as num,
+              if (hasKwh) 'kWh': row[5] as num,
+              'customerCount': (hasKwh) ? row[4] as int : row[4] as int,
+              'hardship': row[3] == 'X'
+                  ? true
+                  : (row[3] == 'N'
+                      ? false
+                      : throw StateError('Unknown hardship status'))
+            });
+          } else {
+            data.add({
+              'supplierName': row[0] as String,
+              'price': row[1] as num,
+              if (hasKwh) 'kWh': row[4] as num,
+              'customerCount': (hasKwh) ? row[3] as int : row[2] as int,
+            });
+          }
         }
       }
       var groups = groupBy(data, (e) => e['supplierName']);
       for (var supplierName in groups.keys) {
         var xs = groups[supplierName]!;
+        var totalCustomerCount = sum(xs.map((e) => e['customerCount']));
+        late num avgPriceHardship;
+        if (hasHardshipStatus) {
+          avgPriceHardship = sum(xs
+                  .where((e) => e['hardship'])
+                  .map((e) => e['customerCount'] * e['price'])) /
+              sum(xs
+                  .where((e) => e['hardship'])
+                  .map((e) => e['customerCount']));
+        }
+        var avgPrice = sum(xs.map((e) => e['customerCount'] * e['price'])) /
+            totalCustomerCount;
+
         out.add({
           'month': month.toIso8601String(),
           'utility': 'UI',
@@ -205,9 +234,16 @@ class CtSupplierBacklogRatesArchive {
           'customerCount': xs.map((e) => e['customerCount']).toList(),
           'summary': {
             'customerCount': sum(xs.map((e) => e['customerCount'])),
+            if (hasHardshipStatus)
+              'hardshipCustomerCount': sum(xs
+                  .where((e) => e['hardship'])
+                  .map((e) => e['customerCount'])),
             if (hasKwh) 'kWh': sum(xs.map((e) => e['kWh'])),
             'averagePriceWeightedByCustomerCount':
                 mean(xs.map((e) => e['customerCount'] * e['price'])),
+            if (hasHardshipStatus && avgPriceHardship.isFinite)
+              'averagePriceWeightedByCustomerCountForHardshipCustomers':
+                  avgPriceHardship,
             if (hasKwh)
               'averagePriceWeightedByVolume':
                   mean(xs.map((e) => e['kWh'] * e['price'])),
@@ -261,13 +297,9 @@ class CtSupplierBacklogRatesArchive {
 
   /// Get all urls and cache them ...
   Future<List<Map<String, dynamic>>> getAllUrls() async {
-    var browser = await puppeteer.launch();
-    var page = await browser.newPage();
-
-    await page.goto(
-        'https://energizect.com/rate-board-residential-standard-service-generation-rates');
-    var content = await page.content;
-    await browser.close();
+    var aux = await get(Uri.parse(
+        'https://energizect.com/rate-board-residential-standard-service-generation-rates'));
+    var content = aux.body;
     var document = parse(content);
 
     /// current year links
@@ -306,8 +338,8 @@ class CtSupplierBacklogRatesArchive {
 
     /// sort by month and utility
     const natural = naturalComparable<String>;
-    var byMonth = natural.onResultOf<Map>((Map e) => e['month']);
-    var byUtility = natural.onResultOf<Map>((Map e) => e['utility']);
+    var byMonth = natural.keyOf<Map>((Map e) => e['month']);
+    var byUtility = natural.keyOf<Map>((Map e) => e['utility']);
     var ordering = byMonth.thenCompare(byUtility);
     res.sort(ordering);
 
@@ -531,5 +563,12 @@ final specialUrls = [
     "month": "2022-09",
     "utility": "UI",
     "url": "https://energizect.com/media/5836",
+  },
+  // 2026
+  {
+    "month": "2025-06",
+    "utility": "Eversource",
+    "url":
+        "https://www.energizect.com/sites/default/files/documents/Supplier%20Billed%20Rates%20-%20June%202025%20ER_0.xlsx",
   },
 ];
