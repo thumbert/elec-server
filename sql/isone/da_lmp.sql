@@ -1,4 +1,6 @@
 
+SELECT 
+
 
 SELECT * 
 FROM da_lmp 

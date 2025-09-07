@@ -12,7 +12,6 @@ import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:more/more.dart';
-import 'package:puppeteer/puppeteer.dart';
 import 'package:path/path.dart' as path;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:timezone/timezone.dart';
@@ -211,7 +210,6 @@ class CtSupplierBacklogRatesArchive {
       var groups = groupBy(data, (e) => e['supplierName']);
       for (var supplierName in groups.keys) {
         var xs = groups[supplierName]!;
-        var totalCustomerCount = sum(xs.map((e) => e['customerCount']));
         late num avgPriceHardship;
         if (hasHardshipStatus) {
           avgPriceHardship = sum(xs
@@ -221,8 +219,6 @@ class CtSupplierBacklogRatesArchive {
                   .where((e) => e['hardship'])
                   .map((e) => e['customerCount']));
         }
-        var avgPrice = sum(xs.map((e) => e['customerCount'] * e['price'])) /
-            totalCustomerCount;
 
         out.add({
           'month': month.toIso8601String(),

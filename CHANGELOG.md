@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-09-07
+- Add report on Canadian generation
+
 # Release 2025-08-27
 - Fix ct_supplier_backlog_rates to support UI hardship customer counts.  Remove dependency on 
   puppeteer as it was not really needed and was giving errors. 

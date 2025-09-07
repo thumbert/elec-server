@@ -12,6 +12,7 @@ A web server built using [Shelf](https://pub.dartlang.org/packages/shelf).
 
 
 cp ~/Documents/repos/git/thumbert/rascal/html/docs/index.html ~/Software/Apps/public/docs   
+cp ~/Documents/repos/git/thumbert/rascal/html/docs/assets/documentation.css ~/Software/Apps/public/docs/assets   
 
 ```
 duckdb -csv -c "

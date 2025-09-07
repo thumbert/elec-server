@@ -5,27 +5,29 @@ import 'dart:io';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/db_nyiso.dart';
+import 'package:elec_server/src/db/canadian_statistics/canadian_statistics.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/hq/hq_water.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
-import 'package:elec_server/src/db/isoexpress/da_energy_offer.dart';
-import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
-import 'package:elec_server/src/db/isoexpress/morning_report.dart';
-import 'package:elec_server/src/db/isoexpress/mra_capacity_bidoffer.dart';
-import 'package:elec_server/src/db/isoexpress/mra_capacity_results.dart';
-import 'package:elec_server/src/db/isoexpress/rt_energy_offer.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_5min.dart';
 import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
-import 'package:elec_server/src/db/isoexpress/sevenday_capacity_forecast.dart';
-import 'package:elec_server/src/db/isone/historical_btm_solar.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
-import 'package:elec_server/src/db/utilities/ct_supplier_backlog_rates.dart';
-import 'package:elec_server/src/db/utilities/maine/load_cmp.dart';
-import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 import 'package:elec_server/src/db/weather/normal_temperature.dart';
+
+CanadianStatisticsArchive getCanadianStatisticsArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/statistics_canada';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return CanadianStatisticsArchive(
+    duckDbPath: '$dir/energy_generation.duckdb',
+  );
+}
+
+
 
 CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
   var dbConfig = ComponentConfig(
