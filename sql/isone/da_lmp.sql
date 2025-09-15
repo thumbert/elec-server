@@ -1,5 +1,10 @@
 
-SELECT 
+CREATE TABLE buckets 
+AS SELECT * 
+FROM read_csv('/home/adrian/Downloads/Archive/Calendars/buckets.csv', header = true);
+
+
+ATTACH '~/Downloads/Archive/DuckDB/calendars/buckets.duckdb' AS buckets;
 
 
 SELECT * 
@@ -7,6 +12,28 @@ FROM da_lmp
 WHERE ptid = 4000
 AND hour_beginning >= '2025-07-01'
 AND hour_beginning < '2025-07-2';
+
+
+--========================================================================
+-- Pick only the 5x16 hours from the da_lmp table
+SELECT 
+    da_lmp.*, 
+    buckets.buckets.b5x16
+FROM da_lmp 
+JOIN buckets.buckets
+    USING (hour_beginning)
+WHERE ptid = 4000
+AND hour_beginning >= '2025-07-01'
+AND hour_beginning < '2025-07-02'
+;
+
+
+SELECT * 
+FROM buckets.buckets
+WHERE hour_beginning >= '2025-07-01'
+AND hour_beginning < '2025-07-02'
+ORDER BY hour_beginning;
+
 
 
 --- get only several locations as different columns
