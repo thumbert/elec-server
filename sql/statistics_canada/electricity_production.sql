@@ -1,3 +1,16 @@
+SELECT 
+    GEO as region,
+    REF_DATE as month,
+    VALUE as MWh,
+FROM   
+    electricity_production
+WHERE
+    "Type of electricity generation" = 'Hydraulic turbine'
+    AND "Class of electricity producer" = 'Total all classes of electricity producer'
+ORDER BY REF_DATE, GEO;    
+
+
+
 
 
 SELECT 
@@ -9,7 +22,7 @@ FROM
 WHERE
     "Type of electricity generation" = 'Hydraulic turbine'
     AND "Class of electricity producer" = 'Total all classes of electricity producer'
-    AND GEO = 'Quebec' -- 'Ontario', 'Quebec', ''
+    AND GEO = 'Newfoundland and Labrador' -- 'Quebec', 'Ontario', 'Quebec', ''
 ;    
 
 
@@ -22,7 +35,8 @@ FROM
     ep.electricity_production
 WHERE
     \"Type of electricity generation\" = 'Hydraulic turbine'
-    AND GEO = 'Quebec'
+    AND \"Class of electricity producer\" = 'Total all classes of electricity producer'
+    AND GEO = 'Newfoundland and Labrador'
 ;    
 " | qplot
 

@@ -14,6 +14,9 @@ AND hour_beginning >= '2025-07-01'
 AND hour_beginning < '2025-07-2';
 
 
+
+
+
 --========================================================================
 -- Pick only the 5x16 hours from the da_lmp table
 SELECT 
@@ -36,7 +39,7 @@ ORDER BY hour_beginning;
 
 
 
---- get only several locations as different columns
+--- Get hourly prices for several ptids in side by side columns
 SELECT * FROM da_lmp
 PIVOT (
     min(lmp),
@@ -111,6 +114,47 @@ AND hour_beginning < '2025-07-15 00:00:00.000-04:00'
 AND ptid in (4000) 
 ORDER BY component, ptid, hour_beginning; 
     
+
+---=========================================================================
+--- Calculate daily average prices for a given ptid and component
+---=========================================================================
+WITH unpivot_alias AS (
+    UNPIVOT da_lmp
+    ON lmp
+    INTO
+        NAME component
+        VALUE price
+)
+SELECT 
+    component,
+    ptid,
+    hour_beginning::DATE AS day,
+    'ATC' AS bucket,
+    MEAN(price)::DECIMAL(9,4) AS price,
+FROM unpivot_alias
+WHERE hour_beginning >= '2025-07-01 00:00:00.000'
+AND hour_beginning < '2025-07-15 00:00:00.000'
+AND ptid in (4000) 
+GROUP BY component, ptid, day
+ORDER BY component, ptid, day; 
+
+
+SELECT
+    'lmp' AS component,
+    ptid,
+    hour_beginning::DATE AS day,
+    'ATC' AS bucket,
+    MEAN(lmp)::DECIMAL(9,4) AS price,
+FROM da_lmp
+WHERE hour_beginning >= '2025-07-01 00:00:00.000'
+AND hour_beginning < '2025-07-15 00:00:00.000'
+AND ptid in (4000) 
+GROUP BY ptid, day
+ORDER BY ptid, day;
+
+
+
+
 
 ---========================================================================
 CREATE TABLE IF NOT EXISTS da_lmp (
