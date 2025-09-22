@@ -17,10 +17,19 @@ enum IesoFuelType {
 }
 
 class IesoClient {
-  IesoClient(this.client, {required this.rootUrl});
+  IesoClient(this.client, {required this.rootUrl, required this.rustServer});
 
   final http.Client client;
   final String rootUrl;
+  final String rustServer;
+
+  Future<List<(String type, String name)>> getNodeTable() async {
+    var url = '$rustServer/ieso/node_table/all';
+    var aux = await http.get(Uri.parse(url));
+    var data = json.decode(aux.body) as List;
+    return data.map<(String, String)>((e) => (e['type'], e['name'])).toList();
+  }
+
 
   /// Get hourly rt zonal demand.
   /// [term] should be in 'America/Cancun'.

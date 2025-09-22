@@ -4,8 +4,182 @@ SELECT * FROM offers
 WHERE hour_beginning >= '2025-03-02 00:00:00'
 AND hour_beginning < '2025-03-03 00:00:00'
 -- AND masked_lead_participant_id = 353795
-AND masked_asset_id = 98805
+-- AND masked_asset_id = 98805
 ORDER BY hour_beginning, masked_lead_participant_id, masked_asset_id;
+
+
+
+---=======================================================
+--- How many unique participants are offering every day?
+WITH daily_participants AS (
+    SELECT 
+        hour_beginning::DATE AS offer_date,
+        COUNT(DISTINCT masked_lead_participant_id) AS unique_participants
+    FROM offers
+    GROUP BY offer_date
+)
+SELECT 
+    offer_date,
+    unique_participants
+FROM daily_participants
+ORDER BY offer_date;    
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/isone/masked_daas_offers.duckdb' AS db;
+WITH daily_participants AS (
+    SELECT 
+        hour_beginning::DATE AS offer_date,
+        COUNT(DISTINCT masked_lead_participant_id) AS unique_participants
+    FROM db.offers
+    GROUP BY offer_date
+)
+SELECT 
+    offer_date,
+    unique_participants
+FROM daily_participants
+ORDER BY offer_date;    
+" | qplot --config='{"title":"DAAS Offers","yaxis":{"title":"Number of unique participants"}}'
+
+
+---=======================================================================
+--- histogram of unique number of participants per day
+SELECT 
+    kv['key'] AS unique_participants, 
+    kv['value'] AS days
+FROM (
+    WITH daily_participants AS (
+        SELECT 
+            hour_beginning::DATE AS offer_date,
+            COUNT(DISTINCT masked_lead_participant_id) AS unique_participants
+        FROM offers
+        GROUP BY offer_date
+    )
+    SELECT 
+        unnest(map_entries(histogram(unique_participants))) as kv
+    FROM daily_participants
+);
+-- ┌─────────────────────┬────────┐
+-- │ unique_participants │  days  │
+-- │        int64        │ uint64 │
+-- ├─────────────────────┼────────┤
+-- │                  36 │      1 │
+-- │                  39 │      8 │
+-- │                  40 │     15 │
+-- │                  41 │     14 │
+-- │                  42 │      9 │
+-- │                  43 │      8 │
+-- │                  44 │     20 │
+-- │                  45 │     14 │
+-- │                  46 │      3 │
+-- └─────────────────────┴────────┘
+
+
+---=======================================================================
+-- How many MW are offered every day?
+WITH daily_offers AS (
+    SELECT 
+        hour_beginning,
+        SUM(offer_mw) AS total_offer_mw
+    FROM offers
+    GROUP BY hour_beginning
+)
+SELECT 
+    hour_beginning,
+    total_offer_mw
+FROM daily_offers
+ORDER BY hour_beginning;
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/isone/masked_daas_offers.duckdb' AS db;
+WITH daily_offers AS (
+    SELECT 
+        hour_beginning,
+        SUM(offer_mw) AS total_offer_mw
+    FROM db.offers
+    GROUP BY hour_beginning
+)
+SELECT 
+    hour_beginning,
+    total_offer_mw
+FROM daily_offers
+ORDER BY hour_beginning;
+" | qplot --config='{"title":"DAAS Offers","yaxis":{"title":"Total MW offered"}}'
+
+
+
+---=======================================================================
+-- Who is offering the most MWs every day?
+SELECT 
+    masked_lead_participant_id,
+    MAX(offer_mw) AS max_offer_mw
+FROM offers
+GROUP BY masked_lead_participant_id
+HAVING max_offer_mw > 50   
+ORDER BY max_offer_mw DESC;
+-- ┌────────────────────────────┬──────────────┐
+-- │ masked_lead_participant_id │ max_offer_mw │
+-- │           int32            │ decimal(9,2) │
+-- ├────────────────────────────┼──────────────┤
+-- │                     958512 │       620.00 │
+-- │                     595644 │       595.00 │
+-- │                     126216 │       568.00 │
+-- │                     748190 │       514.80 │
+-- │                     352775 │       403.10 │
+-- │                     379629 │       402.00 │
+-- │                     855157 │       400.20 │
+-- │                     878461 │       348.00 │
+-- │                     931987 │       330.00 │
+-- │                     706923 │       320.00 │
+-- │                     591975 │       299.00 │
+-- │                     582462 │       292.00 │
+-- │                     295534 │       265.00 │
+-- │                     328723 │       250.00 │
+-- │                     396955 │       202.00 │
+-- │                     872788 │       194.70 │
+-- │                     639879 │       186.00 │
+-- │                     207554 │       103.50 │
+-- │                     953967 │       100.00 │
+
+---=======================================================================
+-- Show the historical MW offers for one given participant
+SELECT hour_beginning, sum(offer_mw) AS total_offer_mw
+FROM offers
+WHERE masked_lead_participant_id = 958512
+GROUP BY hour_beginning
+ORDER BY hour_beginning;
+
+--- Pivot the data to show historical MW offers for all participants, each as a column
+SELECT hour_beginning,
+FROM (
+    PIVOT offers
+    ON masked_lead_participant_id
+    USING SUM(offer_mw)
+    GROUP BY hour_beginning
+    ORDER BY hour_beginning;
+)
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/isone/masked_daas_offers.duckdb' AS db;
+PIVOT db.offers
+ON masked_lead_participant_id
+USING SUM(offer_mw)
+GROUP BY hour_beginning
+ORDER BY hour_beginning;
+" | qplot --config='{"title":"DAAS Offers by participant","yaxis":{"title":"Total MW offered"}}'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -2,7 +2,7 @@ library test.db.ieso.rt_zonal_demand_test;
 
 import 'dart:convert';
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:elec_server/api/iemo/api_ieso_rtgeneration.dart';
+import 'package:elec_server/api/ieso/api_ieso_rtgeneration.dart';
 import 'package:elec_server/client/ieso/ieso_client.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec/elec.dart';
@@ -12,7 +12,7 @@ import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
-Future<void> tests(String rootUrl) async {
+Future<void> tests(String rootUrl, String rustServer) async {
   var archive = getIesoRtGenerationArchive();
   group('IESO rt generation db tests:', () {
     setUp(() async => await archive.dbConfig.db.open());
@@ -101,7 +101,7 @@ Future<void> tests(String rootUrl) async {
   //
   //
   group('IESO RT Generation client tests:', () {
-    var client = IesoClient(http.Client(), rootUrl: rootUrl);
+    var client = IesoClient(http.Client(), rootUrl: rootUrl, rustServer: rustServer);
     test('get hourly rt generation one name', () async {
       var term = Term.parse('1May19-10May19', Ieso.location);
       var aux = await client.hourlyRtGeneration('ABKENORA', term, variable: 'output');
@@ -131,5 +131,6 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
   var rootUrl = dotenv.env['ROOT_URL']!;
-  tests(rootUrl);
+  var rustServer = dotenv.env['RUST_SERVER']!;
+  tests(rootUrl, rustServer);
 }

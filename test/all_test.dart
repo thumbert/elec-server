@@ -59,6 +59,7 @@ Future<void> main() async {
   DbProd();
   dotenv.load('.env/prod.env');
   var rootUrl = dotenv.env['ROOT_URL']!;
+  var rustServer = dotenv.env['RUST_SERVER']!;
 
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
@@ -69,8 +70,8 @@ Future<void> main() async {
   await bc.tests(rootUrl);
   await cme.tests(rootUrl);
   await ct_retail_suppliers.tests(rootUrl);
-  await ieso_rtgen.tests(rootUrl);
-  await ieso_rtzd.tests(rootUrl);
+  await ieso_rtgen.tests(rootUrl, rustServer);
+  await ieso_rtzd.tests(rootUrl, rustServer);
   await da_congestion.tests(rootUrl);
   await dalmp.tests(rootUrl);
   await demand_bids.tests();

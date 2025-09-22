@@ -1,11 +1,35 @@
-SELECT * from total_demand_final
-WHERE hour_beginning >= '2019-01-31'
-LIMIT 40;
+
+SELECT MIN(hour_beginning), MAX(hour_beginning) 
+FROM total_demand_final;
+
+SELECT * FROM total_demand_final;
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/hq/total_demand.duckdb' AS g;
+SELECT hour_beginning, value
+FROM g.total_demand_final
+ORDER BY hour_beginning;
+" | qplot
 
 
 
-SELECT * from total_demand_prelim
+
+SELECT * FROM total_demand_prelim
 ORDER BY zoned;
+
+SELECT MAX(value) as max_demand
+FROM total_demand_prelim
+WHERE zoned >= CURRENT_TIMESTAMP::TIMESTAMPTZ - INTERVAL '1 days';
+
+
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/hq/total_demand.duckdb' AS g;
+SELECT zoned, value
+FROM g.total_demand_prelim
+ORDER BY zoned;
+" | qplot
+
+
 
 
 ---==================================================================================

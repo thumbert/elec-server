@@ -2,7 +2,7 @@ library test.db.ieso.rt_zonal_demand_test;
 
 import 'dart:convert';
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:elec_server/api/iemo/api_ieso_rtzonaldemand.dart';
+import 'package:elec_server/api/ieso/api_ieso_rtzonaldemand.dart';
 import 'package:elec_server/client/ieso/ieso_client.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec/elec.dart';
@@ -13,7 +13,7 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
-Future<void> tests(String rootUrl) async {
+Future<void> tests(String rootUrl, String rustServer) async {
   var archive = getIesoRtZonalDemandArchive();
   group('IESO rt zonal demand db tests:', () {
     setUp(() async => await archive.dbConfig.db.open());
@@ -65,7 +65,7 @@ Future<void> tests(String rootUrl) async {
     });
   });
   group('IESO RT Zonal Demand client tests:', () {
-    var client = IesoClient(http.Client(), rootUrl: rootUrl);
+    var client = IesoClient(http.Client(), rootUrl: rootUrl, rustServer: rustServer);
     test('get hourly rt demand', () async {
       var term = Term.parse('1Jan23-15Jan23', Ieso.location);
       var aux = await client.hourlyRtZonalDemand(IesoLoadZone.ontario, term);
@@ -81,5 +81,6 @@ void main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
   var rootUrl = dotenv.env['ROOT_URL']!;
-  tests(rootUrl);
+  var rustServer = dotenv.env['RUST_SERVER']!;
+  tests(rootUrl, rustServer);
 }
