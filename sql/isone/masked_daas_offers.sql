@@ -75,7 +75,7 @@ FROM (
 
 
 ---=======================================================================
--- How many MW are offered every day?
+-- How many MW are offered every day?  Average all hours in the day.
 WITH daily_offers AS (
     SELECT 
         hour_beginning,
@@ -84,10 +84,13 @@ WITH daily_offers AS (
     GROUP BY hour_beginning
 )
 SELECT 
-    hour_beginning,
-    total_offer_mw
+    hour_beginning::DATE AS offer_date,
+    ROUND(mean(total_offer_mw)) AS total_offer_mw
 FROM daily_offers
-ORDER BY hour_beginning;
+GROUP BY offer_date
+ORDER BY offer_date;
+
+
 
 duckdb -csv -c "
 ATTACH '~/Downloads/Archive/DuckDB/isone/masked_daas_offers.duckdb' AS db;
@@ -140,6 +143,7 @@ ORDER BY max_offer_mw DESC;
 -- │                     207554 │       103.50 │
 -- │                     953967 │       100.00 │
 
+
 ---=======================================================================
 -- Show the historical MW offers for one given participant
 SELECT hour_beginning, sum(offer_mw) AS total_offer_mw
@@ -169,6 +173,18 @@ ORDER BY hour_beginning;
 
 
 
+---=======================================================================
+-- Show the assets for 
+SELECT DISTINCT masked_lead_participant_id, masked_asset_id
+FROM offers
+WHERE masked_lead_participant_id = 748190
+ORDER BY masked_lead_participant_id, masked_asset_id;
+
+SELECT masked_lead_participant_id, masked_asset_id, MEAN(offer_mw) AS avg_offer_mw, MAX(offer_mw) AS max_offer_mw
+FROM offers
+WHERE masked_lead_participant_id = 379629
+GROUP BY masked_lead_participant_id, masked_asset_id
+ORDER BY masked_lead_participant_id, masked_asset_id;
 
 
 
