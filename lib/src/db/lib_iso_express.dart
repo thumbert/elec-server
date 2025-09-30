@@ -21,6 +21,7 @@ Future<int> baseDownloadUrl(
   String? acceptHeader,
   String? workingDirectory,
   bool zipFile = false,
+  bool gzipFile = false,
   Duration timeout = const Duration(seconds: 60),
 }) async {
   if (fileout.existsSync() && !overwrite) {
@@ -59,6 +60,13 @@ Future<int> baseDownloadUrl(
             workingDirectory: workingDirectory);
         if (res.exitCode == 0) {
           fileout.deleteSync();
+        }
+      }
+      if (gzipFile) {
+        var res = Process.runSync('gzip', ['-f', basename(fileout.path)],
+            workingDirectory: workingDirectory);
+        if (res.exitCode == 0) {
+          print('GZipped file ${fileout.path}');
         }
       }
     } catch (e) {

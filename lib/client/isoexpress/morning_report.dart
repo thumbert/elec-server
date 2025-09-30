@@ -1,5 +1,6 @@
 library client.isoexpress.morning_report;
 
+import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:timezone/timezone.dart';
@@ -41,7 +42,7 @@ class MorningReport {
     required this.importLimitInHighgateMw,
     required this.exportLimitOutHighgateMw,
     required this.scheduledHighgateMw,
-    required this.tieFlowHigateMw,
+    required this.tieFlowHighgateMw,
     //
     required this.importLimitInNbMw,
     required this.exportLimitOutNbMw,
@@ -67,6 +68,11 @@ class MorningReport {
     required this.exportLimitOutPhase2Mw,
     required this.scheduledPhase2Mw,
     required this.tieFlowPhase2Mw,
+    //
+    required this.importLimitInNececMw,
+    required this.exportLimitOutNececMw,
+    required this.scheduledNececMw,
+    required this.tieFlowNececMw,
     //
     required this.highTemperatureBoston,
     required this.weatherConditionsBoston,
@@ -121,7 +127,7 @@ class MorningReport {
   final num importLimitInHighgateMw;
   final num exportLimitOutHighgateMw;
   final num scheduledHighgateMw;
-  final num tieFlowHigateMw;
+  final num tieFlowHighgateMw;
   //
   final num importLimitInNbMw;
   final num exportLimitOutNbMw;
@@ -147,6 +153,11 @@ class MorningReport {
   final num exportLimitOutPhase2Mw;
   final num scheduledPhase2Mw;
   final num tieFlowPhase2Mw;
+  //
+  final num? importLimitInNececMw;
+  final num? exportLimitOutNececMw;
+  final num? scheduledNececMw;
+  final num? tieFlowNececMw;
   // weather
   final num highTemperatureBoston;
   final String weatherConditionsBoston;
@@ -155,7 +166,7 @@ class MorningReport {
   final String weatherConditionsHartford;
   final String windDirSpeedHartford;
   //
-  final num nonCommUnitsCapMw;
+  final num? nonCommUnitsCapMw;
   final int unitsCommMinOrrCount;
   final num unitsCommMinOrrMw;
   //
@@ -197,7 +208,7 @@ class MorningReport {
     'importLimitInHighgateMw',
     'exportLimitOutHighgateMw',
     'scheduledHighgateMw',
-    'tieFlowHigateMw',
+    'tieFlowHighgateMw',
     'importLimitInNbMw',
     'exportLimitOutNbMw',
     'scheduledNbMw',
@@ -218,6 +229,10 @@ class MorningReport {
     'exportLimitOutPhase2Mw',
     'scheduledPhase2Mw',
     'tieFlowPhase2Mw',
+    'importLimitInNececMw',
+    'exportLimitOutNececMw',
+    'scheduledNececMw',
+    'tieFlowNececMw',
     'highTemperatureBoston',
     'weatherConditionsBoston',
     'windDirSpeedBoston',
@@ -236,7 +251,7 @@ class MorningReport {
   /// A file contains two versions of the report the Final and Preliminary
   /// To process a json file, you need to run this function twice.
   static MorningReport fromJson(Map<String, dynamic> x) {
-    var tieFlow = x['TieDelivery'] as List;
+    var tieDelivery = x['TieDelivery'] as List;
     var interchange = x['InterchangeDetail'] as List;
     var weather = x['CityForecastDetail'] as List;
 
@@ -256,17 +271,22 @@ class MorningReport {
       uncommittedAvailableDrrGenMw: x['UncommitedAvailDRRMw'],
       netCapacityDeliveryMw: x['NetCapDeliveryMw'],
       //
-      tieFlowHigateMw:
-          tieFlow.firstWhere((e) => e['TieName'] == 'Highgate')['TieFlowMw'],
-      tieFlowNbMw: tieFlow.firstWhere((e) => e['TieName'] == 'NB')['TieFlowMw'],
-      tieFlowNyisoAcMw:
-          tieFlow.firstWhere((e) => e['TieName'] == 'NYISO AC')['TieFlowMw'],
-      tieFlowNyisoCscMw:
-          tieFlow.firstWhere((e) => e['TieName'] == 'NYISO CSC')['TieFlowMw'],
-      tieFlowNyisoNncMw:
-          tieFlow.firstWhere((e) => e['TieName'] == 'NYISO NNC')['TieFlowMw'],
+      tieFlowHighgateMw: tieDelivery
+          .firstWhere((e) => e['TieName'] == 'Highgate')['TieFlowMw'],
+      tieFlowNbMw:
+          tieDelivery.firstWhere((e) => e['TieName'] == 'NB')['TieFlowMw'],
+      tieFlowNyisoAcMw: tieDelivery
+          .firstWhere((e) => e['TieName'] == 'NYISO AC')['TieFlowMw'],
+      tieFlowNyisoCscMw: tieDelivery
+          .firstWhere((e) => e['TieName'] == 'NYISO CSC')['TieFlowMw'],
+      tieFlowNyisoNncMw: tieDelivery
+          .firstWhere((e) => e['TieName'] == 'NYISO NNC')['TieFlowMw'],
       tieFlowPhase2Mw:
-          tieFlow.firstWhere((e) => e['TieName'] == 'Phase 2')['TieFlowMw'],
+          tieDelivery.firstWhere((e) => e['TieName'] == 'Phase 2')['TieFlowMw'],
+      tieFlowNececMw: () {
+        var flow = tieDelivery.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
+        return flow != null ? flow['TieFlowMw'] : null;
+      }(),
       //
       totalAvailableCapacityMw: x['TotAvailCapMw'],
       peakLoadTodayHour: Hour.beginning(
@@ -286,7 +306,9 @@ class MorningReport {
       thirtyMinReserveReqMw: x['ThirtyMinReserveReqMw'],
       thirtyMinReserveEstMw: x['ThirtyMinReserveEstMw'],
 
-      expectedActOp4Mw: x['ExpActOp4Mw'],
+      expectedActOp4Mw: x['ExpActOp4Mw'] is String
+          ? num.parse(x['ExpActOp4Mw'])
+          : x['ExpActOp4Mw'],
       addlCapAvailOp4ActMw: x['AddlCapAvailOp4ActMw'],
       //
       importLimitInHighgateMw: interchange
@@ -331,16 +353,31 @@ class MorningReport {
       scheduledPhase2Mw: interchange
           .firstWhere((e) => e['TieName'] == 'Phase 2')['ScheduledMw'],
       //
+      importLimitInNececMw: () {
+        var limit = interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
+        return limit != null ? limit['ImportLimitInMw'] : null;
+      }(),
+      exportLimitOutNececMw: () {
+        var limit = interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
+        return limit != null ? limit['ExportLimitOutMw'] : null;
+      }(),
+      scheduledNececMw: () {
+        var limit = interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
+        return limit != null ? limit['ScheduledMw'] : null;
+      }(),
+      //
       highTemperatureBoston: weather
           .firstWhere((e) => e['CityName'] == 'Boston')['HighTemperature'],
       weatherConditionsBoston: weather
-          .firstWhere((e) => e['CityName'] == 'Boston')['WeatherConditions'].toString(),
+          .firstWhere((e) => e['CityName'] == 'Boston')['WeatherConditions']
+          .toString(),
       windDirSpeedBoston:
           weather.firstWhere((e) => e['CityName'] == 'Boston')['WindDirSpeed'],
       highTemperatureHartford: weather
           .firstWhere((e) => e['CityName'] == 'Hartford')['HighTemperature'],
       weatherConditionsHartford: weather
-          .firstWhere((e) => e['CityName'] == 'Hartford')['WeatherConditions'].toString(),
+          .firstWhere((e) => e['CityName'] == 'Hartford')['WeatherConditions']
+          .toString(),
       windDirSpeedHartford: weather
           .firstWhere((e) => e['CityName'] == 'Hartford')['WindDirSpeed'],
       //
@@ -394,7 +431,7 @@ class MorningReport {
       'importLimitInHighgateMw': importLimitInHighgateMw,
       'exportLimitOutHighgateMw': exportLimitOutHighgateMw,
       'scheduledHighgateMw': scheduledHighgateMw,
-      'tieFlowHigateMw': tieFlowHigateMw,
+      'tieFlowHigateMw': tieFlowHighgateMw,
       //
       'importLimitInNbMw': importLimitInNbMw,
       'exportLimitOutNbMw': exportLimitOutNbMw,
@@ -420,6 +457,11 @@ class MorningReport {
       'exportLimitOutPhase2Mw': exportLimitOutPhase2Mw,
       'scheduledPhase2Mw': scheduledPhase2Mw,
       'tieFlowPhase2Mw': tieFlowPhase2Mw,
+      //
+      'importLimitInNececMw': importLimitInNececMw,
+      'exportLimitOutNececMw': exportLimitOutNececMw,
+      'scheduledNececMw': scheduledNececMw,
+      'tieFlowNececMw': tieFlowNececMw,
       //
       'highTemperatureBoston': highTemperatureBoston,
       'weatherConditionsBoston': weatherConditionsBoston,

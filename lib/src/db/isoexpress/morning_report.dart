@@ -12,20 +12,20 @@ import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 
-
 /// ISO-NE rolled out improvements to the Morning Report, including a “next day”
-/// operational capacity report.  Starting December 19, 2024 for the December 20 
-/// operating day, ISO-NE began posting three “Morning Reports” for an 
-/// operating day: by 4pm on the day before and by 8 am and noon of the 
+/// operational capacity report.  Starting December 19, 2024 for the December 20
+/// operating day, ISO-NE began posting three “Morning Reports” for an
+/// operating day: by 4pm on the day before and by 8 am and noon of the
 /// operating day.
-class MorningReportArchive {
-  MorningReportArchive({required this.dir});
+class IsoneMorningReportArchive {
+  IsoneMorningReportArchive({required this.dir, required this.duckdbPath});
 
   final String dir;
+  final String duckdbPath;
   static final log = Logger('Morning report');
 
   File getFilename(Date asOfDate) {
-    return File("$dir/Raw/morningreport_$asOfDate.json");
+    return File("$dir/Raw/${asOfDate.year}/morning_report_$asOfDate.json");
   }
 
   String getUrl(Date asOfDate) =>
@@ -68,7 +68,7 @@ class MorningReportArchive {
     for (var x in xs) {
       var values = x.toJson().values.toList();
       assert(values.length == MorningReport.colnames.length);
-      sb.writeln(converter.convert([values]));
+      sb.writeln(converter.convert([values], convertNullTo: ''));
     }
     final file =
         File('$dir/month/morning_report_${month.toIso8601String()}.csv');
@@ -84,9 +84,8 @@ class MorningReportArchive {
     return 0;
   }
 
-  /// Create the Db from scratch
-  int rebuildDuckDb() {
-    final con = Connection('$dir/morning_report.duckdb');
+  int updateDuckDb(Month month) {
+    final con = Connection(duckdbPath);
     con.execute('''
 CREATE TABLE IF NOT EXISTS morning_report (
   ReportType VARCHAR,
@@ -121,7 +120,7 @@ CREATE TABLE IF NOT EXISTS morning_report (
   ImportLimitInHighgateMw FLOAT,
   ExportLimitOutHighgateMw FLOAT,
   ScheduledHighgateMw FLOAT,
-  TieFlowHigateMw FLOAT,
+  TieFlowHighgateMw FLOAT,
   ImportLimitInNbMw FLOAT,
   ExportLimitOutNbMw FLOAT,
   ScheduledNbMw FLOAT,
@@ -142,6 +141,10 @@ CREATE TABLE IF NOT EXISTS morning_report (
   ExportLimitOutPhase2Mw FLOAT,
   ScheduledPhase2Mw FLOAT,
   TieFlowPhase2Mw FLOAT,
+  ImportLimitInNececMw FLOAT,
+  ExportLimitOutNececMw FLOAT,
+  ScheduledNececMw FLOAT,
+  TieFlowNececMw FLOAT,
   HighTemperatureBoston FLOAT,
   WeatherConditionsBoston VARCHAR,
   WindDirSpeedBoston VARCHAR,
@@ -158,11 +161,19 @@ CREATE TABLE IF NOT EXISTS morning_report (
 );
 ''');
     con.execute('''
-INSERT INTO morning_report
-FROM read_csv(
-    '$dir/month/morning_report_*.csv.gz', 
+CREATE TEMPORARY TABLE tmp AS (
+    SELECT *
+    FROM read_csv(
+    '$dir/month/morning_report_${month.toIso8601String()}.csv.gz', 
     header = true, 
-    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
+    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z')
+);
+''');
+    con.execute('''
+INSERT INTO morning_report BY NAME
+FROM tmp
+EXCEPT
+SELECT * FROM morning_report;
 ''');
     con.close();
 

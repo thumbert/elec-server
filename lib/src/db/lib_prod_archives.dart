@@ -18,7 +18,8 @@ import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/weather/normal_temperature.dart';
 
 CanadianStatisticsArchive getCanadianStatisticsArchive() {
-  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/statistics_canada';
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/statistics_canada';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
@@ -26,8 +27,6 @@ CanadianStatisticsArchive getCanadianStatisticsArchive() {
     duckDbPath: '$dir/energy_generation.duckdb',
   );
 }
-
-
 
 CmeSettlementsEnergyArchive getCmeEnergySettlementsArchive() {
   var dbConfig = ComponentConfig(
@@ -236,13 +235,16 @@ SevenDayCapacityForecastArchive getIsoneSevenDayCapacityForecastArchive() {
   return SevenDayCapacityForecastArchive(dir: dir);
 }
 
-MorningReportArchive getIsoneMorningReportArchive() {
+IsoneMorningReportArchive getIsoneMorningReportArchive() {
   var dir =
       '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/IsoExpress/MorningReport';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
-  return MorningReportArchive(dir: dir);
+  return IsoneMorningReportArchive(
+      dir: dir,
+      duckdbPath:
+          '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/isone/morning_report.duckdb');
 }
 
 NormalTemperatureArchive getNormalTemperatureArchive() {

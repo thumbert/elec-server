@@ -68,7 +68,7 @@ Future<void> tests(String rootUrl, String rustServer) async {
     var client = IesoClient(http.Client(), rootUrl: rootUrl, rustServer: rustServer);
     test('get hourly rt demand', () async {
       var term = Term.parse('1Jan23-15Jan23', Ieso.location);
-      var aux = await client.hourlyRtZonalDemand(IesoLoadZone.ontario, term);
+      var aux = await client.hourlyRtZonalDemand(IesoLoadZone.east, term);
       expect(aux.length, 15 * 24);
       expect(
           aux.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2023)));

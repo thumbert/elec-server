@@ -1,4 +1,4 @@
 
 
-qplot:
-    dart compile exe bin/qplot.dart -o ~/.local/bin/qplot
+update_isone_morning_report:
+    dart compile exe bin/jobs/update_isone_morning_report.dart -o /home/adrian/Software/update_isone_morning_report   
