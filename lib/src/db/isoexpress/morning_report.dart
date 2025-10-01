@@ -42,6 +42,7 @@ class IsoneMorningReportArchive {
     var res = json.decode(str);
     // a day may not have a report yet, if too early
     if (res['MorningReports'] == '') return <MorningReport>[];
+    if ((res['MorningReports'] as Map).isEmpty) return <MorningReport>[];
     var xs = res['MorningReports']['MorningReport'] as List;
     return xs.map((x) => MorningReport.fromJson(x)).toList();
   }

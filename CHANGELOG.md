@@ -6,6 +6,8 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-09-29
+- Set up job for morning report.  Add NECEC. 
 
 # Release 2025-09-07
 - Add report on Canadian generation
