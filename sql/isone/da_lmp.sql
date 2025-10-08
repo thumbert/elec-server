@@ -1,10 +1,8 @@
 
-CREATE TABLE buckets 
-AS SELECT * 
-FROM read_csv('/home/adrian/Downloads/Archive/Calendars/buckets.csv', header = true);
 
-
-ATTACH '~/Downloads/Archive/DuckDB/calendars/buckets.duckdb' AS buckets;
+SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*)
+FROM da_lmp
+WHERE ptid = 4000;
 
 
 SELECT * 
@@ -19,6 +17,8 @@ AND hour_beginning < '2025-07-2';
 
 --========================================================================
 -- Pick only the 5x16 hours from the da_lmp table
+ATTACH '~/Downloads/Archive/DuckDB/calendars/buckets.duckdb' AS buckets;
+
 SELECT 
     da_lmp.*, 
     buckets.buckets.b5x16
@@ -30,12 +30,36 @@ AND hour_beginning >= '2025-07-01'
 AND hour_beginning < '2025-07-02'
 ;
 
+-- Calculate daily LMP for the 5x16 bucket
+SELECT 
+    date(hour_beginning) AS day,
+    AVG(lmp)::DECIMAL(9,4) AS price
+FROM da_lmp
+JOIN buckets.buckets
+    USING (hour_beginning)
+WHERE ptid = 4000
+AND hour_beginning >= '2025-07-01'
+AND hour_beginning < '2025-07-31'
+GROUP BY day, buckets.buckets."2x16h"
+HAVING buckets.buckets."2x16h" = true
+ORDER BY day;
 
-SELECT * 
-FROM buckets.buckets
-WHERE hour_beginning >= '2025-07-01'
-AND hour_beginning < '2025-07-02'
-ORDER BY hour_beginning;
+
+
+-- Calculate monthly LMP for the 5x16 bucket
+SELECT 
+    date_trunc('month', hour_beginning) AS month_beginning,
+    AVG(lmp) AS price
+FROM da_lmp
+JOIN buckets.buckets
+    USING (hour_beginning)
+WHERE ptid = 4000
+AND hour_beginning >= '2020-01-01'
+AND hour_beginning < '2025-10-01'
+GROUP BY month_beginning, buckets.buckets.b5x16
+HAVING buckets.buckets.b5x16 = true
+ORDER BY month_beginning;
+
 
 
 
@@ -151,6 +175,8 @@ AND hour_beginning < '2025-07-15 00:00:00.000'
 AND ptid in (4000) 
 GROUP BY ptid, day
 ORDER BY ptid, day;
+
+
 
 
 

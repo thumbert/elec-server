@@ -104,6 +104,8 @@ Flags:
     errors.add(e.toString());
   }
 
+  /// DAAS offers are done with Rust
+
   if (errors.isNotEmpty) {
     throw StateError(errors.join('\n'));
   }

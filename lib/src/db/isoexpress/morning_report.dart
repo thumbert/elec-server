@@ -97,6 +97,8 @@ CREATE TABLE IF NOT EXISTS morning_report (
   CsoMw FLOAT,
   CapAdditionsMw FLOAT,
   GenOutagesReductionMw FLOAT,
+  GenPlannedOutagesReductionMw FLOAT,
+  GenForcedOutagesReductionMw FLOAT,
   UncommittedAvailGenMw FLOAT,
   DrrCapacityMw FLOAT,
   UncommittedAvailableDrrGenMw FLOAT,

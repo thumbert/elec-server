@@ -8,6 +8,12 @@ SELECT MarketDate, TieFlowNececMw
 FROM morning_report
 ORDER BY MarketDate;
 
+-- Look at days when 
+SELECT ReportType, MarketDate, GenPlannedOutagesReductionMw, GenForcedOutagesReductionMw, GenOutagesReductionMw
+FROM morning_report
+WHERE MarketDate >= '2025-07-01'
+AND ReportType = 'Morning Report'
+ORDER BY MarketDate;
 
 
 -- Look at the days when the Excess Commitment Surplus/Deficiency was the lowest

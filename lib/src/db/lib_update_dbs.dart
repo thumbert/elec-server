@@ -153,7 +153,9 @@ Future<void> updateIsoneDaEnergyOffers(
   assert(months.first.location == IsoNewEngland.location);
   var archive = prod.getIsoneDaEnergyOfferArchive();
   for (var month in months) {
-    for (var day in month.days()) {
+    var days = month.days();
+    // days = [Date(2025, 6, 30, location: IsoNewEngland.location)];
+    for (var day in days) {
       if (download) {
         await archive.downloadDay(day);
       }
@@ -308,6 +310,7 @@ Future<void> updateIsoneDemandBids(
   var archive = prod.getIsoneDemandBidsArchive();
   for (var month in months) {
     var days = month.days();
+    // days = [Date(2024, 12, 31, location: IsoNewEngland.location)];
     for (var day in days) {
       if (download) {
         if (!archive.skipDays.contains(day)) {
@@ -353,7 +356,8 @@ Future<void> updateIsoneMorningReport(
         if (res != 0) throw StateError('Failed to download');
       }
     }
-    archive.makeGzFileForMonth(month);
+    // archive.makeGzFileForMonth(month);
+    archive.updateDuckDb(month);
   }
 }
 

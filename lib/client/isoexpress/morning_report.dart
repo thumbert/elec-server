@@ -15,6 +15,8 @@ class MorningReport {
     required this.csoMw,
     required this.capAdditionsMw,
     required this.genOutagesReductionMw,
+    required this.genPlannedOutagesReductionMw,
+    required this.genForcedOutagesReductionMw,
     required this.uncommittedAvailGenMw,
     required this.drrCapacityMw,
     required this.uncommittedAvailableDrrGenMw,
@@ -99,6 +101,9 @@ class MorningReport {
   final num csoMw;
   final num capAdditionsMw;
   final num genOutagesReductionMw;
+  final num? genPlannedOutagesReductionMw;  // added on 7/1/2025
+  final num? genForcedOutagesReductionMw; // added on 7/1/2025
+
   final num uncommittedAvailGenMw;
   final num drrCapacityMw;
   final num uncommittedAvailableDrrGenMw;
@@ -184,6 +189,8 @@ class MorningReport {
     'csoMw',
     'capAdditionsMw',
     'genOutagesReductionMw',
+    'genPlannedOutagesReductionMw',
+    'genForcedOutagesReductionMw',
     'uncommittedAvailGenMw',
     'drrCapacityMw',
     'uncommittedAvailableDrrGenMw',
@@ -266,6 +273,8 @@ class MorningReport {
       csoMw: x["CsoMw"],
       capAdditionsMw: x['CapAdditionsMw'],
       genOutagesReductionMw: x['GenOutagesReductionMW'],
+      genPlannedOutagesReductionMw: x['GenPlannedOutagesReductionMW'],
+      genForcedOutagesReductionMw: x['GenForcedOutagesReductionMW'],
       uncommittedAvailGenMw: x['UncommittedAvailGenMw'],
       drrCapacityMw: x['DRRCapacityMw'],
       uncommittedAvailableDrrGenMw: x['UncommitedAvailDRRMw'],
@@ -403,6 +412,8 @@ class MorningReport {
       'csoMw': csoMw,
       'capAdditionsMw': capAdditionsMw,
       'genOutagesReductionMw': genOutagesReductionMw,
+      'genPlannedOutagesReductionMw': genPlannedOutagesReductionMw,
+      'genForcedOutagesReductionMw': genForcedOutagesReductionMw,
       'uncommittedAvailGenMw': uncommittedAvailGenMw,
       'drrCapacityMw': drrCapacityMw,
       'uncommittedAvailableDrrGenMw': uncommittedAvailableDrrGenMw,

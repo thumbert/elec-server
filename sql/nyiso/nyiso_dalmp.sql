@@ -5,13 +5,13 @@ SELECT COUNT(DISTINCT(ptid)) FROM dalmp WHERE day = '2020-01-01'; -- 574 nodes
 
 SELECT *
 FROM dalmp
-WHERE hour_beginning >= '2025-06-27'
-AND hour_beginning < '2025-06-28'
+WHERE hour_beginning >= '2025-10-08'
+AND hour_beginning < '2025-10-09'
 AND ptid IN (61754, 23575)
 ORDER BY hour_beginning;
 
 --- Check DST. The first 3 LMP values should be [29.27, 27.32, 27.14]
-SELECT * FROM dalmp
+SELECT * FROM g
 WHERE hour_beginning >= '2024-11-03'
 AND hour_beginning < '2024-11-04'
 AND ptid = 61752
@@ -44,27 +44,27 @@ LOAD zipfs;
 CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_zone_csv.zip/*.csv';
 CREATE TEMPORARY TABLE tmp2 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_gen_csv.zip/*.csv';
 
+--- NOTE: this messes up the ordering on the fall DST days. The two hour 1:00 AMs will be in the wrong order! 
 DROP TABLE IF EXISTS tmp;
 CREATE TEMPORARY TABLE tmp AS
-(SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
-FROM (
-    SELECT 
-        strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
-        ptid::INTEGER AS ptid,
-        row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
-        "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
-        "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
-        "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
-    FROM tmp1
-    )
+(SELECT 
+    strptime("Time Stamp" || ' America/New_York' , '%m/%d/%Y %H:%M %Z')::TIMESTAMPTZ AS "hour_beginning",
+    ptid::INTEGER AS ptid,
+    "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+    "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+    "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+FROM tmp1
 )
 UNION 
-(SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
+(
+SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
 FROM (
     SELECT 
         strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
         ptid::INTEGER AS ptid,
-        row_number() OVER (PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')) - 1 AS idx, -- 0 to 23 for each day
+        row_number() OVER (
+            PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')
+            ORDER BY strptime("Time Stamp", '%m/%d/%Y %H:%M')) - 1 AS idx, -- 0 to 23 for each day
         "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
         "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
         "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
@@ -72,6 +72,35 @@ FROM (
     )
 )
 ORDER BY hour_beginning, ptid;
+
+
+DROP TABLE IF EXISTS g;
+CREATE TEMPORARY TABLE g AS
+(
+SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
+FROM (
+    SELECT 
+        strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
+        ptid::INTEGER AS ptid,
+        row_number() OVER (
+            PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')
+            ORDER BY strptime("Time Stamp", '%m/%d/%Y %H:%M')) - 1 AS idx, -- 0 to 23 for each day
+        "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+        "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+        "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+    FROM tmp1
+    )
+)
+ORDER BY hour_beginning, ptid;
+
+SELECT *
+FROM g
+WHERE hour_beginning >= '2025-10-08'
+AND hour_beginning < '2025-10-09'
+AND ptid IN (61754, 23575)
+ORDER BY hour_beginning;
+
+
 
 
 INSERT INTO dalmp
