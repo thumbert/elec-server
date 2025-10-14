@@ -1,4 +1,36 @@
 
+
+
+SELECT 
+    MIN(hour_beginning) as start, 
+    MAX(hour_beginning) as end, 
+    COUNT(*) as rows
+FROM reserve_data;
+
+
+--- How many times was the FER price > DAM price?
+ATTACH '~/Downloads/Archive/DuckDB/isone/dalmp.duckdb' AS lmp;
+SELECT 
+    hour_beginning, 
+    fer_clearing_price, 
+    lmp - mcc - mcl AS energy_price
+FROM reserve_data
+JOIN lmp.da_lmp USING(hour_beginning)
+WHERE ptid = 4000
+AND fer_clearing_price > energy_price
+ORDER BY hour_beginning;
+
+
+
+SELECT * 
+FROM reserve_data
+WHERE hour_beginning >= '2025-06-25 00:00:00'
+AND hour_beginning < '2025-06-26 00:00:00';
+
+
+
+
+
 -- Wow!  This is slick! 
 CREATE TEMPORARY TABLE tmp
 AS

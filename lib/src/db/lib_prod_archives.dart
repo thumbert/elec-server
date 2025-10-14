@@ -80,7 +80,10 @@ DaEnergyOfferArchive getIsoneDaEnergyOfferArchive() {
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
-  return DaEnergyOfferArchive(dir: dir);
+  return DaEnergyOfferArchive(
+      dir: dir,
+      duckDbPath:
+          '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/isone/masked_energy_offers.duckdb');
 }
 
 IesoRtGenerationArchive getIesoRtGenerationArchive() {
@@ -138,7 +141,7 @@ DaDemandBidArchive getIsoneDemandBidsArchive() {
   return DaDemandBidArchive()
     ..dir = dir
     ..duckdbPath =
-        '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone_demand_bids.duckdb';
+        '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone/masked_demand_bids.duckdb';
 }
 
 IsoneBtmSolarArchive getIsoneHistoricalBtmSolarArchive() {

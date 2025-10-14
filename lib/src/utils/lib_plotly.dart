@@ -44,7 +44,12 @@ class Plotly {
     Map<String, dynamic>? config,
     bool displayLogo = false,
     File? file,
+    String version = '2.35.3',
   }) {
+    if (version.startsWith('2')) {
+      print('Using version $version of plotly.js.  '
+          'Please migrate to version 3.x!');
+    }
     config ??= {'displaylogo': false, 'responsive': true};
     if (!config.containsKey('displaylogo')) {
       config['displaylogo'] = false;
@@ -64,7 +69,7 @@ class Plotly {
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.plot.ly/plotly-2.35.3.min.js" charset="utf-8"></script>
+  <script src="https://cdn.plot.ly/plotly-$version.min.js" charset="utf-8"></script>
 </head>
 <body>
   <div id="$divId"></div>

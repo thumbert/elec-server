@@ -1,4 +1,8 @@
-SELECT * FROM offers;
+SELECT MIN(hour_beginning) AS min_hour, MAX(hour_beginning) AS max_hour, COUNT(*) AS total_rows
+FROM offers;
+
+
+
 
 SELECT * FROM offers
 WHERE hour_beginning >= '2025-03-02 00:00:00'

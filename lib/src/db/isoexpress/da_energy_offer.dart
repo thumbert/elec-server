@@ -12,13 +12,14 @@ import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:path/path.dart';
 import 'package:date/date.dart';
+import 'package:timezone/timezone.dart';
 import '../lib_iso_express.dart';
 
 class DaEnergyOfferArchive {
-  
-  DaEnergyOfferArchive({required this.dir});
+  DaEnergyOfferArchive({required this.dir, required this.duckDbPath});
 
   final String dir;
+  final String duckDbPath;
   static final log = Logger('DA Energy Offers');
   static final reportName = 'Day-Ahead Energy Market Historical Offer Report';
 
@@ -107,7 +108,6 @@ class DaEnergyOfferArchive {
         File('$dir/month/da_energy_offers_${month.toIso8601String()}.csv');
     file.writeAsStringSync(sb.toString());
 
-
     // gzip it!
     var res = Process.runSync('gzip', ['-f', file.path], workingDirectory: dir);
     if (res.exitCode != 0) {
@@ -190,5 +190,47 @@ FROM read_csv(
       throw StateError('Gzipping ${basename(fileName)} has failed');
     }
     log.info('Downloaded and gzipped file ${basename(fileName)}');
+  }
+
+  /// Get data from DuckDB directly.
+  /// Correct the offer price for must run units. 
+  List<Datum> getOffers(Connection conn, TZDateTime hourBeginning) {
+    final query = '''
+SELECT 
+    MaskedAssetId,
+    UnitStatus,
+    Segment,
+    CASE 
+        WHEN CumQty - EcoMin < 5 AND UnitStatus = 'MUST_RUN' THEN -999
+        ELSE Price
+    END AS AdjustedPrice,
+    Quantity
+FROM (
+    SELECT 
+        MaskedAssetId, 
+        UnitStatus, 
+        EcoMin, 
+        Segment, 
+        Price, 
+        Quantity,
+        SUM(Quantity) OVER (
+            PARTITION BY MaskedAssetId 
+            ORDER BY Segment 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ) AS CumQty
+    FROM da_offers
+    WHERE HourBeginning = '${hourBeginning.toIso8601String()}'
+);
+    ''';
+    // print(query);
+    final data = conn.fetchRows(query, (List row) => Datum(
+          hourBeginning: hourBeginning,
+          maskedAssetId: row[0] as int,
+          unitStatus: UnitStatus.parse(row[1] as String),
+          segment: row[2] as int,
+          price: row[3] as num,
+          quantity: row[4] as num,
+        ));
+    return data;
   }
 }

@@ -1,8 +1,12 @@
 library client.isoexpress.energy_offer;
 
+import 'dart:convert';
+
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
+import 'package:http/http.dart' as http;
 import 'package:timezone/timezone.dart';
 
 getNewUnits() {}
@@ -10,16 +14,37 @@ getNewUnits() {}
 /// Find the units that tripped (became unavailable in RT when they were available in DA)
 getUnitsUnavailableInRt() {}
 
+/// Get the energy offers from the elec-server.
+Future<List<Datum>> getEnergyOffers(
+    {required Date start,
+    required Date end,
+    required Market market,
+    required Iso iso,
+    required String rootUrl}) async {
+  final url = '$rootUrl/${iso.name.toLowerCase()}/energy_offers'
+      '/${market.name.toLowerCase()}/start/$start/end/$end';
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return (data as List).map<Datum>((e) => Datum.fromJson(e)).toList();
+  } else {
+    throw Exception('Failed to load energy offers');
+  }
+}
+
 enum UnitStatus {
-  economic,
-  unavailable,
-  mustRun;
+  economic(1),
+  unavailable(2),
+  mustRun(0);
+
+  const UnitStatus(this.value);
+  final int value;
 
   static UnitStatus parse(String x) {
-    return switch (x) {
+    return switch (x.toUpperCase()) {
       'ECONOMIC' => UnitStatus.economic,
       'UNAVAILABLE' => UnitStatus.unavailable,
-      'MUST_RUN' => UnitStatus.mustRun,
+      'MUST_RUN' || 'MUSTRUN' => UnitStatus.mustRun,
       _ => throw ArgumentError('Invalid unit type $x'),
     };
   }
@@ -30,6 +55,51 @@ enum UnitStatus {
       UnitStatus.economic => 'ECONOMIC',
       UnitStatus.unavailable => 'UNAVAILABLE',
       UnitStatus.mustRun => 'MUST_RUN',
+    };
+  }
+}
+
+class Datum {
+  Datum(
+      {required this.hourBeginning,
+      required this.maskedAssetId,
+      required this.unitStatus,
+      required this.segment,
+      required this.price,
+      required this.quantity});
+
+  final TZDateTime hourBeginning;
+  final int maskedAssetId;
+  final UnitStatus unitStatus;
+  final int segment;
+  final num price;
+  final num quantity;
+
+  static fromJson(Map<String, dynamic> json) {
+    return Datum(
+      hourBeginning:
+          TZDateTime.parse(IsoNewEngland.location, json['hour_beginning']),
+      maskedAssetId: json['masked_asset_id'],
+      segment: json['segment'],
+      price: json['price'],
+      quantity: json['quantity'],
+      unitStatus: UnitStatus.parse(json['unit_status']),
+    );
+  }
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'hour_beginning': hourBeginning.toIso8601String(),
+      'masked_asset_id': maskedAssetId,
+      'unit_status': unitStatus.toString(),
+      'segment': segment,
+      'price': price,
+      'quantity': quantity,
     };
   }
 }
@@ -92,7 +162,7 @@ class EnergyOfferSegment {
       if (s.first is List) {
         segments = (s.first as List).cast<Map<String, dynamic>>();
       } else {
-        segments = [...s.cast<Map<String,dynamic>>()];
+        segments = [...s.cast<Map<String, dynamic>>()];
       }
     }
     final claim10 = xs['Claim10Mw'] is String

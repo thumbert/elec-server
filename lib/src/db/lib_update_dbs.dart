@@ -164,7 +164,7 @@ Future<void> updateIsoneDaEnergyOffers(
     archive.updateDuckDb(
         months: [month],
         pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
+            '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone/masked_energy_offers.duckdb');
   }
 }
 
@@ -402,7 +402,7 @@ Future<void> updateIsoneRtEnergyOffers(
     archive.updateDuckDb(
         months: [month],
         pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
+            '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone/masked_energy_offers.duckdb');
   }
 }
 

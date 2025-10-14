@@ -8,6 +8,58 @@ ORDER BY YEARMON;
 SELECT COUNT(*) FROM da_offers;
 SELECT COUNT(*) FROM rt_offers;
 
+SELECT MaskedAssetId, UnitStatus, EcoMin, Segment, Price, Quantity,
+    Quantity - EcoMin AS Diff
+FROM da_offers
+WHERE HourBeginning == '2025-06-25 14:00:00.000-04:00'
+AND UnitStatus = 'MUST_RUN'
+AND Segment = 0;
+
+SELECT MaskedAssetId, UnitStatus, EcoMin, EcoMax, Segment, Price, Quantity,
+    SUM(Quantity) OVER (PARTITION BY MaskedAssetId ORDER BY Price, Segment ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS CumQty
+FROM da_offers
+WHERE HourBeginning == '2025-06-25 14:00:00.000-04:00'
+AND MaskedAssetId = 77459
+;
+
+SELECT MaskedAssetId, UnitStatus, EcoMin, EcoMax, Segment, Price, Quantity,
+    SUM(Quantity) OVER (PARTITION BY MaskedAssetId ORDER BY Segment ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS CumQty
+FROM da_offers
+WHERE HourBeginning == '2025-06-25 14:00:00.000-04:00'
+AND MaskedAssetId = 77459
+;
+
+
+SELECT
+    MaskedAssetId,
+    UnitStatus,
+    Segment,
+    CASE 
+        WHEN CumQty - EcoMin < 5 AND UnitStatus = 'MUST_RUN' THEN -999
+        ELSE Price
+    END AS AdjustedPrice,
+    Quantity
+FROM (
+    SELECT 
+        MaskedAssetId, 
+        UnitStatus, 
+        EcoMin, 
+        EcoMax, 
+        Segment, 
+        Price, 
+        Quantity,
+        SUM(Quantity) OVER (
+            PARTITION BY MaskedAssetId 
+            ORDER BY Segment 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ) AS CumQty
+    FROM da_offers
+    WHERE HourBeginning = '2025-06-25 14:00:00.000-04:00'
+    -- AND MaskedAssetId = 77459
+);
+
+
+
 --- Select offers for a couple of asset ids
 SELECT 
     UnitStatus,

@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-10-13
+- Add warning to migrate to plotly 3.x
+
 # Release 2025-09-29
 - Set up job for morning report.  Add NECEC. 
 
