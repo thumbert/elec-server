@@ -52,28 +52,10 @@ Future<void> tests() async {
       ]);
     });
   });
-  // group('Isone DA Congestion compact api tests: ', () {
-  //   var db = DbProd.isoexpress;
-  //   var api = DaCongestionCompact(db, iso: Iso.newEngland);
-  //   setUp(() async => await db.open());
-  //   tearDown(() async => await db.close());
-  //   test('get congestion data for 2 days', () async {
-  //     var aux = await api.getPrices(Date.utc(2019, 1, 1), Date.utc(2019, 1, 2));
-  //     expect(aux.length, 2);
-  //     expect(aux.first.keys.toList(), ['date', 'ptids', 'congestion']);
-  //     var ptids = aux.first['ptids'] as List;
-  //     // expect(ptids.take(4).toList(), [35979, 12530, 43790, 424]);
-  //     expect(ptids.take(4).toList(), [35979, 12530, 43790, 37175]);
-  //     var congestion = aux.first['congestion'] as List;
-  //     expect(congestion.length, 24);
-  //     expect(
-  //         (congestion.first as List).take(4).toList(), [2, -13.73, 8, -7.52]);
-  //   });
-  // });
-  group('Isone DA congestion compact client tests: ', () {
-    var cong = client.DaCongestion(http.Client(),
-        rootUrl: rootUrl, iso: Iso.newEngland, rustServer: rustServer);
-    test('get hourly traces for 15Oct25-16Oct25', () async {
+  group('DA congestion compact client tests: ', () {
+    test('ISONE hourly traces for 15Oct25-16Oct25', () async {
+      var cong = client.DaCongestion(http.Client(),
+          rootUrl: rootUrl, iso: Iso.newEngland, rustServer: rustServer);
       var data = await cong.getHourlyTraces(
           Date.utc(2025, 10, 15), Date.utc(2025, 10, 16));
       expect(data.length, 1213);
@@ -83,7 +65,33 @@ Future<void> tests() async {
       expect(y0.length, 48);
       expect(y0.take(8).toList(), [0, 0, 0, 0, 0, 0, 0.04, -26.28]);
     });
+    test('NYISO hourly traces for 15Oct25-16Oct25', () async {
+      var cong = client.DaCongestion(http.Client(),
+          rootUrl: rootUrl, iso: Iso.newYork, rustServer: rustServer);
+      var data = await cong.getHourlyTraces(
+          Date.utc(2025, 10, 15), Date.utc(2025, 10, 16));
+      expect(data.length, 761);
+      var trace0 = data.firstWhere((e) => e['ptid'] == 23528);
+      expect(trace0.keys.toList(), ['x', 'y', 'ptid']);
+      var y0 = trace0['y'] as List;
+      expect(y0.length, 48);
+      expect(y0.take(9).toList(), [0, 0, 0, 0, 0, 0, 0, -1.14, -1.09]);
+    });
+    // test('IESO hourly traces for 15Oct25-16Oct25', () async {
+    //   var cong = client.DaCongestion(http.Client(),
+    //       rootUrl: rootUrl, iso: Iso.ieso, rustServer: rustServer);
+    //   var data = await cong.getHourlyTraces(
+    //       Date.utc(2025, 10, 15), Date.utc(2025, 10, 16));
+    //   expect(data.length, 761);
+    //   var trace0 = data.firstWhere((e) => e['ptid'] == 23528);
+    //   expect(trace0.keys.toList(), ['x', 'y', 'ptid']);
+    //   var y0 = trace0['y'] as List;
+    //   expect(y0.length, 48);
+    //   expect(y0.take(9).toList(), [0, 0, 0, 0, 0, 0, 0, -1.14, -1.09]);
+    // });
     test('speed test', () async {
+      var cong = client.DaCongestion(http.Client(),
+          rootUrl: rootUrl, iso: Iso.newEngland, rustServer: rustServer);
       var sw = Stopwatch()..start();
       var data = await cong.getHourlyTraces(
           Date.utc(2024, 10, 1), Date.utc(2024, 10, 30));

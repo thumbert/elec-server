@@ -9,9 +9,7 @@ import 'package:timezone/timezone.dart';
 class DaCongestion {
   /// Get congestion prices for all the nodes in the pool at once.
   DaCongestion(http.Client client,
-      {required this.iso,
-      required this.rootUrl,
-      required this.rustServer}) {
+      {required this.iso, required this.rootUrl, required this.rustServer}) {
     if (!_isoMap.keys.contains(iso)) {
       throw ArgumentError('Iso $iso is not supported');
     }
@@ -96,7 +94,7 @@ class DaCongestion {
       var x = entry.value as Map<String, dynamic>;
       var one = Map<int, List<num>>.fromEntries(x.entries.map((e) => flipSign
           ? MapEntry(
-              int.parse(e.key), e.value.cast<num>().map((v) => -v).toList())
+              int.parse(e.key), (e.value as List).map<num>((v) => -v).toList())
           : MapEntry(int.parse(e.key), e.value.cast<num>())));
       cache[date] = one;
     }
