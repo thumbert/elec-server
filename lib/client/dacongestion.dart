@@ -10,7 +10,7 @@ class DaCongestion {
   /// Get congestion prices for all the nodes in the pool at once.
   DaCongestion(http.Client client,
       {required this.iso,
-      this.rootUrl = 'http://localhost:8000',
+      required this.rootUrl,
       required this.rustServer}) {
     if (!_isoMap.keys.contains(iso)) {
       throw ArgumentError('Iso $iso is not supported');
