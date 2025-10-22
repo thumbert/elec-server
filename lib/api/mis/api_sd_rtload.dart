@@ -1,5 +1,3 @@
-library api.sd_rtload;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec_server/src/db/lib_settlements.dart';
@@ -200,7 +198,7 @@ class SdRtload {
   //http://127.0.0.1:8080/sd_rtload/v1/start/20171201/end/20171201
   // @ApiMethod(path: 'start/{start}/end/{end}')
   Future<List<Map<String, dynamic>>> rtloadAll(String start, String end) async {
-    var pipeline = <Map<String,Object>>[];
+    var pipeline = <Map<String, Object>>[];
     pipeline.add({
       '\$match': {
         'date': {
@@ -370,7 +368,8 @@ class SdRtload {
     return out;
   }
 
-  Future<List<Map<String, dynamic>>> _format2(Stream<Map<String,dynamic>> data) async {
+  Future<List<Map<String, dynamic>>> _format2(
+      Stream<Map<String, dynamic>> data) async {
     var out = <Map<String, dynamic>>[];
     var keys = <String>[
       'version',

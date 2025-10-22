@@ -1,5 +1,3 @@
-library test.db.nyiso.rt_lmp_hourly_test;
-
 import 'dart:convert';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/api_lmp.dart';
@@ -50,14 +48,13 @@ Future<void> tests(String rootUrl) async {
       expect(data['2021-01-01']!.take(3), [45.67, 32.74, 22.22]);
     });
 
-
     test('get hourly lmp data for several ptids for several days', () async {
       var url = '$rootUrl/nyiso/rt/v1/hourly/lmp/'
           'ptids/61757,61754/start/2021-01-01/end/2021-01-02';
       var res = await http
           .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
       var data = json.decode(res.body) as List;
-      expect(data.length, 2*48);
+      expect(data.length, 2 * 48);
       var x0 = data.firstWhere((e) => e['ptid'] == 61757);
       expect(x0, {
         'hourBeginning': '2021-01-01T00:00:00.000-0500',
@@ -65,7 +62,6 @@ Future<void> tests(String rootUrl) async {
         'lmp': 45.67,
       });
     });
-
 
     test('get daily lmp prices by peak bucket for one ptid', () async {
       var res = await http.get(
@@ -77,15 +73,13 @@ Future<void> tests(String rootUrl) async {
       expect(aux.first, {'date': '2021-01-01', 'lmp': 45.218125});
     });
 
-
     test('get daily lmp prices by peak bucket for several ptids', () async {
       var data = await api.getDailyBucketPriceSeveral('lmp', [61757, 61752],
           Date.utc(2021, 1, 1), Date.utc(2021, 1, 7), Bucket.b2x16H);
       expect(data.length, 6);
       var n57 = data
           .firstWhere((e) => e['ptid'] == 61757 && e['date'] == '2021-01-01');
-      expect(n57,
-          {'ptid': 61757, 'date': '2021-01-01', 'lmp': 45.218125});
+      expect(n57, {'ptid': 61757, 'date': '2021-01-01', 'lmp': 45.218125});
       var res = await http.get(
           Uri.parse('$rootUrl/nyiso/rt/v1/daily/lmp/'
               'ptids/61757,61752/start/2021-01-01/end/2021-01-07/bucket/2x16H'),
@@ -114,7 +108,8 @@ Future<void> tests(String rootUrl) async {
         'congestion': -18.047916666666666,
       });
       expect(data.length, 62);
-      var url = '$rootUrl/nyiso/rt/v1/daily/congestion/ptids/61752,61758/start/2021-01-01/end/2021-01-31/bucket/7x24';
+      var url =
+          '$rootUrl/nyiso/rt/v1/daily/congestion/ptids/61752,61758/start/2021-01-01/end/2021-01-31/bucket/7x24';
       var aux = await http.get(Uri.parse(url));
       var res = json.decode(aux.body) as List;
       expect(res.length, 62);
@@ -209,7 +204,6 @@ Future<void> tests(String rootUrl) async {
   //   });
   // });
 }
-
 
 void main() async {
   initializeTimeZones();

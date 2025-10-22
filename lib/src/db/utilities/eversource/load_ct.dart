@@ -1,5 +1,3 @@
-library db.utilities.eversource.load_ct;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:html/parser.dart';
@@ -50,7 +48,7 @@ class EversourceCtLoadArchive {
       print(
           '---> Inserted Eversource CT load data from ${data.first['date']} to ${data.last['date']}');
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
     }
   }
 
@@ -91,7 +89,8 @@ class EversourceCtLoadArchive {
     var keys = <String>[
       'date',
       'version',
-      'hourBeginning', ...loadKeys,
+      'hourBeginning',
+      ...loadKeys,
     ];
 
     /// TODO: Check that the column names haven't changed
@@ -156,14 +155,14 @@ class EversourceCtLoadArchive {
 
   /// Get the file for this month
   File getFile(int? year) {
-    return File(dir! + 'actual_load_${year.toString()}.xlsx');
+    return File('${dir!}actual_load_${year.toString()}.xlsx');
   }
 
   /// Download a file.
   /// https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)
   /// https://www.eversource.com/content/docs/default-source/doing-business/actual-load-2016.xlsx?sfvrsn=e5a7fb62_6
   Future downloadFile(String link) async {
-    var url = 'https://www.eversource.com' + link;
+    var url = 'https://www.eversource.com$link';
     var year = getYear(link);
     var fileout = getFile(year);
     return HttpClient()

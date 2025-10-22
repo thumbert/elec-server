@@ -1,5 +1,3 @@
-library elec_server.ui;
-
 export 'src/ui/categorical_dropdown_checkbox_filter.dart';
 export 'src/ui/categorical_dropdown_filter.dart';
 export 'src/ui/checkbox_label.dart';

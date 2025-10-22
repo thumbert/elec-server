@@ -1,5 +1,3 @@
-library api.sp_peakcontributiondly;
-
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:timezone/timezone.dart';
@@ -56,8 +54,7 @@ class SpPeakContributionDly {
     var m = Month.utc(
         int.parse(month.substring(0, 4)), int.parse(month.substring(4, 6)));
 
-    var loadIds =
-        assetIds.split(',').map((e) => int.parse(e.trim())).toList();
+    var loadIds = assetIds.split(',').map((e) => int.parse(e.trim())).toList();
     var pipeline = [];
     pipeline.add({
       '\$match': {

@@ -1,5 +1,3 @@
-library db.isoexpress.regulation_offer;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -13,16 +11,16 @@ import '../converters.dart';
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 
 class RegulationOfferArchive extends DailyIsoExpressReport {
-
   RegulationOfferArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'regulation_offer');
+        host: '127.0.0.1',
+        dbName: 'isoexpress',
+        collectionName: 'regulation_offer');
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}PricingReports/DaRegulationOffer/Raw/';
     this.dir = dir;
     reportName = 'Historical Regulation Offer Data Report';
   }
-
 
   @override
   String getUrl(Date? asOfDate) =>
@@ -35,22 +33,23 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
   @override
   Map<String, dynamic> converter(List<Map> rows) {
     var row = <String, dynamic>{};
+
     /// daily info
     row['date'] = formatDate(rows.first['Day']);
     row['Masked Lead Participant ID'] =
-    rows.first['Masked Lead Participant ID'];
+        rows.first['Masked Lead Participant ID'];
     row['Masked Asset ID'] = rows.first['Masked Asset ID'];
     row['hourBeginning'] = rows.map((e) {
       var utc = parseHourEndingStamp(e['Day'], e['Hour Ending']);
       return TZDateTime.fromMicrosecondsSinceEpoch(
-          location, utc.microsecondsSinceEpoch)
+              location, utc.microsecondsSinceEpoch)
           .toIso8601String();
     }).toList();
 
     row.addAll(rowsToColumns(rows as List<Map<String, dynamic>>, columns: [
       'Regulation Low Limit',
       'Regulation High Limit',
-      'Regulation Status',   // AVAILABLE or UNAVAILABLE
+      'Regulation Status', // AVAILABLE or UNAVAILABLE
       'Automatic Response Rate',
       'Regulation Service Offer Price',
       'Regulation Capacity Offer Price',
@@ -88,7 +87,7 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var data = mis.readReportTabAsMap(file, tab: 0);
-    if (data.isEmpty) return <Map<String,dynamic>>[];
+    if (data.isEmpty) return <Map<String, dynamic>>[];
     var dataByAssetId = groupBy(data, (dynamic row) => row['Masked Asset ID']);
     var out = dataByAssetId.keys
         .map((ptid) => converter(dataByAssetId[ptid]!))

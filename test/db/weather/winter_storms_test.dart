@@ -1,5 +1,3 @@
-library test.db.weather.winter_storms_test;
-
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:elec_server/src/db/weather/winter_storms.dart';
@@ -8,7 +6,8 @@ import 'package:html/parser.dart';
 /// Go to https://www.weather.gov/box/pastevents#, open the editor and copy the
 /// html table with the year you want.
 void getStormNames() {
-  var input = r"""<li class="ui-menu-item"><div aria-haspopup="true" id="ui-id-14" tabindex="-1" role="menuitem" class="ui-menu-item-wrapper"><span class="ui-menu-icon ui-icon ui-icon-caret-1-e"></span>2019</div>
+  var input =
+      r"""<li class="ui-menu-item"><div aria-haspopup="true" id="ui-id-14" tabindex="-1" role="menuitem" class="ui-menu-item-wrapper"><span class="ui-menu-icon ui-icon ui-icon-caret-1-e"></span>2019</div>
       <ul role="menu" aria-expanded="false" class="ui-menu ui-widget ui-widget-content ui-front" style="display: none; top: 82px; left: 150px;" aria-hidden="true">
   <li class="ui-menu-item"><div id="Dec_29-30_2019" title="Max Gust, Snowfall, Ice Accum" tabindex="-1" role="menuitem" class="ui-menu-item-wrapper">Dec 29-30, 2019</div></li>
   <li class="ui-menu-item"><div id="Dec_17-18_2019" title="Snowfall, Ice Accum" tabindex="-1" role="menuitem" class="ui-menu-item-wrapper">Dec 17-18, 2019</div></li>
@@ -59,7 +58,6 @@ Future<void> tests() async {
   // });
 }
 
-
 winterStormTests() async {
   var archive = WinterStormsArchive();
 
@@ -68,9 +66,7 @@ winterStormTests() async {
   await archive.dbConfig.db.open();
   await archive.updateDb();
   await archive.dbConfig.db.close();
-
 }
-
 
 Future<void> main() async {
   initializeTimeZones();
@@ -79,7 +75,6 @@ Future<void> main() async {
 
   // getStormNames();
 
-  
 //  var date = '4/19/2018';
 //  var time = ' 700 AM';
 //  var fmt1 = new DateFormat('M/dd/yyyy');
@@ -88,8 +83,5 @@ Future<void> main() async {
 //  var fmt2 = new DateFormat('M/dd/yyyy h:mm a');
 //  print(fmt2.parse('4/19/2018 7:00 AM'));
 
-
   //print(dt);
-
 }
-

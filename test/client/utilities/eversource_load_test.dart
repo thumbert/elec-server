@@ -1,6 +1,3 @@
-library test.client.utilities.eversource_load_test;
-
-
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
@@ -18,8 +15,15 @@ tests() async {
       expect(data.length == 8760, true);
       var first = data.first;
       expect(first.value['LRS'], 86.304);
-      expect(first.value.keys.toList(), ['LRS', 'L-CI', 'RES', 'S-CI',
-        'S-LT', 'SS Total', 'Competitive Supply']);
+      expect(first.value.keys.toList(), [
+        'LRS',
+        'L-CI',
+        'RES',
+        'S-CI',
+        'S-LT',
+        'SS Total',
+        'Competitive Supply'
+      ]);
     });
   });
 }

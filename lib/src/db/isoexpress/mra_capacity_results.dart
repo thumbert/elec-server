@@ -1,5 +1,3 @@
-library db.isoexpress.mra_capacity_results;
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
@@ -75,7 +73,6 @@ class MraCapacityResultsArchive {
     ];
   }
 
-
   int updateDuckDb({required List<Month> months, required String pathDbFile}) {
     final con = Connection(pathDbFile);
 
@@ -97,7 +94,8 @@ CREATE TABLE IF NOT EXISTS results_zone (
 );
 ''');
     for (var month in months) {
-      log.info('Inserting zone results for month ${month.toIso8601String()}...');
+      log.info(
+          'Inserting zone results for month ${month.toIso8601String()}...');
       // remove the data if it's already there
       con.execute('''
 DELETE FROM results_zone 
@@ -129,7 +127,8 @@ CREATE TABLE IF NOT EXISTS results_interface (
 );
 ''');
     for (var month in months) {
-      log.info('Inserting interface results for month ${month.toIso8601String()}...');
+      log.info(
+          'Inserting interface results for month ${month.toIso8601String()}...');
       // remove the data if it's already there
       con.execute('''
 DELETE FROM results_interface 

@@ -1,5 +1,3 @@
-library db.mis.sr_arrdistr;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';
@@ -74,7 +72,7 @@ class SrArrDistrArchive extends mis.MisReportArchive {
           '--->  Inserted $reportName for $date, version $version, tab $tab successfully');
       return Future.value(0);
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return Future.value(1);
     }
   }

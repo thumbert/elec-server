@@ -1,5 +1,3 @@
-library test.db.isoexpress.da_energy_offers_test;
-
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/api_energyoffers.dart';

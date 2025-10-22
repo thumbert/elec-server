@@ -1,5 +1,3 @@
-library elec_server.system_demand.v1;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec/risk_system.dart';
@@ -18,7 +16,8 @@ class SystemDemand {
   /// Get system demand between a start and end date.
   Future<TimeSeries<double>> getSystemDemand(
       Market market, Date start, Date end) async {
-    var url = '$rootUrl${servicePath}market/${market.toString()}/start/${start.toString()}/end/${end.toString()}';
+    var url =
+        '$rootUrl${servicePath}market/${market.toString()}/start/${start.toString()}/end/${end.toString()}';
 
     late String columnName;
     if (market.toString().toUpperCase() == 'DA') {

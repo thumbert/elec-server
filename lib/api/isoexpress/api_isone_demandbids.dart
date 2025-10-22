@@ -1,5 +1,3 @@
-library api.isone_demandbids;
-
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'dart:async';

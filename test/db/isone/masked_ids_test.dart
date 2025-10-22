@@ -1,5 +1,3 @@
-library test.db.isone.masked_ids_test;
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -59,7 +57,8 @@ Future<void> tests(String rootUrl) async {
   });
 
   group('ISO New England masked assets client tests:', () {
-    var client = MaskedIds(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
+    var client =
+        MaskedIds(http.Client(), iso: Iso.newEngland, rootUrl: rootUrl);
     test('get all masked generators', () async {
       var data = await client.getAssets(type: 'generator');
       var my9 = data.firstWhere((e) => e['ptid'] == 1616);

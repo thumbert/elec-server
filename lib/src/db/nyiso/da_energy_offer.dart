@@ -1,5 +1,3 @@
-library db.nyiso.energy_offer;
-
 /// All data from ...
 ///   http://mis.nyiso.com/public/P-27list.htm
 /// contains both the DAM and the HAM market (RT)

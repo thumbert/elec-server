@@ -1,5 +1,3 @@
-library elec_server.client.rtlmp.v1;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
@@ -35,7 +33,8 @@ class RtLmp {
   Future<TimeSeries<double>> getHourlyLmp(
       int ptid, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}hourly/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}hourly/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as Map;
@@ -56,7 +55,8 @@ class RtLmp {
   Future<TimeSeries<double>> getDailyLmpBucket(int ptid, LmpComponent component,
       Bucket bucket, Date start, Date end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}/bucket/${bucket.name}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}daily/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}/bucket/${bucket.name}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
@@ -70,7 +70,8 @@ class RtLmp {
   Future<Map<int, TimeSeries<num>>> getDailyPricesAllNodes(
       LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/mean/$cmp/start/${start.toString()}/end/${end.toString()}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}daily/mean/$cmp/start/${start.toString()}/end/${end.toString()}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
@@ -90,7 +91,8 @@ class RtLmp {
   Future<TimeSeries<double>> getMonthlyLmpBucket(int ptid,
       LmpComponent component, Bucket bucket, Month start, Month end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}monthly/$cmp/ptid/${ptid.toString()}/start/${start.toIso8601String()}/end/${end.toIso8601String()}/bucket/${bucket.name}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}monthly/$cmp/ptid/${ptid.toString()}/start/${start.toIso8601String()}/end/${end.toIso8601String()}/bucket/${bucket.name}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;

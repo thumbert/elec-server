@@ -1,5 +1,3 @@
-library db.isoexpress.zona_information;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -20,8 +18,7 @@ class ZonalDemandArchive extends IsoExpressReport {
     this.dir = dir;
   }
 
-  File getFilename(int year) =>
-      File('$dir${year.toString()}_smd_hourly.xlsx');
+  File getFilename(int year) => File('$dir${year.toString()}_smd_hourly.xlsx');
 
   /// not used
   @override
@@ -149,9 +146,9 @@ class ZonalDemandArchive extends IsoExpressReport {
   ///
   final _urls = <int, String>{
     2023:
-     'https://www.iso-ne.com/static-assets/documents/2023/02/2023_smd_hourly.xlsx',
+        'https://www.iso-ne.com/static-assets/documents/2023/02/2023_smd_hourly.xlsx',
     2022:
-     'https://www.iso-ne.com/static-assets/documents/2022/02/2022_smd_hourly.xlsx',
+        'https://www.iso-ne.com/static-assets/documents/2022/02/2022_smd_hourly.xlsx',
     2021:
         'https://www.iso-ne.com/static-assets/documents/2021/02/2021_smd_hourly.xlsx',
     2020:

@@ -1,5 +1,3 @@
-library test.db.risk_system.calculator_examples;
-
 /// One leg
 Map<String, dynamic> calc1() => <String, dynamic>{
       'userId': 'e42111',

@@ -1,5 +1,3 @@
-library api.ieso.api_ieso_rtgeneration;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
@@ -52,11 +50,11 @@ class ApiIesoRtGeneration {
 
     /// Get all data between a start/end date for all the generators
     router.get('/all/start/<start>/end/<end>',
-            (Request request, String start, String end) async {
-          var aux = await getAll(
-              Date.parse(start).toString(), Date.parse(end).toString());
-          return Response.ok(json.encode(aux), headers: headers);
-        });
+        (Request request, String start, String end) async {
+      var aux = await getAll(
+          Date.parse(start).toString(), Date.parse(end).toString());
+      return Response.ok(json.encode(aux), headers: headers);
+    });
 
     /// Get all variables from one generator between a start/end date
     router.get('/name/<name>/start/<start>/end/<end>',

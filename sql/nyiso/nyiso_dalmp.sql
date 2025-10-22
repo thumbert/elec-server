@@ -18,6 +18,30 @@ AND ptid = 61752
 ORDER BY hour_beginning;
 
 
+--- Create a compact json string by hand:  
+--- {"2025-07-01": {"4000":[...],"4001":[...]}, "2025-07-02":{...} ...}
+SELECT '{' || string_agg('"' || date || '":' || map_json, ',') || '}' AS out
+FROM (
+    WITH per_ptid AS (
+    SELECT
+        strftime(hour_beginning, '%Y-%m-%d') AS date,
+        ptid,
+        list(mcc ORDER BY hour_beginning)::DECIMAL(9,4)[] AS prices
+    FROM dalmp
+    WHERE hour_beginning >= '2025-07-01 00:00:00.000-04:00'
+        AND hour_beginning <  '2025-07-15 00:00:00.000-04:00'
+AND ptid in (61754, 23575) 
+    GROUP BY date, ptid
+    )
+    SELECT 
+        date,
+        '{' || string_agg(ptid || ':' || to_json(prices), ',') || '}' AS map_json
+    FROM per_ptid
+    GROUP BY date
+    ORDER BY date
+);
+
+
 
 SELECT 
     '2024-11-03 00:00:00-04:00'::TIMESTAMPTZ AS H0, 

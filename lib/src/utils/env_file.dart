@@ -1,5 +1,3 @@
-library utils.env_file_utils;
-
 import 'dart:io';
 
 class EnvFile {

@@ -1,6 +1,3 @@
-library test.db.isoexpress.monthly_wholesale_load_cost_test;
-
-
 import 'package:elec_server/api/isoexpress/api_wholesale_load_cost.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:test/test.dart';

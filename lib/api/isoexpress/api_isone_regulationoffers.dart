@@ -1,5 +1,3 @@
-library api.isoexpress.isone_regulationoffers;
-
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/timezone.dart';

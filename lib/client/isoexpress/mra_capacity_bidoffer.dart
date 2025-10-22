@@ -1,5 +1,3 @@
-library client.isoexpress.mra_capacity_bidoffer;
-
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
@@ -60,7 +58,7 @@ class MraCapacityRecord {
     final month =
         Month.parse((x['BeginDate'] as String).substring(0, 7), location: UTC);
     final segmentCount = x.keys.where((e) => e.startsWith('Seg')).length ~/ 2;
-    
+
     var out = <MraCapacityRecord>[];
     for (var segment = 1; segment <= segmentCount; segment++) {
       // ISO has the quantity and price fields backwards!  Nice job!
@@ -84,7 +82,7 @@ class MraCapacityRecord {
         ResourceType.parse(x['ResType']),
         !x.containsKey('MaskIntfcID') ? null : x['MaskIntfcID'],
         BidOffer.parse(x['BidType']),
-        segment-1,
+        segment - 1,
         quantity,
         price,
       ));

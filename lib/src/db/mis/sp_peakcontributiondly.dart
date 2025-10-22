@@ -1,5 +1,3 @@
-library db.mis.sp_peakcontributiondly;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:mongo_dart/mongo_dart.dart';

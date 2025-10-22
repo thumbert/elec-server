@@ -1,5 +1,3 @@
-library elec_server.ptids.v1;
-
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;

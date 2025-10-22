@@ -1,5 +1,3 @@
-library api.cme.api_cme;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';

@@ -1,5 +1,3 @@
-library test.db.risk_system.calculator_archive_test;
-
 import 'package:elec/calculators/elec_swap.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

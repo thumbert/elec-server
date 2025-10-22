@@ -1,5 +1,3 @@
-library utils.lib_plotly;
-
 import 'dart:convert';
 import 'dart:io';
 

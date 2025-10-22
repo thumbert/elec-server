@@ -1,5 +1,3 @@
-library db.utilities.eversource.customer_counts_east_ma;
-
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -10,7 +8,6 @@ import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
-
 class EversourceEastMaCustomerCountsArchive {
   late ComponentConfig dbConfig;
   String? dir;
@@ -19,10 +16,13 @@ class EversourceEastMaCustomerCountsArchive {
     Map env = Platform.environment;
     if (dbConfig == null) {
       this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'utility', collectionName: 'eversource_customer_counts');
+          host: '127.0.0.1',
+          dbName: 'utility',
+          collectionName: 'eversource_customer_counts');
     }
 
-    dir ??= env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/East_MA/';
+    dir ??=
+        env['HOME'] + '/Downloads/Archive/CustomerCounts/Eversource/East_MA/';
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
     }
@@ -38,7 +38,7 @@ class EversourceEastMaCustomerCountsArchive {
     try {
       await dbConfig.coll.insertAll(data);
     } catch (e) {
-      print(' XXXX ' + e.toString());
+      print(' XXXX $e');
       return Future.value(1);
     }
     print('--->  SUCCESS Eversource East MA inserting month $month');
@@ -82,9 +82,12 @@ class EversourceEastMaCustomerCountsArchive {
             'month': month,
             'zone': zone,
             'service': service,
-            'rateClass': rows[i][0].toString().replaceAll(RegExp('\\s'), '').toLowerCase(),
+            'rateClass': rows[i][0]
+                .toString()
+                .replaceAll(RegExp('\\s'), '')
+                .toLowerCase(),
             'customers': rows[i][1],
-            'mwh': rows[i][2]/1000,
+            'mwh': rows[i][2] / 1000,
           };
           res.add(aux);
         }
@@ -96,7 +99,7 @@ class EversourceEastMaCustomerCountsArchive {
 
   /// Get the file for this month
   File getFile(Month month) {
-    return File(dir! + '${month.startDate.toString().substring(0, 7)}.xlsx');
+    return File('${dir!}${month.startDate.toString().substring(0, 7)}.xlsx');
   }
 
   /// Download a file.
@@ -108,7 +111,7 @@ class EversourceEastMaCustomerCountsArchive {
     var match = matches.elementAt(0);
     var fName = match.group(2)!;
 
-    url = 'https://www.eversource.com' + url;
+    url = 'https://www.eversource.com$url';
 
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
@@ -129,14 +132,13 @@ class EversourceEastMaCustomerCountsArchive {
     }
 
     await dbConfig.db.open();
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'region': 1, 'month': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'region': 1, 'month': 1});
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'zone': 1, 'month': 1, 'service': 1});
 
     await dbConfig.db.close();
   }
-
 }
 
 /// Get all the API links from url with a given pattern

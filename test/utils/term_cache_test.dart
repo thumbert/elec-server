@@ -1,5 +1,3 @@
-library test.utils.term_cache_test;
-
 import 'package:date/date.dart';
 import 'package:elec_server/utils.dart';
 import 'package:test/test.dart';
@@ -7,8 +5,7 @@ import 'package:test/test.dart';
 void tests() {
   group('TestCache tests:', () {
     loader(Interval interval) {
-      var days =
-          interval.splitLeft((dt) => Date.containing(dt)).cast<Date>();
+      var days = interval.splitLeft((dt) => Date.containing(dt)).cast<Date>();
       var out = <Map<String, dynamic>>[];
       for (var date in days) {
         out.add({
@@ -19,6 +16,7 @@ void tests() {
       }
       return Future.value(out);
     }
+
     keyAssign(Map<String, dynamic> e) => e['date'] as Date?;
     keysFromInterval(Interval interval) =>
         interval.splitLeft((dt) => Date.containing(dt)).cast<Date>();
@@ -57,6 +55,7 @@ void tests() {
         }
         return Future.value(out);
       }
+
       keyAssign(Map<String, dynamic> e) => e['month'] as Month?;
       var cache = MonthCache(loader, keyAssign);
       await cache.set(parseMonth('Oct19'));

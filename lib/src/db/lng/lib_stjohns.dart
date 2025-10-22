@@ -1,5 +1,3 @@
-library lng.lib_stjohns;
-
 import 'dart:convert';
 import 'dart:io';
 

@@ -1,5 +1,3 @@
-library test.db.nyiso.da_energy_offer_analysis;
-
 import 'package:http/http.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';

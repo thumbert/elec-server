@@ -1,5 +1,3 @@
-library db.isoexpress.mra_capacity_bidoffer;
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';

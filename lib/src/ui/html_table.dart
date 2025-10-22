@@ -1,5 +1,3 @@
-library ui.html_table;
-
 import 'dart:html';
 
 /// See the example in web/ui/html_table for how to set the style of the table.
@@ -136,7 +134,7 @@ class HtmlTable {
   void _save() {
     var downloadLink = document.createElement('a') as AnchorElement;
     document.body!.append(downloadLink);
-    downloadLink.href = 'data:application/vnd.ms-excel, ' + table.outerHtml!;
+    downloadLink.href = 'data:application/vnd.ms-excel, ${table.outerHtml!}';
     downloadLink.download = 'data.xlsx';
     downloadLink.click();
   }

@@ -1,5 +1,3 @@
-library elec_server.client.isoexpress.zonal_demand;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
@@ -14,9 +12,10 @@ class IsoneZonalDemand {
   String rootUrl;
   final String servicePath = '/isone/zonal_demand/v1/';
 
-  IsoneZonalDemand(http.Client client, {this.rootUrl = 'http://localhost:8080'});
+  IsoneZonalDemand(http.Client client,
+      {this.rootUrl = 'http://localhost:8080'});
 
-  static const _ptidMap = <int,String>{
+  static const _ptidMap = <int, String>{
     4001: 'me',
     4002: 'nh',
     4003: 'vt',
@@ -29,21 +28,22 @@ class IsoneZonalDemand {
 
   Future<TimeSeries<num>> getPoolDemand(
       Market market, Date start, Date end) async {
-    var url = '$rootUrl${servicePath}market/${market.name}/zone/isone/start/${start.toString()}/end/${end.toString()}';
+    var url =
+        '$rootUrl${servicePath}market/${market.name}/zone/isone/start/${start.toString()}/end/${end.toString()}';
     return _process(Uri.parse(url));
   }
-
 
   Future<TimeSeries<num>> getZonalDemand(
       int ptid, Market market, Date start, Date end) async {
     if (!_ptidMap.containsKey(ptid)) {
-      throw ArgumentError('Wrong ptid $ptid.  Needs to be one of: ${_ptidMap.keys.join(', ')}');
+      throw ArgumentError(
+          'Wrong ptid $ptid.  Needs to be one of: ${_ptidMap.keys.join(', ')}');
     }
     var zone = _ptidMap[ptid]!;
-    var url = '$rootUrl${servicePath}market/${market.name}/zone/$zone/start/${start.toString()}/end/${end.toString()}';
+    var url =
+        '$rootUrl${servicePath}market/${market.name}/zone/$zone/start/${start.toString()}/end/${end.toString()}';
     return _process(Uri.parse(url));
   }
-
 
   Future<TimeSeries<num>> _process(Uri url) async {
     var response = await http.get(url);
@@ -56,5 +56,4 @@ class IsoneZonalDemand {
 
     return ts;
   }
-
 }

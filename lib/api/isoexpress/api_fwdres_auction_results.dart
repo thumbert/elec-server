@@ -1,5 +1,3 @@
-library api.api_fwdres_auction_results;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';

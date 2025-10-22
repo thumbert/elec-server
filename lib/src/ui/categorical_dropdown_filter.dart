@@ -1,5 +1,3 @@
-library ui.categorical_dropdown_filter;
-
 import 'dart:html' as html;
 
 class CategoricalDropdownFilter {
@@ -18,8 +16,7 @@ class CategoricalDropdownFilter {
     // put both the label and the select element into a div
     inner = html.DivElement()
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
-    inner.children.add(html.LabelElement()
-      ..text = name);
+    inner.children.add(html.LabelElement()..text = name);
 
     _selector = html.SelectElement()
       ..setAttribute('style', 'margin-left: 15px;');
@@ -53,6 +50,6 @@ class CategoricalDropdownFilter {
     }
   }
 
-  void onChange(Function x) =>  _selector.onChange.listen(x as void Function(html.Event)?);
+  void onChange(Function x) =>
+      _selector.onChange.listen(x as void Function(html.Event)?);
 }
-

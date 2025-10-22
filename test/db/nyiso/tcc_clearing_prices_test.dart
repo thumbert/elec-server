@@ -1,5 +1,3 @@
-library test.db.nyiso.tcc_clearing_prices_test;
-
 import 'dart:convert';
 import 'dart:io';
 

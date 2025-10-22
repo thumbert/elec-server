@@ -1,5 +1,3 @@
-library test.db.isoexpress.fuelmix_report_test;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -104,7 +102,6 @@ Future<void> tests(String rootUrl) async {
       expect(data.length, 48);
       expect(data.values.toList()[2], 8070.75);
     });
-
   });
 }
 

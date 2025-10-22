@@ -1,5 +1,3 @@
-library lib.src.db.lib_update_dbs;
-
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart' as dotenv;
@@ -319,10 +317,7 @@ Future<void> updateIsoneDemandBids(
       }
     }
     archive.makeGzFileForMonth(month);
-    archive.updateDuckDb(
-        months: [month],
-        pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone_demand_bids.duckdb');
+    archive.updateDuckDb(months: [month], pathDbFile: archive.duckdbPath);
   }
 }
 

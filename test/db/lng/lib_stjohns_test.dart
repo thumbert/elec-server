@@ -1,5 +1,3 @@
-library test.db.lng.lib_stjohns_test;
-
 import 'package:elec_server/src/db/lng/lib_stjohns.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
@@ -11,15 +9,24 @@ Future<void> tests(String rootUrl) async {
       var data = await sj.getExpectedVessels();
       expect(data.length > 1, true);
       expect(data.first.keys.toSet(), {
-        'VESSEL_NAME', 'SHIP_LINE', 'BERTH', 'AGENT', 'ETA', 'CARGO_ACTIVITY',
+        'VESSEL_NAME',
+        'SHIP_LINE',
+        'BERTH',
+        'AGENT',
+        'ETA',
+        'CARGO_ACTIVITY',
       });
     });
     test('read current vessels in port', () async {
       var data = await sj.getCurrentVessels();
       expect(data.length > 1, true);
       expect(data.first.keys.toSet(), {
-        'VESSEL_NAME', 'SHIP_LINE', 'BERTH', 'AGENT',
-        'DATE_OF_ARRIVAL', 'CARGO_ACTIVITY',
+        'VESSEL_NAME',
+        'SHIP_LINE',
+        'BERTH',
+        'AGENT',
+        'DATE_OF_ARRIVAL',
+        'CARGO_ACTIVITY',
       });
     });
     test('read file with ships', () {
@@ -46,9 +53,7 @@ Future<void> notify() async {
       }
     }
   }
-
 }
-
 
 void main() async {
   initializeTimeZones();

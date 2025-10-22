@@ -1,5 +1,3 @@
-library db.nyiso.gold_book;
-
 /// Go to Library > Planning Reports > Load & Capacity Data Report
 
 final urls = {

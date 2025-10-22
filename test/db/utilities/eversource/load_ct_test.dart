@@ -1,17 +1,15 @@
-library test.utilities.eversource.customer_counts;
-
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/utilities/eversource/load_ct.dart';
 
 loadTest() async {
   late EversourceCtLoadArchive archive;
-  group('eversource ct loads', (){
-    setUp(()async {
-      archive =  EversourceCtLoadArchive();
+  group('eversource ct loads', () {
+    setUp(() async {
+      archive = EversourceCtLoadArchive();
       await archive.dbConfig.db.open();
     });
-    tearDown(()async {
+    tearDown(() async {
       await archive.dbConfig.db.close();
     });
     test('read year 2019', () async {
@@ -26,11 +24,11 @@ loadTest() async {
   });
 }
 
-
 updateDb() async {
   var archive = EversourceCtLoadArchive();
 
-  var url = 'https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)';
+  var url =
+      'https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)';
   var links = await getLinks(url, patterns: ['actual-load-', 'actual-loads-']);
   links.forEach(print);
 
@@ -43,9 +41,7 @@ updateDb() async {
     await archive.insertData(data);
   }
   await archive.dbConfig.db.close();
-
 }
-
 
 main() async {
   await initializeTimeZone();

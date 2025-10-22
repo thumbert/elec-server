@@ -1,5 +1,3 @@
-library db.isoexpress.rt_system_demand_hourly;
-
 import 'dart:io';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -14,14 +12,15 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
 
   RtSystemDemandReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'system_demand');
+        host: '127.0.0.1',
+        dbName: 'isoexpress',
+        collectionName: 'system_demand');
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}EnergyReports/RtHourlyDemand/Raw/';
     this.dir = dir;
     reportName = 'Real-Time Hourly System Load Report';
   }
-  
-  
+
   @override
   String getUrl(Date asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hourlysystemdemand?start=${yyyymmdd(asOfDate)}&end=${yyyymmdd(asOfDate)}';
@@ -29,7 +28,6 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
   @override
   File getFilename(Date asOfDate) =>
       File('${dir}rt_hourlydemand_${yyyymmdd(asOfDate)}.csv');
-
 
   /// File may be incomplete if downloaded during the day ...
   @override
@@ -49,7 +47,8 @@ class RtSystemDemandReportArchive extends DailyIsoExpressReport {
     row['hourBeginning'] = [];
     row['Total Load'] = <num>[];
     for (var e in rows) {
-      row['hourBeginning'].add(parseHourEndingStamp(localDate, e['Hour Ending']));
+      row['hourBeginning']
+          .add(parseHourEndingStamp(localDate, e['Hour Ending']));
       row['Total Load'].add(e['Total Load']);
     }
     return row;

@@ -1,5 +1,3 @@
-library db.weather.winter_storms;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -223,21 +221,22 @@ class WinterStormsArchive extends IsoExpressReport {
 
   WinterStormsArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'weather', collectionName: 'winter_storms');
-    dir ??= '${Platform.environment['HOME']!}/Downloads/Archive/Weather/WinterStorms/Raw/';
+        host: '127.0.0.1', dbName: 'weather', collectionName: 'winter_storms');
+    dir ??=
+        '${Platform.environment['HOME']!}/Downloads/Archive/Weather/WinterStorms/Raw/';
     this.dir = dir;
     this.dbConfig = dbConfig;
   }
 
   @override
-  Map<String,dynamic> converter(List<Map<String,dynamic>> rows) {
-    return <String,dynamic>{};
+  Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
+    return <String, dynamic>{};
   }
 
   /// SNOW total accumulation, RAIN totals (inches), and wind speeds are reported.
   ///
   @override
-  List<Map<String,dynamic>> processFile(File file) {
+  List<Map<String, dynamic>> processFile(File file) {
     print(file.path);
     var aux = file.readAsStringSync();
 
@@ -245,7 +244,7 @@ class WinterStormsArchive extends IsoExpressReport {
     var lines = aux.split('\n').where((String line) => line.startsWith(':'));
     var converter = CsvToListConverter();
     var rows = lines.map((String row) => converter.convert(row).first).toList();
-    var out = <Map<String,dynamic>>[];
+    var out = <Map<String, dynamic>>[];
     var keys = [
       'date',
       'timestamp',
@@ -310,8 +309,8 @@ class WinterStormsArchive extends IsoExpressReport {
     }
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'stormId': 1}, unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'startDate': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'startDate': 1});
     await dbConfig.db.close();
   }
 
@@ -344,4 +343,4 @@ String url =
     'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/Jan_12-13_2018/Jan_12-13_2018_Text_Xml.xml';
 // changed the format
 String url2 =
-  'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/Jan_16-17_2022/Jan_16-17_2022_Text.xml';
+    'https://www.weather.gov/source/box/ClimatePastWeather/pastevents/Jan_16-17_2022/Jan_16-17_2022_Text.xml';

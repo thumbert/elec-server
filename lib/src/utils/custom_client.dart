@@ -1,5 +1,3 @@
-library utils.custom_client;
-
 import 'package:http/http.dart';
 import 'package:http/browser_client.dart';
 

@@ -11,7 +11,49 @@ WHERE ptid = 4000
 AND hour_beginning >= '2025-07-01'
 AND hour_beginning < '2025-07-2';
 
+--- Get the hourly MCC prices in Json compact form for MCC surfer!
 
+
+SELECT ptid, hour_beginning, mcc
+FROM da_lmp
+WHERE ptid in (4000, 4001)
+AND hour_beginning >= '2025-07-01'
+AND hour_beginning < '2025-07-03'
+ORDER BY ptid, hour_beginning;
+
+SELECT
+  date(hour_beginning) AS date,
+  ptid,
+  list(mcc ORDER BY hour_beginning)::DECIMAL(9,4)[] AS values
+FROM da_lmp
+WHERE hour_beginning >= '2025-07-01'
+  AND hour_beginning <  '2025-07-15'
+  AND ptid IN (4000, 4001)
+GROUP BY ptid, date
+ORDER BY ptid, date;
+
+--- Create a compact json string by hand:  
+--- {"2025-07-01": {"4000":[...],"4001":[...]}, "2025-07-02":{...} ...}
+SELECT '{' || string_agg('"' || date || '":' || map_json, ',') || '}' AS out
+FROM (
+    WITH per_ptid AS (
+    SELECT
+        strftime(hour_beginning, '%Y-%m-%d') AS date,
+        ptid,
+        list(mcc ORDER BY hour_beginning)::DECIMAL(9,4)[] AS prices
+    FROM da_lmp
+    WHERE hour_beginning >= '2025-07-01 00:00:00.000-04:00'
+        AND hour_beginning <  '2025-07-15 00:00:00.000-04:00'
+AND ptid in (4000, 4001) 
+    GROUP BY date, ptid
+    )
+    SELECT 
+        date,
+        '{' || string_agg(ptid || ':' || to_json(prices), ',') || '}' AS map_json
+    FROM per_ptid
+    GROUP BY date
+    ORDER BY date
+);
 
 
 

@@ -1,6 +1,5 @@
-library test.db.nyiso.da_congestion_compact_test;
-
 import 'dart:convert';
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/api/api_dacongestion.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
@@ -11,7 +10,10 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/client/dacongestion.dart' as client;
 
-Future<void> tests(String rootUrl) async {
+Future<void> tests() async {
+  final rootUrl = dotenv.env['ROOT_URL']!;
+  final rustServer = dotenv.env['RUST_SERVER']!;
+
   group('Nyiso DAM congestion compact db tests: ', () {
     var archive = NyisoDaCongestionCompactArchive();
     setUp(() async {
@@ -64,8 +66,8 @@ Future<void> tests(String rootUrl) async {
   });
 
   group('Nyiso DAM congestion compact client tests: ', () {
-    var cong =
-        client.DaCongestion(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
+    var cong = client.DaCongestion(http.Client(),
+        iso: Iso.newYork, rootUrl: rootUrl, rustServer: rustServer);
     test('get hourly traces for 1Jan19-5Jan19', () async {
       var data = await cong.getHourlyTraces(
           Date.utc(2019, 1, 1), Date.utc(2019, 1, 5));
@@ -91,5 +93,7 @@ Future<void> tests(String rootUrl) async {
 void main() async {
   initializeTimeZones();
   DbProd();
-  tests('http://127.0.0.1:8080');
+  dotenv.load('.env/prod.env');
+
+  await tests();
 }

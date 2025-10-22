@@ -1,5 +1,3 @@
-library test.db.cme.cme_energy_settlements_test;
-
 import 'dart:convert';
 
 import 'package:dotenv/dotenv.dart' as dotenv;

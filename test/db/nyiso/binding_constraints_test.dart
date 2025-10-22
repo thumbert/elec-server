@@ -1,5 +1,3 @@
-library test.db.nyiso.binding_constraints_test;
-
 import 'dart:convert';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
@@ -136,7 +134,7 @@ Future<void> tests(String rootUrl) async {
 
       /// on laptop 761 ms, 2/13/2022
       /// on desktop 1998 ms, 8/2/2024
-      expect(elapsed < 3000, true); 
+      expect(elapsed < 3000, true);
       expect(aux.isNotEmpty, true);
     });
     test('get daily cost by constraint', () async {

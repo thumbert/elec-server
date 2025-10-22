@@ -1,11 +1,8 @@
-library db.archive;
-
 import 'dart:async';
 import 'package:date/date.dart';
 
 /// An abstract class for a daily ingestion into mongo.
 abstract class DailyArchive {
-
   /// get the daily data from a web source, always save it for reference
   oneDayDownload(Date date);
 
@@ -24,4 +21,3 @@ abstract class DailyArchive {
   /// maintain the Db
   updateDb(Date start, Date end);
 }
-

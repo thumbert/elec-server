@@ -1,5 +1,3 @@
-library api.nyiso.api_nyiso_ptids;
-
 import 'dart:async';
 
 import 'dart:convert';

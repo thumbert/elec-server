@@ -1,5 +1,3 @@
-library db.epa.epa_emissions;
-
 import 'dart:convert';
 import 'dart:io';
 

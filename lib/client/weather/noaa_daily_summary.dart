@@ -1,5 +1,3 @@
-library client.weather.noaa_daily_summary;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -7,8 +5,7 @@ import 'package:timeseries/timeseries.dart';
 import 'package:http/http.dart' as http;
 
 class NoaaDailySummary {
-  NoaaDailySummary(this.client,
-      {this.rootUrl = 'http://localhost:8000'});
+  NoaaDailySummary(this.client, {this.rootUrl = 'http://localhost:8000'});
 
   final http.Client client;
   final String rootUrl;

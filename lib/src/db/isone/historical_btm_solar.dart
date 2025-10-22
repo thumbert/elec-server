@@ -1,5 +1,3 @@
-library db.isone.historical_btm_solar;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';
@@ -25,6 +23,7 @@ class IsoneBtmSolarArchive {
   /// Insert data into Mongo. All zones at once.
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(0);
+
     /// split the data by day and insert it
     var groups = groupBy(data, (e) => e['date']);
     for (var date in groups.keys) {

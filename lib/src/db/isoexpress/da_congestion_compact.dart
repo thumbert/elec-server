@@ -1,5 +1,3 @@
-library db.isoexpress.da_congestion_compact;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:date/date.dart';
@@ -29,9 +27,11 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
   @override
   File getFilename(Date asOfDate, {String extension = 'json'}) {
     if (extension == 'csv') {
-      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv.gz');
+      return File(
+          '$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.csv.gz');
     } else if (extension == 'json') {
-      return File('$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json.gz');
+      return File(
+          '$dir${asOfDate.year}/WW_DALMP_ISO_${yyyymmdd(asOfDate)}.json.gz');
     } else {
       throw StateError('Unsupported extension $extension');
     }

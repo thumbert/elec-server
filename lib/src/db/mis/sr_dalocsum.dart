@@ -1,5 +1,3 @@
-library elec.mis.sr_dalocsum;
-
 import 'dart:async';
 import 'dart:io';
 
@@ -57,7 +55,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
       print(
           '--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 0 successfully');
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
     }
   }
 
@@ -85,7 +83,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
       print(
           '--->  Inserted $reportName for ${data.first['date']}, version ${data.first['version']}, tab 1 successfully');
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
     }
   }
 

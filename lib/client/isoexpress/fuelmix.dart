@@ -1,5 +1,3 @@
-library client.isone.fuelmix;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';

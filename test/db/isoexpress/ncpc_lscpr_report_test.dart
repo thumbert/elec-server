@@ -1,5 +1,3 @@
-library test.db.isoexpress.ncpc_lscpr_report_test;
-
 import 'package:elec_server/src/db/isoexpress/ncpc_lscpr_report.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';

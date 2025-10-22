@@ -1,5 +1,3 @@
-library db.isoexpress.ncpc_lscpr_report;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -29,20 +27,19 @@ class NcpcLscprReportArchive extends DailyIsoExpressReport {
 
   NcpcLscprReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
+        host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'NCPC/LscprCost/Raw/';
+    dir ??= '${baseDir}NCPC/LscprCost/Raw/';
     this.dir = dir;
   }
 
   @override
   String getUrl(Date? asOfDate) =>
-      'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=lscpr&start=' +
-      yyyymmdd(asOfDate);
+      'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=lscpr&start=${yyyymmdd(asOfDate)}';
 
   @override
   File getFilename(Date? asOfDate) =>
-      File(dir + 'ncpc_lscpr_' + yyyymmdd(asOfDate) + '.csv');
+      File('${dir}ncpc_lscpr_${yyyymmdd(asOfDate)}.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {

@@ -1,5 +1,3 @@
-library lib.db.ieso.rt_generation_archive;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -39,7 +37,7 @@ class IesoRtGenerationArchive extends IsoExpressReport {
   @override
   Future<int> insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(0);
-    var month = Month.parse((data.first['date'] as String).substring(0,7));
+    var month = Month.parse((data.first['date'] as String).substring(0, 7));
     try {
       for (var x in data) {
         await dbConfig.coll.remove({
@@ -48,7 +46,8 @@ class IesoRtGenerationArchive extends IsoExpressReport {
         });
         await dbConfig.coll.insert(x);
       }
-      log.info('--->  Inserted IESO rt generation data successfully for $month');
+      log.info(
+          '--->  Inserted IESO rt generation data successfully for $month');
     } catch (e) {
       log.severe('XXX $e');
       return Future.value(1);
@@ -87,6 +86,7 @@ class IesoRtGenerationArchive extends IsoExpressReport {
         'Forecast' => 'forecast',
         _ => throw StateError('Unknown measurement for $x'),
       };
+
       /// make sure the values are all ints.  Occasionally the spreadsheet
       /// contains ' '.  I replace that with 0's.
       var values = es.sublist(4, 28).map((e) => e is int ? e : 0).toList();

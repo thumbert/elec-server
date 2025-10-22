@@ -1,5 +1,3 @@
-library test.mis.sr_rtlocsum_test;
-
 import 'dart:io';
 import 'package:elec_server/api/mis/api_sd_arrawdsum.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';

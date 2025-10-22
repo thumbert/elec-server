@@ -1,5 +1,3 @@
-library test.utilities.eversource.customer_counts;
-
 import 'dart:io';
 import 'package:elec_server/src/db/utilities/eversource/customer_counts_ct.dart';
 
@@ -49,7 +47,8 @@ import 'package:timezone/standalone.dart';
 //}
 
 updateDb() async {
-  var url = 'https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)';
+  var url =
+      'https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)';
   var links = await getLinks(url);
   links.forEach(print);
 

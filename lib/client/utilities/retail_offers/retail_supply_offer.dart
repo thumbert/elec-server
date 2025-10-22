@@ -1,6 +1,3 @@
-library db.utilities.retail_supply_offer;
-
-
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 

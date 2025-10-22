@@ -1,5 +1,3 @@
-library db.gas.notices.agt_notices;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -35,8 +33,10 @@ class AgtNoticesArchive {
   ///    ...
   /// ]
   /// ```
-  Future<List<Uri>> getUris({String pipeline = 'AG', String type = 'CRI'}) async {
-    var url = 'https://infopost.enbridge.com/InfoPost/NoticesList.asp?pipe=$pipeline&type=$type';
+  Future<List<Uri>> getUris(
+      {String pipeline = 'AG', String type = 'CRI'}) async {
+    var url =
+        'https://infopost.enbridge.com/InfoPost/NoticesList.asp?pipe=$pipeline&type=$type';
     var res = await get(Uri.parse(url));
 
     var document = parse(res.body);
@@ -44,8 +44,15 @@ class AgtNoticesArchive {
     var main = body.children.first;
     var tbody = main.querySelector('tbody')!;
     var colnames = tbody.children.first.nodes.map((e) => e.text).toList();
-    if (!ListEquality().equals(colnames,['Notice Type', 'Posted Date/Time', 'Notice Effective Date/Time',
-      'Notice End Date/Time', 'Notice Identifier', 'Subject', 'Response Date/Time'])) {
+    if (!ListEquality().equals(colnames, [
+      'Notice Type',
+      'Posted Date/Time',
+      'Notice Effective Date/Time',
+      'Notice End Date/Time',
+      'Notice Identifier',
+      'Subject',
+      'Response Date/Time'
+    ])) {
       throw StateError('Table format has changed!  Aborting.');
     }
 
@@ -55,7 +62,9 @@ class AgtNoticesArchive {
       return a!['href']!;
     }).toList();
 
-    return uris.map((e) => Uri.parse('https://infopost.enbridge.com/InfoPost/$e')).toList();
+    return uris
+        .map((e) => Uri.parse('https://infopost.enbridge.com/InfoPost/$e'))
+        .toList();
   }
 
   Future<void> saveUrisToDisk(List<Uri> uris) async {
@@ -64,8 +73,8 @@ class AgtNoticesArchive {
     }
     for (var uri in uris) {
       var params = uri.queryParameters;
-      var file = File(join(dir,
-          '${params['strKey1']}_${params['pipe']}_${params['type']}.txt'));
+      var file = File(join(
+          dir, '${params['strKey1']}_${params['pipe']}_${params['type']}.txt'));
       if (!file.existsSync()) {
         var res = await get(uri);
         file.writeAsStringSync(res.body);
@@ -75,16 +84,17 @@ class AgtNoticesArchive {
 
   /// Historical notices for the past 3 years are in Pdf format only
   /// https://linkwc.enbridge.com/HistoricalNotices/AGT/CRI/2019/January%202019.pdf
-  Future<void> savePdfToDisk(List<Month> months, {String pipeline = 'AGT', String type = 'CRI'}) async {
+  Future<void> savePdfToDisk(List<Month> months,
+      {String pipeline = 'AGT', String type = 'CRI'}) async {
     var dir1 = join(dir, 'Pdf');
     if (!Directory(dir1).existsSync()) {
       Directory(dir1).createSync(recursive: true);
     }
     for (var month in months) {
       var aux = '${monthMap[month.month]} ${month.year}.pdf';
-      var uri = Uri.parse('https://linkwc.enbridge.com/HistoricalNotices/$pipeline/$type/${month.year}/$aux');
-      var file = File(join(dir1,
-          '${pipeline}_${month.toIso8601String()}.pdf'));
+      var uri = Uri.parse(
+          'https://linkwc.enbridge.com/HistoricalNotices/$pipeline/$type/${month.year}/$aux');
+      var file = File(join(dir1, '${pipeline}_${month.toIso8601String()}.pdf'));
       if (!file.existsSync()) {
         var res = await get(uri);
         file.writeAsBytesSync(res.bodyBytes);
@@ -92,7 +102,7 @@ class AgtNoticesArchive {
     }
   }
 
-  static const monthMap = <int,String>{
+  static const monthMap = <int, String>{
     1: 'January',
     2: 'February',
     3: 'March',
@@ -107,12 +117,10 @@ class AgtNoticesArchive {
     12: 'December',
   };
 
-
   ///
   // String getFilename(int id, String pipeline, String type) {
   //
   // }
-
 
   /// Input [file] is the daily CSV file,
   /// Encode the system value with ptid = -1.
@@ -184,7 +192,6 @@ class AgtNoticesArchive {
         keys: {'type': 1, 'date': 1, 'ptid': 1});
     await dbConfig.db.close();
   }
-
 }
 
 class Notice {

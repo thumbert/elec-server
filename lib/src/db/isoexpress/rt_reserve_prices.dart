@@ -1,5 +1,3 @@
-library db.isoexpress.rt_reserve_prices;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -111,7 +109,8 @@ class RtReservePriceArchive {
   }
 
   int testDuckDb() {
-    final con = Connection("/home/adrian/Downloads/Archive/IsoExpress/PricingReports/RtReservePrice/bar.duckdb");
+    final con = Connection(
+        "/home/adrian/Downloads/Archive/IsoExpress/PricingReports/RtReservePrice/bar.duckdb");
     con.execute(r'''
 CREATE TABLE IF NOT EXISTS bar (
     IntervalBeginning5Min TIMESTAMPTZ,
@@ -197,7 +196,7 @@ CREATE TABLE IF NOT EXISTS rt_reserve_price (
     for (var month in months) {
       // remove the data if it's already there
 //       con.execute('''
-// DELETE FROM rt_reserve_price 
+// DELETE FROM rt_reserve_price
 // WHERE "IntervalBeginning5Min" >= '${month.start.toIso8601String()}'
 // AND "IntervalBeginning5Min" < '${month.next.start.toIso8601String()}';
 //       ''');

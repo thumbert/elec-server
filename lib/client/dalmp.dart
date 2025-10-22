@@ -1,5 +1,3 @@
-library elec_server.client.dalmp.v1;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
@@ -24,10 +22,11 @@ class DaLmp {
 
   /// Get hourly prices for a ptid between a start and end date.
   /// Return an hourly timeseries.
-  Future<TimeSeries<double>> getHourlyLmp(Iso iso,
-      int ptid, LmpComponent component, Date start, Date end) async {
+  Future<TimeSeries<double>> getHourlyLmp(
+      Iso iso, int ptid, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}hourly/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}hourly/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as Map;
@@ -45,10 +44,11 @@ class DaLmp {
   }
 
   /// Get daily prices for a ptid/bucket between a start and end date.
-  Future<TimeSeries<double>> getDailyLmpBucket(Iso iso, int ptid, LmpComponent component,
-      Bucket bucket, Date start, Date end) async {
+  Future<TimeSeries<double>> getDailyLmpBucket(Iso iso, int ptid,
+      LmpComponent component, Bucket bucket, Date start, Date end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}/bucket/${bucket.name}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}daily/$cmp/ptid/${ptid.toString()}/start/${start.toString()}/end/${end.toString()}/bucket/${bucket.name}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
@@ -59,10 +59,11 @@ class DaLmp {
   }
 
   /// get the daily prices for all nodes in the db as calculated by mongo
-  Future<Map<int, TimeSeries<num>>> getDailyPricesAllNodes(Iso iso,
-      LmpComponent component, Date start, Date end) async {
+  Future<Map<int, TimeSeries<num>>> getDailyPricesAllNodes(
+      Iso iso, LmpComponent component, Date start, Date end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}daily/mean/$cmp/start/${start.toString()}/end/${end.toString()}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}daily/mean/$cmp/start/${start.toString()}/end/${end.toString()}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
@@ -82,7 +83,8 @@ class DaLmp {
   Future<TimeSeries<double>> getMonthlyLmpBucket(Iso iso, int ptid,
       LmpComponent component, Bucket bucket, Month start, Month end) async {
     var cmp = component.toString();
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}monthly/$cmp/ptid/${ptid.toString()}/start/${start.toIso8601String()}/end/${end.toIso8601String()}/bucket/${bucket.name}';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}monthly/$cmp/ptid/${ptid.toString()}/start/${start.toIso8601String()}/end/${end.toIso8601String()}/bucket/${bucket.name}';
 
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;

@@ -1,5 +1,3 @@
-library db.nyiso.da_congestion_compact;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -102,8 +100,8 @@ class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
     }
 
     /// order the congestion data
-    var ordering = naturalComparable<num>
-        .onResultOf((List xs) => xs[1]) // sort by hour beginning 0
+    var ordering = naturalComparable<num>.onResultOf(
+            (List xs) => xs[1]) // sort by hour beginning 0
         .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
         .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
         .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))

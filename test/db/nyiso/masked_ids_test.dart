@@ -1,5 +1,3 @@
-library test.db.nyiso.masked_ids_test;
-
 import 'package:elec/elec.dart';
 import 'package:elec_server/client/masked_ids.dart';
 import 'package:http/http.dart';

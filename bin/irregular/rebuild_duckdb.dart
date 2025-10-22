@@ -1,12 +1,19 @@
+import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
+import 'package:elec_server/src/db/lib_update_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-// void rebuildIsoneEnergyOffers() {
-//   getDaEnergyOfferArchive().updateDuckDb();
-//   getIsoneRtEnergyOfferArchive().updateDuckDb();
-// }
+Future<void> rebuildIsoneMaskedData() async {
+  var months = Month(2022, 2, location: IsoNewEngland.location)
+      .upTo(Month(2025, 6, location: IsoNewEngland.location));
+  await updateIsoneDemandBids(months: months, download: false);
+
+  // getIsoneDaEnergyOfferArchive().updateDuckDb(months: months);
+  // getIsoneRtEnergyOfferArchive().updateDuckDb();
+}
 
 Future<void> main() async {
   initializeTimeZones();
@@ -18,7 +25,7 @@ Future<void> main() async {
 
   // getIsoneMorningReportArchive().rebuildDuckDb();
   // getIsoneDaLmpArchive().rebuildDuckDb();
-  getIsoneRtLmpArchive().rebuildDuckDb();
+  // getIsoneRtLmpArchive().rebuildDuckDb();
 
-  // rebuildIsoneEnergyOffers();
+  await rebuildIsoneMaskedData();
 }

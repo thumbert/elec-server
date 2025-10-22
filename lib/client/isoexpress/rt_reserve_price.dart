@@ -1,5 +1,3 @@
-library client.isoexpress.rt_reserve_price;
-
 import 'package:elec/elec.dart';
 import 'package:timezone/timezone.dart';
 

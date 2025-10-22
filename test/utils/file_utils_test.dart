@@ -1,5 +1,3 @@
-library test.utils.file_utils_test;
-
 import 'dart:io';
 
 import 'package:elec_server/src/utils/env_file.dart';

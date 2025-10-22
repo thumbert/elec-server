@@ -1,5 +1,3 @@
-library ui.checkbox;
-
 import 'dart:html' as html;
 
 class CheckboxLabel {
@@ -34,7 +32,6 @@ class CheckboxLabel {
   void setAttribute(String name, String value) =>
       _wrapper.setAttribute(name, value);
 
-
   set checked(bool? x) => _checkboxInputElement.checked = x;
 
   bool? get checked => _checkboxInputElement.checked;
@@ -43,4 +40,3 @@ class CheckboxLabel {
     _checkboxInputElement.onChange.listen(x as void Function(html.Event)?);
   }
 }
-

@@ -1,5 +1,3 @@
-library client.isoexpress.monthly_ncpc_asset;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -30,10 +28,8 @@ class MonthlyAssetNcpc {
   /// ```
   Future<List<Map<String, dynamic>>> getAllAssets(
       Month start, Month end) async {
-    var _url = rootUrl +
-        servicePath +
-        'all/start/${start.toIso8601String()}'
-            '/end/${end.toIso8601String()}';
+    var _url =
+        '$rootUrl${servicePath}all/start/${start.toIso8601String()}/end/${end.toIso8601String()}';
 
     var _response = await client.get(Uri.parse(_url));
     var xs = (json.decode(_response.body) as List).cast<Map<String, dynamic>>();

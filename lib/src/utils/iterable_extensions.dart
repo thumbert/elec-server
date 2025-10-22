@@ -1,5 +1,3 @@
-library utils.list_extensions;
-
 import 'package:build_html/build_html.dart';
 
 extension HtmlExtension on List<List<String>> {

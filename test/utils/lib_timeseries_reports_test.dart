@@ -1,5 +1,3 @@
-library test.utils.lib_timeseries_reports_test;
-
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';

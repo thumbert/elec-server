@@ -1,5 +1,3 @@
-library db.mis.tr_sch2tp;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:collection/collection.dart';
@@ -83,7 +81,7 @@ class TrSch2tpArchive extends mis.MisReportArchive {
           '--->  Inserted $reportName for account $account, month $month, version $version, tab $tab successfully');
       return Future.value(0);
     } catch (e) {
-      print('XXX ' + e.toString());
+      print('XXX $e');
       return Future.value(1);
     }
   }

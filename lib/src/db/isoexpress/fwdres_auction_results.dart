@@ -1,5 +1,3 @@
-library db.isoexpress.fwdres_auction_results;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -31,7 +29,8 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
   }
 
   File getFilename(String auctionName) {
-    return File('${dir}fwdres_auction_results_${startMonth(auctionName).toIso8601String()}.csv');
+    return File(
+        '${dir}fwdres_auction_results_${startMonth(auctionName).toIso8601String()}.csv');
   }
 
   /// Can insert data for multiple auctions at once
@@ -150,7 +149,7 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
     'Summer 16':
         'https://www.iso-ne.com/static-assets/documents/2016/04/fr_auction_sum2016.csv',
     'Winter 24-25':
-        'https://www.iso-ne.com/static-assets/documents/100014/forward_reserve_auction_results.csv',    
+        'https://www.iso-ne.com/static-assets/documents/100014/forward_reserve_auction_results.csv',
     'Winter 23-24':
         'https://www.iso-ne.com/static-assets/documents/2023/08/forward_reserve_auction_results.csv',
     'Winter 22-23':

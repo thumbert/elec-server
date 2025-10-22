@@ -1,5 +1,3 @@
-library test.mis.sr_rsvcharge_test;
-
 import 'dart:io';
 import 'package:elec_server/src/db/mis/sr_rsvcharge.dart';
 import 'package:path/path.dart';

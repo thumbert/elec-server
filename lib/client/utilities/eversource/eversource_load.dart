@@ -1,5 +1,3 @@
-library elec_server.utilities.eversource_load.v1;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -16,11 +14,8 @@ class EversourceLoad {
 
   /// Get hourly prices for a ptid between a start and end date.
   Future<TimeSeries<Map<String, num>>> getCtLoad(Date start, Date end) async {
-    var _url = rootUrl +
-        servicePath +
-        'zone/ct' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}';
+    var _url =
+        '$rootUrl${servicePath}zone/ct/start/${start.toString()}/end/${end.toString()}';
 
     var _response = await http.get(Uri.parse(_url));
     var xs = json.decode(_response.body) as List;

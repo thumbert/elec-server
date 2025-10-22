@@ -1,5 +1,3 @@
-library test.db.isoexpress.da_demand_bid_test;
-
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -12,31 +10,28 @@ import 'dart:async';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
-// import 'package:elec_server/api/isoexpress/api_isone_demandbids.dart';
 import 'package:timezone/timezone.dart';
 
 Future<void> tests() async {
   group('DA demand bid report (masked bids), 2019-02-28', () {
     final archive = getIsoneDemandBidsArchive();
-    test('read 2021-04-12 json file', () async {
-      var asOfDate = Date.utc(2021, 4, 12);
+    test('read 2025-01-01 json file', () async {
+      var asOfDate = Date.utc(2025, 1, 1);
       var file = archive.getFilename(asOfDate);
       if (!file.existsSync()) {
         await archive.downloadDay(asOfDate);
       }
       final data = archive.processFileJson(file);
-      expect(data.length, 22462);
+      expect(data.length, 19513);
       final x0 = data.first;
-      expect(
-          x0.hourBeginning, TZDateTime(IsoNewEngland.location, 2021, 4, 12, 5));
-      expect(x0.maskedParticipantId, 100566);
-      expect(x0.maskedLocationId, 10670);
-      expect(x0.locationType, 'NETWORK NODE');
-      expect(x0.bidType, 'DEC');
-      expect(x0.bidId, 748985662);
-      expect(x0.segment, 1);
-      expect(x0.price, 1000);
-      expect(x0.mw, 0.2);
+      expect(x0.hourBeginning, TZDateTime(IsoNewEngland.location, 2025, 1, 1));
+      expect(x0.maskedParticipantId, 104136);
+      expect(x0.maskedLocationId, 28934);
+      expect(x0.locationType, 'LOAD ZONE');
+      expect(x0.bidType, 'FIXED');
+      expect(x0.bidId, 784447620);
+      expect(x0.segment, 0);
+      expect(x0.mw, 65.7);
     });
 
     test('read 2023-01-01 json file', () async {
@@ -51,7 +46,7 @@ Future<void> tests() async {
       expect(x0.locationType, 'LOAD ZONE');
       expect(x0.bidType, 'FIXED');
       expect(x0.bidId, 784447620);
-      expect(x0.segment, 1);
+      expect(x0.segment, 0);
       expect(x0.price, null);
       expect(x0.mw, 6.9);
     });
@@ -140,8 +135,6 @@ Future<void> tests() async {
   // });
 }
 
-class Row {}
-
 /// Look at Calpine load data
 void analyzeData() {
   final archive = getIsoneDemandBidsArchive();
@@ -181,13 +174,14 @@ ORDER BY maskedParticipantId, day;
     'yaxis': {'title': 'MW'},
   };
 
-  Plotly.now(traces, layout, file: File('/home/adrian/Downloads/hist_load.html'));
+  Plotly.now(traces, layout,
+      file: File('/home/adrian/Downloads/hist_load.html'));
 }
 
 Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
-  // await tests();
+  await tests();
 
-  analyzeData();
+  // analyzeData();
 }

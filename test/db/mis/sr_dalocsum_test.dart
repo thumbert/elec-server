@@ -1,5 +1,3 @@
-library test.mis.sr_dalocsum_test;
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -66,17 +64,15 @@ void tests(String rootUrl) async {
 
   group('MIS report sr_dalocsum client tests', () {
     test('get one column for one zone, for account', () async {
-      var url = rootUrl +
-          '/sr_dalocsum/v1/accountId/000000003/locationId/401/column'
-              '/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
+      var url =
+          '$rootUrl/sr_dalocsum/v1/accountId/000000003/locationId/401/column/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
       var res = await http.get(Uri.parse(url));
       var data = json.decode(res.body);
       expect(data.length, 24);
     });
     test('get one column for one zone, for subaccount', () async {
-      var url = rootUrl +
-          '/sr_dalocsum/v1/accountId/000000003/subaccountId/9001/locationId/401/column'
-              '/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
+      var url =
+          '$rootUrl/sr_dalocsum/v1/accountId/000000003/subaccountId/9001/locationId/401/column/Day Ahead Cleared Demand Bids/start/20130603/end/20130603';
       var res = await http.get(Uri.parse(url));
       var data = json.decode(res.body);
       expect(data.length, 24);

@@ -1,5 +1,3 @@
-library api.tr_sch2tp;
-
 import 'dart:async';
 import 'dart:convert';
 

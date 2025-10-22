@@ -1,5 +1,3 @@
-library test.db.isoexpress.da_lmp_hourly_speed_test;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -16,12 +14,12 @@ Future<void> oneByOneAsTimeseries(List<int> ptids,
     {String rootUrl = 'http://127.0.0.1:8080'}) async {
   var start = Date.utc(2019, 1, 1);
   var end = Date.utc(2019, 12, 31);
-  var daLmp =
-      client.DaLmp(http.Client(), rootUrl: rootUrl);
+  var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
   var sw = Stopwatch()..start();
   var out = <int, TimeSeries<double>>{};
   for (var ptid in ptids) {
-    out[ptid] = await daLmp.getHourlyLmp(Iso.newEngland, ptid, LmpComponent.lmp, start, end);
+    out[ptid] = await daLmp.getHourlyLmp(
+        Iso.newEngland, ptid, LmpComponent.lmp, start, end);
   }
   sw.stop();
   print(sw.elapsedMilliseconds);
@@ -34,8 +32,8 @@ Future<void> parallelGet(List<int> ptids,
   var daLmp = client.DaLmp(http.Client(), rootUrl: rootUrl);
   var sw = Stopwatch()..start();
   var out = <int, TimeSeries<double>>{};
-  var futs = ptids.map(
-      (ptid) => daLmp.getHourlyLmp(Iso.newEngland, ptid, LmpComponent.congestion, start, end));
+  var futs = ptids.map((ptid) => daLmp.getHourlyLmp(
+      Iso.newEngland, ptid, LmpComponent.congestion, start, end));
   var res = await Future.wait(futs);
   for (var i = 0; i < ptids.length; i++) {
     out[ptids[i]] = res[i];
@@ -68,7 +66,7 @@ Future<void> compactGet(List<int> ptids,
   var data = json.decode(aux.body);
   sw.stop();
   print(sw.elapsedMilliseconds);
-  print(data.toString().substring(0,10));
+  print(data.toString().substring(0, 10));
   // var traces = <Map<String, dynamic>>[];
 }
 

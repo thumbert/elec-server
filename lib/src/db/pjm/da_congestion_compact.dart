@@ -1,5 +1,3 @@
-library db.pjm.da_congestion_compact;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -56,7 +54,7 @@ class PjmDaCongestionCompactArchive extends DailyPjmCsvReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }
@@ -118,8 +116,8 @@ class PjmDaCongestionCompactArchive extends DailyPjmCsvReport {
     }
 
     /// order the congestion data
-    var ordering = naturalComparable<num>
-        .onResultOf((List xs) => xs[1]) // sort by hour beginning 0
+    var ordering = naturalComparable<num>.onResultOf(
+            (List xs) => xs[1]) // sort by hour beginning 0
         .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
         .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
         .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))
@@ -153,6 +151,6 @@ class PjmDaCongestionCompactArchive extends DailyPjmCsvReport {
 
   @override
   File getCsvFile(Date asOfDate) {
-    return File(dir + 'da_hrl_lmps_' + asOfDate.toString() + '.csv');
+    return File('${dir}da_hrl_lmps_$asOfDate.csv');
   }
 }

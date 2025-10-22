@@ -1,5 +1,3 @@
-library test.utilities.rate_board_test;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';

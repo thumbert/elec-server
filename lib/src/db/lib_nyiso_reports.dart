@@ -1,5 +1,3 @@
-library db.lib_nysio_reports;
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
@@ -20,8 +18,7 @@ abstract class NyisoReport {
   static final Location location = getLocation('America/New_York');
 
   /// the location of this report on disk
-  String dir =
-      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Nyiso/';
+  String dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Nyiso/';
 
   /// Parse NYISO timestamp as it appears in the Csv reports.
   /// Possible inputs (for example):
@@ -115,7 +112,8 @@ abstract class NyisoReport {
     var asOfDate = data.first['asOfDate'];
     return dbConfig.coll
         .insertAll(data)
-        .then((_) => print('--->  Inserted $reportName for $asOfDate successfully'))
+        .then((_) =>
+            print('--->  Inserted $reportName for $asOfDate successfully'))
         .catchError((e) => print('XXXXX$e'));
   }
 }
@@ -218,7 +216,8 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   }
 
   /// Read one entire month at a time (the entire zip file)
-  List<Map<String, dynamic>> readReportMonth(Month month, {String eol = '\r\n'}) {
+  List<Map<String, dynamic>> readReportMonth(Month month,
+      {String eol = '\r\n'}) {
     var out = <Map<String, dynamic>>[];
     var converter = CsvToListConverter();
 
@@ -249,6 +248,3 @@ abstract class DailyNysioCsvReport extends NyisoReport {
   /// Format a date to the yyyymmdd format, e.g. 20170115.
   String yyyymmdd(Date date) => date.toString().replaceAll('-', '');
 }
-
-
-

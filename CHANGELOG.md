@@ -6,6 +6,11 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-10-22
+- Add pyproject.toml
+- Bump up to lints 6.0.  Applied a few dart fix rules.  Still 468 "problems".
+- Switch from special DaCongestion compact MongoDB + rle to simply DuckDB.   
+
 # Release 2025-10-13
 - Add warning to migrate to plotly 3.x
 

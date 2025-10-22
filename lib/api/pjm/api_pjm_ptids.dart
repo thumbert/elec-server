@@ -1,5 +1,3 @@
-library api.pjm.api_pjm_ptids;
-
 import 'dart:async';
 
 import 'dart:convert';

@@ -1,5 +1,3 @@
-library test.db.isone_ptids_test;
-
 import 'dart:io';
 import 'dart:convert';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -145,9 +143,16 @@ Future<void> tests(String rootUrl) async {
     test('get current ptid table for pjm', () async {
       var data = await client.getPtidTable(region: 'pjm');
       var fitz = data.firstWhere((e) => e['ptid'] == 51288);
-      expect(fitz.keys.toSet(),
-          {'ptid', 'name', 'type', 'subtype', 'zoneName',
-            'voltageLevel', 'effectiveDate', 'terminationDate'});
+      expect(fitz.keys.toSet(), {
+        'ptid',
+        'name',
+        'type',
+        'subtype',
+        'zoneName',
+        'voltageLevel',
+        'effectiveDate',
+        'terminationDate'
+      });
     });
     test('get asOfDates', () async {
       var dates = await client.getAvailableAsOfDates();

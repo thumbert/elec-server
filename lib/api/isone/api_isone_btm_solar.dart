@@ -1,5 +1,3 @@
-library api.isone.api_isone_btm_solar;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -8,7 +6,6 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class ApiIsoneBtmSolar {
-
   ApiIsoneBtmSolar(Db db) {
     coll = db.collection('hourly_btm_solar');
   }
@@ -29,15 +26,16 @@ class ApiIsoneBtmSolar {
     });
 
     router.get('/zone/<zone>/start/<start>/end/<end>',
-            (Request request, String zone, String start, String end) async {
-          var aux = await getData(zone, start, end);
-          return Response.ok(json.encode(aux), headers: headers);
-        });
+        (Request request, String zone, String start, String end) async {
+      var aux = await getData(zone, start, end);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
 
     return router;
   }
 
-  Future<List<Map<String, dynamic>>> getData(String zone, String start, String end) async {
+  Future<List<Map<String, dynamic>>> getData(
+      String zone, String start, String end) async {
     var query = where
       ..eq('zone', zone.toUpperCase())
       ..gte('date', Date.parse(start).toString())

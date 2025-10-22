@@ -1,5 +1,3 @@
-library utils.api_response;
-
 import 'dart:collection' as collection;
 
 class ApiResponse {

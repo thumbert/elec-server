@@ -1,5 +1,3 @@
-library db.webservices.asset_ncpc;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:date/date.dart';
@@ -17,17 +15,16 @@ class AssetNcpcArchive {
       this.dbConfig = ComponentConfig(
           host: '127.0.0.1', dbName: 'isone_ws', collectionName: 'asset_ncpc');
     }
-    dir ??= baseDir + 'webservices/Raw/';
+    dir ??= '${baseDir}webservices/Raw/';
   }
 
   /// See documentation at
   /// https://www.iso-ne.com/static-assets/documents/2017/06/webservices_documentation.xlsx
   String getUrl(Month month) =>
-      'https://webservices.iso-ne.com/api/v1.1/monthlyassetncpc/' +
-      month.toIso8601String().replaceAll('-', '');
+      'https://webservices.iso-ne.com/api/v1.1/monthlyassetncpc/${month.toIso8601String().replaceAll('-', '')}';
 
   File getFilename(Month month) =>
-      File(dir! + 'asset_ncpc_' + month.toIso8601String() + '.json');
+      File('${dir!}asset_ncpc_${month.toIso8601String()}.json');
 
   Future downloadMonth(Month month) async {
     var _user = Platform.environment['ISONE_WS_USER']!;

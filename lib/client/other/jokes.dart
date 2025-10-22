@@ -1,10 +1,7 @@
-library client.jokes;
-
 import 'dart:math';
 
 /// Get some jokes to display when waiting from the database.
 class Jokes {
-
   Jokes() {
     random = Random();
   }
@@ -30,5 +27,4 @@ class Jokes {
     'Two goldfish are in a tank.  One says to the other, "Do you know how to drive this thing?"',
     'I didn\'t get a haircut, I got them all cut',
   ];
-
 }

@@ -1,17 +1,15 @@
-library db.risk_system.calculator_archive;
-
 import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';
 
 class CalculatorArchive {
-
   CalculatorArchive({ComponentConfig? dbConfig}) {
-    this.dbConfig = dbConfig ?? ComponentConfig(
-          host: '127.0.0.1',
-          dbName: 'risk_system',
-          collectionName: 'calculators');
+    this.dbConfig = dbConfig ??
+        ComponentConfig(
+            host: '127.0.0.1',
+            dbName: 'risk_system',
+            collectionName: 'calculators');
   }
 
   late ComponentConfig dbConfig;
@@ -27,7 +25,6 @@ class CalculatorArchive {
   };
 
   final log = Logger('CalculatorArchive');
-
 
   mongo.Db get db => dbConfig.db;
 
@@ -62,8 +59,7 @@ class CalculatorArchive {
   }
 
   void setup() async {
-    await dbConfig.db
-        .createIndex(dbConfig.collectionName, keys: {'userId': 1});
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'userId': 1});
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {
           'userId': 1,

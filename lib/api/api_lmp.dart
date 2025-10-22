@@ -1,5 +1,3 @@
-library api.lmp;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
@@ -104,35 +102,36 @@ class Lmp {
     ///   'lmp': 19.16,
     /// }
     /// ```
-    router.get(
-        '/hourly/<component>/ptids/<ptids>/start/<start>/end/<end>',
-            (Request request, String component, String ptids, String start, String end) async {
-          var ptids0 = ptids.split(',').map((e) => int.parse(e)).toList();
-          var startDate = Date.parse(start, location: UTC);
-          var endDate = Date.parse(end, location: UTC);
+    router.get('/hourly/<component>/ptids/<ptids>/start/<start>/end/<end>',
+        (Request request, String component, String ptids, String start,
+            String end) async {
+      var ptids0 = ptids.split(',').map((e) => int.parse(e)).toList();
+      var startDate = Date.parse(start, location: UTC);
+      var endDate = Date.parse(end, location: UTC);
 
-          var aux = await getHourlyDataSeveral(ptids0, startDate, endDate, component);
-          var out = <Map<String, dynamic>>[];
+      var aux =
+          await getHourlyDataSeveral(ptids0, startDate, endDate, component);
+      var out = <Map<String, dynamic>>[];
 
-          var groups = groupBy(aux, (Map e) => e['date']);
-          for (var yyyymmdd in groups.keys) {
-            var date = Date.fromIsoString(yyyymmdd, location: IsoNewEngland.location);
-            var hours = date.hours();
-            var group = groups[yyyymmdd]!;
-            for (var i=0; i<hours.length; i++) {
-              for (var e in group) {
-                out.add({
-                  'hourBeginning': hours[i].start.toIso8601String(),
-                  'ptid': e['ptid'],
-                  component:  e[component][i],
-                });
-              }
-            }
+      var groups = groupBy(aux, (Map e) => e['date']);
+      for (var yyyymmdd in groups.keys) {
+        var date =
+            Date.fromIsoString(yyyymmdd, location: IsoNewEngland.location);
+        var hours = date.hours();
+        var group = groups[yyyymmdd]!;
+        for (var i = 0; i < hours.length; i++) {
+          for (var e in group) {
+            out.add({
+              'hourBeginning': hours[i].start.toIso8601String(),
+              'ptid': e['ptid'],
+              component: e[component][i],
+            });
           }
+        }
+      }
 
-          return Response.ok(json.encode(out), headers: headers);
-        });
-
+      return Response.ok(json.encode(out), headers: headers);
+    });
 
     /// Get all the existing ptids in the collection, sorted
     router.get('/ptids', (Request request) async {

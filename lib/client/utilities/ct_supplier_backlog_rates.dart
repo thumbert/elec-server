@@ -1,5 +1,3 @@
-library elec_server.utilities.eversource_competitive_suppliers.v1;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;

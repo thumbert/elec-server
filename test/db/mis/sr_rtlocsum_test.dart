@@ -1,5 +1,3 @@
-library test.mis.sr_rtlocsum_test;
-
 import 'dart:io';
 import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
@@ -10,7 +8,7 @@ import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 
 void tests() async {
   var dir = Directory(
-      '${Platform.environment['HOME']!}/Downloads/Archive/mis/all_samples');
+      '${Platform.environment['HOME']!}/Downloads/Archive/Mis/all_samples');
   var file = dir
       .listSync()
       .where((e) => basename(e.path).startsWith('sr_rtlocsum_'))

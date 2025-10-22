@@ -1,5 +1,3 @@
-library test.db.nyiso.binding_constraints_test;
-
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';

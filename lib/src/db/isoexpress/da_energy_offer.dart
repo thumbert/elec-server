@@ -1,5 +1,3 @@
-library db.isoexpress.da_energy_offer;
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
@@ -193,7 +191,7 @@ FROM read_csv(
   }
 
   /// Get data from DuckDB directly.
-  /// Correct the offer price for must run units. 
+  /// Correct the offer price for must run units.
   List<Datum> getOffers(Connection conn, TZDateTime hourBeginning) {
     final query = '''
 SELECT 
@@ -223,14 +221,16 @@ FROM (
 );
     ''';
     // print(query);
-    final data = conn.fetchRows(query, (List row) => Datum(
-          hourBeginning: hourBeginning,
-          maskedAssetId: row[0] as int,
-          unitStatus: UnitStatus.parse(row[1] as String),
-          segment: row[2] as int,
-          price: row[3] as num,
-          quantity: row[4] as num,
-        ));
+    final data = conn.fetchRows(
+        query,
+        (List row) => Datum(
+              hourBeginning: hourBeginning,
+              maskedAssetId: row[0] as int,
+              unitStatus: UnitStatus.parse(row[1] as String),
+              segment: row[2] as int,
+              price: row[3] as num,
+              quantity: row[4] as num,
+            ));
     return data;
   }
 }

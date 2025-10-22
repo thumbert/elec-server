@@ -1,5 +1,3 @@
-library api.isone_rtlmp;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
@@ -47,8 +45,7 @@ class RtLmp {
       return Response.ok(json.encode(aux), headers: headers);
     });
 
-    router.get(
-        '/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>',
+    router.get('/hourly/<component>/ptid/<ptid>/start/<start>/end/<end>',
         (Request request, String component, String ptid, String start,
             String end) async {
       var aux = await getHourlyPrices(component, int.parse(ptid), start, end);
@@ -63,9 +60,9 @@ class RtLmp {
       int ptid, String start, String end, String bucket) async {
     var startDate = Date.utc(
         int.parse(start.substring(0, 4)), int.parse(start.substring(4, 6)), 1);
-    var endDate =
-        Month.utc(int.parse(end.substring(0, 4)), int.parse(end.substring(4, 6)))
-            .endDate;
+    var endDate = Month.utc(
+            int.parse(end.substring(0, 4)), int.parse(end.substring(4, 6)))
+        .endDate;
     var bucketO = Bucket.parse(bucket);
 
     var aux = await getHourlyData(ptid, startDate, endDate, component);

@@ -1,5 +1,3 @@
-library test.db.lib_setlements_test;
-
 import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
@@ -71,16 +69,16 @@ void tests() {
         {'date': '2019-01-02', 'product': 'A', 'version': 2, 'value': 4.1},
         {'date': '2019-01-02', 'product': 'B', 'version': 2, 'value': 4.2},
       ];
-      var out0 = getNthSettlement(xs,
-          (e) => Tuple2(e['date'], e['product']), n: 0);
+      var out0 =
+          getNthSettlement(xs, (e) => Tuple2(e['date'], e['product']), n: 0);
       expect(out0, xs.sublist(0, 6));
 
-      var out1 = getNthSettlement(xs,
-          (e) => Tuple2(e['date'], e['product']), n: 1);
+      var out1 =
+          getNthSettlement(xs, (e) => Tuple2(e['date'], e['product']), n: 1);
       expect(out1, [xs[0], xs[1], xs[6], xs[7], xs[4], xs[5]]);
 
-      var out2 = getNthSettlement(xs,
-          (e) => Tuple2(e['date'], e['product']), n: 2);
+      var out2 =
+          getNthSettlement(xs, (e) => Tuple2(e['date'], e['product']), n: 2);
       expect(out2, [xs[0], xs[1], xs[6], xs[7], xs[4], xs[5]]);
     });
 
@@ -95,21 +93,18 @@ void tests() {
         {'date': '2019-01-01', 'product': 'A', 'version': 1, 'value': 1.1},
         {'date': '2019-01-01', 'product': 'B', 'version': 1, 'value': 1.2},
       ];
-      var out0 = getNthSettlement(xs,
-              (e) => Tuple2(e['product'], e['date']), n: 0);
+      var out0 =
+          getNthSettlement(xs, (e) => Tuple2(e['product'], e['date']), n: 0);
       expect(out0, [xs[0], xs[1], xs[2], xs[3], xs[6], xs[7]]);
 
-      var out1 = getNthSettlement(xs,
-              (e) => Tuple2(e['date'], e['product']), n: 1);
+      var out1 =
+          getNthSettlement(xs, (e) => Tuple2(e['date'], e['product']), n: 1);
       expect(out1, [xs[4], xs[5], xs[2], xs[3], xs[6], xs[7]]);
 
-      var out2 = getNthSettlement(xs,
-              (e) => Tuple2(e['date'], e['product']), n: 2);
+      var out2 =
+          getNthSettlement(xs, (e) => Tuple2(e['date'], e['product']), n: 2);
       expect(out2, [xs[4], xs[5], xs[2], xs[3], xs[6], xs[7]]);
-
     });
-
-
   });
 }
 

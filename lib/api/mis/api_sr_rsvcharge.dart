@@ -1,5 +1,3 @@
-library api.mis.sr_rsvcharge;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec_server/src/db/lib_settlements.dart';

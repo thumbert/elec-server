@@ -1,5 +1,3 @@
-library db.utilities.eversource.customer_counts_ct;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:html/parser.dart';
@@ -39,7 +37,7 @@ class EversourceCtCustomerCountsArchive {
     try {
       await dbConfig.coll.insertAll(data);
     } catch (e) {
-      print(' XXXX ' + e.toString());
+      print(' XXXX $e');
       return Future.value(1);
     }
     print('--->  SUCCESS Eversource CT inserting month $month');
@@ -107,7 +105,7 @@ class EversourceCtCustomerCountsArchive {
   /// Go to PURA Dockets
   Future downloadFile(String url, {File? fileout}) async {
     fileout ??= File(dir! + getFilename(url));
-    url = 'https://www.eversource.com' + url;
+    url = 'https://www.eversource.com$url';
 
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
@@ -148,7 +146,7 @@ class EversourceCtCompetitiveSupply {
           dbName: 'eversource',
           collectionName: 'competitive_suppliers');
     }
-    dir ??= env['HOME']! + '/Downloads/Archive/CustomerCounts/Eversource/CT/';
+    dir ??= '${env['HOME']!}/Downloads/Archive/CustomerCounts/Eversource/CT/';
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);
     }
@@ -164,7 +162,7 @@ class EversourceCtCompetitiveSupply {
     try {
       await dbConfig.coll.insertAll(data);
     } catch (e) {
-      print(' XXXX ' + e.toString());
+      print(' XXXX $e');
       return Future.value(1);
     }
     print('--->  SUCCESS Eversource CT competitive suppliers for month $month');
@@ -205,7 +203,7 @@ class EversourceCtCompetitiveSupply {
   /// https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)
   Future downloadFile(String url, {File? fileout}) async {
     fileout ??= File(dir! + getFilename(url));
-    url = 'https://www.eversource.com' + url;
+    url = 'https://www.eversource.com$url';
 
     if (!Directory(dir!).existsSync()) {
       Directory(dir!).createSync(recursive: true);

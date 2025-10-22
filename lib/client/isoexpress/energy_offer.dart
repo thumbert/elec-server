@@ -1,5 +1,3 @@
-library client.isoexpress.energy_offer;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';

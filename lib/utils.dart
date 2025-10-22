@@ -1,5 +1,3 @@
-library elec_server.utils;
-
 export 'src/utils/convert_xls_to_xlsx.dart';
 export 'src/utils/file_utils.dart';
 export 'src/utils/iterable_extensions.dart';

@@ -1,5 +1,3 @@
-library client.isoexpress.regulation_requirement;
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
@@ -43,7 +41,7 @@ class RegulationRequirement {
 
   /// Get all the specifications.  Return them sorted by 'from' date.
   Future<List<Map<String, dynamic>>> getSpecification() async {
-    var _url = rootUrl + servicePath + 'values';
+    var _url = '$rootUrl${servicePath}values';
     var _response = await http.get(Uri.parse(_url));
     var out =
         (json.decode(_response.body) as List).cast<Map<String, dynamic>>();

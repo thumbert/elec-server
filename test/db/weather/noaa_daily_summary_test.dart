@@ -1,5 +1,3 @@
-library test.db.weather.noaa_daily_summary_test;
-
 import 'dart:io';
 
 import 'package:elec_server/api/weather/api_noaa_daily_summary.dart';
@@ -16,7 +14,8 @@ import 'package:timezone/timezone.dart';
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
   var archive = NoaaDailySummaryArchive()
-    ..dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
+    ..dir =
+        '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
   group('NOAA daily summary db tests:', () {
     setUp(() async => await archive.db.open());
     tearDown(() async => await archive.dbConfig.db.close());

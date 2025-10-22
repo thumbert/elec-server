@@ -1,5 +1,3 @@
-library lib.db.ieso.rt_zonal_demand_archive;
-
 import 'dart:io';
 
 import 'package:collection/collection.dart';

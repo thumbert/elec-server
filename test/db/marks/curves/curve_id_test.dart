@@ -1,5 +1,3 @@
-library test.db.curves.curve_id_test;
-
 import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;

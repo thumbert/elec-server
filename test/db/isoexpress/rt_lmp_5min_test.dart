@@ -1,5 +1,3 @@
-library test.db.isoexpress.rt_lmp_5min_test;
-
 // import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';

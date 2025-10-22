@@ -1,5 +1,3 @@
-library client.isoexpress.mra_capacity_results;
-
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
@@ -161,8 +159,8 @@ class MraCapacityInterfaceRecord extends MraCapacityRecord {
     final month =
         Month.parse((x['Auction']['Description'] as String), location: UTC);
     final auction = x['Auction'] as Map;
-    // In 2025-04, the ISO changed the format by nesting the field 'ClearedCapacityZones' 
-    // under 'Auction'. 
+    // In 2025-04, the ISO changed the format by nesting the field 'ClearedCapacityZones'
+    // under 'Auction'.
     late List<dynamic> zs;
     if (auction.containsKey('ClearedCapacityZones')) {
       zs = auction['ClearedCapacityZones']['ClearedCapacityZone'];

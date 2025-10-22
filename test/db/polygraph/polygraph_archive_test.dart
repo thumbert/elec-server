@@ -1,5 +1,3 @@
-library test.db.polygraph.polygraph_archive_test;
-
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'dart:convert';
 
@@ -23,7 +21,7 @@ Future<void> tests(String rootUrl) async {
     test('Get one project', () async {
       var url = '$rootUrl/polygraph/v1/user/e47187/project_name/project 1';
       var res = await get(Uri.parse(url));
-      var data = json.decode(res.body) as Map<String,dynamic>;
+      var data = json.decode(res.body) as Map<String, dynamic>;
       expect(data.keys.toSet(), {'userId', 'projectName', 'tabs'});
     });
     test('Save/Delete a project', () async {
@@ -54,13 +52,8 @@ Future<void> tests(String rootUrl) async {
       users = json.decode(aux.body) as List;
       expect(users.contains('Testy Tester'), false);
     });
-
-
-
-
   });
 }
-
 
 Future<void> main() async {
   dotenv.load('.env/prod.env');

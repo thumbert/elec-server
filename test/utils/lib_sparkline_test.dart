@@ -1,5 +1,3 @@
-library test.utils.lib_plotly_test;
-
 import 'dart:io';
 
 import 'package:elec_server/src/utils/lib_sparkline.dart';
@@ -37,7 +35,6 @@ ${data.toHtml()}
 """;
   File('${Platform.environment['HOME']}/Downloads/sparkline1.html')
       .writeAsStringSync(html);
-
 
 //   expect(svg, """
 // <svg height="180px" width="500px" viewBox="0 0 9 15" preserveAspectRatio="none">

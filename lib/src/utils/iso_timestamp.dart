@@ -1,5 +1,3 @@
-library elec.iso_timestamp;
-
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
@@ -12,8 +10,8 @@ final Location _eastern = getLocation('America/New_York');
 TZDateTime parseHourEndingStamp(String localDate, String hourEnding) {
   var res = TZDateTime(
           _eastern,
-          int.parse(localDate.substring(6, 10)), 
-          int.parse(localDate.substring(0, 2)),   
+          int.parse(localDate.substring(6, 10)),
+          int.parse(localDate.substring(0, 2)),
           int.parse(localDate.substring(3, 5)),
           int.parse(hourEnding.substring(0, 2)) - 1)
       .toUtc();

@@ -1,5 +1,3 @@
-library db.utilities.eversource.supplier_backlog_rates;
-
 import 'dart:io';
 
 import 'package:elec_server/client/utilities/ct_supplier_backlog_rates.dart';

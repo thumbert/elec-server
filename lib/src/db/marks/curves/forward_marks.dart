@@ -1,5 +1,3 @@
-library db.marks.forward_marks;
-
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';

@@ -1,5 +1,3 @@
-library test.db.isoexpress.monthly_ncpc_asset_test;
-
 import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/isoexpress/api_isone_monthly_asset_ncpc.dart';
 import 'package:elec_server/client/isoexpress/monthly_asset_ncpc.dart';

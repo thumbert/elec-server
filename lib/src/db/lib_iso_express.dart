@@ -1,5 +1,3 @@
-library iso.isone.isoexpress;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';

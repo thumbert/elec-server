@@ -1,6 +1,3 @@
-library test.api.utilities.api_load_eversource_test;
-
-
 import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/data/latest.dart';

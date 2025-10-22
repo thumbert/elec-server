@@ -1,5 +1,3 @@
-library db.isoexpress.da_binding_constraints_report;
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';

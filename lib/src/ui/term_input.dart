@@ -1,5 +1,3 @@
-library ui.term_input;
-
 import 'dart:html' as html;
 import 'package:timezone/browser.dart';
 import 'package:date/date.dart';

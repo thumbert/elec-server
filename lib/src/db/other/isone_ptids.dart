@@ -1,5 +1,3 @@
-library db.isone_ptids;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as path;

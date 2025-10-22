@@ -1,5 +1,3 @@
-library api.dacongestion_compact;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;

@@ -61,6 +61,22 @@ WHERE hourBeginning = '2025-06-01 00:00:00-04:00'
 AND bidType = 'DEC';
 
 
+SELECT 
+    MaskedParticipantId,
+    MaskedAssetId, 
+    BidType,
+    HourBeginning,
+    Segment,
+    Price,
+    MW AS Quantity
+FROM da_bids
+WHERE HourBeginning >= '2025-06-01 00:00:00.000-04:00'
+AND HourBeginning < '2025-06-02 00:00:00.000-04:00'   
+AND "MaskedParticipantId" = 504170 
+AND "BidType" in ('PRICE', 'FIXED') 
+ORDER BY "MaskedAssetId", "HourBeginning";
+
+
 SELECT hourBeginning, strftime(hourBeginning, '%Y-%m-%d'), maskedParticipantId, segment, mw 
 FROM da_bids
 WHERE hourBeginning >= '2022-01-01'
@@ -122,3 +138,12 @@ FROM read_csv(
     timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 
 
+--- Decrement all segments by 1 to make them 0-based instead of 1-based!
+BEGIN TRANSACTION;
+UPDATE da_bids
+SET segment = segment - 1
+WHERE segment > 0;
+COMMIT;
+
+-- quick check
+SELECT DISTINCT segment FROM da_bids ORDER BY segment;

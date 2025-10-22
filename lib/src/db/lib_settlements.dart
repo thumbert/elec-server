@@ -1,5 +1,3 @@
-library src.db.lib_settlements;
-
 import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:table/table.dart';

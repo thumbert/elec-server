@@ -1,8 +1,5 @@
-library test.utils.parse_custom_integer_range_test;
-
 import 'package:elec_server/src/utils/parse_custom_integer_range.dart';
 import 'package:test/test.dart';
-
 
 void tests() {
   group('parseCustomIntegerRange tests', () {

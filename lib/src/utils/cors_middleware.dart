@@ -1,5 +1,3 @@
-library utils.cors_middleware;
-
 import 'package:shelf/shelf.dart';
 
 const corsHeaders = {

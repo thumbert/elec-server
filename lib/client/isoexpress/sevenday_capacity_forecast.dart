@@ -1,5 +1,3 @@
-library client.isoexpress.sevenday_capacity_forecast;
-
 import 'package:date/date.dart';
 
 class DailyForecast {

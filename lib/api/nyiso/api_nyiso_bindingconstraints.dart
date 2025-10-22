@@ -1,5 +1,3 @@
-library api.nyiso.bingingconstraints;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec/elec.dart';
@@ -161,8 +159,9 @@ class BindingConstraints {
     ];
 
     var res = await coll.aggregateToStream(pipeline).map((e) {
-      e['hourBeginning'] =
-          (e['hourBeginning'] as List).map((e) => e.millisecondsSinceEpoch).toList();
+      e['hourBeginning'] = (e['hourBeginning'] as List)
+          .map((e) => e.millisecondsSinceEpoch)
+          .toList();
       return e;
     }).toList();
     return res;

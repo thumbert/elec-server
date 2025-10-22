@@ -1,5 +1,3 @@
-library db.lib_pjm_reports;
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
@@ -18,7 +16,7 @@ abstract class PjmReport {
   static final Location location = getLocation('America/New_York');
 
   /// the location of this report on disk
-  String dir = (Platform.environment['HOME'] ?? '') + '/Downloads/Archive/Pjm/';
+  String dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Pjm/';
 
   // /// Parse NYISO timestamp as it appears in the Csv reports.
   // /// Possible inputs (for example):
@@ -108,7 +106,7 @@ abstract class PjmReport {
     return dbConfig.coll
         .insertAll(data)
         .then((_) => print('--->  Inserted $reportName successfully'))
-        .catchError((e) => print('XXXXX' + e.toString()));
+        .catchError((e) => print('XXXXX$e'));
   }
 }
 
@@ -156,7 +154,7 @@ abstract class DailyPjmCsvReport extends PjmReport {
         print('--->  Inserted $reportName for day $day');
         return 0;
       }).catchError((e) {
-        print('XXXX ' + e.toString());
+        print('XXXX $e');
         return 1;
       });
     } on mis.IncompleteReportException {
@@ -177,7 +175,7 @@ abstract class DailyPjmCsvReport extends PjmReport {
     var out = <Map<String, dynamic>>[];
     var converter = CsvToListConverter();
 
-    var zipFile = File(getCsvFile(date).path + '.zip');
+    var zipFile = File('${getCsvFile(date).path}.zip');
     if (!zipFile.existsSync()) {
       throw StateError('File $zipFile does not exist.');
     }

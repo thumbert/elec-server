@@ -1,5 +1,3 @@
-library client.isoexpress.morning_report;
-
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
@@ -101,7 +99,7 @@ class MorningReport {
   final num csoMw;
   final num capAdditionsMw;
   final num genOutagesReductionMw;
-  final num? genPlannedOutagesReductionMw;  // added on 7/1/2025
+  final num? genPlannedOutagesReductionMw; // added on 7/1/2025
   final num? genForcedOutagesReductionMw; // added on 7/1/2025
 
   final num uncommittedAvailGenMw;
@@ -363,15 +361,18 @@ class MorningReport {
           .firstWhere((e) => e['TieName'] == 'Phase 2')['ScheduledMw'],
       //
       importLimitInNececMw: () {
-        var limit = interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
+        var limit =
+            interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
         return limit != null ? limit['ImportLimitInMw'] : null;
       }(),
       exportLimitOutNececMw: () {
-        var limit = interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
+        var limit =
+            interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
         return limit != null ? limit['ExportLimitOutMw'] : null;
       }(),
       scheduledNececMw: () {
-        var limit = interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
+        var limit =
+            interchange.firstWhereOrNull((e) => e['TieName'] == 'NECEC');
         return limit != null ? limit['ScheduledMw'] : null;
       }(),
       //

@@ -1,5 +1,3 @@
-library db.mis.sd_rtload_test;
-
 import 'dart:io';
 
 import 'package:elec_server/api/mis/api_sd_rtload.dart';

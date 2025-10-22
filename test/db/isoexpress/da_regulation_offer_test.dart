@@ -1,5 +1,3 @@
-library test.db.isoexpress.da_regulation_offer_test;
-
 import 'dart:async';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
@@ -29,14 +27,13 @@ tests() async {
   });
 }
 
-
 Future insertDays() async {
   var location = getLocation('America/New_York');
   var archive = RegulationOfferArchive();
   //await archive.setupDb();
-  var days = Interval(TZDateTime(location, 2019, 7),
-      TZDateTime(location, 2019, 8))
-      .splitLeft((dt) => Date.containing(dt));
+  var days =
+      Interval(TZDateTime(location, 2019, 7), TZDateTime(location, 2019, 8))
+          .splitLeft((dt) => Date.containing(dt));
   await archive.dbConfig.db.open();
   for (var day in days) {
     await archive.downloadDay(day);

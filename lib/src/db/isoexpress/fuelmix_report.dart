@@ -1,5 +1,3 @@
-library db.isoexpress.fuelmix_report_archive;
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
@@ -16,8 +14,8 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
   /// Report gets finalized every day at midnight, and published throughout the
   /// day.
   FuelMixReportArchive({ComponentConfig? dbConfig, String? dir}) {
-    dbConfig ??= ComponentConfig(host: '127.0.0.1', dbName: 'isoexpress',
-        collectionName: 'fuel_mix');
+    dbConfig ??= ComponentConfig(
+        host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'fuel_mix');
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}GridReports/FuelMix/Raw/';
     this.dir = dir;
@@ -29,8 +27,8 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
       'https://webservices.iso-ne.com/api/v1.1/genfuelmix/day/${yyyymmdd(asOfDate)}';
 
   @override
-  File getFilename(Date asOfDate) => File(
-      '${dir}genfuelmix_${yyyymmdd(asOfDate)}.json');
+  File getFilename(Date asOfDate) =>
+      File('${dir}genfuelmix_${yyyymmdd(asOfDate)}.json');
 
   @override
   Future downloadDay(Date day) async {
@@ -38,8 +36,8 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
     var pwd = dotenv.env['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
-      ..addCredentials(Uri.parse(getUrl(day)), '',
-          HttpClientBasicCredentials(user, pwd))
+      ..addCredentials(
+          Uri.parse(getUrl(day)), '', HttpClientBasicCredentials(user, pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');
@@ -50,7 +48,6 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
     var response = await request.close();
     await response.pipe(getFilename(day).openWrite());
   }
-
 
   /// Return one document for one fuel category per day.
   /// Aggregate all intra hour observations into one average value.
@@ -66,7 +63,7 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
   @override
   List<Map<String, dynamic>> processFile(File file) {
     var aux = json.decode(file.readAsStringSync());
-    late List<Map<String,dynamic>> xs;
+    late List<Map<String, dynamic>> xs;
     if ((aux as Map).containsKey('GenFuelMixes')) {
       if (aux['GenFuelMixes'] == '') return <Map<String, dynamic>>[];
       xs = (aux['GenFuelMixes']['GenFuelMix'] as List)
@@ -75,9 +72,11 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
       throw ArgumentError('Can\'t find key GenFuelMixes.  Check file!');
     }
 
-    var date = (xs.first['BeginDate'] as String).substring(0,10);
-    var ts0 = TimeSeries<num>.fill(Date.parse(date, location: location).hours(), 0);
-    var bool0 = TimeSeries.fill(Date.parse(date, location: location).hours(), false);
+    var date = (xs.first['BeginDate'] as String).substring(0, 10);
+    var ts0 =
+        TimeSeries<num>.fill(Date.parse(date, location: location).hours(), 0);
+    var bool0 =
+        TimeSeries.fill(Date.parse(date, location: location).hours(), false);
 
     /// Split the data by fuel category
     var groups = groupBy(xs, (Map e) => e['FuelCategory'] as String);
@@ -85,25 +84,36 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
     var out = <Map<String, dynamic>>[];
     for (var fuelType in groups.keys) {
       /// hourly average, some hours may be missing
-      var mwData = toHourly(groups[fuelType]!.map((e) =>
-          IntervalTuple<num>(Hour.beginning(TZDateTime.parse(location, e['BeginDate'])), e['GenMw'])), mean);
-      var mw = ts0.merge(mwData, joinType: JoinType.Left, f: (x,y) {
-        if (y == null) {
-          return 0;
-        } else {
-          return y;
-        }
-      }).values.toList();
-      var marginalFlag = toHourly(groups[fuelType]!.map((e) =>
-          IntervalTuple<String>(Hour.beginning(TZDateTime.parse(location, e['BeginDate'])), e['MarginalFlag'])),
-              (xs) => xs.any((e) => e == 'Y'));
-      var isMarginal = bool0.merge(marginalFlag, joinType: JoinType.Left, f: (x,y) {
-        if (y == null) {
-          return 0;
-        } else {
-          return y;
-        }
-      }).values.toList();
+      var mwData = toHourly(
+          groups[fuelType]!.map((e) => IntervalTuple<num>(
+              Hour.beginning(TZDateTime.parse(location, e['BeginDate'])),
+              e['GenMw'])),
+          mean);
+      var mw = ts0
+          .merge(mwData, joinType: JoinType.Left, f: (x, y) {
+            if (y == null) {
+              return 0;
+            } else {
+              return y;
+            }
+          })
+          .values
+          .toList();
+      var marginalFlag = toHourly(
+          groups[fuelType]!.map((e) => IntervalTuple<String>(
+              Hour.beginning(TZDateTime.parse(location, e['BeginDate'])),
+              e['MarginalFlag'])),
+          (xs) => xs.any((e) => e == 'Y'));
+      var isMarginal = bool0
+          .merge(marginalFlag, joinType: JoinType.Left, f: (x, y) {
+            if (y == null) {
+              return 0;
+            } else {
+              return y;
+            }
+          })
+          .values
+          .toList();
       out.add({
         'date': date,
         'category': fuelType,
@@ -121,12 +131,13 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
   }
 
   @override
-  Future insertData(List<Map<String,dynamic>> data) async {
+  Future insertData(List<Map<String, dynamic>> data) async {
     var doc = data.first;
     await dbConfig.coll.remove({'date': doc['date']});
     return dbConfig.coll
         .insertAll(data)
-        .then((_) => print('--->  Inserted ISONE FuelMix data for ${doc['date']} successfully'))
+        .then((_) => print(
+            '--->  Inserted ISONE FuelMix data for ${doc['date']} successfully'))
         .catchError((e) => print(' XXXX $e'));
   }
 
@@ -136,9 +147,7 @@ class FuelMixReportArchive extends DailyIsoExpressReport {
     await dbConfig.db.open();
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'category': 1, 'date': 1}, unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1});
+    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1});
     await dbConfig.db.close();
   }
-
 }

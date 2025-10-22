@@ -1,8 +1,5 @@
-library test.utils.layout_tee_test;
-
 import 'package:test/test.dart';
 import 'package:elec_server/src/utils/layout_tree.dart';
-
 
 void main() {
   group('Layout tree tests:', () {
@@ -97,10 +94,9 @@ void main() {
       expect(top.width(), root.width());
       expect(top.height(), root.height() / 2);
 
-
       var v2 = root.splitVertically(2);
       var left = v2.children.first as SingleNode;
-      expect(left.width(), root.width()/2);
+      expect(left.width(), root.width() / 2);
       expect(left.height(), root.height());
     });
 
@@ -411,7 +407,7 @@ void main() {
           },
         ]
       }) as ColumnNode;
-      var x = root.removeAt(2) as ColumnNode;  // the (300,300) window
+      var x = root.removeAt(2) as ColumnNode; // the (300,300) window
       expect(x.children.length, 3); // same as the original
       expect(x.width(), 900);
       expect(x.height(), 1000);
@@ -453,7 +449,7 @@ void main() {
           },
         ]
       }) as ColumnNode;
-      var x = root.removeAt(1) as ColumnNode;  // the (300,300) window
+      var x = root.removeAt(1) as ColumnNode; // the (300,300) window
       expect(x.children.length, 2);
       expect(x.width(), 900);
       expect(x.height(), 600);
@@ -503,7 +499,7 @@ void main() {
           },
         ]
       }) as ColumnNode;
-      var x = root.removeAt(2) as ColumnNode;  // the (300,300) window
+      var x = root.removeAt(2) as ColumnNode; // the (300,300) window
       expect(x.children.length, 3);
       expect(x.width(), 900);
       expect(x.height(), 600);
@@ -521,7 +517,4 @@ void main() {
       expect(x10.height(), 200);
     });
   });
-
-
 }
-

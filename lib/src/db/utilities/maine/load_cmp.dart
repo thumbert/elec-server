@@ -1,5 +1,3 @@
-library db.utilities.maine.load_cmp;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:csv/csv.dart';
@@ -87,7 +85,7 @@ class MaineCmpLoadArchive {
     final fmt = DateFormat('M/d/yyyy');
     var out = <Map<String, dynamic>>[];
     for (String key in groups.keys) {
-      if (key == '') continue;  // you may get a stray eof line
+      if (key == '') continue; // you may get a stray eof line
       // key is in mm/dd/yyyy format
       var dt = fmt.parse(key.trim(), true);
       late List<num> mwh;

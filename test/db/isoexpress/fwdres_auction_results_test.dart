@@ -1,5 +1,3 @@
-library test.db.isoexpress.fwdres_auction_results_test;
-
 import 'dart:convert';
 
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';

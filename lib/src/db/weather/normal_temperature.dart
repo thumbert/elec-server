@@ -1,5 +1,3 @@
-library src.weather.weather_norm;
-
 import 'dart:convert';
 import 'dart:io';
 

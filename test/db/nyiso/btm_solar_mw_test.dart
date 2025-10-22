@@ -1,5 +1,3 @@
-library test.db.nyiso.binding_constraints_test;
-
 import 'package:elec_server/src/db/nyiso/btm_solar_actual_mw.dart';
 import 'package:elec_server/src/db/nyiso/btm_solar_forecast_mw.dart';
 import 'package:test/test.dart';
@@ -19,11 +17,11 @@ Future<void> tests(String rootUrl) async {
       var date = Date.utc(2020, 11, 17);
       var file = archive.getCsvFile(date);
       var data = archive.processFile(file);
-      expect(data.length, 12);  // 11 zones + total system
+      expect(data.length, 12); // 11 zones + total system
       expect(data.first.keys.toSet(), {'type', 'date', 'ptid', 'mw'});
       expect((data.first['mw'] as List).length, 24);
       expect(data.first['type'], 'estimatedActual');
-      expect(data.map((e) => e['ptid']).contains(-1), true);  // System
+      expect(data.map((e) => e['ptid']).contains(-1), true); // System
     });
   });
   group('NYISO btm solar forecast db tests:', () {
@@ -33,14 +31,13 @@ Future<void> tests(String rootUrl) async {
       var date = Date.utc(2020, 11, 17);
       var file = archiveF.getCsvFile(date);
       var data = archiveF.processFile(file);
-      expect(data.length, 12);  // 11 zones + total system
+      expect(data.length, 12); // 11 zones + total system
       expect(data.first.keys.toSet(), {'type', 'date', 'ptid', 'mw'});
       expect((data.first['mw'] as List).length, 24);
       expect(data.first['type'], 'forecast');
-      expect(data.map((e) => e['ptid']).contains(-1), true);  // System
+      expect(data.map((e) => e['ptid']).contains(-1), true); // System
     });
   });
-
 
   // group('NYISO btm solar API tests:', () {
   //   var bc = api.BindingConstraints(

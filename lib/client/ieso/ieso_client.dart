@@ -1,5 +1,3 @@
-library client.ieso.rt_zonal_demand;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -30,13 +28,13 @@ class IesoClient {
     return data.map<(String, String)>((e) => (e['type'], e['name'])).toList();
   }
 
-
   /// Get hourly rt zonal demand.
   /// [term] should be in 'America/Cancun'.
   Future<TimeSeries<num>> hourlyRtZonalDemand(
       IesoLoadZone loadZone, Term term) async {
     if (term.location.name != 'EST') {
-      throw ArgumentError('Term needs to be in EST timezone.  Use Ieso.location');
+      throw ArgumentError(
+          'Term needs to be in EST timezone.  Use Ieso.location');
     }
     var url = '$rootUrl/ieso/rt/zonal_demand/v1/zone/${loadZone.toString()}'
         '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
@@ -62,7 +60,8 @@ class IesoClient {
   Future<TimeSeries<num>> hourlyRtGeneration(String generatorName, Term term,
       {String variable = 'output'}) async {
     if (term.location.name != 'EST') {
-      throw ArgumentError('Term needs to be in EST timezone. Use Ieso.location');
+      throw ArgumentError(
+          'Term needs to be in EST timezone. Use Ieso.location');
     }
     var url = '$rootUrl/ieso/rt/generation/v1/name/$generatorName/$variable'
         '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
@@ -82,9 +81,11 @@ class IesoClient {
   }
 
   /// Get all variables associated with this generator name.
-  Future<Map<String,TimeSeries<num>>> hourlyRtGenerationAll(String generatorName, Term term) async {
+  Future<Map<String, TimeSeries<num>>> hourlyRtGenerationAll(
+      String generatorName, Term term) async {
     if (term.location.name != 'EST') {
-      throw ArgumentError('Term needs to be in EST timezone. Use Ieso.location');
+      throw ArgumentError(
+          'Term needs to be in EST timezone. Use Ieso.location');
     }
     var url = '$rootUrl/ieso/rt/generation/v1/name/$generatorName'
         '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
@@ -92,14 +93,15 @@ class IesoClient {
     var data = json.decode(aux.body) as List;
     data.sort((a, b) => a['date'].compareTo(b['date']));
 
-    var out = <String,TimeSeries<num>>{
+    var out = <String, TimeSeries<num>>{
       'output': TimeSeries<num>(),
       'forecast': TimeSeries<num>(),
       'capability': TimeSeries<num>(),
       'capacity': TimeSeries<num>(),
     };
     for (Map e in data) {
-      var hours = Date.fromIsoString(e['date'], location: Ieso.location).hours();
+      var hours =
+          Date.fromIsoString(e['date'], location: Ieso.location).hours();
       var variables = e.keys.toList()..removeAt(0);
       for (var i = 0; i < hours.length; i++) {
         for (var variable in variables) {
@@ -110,8 +112,6 @@ class IesoClient {
     return out..removeWhere((key, value) => value.isEmpty);
   }
 
-
-
   /// Get hourly rt generation for a fuel type, e.g. biofuel, hydro, gas,
   /// nuclear, solar, wind.
   /// [term] should be in 'America/Cancun'.
@@ -120,7 +120,8 @@ class IesoClient {
       IesoFuelType fuel, Term term,
       {String variable = 'output'}) async {
     if (term.location.name != 'EST') {
-      throw ArgumentError('Term needs to be in EST timezone.  Use Ieso.location');
+      throw ArgumentError(
+          'Term needs to be in EST timezone.  Use Ieso.location');
     }
     var url = '$rootUrl/ieso/rt/generation/v1/fuel/${fuel.name}/$variable'
         '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
@@ -146,5 +147,4 @@ class IesoClient {
     var data = json.decode(aux.body) as List;
     return data.cast<String>();
   }
-
 }

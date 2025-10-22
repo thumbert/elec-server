@@ -1,5 +1,3 @@
-library client.ftr_clearing_prices.v1;
-
 import 'dart:convert';
 import 'package:date/date.dart';
 import 'package:http/http.dart' as http;

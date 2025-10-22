@@ -1,5 +1,3 @@
-library db.customer_counts;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as path;
@@ -19,7 +17,9 @@ class NGridCustomerCountsArchive {
     Map env = Platform.environment;
     if (dbConfig == null) {
       this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'isone', collectionName: 'ngrid_customer_counts');
+          host: '127.0.0.1',
+          dbName: 'isone',
+          collectionName: 'ngrid_customer_counts');
     }
     dir ??= env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
   }
@@ -36,7 +36,7 @@ class NGridCustomerCountsArchive {
     return dbConfig.coll
         .insertAll(data as List<Map<String, dynamic>>)
         .then((_) => print('--->  SUCCESS'))
-        .catchError((e) => print('   ' + e.toString()));
+        .catchError((e) => print('   $e'));
   }
 
   /// Read the entire contents of a given spreadsheet, and prepare it for
@@ -65,8 +65,8 @@ class NGridCustomerCountsArchive {
     /// the first row is the months, starts in column 3
     List<Date> months = table.rows[0]
         .sublist(2)
-        .map((x) => Date.containing(
-            TZDateTime.from(convertXlsxDateTime(x), UTC)))
+        .map((x) =>
+            Date.containing(TZDateTime.from(convertXlsxDateTime(x), UTC)))
         .toList();
 
     int nMonths = months.length;
@@ -170,7 +170,7 @@ class NGridCustomerCountsArchive {
     var match = matches.elementAt(0);
 
     String filename = path.basename(url);
-    File fileout = File(dir! + match.group(2)! + '_' + filename);
+    File fileout = File('${dir!}${match.group(2)!}_$filename');
     print(fileout);
 
     if (fileout.existsSync()) {
@@ -193,7 +193,9 @@ class NGridCustomerCountsArchive {
     List<String?> collections = await dbConfig.db.getCollectionNames();
     print('Collections in ${dbConfig.dbName} db:');
     print(collections);
-    if (collections.contains(dbConfig.collectionName)) await dbConfig.coll.drop();
+    if (collections.contains(dbConfig.collectionName)) {
+      await dbConfig.coll.drop();
+    }
     await insertMongo(file: getLatestFile());
     await dbConfig.db.createIndex(dbConfig.collectionName,
         keys: {'variable': 1, 'zone': 1, 'town': 1});

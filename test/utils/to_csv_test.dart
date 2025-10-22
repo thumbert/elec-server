@@ -1,5 +1,3 @@
-library test.utils.to_csv_test;
-
 import 'package:test/test.dart';
 
 import 'package:elec_server/src/utils/to_csv.dart';
@@ -16,7 +14,6 @@ void tests() {
     });
   });
 }
-
 
 void main() {
   tests();

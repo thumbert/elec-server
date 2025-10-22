@@ -1,5 +1,3 @@
-library db.isoexpress.sevenday_capacity_forecast;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -61,14 +59,14 @@ class SevenDayCapacityForecastArchive {
       xs.addAll(processFile(file));
     }
 
-    final converter = ListToCsvConverter();    
+    final converter = ListToCsvConverter();
     var sb = StringBuffer();
     sb.writeln(DailyForecast.names.join(','));
     for (var x in xs) {
       sb.writeln(converter.convert([x.toList()]));
     }
-    final file =
-        File('$dir/month/7day_capacity_forecast_${month.toIso8601String()}.csv');
+    final file = File(
+        '$dir/month/7day_capacity_forecast_${month.toIso8601String()}.csv');
     file.writeAsStringSync(sb.toString());
 
     // gzip it!

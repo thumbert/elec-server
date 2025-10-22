@@ -1,5 +1,3 @@
-library ui.categorical_dropdown_checkbox_filter;
-
 import 'dart:html' as html;
 
 class CategoricalDropdownCheckboxFilter {
@@ -16,7 +14,8 @@ class CategoricalDropdownCheckboxFilter {
   /// Variable [name] is the text of the associated label.
   ///
   /// Need to trigger an action onChange.
-  CategoricalDropdownCheckboxFilter(this.wrapper, List<String> values, this.name) {
+  CategoricalDropdownCheckboxFilter(
+      this.wrapper, List<String> values, this.name) {
     // put both the label and the select element into a div
     _wrapper = html.DivElement()
       ..setAttribute('style', 'margin-top: 6px; margin-bottom: 6px;');
@@ -62,7 +61,7 @@ class CategoricalDropdownCheckboxFilter {
         ..text = e);
     }
   }
-  
+
   bool? get checked => _checkboxInputElement.checked;
 
   void onChange(Function x) {
@@ -70,4 +69,3 @@ class CategoricalDropdownCheckboxFilter {
     _checkboxInputElement.onChange.listen(x as void Function(html.Event)?);
   }
 }
-

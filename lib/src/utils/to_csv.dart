@@ -1,5 +1,3 @@
-library utils.to_csv;
-
 import 'package:csv/csv.dart';
 
 String _nullToEmpty(dynamic x) {

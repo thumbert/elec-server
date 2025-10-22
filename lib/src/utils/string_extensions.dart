@@ -1,5 +1,3 @@
-library utils.string_extensions;
-
 extension StringExtensions on String {
   String capitalize() {
     if (isEmpty) return this;

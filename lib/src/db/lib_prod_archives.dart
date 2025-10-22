@@ -1,5 +1,3 @@
-library lib.src.db.lib_prod_archives;
-
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart' as dotenv;

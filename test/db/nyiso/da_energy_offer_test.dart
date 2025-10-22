@@ -1,5 +1,3 @@
-library test.db.nyiso.da_energy_offer_test;
-
 import 'dart:convert';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/api/api_energyoffers.dart';

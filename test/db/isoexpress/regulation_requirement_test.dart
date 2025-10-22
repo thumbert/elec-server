@@ -1,5 +1,3 @@
-library test.db.isoexpress.regulation_requirement_test;
-
 import 'package:http/http.dart' as http;
 //import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timeseries/timeseries.dart';

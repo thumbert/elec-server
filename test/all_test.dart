@@ -72,7 +72,7 @@ Future<void> main() async {
   await ct_retail_suppliers.tests(rootUrl);
   await ieso_rtgen.tests(rootUrl, rustServer);
   await ieso_rtzd.tests(rootUrl, rustServer);
-  await da_congestion.tests(rootUrl);
+  await da_congestion.tests();
   await dalmp.tests(rootUrl);
   await demand_bids.tests();
   // await energy_offers.tests(rootUrl);
@@ -83,7 +83,7 @@ Future<void> main() async {
   await monthly_asset_ncpc.tests(rootUrl);
   await nyiso_binding_constraints.tests(rootUrl);
   await nyiso_dalmp.tests(rootUrl);
-  await nyiso_dacongestion.tests(rootUrl);
+  await nyiso_dacongestion.tests();
   await nyiso_daenergyoffer.tests(rootUrl);
   await nyiso_rtlmp.tests(rootUrl);
   await nyiso_masked_ids.tests(rootUrl);

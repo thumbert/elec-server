@@ -1,5 +1,3 @@
-library client.isone.isone_btm_solar;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -7,14 +5,13 @@ import 'package:elec/elec.dart';
 import 'package:http/http.dart';
 import 'package:timeseries/timeseries.dart';
 
-
 class IsoneBtmSolar {
-
   IsoneBtmSolar({required this.rootUrl});
 
   final String rootUrl;
 
-  Future<TimeSeries<num>> getHourlyBtmForZone(Term term, {required LoadZone zone}) async {
+  Future<TimeSeries<num>> getHourlyBtmForZone(Term term,
+      {required LoadZone zone}) async {
     var zoneName = zone.name;
     if (zoneName == 'MAINE') zoneName = 'ME';
     var url = '$rootUrl/isone/btm/solar/v1/zone/$zoneName'
@@ -34,11 +31,12 @@ class IsoneBtmSolar {
 
   TimeSeries<num> _format(List data) {
     var out = TimeSeries<num>();
-    for (Map<String,dynamic> e in data) {
-      var date = Date.fromIsoString(e['date'], location: IsoNewEngland.location);
+    for (Map<String, dynamic> e in data) {
+      var date =
+          Date.fromIsoString(e['date'], location: IsoNewEngland.location);
       var mwh = e['values'] as List;
       var hours = date.hours();
-      for (var i=0; i<hours.length; i++) {
+      for (var i = 0; i < hours.length; i++) {
         out.add(IntervalTuple<num>(hours[i], mwh[i]));
       }
     }

@@ -1,5 +1,3 @@
-library test.db.nyiso.binding_constraints_test;
-
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';

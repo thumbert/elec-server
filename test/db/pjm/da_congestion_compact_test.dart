@@ -1,5 +1,3 @@
-library test.db.pjm.da_congestion_compact_test;
-
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/pjm/da_congestion_compact.dart';
 import 'package:test/test.dart';

@@ -1,5 +1,3 @@
-library ui.checkbox_group;
-
 import 'dart:html' as html;
 
 enum CheckboxGroupOrientation { horizontal, vertical }
@@ -10,11 +8,13 @@ class CheckboxGroup {
   late List<html.CheckboxInputElement?> _checkboxes;
   List<String> labels;
   List<bool>? state;
+
   /// If you want a label to the left of the checkboxes
   String leftLabel;
+
   /// space between the elements, in px
   int marginRight;
-  
+
   CheckboxGroupOrientation orientation;
 
   /// A List of checkboxes with a text labels.
@@ -23,8 +23,10 @@ class CheckboxGroup {
   /// By default [state] is set to all elements [true] i.e. checked.
   /// Need to trigger an action onChange.
   CheckboxGroup(this.wrapper, this.labels,
-      {this.state, this.orientation = CheckboxGroupOrientation.horizontal, 
-      this.leftLabel = '', this.marginRight = 8}) {
+      {this.state,
+      this.orientation = CheckboxGroupOrientation.horizontal,
+      this.leftLabel = '',
+      this.marginRight = 8}) {
     /// set all checkboxes to checked
     state ??= List.filled(labels.length, true);
 
@@ -48,8 +50,8 @@ class CheckboxGroup {
           ..checked = state![i];
         inner.children.add(_checkboxes[i]!);
         inner.children.add(html.LabelElement()
-          ..setAttribute('style',
-              'margin-left: 8px; margin-right: ${marginRight}px;')
+          ..setAttribute(
+              'style', 'margin-left: 8px; margin-right: ${marginRight}px;')
           ..text = labels[i]
           ..htmlFor = _checkboxes[i]!.id);
       }
@@ -74,7 +76,7 @@ class CheckboxGroup {
 
   List<String> get selected {
     var out = <String>[];
-    for (var i=0; i<labels.length; i++) {
+    for (var i = 0; i < labels.length; i++) {
       if (_checkboxes[i]!.checked!) out.add(labels[i]);
     }
     return out;

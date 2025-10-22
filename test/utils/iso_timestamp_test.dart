@@ -1,5 +1,3 @@
-library test.elec.iso_parsetime;
-
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';

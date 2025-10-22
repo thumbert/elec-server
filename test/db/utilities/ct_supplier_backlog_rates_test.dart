@@ -1,5 +1,3 @@
-library test.db.utilities.ct_supplier_backlog_rates_test;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -108,7 +106,7 @@ Future<void> tests(String rootUrl) async {
         'summary',
       });
     });
-    
+
     test('get Eversource data Feb25 had some NaN', () async {
       var res = await api.getAllDataForOneUtility(
           Utility.eversource, Month.utc(2025, 2), Month.utc(2025, 2));
@@ -128,7 +126,6 @@ Future<void> tests(String rootUrl) async {
         'summary',
       });
     });
-
   });
 
   group('Supplier backlog rates Client tests:', () {

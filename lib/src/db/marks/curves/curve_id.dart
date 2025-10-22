@@ -1,5 +1,3 @@
-library db.curves.curveid;
-
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:elec_server/src/db/config.dart';

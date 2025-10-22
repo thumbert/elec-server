@@ -1,5 +1,3 @@
-library api.risk_system.api_calculator;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec_server/src/db/risk_system/calculator_archive.dart';
@@ -82,19 +80,19 @@ class ApiCalculators {
     return names;
   }
 
-  Future<Map<String,dynamic>> getCalculator(
+  Future<Map<String, dynamic>> getCalculator(
       String userId, String calculatorName) async {
     var res = await (coll
         .findOne({'userId': userId, 'calculatorName': calculatorName}));
     if (res == null) {
-      return <String,dynamic>{};
+      return <String, dynamic>{};
     } else {
       res.remove('_id');
       return res;
     }
   }
 
-  Future<Map<String,dynamic>> removeCalculator(
+  Future<Map<String, dynamic>> removeCalculator(
       String userId, String calculatorName) async {
     var res =
         await coll.remove({'userId': userId, 'calculatorName': calculatorName});

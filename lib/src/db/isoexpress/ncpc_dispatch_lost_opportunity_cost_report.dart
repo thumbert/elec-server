@@ -1,5 +1,3 @@
-library db.isoexpress.ncpc_dispatch_lost_opportunity_cost_report;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -11,28 +9,32 @@ import '../lib_iso_express.dart';
 
 class NcpcDlocReportArchive extends DailyIsoExpressReport {
   @override
-  final String reportName = 'Dispatch Lost Opportunity Cost Net Commitment Period Compensation Report';
+  final String reportName =
+      'Dispatch Lost Opportunity Cost Net Commitment Period Compensation Report';
   final _setEq = const SetEquality();
-  final _columnNames = {'H', 'Operating Day', 'DLOC NCPC Charge',
-    'DLOC Real-Time Load Obligation',	'DLOC NCPC Charge Rate',
+  final _columnNames = {
+    'H',
+    'Operating Day',
+    'DLOC NCPC Charge',
+    'DLOC Real-Time Load Obligation',
+    'DLOC NCPC Charge Rate',
   };
 
   NcpcDlocReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
+        host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'NCPC/DlocCost/Raw/';
+    dir ??= '${baseDir}NCPC/DlocCost/Raw/';
     this.dir = dir;
   }
 
   @override
   String getUrl(Date? asOfDate) =>
-      'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=DLOC&start=' +
-          yyyymmdd(asOfDate);
+      'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=DLOC&start=${yyyymmdd(asOfDate)}';
 
   @override
   File getFilename(Date? asOfDate) =>
-      File(dir + 'ncpc_dloc_' + yyyymmdd(asOfDate) + '.csv');
+      File('${dir}ncpc_dloc_${yyyymmdd(asOfDate)}.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
@@ -62,10 +64,10 @@ class NcpcDlocReportArchive extends DailyIsoExpressReport {
     // if (collections.contains(dbConfig.collectionName)) {
     //   await dbConfig.coll.remove({'ncpcType': 'DLOC'});
     // }
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'date': 1, 'ncpcType': 1});
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'ncpcType': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'date': 1, 'ncpcType': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'ncpcType': 1});
     await dbConfig.db.close();
   }
 }

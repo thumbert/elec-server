@@ -1,5 +1,3 @@
-library utils.lib_pdf;
-
 import 'dart:io';
 
 enum LayoutMode { layout, simple, table, linePrinter, raw }
@@ -22,7 +20,7 @@ Future<List<String>> readPdf(File file,
     bool? quiet,
     File? fileout,
     required Directory pathTopdftotext}) async {
-  var executable = '"${pathTopdftotext.path}pdftotext" "' + file.path + '"';
+  var executable = '"${pathTopdftotext.path}pdftotext" "${file.path}"';
 
   var options = <String>[];
   switch (layoutMode) {
@@ -44,7 +42,7 @@ Future<List<String>> readPdf(File file,
   }
   noPageBreaks ??= false;
   if (noPageBreaks) options.add('-nopgbrk');
-  
+
   // TODO: deal with errors
   var process = await Process.start(executable, ['-']);
   var aux = await process.stdout.toList();

@@ -1,5 +1,3 @@
-library utils.parse_custom_integer_range;
-
 /// Do the opposite of [unpackIntegerList].  Go from a list of positive
 /// integers to a [String], e.g. '1-5, 8, 11-13'.
 /// The empty list is packed as ''.

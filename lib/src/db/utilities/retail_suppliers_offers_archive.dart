@@ -1,5 +1,3 @@
-library db.utilities.eversource.rate_board;
-
 import 'dart:convert';
 import 'dart:io';
 

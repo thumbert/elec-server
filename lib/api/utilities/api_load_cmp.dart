@@ -1,5 +1,3 @@
-library api.utilities.api_load_cmp;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -8,7 +6,6 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 class ApiLoadCmp {
-
   ApiLoadCmp(Db db) {
     coll = db.collection('load_cmp');
   }
@@ -35,16 +32,19 @@ class ApiLoadCmp {
       return Response.ok(json.encode(res), headers: headers);
     });
 
-    router.get('/class/<customerClass>/start/<start>/end/<end>/settlement/<settlement>',
-            (Request request, String customerClass, String start, String end, String settlement) async {
-          var aux = await getLoad(customerClass, start, end, settlement);
-          return Response.ok(json.encode(aux), headers: headers);
-        });
+    router.get(
+        '/class/<customerClass>/start/<start>/end/<end>/settlement/<settlement>',
+        (Request request, String customerClass, String start, String end,
+            String settlement) async {
+      var aux = await getLoad(customerClass, start, end, settlement);
+      return Response.ok(json.encode(aux), headers: headers);
+    });
 
     return router;
   }
 
-  Future<List<Map<String, dynamic>>> getLoad(String customerClass, String start, String end, String settlement) async {
+  Future<List<Map<String, dynamic>>> getLoad(
+      String customerClass, String start, String end, String settlement) async {
     var query = where
       ..eq('settlement', settlement.toLowerCase())
       ..eq('class', customerClass)

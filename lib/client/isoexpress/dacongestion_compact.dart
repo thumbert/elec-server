@@ -1,5 +1,3 @@
-library elec_server.client.dacongestion_compact.v1;
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
@@ -106,9 +104,8 @@ class DaCongestion {
   Future<void> _populateCache(Date start, Date end) async {
     var term = _calculateStartEnd(start, end);
     if (term != null) {
-      var _url = rootUrl +
-          '/da_congestion_compact/v1'
-              '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
+      var _url =
+          '$rootUrl/da_congestion_compact/v1/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
       var _response = await http.get(Uri.parse(_url));
       var xs = json.decode(_response.body) as List;
       for (var x in xs) {

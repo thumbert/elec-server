@@ -1,5 +1,3 @@
-library db.nyiso.da_lmp_hourly;
-
 /// Data from http://mis.nyiso.com/public/
 
 import 'dart:io';
@@ -149,6 +147,7 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
 
   @override
   File getZipFileForMonth(Month month) {
-    return File('$dir${month.startDate.toString().replaceAll('-', '')}damlbmp_${nodeType.toString()}.csv.zip');
+    return File(
+        '$dir${month.startDate.toString().replaceAll('-', '')}damlbmp_${nodeType.toString()}.csv.zip');
   }
 }

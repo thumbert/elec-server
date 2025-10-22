@@ -1,5 +1,3 @@
-library test.db.ieso.rt_zonal_demand_test;
-
 import 'dart:convert';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/api/ieso/api_ieso_rtzonaldemand.dart';
@@ -65,7 +63,8 @@ Future<void> tests(String rootUrl, String rustServer) async {
     });
   });
   group('IESO RT Zonal Demand client tests:', () {
-    var client = IesoClient(http.Client(), rootUrl: rootUrl, rustServer: rustServer);
+    var client =
+        IesoClient(http.Client(), rootUrl: rootUrl, rustServer: rustServer);
     test('get hourly rt demand', () async {
       var term = Term.parse('1Jan23-15Jan23', Ieso.location);
       var aux = await client.hourlyRtZonalDemand(IesoLoadZone.east, term);

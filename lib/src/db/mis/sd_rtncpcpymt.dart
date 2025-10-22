@@ -1,5 +1,3 @@
-library db.mis.sd_rtncpcpymt;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';

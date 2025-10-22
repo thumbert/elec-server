@@ -1,5 +1,3 @@
-library db.pjm.pjm_ptids;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:collection/collection.dart';
@@ -44,17 +42,16 @@ class PtidArchive extends NyisoReport {
     if (xs.isEmpty) return out;
 
     var keys = xs.first.cast<String>();
-    if (!ListEquality().equals(keys,
-        <String>[
-          'pnode_id',
-          'pnode_name',
-          'pnode_type',
-          'pnode_subtype',
-          'zone',
-          'voltage_level',
-          'effective_date',
-          'termination_date',
-        ])) {
+    if (!ListEquality().equals(keys, <String>[
+      'pnode_id',
+      'pnode_name',
+      'pnode_type',
+      'pnode_subtype',
+      'zone',
+      'voltage_level',
+      'effective_date',
+      'termination_date',
+    ])) {
       throw ArgumentError('File contents have changed!');
     }
 
@@ -96,7 +93,7 @@ class PtidArchive extends NyisoReport {
     var dates = files
         .whereType<File>()
         .map((e) =>
-        path.basenameWithoutExtension(e.path).replaceAll('pnode_', ''))
+            path.basenameWithoutExtension(e.path).replaceAll('pnode_', ''))
         .toList();
     dates.sort();
     return Date.parse(dates.last, location: UTC);

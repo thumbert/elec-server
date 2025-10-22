@@ -1,5 +1,3 @@
-library api.utilities.api_retail_suppliers_offers;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
@@ -25,9 +23,13 @@ class ApiRetailSuppliersOffers {
 
     /// Get all offers for a region between a start and end date
     router.get('/offers/region/<region>/state/<state>/start/<start>/end/<end>',
-        (Request request, String region, String state, String start, String end) async {
-      var aux = await getOffersForRegionState(region.toUpperCase(), state.toUpperCase(),
-          Date.parse(start, location: UTC), Date.parse(end, location: UTC));
+        (Request request, String region, String state, String start,
+            String end) async {
+      var aux = await getOffersForRegionState(
+          region.toUpperCase(),
+          state.toUpperCase(),
+          Date.parse(start, location: UTC),
+          Date.parse(end, location: UTC));
       return Response.ok(json.encode(aux), headers: headers);
     });
 

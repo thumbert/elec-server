@@ -1,5 +1,3 @@
-library api.isone_energyoffers;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
@@ -27,8 +25,7 @@ class DaEnergyOffers {
   final DateFormat fmt = DateFormat('yyyy-MM-ddTHH:00:00.000-ZZZZ');
   String collectionName = 'da_energy_offer';
 
-  late int Function(Map<String,dynamic>, Map<String,dynamic>) ordering;
-
+  late int Function(Map<String, dynamic>, Map<String, dynamic>) ordering;
 
   final headers = {
     'Content-Type': 'application/json',

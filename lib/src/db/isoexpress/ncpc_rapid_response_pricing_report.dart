@@ -16,18 +16,17 @@ class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
     dbConfig ??= ComponentConfig(
           host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
     this.dbConfig = dbConfig;
-    dir ??= baseDir + 'NCPC/RapidResponsePricingOpportunityCost/Raw/';
+    dir ??= '${baseDir}NCPC/RapidResponsePricingOpportunityCost/Raw/';
     this.dir = dir;
   }
 
   @override
   String getUrl(Date? asOfDate) =>
-      'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=rrp&start=' +
-      yyyymmdd(asOfDate);
+      'https://www.iso-ne.com/transform/csv/ncpc/daily?ncpcType=rrp&start=${yyyymmdd(asOfDate)}';
 
   @override
   File getFilename(Date? asOfDate) =>
-      File(dir + 'ncpc_rrp_' + yyyymmdd(asOfDate) + '.csv');
+      File('${dir}ncpc_rrp_${yyyymmdd(asOfDate)}.csv');
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {

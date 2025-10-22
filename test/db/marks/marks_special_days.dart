@@ -1,5 +1,3 @@
-library test.db.marks.marks_20200529;
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:elec/risk_system.dart';

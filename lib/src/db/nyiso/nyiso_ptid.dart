@@ -1,5 +1,3 @@
-library db.nyiso.nyiso_ptids;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';

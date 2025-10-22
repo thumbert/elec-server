@@ -1,5 +1,3 @@
-library db.isoexpress.regulation_requirement;
-
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';

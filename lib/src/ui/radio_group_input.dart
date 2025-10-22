@@ -1,5 +1,3 @@
-library ui.radio_group_input;
-
 import 'dart:html' as html;
 
 enum RadioGroupOrientation { horizontal, vertical }
@@ -23,7 +21,7 @@ class RadioGroupInput {
       {orientation = RadioGroupOrientation.horizontal}) {
     _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px');
 
-    var _name =  wrapper!.id + labels.join(); // name of the radio group
+    var _name = wrapper!.id + labels.join(); // name of the radio group
     _buttons = List.filled(labels.length, null);
 
     if (orientation == RadioGroupOrientation.horizontal) {

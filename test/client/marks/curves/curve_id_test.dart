@@ -1,5 +1,3 @@
-library test.client.marks.curves.curve_id_test;
-
 //import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:http/http.dart';

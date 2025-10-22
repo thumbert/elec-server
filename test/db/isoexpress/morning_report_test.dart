@@ -1,5 +1,3 @@
-library test.db.isoexpress.morning_report_test;
-
 import 'package:date/date.dart';
 import 'package:elec_server/client/isoexpress/morning_report.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';

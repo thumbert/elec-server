@@ -1,5 +1,3 @@
-library ui.spinner;
-
 import 'dart:html' as html;
 
 class Spinner {
@@ -7,8 +5,7 @@ class Spinner {
   late html.DivElement _spinner;
 
   Spinner(this.wrapper) {
-    _spinner = html.DivElement()
-      ..className = 'loader';
+    _spinner = html.DivElement()..className = 'loader';
     wrapper!.children.add(_spinner);
   }
 

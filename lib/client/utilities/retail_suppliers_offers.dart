@@ -1,5 +1,3 @@
-library client.utilities.retail_suppliers_offers;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -19,9 +17,11 @@ class RetailSuppliersOffers {
   static List<RetailSupplyOffer> getCurrentOffers(
       Iterable<RetailSupplyOffer> xs, Date asOfDate) {
     /// keep only offers that are between postedOnDate and lastDateOnWebsite
-    var aux = xs.where((e) =>
-        e.lastDateOnWebsite.value >= asOfDate.value &&
-        e.offerPostedOnDate.value <= asOfDate.value).toList();
+    var aux = xs
+        .where((e) =>
+            e.lastDateOnWebsite.value >= asOfDate.value &&
+            e.offerPostedOnDate.value <= asOfDate.value)
+        .toList();
 
     // /// group by
     // var groups = groupBy(
@@ -49,7 +49,9 @@ class RetailSuppliersOffers {
   /// contract.
   ///
   Future<List<RetailSupplyOffer>> getOffers(
-  {required String region, required String state, required Term term}) async {
+      {required String region,
+      required String state,
+      required Term term}) async {
     var url =
         '$rootUrl${servicePath}offers/region/$region/state/$state/start/${term.startDate}/end/${term.endDate}';
 

@@ -1,5 +1,3 @@
-library db.nyiso.binding_constraints;
-
 /// Data from http://mis.nyiso.com/public/
 
 import 'dart:io';
@@ -146,6 +144,7 @@ class NyisoDaBindingConstraintsReportArchive extends DailyNysioCsvReport {
 
   @override
   File getZipFileForMonth(Month month) {
-    return File('$dir${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints.csv.zip');
+    return File(
+        '$dir${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints.csv.zip');
   }
 }

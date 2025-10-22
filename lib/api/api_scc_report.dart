@@ -1,12 +1,9 @@
-library api.scc_report;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 // import 'package:rpc/rpc.dart';
 import 'package:date/date.dart';
 import '../src/utils/api_response.dart';
-
 
 // @ApiClass(name: 'scc_report', version: 'v1')
 class SccReport {
@@ -23,8 +20,8 @@ class SccReport {
     if (yyyymm.length != 6) {
       throw ArgumentError('Invalid month format $month');
     }
-    var mon = Month.utc(int.parse(yyyymm.substring(0,4)),
-        int.parse(yyyymm.substring(4)));
+    var mon = Month.utc(
+        int.parse(yyyymm.substring(0, 4)), int.parse(yyyymm.substring(4)));
 
     var query = mongo.where;
     query = query.eq('month', mon.toIso8601String());
@@ -47,9 +44,4 @@ class SccReport {
     var res = await coll.distinct('month');
     return ApiResponse()..result = json.encode(res['values']);
   }
-
-
-
 }
-
-

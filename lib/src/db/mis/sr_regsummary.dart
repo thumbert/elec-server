@@ -1,5 +1,3 @@
-library db.mis.sr_regsummary;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';

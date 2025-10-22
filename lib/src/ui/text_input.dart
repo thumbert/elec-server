@@ -1,5 +1,3 @@
-library ui.text_input;
-
 import 'dart:html' as html;
 
 class TextInput {
@@ -15,17 +13,14 @@ class TextInput {
   /// Variable [name] is the text of the accompanying label.
   ///
   /// Need to trigger an action onChange.
-  TextInput(this.wrapper, this.name, {this.initialValue, int? size,
-    String? placeholder, this.allow}) {
-
+  TextInput(this.wrapper, this.name,
+      {this.initialValue, int? size, String? placeholder, this.allow}) {
     String? aux = '';
     if (initialValue != null) aux = initialValue;
     allow ??= (String? x) => true;
 
-    inner = html.DivElement()
-      ..setAttribute('style', 'margin-top: 8px');
-    inner.children.add(html.LabelElement()
-      ..text = name);
+    inner = html.DivElement()..setAttribute('style', 'margin-top: 8px');
+    inner.children.add(html.LabelElement()..text = name);
     _textInput = html.TextInputElement()
       ..setAttribute('style', 'margin-left: 15px')
       ..value = aux;
@@ -39,10 +34,12 @@ class TextInput {
   String? get value {
     var _value = _textInput.value;
     if (allow!(_value)) {
-      _textInput.setAttribute('style', 'margin-left: 15px; border-color: initial;');
+      _textInput.setAttribute(
+          'style', 'margin-left: 15px; border-color: initial;');
       return _value;
     } else {
-      _textInput.setAttribute('style', 'margin-left: 15px; border: 2px solid red;');
+      _textInput.setAttribute(
+          'style', 'margin-left: 15px; border: 2px solid red;');
     }
     return _value;
   }

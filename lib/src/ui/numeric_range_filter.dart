@@ -1,5 +1,3 @@
-library ui.numeric_range_filter;
-
 import 'dart:html' as html;
 
 class NumericRangeFilter {
@@ -20,8 +18,7 @@ class NumericRangeFilter {
     _defaultMax = maxValue;
     size ??= 4;
 
-    var _wrapper = html.DivElement()
-      ..setAttribute('style', 'margin-top: 8px');
+    var _wrapper = html.DivElement()..setAttribute('style', 'margin-top: 8px');
     _wrapper.children.add(html.LabelElement()
       ..text = '$name above'
       ..setAttribute('style', 'margin-left: 15px'));

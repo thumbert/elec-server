@@ -1,5 +1,3 @@
-library api.weather.api_noaa_daily_summary;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;

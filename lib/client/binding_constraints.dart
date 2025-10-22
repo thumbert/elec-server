@@ -1,5 +1,3 @@
-library elec_server.client.binding_constraints.v1;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec/elec.dart';
@@ -40,7 +38,8 @@ class BindingConstraints {
     } else {
       end = Date.containing(interval.end);
     }
-    var url = '$rootUrl${_isoMap[iso]!}${servicePath}market/da/start/${start.toString()}/end/${end.toString()}/timeseries';
+    var url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}market/da/start/${start.toString()}/end/${end.toString()}/timeseries';
     var response = await http.get(Uri.parse(url));
     var xs = json.decode(response.body) as List;
     var out = <String, TimeSeries<num>>{};
@@ -86,12 +85,8 @@ class BindingConstraints {
     } else {
       end = Date.fromTZDateTime(interval.end);
     }
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'market/da' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}';
+    var _url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}market/da/start/${start.toString()}/end/${end.toString()}';
     var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
@@ -109,12 +104,8 @@ class BindingConstraints {
   /// This is a format convenient to summarize in a table.
   Future<List<Map<String, dynamic>>> dailyConstraintCost(
       Date start, Date end) async {
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'market/da' +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}/dailycost';
+    var _url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}market/da/start/${start.toString()}/end/${end.toString()}/dailycost';
     var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
   }
@@ -122,14 +113,8 @@ class BindingConstraints {
   /// Get all the occurrences of this constraint in the history.
   Future<List<Map<String, dynamic>>> getDaBindingConstraint(
       String name, Date start, Date end) async {
-    var _url = rootUrl +
-        _isoMap[iso]! +
-        servicePath +
-        'market/da' +
-        '/constraintname/' +
-        Uri.encodeComponent(name) +
-        '/start/${start.toString()}' +
-        '/end/${end.toString()}';
+    var _url =
+        '$rootUrl${_isoMap[iso]!}${servicePath}market/da/constraintname/${Uri.encodeComponent(name)}/start/${start.toString()}/end/${end.toString()}';
 
     var _response = await http.get(Uri.parse(_url));
     return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();

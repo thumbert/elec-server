@@ -1,5 +1,3 @@
-library db.nyiso.rt_zonal_load_hourly;
-
 /// Data from http://mis.nyiso.com/public/P-58Clist.htm
 
 import 'dart:io';
@@ -57,7 +55,6 @@ class NyisoHourlyRtZonalLoadReportArchive extends DailyNysioCsvReport {
     var date = getReportDate(file);
     var xs = readReport(date);
     if (xs.isEmpty) return out;
-
 
     var grp = groupBy(xs, (Map e) => e['PTID'] as int);
 

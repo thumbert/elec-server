@@ -1,5 +1,3 @@
-library api.isoexpress.isone_fuelmix;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:timezone/timezone.dart';
@@ -35,7 +33,7 @@ class ApiIsoneFuelMix {
     /// over all types.
     router.get('/hourly/mw/type/<type>/start/<startDate>/end/<endDate>',
         (Request request, String type, String startDate, String endDate) async {
-      late List<Map<String,dynamic>> aux;
+      late List<Map<String, dynamic>> aux;
       if (type.toLowerCase() == 'all') {
         aux = await getAllMw(startDate, endDate);
       } else {

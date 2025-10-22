@@ -1,5 +1,3 @@
-library test.db.isone.historical_btm_solar_test;
-
 import 'dart:convert';
 
 import 'package:date/date.dart';
@@ -35,7 +33,8 @@ Future<void> tests(String rootUrl) async {
           {'CT', 'NEMA', 'SEMA', 'WCMA', 'ME', 'NH', 'RI', 'VT', 'ISONE'});
     });
     test('get data for one zone', () async {
-      var res = await http.get(Uri.parse('$rootUrl/isone/btm/solar/v1/zone/CT/start/2022-04-01/end/2022-04-10'));
+      var res = await http.get(Uri.parse(
+          '$rootUrl/isone/btm/solar/v1/zone/CT/start/2022-04-01/end/2022-04-10'));
       var data = json.decode(res.body) as List;
       expect(data.length, 10); // one element per day
       expect((data.first as Map).keys.toSet(), {'date', 'values'});
@@ -48,7 +47,8 @@ Future<void> tests(String rootUrl) async {
     var client = IsoneBtmSolar(rootUrl: rootUrl);
     test('get data for one zone', () async {
       var term = Term.parse('1Apr22-10Apr22', IsoNewEngland.location);
-      var data = await client.getHourlyBtmForZone(term, zone: IsoNewEngland.connecticut);
+      var data = await client.getHourlyBtmForZone(term,
+          zone: IsoNewEngland.connecticut);
       expect(data.length, 240);
       expect(data[10].value, 200.9);
     });

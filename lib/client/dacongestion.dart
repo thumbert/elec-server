@@ -1,5 +1,3 @@
-library elec_server.client.dacongestion.v1;
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
@@ -9,21 +7,25 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
 class DaCongestion {
-  final String rootUrl;
-  final Iso iso;
-  final location = getLocation('America/New_York');
-
   /// Get congestion prices for all the nodes in the pool at once.
   DaCongestion(http.Client client,
-      {required this.iso, this.rootUrl = 'http://localhost:8000'}) {
+      {required this.iso,
+      this.rootUrl = 'http://localhost:8000',
+      required this.rustServer}) {
     if (!_isoMap.keys.contains(iso)) {
       throw ArgumentError('Iso $iso is not supported');
     }
   }
 
+  final String rootUrl;
+  final String rustServer;
+  final Iso iso;
+  final location = getLocation('America/New_York');
+
   final _isoMap = <Iso, String>{
     Iso.newEngland: '/isone',
     Iso.newYork: '/nyiso',
+    Iso.ieso: '/ieso',
   };
 
   /// Date -> ptid -> hourly congestion prices for the day
@@ -49,8 +51,8 @@ class DaCongestion {
     }
     await _populateCache(start, end);
 
-    /// the cache should now have all the days you requested
-    /// need to loop over all the days in range and then for all ptids
+    /// The cache should now have all the days you requested.
+    /// Loop over all the days in range and then for all ptids.
     var aux = <int, Map<String, dynamic>>{};
     var days = Term(start, end).days();
     for (var day in days) {
@@ -78,82 +80,33 @@ class DaCongestion {
     return aux.values.toList();
   }
 
-  /// Populate the cache if needed.  If the data is compressed, expand it.
+  /// Populate the cache.  As the data is in run-length compressed, expand it.
   Future<void> _populateCache(Date start, Date end) async {
     var term = calculateStartEnd(start, end);
-    if (term != null) {
-      var _url = rootUrl +
-          _isoMap[iso]! +
-          '/dacongestion/v1' +
-          '/start/${term.startDate.toString()}/end/${term.endDate.toString()}';
-      var _response = await http.get(Uri.parse(_url));
-      var xs = json.decode(_response.body) as List;
-      bool flipSign = false;
-      if (iso == Iso.newYork) flipSign = true;
-      for (var x in xs) {
-        // loop over days
-        var date = Date.parse(x['date'], location: UTC);
-        var ptids = (x['ptids'] as List).cast<int>();
-        var one = Map.fromIterables(
-            ptids,
-            List.generate(ptids.length,
-                (index) => <num>[])); // keep all 24 hours of congestion
-        var congestion = x['congestion'] as List;
-        for (var data1H in congestion) {
-          // data1H has data for 1 hour for all the nodes in the pool
-          var aux = _rld(data1H);
-          for (var i = 0; i < ptids.length; i++) {
-            // loop over ptids
-            if (flipSign) {
-              one[ptids[i]]!.add(-aux[i]);
-            } else {
-              one[ptids[i]]!.add(aux[i]);
-            }
-          }
-        }
-        cache[date] = one;
-      }
+    var url = '$rustServer${_isoMap[iso]!}/prices/da/hourly'
+        '/start/${term.startDate.toString()}/end/${term.endDate.toString()}'
+        '?components=mcc&format=compact';
+    var response = await http.get(Uri.parse(url));
+    var xs = json.decode(response.body) as Map;
+    bool flipSign = false;
+    if (iso == Iso.newYork) flipSign = true;
+    for (var entry in xs.entries) {
+      // loop over days
+      var date = Date.parse(entry.key, location: UTC);
+      var x = entry.value as Map<String, dynamic>;
+      var one = Map<int, List<num>>.fromEntries(x.entries.map((e) => flipSign
+          ? MapEntry(
+              int.parse(e.key), e.value.cast<num>().map((v) => -v).toList())
+          : MapEntry(int.parse(e.key), e.value.cast<num>())));
+      cache[date] = one;
     }
   }
 
-  /// Calculate the extend of the data you need.  If it returns [null] you
-  /// need no new data.
-  Term? calculateStartEnd(Date start, Date end) {
+  /// Calculate the extend of the data you need.  Always round to full months.
+  Term calculateStartEnd(Date start, Date end) {
     start = Date.utc(start.year, start.month, 1);
     var lastMonth = Month.utc(end.year, end.month);
     end = lastMonth.endDate;
-
-    /// NO CACHING --- things can get too big if you request Jan19 and then
-    /// Oct21, you end up with all the nodes for several years.  Too much
-    /// memory consumption.  So only pull one month at a time.
-    // if (cache.isNotEmpty) {
-    //   if (start.isBefore(cache.firstKey()!)) {
-    //     start = Date.utc(start.year, start.month, 1);
-    //     if (end.isBefore(cache.lastKey()!) || end == cache.lastKey()) {
-    //       end = cache.firstKey()!.previous;
-    //     }
-    //   }
-    //   if (start.isAfter(cache.lastKey()!)) {
-    //     start = cache.lastKey()!.next;
-    //   }
-    //   // the easiest case
-    //   if (cache.containsKey(start) && cache.containsKey(lastMonth.startDate)) {
-    //     return null;
-    //   }
-    // }
     return Term(start, end);
-  }
-
-  List<num> _rld(List xs) {
-    var ys = <num>[];
-    if (xs.isEmpty) return ys;
-    for (var i = 0; i < xs.length; i = i + 2) {
-      if (xs[i] == 1) {
-        ys.add(xs[i + 1] as num);
-      } else {
-        ys.addAll(List.filled(xs[i] as int, xs[i + 1] as num));
-      }
-    }
-    return ys;
   }
 }

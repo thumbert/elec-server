@@ -1,5 +1,3 @@
-library api.isone_zonal_demand;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -47,16 +45,16 @@ class ZonalDemand {
     ///   '2017-01-01': <num>[11810.35, ...],
     /// }
     /// ```
-    router.get('/market/<market>/zone/<zone>/start/<start>/end/<end>', (Request request,
-        String market, String zone, String start, String end) async {
-      var aux = await getData(zone, startDate: start, endDate: end, market: market.toUpperCase());
+    router.get('/market/<market>/zone/<zone>/start/<start>/end/<end>',
+        (Request request, String market, String zone, String start,
+            String end) async {
+      var aux = await getData(zone,
+          startDate: start, endDate: end, market: market.toUpperCase());
       return Response.ok(json.encode(aux), headers: headers);
     });
 
-
     return router;
   }
-
 
   /// http://localhost:8080/zonal_demand/v1/zone/isone/start/20170101/end/20170101
   ///
@@ -87,17 +85,19 @@ class ZonalDemand {
   //   return out;
   // }
 
-
   /// Return one element for each day
-  Future<Map<String,List>> getData(String zone,
-      {required String startDate, required String endDate, required String market}) async {
+  Future<Map<String, List>> getData(String zone,
+      {required String startDate,
+      required String endDate,
+      required String market}) async {
     late String variable;
     if (market.toUpperCase() == 'RT') {
       variable = 'RT_Demand';
     } else if (market.toUpperCase() == 'DA') {
       variable = 'DA_Demand';
     } else {
-      throw StateError('Unsupported market "$market" in api_isone_zonal_demand ');
+      throw StateError(
+          'Unsupported market "$market" in api_isone_zonal_demand ');
     }
 
     var project = {
@@ -107,7 +107,7 @@ class ZonalDemand {
       variable: 1,
     };
 
-    var pipeline = <Map<String,Object>>[
+    var pipeline = <Map<String, Object>>[
       {
         '\$match': {
           'zoneName': zone.toUpperCase(),
@@ -127,7 +127,7 @@ class ZonalDemand {
       }
     ];
     var xs = await coll.aggregateToStream(pipeline).toList();
-    return Map.fromEntries(xs
-        .map((e) => MapEntry<String,List>(e['date'], e[variable])));
+    return Map.fromEntries(
+        xs.map((e) => MapEntry<String, List>(e['date'], e[variable])));
   }
 }

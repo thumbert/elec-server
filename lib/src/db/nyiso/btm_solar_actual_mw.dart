@@ -1,5 +1,3 @@
-library db.nyiso.btm_solar_actual_mw;
-
 /// http://mis.nyiso.com/public/P-70Alist.htm
 
 import 'dart:io';
@@ -17,8 +15,7 @@ class NyisoBtmSolarActualArchive extends DailyNysioCsvReport {
   /// Data is available only from 2020-11-17 forward.
   /// Occasionally, there are missing days for example the last 5 days of 2021
   /// are missing.
-  NyisoBtmSolarActualArchive(
-      {ComponentConfig? dbConfig, String? dir}) {
+  NyisoBtmSolarActualArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'btm_solar_mw');
     this.dbConfig = dbConfig;
@@ -28,7 +25,6 @@ class NyisoBtmSolarActualArchive extends DailyNysioCsvReport {
   }
 
   Db get db => dbConfig.db;
-
 
   /// For one day only, available for the latest 10 days
   /// Entire month is available at
@@ -114,8 +110,8 @@ class NyisoBtmSolarActualArchive extends DailyNysioCsvReport {
   @override
   Future<void> setupDb() async {
     await dbConfig.db.open();
-    await dbConfig.db
-        .createIndex(dbConfig.collectionName, keys: {'type': 1, 'date': 1, 'ptid': 1});
+    await dbConfig.db.createIndex(dbConfig.collectionName,
+        keys: {'type': 1, 'date': 1, 'ptid': 1});
     await dbConfig.db.close();
   }
 

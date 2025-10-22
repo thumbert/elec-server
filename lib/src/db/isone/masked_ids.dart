@@ -1,5 +1,3 @@
-library db.isone.masked_ids;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
@@ -26,7 +24,7 @@ class IsoNeMaskedIdsArchive {
       await config!.coll.remove(<String, dynamic>{});
       await config!.coll.insertAll(data);
     } catch (e) {
-      print('XXXX ' + e.toString());
+      print('XXXX $e');
       return Future.value(1);
     }
     print('--->  Updated ISONE masked ids successfully');
@@ -36,7 +34,7 @@ class IsoNeMaskedIdsArchive {
   /// Read the master xlsx file.
   ///
   List<Map<String, dynamic>> readXlsx({File? file}) {
-    file ??= File(dir! + 'unmasked.xlsx');
+    file ??= File('${dir!}unmasked.xlsx');
     if (!file.existsSync()) throw 'File ${file.path} does not exist!';
 
     var res = <Map<String, dynamic>>[];

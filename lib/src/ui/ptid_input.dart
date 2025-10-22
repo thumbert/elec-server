@@ -1,5 +1,3 @@
-library ui.ptid_input;
-
 import 'dart:html' as html;
 
 class PtidInput {

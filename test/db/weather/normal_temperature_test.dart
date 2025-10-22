@@ -1,5 +1,3 @@
-library test.weather.dual_strike_option_test;
-
 import 'dart:convert';
 import 'dart:io';
 

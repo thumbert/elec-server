@@ -1,5 +1,3 @@
-library ui.slider2;
-
 import 'dart:html' as html;
 
 import 'dart:math' as math;
@@ -37,14 +35,14 @@ class Slider2 {
     var _range = maxValue! - minValue!;
     leftInitialValue ??= minValue;
     rightInitialValue ??= maxValue;
-    increment ??= _range/100;
+    increment ??= _range / 100;
     format ??= (num? x) => x.toString();
     scale = (num? x) => math.max(
         0,
         math.min(100,
             num.parse((100 * (x! - minValue!) / _range).toStringAsFixed(1))));
-    scaleInverse = (num percent) => math.min(maxValue!,
-        minValue! + _range * percent/100);
+    scaleInverse = (num percent) =>
+        math.min(maxValue!, minValue! + _range * percent / 100);
 
     if (!(minValue! <= leftInitialValue! &&
         leftInitialValue! <= rightInitialValue! &&
@@ -53,7 +51,7 @@ class Slider2 {
           'minValue <= leftInitialValue <= rightInitialValue <= maxValue');
     }
 
-    var _step = (100*increment!/_range);
+    var _step = (100 * increment! / _range);
     _inputL = html.InputElement()
       ..type = 'range'
       ..tabIndex = 0
@@ -79,8 +77,8 @@ class Slider2 {
         (children[3] as html.Element).setAttribute('style', 'left:$value%');
         // sign
         (children[5] as html.Element).setAttribute('style', 'left:$value%');
-        (children[5].firstChild as html.Element)
-          .innerHtml = format!(scaleInverse(num.parse(_inputL!.value!)));
+        (children[5].firstChild as html.Element).innerHtml =
+            format!(scaleInverse(num.parse(_inputL!.value!)));
       });
 
     _inputR = html.InputElement()
@@ -101,19 +99,19 @@ class Slider2 {
         var children = first.childNodes;
         // inverse-right
         (children[1] as html.Element)
-          .setAttribute('style', 'width:$_rightWidth%');
+            .setAttribute('style', 'width:$_rightWidth%');
         var _style = (children[2] as html.Element).getAttribute('style')!;
         _style = [_style.split(';')[0], 'right:$_rightWidth%'].join(';');
         // range
         (children[2] as html.Element).setAttribute('style', _style);
         // thumb
         (children[4] as html.Element)
-          .setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
+            .setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
         // sign
         (children[6] as html.Element)
-          .setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
-        (children[6].firstChild as html.Element)
-          .innerHtml = format!(scaleInverse(num.parse(_inputR!.value!)));
+            .setAttribute('style', 'left:${value.toStringAsFixed(1)}%');
+        (children[6].firstChild as html.Element).innerHtml =
+            format!(scaleInverse(num.parse(_inputR!.value!)));
       });
 
     var _rightInitialWidth =
@@ -164,11 +162,10 @@ class Slider2 {
   }
 
   num get leftValue =>
-    num.parse(format!(scaleInverse(num.parse(_inputL!.value!))));
+      num.parse(format!(scaleInverse(num.parse(_inputL!.value!))));
 
   num get rightValue =>
       num.parse(format!(scaleInverse(num.parse(_inputR!.value!))));
-
 
   /// trigger a change when either one of the two inputs change
   void onChange(Function x) {
@@ -176,4 +173,3 @@ class Slider2 {
     _inputR!.onChange.listen(x as void Function(html.Event)?);
   }
 }
-

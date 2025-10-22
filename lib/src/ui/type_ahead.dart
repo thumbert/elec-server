@@ -67,7 +67,7 @@ class TypeAhead {
         var _b = DivElement()..innerHtml = innerHtml;
 //        _b.innerHtml = '<strong>${value.substring(0, _value.length)}</strong>';
 //        _b.innerHtml += value.substring(_value.length);
-        _b.innerHtml = _b.innerHtml! + '<input type="hidden" value="$value">';
+        _b.innerHtml = '${_b.innerHtml!}<input type="hidden" value="$value">';
         _b.onClick.listen((e) {
           _input.value = value;
           _closeAllLists();

@@ -1,5 +1,3 @@
-library test.utilities.retail_offers.retail_supply_offer_rate_test;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -12,8 +10,9 @@ import 'package:timezone/data/latest.dart';
 Future<void> tests() async {
   group('Competitive Offer Rate tests', () {
     var archive = RetailSuppliersOffersArchive();
-    var aux = json.decode(File('${archive.dir}/2022-12-04_ct.json').readAsStringSync()) as List;
-    var allData = aux.cast<Map<String,dynamic>>();
+    var aux = json.decode(
+        File('${archive.dir}/2022-12-04_ct.json').readAsStringSync()) as List;
+    var allData = aux.cast<Map<String, dynamic>>();
 
     test('Process all CT offers as of 2022-12-04', () {
       var offers = allData.map((e) => CtSupplyOffer.toMongo(e)).toList();
@@ -72,7 +71,6 @@ Future<void> tests() async {
     //
     //
     // }, solo: true);
-
   });
 }
 

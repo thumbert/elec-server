@@ -1,5 +1,3 @@
-library utils.lib_sparkline;
-
 import 'package:dama/analysis/interpolation/multi_linear_interpolator.dart';
 import 'package:dama/dama.dart';
 

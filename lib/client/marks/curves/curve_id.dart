@@ -1,5 +1,3 @@
-library client.marks.curves.curve_id;
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -42,7 +40,8 @@ class CurveIdClient {
   /// As of 2021-05, some curves don't have serviceType specified, for example
   /// the hourlyShape curves.
   Future<List<String?>> serviceTypes(String commodity, String region) async {
-    var url = '$rootUrl${servicePath}commodity/$commodity/region/$region/serviceTypes';
+    var url =
+        '$rootUrl${servicePath}commodity/$commodity/region/$region/serviceTypes';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
     return data.cast<String?>();
@@ -51,7 +50,8 @@ class CurveIdClient {
   /// Get all electricity documents for a region, serviceType.
   Future<List<Map<String, dynamic>>> electricityDocuments(
       String region, String serviceType) async {
-    var url = '$rootUrl${servicePath}data/commodity/electricity/region/$region/serviceType/$serviceType';
+    var url =
+        '$rootUrl${servicePath}data/commodity/electricity/region/$region/serviceType/$serviceType';
     var response = await http.get(Uri.parse(url));
     return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }

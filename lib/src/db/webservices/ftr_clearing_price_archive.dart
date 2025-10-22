@@ -1,5 +1,3 @@
-library db.webservices.ftr_clearing_price_archive;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:date/date.dart';
@@ -15,20 +13,21 @@ class FtrClearingPriceArchive {
   FtrClearingPriceArchive({ComponentConfig? dbConfig, this.dir}) {
     if (dbConfig == null) {
       this.dbConfig = ComponentConfig(
-          host: '127.0.0.1', dbName: 'isone_ws', collectionName: 'ftr_clearing_prices');
+          host: '127.0.0.1',
+          dbName: 'isone_ws',
+          collectionName: 'ftr_clearing_prices');
     }
 
-    dir ??= baseDir + 'webservices/FtrClearingPrices/Raw/';
+    dir ??= '${baseDir}webservices/FtrClearingPrices/Raw/';
   }
 
   /// See documentation at
   /// https://www.iso-ne.com/static-assets/documents/2017/06/webservices_documentation.xlsx
   String getUrl(Month month) =>
-      'https://webservices.iso-ne.com/api/v1.1/ftrauctionclearingprices/' +
-      month.toIso8601String().replaceAll('-', '');
+      'https://webservices.iso-ne.com/api/v1.1/ftrauctionclearingprices/${month.toIso8601String().replaceAll('-', '')}';
 
   File getFilename(Month month) =>
-      File(dir! + 'asset_ncpc_' + month.toIso8601String() + '.json');
+      File('${dir!}asset_ncpc_${month.toIso8601String()}.json');
 
   Future downloadMonth(Month month) async {
     var _user = Platform.environment['ISONE_WS_USER']!;

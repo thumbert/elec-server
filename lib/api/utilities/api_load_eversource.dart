@@ -1,5 +1,3 @@
-library api.utilities.api_load_eversource;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';

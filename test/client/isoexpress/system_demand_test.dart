@@ -1,5 +1,3 @@
-library test.client.isoexpress.system_demand;
-
 import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
@@ -15,22 +13,29 @@ tests(String rootUrl) async {
     var api = SystemDemand(client, rootUrl: rootUrl);
 
     test('get system demand between two dates', () async {
-      var data = await api.getSystemDemand(Market.rt, Date.utc(2017, 1, 1), Date.utc(2017, 1, 5));
+      var data = await api.getSystemDemand(
+          Market.rt, Date.utc(2017, 1, 1), Date.utc(2017, 1, 5));
       expect(data.length, 120);
       expect(data.take(3).toList(), [
-        IntervalTuple(Hour.containing(TZDateTime(location, 2017, 1, 1, 0)), 12268.9),
-        IntervalTuple(Hour.containing(TZDateTime(location, 2017, 1, 1, 1)), 11823.69),
-        IntervalTuple(Hour.containing(TZDateTime(location, 2017, 1, 1, 2)), 11790.9),
+        IntervalTuple(
+            Hour.containing(TZDateTime(location, 2017, 1, 1, 0)), 12268.9),
+        IntervalTuple(
+            Hour.containing(TZDateTime(location, 2017, 1, 1, 1)), 11823.69),
+        IntervalTuple(
+            Hour.containing(TZDateTime(location, 2017, 1, 1, 2)), 11790.9),
       ]);
     });
     test('get system demand for 1 year', () async {
       var year = 2016;
-      var data = await api.getSystemDemand(Market.rt, Date.utc(year, 1, 1), Date.utc(year, 12, 31));
+      var data = await api.getSystemDemand(
+          Market.rt, Date.utc(year, 1, 1), Date.utc(year, 12, 31));
 
       var grp = data.splitByIndex((e) => Date.fromTZDateTime(e.start));
-      var aux = grp.entries.map((e) => MapEntry(e.key,e.value.length));
-      var days = Interval(TZDateTime(location, year), TZDateTime(location, year+1))
-        .splitLeft((dt) => Date.fromTZDateTime(dt)).toSet();
+      var aux = grp.entries.map((e) => MapEntry(e.key, e.value.length));
+      var days =
+          Interval(TZDateTime(location, year), TZDateTime(location, year + 1))
+              .splitLeft((dt) => Date.fromTZDateTime(dt))
+              .toSet();
       var missingDays = days.difference(aux.map((e) => e.key).toSet());
       if (missingDays.isNotEmpty) {
         print("missing days for rt system demand");
@@ -49,7 +54,6 @@ tests(String rootUrl) async {
 //        IntervalTuple(Hour.containing(TZDateTime(location, 2017, 1, 1, 2)), 11790.9),
 //      ]);
     });
-
   });
 }
 
@@ -59,4 +63,3 @@ main() async {
   var rootUrl = "http://localhost:8080/"; // testing
   await tests(rootUrl);
 }
-

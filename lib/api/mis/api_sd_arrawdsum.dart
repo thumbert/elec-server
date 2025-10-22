@@ -1,5 +1,3 @@
-library api.sd_arrawdsum;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:elec_server/src/db/lib_mis_reports.dart';

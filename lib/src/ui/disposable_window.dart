@@ -1,5 +1,3 @@
-library ui.maya.elec_calc_cfd.help_window;
-
 import 'dart:html';
 
 class DisposableWindow {
@@ -21,6 +19,7 @@ class DisposableWindow {
 
     content!.onKeyDown.listen((event) {
       event.preventDefault();
+
       /// close the window if you press Esc while mouse is on the content
       if (event.key == 'Escape') {
         inner!.children.clear();
@@ -32,7 +31,7 @@ class DisposableWindow {
         close!,
         BRElement(),
         BRElement(),
-        content!..tabIndex = -1,  // make it focusable
+        content!..tabIndex = -1, // make it focusable
       ];
   }
 }

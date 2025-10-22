@@ -1,5 +1,3 @@
-library test.db.isoexpress.rt_lmp_hourly_test;
-
 import 'dart:async';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
@@ -28,13 +26,14 @@ Future<void> tests() async {
     tearDown(() async {
       await archive.dbConfig.db.close();
     });
-   test('RT hourly lmp report, DST day spring', () async {
-     var file = archive.getFilename(Date.utc(2022, 12, 22));
-     var res = archive.processFile(file);
-     expect(res.first.keys.toSet(), {'date', 'ptid', 'congestion', 'lmp', 'marginal_loss'});
-     var x321 = res.firstWhere((e) => e['ptid'] == 321);
-     expect(x321['lmp'].first, 136.57);
-   });
+    test('RT hourly lmp report, DST day spring', () async {
+      var file = archive.getFilename(Date.utc(2022, 12, 22));
+      var res = archive.processFile(file);
+      expect(res.first.keys.toSet(),
+          {'date', 'ptid', 'congestion', 'lmp', 'marginal_loss'});
+      var x321 = res.firstWhere((e) => e['ptid'] == 321);
+      expect(x321['lmp'].first, 136.57);
+    });
 //    test('RT hourly lmp report, DST day spring', () async {
 //      File file = archive.getFilename(new Date.utc(2017, 3, 12));
 //      var res = await archive.processFile(file);
@@ -80,5 +79,4 @@ Future<void> main() async {
   // await RtLmpHourlyArchive().setupDb();
   // await prepareData();
   await tests();
-
 }

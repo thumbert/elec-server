@@ -1,5 +1,3 @@
-library db.isoexpress.da_demand_bid;
-
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
@@ -66,6 +64,7 @@ class DaDemandBidArchive {
       'https://webservices.iso-ne.com/api/v1.1/hbdayaheaddemandbid/day/${yyyymmdd(asOfDate)}';
 
   final skipDays = <Date>{
+    //
     Date(2022, 5, 1, location: IsoNewEngland.location),
     Date(2022, 5, 2, location: IsoNewEngland.location),
     Date(2022, 5, 3, location: IsoNewEngland.location),
@@ -239,6 +238,11 @@ FROM read_csv(
           _ => throw StateError(
               'Don\'t know how to parse ${e['Number'] ?? e['@Number']}'),
         };
+        // In the Demand Bids file, the segments start at 1.  Convert it to 0-based.
+        n = n - 1;
+        if (n < 0) {
+          throw StateError('Segment number $n should be positive!');
+        }
         out.add(DemandBidSegment(
             hourBeginning: TZDateTime.parse(
                 IsoNewEngland.location, _reformatDateTime(x['BeginDate'])),

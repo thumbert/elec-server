@@ -1,5 +1,3 @@
-library db.isoexpress.da_lmp_hourly;
-
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -10,18 +8,17 @@ import 'package:path/path.dart';
 /// TODO: continue
 class EcbFxArchive {
   EcbFxArchive({ComponentConfig? dbConfig, String? dir}) {
-    this.dbConfig = dbConfig ?? ComponentConfig(
-        host: '127.0.0.1',
-        dbName: 'fx',
-        collectionName: 'ecb');
-    this.dir = dir ?? '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Fx/Ecb/Raw/';
+    this.dbConfig = dbConfig ??
+        ComponentConfig(host: '127.0.0.1', dbName: 'fx', collectionName: 'ecb');
+    this.dir = dir ??
+        '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/Fx/Ecb/Raw/';
   }
 
   late final ComponentConfig dbConfig;
   late final String dir;
 
   String getUrl() =>
-    'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip';
+      'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip';
 
   /// Keep one file for the entire year.
   File getFilename(Date asOfDate, {String extension = 'csv'}) {
@@ -78,7 +75,6 @@ class EcbFxArchive {
     }
   }
 
-
   List<Map<String, dynamic>> _processFileCsv(File file) {
     // var data = mis.readReportTabAsMap(file, tab: 0);
     // if (data.isEmpty) return <Map<String, dynamic>>[];
@@ -88,7 +84,6 @@ class EcbFxArchive {
     //     .toList();
     return [];
   }
-
 
   /// need to split the file into years
   Future downloadFile() async {
@@ -118,5 +113,4 @@ class EcbFxArchive {
     await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'date': 1});
     await dbConfig.db.close();
   }
-
 }

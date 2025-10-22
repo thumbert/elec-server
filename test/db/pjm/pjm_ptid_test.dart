@@ -1,6 +1,3 @@
-library test.db.pjm.pjm_ptid_test;
-
-
 import 'dart:convert';
 
 import 'package:elec_server/api/pjm/api_pjm_ptids.dart';
@@ -19,9 +16,17 @@ Future<void> tests(String rootUrl) async {
       var date = archive.lastDate();
       var data = archive.processData(date);
       var wHub = data.firstWhere((e) => e['ptid'] == 51288);
-      expect(wHub.keys.toSet(),
-          {'asOfDate', 'ptid', 'name', 'type', 'subtype', 'zoneName',
-            'voltageLevel', 'effectiveDate', 'terminationDate'});
+      expect(wHub.keys.toSet(), {
+        'asOfDate',
+        'ptid',
+        'name',
+        'type',
+        'subtype',
+        'zoneName',
+        'voltageLevel',
+        'effectiveDate',
+        'terminationDate'
+      });
 
       /// issue with large ptids
       var d1 = data.firstWhere((e) => e['ptid'] == 2155501806);
@@ -39,7 +44,7 @@ Future<void> tests(String rootUrl) async {
     });
     test('Get the current table', () async {
       var res = await api.ptidTableCurrent();
-      expect(res.length > 13000, true);  // lots of nodes
+      expect(res.length > 13000, true); // lots of nodes
 
       var d1 = res.firstWhere((e) => e['ptid'] == 2155501806);
       var e = json.encode(d1);
@@ -57,9 +62,16 @@ Future<void> tests(String rootUrl) async {
       var data = json.decode(res.body);
       expect(data.length > 13000, true);
       var wHub = data.firstWhere((e) => e['ptid'] == 51288);
-      expect(wHub.keys.toSet(),
-          {'ptid', 'name', 'type', 'subtype', 'zoneName',
-            'voltageLevel', 'effectiveDate', 'terminationDate'});
+      expect(wHub.keys.toSet(), {
+        'ptid',
+        'name',
+        'type',
+        'subtype',
+        'zoneName',
+        'voltageLevel',
+        'effectiveDate',
+        'terminationDate'
+      });
     });
   });
 

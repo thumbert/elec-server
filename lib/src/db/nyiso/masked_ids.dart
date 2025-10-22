@@ -1,5 +1,3 @@
-library db.nyiso.masked_ids;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';

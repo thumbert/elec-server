@@ -1,5 +1,3 @@
-library db.nyiso.rt_lmp_hourly;
-
 /// Data from http://mis.nyiso.com/public/
 
 import 'dart:io';
@@ -98,9 +96,6 @@ class NyisoRtLmpHourlyArchive extends DailyNysioCsvReport {
 
     return out;
   }
-
-
-
 
   /// Return a list with each element of this form, ready for insertion
   /// into the Db.
@@ -203,6 +198,7 @@ class NyisoRtLmpHourlyArchive extends DailyNysioCsvReport {
 
   @override
   File getZipFileForMonth(Month month) {
-    return File('$dir${month.startDate.toString().replaceAll('-', '')}rtlbmp_${nodeType.toString()}.csv.zip');
+    return File(
+        '$dir${month.startDate.toString().replaceAll('-', '')}rtlbmp_${nodeType.toString()}.csv.zip');
   }
 }

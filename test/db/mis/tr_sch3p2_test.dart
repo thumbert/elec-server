@@ -1,5 +1,3 @@
-library test.mis.tr_sch3p2_test;
-
 import 'dart:io';
 import 'package:date/date.dart';
 import 'package:elec_server/api/mis/api_tr_sch3p2.dart';

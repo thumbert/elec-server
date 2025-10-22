@@ -1,5 +1,3 @@
-library test.utils.lib_plotly_test;
-
 import 'dart:io';
 
 import 'package:elec_server/src/utils/lib_plotly.dart';
@@ -774,7 +772,7 @@ void testHeatmap() {
   );
 }
 
-Future<void> tests() async{
+Future<void> tests() async {
   group('Plotly tests', () {
     test('make traces from csv', () async {
       final response = await get(Uri.parse(
@@ -790,7 +788,7 @@ Future<void> tests() async{
   });
 }
 
-Future<void> main() async{
+Future<void> main() async {
   // test1a();
   // test1b();
   // testHeatmap();

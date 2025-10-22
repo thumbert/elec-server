@@ -1,5 +1,3 @@
-library db.mis.sr_rsvcharge;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:date/date.dart';
@@ -12,7 +10,6 @@ import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:tuple/tuple.dart';
 
 class SrRsvChargeArchive extends mis.MisReportArchive {
-
   SrRsvChargeArchive({ComponentConfig? dbConfig}) {
     reportName = 'SR_RSVCHARGE';
     dbConfig ??= ComponentConfig(

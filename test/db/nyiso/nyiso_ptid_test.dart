@@ -1,5 +1,3 @@
-library test.db.nyiso_ptid_test;
-
 import 'dart:convert';
 
 import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart';

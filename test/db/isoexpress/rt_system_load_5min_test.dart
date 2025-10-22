@@ -1,5 +1,3 @@
-library test.db.isoexpress.da_lmp_hourly_test;
-
 import 'dart:async';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';

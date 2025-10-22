@@ -1,5 +1,3 @@
-library ui.selectable_list;
-
 import 'dart:html';
 
 enum SelectionType {

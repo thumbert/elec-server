@@ -1,5 +1,3 @@
-library db.nyiso.tcc_clearing_prices;
-
 import 'dart:io';
 
 import 'package:collection/collection.dart';

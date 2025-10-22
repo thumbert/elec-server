@@ -1,6 +1,3 @@
-library test.db.isoexpress.rt_energy_offer_test;
-
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';

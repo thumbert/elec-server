@@ -1,5 +1,3 @@
-library db.weather.noaa_daily_summary;
-
 import 'dart:async';
 import 'dart:io';
 import 'package:csv/csv.dart';
@@ -17,7 +15,8 @@ class NoaaDailySummaryArchive extends IsoExpressReport {
             host: '127.0.0.1',
             dbName: 'weather',
             collectionName: 'noaa_daily_summary');
-    this.dir = dir ?? '${Platform.environment['HOME']}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
+    this.dir = dir ??
+        '${Platform.environment['HOME']}/Downloads/Archive/Weather/Noaa/DailySummary/Raw/';
   }
 
   mongo.Db get db => dbConfig.db;

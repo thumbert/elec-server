@@ -1,5 +1,3 @@
-library test.isone_dalmp_test;
-
 import 'dart:io';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
@@ -16,7 +14,6 @@ String? getEiaKey() {
   return env['EIA_API_KEY'];
 }
 
-
 tests() async {
   var key = getEiaKey();
   var api = EiaApi(Client(), key);
@@ -28,7 +25,7 @@ tests() async {
       expect(aux.containsKey('data'), true);
       expect((aux['data'] as List).length > 400, true);
       var ts = processSeries(aux);
-      expect(ts.observationAt(Date.utc(2018,12,21)).value, 2725);
+      expect(ts.observationAt(Date.utc(2018, 12, 21)).value, 2725);
       //ts.sublist(460).forEach(print);
     });
   });

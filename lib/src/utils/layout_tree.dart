@@ -1,5 +1,3 @@
-library utils.tree_layout;
-
 import 'package:dama/dama.dart';
 
 /// An experiment on how to manage windows on a canvas using a tree structure.
@@ -82,7 +80,8 @@ class SingleNode extends WindowNode {
   RowNode splitVertically(int n) {
     assert(n > 1);
     var width = _width / n;
-    var children = List<WindowNode>.generate(n, (index) => SingleNode(width, _height));
+    var children =
+        List<WindowNode>.generate(n, (index) => SingleNode(width, _height));
     return RowNode(children);
   }
 
@@ -90,7 +89,8 @@ class SingleNode extends WindowNode {
   ColumnNode splitHorizontally(int n) {
     assert(n > 1);
     var height = _height / n;
-    var children = List<WindowNode>.generate(n, (index) => SingleNode(_width, height));
+    var children =
+        List<WindowNode>.generate(n, (index) => SingleNode(_width, height));
     return ColumnNode(children);
   }
 
@@ -171,6 +171,7 @@ class ColumnNode extends WindowNode {
   /// Return the [i]^th node.
   WindowNode splitHorizontally(int i, {int n = 2}) {
     assert(i >= 0);
+
     /// need to find the correct node from the children ...
     var sizes =
         children.map((e) => e.flatten().length).cumSum().toList().cast<int>();
@@ -194,6 +195,7 @@ class ColumnNode extends WindowNode {
   /// Return the [i]^th node.
   WindowNode splitVertically(int i, {int n = 2}) {
     assert(i >= 0);
+
     /// need to find the correct node from the children ...
     var sizes =
         children.map((e) => e.flatten().length).cumSum().toList().cast<int>();
@@ -274,6 +276,7 @@ class RowNode extends WindowNode {
   ///
   WindowNode splitHorizontally(int i, {int n = 2}) {
     assert(i >= 0);
+
     /// need to find the correct node from the children ...
     var sizes =
         children.map((e) => e.flatten().length).cumSum().toList().cast<int>();
@@ -297,6 +300,7 @@ class RowNode extends WindowNode {
   ///
   WindowNode splitVertically(int i, {int n = 2}) {
     assert(i >= 0);
+
     /// need to find the correct node from the children ...
     var sizes =
         children.map((e) => e.flatten().length).cumSum().toList().cast<int>();

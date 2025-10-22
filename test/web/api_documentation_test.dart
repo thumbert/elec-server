@@ -1,5 +1,3 @@
-library test.web.api_documentation_test;
-
 import 'dart:io';
 import 'package:test/test.dart';
 import 'package:http/http.dart';

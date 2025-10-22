@@ -1,5 +1,3 @@
-library test.db.nyiso.da_lmp_hourly_test;
-
 import 'dart:convert';
 import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/client/dalmp.dart' as client;
@@ -217,9 +215,10 @@ Future<void> tests(String rootUrl) async {
 // }
 
 readDuckDb() {
-  final conn = Connection('/home/adrian/Downloads/Archive/DuckDB/nyiso/dalmp.duckdb');
+  final conn =
+      Connection('/home/adrian/Downloads/Archive/DuckDB/nyiso/dalmp.duckdb');
   final result = conn.fetch('SELECT * FROM dalmp WHERE ptid = 61752 '
-  'and hour_beginning >= \'2024-11-03\' and hour_beginning < \'2024-11-04\'');
+      'and hour_beginning >= \'2024-11-03\' and hour_beginning < \'2024-11-04\'');
   print(result); // not working
 }
 

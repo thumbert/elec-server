@@ -1,5 +1,3 @@
-library client.isone.masked_ids.v1;
-
 import 'dart:convert';
 import 'dart:async';
 import 'package:elec/elec.dart';

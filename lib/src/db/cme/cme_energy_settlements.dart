@@ -1,5 +1,3 @@
-library lib.db.cme.cme_energy_settlements;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -17,9 +15,7 @@ class CmeSettlementsEnergyArchive {
   CmeSettlementsEnergyArchive({ComponentConfig? dbConfig, String? dir}) {
     this.dbConfig = dbConfig ??
         ComponentConfig(
-            host: '127.0.0.1',
-            dbName: 'cme',
-            collectionName: 'settlements');
+            host: '127.0.0.1', dbName: 'cme', collectionName: 'settlements');
     this.dir = dir ?? '$baseDir../Cme/Settlements/Energy/Raw/';
   }
 
@@ -29,13 +25,13 @@ class CmeSettlementsEnergyArchive {
   late final ComponentConfig dbConfig;
   final log = Logger('CME energy settlements');
 
-
   /// Only curves that are currently processed
   final curveMapping = <String, String>{
     'OIL_WTI_CME': 'CL Light Sweet Crude Oil Futures',
     'OIL_HO_CME': 'HO NY Harbor ULSD Futures',
     'NG_HENRY_HUB_CME': 'NG Henry Hub Natural Gas Futures',
-    'NG_TTF_USD_CME': 'TTE Dutch TTF Natural Gas (USD/MMBtu) (ICIS Heren) Front Month Futures',
+    'NG_TTF_USD_CME':
+        'TTE Dutch TTF Natural Gas (USD/MMBtu) (ICIS Heren) Front Month Futures',
   };
 
   Future<int> insertData(List<Map<String, dynamic>> data) async {
@@ -106,7 +102,7 @@ class CmeSettlementsEnergyArchive {
   /// ```
   List<Map<String, dynamic>> processFile(File file) {
     if (!file.existsSync()) {
-      return <Map<String,dynamic>>[];
+      return <Map<String, dynamic>>[];
     }
     late List<String> xs;
     if (extension(file.path) == '.zip') {
@@ -182,7 +178,8 @@ class CmeSettlementsEnergyArchive {
           'curveId': 1,
         },
         unique: true);
-    await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'fromDate': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'fromDate': 1});
     await dbConfig.db.close();
   }
 }

@@ -1,5 +1,3 @@
-library db.curves.curve_id.curve_id_ng;
-
 List<Map<String, dynamic>> getCurves() {
   var xs = <Map<String, dynamic>>[
     {

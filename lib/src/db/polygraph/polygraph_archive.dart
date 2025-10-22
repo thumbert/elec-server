@@ -1,5 +1,3 @@
-library lib.db.polygraph.polygraph_archive;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -17,14 +15,15 @@ class PolygraphArchive {
   }
 
   late final ComponentConfig dbConfig;
+
   /// Store projects as json files
   late final Directory dir;
   final log = Logger('CME energy settlements');
 
   /// Read a json file with a Polygraph project
-  Map<String,dynamic> readFile(File file) {
+  Map<String, dynamic> readFile(File file) {
     var aux = json.decode(file.readAsStringSync());
-    aux['tabs'] = (aux['tabs'] as List).cast<Map<String,dynamic>>();
+    aux['tabs'] = (aux['tabs'] as List).cast<Map<String, dynamic>>();
     return aux;
   }
 
@@ -65,7 +64,7 @@ class PolygraphArchive {
         case {
           'userId': String userId,
           'projectName': String projectName,
-          'tabs': List<Map<String,dynamic>> tabs,
+          'tabs': List<Map<String, dynamic>> tabs,
         }) {
       assert(tabs.isNotEmpty, true);
       try {

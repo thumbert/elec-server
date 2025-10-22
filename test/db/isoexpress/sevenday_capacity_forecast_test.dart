@@ -1,5 +1,3 @@
-library test.db.isoexpress.sevenday_capacity_forecast_test;
-
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:test/test.dart';

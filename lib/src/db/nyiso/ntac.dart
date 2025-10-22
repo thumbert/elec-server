@@ -115,7 +115,7 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
       }
       return 0;
     } catch (e) {
-      print('xxxx ERROR xxxx ' + e.toString());
+      print('xxxx ERROR xxxx $e');
       return 1;
     }
   }
@@ -139,14 +139,10 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
 
   @override
   String getUrlForMonth(Month month) =>
-      'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/' +
-      month.startDate.toString().replaceAll('-', '') +
-      'DAMLimitingConstraints_csv.zip';
+      'http://mis.nyiso.com/public/csv/DAMLimitingConstraints/${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints_csv.zip';
 
   @override
   File getZipFileForMonth(Month month) {
-    return File(dir +
-        month.startDate.toString().replaceAll('-', '') +
-        'DAMLimitingConstraints.csv.zip');
+    return File('$dir${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints.csv.zip');
   }
 }

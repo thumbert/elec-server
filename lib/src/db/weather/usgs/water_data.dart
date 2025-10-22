@@ -1,5 +1,3 @@
-library db.usgs.water_data;
-
 class WaterDataArchive {
   /// Get water flow data from USGS at different stations around the US
   /// See for example Merrimack River at Lowell, MA
