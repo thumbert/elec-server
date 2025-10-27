@@ -22,8 +22,8 @@ enum BidOffer {
 
   static BidOffer parse(String x) {
     return switch (x.toLowerCase()) {
-      'supply_offer' => BidOffer.offer,
-      'demand_bid' => BidOffer.bid,
+      'supply_offer' || 'offer' => BidOffer.offer,
+      'demand_bid' || 'bid' => BidOffer.bid,
       _ => throw ArgumentError('Invalid BidOffer $x'),
     };
   }

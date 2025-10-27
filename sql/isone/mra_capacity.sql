@@ -18,8 +18,8 @@ SELECT month,
     netCapacityCleared,
     clearingPrice
 FROM results_zone 
-WHERE month >= 202401
-AND month <= 202407;
+WHERE month == 202401;
+
 
 
 SELECT DISTINCT month 

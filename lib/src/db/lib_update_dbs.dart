@@ -277,7 +277,7 @@ Future<void> updateIsoneMraCapacityBidOffer(
     archive.updateDuckDb(
         months: [month],
         pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/mra.duckdb');
+            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/isone/mra.duckdb');
   }
 }
 
@@ -379,7 +379,7 @@ Future<void> updateIsoneMraCapacityResults(
     archive.updateDuckDb(
         months: [month],
         pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/mra.duckdb');
+            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/isone/mra.duckdb');
   }
 }
 

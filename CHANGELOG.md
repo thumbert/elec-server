@@ -6,6 +6,11 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-10-27
+- Add lib/src/utils/lib_duckdb_builder.dart to help autogenerate Rust code for an Archive, etc. 
+  Used it for the first time for the ISONE participant lists.  Will make a Dart version of this 
+  too.
+
 # Release 2025-10-22
 - Add pyproject.toml
 - Bump up to lints 6.0.  Applied a few dart fix rules.  Still 468 "problems".

@@ -1,3 +1,6 @@
+SELECT MIN(as_of) AS as_of_min, MAX(as_of) AS as_of_max, COUNT(*) AS cnt
+FROM scheduled_outages;
+
 
 SELECT *
 FROM scheduled_outages
@@ -10,7 +13,7 @@ AND equipment_type = 'LINE';
 
 SELECT *
 FROM scheduled_outages
-WHERE as_of = CURRENT_DATE
+WHERE as_of = '2025-09-24'
 AND equipment_name LIKE 'CLAY%'
 AND equipment_type = 'LINE';
 
