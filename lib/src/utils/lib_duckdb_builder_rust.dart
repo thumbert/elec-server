@@ -126,6 +126,8 @@ String getRustType({
       return isNullable ? 'Option<u64>' : 'u64';
     case ColumnTypeDuckDB.timestamptz:
       return isNullable ? 'Option<Zoned>' : 'Zoned';
+    case ColumnTypeDuckDB.uint128:
+      return isNullable ? 'Option<u128>' : 'u128';
   }
 }
 

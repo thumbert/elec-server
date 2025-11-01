@@ -287,15 +287,16 @@ ColumnTypeDuckDB getColumnType(String input) {
     case 'FLOAT4':
     case 'FLOAT8':
       return ColumnTypeDuckDB.float;
-    case 'UTINYINT':
+    case 'UTINYINT' || 'UINT8':
       return ColumnTypeDuckDB.uint8;
-    case 'USMALLINT':
+    case 'USMALLINT' || 'UINT16':
       return ColumnTypeDuckDB.uint16;
-    case 'UINT':
-    case 'UINTEGER':
+    case 'UINT32' || 'UINTEGER':
       return ColumnTypeDuckDB.uint32;
-    case 'UBIGINT':
+    case 'UBIGINT' || 'UINT64':
       return ColumnTypeDuckDB.uint64;
+    case 'UHUGEINT' || 'UINT128':
+      return ColumnTypeDuckDB.uint128;
     case 'VARCHAR' || 'CHAR' || 'STRING' || 'TEXT':
       return ColumnTypeDuckDB.varchar;
     case 'TIMESTAMP' || 'TIMESTAMP WITHOUT TIME ZONE' || 'DATETIME':
@@ -343,6 +344,7 @@ enum ColumnTypeDuckDB {
   uint16,
   uint32,
   uint64,
+  uint128,
   varchar,
   time,
   timestamp,

@@ -1,52 +1,56 @@
 
--- Wow!  This is slick! 
+SELECT * FROM strike_prices;
+
+
+
+---========================================================================
+CREATE TABLE IF NOT EXISTS strike_prices (
+    hour_beginning TIMESTAMPTZ NOT NULL,
+    strike_price DECIMAL(9,2) NOT NULL,
+    strike_price_timestamp TIMESTAMPTZ NOT NULL,
+    spc_load_forecast_mw DECIMAL(9,2) NOT NULL,
+    percentile_10_rt_hub_lmp DECIMAL(9,2) NOT NULL,
+    percentile_25_rt_hub_lmp DECIMAL(9,2) NOT NULL,
+    percentile_75_rt_hub_lmp DECIMAL(9,2) NOT NULL,
+    percentile_90_rt_hub_lmp DECIMAL(9,2) NOT NULL, 
+    expected_rt_hub_lmp DECIMAL(9,2) NOT NULL,
+    expected_rt_hub_lmp_override DECIMAL(9,2),
+    expected_closeout_charge DECIMAL(9,2) NOT NULL,
+    expected_closeout_charge_override DECIMAL(9,2)
+);
+
 CREATE TEMPORARY TABLE tmp
 AS
-    SELECT * 
-    FROM (
-        SELECT unnest(isone_web_services.day_ahead_reserves.day_ahead_reserve, recursive := true)
-        FROM read_json('~/Downloads/Archive/IsoExpress/DASI/ReserveData/Raw/2025/daas_reserve_data_2025-03-*.json.gz')
-    )
-    ORDER BY local_day
-;
-SELECT * from tmp;
-
-INSERT INTO reserve_data
     SELECT 
-        local_day::TIMESTAMPTZ as hour_beginning,
-        ten_min_spin_req_mw::DECIMAL(9,2) as ten_min_spin_req_mw,
-        total_ten_min_req_mw::DECIMAL(9,2) as total_ten_min_req_mw,
-        total_thirty_min_req_mw::DECIMAL(9,2) as total_thirty_min_req_mw,
-        forecasted_energy_req_mw::DECIMAL(9,2) as forecasted_energy_req_mw,
-        tmsr_clearing_price::DECIMAL(9,2) as tmsr_clearing_price,
-        tmnsr_clearing_price::DECIMAL(9,2) as tmnsr_clearing_price,
-        tmor_clearing_price::DECIMAL(9,2) as tmor_clearing_price,
-        fer_clearing_price::DECIMAL(9,2) as fer_clearing_price,
-        tmsr_designation_mw::DECIMAL(9,2) as tmsr_designation_mw,
-        tmnsr_designation_mw::DECIMAL(9,2) as tmnsr_designation_mw,
-        tmor_designation_mw::DECIMAL(9,2) as tmor_designation_mw,
-        eir_designation_mw::DECIMAL(9,2) as eir_designation_mw
-    FROM tmp
-EXCEPT 
-    SELECT * FROM reserve_data;        
+        json_extract(aux, '$.market_hour.local_day')::TIMESTAMPTZ as hour_beginning,
+        json_extract(aux, '$.strike_price')::DECIMAL(9,2) as strike_price,
+        json_extract(aux, '$.strike_price_timestamp')::TIMESTAMPTZ as strike_price_timestamp,
+        json_extract(aux, '$.spc_load_forecast_mw')::DECIMAL(9,2) as spc_load_forecast_mw,  
+        json_extract(aux, '$.percentile_10_rt_hub_lmp')::DECIMAL(9,2) as percentile_10_rt_hub_lmp,
+        json_extract(aux, '$.percentile_25_rt_hub_lmp')::DECIMAL(9,2) as percentile_25_rt_hub_lmp,
+        json_extract(aux, '$.percentile_75_rt_hub_lmp')::DECIMAL(9,2) as percentile_75_rt_hub_lmp,
+        json_extract(aux, '$.percentile_90_rt_hub_lmp')::DECIMAL(9,2) as percentile_90_rt_hub_lmp,
+        json_extract(aux, '$.expected_rt_hub_lmp')::DECIMAL(9,2) as expected_rt_hub_lmp,
+        json_extract(aux, '$.expected_rt_hub_lmp_override')::DECIMAL(9,2) as expected_rt_hub_lmp_override,
+        json_extract(aux, '$.expected_closeout_charge')::DECIMAL(9,2) as expected_closeout_charge,
+        json_extract(aux, '$.expected_closeout_charge_override')::DECIMAL(9,2) as expected_closeout_charge_override
+    FROM (
+        SELECT  unnest(isone_web_services.day_ahead_strike_prices.day_ahead_strike_price)::JSON as aux
+        FROM read_json('~/Downloads/Archive/IsoExpress/DASI/StrikePrices/Raw/2025/daas_strike_prices_2025-04-*.json.gz')
+    )
+    ORDER BY hour_beginning
+;
 
 
--- ========================================================
-CREATE TABLE IF NOT EXISTS reserve_data (
-    hour_beginning TIMESTAMPTZ NOT NULL,
-    ten_min_spin_req_mw DECIMAL(9,2) NOT NULL,
-    total_ten_min_req_mw DECIMAL(9,2) NOT NULL,
-    total_thirty_min_req_mw DECIMAL(9,2) NOT NULL,
-    forecasted_energy_req_mw DECIMAL(9,2) NOT NULL,
-    tmsr_clearing_price DECIMAL(9,2) NOT NULL,
-    tmnsr_clearing_price DECIMAL(9,2) NOT NULL,
-    tmor_clearing_price DECIMAL(9,2) NOT NULL,
-    fer_clearing_price DECIMAL(9,2) NOT NULL,
-    tmsr_designation_mw DECIMAL(9,2) NOT NULL,
-    tmnsr_designation_mw DECIMAL(9,2) NOT NULL,
-    tmor_designation_mw DECIMAL(9,2) NOT NULL,
-    eir_designation_mw DECIMAL(9,2) NOT NULL,
-);
+INSERT INTO strike_prices
+    SELECT *
+    FROM tmp t
+WHERE NOT EXISTS (
+    SELECT * FROM strike_prices s
+    WHERE
+        s.hour_beginning = t.hour_beginning
+) ORDER BY hour_beginning;
+
 
 
 

@@ -33,10 +33,10 @@ CREATE TABLE IF NOT EXISTS capacity_forecast (
     is_cold_weather_watch BOOLEAN,
     is_cold_weather_warn BOOLEAN,
     is_cold_weather_event BOOLEAN,
-    boston_high_temp_f INT1,
-    boston_dew_point_f INT1,
-    hartford_high_temp_f INT1,
-    hartford_dew_point_f INT1,
+    boston_high_temp_F INT1,
+    boston_dew_point_F INT1,
+    hartford_high_temp_F INT1,
+    hartford_dew_point_F INT1,
 );
 
 
@@ -154,8 +154,8 @@ AS
         SELECT 
             * EXCLUDE (city_weather),
             CAST(city_weather ->> 'CityName' AS STRING) AS city_name,
-            CAST(city_weather -> 'HighTempF' AS INT1) AS high_temp_f,
-            CAST(city_weather -> 'DewPointF' AS INT1) AS dew_point_f
+            CAST(city_weather -> 'HighTempF' AS INT1) AS high_temp_F,
+            CAST(city_weather -> 'DewPointF' AS INT1) AS dew_point_F
         FROM (
         SELECT 
             CAST(aux -> 'MarketDate' AS DATE) AS for_day,
@@ -203,24 +203,7 @@ AS
             FROM (
                 SELECT 
                     unnest(CAST(sevendayforecasts.Sevendayforecast AS JSON) -> '$[0]' -> '$.MarketDay[*]') as aux
-                -- FROM read_json('~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2022/7dayforecast_2022-*.json.gz')
-                                FROM read_json(
-                    ['~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-17.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-18.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-19.json.gz',
-                    '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-20.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-21.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-22.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-23.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-24.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-25.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-26.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-27.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-28.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-29.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-30.json.gz',
-                     ])
-
+                FROM read_json('~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-07-*.json.gz')
             )
         ) 
     ) ON city_name 
@@ -233,8 +216,11 @@ AS
 
 INSERT INTO capacity_forecast
     SELECT * FROM tmp
-EXCEPT
-    SELECT * FROM capacity_forecast;
+WHERE NOT EXISTS (
+    SELECT * FROM capacity_forecast
+        WHERE capacity_forecast.for_day = tmp.for_day
+        AND capacity_forecast.day_index = tmp.day_index
+) ORDER BY for_day, day_index;
 
 
 

@@ -6,6 +6,10 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-11-01
+- Add client/lmp.dart to get LMP prices from DuckDB (the new stack)
+- Support all unsigned number variants for DuckDB numeric types in lib_duckdb_builder.
+
 # Release 2025-10-27
 - Add lib/src/utils/lib_duckdb_builder.dart to help autogenerate Rust code for an Archive, etc. 
   Used it for the first time for the ISONE participant lists.  Will make a Dart version of this 

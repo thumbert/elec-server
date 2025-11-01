@@ -5,8 +5,7 @@ FROM offers;
 
 
 SELECT * FROM offers
-WHERE hour_beginning >= '2025-03-02 00:00:00'
-AND hour_beginning < '2025-03-03 00:00:00'
+WHERE hour_beginning == '2025-06-25 00:00:00-04:00'
 -- AND masked_lead_participant_id = 353795
 -- AND masked_asset_id = 98805
 ORDER BY hour_beginning, masked_lead_participant_id, masked_asset_id;

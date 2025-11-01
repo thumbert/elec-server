@@ -402,8 +402,42 @@ CREATE TABLE IF NOT EXISTS participants (
   print(generateRustStub(input));
 }
 
+void testIsone7dayCapacityReport() {
+  final input = '''
+CREATE TABLE IF NOT EXISTS capacity_forecast (
+    for_day DATE NOT NULL,
+    day_index UINT8 NOT NULL,
+    cso_mw INT,
+    cold_weather_outages_mw INT,
+    other_gen_outages_mw INT,
+    delist_mw INT,
+    total_available_gen_mw INT,
+    peak_import_mw INT,
+    total_available_gen_import_mw INT,
+    peak_load_mw INT,
+    replacement_reserve_req_mw INT,
+    required_reserve_mw INT,
+    required_reserve_incl_replacement_mw INT,
+    total_load_plus_required_reserve_mw INT,
+    drr_mw INT,
+    surplus_deficiency_mw INT,
+    is_power_watch BOOLEAN,
+    is_power_warn BOOLEAN, 
+    is_cold_weather_watch BOOLEAN,
+    is_cold_weather_warn BOOLEAN,
+    is_cold_weather_event BOOLEAN,
+    boston_high_temp_F INT1,
+    boston_dew_point_F INT1,
+    hartford_high_temp_F INT1,
+    hartford_dew_point_F INT1,
+);
+''';
+  print(generateRustStub(input));
+}
+
 void main() {
   // tests();
 
-  testIsoneParticipants();
+  // testIsoneParticipants();
+  testIsone7dayCapacityReport();
 }
