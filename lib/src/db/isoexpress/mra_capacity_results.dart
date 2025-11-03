@@ -23,12 +23,19 @@ class MraCapacityResultsArchive {
     return 'https://webservices.iso-ne.com/api/v1.1/fcmmra/cp/$cp/month/${month.toIso8601String().replaceAll('-', '')}';
   }
 
-  File getFilename(Month month) =>
-      File('$dir/Raw/fcmmra_${month.toIso8601String()}.json');
+  File getFilename(Month month, {String extension = 'json'}) {
+    if (extension == 'json') {
+      return File('$dir/Raw/fcmmra_${month.toIso8601String()}.json');
+    } else if (extension == 'gz') {
+      return File('$dir/Raw/fcmmra_${month.toIso8601String()}.json.gz');
+    } else {
+      throw ArgumentError('Unsupported extension: $extension');
+    }
+  }
 
   /// Create two files, one for zones, one for interfaces
   int makeCsvFileForDuckDb(Month month) {
-    final fileIn = getFilename(month);
+    final fileIn = getFilename(month, extension: 'gz');
     if (!fileIn.existsSync()) {
       throw StateError(
           'ISO file for month $month has not been downloaded.  Download that file first!');
@@ -59,7 +66,9 @@ class MraCapacityResultsArchive {
 
   ///
   List<MraCapacityRecord> processFile(File file) {
-    var aux = json.decode(file.readAsStringSync());
+    final bytes = file.readAsBytesSync();
+    final decoded = utf8.decode(gzip.decode(bytes));
+    var aux = json.decode(decoded);
     var results = aux['FCMRAResults']['FCMRAResult'];
     late Map<String, dynamic> data;
     if (results is List) {
@@ -73,7 +82,7 @@ class MraCapacityResultsArchive {
     ];
   }
 
-  int updateDuckDb({required List<Month> months, required String pathDbFile}) {
+  int updateDuckDB({required List<Month> months, required String pathDbFile}) {
     final con = Connection(pathDbFile);
 
     ///

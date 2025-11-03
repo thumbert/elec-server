@@ -277,7 +277,7 @@ Future<void> updateIsoneMraCapacityBidOffer(
     archive.updateDuckDb(
         months: [month],
         pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/isone/mra.duckdb');
+            '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone/mra.duckdb');
   }
 }
 
@@ -372,15 +372,16 @@ Future<void> updateIsoneMraCapacityResults(
       await baseDownloadUrl(url, file,
           acceptHeader: 'application/json',
           username: dotenv.env['ISONE_WS_USER'],
-          password: dotenv.env['ISONE_WS_PASSWORD']);
+          password: dotenv.env['ISONE_WS_PASSWORD'],
+          gzipFile: true);
       log.info('   Downloaded JSON file for ${month.toIso8601String()}');
     }
     archive.makeCsvFileForDuckDb(month);
     log.info('   Created CSV files for month ${month.toIso8601String()}');
-    archive.updateDuckDb(
+    archive.updateDuckDB(
         months: [month],
         pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/Capacity/isone/mra.duckdb');
+            '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone/mra.duckdb');
   }
 }
 

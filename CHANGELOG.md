@@ -8,6 +8,7 @@
 
 # Release 2025-11-03
 - Fix minor things on isone morning report.
+- Gzip MRA bids/offer files too
 
 # Release 2025-11-01
 - Add client/lmp.dart to get LMP prices from DuckDB (the new stack)
