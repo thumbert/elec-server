@@ -22,8 +22,14 @@ class IsoneMorningReportArchive {
   final String duckdbPath;
   static final log = Logger('Morning report');
 
-  File getFilename(Date asOfDate) {
-    return File("$dir/Raw/${asOfDate.year}/morning_report_$asOfDate.json");
+  File getFile(Date asOfDate, {String format = 'json'}) {
+    if (format == 'gz') {
+      return File("$dir/Raw/${asOfDate.year}/morning_report_$asOfDate.json.gz");
+    } else if (format == 'json') {
+      return File("$dir/Raw/${asOfDate.year}/morning_report_$asOfDate.json");
+    } else {
+      throw StateError('Unsupported format $format');
+    }
   }
 
   String getUrl(Date asOfDate) =>
@@ -33,11 +39,12 @@ class IsoneMorningReportArchive {
   static final missingDays = <Date>{};
 
   List<MorningReport> processFile(File file) {
-    if (extension(file.path) != '.json') {
-      throw ArgumentError('File needs to be a json file');
+    if (extension(file.path) != '.gz') {
+      throw ArgumentError('File needs to be a gz file');
     }
-    var str = file.readAsStringSync();
-    var res = json.decode(str);
+    final bytes = file.readAsBytesSync();
+    final decoded = utf8.decode(gzip.decode(bytes));
+    var res = json.decode(decoded);
     // a day may not have a report yet, if too early
     if (res['MorningReports'] == '') return <MorningReport>[];
     if ((res['MorningReports'] as Map).isEmpty) return <MorningReport>[];
@@ -56,7 +63,7 @@ class IsoneMorningReportArchive {
       // each file usually contains 2 reports (Final and Preliminary)
       if (day.isAfter(today)) continue;
       if (missingDays.contains(day)) continue;
-      var file = getFilename(day);
+      var file = getFile(day, format: 'gz');
       xs.addAll(processFile(file));
       print('Processed day $day');
     }
@@ -83,7 +90,7 @@ class IsoneMorningReportArchive {
     return 0;
   }
 
-  int updateDuckDb(Month month) {
+  int updateDuckDB(Month month) {
     final con = Connection(duckdbPath);
     con.execute('''
 CREATE TABLE IF NOT EXISTS morning_report (

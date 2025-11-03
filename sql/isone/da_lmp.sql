@@ -4,6 +4,11 @@ SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*)
 FROM da_lmp
 WHERE ptid = 4000;
 
+SELECT strftime(hour_beginning, '%Y-%m') AS yearmon, COUNT(*) AS rows
+FROM da_lmp
+WHERE ptid = 4000
+GROUP BY yearmon
+ORDER BY yearmon;
 
 SELECT * 
 FROM da_lmp 

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:timezone/data/latest.dart';
@@ -47,10 +46,6 @@ Flags:
   }
 
   await updateIsoneMorningReport(months: [month], download: true);
-  final archive = getIsoneMorningReportArchive();
-  archive.updateDuckDb(month);
-  logger.info('Updated DuckDB for month $month');
-
   logger.info('Done at ${DateTime.now().toString()}');
   exit(0);
 }

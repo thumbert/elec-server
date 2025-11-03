@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-11-03
+- Fix minor things on isone morning report.
+
 # Release 2025-11-01
 - Add client/lmp.dart to get LMP prices from DuckDB (the new stack)
 - Support all unsigned number variants for DuckDB numeric types in lib_duckdb_builder.
