@@ -61,11 +61,11 @@ Future<int> baseDownloadUrl(
         }
       }
       if (gzipFile) {
-        var res = Process.runSync('gzip', ['-f', basename(fileout.path)],
-            workingDirectory: workingDirectory);
-        if (res.exitCode == 0) {
-          print('GZipped file ${fileout.path}');
-        }
+        final content = await fileout.readAsBytes();
+        final compressed = GZipCodec().encode(content);
+        final gzipFile = File('${fileout.path}.gz');
+        gzipFile.writeAsBytesSync(compressed);
+        print('GZipped file ${fileout.path}');
       }
     } catch (e) {
       print(e);

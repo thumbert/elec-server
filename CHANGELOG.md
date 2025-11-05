@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-11-05
+- Use Dart archive package for gzipping to avoid system dependencies.
+
 # Release 2025-11-03
 - Fix minor things on isone morning report.
 - Gzip MRA bids/offer files too
