@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-11-09
+- Change lib/client/lmp.dart to work with LmpComponent shortNames
+
 # Release 2025-11-05
 - Use Dart archive package for gzipping to avoid system dependencies.
 

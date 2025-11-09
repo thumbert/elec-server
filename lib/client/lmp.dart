@@ -20,7 +20,7 @@ class Lmp {
     Iso.newYork: '/nyiso',
   };
 
-  /// Get hourly prices for a ptid between a start and end date.
+  /// Get hourly prices for one ptid between a start and end date.
   /// Return an hourly timeseries.
   Future<TimeSeries<num>> getHourlyLmp(
       {required Iso iso,
@@ -28,7 +28,7 @@ class Lmp {
       required LmpComponent component,
       required Term term,
       required Market market}) async {
-    var cmp = component.toString();
+    var cmp = component.shortName();
     var url = '$rustServer${_isoMap[iso]!}/prices/$market/hourly/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
         '?ptids=$ptid&components=$cmp';

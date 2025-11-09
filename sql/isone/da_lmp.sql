@@ -103,9 +103,37 @@ JOIN buckets.buckets
 WHERE ptid = 4000
 AND hour_beginning >= '2020-01-01'
 AND hour_beginning < '2025-10-01'
-GROUP BY month_beginning, buckets.buckets.b5x16
-HAVING buckets.buckets.b5x16 = true
+GROUP BY month_beginning, buckets.buckets."5x16"
+HAVING buckets.buckets."5x16" = true
 ORDER BY month_beginning;
+
+
+-- Calculate LMP for one given term, say a couple of days, a couple of months, etc. 
+-- and one ptid and bucket.
+CREATE TEMPORARY TABLE terms (
+    term VARCHAR NOT NULL,
+    term_start TIMESTAMPTZ NOT NULL,
+    term_end TIMESTAMPTZ NOT NULL
+);
+INSERT INTO terms VALUES
+    ('Cal24', '2024-01-01', '2025-01-01'),
+    ('Jul25', '2025-07-01', '2025-08-01'),
+    ('Jul25-Aug25', '2025-08-01', '2025-09-01');
+
+SELECT
+  t.term,
+  d.ptid,
+  AVG(d.lmp)::DECIMAL(9,4) AS avg_price
+FROM da_lmp d
+JOIN terms t
+  ON d.hour_beginning >= t.term_start
+  AND d.hour_beginning < t.term_end
+JOIN buckets.buckets b
+  ON d.hour_beginning = b.hour_beginning
+WHERE b."5x16" = true
+  AND d.ptid IN (4000, 4001) -- add more ptids as needed
+GROUP BY t.term, d.ptid
+ORDER BY t.term, d.ptid;
 
 
 

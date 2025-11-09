@@ -15,7 +15,7 @@ Future<void> tests(String rootUrl) async {
 
   group('LMP client tests: ', () {
     var lmp = client.Lmp(http.Client(), rustServer: rootUrl);
-    test('get hourly prices ISONE', () async {
+    test('get hourly lmp prices ISONE', () async {
       var data = await lmp.getHourlyLmp(
           iso: Iso.newEngland,
           ptid: 4000,
@@ -32,6 +32,25 @@ Future<void> tests(String rootUrl) async {
             Hour.beginning(TZDateTime(location, 2025, 1, 1, 2)), 31.62),
       ]);
     });
+
+    test('get hourly congestion prices ISONE', () async {
+      var data = await lmp.getHourlyLmp(
+          iso: Iso.newEngland,
+          ptid: 4000,
+          component: LmpComponent.congestion,
+          term: Term(Date.utc(2025, 1, 1), Date.utc(2025, 1, 1)),
+          market: Market.da);
+      expect(data.length, 24);
+      expect(data.take(3).toList(), [
+        IntervalTuple<num>(
+            Hour.beginning(TZDateTime(location, 2025, 1, 1, 0)), 0.0),
+        IntervalTuple<num>(
+            Hour.beginning(TZDateTime(location, 2025, 1, 1, 1)), 0.0),
+        IntervalTuple<num>(
+            Hour.beginning(TZDateTime(location, 2025, 1, 1, 2)), 0.0),
+      ]);
+    });
+    
   });
 }
 
