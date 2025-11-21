@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/db_isone.dart';
-import 'package:elec_server/db_nyiso.dart';
+import 'package:elec_server/db_nyiso.dart' hide PtidArchive;
 import 'package:elec_server/src/db/canadian_statistics/canadian_statistics.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -187,6 +187,21 @@ MraCapacityResultsArchive getIsoneMraResultsArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return MraCapacityResultsArchive(dir: dir);
+}
+
+PtidArchive getIsonePtidArchive() {
+   var config = ComponentConfig(
+    host: dotenv.env['MONGO_CONNECTION']!,
+    dbName: 'isone',
+    collectionName: 'pnode_table',
+  );
+  var dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/PnodeTable/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return PtidArchive(config: config, dir: dir);
+
 }
 
 RtEnergyOfferArchive getIsoneRtEnergyOfferArchive() {

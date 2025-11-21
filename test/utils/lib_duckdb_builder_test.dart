@@ -101,14 +101,14 @@ CREATE TABLE IF NOT EXISTS participants (
             name: 'as_of',
             type: ColumnTypeDuckDB.date,
             isNullable: false,
-            line: '')
+            input: '')
           ..hasGteFilter = true
           ..hasLteFilter = true,
         Column(
             name: 'id',
             type: ColumnTypeDuckDB.int64,
             isNullable: false,
-            line: '')
+            input: '')
           ..hasInFilter = true,
       ];
       final queryStruct = makeQueryFilterStruct(columns);
@@ -130,14 +130,14 @@ pub struct QueryFilter {
             name: 'as_of',
             type: ColumnTypeDuckDB.date,
             isNullable: false,
-            line: '')
+            input: '')
           ..hasGteFilter = true
           ..hasLteFilter = true,
         Column(
             name: 'id',
             type: ColumnTypeDuckDB.int64,
             isNullable: false,
-            line: '')
+            input: '')
           ..hasInFilter = true,
       ];
       final queryStruct = makeQueryFilterBuilder(columns);
@@ -193,14 +193,14 @@ impl QueryFilterBuilder {
             name: 'as_of',
             type: ColumnTypeDuckDB.date,
             isNullable: false,
-            line: '')
+            input: '')
           ..hasGteFilter = true
           ..hasLteFilter = true,
         Column(
             name: 'id',
             type: ColumnTypeDuckDB.int64,
             isNullable: false,
-            line: '')
+            input: '')
           ..hasInFilter = true,
       ];
       final queryFn = makeQueryFunction('participants', columns);
@@ -252,12 +252,12 @@ FROM participants WHERE 1=1
             name: 'status',
             type: ColumnTypeDuckDB.enumType,
             isNullable: false,
-            line: ''),
+            input: ''),
         Column(
             name: 'id',
             type: ColumnTypeDuckDB.int64,
             isNullable: false,
-            line: '')
+            input: '')
           ..hasInFilter = true,
       ];
       final queryFn = makeQueryFunction('participants', columns);

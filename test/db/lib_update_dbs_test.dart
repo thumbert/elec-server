@@ -53,13 +53,14 @@ Future<void> tests() async {
   // await updateIsoneRtSystemLoad5minArchive(days: days, download: true);
 
   // await insertDays(DaLmpHourlyArchive(), days, gzip: true);
-  final months = Month(2022, 1, location: IsoNewEngland.location)
-      .upTo(Month(2022, 2, location: IsoNewEngland.location));
-  await updateIsoneDaLmp(months: months, download: true);
+  // final months = Month(2022, 1, location: IsoNewEngland.location)
+  //     .upTo(Month(2022, 2, location: IsoNewEngland.location));
+  // await updateIsoneDaLmp(months: months, download: true);
   // await updateIsoneMonthlyAssetNcpc(months: months, download: true);
   // await updateIsoneDemandBids(months: months, download: true);
   // await updateIsoneDaEnergyOffers(months: months, download: false);
 
+  await updateIsonePtidTable(url: 'https://www.iso-ne.com/static-assets/documents/100028/pnode_table_2025_11_01.xlsx');
   // await updateIsoneRtLmp(months: months, download: true);
   // await updateIsoneRtLmp5Min(
   //     months: months, ptids: [4000], reportType: 'prelim', download: false);
@@ -90,7 +91,7 @@ Future<void> tests() async {
 
   ///------------------------------------------------------------------
   /// NYISO
-  // await updateEnergyOffersNyiso(months: months, download: true);
+  // await updateNyisoEnergyOffers(months: months, download: true);
 
   ///------------------------------------------------------------------
   /// Weather

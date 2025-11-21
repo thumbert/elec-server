@@ -5,15 +5,14 @@ part 'lib_duckdb_builder_rust.dart';
 /// a DuckDB table schema.  The entire info is already available, so why
 /// not generate the Rust code automatically?
 ///
-/// Given a DuckDB CREATE TABLE statement as input,
-/// generates a Rust struct stub representing the table schema, etc.
-/// This includes:
-///  - creating the enums for any columns that are ENUM in DuckDB
-///  - generating a function that will query the database and return a Vec of
-///    the struct
-///  - generating a test stub
+/// [input] is the entire DuckDB CREATE TABLE statement.
+/// 
+/// Given a the [input], create:
+///   1. a Rust struct with the appropriate types
+///   2. the enums for all DuckDB ENUM columns
+///   3. a function to query the database and return a Vec of the struct
+///   4. a test stub
 ///
-/// [input] is the DuckDB CREATE TABLE statement.
 ///
 /// See the test folder for examples.
 String generateRustStub(String input,
@@ -36,7 +35,7 @@ String generateRustStub(String input,
 
   for (var column in columns) {
     if (column.type == ColumnTypeDuckDB.enumType) {
-      final variants = getEnumVariants(column.line);
+      final variants = getEnumVariants(column.input);
       variants.sort();
       buffer.write('\n');
       buffer.write(makeEnum(
@@ -66,11 +65,11 @@ class Column {
       {required this.name,
       required this.type,
       required this.isNullable,
-      required this.line});
+      required this.input});
   final String name;
   final ColumnTypeDuckDB type;
   final bool isNullable;
-  final String line;
+  final String input;
 
   // Not sure about having these flags here, but let's see how it holds up
   // These fields should be private, but I can't test Column without them.
@@ -189,7 +188,7 @@ List<Column> getColumns(String input,
       name: getColumnName(line),
       type: getColumnType(line),
       isNullable: isColumnNullable(line),
-      line: line,
+      input: line,
     );
     if (one.type == ColumnTypeDuckDB.timestamptz) {
       one.timezoneName = timezoneName!;

@@ -6,6 +6,12 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-11-21
+- Expose lib_duckdb_builder
+
+# Release 2025-11-16
+- Fix ISONE ptid node table definition with NECEC addition
+
 # Release 2025-11-09
 - Change lib/client/lmp.dart to work with LmpComponent shortNames
 

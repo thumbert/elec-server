@@ -155,8 +155,10 @@ class PtidArchive {
       });
     }
 
+    /// Format changed in 2025-11 with the introduction of NECEC interface.
     /// rows 21:26 are Interfaces
-    for (var r = 21; r < 27; r++) {
+    var lastRow = table.rows.indexWhere((e) => e[0] == 'ISO-NE PUBLIC');
+    for (var r = 21; r < lastRow; r++) {
       res.add({
         'ptid': table.rows[r][3],
         'name': table.rows[r][2],
@@ -165,7 +167,8 @@ class PtidArchive {
     }
 
     /// rows 8:26 are the DRR aggregation zones
-    for (var r = 7; r < 27; r++) {
+    for (var r = 7; r < lastRow; r++) {
+      if (table.rows[r][7] == null) continue;
       res.add({
         'ptid': table.rows[r][7],
         'name': table.rows[r][6],

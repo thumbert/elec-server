@@ -2,6 +2,7 @@ export 'src/utils/convert_xls_to_xlsx.dart';
 export 'src/utils/file_utils.dart';
 export 'src/utils/iterable_extensions.dart';
 export 'src/utils/layout_tree.dart';
+export 'src/utils/lib_duckdb_builder.dart';
 export 'src/utils/lib_plotly.dart';
 export 'src/utils/parse_custom_integer_range.dart';
 // export 'src/utils/mailtrap.dart';

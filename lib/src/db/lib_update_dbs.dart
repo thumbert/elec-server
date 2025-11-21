@@ -385,6 +385,21 @@ Future<void> updateIsoneMraCapacityResults(
   }
 }
 
+/// Get the [url] from the ISO website
+/// https://www.iso-ne.com/markets-operations/settlements/pricing-node-tables
+///
+Future<void> updateIsonePtidTable({required String url}) async {
+  // https://www.iso-ne.com/static-assets/documents/100024/pnode_table_2025_06_12.xlsx
+  var archive = prod.getIsonePtidArchive();
+  // await archive.downloadFile(url);
+  var file = File('${archive.dir}${path.basename(url)}');
+  await archive.db.open();
+  await archive.insertMongo(file);
+  await archive.db.close();
+}
+
+
+
 Future<void> updateIsoneRtEnergyOffers(
     {required List<Month> months, bool download = false}) async {
   var archive = prod.getIsoneRtEnergyOfferArchive();
@@ -540,7 +555,7 @@ Future<void> updateNyisoEnergyOffers(
     archive.updateDuckDb(
         months: [month],
         pathDbFile:
-            '${Platform.environment['HOME']}/Downloads/Archive/Nyiso/nyiso_energy_offers.duckdb');
+            '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/nyiso/nyiso_energy_offers.duckdb');
     if (res != 0) {
       throw StateError("Failed to update DuckDB for month $month");
     }
