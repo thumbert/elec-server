@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:elec_server/src/utils/lib_duckdb_builder.dart';
 import 'package:test/test.dart';
 
@@ -18,7 +20,7 @@ CREATE TABLE IF NOT EXISTS participants (
     termination_date DATE,
 );
 ''';
-      final rustStub = generateRustStub(input);
+      final rustStub = CodeGenerator(input).generateRustStub();
       print(rustStub);
     });
 
@@ -93,6 +95,26 @@ CREATE TABLE IF NOT EXISTS participants (
           getEnumVariants(
               "participant_type ENUM('Participant', 'Non-Participant', 'Pool Operator') NOT NULL,"),
           ['Participant', 'Non-Participant', 'Pool Operator']);
+    });
+
+    test('make Rust enum', () {
+      final actual = makeEnum(
+          columnName: 'sector',
+          values: [
+            'Supplier',
+            'Not applicable',
+            'Alternative Resources',
+            'Generation',
+            'End User',
+            'Publicly-Owned Entity',
+            'Transmission',
+            'Market Participant'
+          ],
+          isNullable: false);
+      // print(actual);
+      var expected =
+          File('test/utils/_golden/enum_sector.rs.gold').readAsStringSync();
+      expect(actual, expected);
     });
 
     test('make the QueryFilter structure', () {
@@ -300,79 +322,6 @@ FROM participants WHERE 1=1
     });
 
     test('is column nullable', () {});
-    test('make enum, 1', () {
-      final enumCode = makeEnum(
-          columnName: 'status',
-          values: ['ACTIVE', 'SUSPENDED'],
-          isNullable: false);
-      final expected =
-          '''#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum Status {
-    Active,
-    Suspended,
-}
-
-impl std::str::FromStr for Status {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "ACTIVE" => Ok(Status::Active),
-            "SUSPENDED" => Ok(Status::Suspended),
-            _ => Err(()),
-        }
-    }
-}
-
-impl std::fmt::Display for Status {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Status::Active => write!(f, "ACTIVE"),
-            Status::Suspended => write!(f, "SUSPENDED"),
-        }
-    }
-}
-''';
-      // print(enumCode);
-      expect(enumCode, expected);
-    });
-    test('make enum, 2', () {
-      final enumCode = makeEnum(
-          columnName: 'status',
-          values: ['Participant', 'Non-Participant', 'Pool Operator'],
-          isNullable: false);
-      final expected =
-          '''#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum Status {
-    Participant,
-    NonParticipant,
-    PoolOperator,
-}
-
-impl std::str::FromStr for Status {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Participant" => Ok(Status::Participant),
-            "Non-Participant" => Ok(Status::NonParticipant),
-            "Pool Operator" => Ok(Status::PoolOperator),
-            _ => Err(()),
-        }
-    }
-}
-
-impl std::fmt::Display for Status {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Status::Participant => write!(f, "Participant"),
-            Status::NonParticipant => write!(f, "Non-Participant"),
-            Status::PoolOperator => write!(f, "Pool Operator"),
-        }
-    }
-}
-''';
-      // print(enumCode);
-      expect(enumCode, expected);
-    });
   });
 }
 
@@ -399,7 +348,7 @@ CREATE TABLE IF NOT EXISTS participants (
     termination_date DATE,
 );
 ''';
-  print(generateRustStub(input));
+  print(CodeGenerator(input).generateRustStub());
 }
 
 void testIsone7dayCapacityReport() {
@@ -432,12 +381,37 @@ CREATE TABLE IF NOT EXISTS capacity_forecast (
     hartford_dew_point_F INT1,
 );
 ''';
-  print(generateRustStub(input));
+  print(CodeGenerator(input).generateRustStub());
+}
+
+void testSdTransact() {
+  final input = '''
+CREATE TABLE IF NOT EXISTS tab1 (
+    account_id UINTEGER NOT NULL,
+    report_date DATE NOT NULL,
+    version TIMESTAMP NOT NULL,
+    hour_beginning TIMESTAMPTZ NOT NULL,
+    transaction_number UINTEGER NOT NULL,
+    reference_id VARCHAR,
+    transaction_type ENUM ('IBM') NOT NULL,
+    other_party UINTEGER NOT NULL,
+    settlement_location_id UINTEGER NOT NULL,
+    location_name VARCHAR NOT NULL,
+    location_type ENUM ('HUB', 'LOAD ZONE', 'NETWORK NODE', 'DRR AGGREGATION ZONE') NOT NULL,
+    amount DECIMAL(9,4) NOT NULL,
+    impacts_marginal_loss_revenue_allocation BOOLEAN NOT NULL,
+    subaccount_id VARCHAR NOT NULL,
+);
+''';
+  final generator = CodeGenerator(input, timezoneName: 'America/New_York');
+  print(generator.generateRustStub());
+  print(generator.generateHtmlDocs());
 }
 
 void main() {
-  // tests();
+//   tests();
 
   // testIsoneParticipants();
-  testIsone7dayCapacityReport();
+  // testIsone7dayCapacityReport();
+  testSdTransact();
 }

@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-11-28
+- Hide all implementation details for the DuckDB code generator.  
+
 # Release 2025-11-21
 - Expose lib_duckdb_builder
 

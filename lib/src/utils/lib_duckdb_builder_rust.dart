@@ -46,6 +46,7 @@ String addImports(List<Column> columns) {
   }
   if (hasEnum) {
     buffer.writeln('use std::str::FromStr;');
+    buffer.writeln('use convert_case::{Case, Casing};');
   }
   if (hasTime) {
     buffer.writeln('use jiff::civil::Time;');
@@ -54,7 +55,7 @@ String addImports(List<Column> columns) {
     buffer.writeln('use jiff::Timestamp;');
   }
   if (hasTimestamptz) {
-    buffer.writeln('use jiff::Zoned;');
+    buffer.writeln('use jiff::{Zoned, tz::TimeZone};');
   }
 
   buffer.writeln();
@@ -93,7 +94,7 @@ String getRustType({
     case ColumnTypeDuckDB.date:
       return isNullable ? 'Option<Date>' : 'Date';
     case ColumnTypeDuckDB.decimal:
-      return isNullable ? 'Option<f64>' : 'f64';
+      return isNullable ? 'Option<Decimal>' : 'Decimal';
     case ColumnTypeDuckDB.tinyint:
       return isNullable ? 'Option<i8>' : 'i8';
     case ColumnTypeDuckDB.int16:
@@ -133,62 +134,88 @@ String getRustType({
 
 /// Generate a Rust enum from a DuckDB ENUM column.
 /// Make sure that the variant name is in Pascal case.
+/// Have a custom serializer that serializes back to the original data.
+/// Have a custom deserializer that is a bit more liberal with the input 
+/// (accepts different casing).
+///
 /// * [columnName] the DuckDB column name,
-/// * [values] the list of ENUM values in DuckDB,
+/// * [values] the list of ENUM values in DuckDB in UPPER_SNAKE_CASE,
 /// * [isNullable] whether the column is nullable.
 String makeEnum(
     {required String columnName,
     required List<String> values,
     required bool isNullable}) {
-  final enumName = columnName.toPascalCase();
+  final enumNameRust = columnName.toPascalCase();
   final buffer = StringBuffer();
-  buffer.writeln(
-      '#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]');
-  buffer.writeln('pub enum $enumName {');
+  buffer.writeln('#[derive(Clone, Copy, Debug, PartialEq)]');
+  buffer.writeln('pub enum $enumNameRust {');
   for (var value in values) {
-    final variantName = value.replaceAll(' ', '_').toPascalCase();
-    buffer.writeln('    $variantName,');
+    final variantNameRust = value.toPascalCase();
+    buffer.writeln('    $variantNameRust,');
   }
   buffer.writeln('}');
 
-  // implement FromStr for the enum to parse from string
-  buffer.writeln('\nimpl std::str::FromStr for $enumName {');
-  buffer.writeln('    type Err = ();');
+  // Implement FromStr for the enum to parse from string.  Be case insensitive.
+  buffer.writeln('\nimpl std::str::FromStr for $enumNameRust {');
+  buffer.writeln('    type Err = String;');
   buffer.writeln('    fn from_str(s: &str) -> Result<Self, Self::Err> {');
-  buffer.writeln('        match s {');
+  buffer.writeln('        match s.to_case(Case::UpperSnake).as_str() {');
   for (var value in values) {
-    final variantName = value.replaceAll(' ', '_').toPascalCase();
-    buffer.writeln('            "$value" => Ok($enumName::$variantName),');
+    final variantNameRust = value.toPascalCase();
+    buffer.writeln(
+        '            "${value.toUpperSnakeCase()}" => Ok($enumNameRust::$variantNameRust),');
   }
-  buffer.writeln('            _ => Err(()),');
+  buffer.writeln(
+      '            _ => Err(format!("Invalid value for $enumNameRust: {}", s)),');
   buffer.writeln('        }');
   buffer.writeln('    }');
   buffer.writeln('}');
 
-  // implement Display so that the Serde serializer prints the correct output
-  buffer.writeln('\nimpl std::fmt::Display for $enumName {');
+  // Implement Display so that the Serde serializer prints the correct output
+  buffer.writeln('\nimpl std::fmt::Display for $enumNameRust {');
   buffer.writeln(
       '    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {');
   buffer.writeln('        match self {');
   for (var value in values) {
-    final variantName = value.replaceAll(' ', '_').toPascalCase();
-    buffer
-        .writeln('            $enumName::$variantName => write!(f, "$value"),');
+    final variantNameRust = value.toPascalCase();
+    buffer.writeln(
+        '            $enumNameRust::$variantNameRust => write!(f, "$value"),');
   }
   buffer.writeln('        }');
   buffer.writeln('    }');
   buffer.writeln('}');
 
-  // implement a custom Deserializer so that the Actix path can parse different
-  // casing.
-  // buffer.writeln("\nimpl<'de> serde::Deserialize<'de> for $enumName {");
-  // buffer.writeln('    fn derialize<D>(deserializer: D) -> Result<Self, D::Error>');
-  // buffer.writeln('    where');
-  // buffer.writeln("        D: serde::Deserializer<'de>,");
-  // buffer.writeln('    {');
-  // buffer.writeln('        let s = String::deserialize(deserializer)?;');
-  // buffer.writeln('        $enumName::from_str(&s.to_ascii_uppercase()).map_err(serde::de::Error::custom)');
-  // buffer.writeln('}');
+  // Implement a custom Serializer
+  buffer.writeln("\nimpl serde::Serialize for $enumNameRust {");
+  buffer.writeln(
+      '    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>');
+  buffer.writeln('    where');
+  buffer.writeln("        S: serde::Serializer,");
+  buffer.writeln('    {');
+  buffer.writeln('        let s = match self {');
+  for (var value in values) {
+    final variantNameRust = value.toPascalCase();
+    buffer.writeln(
+        '            $enumNameRust::$variantNameRust => "$value",');
+  }
+  buffer.writeln('        };');
+  buffer.writeln('        serializer.serialize_str(&s)');
+  buffer.writeln('    }');
+  buffer.writeln('}');
+
+  // Implement a custom Deserializer so that the Actix path can parse different
+  // casing
+  buffer.writeln("\nimpl<'de> serde::Deserialize<'de> for $enumNameRust {");
+  buffer.writeln(
+      '    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>');
+  buffer.writeln('    where');
+  buffer.writeln("        D: serde::Deserializer<'de>,");
+  buffer.writeln('    {');
+  buffer.writeln('        let s = String::deserialize(deserializer)?;');
+  buffer.writeln(
+      '        $enumNameRust::from_str(&s).map_err(serde::de::Error::custom)');
+  buffer.writeln('    }');
+  buffer.writeln('}');
 
   return buffer.toString();
 }
@@ -209,7 +236,7 @@ String makeQueryFunction(String tableName, List<Column> columns) {
     var variables = column.getQueryFilterVariables();
     for (var variable in variables) {
       var borrow = '';
-      if (['String', 'Option<String>'].contains(variable.rustType)) {
+      if (['String', 'Option<String>', 'Zoned'].contains(variable.rustType)) {
         borrow = '&';
       }
       buffer.writeln(
@@ -266,11 +293,17 @@ String makeQueryFunction(String tableName, List<Column> columns) {
         buffer.writeln(
             '        let $name = Time::midnight() + _micros$i.microseconds();');
         break;
+      case ColumnTypeDuckDB.timestamp:
+        buffer.writeln(
+            '        let _micros$i: i64 = row.get::<usize, i64>($i)?;');
+        buffer.writeln('        let $name = '
+            'Timestamp::from_microsecond(_micros$i).unwrap();');
+        break;
       case ColumnTypeDuckDB.timestamptz:
         buffer.writeln(
             '        let _micros$i: i64 = row.get::<usize, i64>($i)?;');
         buffer.writeln('        let $name = Zoned::new(\n'
-            '                 Timestamp::from_microseconds(_micros$i).unwrap(),\n'
+            '                 Timestamp::from_microsecond(_micros$i).unwrap(),\n'
             '                 TimeZone::get("${column.timezoneName}").unwrap()\n'
             '        );');
         break;
@@ -461,40 +494,3 @@ String makeTest() {
   return buffer.toString();
 }
 
-/// Generate HTML documentation for the query.
-String generateHtmlDocs(List<Column> columns) {
-  final buffer = StringBuffer();
-
-  buffer.writeln('<p>The url query string has the following components:</p>');
-  buffer.writeln('<ul style="list-style-type: circle;">');
-  for (var column in columns) {
-    final rustType = getRustType(
-      type: column.type,
-      columnName: column.name,
-      isNullable: false,
-    );
-    final filters = column.getQueryFilterVariables();
-    for (var filter in filters) {
-      switch (filter.filterClause) {
-        case FilterClause.equal:
-          buffer.writeln('<li><b>${column.name}</b> $rustType,');
-          break;
-        case FilterClause.greaterThanOrEqual:
-          buffer.writeln('<li><b>${column.name}_gte</b> $rustType,');
-          break;
-        case FilterClause.lessThanOrEqual:
-          buffer.writeln('<li><b>${column.name}_lte</b> $rustType,');
-          break;
-        case FilterClause.like:
-          buffer.writeln('<li><b>${column.name}_like</b> String,');
-          break;
-        case FilterClause.inList:
-          buffer.writeln('<li><b>${column.name}_in</b> Vec<$rustType>,');
-          break;
-      }
-    }
-  }
-  buffer.writeln('</ul>');
-
-  return buffer.toString();
-}

@@ -1,0 +1,72 @@
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Sector {
+    Supplier,
+    NotApplicable,
+    AlternativeResources,
+    Generation,
+    EndUser,
+    PubliclyOwnedEntity,
+    Transmission,
+    MarketParticipant,
+}
+
+impl std::str::FromStr for Sector {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_case(Case::UpperSnake).as_str() {
+            "SUPPLIER" => Ok(Sector::Supplier),
+            "NOT_APPLICABLE" => Ok(Sector::NotApplicable),
+            "ALTERNATIVE_RESOURCES" => Ok(Sector::AlternativeResources),
+            "GENERATION" => Ok(Sector::Generation),
+            "END_USER" => Ok(Sector::EndUser),
+            "PUBLICLY_OWNED_ENTITY" => Ok(Sector::PubliclyOwnedEntity),
+            "TRANSMISSION" => Ok(Sector::Transmission),
+            "MARKET_PARTICIPANT" => Ok(Sector::MarketParticipant),
+            _ => Err(format!("Invalid value for Sector: {}", s)),
+        }
+    }
+}
+
+impl std::fmt::Display for Sector {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Sector::Supplier => write!(f, "Supplier"),
+            Sector::NotApplicable => write!(f, "Not applicable"),
+            Sector::AlternativeResources => write!(f, "Alternative Resources"),
+            Sector::Generation => write!(f, "Generation"),
+            Sector::EndUser => write!(f, "End User"),
+            Sector::PubliclyOwnedEntity => write!(f, "Publicly-Owned Entity"),
+            Sector::Transmission => write!(f, "Transmission"),
+            Sector::MarketParticipant => write!(f, "Market Participant"),
+        }
+    }
+}
+
+impl serde::Serialize for Sector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let s = match self {
+            Sector::Supplier => "Supplier",
+            Sector::NotApplicable => "Not applicable",
+            Sector::AlternativeResources => "Alternative Resources",
+            Sector::Generation => "Generation",
+            Sector::EndUser => "End User",
+            Sector::PubliclyOwnedEntity => "Publicly-Owned Entity",
+            Sector::Transmission => "Transmission",
+            Sector::MarketParticipant => "Market Participant",
+        };
+        serializer.serialize_str(&s)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Sector {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        Sector::from_str(&s).map_err(serde::de::Error::custom)
+    }
+}

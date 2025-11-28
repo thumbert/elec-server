@@ -1,63 +1,120 @@
 import 'package:elec_server/utils.dart';
 part 'lib_duckdb_builder_rust.dart';
 
-/// It gets really tedious to manually write Rust structs that correspond to
-/// a DuckDB table schema.  The entire info is already available, so why
-/// not generate the Rust code automatically?
-///
-/// [input] is the entire DuckDB CREATE TABLE statement.
-/// 
-/// Given a the [input], create:
-///   1. a Rust struct with the appropriate types
-///   2. the enums for all DuckDB ENUM columns
-///   3. a function to query the database and return a Vec of the struct
-///   4. a test stub
-///
-///
-/// See the test folder for examples.
-String generateRustStub(String input,
-    {List<String> likeFilters = const <String>[],
-    List<String> inFilters = const <String>[],
-    String? timezoneName}) {
-  final tableName = getTableName(input);
-  final columns =
-      getColumns(input, likeFilters: likeFilters, inFilters: inFilters);
+class CodeGenerator {
+  CodeGenerator(this.sql,
+      {this.likeFilters = const <String>[],
+      this.inFilters = const <String>[],
+      this.timezoneName}) {
+    tableName = getTableName(sql);
+    columns = getColumns(sql,
+        likeFilters: likeFilters,
+        inFilters: inFilters,
+        timezoneName: timezoneName);
+      }
 
-  final buffer = StringBuffer();
-  buffer.writeln('// Auto-generated Rust stub for DuckDB table: $tableName');
-  buffer.writeln(
-      '// Created on ${DateTime.now().toIso8601String().substring(0, 10)} '
-      'with elec_server/utils/lib_duckdb_builder.dart\n');
-  buffer.write(addImports(columns));
+  final String sql;
+  final List<String> likeFilters;
+  final List<String> inFilters;
+  final String? timezoneName;
 
-  buffer.write('\n');
-  buffer.write(makeStruct(columns));
+  ///
+  late final String tableName;
+  late final List<Column> columns;
 
-  for (var column in columns) {
-    if (column.type == ColumnTypeDuckDB.enumType) {
-      final variants = getEnumVariants(column.input);
-      variants.sort();
-      buffer.write('\n');
-      buffer.write(makeEnum(
-          columnName: column.name,
-          values: variants,
-          isNullable: column.isNullable));
-    }
+  String generateDartStub() {
+    throw UnimplementedError('Dart stub generation not implemented yet.');
   }
 
-  buffer.write('\n');
-  buffer.write(makeQueryFunction(tableName, columns));
+  /// It gets really tedious to manually write Rust structs that correspond to
+  /// a DuckDB table schema.  The entire info is already available, so why
+  /// not generate the Rust code automatically?
+  ///
+  /// [sql] is the entire DuckDB CREATE TABLE statement.
+  /// [inFilters]
+  ///
+  /// Given a the [sql], create:
+  ///   1. a Rust struct with the appropriate types
+  ///   2. the enums for all DuckDB ENUM columns
+  ///   3. a function to query the database and return a Vec of the struct
+  ///   4. a test stub
+  ///
+  ///
+  /// See the test folder for examples.
+  String generateRustStub() {
+    final buffer = StringBuffer();
+    buffer.writeln('// Auto-generated Rust stub for DuckDB table: $tableName');
+    buffer.writeln(
+        '// Created on ${DateTime.now().toIso8601String().substring(0, 10)} '
+        'with elec_server/utils/lib_duckdb_builder.dart\n');
+    buffer.write(addImports(columns));
 
-  buffer.write('\n');
-  buffer.write(makeQueryFilterStruct(columns));
+    buffer.write('\n');
+    buffer.write(makeStruct(columns));
 
-  buffer.write('\n');
-  buffer.write(makeQueryFilterBuilder(columns));
+    for (var column in columns) {
+      if (column.type == ColumnTypeDuckDB.enumType) {
+        final variants = getEnumVariants(column.input);
+        variants.sort();
+        buffer.write('\n');
+        buffer.write(makeEnum(
+            columnName: column.name,
+            values: variants,
+            isNullable: column.isNullable));
+      }
+    }
 
-  buffer.write('\n\n');
-  buffer.write(makeTest());
+    buffer.write('\n');
+    buffer.write(makeQueryFunction(tableName, columns));
 
-  return buffer.toString();
+    buffer.write('\n');
+    buffer.write(makeQueryFilterStruct(columns));
+
+    buffer.write('\n');
+    buffer.write(makeQueryFilterBuilder(columns));
+
+    buffer.write('\n\n');
+    buffer.write(makeTest());
+
+    return buffer.toString();
+  }
+
+  /// Generate HTML documentation for the query.
+  String generateHtmlDocs() {
+    final buffer = StringBuffer();
+    buffer.writeln('<p>The url query string has the following components:</p>');
+    buffer.writeln('<ul style="list-style-type: circle;">');
+    for (var column in columns) {
+      final rustType = getRustType(
+        type: column.type,
+        columnName: column.name,
+        isNullable: false,
+      );
+      final filters = column.getQueryFilterVariables();
+      for (var filter in filters) {
+        switch (filter.filterClause) {
+          case FilterClause.equal:
+            buffer.writeln('<li><b>${column.name}</b> $rustType,');
+            break;
+          case FilterClause.greaterThanOrEqual:
+            buffer.writeln('<li><b>${column.name}_gte</b> $rustType,');
+            break;
+          case FilterClause.lessThanOrEqual:
+            buffer.writeln('<li><b>${column.name}_lte</b> $rustType,');
+            break;
+          case FilterClause.like:
+            buffer.writeln('<li><b>${column.name}_like</b> String,');
+            break;
+          case FilterClause.inList:
+            buffer.writeln('<li><b>${column.name}_in</b> Vec<$rustType>,');
+            break;
+        }
+      }
+    }
+    buffer.writeln('</ul>');
+
+    return buffer.toString();
+  }
 }
 
 class Column {
@@ -72,8 +129,6 @@ class Column {
   final String input;
 
   // Not sure about having these flags here, but let's see how it holds up
-  // These fields should be private, but I can't test Column without them.
-  // Very annoying, Dart!
   bool hasInFilter = false;
   bool hasLikeFilter = false;
   bool hasGteFilter = false;
@@ -191,7 +246,11 @@ List<Column> getColumns(String input,
       input: line,
     );
     if (one.type == ColumnTypeDuckDB.timestamptz) {
-      one.timezoneName = timezoneName!;
+      if (timezoneName == null) {
+        throw StateError(
+            'timezoneName argument is required for TIMESTAMPTZ columns');
+      }
+      one.timezoneName = timezoneName;
     }
     if (likeFilters.contains(one.name) &&
         one.type == ColumnTypeDuckDB.varchar) {
@@ -318,7 +377,7 @@ bool isColumnNullable(String input) {
 
 /// Extract the enum variants for a given column.
 /// [input] is one row.
-///
+/// The Rust enum variant name will be in Pascal case.
 List<String> getEnumVariants(String input) {
   // Split by commas not inside quotes
   final variantList = RegExp(r"'([^']*)'")
