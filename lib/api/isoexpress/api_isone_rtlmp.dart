@@ -72,13 +72,13 @@ class RtLmp {
     }).toList();
 
     /// do the monthly aggregation
-    var _monthlyNest = Nest()
+    var monthlyNest = Nest()
       ..key((Map e) {
         String hb = e['hourBeginning'];
         return hb.substring(0, 7);
       })
       ..rollup((Iterable x) => _mean(x.map((e) => e[component])));
-    List<Map> res = _monthlyNest.entries(out);
+    List<Map> res = monthlyNest.entries(out);
     var res2 = res
         .map((Map e) => {'month': e['key'], component: e['values']})
         .toList();

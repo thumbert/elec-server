@@ -119,7 +119,7 @@ abstract class NyisoReport {
 }
 
 /// An archive that gets daily updates.
-abstract class DailyNysioCsvReport extends NyisoReport {
+abstract class DailyNyisoCsvReport extends NyisoReport {
   /// Get the url of this report for this date.  Monthly reports
   /// do not have an url for each day.
   /// For daily reports, the most recent 10 days are (usually) available

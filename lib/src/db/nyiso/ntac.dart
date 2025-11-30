@@ -1,10 +1,9 @@
-/// To get the data, go to nyiso page,
-/// click on Markets > Reports & Info > General Information > External Transaction TSC- Summary & Details
-/// takes you to http://mis.nyiso.com/public/P-62list.htm
-///
-/// Data is published for one month ahead, usually on the 15th of the
-/// previous month
-
+// To get the data, go to nyiso page,
+// click on Markets > Reports & Info > General Information > External Transaction TSC- Summary & Details
+// takes you to http://mis.nyiso.com/public/P-62list.htm
+//
+// Data is published for one month ahead, usually on the 15th of the
+// previous month
 import 'dart:io';
 import 'dart:async';
 import 'package:collection/collection.dart';
@@ -13,9 +12,8 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
-import 'package:tuple/tuple.dart';
 
-class NyisoNtacReportArchive extends DailyNysioCsvReport {
+class NyisoNtacReportArchive extends DailyNyisoCsvReport {
   NyisoNtacReportArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'ancillaries');
@@ -67,14 +65,14 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
     var xs = readReport(getReportDate(file));
     if (xs.isEmpty) return out;
 
-    var date = Date.fromTZDateTime(NyisoReport.parseTimestamp(
+    var date = Date.containing(NyisoReport.parseTimestamp(
             xs.first['Time Stamp'], xs.first['Time Zone']))
         .toString();
     var groups =
         groupBy(xs, (Map e) => (e['Limiting Facility'] as String).trim());
 
     for (var group in groups.entries) {
-      var _hours = group.value
+      var hours = group.value
           .map((e) => {
                 'hourBeginning':
                     NyisoReport.parseTimestamp(e['Time Stamp'], e['Time Zone']),
@@ -86,12 +84,12 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
       // see for example 2019-12-15 for 'E13THSTA 345 FARRAGUT 345 1'
       // because there are different contingencies for this limitingFacility
       // so I will sort them here before storing
-      _hours.sort((a, b) => a['hourBeginning'].compareTo(b['hourBeginning']));
+      hours.sort((a, b) => a['hourBeginning'].compareTo(b['hourBeginning']));
       out.add({
         'date': date,
         'market': 'DA',
         'limitingFacility': group.key,
-        'hours': _hours,
+        'hours': hours,
       });
     }
 
@@ -105,13 +103,12 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
       print('--->  No data');
       return Future.value(-1);
     }
-    var groups = groupBy(data, (Map e) => Tuple2(e['market'], e['date']));
+    var groups = groupBy(data, (Map e) => (e['market'], e['date']));
     try {
       for (var t2 in groups.keys) {
-        await dbConfig.coll.remove({'market': t2.item1, 'date': t2.item2});
+        await dbConfig.coll.remove({'market': t2.$1, 'date': t2.$2});
         await dbConfig.coll.insertAll(groups[t2]!);
-        print(
-            '--->  Inserted ${t2.item1} binding constraints for day ${t2.item2}');
+        print('--->  Inserted ${t2.$1} binding constraints for day ${t2.$2}');
       }
       return 0;
     } catch (e) {
@@ -143,6 +140,7 @@ class NyisoNtacReportArchive extends DailyNysioCsvReport {
 
   @override
   File getZipFileForMonth(Month month) {
-    return File('$dir${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints.csv.zip');
+    return File(
+        '$dir${month.startDate.toString().replaceAll('-', '')}DAMLimitingConstraints.csv.zip');
   }
 }

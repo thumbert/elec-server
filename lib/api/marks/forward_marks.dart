@@ -11,7 +11,6 @@ import 'package:more/cache.dart';
 import 'package:date/date.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 import 'package:elec_server/src/db/marks/curve_attributes.dart' as ca;
 import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:elec/risk_system.dart';
@@ -40,9 +39,10 @@ class ForwardMarks {
   /// Cache with curve values.  The key is: (asOfDate, curveId)
   /// The [asOfDate] key is a UTC date, but the [MarksCurve] is in the correct
   /// [curveId] timezone.
-  /// TODO: if curves are resubmitted intra-day, they need be removed from the cache
+  /// 
+  /// TODO: If curves are resubmitted intra-day, they need be removed from the cache
   /// or always pull current day marks in the cache.
-  static late Cache<Tuple2<Date, String>, MarksCurve> marksCache;
+  static late Cache<(Date, String), MarksCurve> marksCache;
 
   final headers = {
     'Content-Type': 'application/json',
@@ -56,8 +56,8 @@ class ForwardMarks {
     collCurveId = db.collection('curve_ids');
     curveIdCache = Cache<String, Map<String, dynamic>?>.lru(
         loader: _curveIdCacheLoader, maximumSize: 20000);
-    marksCache = Cache<Tuple2<Date, String>, MarksCurve>.lru(
-        loader: (x) => _getForwardCurve(x.item1, x.item2), maximumSize: 10000);
+    marksCache = Cache<(Date, String), MarksCurve>.lru(
+        loader: (x) => _getForwardCurve(x.$1, x.$2), maximumSize: 10000);
   }
 
   Router get router {
@@ -75,7 +75,7 @@ class ForwardMarks {
     ///
     router.get('/curveId/<curveId>/asOfDate/<asOfDate>',
         (Request request, String curveId, String asOfDate) async {
-      var aux = await marksCache.get(Tuple2(Date.parse(asOfDate), curveId));
+      var aux = await marksCache.get((Date.parse(asOfDate), curveId));
       if (aux is MarksCurveEmpty) {
         return Response.ok(json.encode({}), headers: headers);
       }
@@ -91,11 +91,11 @@ class ForwardMarks {
         '/curveId/<curveId>/term/<term>/bucket/<bucket>/start/<start>/end/<end>',
         (Request request, String curveId, String term, String bucket,
             String start, String end) async {
-      var _term = Term.parse(term, UTC);
-      var _bucket = Bucket.parse(bucket);
-      var _start = Date.parse(start, location: UTC);
-      var _end = Date.parse(end, location: UTC);
-      var out = await getStripPrice(curveId, _term, _bucket, _start, _end);
+      var term1 = Term.parse(term, UTC);
+      var bucket1 = Bucket.parse(bucket);
+      var start1 = Date.parse(start, location: UTC);
+      var end1 = Date.parse(end, location: UTC);
+      var out = await getStripPrice(curveId, term1, bucket1, start1, end1);
       return Response.ok(json.encode(out), headers: headers);
     });
 
@@ -114,12 +114,12 @@ class ForwardMarks {
         '/curveId/<curveId>/term/<term>/bucket/<bucket>/start/<start>/end/<end>/values',
         (Request request, String curveId, String term, String bucket,
             String start, String end) async {
-      var _term = Term.parse(term, UTC);
-      var _bucket = Bucket.parse(bucket);
-      var _start = Date.parse(start, location: UTC);
-      var _end = Date.parse(end, location: UTC);
+      var term1 = Term.parse(term, UTC);
+      var bucket1 = Bucket.parse(bucket);
+      var start1 = Date.parse(start, location: UTC);
+      var end1 = Date.parse(end, location: UTC);
       var out =
-          await getStripPriceValues(curveId, _term, _bucket, _start, _end);
+          await getStripPriceValues(curveId, term1, bucket1, start1, end1);
       return Response.ok(json.encode(out), headers: headers);
     });
 
@@ -164,7 +164,7 @@ class ForwardMarks {
     /// Invalidate an entry in the marks cache
     router.get('/cache-invalidate/curveId/<curveId>/asOfDate/<asOfDate>',
         (Request request, String curveId, String asOfDate) async {
-      await marksCache.invalidate(Tuple2(Date.parse(asOfDate), curveId));
+      await marksCache.invalidate((Date.parse(asOfDate), curveId));
       return Response.ok(json.encode('Success'), headers: headers);
     });
 
@@ -267,7 +267,7 @@ class ForwardMarks {
   /// ```
   /// [asOfDate] is an UTC date, as there is no curve information yet
   Future<MarksCurve> getForwardCurve(Date asOfDate, String curveId) async {
-    return marksCache.get(Tuple2(asOfDate, curveId));
+    return marksCache.get((asOfDate, curveId));
   }
 
   /// Get one curve from Mongo and add it to the cache.  The loader function
@@ -317,7 +317,7 @@ class ForwardMarks {
 
     var date = start;
     while (!date.isAfter(end)) {
-      var aux = await marksCache.get(Tuple2(date, curveId));
+      var aux = await marksCache.get((date, curveId));
       if (aux is PriceCurve) {
         // could be a MarksCurveEmpty
         out[date.toString()] = aux.value(term.interval, bucket);
@@ -352,7 +352,7 @@ class ForwardMarks {
 
     var date = start;
     while (!date.isAfter(end)) {
-      var aux = await marksCache.get(Tuple2(date, curveId));
+      var aux = await marksCache.get((date, curveId));
       if (aux is PriceCurve) {
         // could be a MarksCurveEmpty
         out[date.toString()] =
@@ -392,7 +392,7 @@ class ForwardMarks {
         for (var day in days) {
           var value = _formatMongoDocument(
               docs.first, day.toString(), curveId, tzLocation);
-          await marksCache.set(Tuple2(day, curveId), value);
+          await marksCache.set((day, curveId), value);
         }
       } else {
         var i = 1;
@@ -403,7 +403,7 @@ class ForwardMarks {
           }
           var value = _formatMongoDocument(
               docs[i - 1], day.toString(), curveId, tzLocation);
-          await marksCache.set(Tuple2(day, curveId), value);
+          await marksCache.set((day, curveId), value);
         }
       }
     }
@@ -419,15 +419,15 @@ class ForwardMarks {
     }
     var location = tzLocation == 'UTC' ? UTC : getLocation(tzLocation);
     // localize asOfDate in the timezone of the curve
-    var _asOfDate = Date.parse(asOfDate, location: location);
+    var asOfDate1 = Date.parse(asOfDate, location: location);
     MarksCurve curve;
     if (ForwardMarksArchive.isPriceCurve(curveId)) {
-      curve = _toPriceCurve(document, _asOfDate);
+      curve = _toPriceCurve(document, asOfDate1);
     } else {
       if (curveId.contains('volatility')) {
-        curve = _toVolatilitySurface(document, _asOfDate);
+        curve = _toVolatilitySurface(document, asOfDate1);
       } else if (curveId.contains('hourlyshape')) {
-        curve = _toHourlyShape(document, _asOfDate);
+        curve = _toHourlyShape(document, asOfDate1);
       } else {
         log.severe('Unknown classification for curve $curveId');
         return MarksCurveEmpty();
@@ -455,9 +455,9 @@ class ForwardMarks {
     var curveDetails0 = curveDetails['children'][0] as String;
     var curveDetails1 = curveDetails['children'][1] as String;
     var c0 =
-        await marksCache.get(Tuple2(asOfDate, curveDetails0)) as PriceCurve;
+        await marksCache.get((asOfDate, curveDetails0)) as PriceCurve;
     var c1 =
-        await marksCache.get(Tuple2(asOfDate, curveDetails1)) as PriceCurve;
+        await marksCache.get((asOfDate, curveDetails1)) as PriceCurve;
     return c0 + c1;
   }
 
@@ -467,9 +467,9 @@ class ForwardMarks {
     var curveDetails0 = curveDetails['children'][0] as String;
     var curveDetails1 = curveDetails['children'][1] as String;
     var c0 =
-        await marksCache.get(Tuple2(asOfDate, curveDetails0)) as PriceCurve;
+        await marksCache.get((asOfDate, curveDetails0)) as PriceCurve;
     var c1 =
-        await marksCache.get(Tuple2(asOfDate, curveDetails1)) as PriceCurve;
+        await marksCache.get((asOfDate, curveDetails1)) as PriceCurve;
     return c0 - c1;
   }
 
@@ -481,11 +481,11 @@ class ForwardMarks {
     var curveDetails1 = curveDetails['children'][1] as String;
     var curveDetails2 = curveDetails['children'][2] as String;
     var c0 =
-        await marksCache.get(Tuple2(asOfDate, curveDetails0)) as PriceCurve;
+        await marksCache.get((asOfDate, curveDetails0)) as PriceCurve;
     var c1 =
-        await marksCache.get(Tuple2(asOfDate, curveDetails1)) as PriceCurve;
+        await marksCache.get((asOfDate, curveDetails1)) as PriceCurve;
     var c2 =
-        await marksCache.get(Tuple2(asOfDate, curveDetails2)) as PriceCurve;
+        await marksCache.get((asOfDate, curveDetails2)) as PriceCurve;
     return c0 + c1 + c0 * c2;
   }
 
@@ -564,7 +564,7 @@ class ForwardMarks {
     var curve =
         VolatilitySurface.fromJson(document, location: asOfDate.location);
     // return from prompt month forward
-    var start = Month.fromTZDateTime(asOfDate.start).next.start;
+    var start = Month.containing(asOfDate.start).next.start;
     var end = curve.terms.last.end;
     curve.window(Interval(start, end));
     return curve;

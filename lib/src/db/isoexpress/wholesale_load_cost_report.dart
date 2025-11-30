@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
-import 'package:tuple/tuple.dart';
 import '../lib_iso_express.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
@@ -33,12 +32,12 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
       '${dir}whlsecost_hourly_${ptid}_${month.toIso8601String().replaceAll('-', '')}.json');
 
   Future<void> downloadFile(Month month, int ptid) async {
-    var _user = dotenv.env['ISONE_WS_USER']!;
-    var _pwd = dotenv.env['ISONE_WS_PASSWORD']!;
+    var user = dotenv.env['ISONE_WS_USER']!;
+    var pwd = dotenv.env['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
       ..addCredentials(Uri.parse(getUrl(month, ptid)), '',
-          HttpClientBasicCredentials(_user, _pwd))
+          HttpClientBasicCredentials(user, pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');
@@ -98,12 +97,12 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
 
     /// split data by ptid and date
     var groups = groupBy(
-        data, (dynamic e) => Tuple2(e['ptid'] as int?, e['date'] as String?));
+        data, (dynamic e) => (e['ptid'] as int?, e['date'] as String?));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
-          'ptid': key.item1,
-          'date': key.item2,
+          'ptid': key.$1,
+          'date': key.$2,
         });
         await dbConfig.coll.insertAll(groups[key]!);
       }
@@ -129,7 +128,6 @@ class WholesaleLoadCostReportArchive extends IsoExpressReport {
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
-    // TODO: implement converter
     throw UnimplementedError();
   }
 }

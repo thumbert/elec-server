@@ -1,4 +1,4 @@
-/// Data from http://mis.nyiso.com/public/
+// Data from http://mis.nyiso.com/public/
 
 import 'dart:io';
 import 'dart:async';
@@ -11,7 +11,7 @@ import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 
-class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
+class NyisoDaLmpHourlyArchive extends DailyNyisoCsvReport {
   NyisoDaLmpHourlyArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_lmp_hourly');
@@ -66,7 +66,7 @@ class NyisoDaLmpHourlyArchive extends DailyNysioCsvReport {
       nodeType = nType;
       var xs = readReport(date);
       if (xs.isEmpty) return out;
-      var asOfDate = parseMmddyyy(xs.first['Time Stamp']);
+      var asOfDate = parseMmddyyyy(xs.first['Time Stamp']);
 
       // takes care of DST dates automatically as each day will contain 23, 24, 25
       // hours as needed for each ptid

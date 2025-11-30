@@ -1,6 +1,6 @@
-/// All data from ...
-///   http://mis.nyiso.com/public/P-27list.htm
-/// contains both the DAM and the HAM market (RT)
+// All data from ...
+//   http://mis.nyiso.com/public/P-27list.htm
+// contains both the DAM and the HAM market (RT)
 
 import 'dart:io';
 import 'dart:async';
@@ -13,9 +13,8 @@ import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
-import 'package:tuple/tuple.dart';
 
-class NyisoEnergyOfferArchive extends DailyNysioCsvReport {
+class NyisoEnergyOfferArchive extends DailyNyisoCsvReport {
   NyisoEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_energy_offer');
@@ -151,7 +150,7 @@ class NyisoEnergyOfferArchive extends DailyNysioCsvReport {
     var groups = groupBy(xs.where((e) => e['Market'].trim() == 'DAM'), (Map e) {
       var dt = NyisoReport.parseTimestamp2((e['Date Time'] as String).trim());
       var date = dt.toString().substring(0, 10);
-      return Tuple2(e['Masked Gen ID'] as int, date);
+      return (e['Masked Gen ID'] as int, date);
     });
 
     for (var group in groups.keys) {

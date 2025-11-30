@@ -264,7 +264,7 @@ class WinterStormsArchive extends IsoExpressReport {
 //          throw new StateError('Unit is not Inch.  Do something! \n$row');
         var dt = parseTimestamp(row[0], row[1]);
         out.add(Map.fromIterables(keys, [
-          Date.fromTZDateTime(dt).toString(),
+          Date.containing(dt).toString(),
           dt,
           (row[2] as String).trim(), // state
           (row[3] as String).trim(), // county
@@ -279,7 +279,7 @@ class WinterStormsArchive extends IsoExpressReport {
         ]));
       }
     }
-    return out as List<Map<String, dynamic>>;
+    return out;
   }
 
   /// date is ":4/19/2018", time is " 700 AM"

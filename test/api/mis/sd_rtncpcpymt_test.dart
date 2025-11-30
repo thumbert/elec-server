@@ -4,7 +4,7 @@ import 'package:timezone/data/latest.dart';
 import 'package:elec_server/src/db/mis/sd_rtncpcpymt.dart';
 
 void tests() async {
-  var archive = SdRtNcpcPymtArchive();
+  var archive = SdRtNcpcPymntArchive();
   group('MIS SD_RTNCPCPYMT report archive', () {
     setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());

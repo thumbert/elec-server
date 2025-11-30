@@ -10,7 +10,7 @@ import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 
-class NyisoDaCongestionCompactArchive extends DailyNysioCsvReport {
+class NyisoDaCongestionCompactArchive extends DailyNyisoCsvReport {
   /// A collection for storing congestion only prices to get fast access to
   /// all hourly prices for all locations available for TCCs.
   ///

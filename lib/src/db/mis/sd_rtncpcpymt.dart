@@ -7,10 +7,10 @@ import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 
-class SdRtNcpcPymtArchive extends mis.MisReportArchive {
+class SdRtNcpcPymntArchive extends mis.MisReportArchive {
   final DateFormat fmt = DateFormat('MM/dd/yyyy');
 
-  SdRtNcpcPymtArchive({ComponentConfig? dbConfig}) {
+  SdRtNcpcPymntArchive({ComponentConfig? dbConfig}) {
     reportName = 'SD_RTNCPCPYMNT';
     dbConfig ??= ComponentConfig(
         host: '127.0.0.1',
@@ -63,7 +63,7 @@ class SdRtNcpcPymtArchive extends mis.MisReportArchive {
     var tab2 = <Map<String, dynamic>>[];
     for (var entry in grp.entries) {
       labels['Asset ID'] = entry.key;
-      tab2.addAll(addLabels([rowsToColumns(entry.value)], labels,
+      tab2.addAll(addLabels([collapseListOfMap(entry.value)], labels,
           ['H', 'Asset ID', 'Asset Name']));
     }
 
@@ -131,7 +131,6 @@ class SdRtNcpcPymtArchive extends mis.MisReportArchive {
   }
 
   Future<void> updateDb() async {
-    // TODO: implement updateDb
-    return null;
+    return;
   }
 }

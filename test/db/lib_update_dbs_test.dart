@@ -2,16 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:date/date.dart';
-import 'package:elec/elec.dart';
 import 'package:elec_server/db_isone.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
 import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:timezone/timezone.dart';
 
-import '../../bin/setup_db.dart';
 
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     {bool gzip = false}) async {

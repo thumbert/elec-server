@@ -60,13 +60,13 @@ class Lmp {
         '/daily/<component>/ptids/<ptids>/start/<start>/end/<end>/bucket/<bucket>',
         (Request request, String component, String ptids, String start,
             String end, String bucket) async {
-      var _ptids = ptids.split(',').map((e) => int.parse(e)).toList();
-      var _start = Date.parse(start, location: UTC);
-      var _end = Date.parse(end, location: UTC);
-      var _bucket = Bucket.parse(bucket);
+      var ptids1 = ptids.split(',').map((e) => int.parse(e)).toList();
+      var start1 = Date.parse(start, location: UTC);
+      var end1 = Date.parse(end, location: UTC);
+      var bucket1 = Bucket.parse(bucket);
 
       var aux = await getDailyBucketPriceSeveral(
-          component, _ptids, _start, _end, _bucket);
+          component, ptids1, start1, end1, bucket1);
       return Response.ok(json.encode(aux), headers: headers);
     });
 
@@ -242,7 +242,7 @@ class Lmp {
   }
 
   /// Get hourly prices for one ptid.
-  /// Each element of the Map is 'yyyy-mm-dd' -> <num>[...]
+  /// Each element of the Map is `'yyyy-mm-dd' -> <num>[...]`
   /// http://localhost:8080/nyiso/dalmp/v1/hourly/congestion/ptid/61757/start/20190101/end/20190101
   Future<Map<String, List<num>>> getHourlyPrices(
       String component, int ptid, String start, String end) async {

@@ -3,7 +3,6 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
-import 'package:tuple/tuple.dart';
 import 'package:timeseries/timeseries.dart';
 
 import '../../../bin/setup_db.dart';
@@ -446,7 +445,7 @@ Future<void> tests(String rootUrl) async {
       var feb21 = Month(2021, 2, location: location);
 
       var p75 = await ForwardMarks.marksCache
-              .get(Tuple2(Date.utc(2020, 7, 5), 'isone_energy_4000_da_lmp'))
+              .get((Date.utc(2020, 7, 5), 'isone_energy_4000_da_lmp'))
           as PriceCurve;
       expect(p75.first.interval, Date(2020, 7, 6, location: location));
       expect(p75.first.value[Bucket.b5x16], 25.4); // the value as of 5/29/2020
@@ -454,13 +453,13 @@ Future<void> tests(String rootUrl) async {
       expect(p75.value(feb21, Bucket.b5x16), 55.75);
 
       var p76 = await ForwardMarks.marksCache
-              .get(Tuple2(Date.utc(2020, 7, 6), 'isone_energy_4000_da_lmp'))
+              .get((Date.utc(2020, 7, 6), 'isone_energy_4000_da_lmp'))
           as PriceCurve;
       expect(p76.value(jan21, Bucket.b5x16), 60.7);
       expect(p76.value(feb21, Bucket.b5x16), 57.2);
 
       var p77 = await ForwardMarks.marksCache
-              .get(Tuple2(Date.utc(2020, 7, 7), 'isone_energy_4000_da_lmp'))
+              .get((Date.utc(2020, 7, 7), 'isone_energy_4000_da_lmp'))
           as PriceCurve;
       expect(p77.value(jan21, Bucket.b5x16), 60.7);
       expect(p77.value(feb21, Bucket.b5x16), 57.2);

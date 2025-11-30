@@ -8,7 +8,6 @@ import 'db/cme/cme_energy_settlements_test.dart' as cme;
 import 'db/ieso/rt_generation_test.dart' as ieso_rtgen;
 import 'db/ieso/rt_zonal_demand_test.dart' as ieso_rtzd;
 import 'db/isoexpress/da_binding_constraints_report_test.dart' as bc;
-import 'db/isoexpress/da_energy_offer_test.dart' as energy_offers;
 import 'db/isoexpress/da_demand_bid_test.dart' as demand_bids;
 import 'db/isoexpress/da_congestion_compact_test.dart' as da_congestion;
 import 'db/isoexpress/da_lmp_hourly_test.dart' as dalmp;

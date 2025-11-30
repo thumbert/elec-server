@@ -4,7 +4,6 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:tuple/tuple.dart';
 import 'package:table/table.dart';
 import 'package:dama/dama.dart';
 import 'package:elec_server/src/db/lib_settlements.dart';
@@ -455,9 +454,9 @@ class SrRtLocSum {
       String? locations,
       int settlement,
       {required List<String> columns}) async {
-    var _locations = <int>[];
+    var locations1 = <int>[];
     if (locations != null) {
-      _locations = locations.split(',').map((e) => int.parse(e)).toList();
+      locations1 = locations.split(',').map((e) => int.parse(e)).toList();
     }
     var pipeline = [
       {
@@ -469,7 +468,7 @@ class SrRtLocSum {
             '\$gte': startDate,
             '\$lte': endDate,
           },
-          if (_locations.isNotEmpty) 'Location ID': {'\$in': _locations},
+          if (locations1.isNotEmpty) 'Location ID': {'\$in': locations1},
         },
       },
       {
@@ -500,7 +499,7 @@ class SrRtLocSum {
       },
     ];
     var data = await coll.aggregateToStream(pipeline).toList();
-    var aux = getNthSettlement(data, (e) => Tuple2(e['date'], e['Location ID']),
+    var aux = getNthSettlement(data, (e) => (e['date'], e['Location ID']),
         n: settlement);
     return aux;
   }
@@ -625,7 +624,7 @@ class SrRtLocSum {
     }
     var aux = coll.find(query).toList();
     if (settlement != null) {
-      /// FIXME:  implement this
+      throw UnimplementedError();
     }
 
     return aux;
@@ -674,7 +673,7 @@ class SrRtLocSum {
     ];
     var res = await coll.aggregateToStream(pipeline).toList();
     if (settlement != null) {
-      /// FIXME:  return only the settlement you're interested in.
+      throw UnimplementedError();
     }
 
     return res;

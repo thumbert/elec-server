@@ -7,7 +7,6 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
 import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 
 class SrDaLocSumArchive extends mis.MisReportArchive {
   SrDaLocSumArchive({ComponentConfig? dbConfig}) {
@@ -40,15 +39,15 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
 
     /// split the data by Location ID, date, version
     var groups = groupBy(
-        data, (dynamic e) => Tuple3(e['Location ID'], e['date'], e['version']));
+        data, (dynamic e) => (e['Location ID'], e['date'], e['version']));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'account': account,
           'tab': 0,
-          'Location ID': key.item1,
-          'date': key.item2,
-          'version': key.item3,
+          'Location ID': key.$1,
+          'date': key.$2,
+          'version': key.$3,
         });
         await dbConfig.coll.insertAll(groups[key]!);
       }
@@ -66,17 +65,17 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     /// split the data by Asset ID, date, version
     var groups = groupBy(
         data,
-        (dynamic e) => Tuple4(
-            e['Subaccount ID'], e['Location ID'], e['date'], e['version']));
+        (dynamic e) =>
+            (e['Subaccount ID'], e['Location ID'], e['date'], e['version']));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'account': account,
           'tab': 1,
-          'Subaccount ID': key.item1,
-          'Location ID': key.item2,
-          'date': key.item3,
-          'version': key.item4,
+          'Subaccount ID': key.$1,
+          'Location ID': key.$2,
+          'date': key.$3,
+          'version': key.$4,
         });
         await dbConfig.coll.insertAll(groups[key]!);
       }
@@ -108,7 +107,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     for (var column in keepColumns) {
-      var name = mis.removeParanthesesEnd(column);
+      var name = mis.removeParenthesesEnd(column);
 
       /// Fix column name: 'Day Ahead Generation Obligation D=(A+B+C)'
       if (name.endsWith(' D=')) name = name.replaceAll(' D=', '');
@@ -121,7 +120,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
           location, hB.millisecondsSinceEpoch);
       row['hourBeginning'].add(hB.toIso8601String());
       for (var column in keepColumns) {
-        var name = mis.removeParanthesesEnd(column);
+        var name = mis.removeParenthesesEnd(column);
         if (name.endsWith(' D=')) name = name.replaceAll(' D=', '');
         row[name].add(e[column]);
       }
@@ -153,7 +152,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     for (var column in keepColumns) {
-      row[mis.removeParanthesesEnd(column)] = [];
+      row[mis.removeParenthesesEnd(column)] = [];
     }
     for (var e in rows) {
       var hB = parseHourEndingStamp(
@@ -162,7 +161,7 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
           location, hB.millisecondsSinceEpoch);
       row['hourBeginning'].add(hB.toIso8601String());
       for (var column in keepColumns) {
-        row[mis.removeParanthesesEnd(column)].add(e[column]);
+        row[mis.removeParenthesesEnd(column)].add(e[column]);
       }
     }
     return row;
@@ -186,8 +185,8 @@ class SrDaLocSumArchive extends mis.MisReportArchive {
     data = mis.readReportTabAsMap(file, tab: 1);
     var res1 = <Map<String, dynamic>>[];
     if (data.isNotEmpty) {
-      var dataById = groupBy(data,
-          (dynamic row) => Tuple2(row['Subaccount ID'], row['Location ID']));
+      var dataById = groupBy(
+          data, (dynamic row) => (row['Subaccount ID'], row['Location ID']));
       res1 = dataById.keys
           .map((tuple) =>
               rowConverter1(dataById[tuple]!, account, reportDate, version))

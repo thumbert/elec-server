@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:tuple/tuple.dart';
 import 'package:date/date.dart';
 import 'package:collection/collection.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -63,12 +62,12 @@ class SdRtloadArchive extends mis.MisReportArchive {
 
     /// split the data by Asset ID, date, version
     var groups = groupBy(
-        data, (Map e) => Tuple3(e['Asset ID'], e['date'], e['version']));
+        data, (Map e) => (e['Asset ID'], e['date'], e['version']));
     for (var key in groups.keys) {
       await dbConfig.coll.remove({
-        'Asset ID': key.item1,
-        'date': key.item2,
-        'version': key.item3,
+        'Asset ID': key.$1,
+        'date': key.$2,
+        'version': key.$3,
       });
       await dbConfig.coll.insertAll(groups[key]!);
     }

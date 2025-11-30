@@ -60,10 +60,10 @@ class SdDaTransactArchive extends mis.MisReportArchive {
       aux['tab'] = 0; // index
       aux['date'] = reportDate.toString(); // index
       aux['version'] = version;
-      var _hb =
+      var hb =
           parseHourEndingStamp(mmddyyyy(reportDate), row['Trading Interval']);
       var hbL = TZDateTime.fromMillisecondsSinceEpoch(
-          location, _hb.millisecondsSinceEpoch);
+          location, hb.millisecondsSinceEpoch);
       aux['hourBeginning'] = hbL.toIso8601String();
       for (var column in columns) {
         aux[column] = row[column];
@@ -92,10 +92,10 @@ class SdDaTransactArchive extends mis.MisReportArchive {
       aux['tab'] = 1;
       aux['date'] = reportDate.toString();
       aux['version'] = version;
-      var _hb =
+      var hb =
           parseHourEndingStamp(mmddyyyy(reportDate), row['Trading Interval']);
       var hbL = TZDateTime.fromMillisecondsSinceEpoch(
-          location, _hb.millisecondsSinceEpoch);
+          location, hb.millisecondsSinceEpoch);
       aux['hourBeginning'] = hbL.toIso8601String();
       for (var column in columns) {
         aux[column] = row[column];
@@ -150,6 +150,6 @@ class SdDaTransactArchive extends mis.MisReportArchive {
   }
 
   Future<void> updateDb() async {
-    return null;
+    return;
   }
 }

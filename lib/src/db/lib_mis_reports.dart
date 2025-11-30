@@ -246,9 +246,9 @@ List<Map<String, dynamic>> readReportTabAsMap(File file, {int tab = 0}) {
       .toList();
 }
 
-/// Colnames in MIS reports sometimes have unnecessary parantheses.
+/// Colnames in MIS reports sometimes have unnecessary parentheses.
 /// For example: 'Internal Bilateral For Load (F)'.  Remove them.
-String removeParanthesesEnd(String x) {
+String removeParenthesesEnd(String x) {
   var ind = x.indexOf(RegExp('\\(.*\\)'));
   if (ind != -1) {
     x = x.substring(0, ind);

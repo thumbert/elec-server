@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:collection/collection.dart';
-import 'package:tuple/tuple.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
@@ -35,13 +34,13 @@ class EversourceCtLoadArchive {
   Future insertData(List<Map<String, dynamic>> data) async {
     if (data.isEmpty) return Future.value(null);
     // split the data by day and version
-    var groups = groupBy(
-        data, (Map e) => Tuple2<String?, String?>(e['date'], e['version']));
+    var groups = groupBy<Map<String, dynamic>, (String, String)>(
+        data, (Map e) => (e['date']!, e['version']!));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
-          'date': key.item1,
-          'version': key.item2,
+          'date': key.$1,
+          'version': key.$2,
         });
         await dbConfig.coll.insertAll(groups[key]!);
       }

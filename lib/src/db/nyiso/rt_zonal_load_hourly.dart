@@ -9,7 +9,7 @@ import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
 
-class NyisoHourlyRtZonalLoadReportArchive extends DailyNysioCsvReport {
+class NyisoHourlyRtZonalLoadReportArchive extends DailyNyisoCsvReport {
   NyisoHourlyRtZonalLoadReportArchive(
       {ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:collection/collection.dart';
-import 'package:tuple/tuple.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
@@ -35,16 +34,16 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     String? account = data.first['account'];
 
     /// split the data by Location ID, date, version
-    var groups = groupBy(
-        data, (Map e) => Tuple3(e['Location ID'], e['date'], e['version']));
+    var groups =
+        groupBy(data, (Map e) => (e['Location ID'], e['date'], e['version']));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'account': account,
           'tab': 0,
-          'Location ID': key.item1,
-          'date': key.item2,
-          'version': key.item3,
+          'Location ID': key.$1,
+          'date': key.$2,
+          'version': key.$3,
         });
         await dbConfig.coll.insertAll(groups[key]!);
       }
@@ -63,17 +62,17 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     /// split the data by Asset ID, date, version
     var groups = groupBy(
         data,
-        (Map e) => Tuple4(
-            e['Subaccount ID'], e['Location ID'], e['date'], e['version']));
+        (Map e) =>
+            (e['Subaccount ID'], e['Location ID'], e['date'], e['version']));
     try {
       for (var key in groups.keys) {
         await dbConfig.coll.remove({
           'account': account,
           'tab': 1,
-          'Subaccount ID': key.item1,
-          'Location ID': key.item2,
-          'date': key.item3,
-          'version': key.item4,
+          'Subaccount ID': key.$1,
+          'Location ID': key.$2,
+          'date': key.$3,
+          'version': key.$4,
         });
         await dbConfig.coll.insertAll(groups[key]!);
       }
@@ -107,13 +106,13 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     for (var column in keepColumns) {
-      row[mis.removeParanthesesEnd(column)] = [];
+      row[mis.removeParenthesesEnd(column)] = [];
     }
     for (var e in rows) {
       row['hourBeginning'].add(parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!));
       for (var column in keepColumns) {
-        row[mis.removeParanthesesEnd(column)].add(e[column]);
+        row[mis.removeParenthesesEnd(column)].add(e[column]);
       }
     }
     return row;
@@ -143,13 +142,13 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     var keepColumns = rows.first.keys.toList();
     keepColumns.removeWhere((e) => excludeColumns.contains(e));
     for (var column in keepColumns) {
-      row[mis.removeParanthesesEnd(column)] = [];
+      row[mis.removeParenthesesEnd(column)] = [];
     }
     for (var e in rows) {
       row['hourBeginning'].add(parseHourEndingStamp(
           mmddyyyy(reportDate), stringHourEnding(e['Trading Interval'])!));
       for (var column in keepColumns) {
-        row[mis.removeParanthesesEnd(column)].add(e[column]);
+        row[mis.removeParenthesesEnd(column)].add(e[column]);
       }
     }
     return row;
@@ -174,7 +173,7 @@ class SrRtLocSumArchive extends mis.MisReportArchive {
     var res1 = <Map<String, dynamic>>[];
     if (data.isNotEmpty) {
       var dataById = groupBy(data,
-          (dynamic row) => Tuple2(row['Subaccount ID'], row['Location ID']));
+          (dynamic row) => (row['Subaccount ID'], row['Location ID']));
       res1 = dataById.keys
           .map((tuple) =>
               rowConverter1(dataById[tuple]!, account, reportDate, version))

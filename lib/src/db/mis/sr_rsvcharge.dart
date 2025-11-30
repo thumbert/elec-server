@@ -7,7 +7,6 @@ import 'package:collection/collection.dart';
 import 'package:table/table.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/lib_mis_reports.dart' as mis;
-import 'package:tuple/tuple.dart';
 
 class SrRsvChargeArchive extends mis.MisReportArchive {
   SrRsvChargeArchive({ComponentConfig? dbConfig}) {
@@ -66,11 +65,11 @@ class SrRsvChargeArchive extends mis.MisReportArchive {
     labels['tab'] = 6;
     var x6 = mis.readReportTabAsMap(file, tab: 6);
     var grp6 = groupBy(
-        x6, (dynamic e) => Tuple2(e['Subaccount ID'], e['Load Zone ID']));
+        x6, (dynamic e) => (e['Subaccount ID'], e['Load Zone ID']));
     var tab6 = <Map<String, dynamic>>[];
     for (var entry in grp6.entries) {
-      labels['Subaccount ID'] = entry.key.item1;
-      labels['Load Zone ID'] = entry.key.item2;
+      labels['Subaccount ID'] = entry.key.$1;
+      labels['Load Zone ID'] = entry.key.$2;
       tab6.addAll(mis.MisReport.addLabels(
           [collapseListOfMap(entry.value)],
           labels,

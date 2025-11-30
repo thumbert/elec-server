@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:elec_server/src/db/lib_settlements.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:date/date.dart';
-import 'package:tuple/tuple.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
@@ -81,7 +80,7 @@ class SrRsvCharge {
       ..excludeFields(['_id', 'account', 'tab']);
 
     var data = await coll.find(query).toList();
-    return getNthSettlement(data, (e) => Tuple2(e['date'], e['Load Zone ID']),
+    return getNthSettlement(data, (e) => (e['date'], e['Load Zone ID']),
         n: settlement);
   }
 
@@ -114,7 +113,7 @@ class SrRsvCharge {
       ..excludeFields(['_id', 'account', 'tab', 'Subaccount ID']);
     var data = await coll.find(query).toList();
 
-    return getNthSettlement(data, (e) => Tuple2(e['date'], e['Load Zone ID']),
+    return getNthSettlement(data, (e) => (e['date'], e['Load Zone ID']),
         n: settlement);
   }
 }

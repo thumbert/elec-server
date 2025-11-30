@@ -1,4 +1,4 @@
-/// Go to Library > Planning Reports > Load & Capacity Data Report
+// Go to Library > Planning Reports > Load & Capacity Data Report
 
 final urls = {
   2021:

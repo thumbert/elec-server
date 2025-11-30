@@ -1,4 +1,4 @@
-/// http://mis.nyiso.com/public/P-70Alist.htm
+// http://mis.nyiso.com/public/P-70Alist.htm
 
 import 'dart:io';
 import 'dart:async';
@@ -9,9 +9,8 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Month;
 import 'package:elec_server/src/db/config.dart';
-import 'package:tuple/tuple.dart';
 
-class NyisoBtmSolarActualArchive extends DailyNysioCsvReport {
+class NyisoBtmSolarActualArchive extends DailyNyisoCsvReport {
   /// Data is available only from 2020-11-17 forward.
   /// Occasionally, there are missing days for example the last 5 days of 2021
   /// are missing.
@@ -92,13 +91,13 @@ class NyisoBtmSolarActualArchive extends DailyNysioCsvReport {
       return Future.value(-1);
     }
 
-    var groups = groupBy(data, (Map e) => Tuple2(e['type'], e['date']));
+    var groups = groupBy(data, (Map e) => (e['type'], e['date']));
     try {
       for (var t2 in groups.keys) {
-        await dbConfig.coll.remove({'type': t2.item1, 'date': t2.item2});
+        await dbConfig.coll.remove({'type': t2.$1, 'date': t2.$2});
         await dbConfig.coll.insertAll(groups[t2]!);
         print(
-            '--->  Inserted ${t2.item1} NYISO BTM solar MW for day ${t2.item2}');
+            '--->  Inserted ${t2.$1} NYISO BTM solar MW for day ${t2.$2}');
       }
       return 0;
     } catch (e) {

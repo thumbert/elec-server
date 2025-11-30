@@ -6,7 +6,6 @@ import 'package:table/table.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
-import 'package:tuple/tuple.dart';
 import 'package:dama/dama.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -76,7 +75,7 @@ class SdRtload {
     return router;
   }
 
-  /// Hourly data, all settlements for one assset id.  Return a list with
+  /// Hourly data, all settlements for one asset id.  Return a list with
   /// elements like this:
   /// ```
   ///{
@@ -94,7 +93,7 @@ class SdRtload {
     return _format(res);
   }
 
-  /// Hourly data last settlement for several assset ids aggregated.
+  /// Hourly data last settlement for several asset ids aggregated.
   /// Return
   /// ```
   /// {
@@ -276,7 +275,7 @@ class SdRtload {
     var pipeline =
         _pipelineAllAssetsVersionsDaily(startM.startDate, endM.endDate);
     var data = await coll.aggregateToStream(pipeline).toList();
-    var res = getNthSettlement(data, (e) => Tuple2(e['date'], e['Asset ID']),
+    var res = getNthSettlement(data, (e) => (e['date'], e['Asset ID']),
         n: settlement);
 
     var nest = Nest()
