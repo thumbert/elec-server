@@ -17,9 +17,9 @@ class DaClearedDemandReportArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}EnergyReports/DaHourlyDemand/Raw/';
     this.dir = dir;
+    reportName = 'Day-Ahead Energy Market Hourly Demand Report';
   }
-  @override
-  String reportName = 'Day-Ahead Energy Market Hourly Demand Report';
+
   @override
   String getUrl(Date? asOfDate) =>
       'https://www.iso-ne.com/transform/csv/hourlydayaheaddemand?start=${yyyymmdd(asOfDate)}&end=${yyyymmdd(asOfDate)}';

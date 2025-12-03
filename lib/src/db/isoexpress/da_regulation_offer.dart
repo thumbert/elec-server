@@ -46,7 +46,7 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
           .toIso8601String();
     }).toList();
 
-    row.addAll(rowsToColumns(rows as List<Map<String, dynamic>>, columns: [
+    row.addAll(collapseListOfMap(rows as List<Map<String, dynamic>>, columns: [
       'Regulation Low Limit',
       'Regulation High Limit',
       'Regulation Status', // AVAILABLE or UNAVAILABLE

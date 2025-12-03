@@ -203,11 +203,10 @@ class DaEnergyOffers {
     var date = Date.fromTZDateTime(hour.start);
     var hours = date.hours();
     var hourIndex = hours.indexWhere((e) => e == hour);
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}date/${date.toString()}/hourindex/$hourIndex';
-    var _response = await http.get(Uri.parse(_url));
-    var out =
-        (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    var out = (json.decode(response.body) as List).cast<Map<String, dynamic>>();
 
     return out;
   }
@@ -232,11 +231,10 @@ class DaEnergyOffers {
   /// ```
   Future<List<Map<String, dynamic>>> getDaEnergyOffersForAsset(
       int maskedAssetId, Date start, Date end) async {
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}assetId/${maskedAssetId.toString()}/start/${start.toString()}/end/${end.toString()}';
-    var _response = await http.get(Uri.parse(_url));
-    var out =
-        (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    var out = (json.decode(response.body) as List).cast<Map<String, dynamic>>();
     for (var e in out) {
       e['hours'] = json.decode(e['hours']);
     }
@@ -249,39 +247,37 @@ class DaEnergyOffers {
     var date = Date.fromTZDateTime(hour.start);
     var hours = date.hours();
     var hourIndex = hours.indexWhere((e) => e == hour);
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}stack/date/${date.toString()}/hourindex/$hourIndex';
-
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get the masked asset id and the masked participant id for this date.
   Future<List<Map<String, dynamic>>> assetsForDay(Date date) async {
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}assets/day/${date.toString()}';
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get the masked asset ids of a masked participant id between a start and end date.
   Future<List<Map<String, dynamic>>> assetsForParticipantId(
       int maskedParticipantId, Date start, Date end) async {
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}assets/participantId/$maskedParticipantId/start/${start.toString()}/end/${end.toString()}';
 
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get the daily variable between a start/end date
   Future<List<Map<String, dynamic>>> dailyVariable(
       String variable, Date start, Date end) async {
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}daily/variable/${Uri.decodeComponent(variable)}/start/${start.toString()}/end/${end.toString()}';
-
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 }
 

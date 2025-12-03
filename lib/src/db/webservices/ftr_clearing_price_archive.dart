@@ -30,12 +30,12 @@ class FtrClearingPriceArchive {
       File('${dir!}asset_ncpc_${month.toIso8601String()}.json');
 
   Future downloadMonth(Month month) async {
-    var _user = Platform.environment['ISONE_WS_USER']!;
-    var _pwd = Platform.environment['ISONE_WS_PASSWORD']!;
+    var user = Platform.environment['ISONE_WS_USER']!;
+    var pwd = Platform.environment['ISONE_WS_PASSWORD']!;
 
     var client = HttpClient()
       ..addCredentials(
-          Uri.parse(getUrl(month)), '', HttpClientBasicCredentials(_user, _pwd))
+          Uri.parse(getUrl(month)), '', HttpClientBasicCredentials(user, pwd))
       ..userAgent = 'Mozilla/4.0'
       ..badCertificateCallback = (cert, host, port) {
         print('Bad certificate connecting to $host:$port:');

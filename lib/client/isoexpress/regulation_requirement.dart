@@ -41,10 +41,10 @@ class RegulationRequirement {
 
   /// Get all the specifications.  Return them sorted by 'from' date.
   Future<List<Map<String, dynamic>>> getSpecification() async {
-    var _url = '$rootUrl${servicePath}values';
-    var _response = await http.get(Uri.parse(_url));
+    var url = '$rootUrl${servicePath}values';
+    var response = await http.get(Uri.parse(url));
     var out =
-        (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+        (json.decode(response.body) as List).cast<Map<String, dynamic>>();
     out.sort((a, b) => a['from'].compareTo(b['from']));
 
     /// Add an interval for convenience

@@ -8,7 +8,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 class ApiLoadEversource {
   late DbCollection coll1;
-  var location;
+  late Location location;
 
   ApiLoadEversource(Db db) {
     coll1 = db.collection('load_ct');

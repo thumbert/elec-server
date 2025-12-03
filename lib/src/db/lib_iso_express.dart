@@ -95,7 +95,7 @@ abstract class IsoExpressReport {
   Future<void> setupDb();
 
   /// Bring the database up to date.
-  /// Future<Null> updateDb();
+  // Future<void> updateDb();
 
   /// Load this file from disk and process it (add conversions, reformat, etc.)
   /// Make it ready for insertion in the database.

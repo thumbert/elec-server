@@ -1,4 +1,4 @@
-/// Data from http://mis.nyiso.com/public/
+// Data from http://mis.nyiso.com/public/
 
 import 'dart:io';
 import 'dart:async';

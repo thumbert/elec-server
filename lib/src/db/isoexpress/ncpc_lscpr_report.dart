@@ -8,9 +8,6 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class NcpcLscprReportArchive extends DailyIsoExpressReport {
-  @override
-  final String reportName =
-      'Local Second Contingency Net Commitment Period Compensation Report';
   final _setEq = const SetEquality();
   final _columnNames = {
     'H',
@@ -31,6 +28,8 @@ class NcpcLscprReportArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}NCPC/LscprCost/Raw/';
     this.dir = dir;
+    reportName =
+        'Local Second Contingency Net Commitment Period Compensation Report';
   }
 
   @override

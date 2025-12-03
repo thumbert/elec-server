@@ -15,8 +15,8 @@ class DaEnergyOffers {
 
     /// create an ordering by price and assetId to use when sorting the stack
     var natural = naturalComparable<num>;
-    var byPrice = natural.onResultOf<Map>((Map e) => e['price']);
-    var byAssetId = natural.onResultOf<Map>((Map e) => e['assetId']);
+    var byPrice = natural.keyOf<Map>((Map e) => e['price']);
+    var byAssetId = natural.keyOf<Map>((Map e) => e['assetId']);
     ordering = byPrice.thenCompare(byAssetId);
   }
 

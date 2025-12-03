@@ -5,18 +5,18 @@ class ApiResponse {
 
   ApiResponse();
 
-  ApiResponse.fromJson(Map _json) {
-    if (_json.containsKey('result')) {
-      result = _json['result'] as String?;
+  ApiResponse.fromJson(Map json) {
+    if (json.containsKey('result')) {
+      result = json['result'] as String?;
     }
   }
 
   Map<String, Object?> toJson() {
-    final _json = <String, Object?>{};
+    final json = <String, Object?>{};
     if (result != null) {
-      _json['result'] = result;
+      json['result'] = result;
     }
-    return _json;
+    return json;
   }
 }
 

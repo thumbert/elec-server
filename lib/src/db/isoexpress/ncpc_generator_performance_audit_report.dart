@@ -8,9 +8,6 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class NcpcGpaReportArchive extends DailyIsoExpressReport {
-  @override
-  final String reportName =
-      'Generator Performance Audit Net Commitment Period Compensation Report';
   final _setEq = const SetEquality();
   final _columnNames = {
     'H',
@@ -26,6 +23,8 @@ class NcpcGpaReportArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}NCPC/GpaCost/Raw/';
     this.dir = dir;
+    reportName =
+        'Generator Performance Audit Net Commitment Period Compensation Report';
   }
 
   @override

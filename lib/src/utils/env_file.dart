@@ -11,7 +11,7 @@ class EnvFile {
     var contents = file.readAsLinesSync();
 
     int? index;
-    var _fileModified = false;
+    var fileModified = false;
     for (var i = 0; i < contents.length; i++) {
       var row = contents[i];
       var aux = row.split('='); // key = value
@@ -20,17 +20,17 @@ class EnvFile {
         var rowKey = aux[0].trim();
         if (rowKey == key) {
           index = i;
-          _fileModified = true;
+          fileModified = true;
         }
       }
     }
 
     if (index != null) {
       contents.removeAt(index);
-      _fileModified = true;
+      fileModified = true;
     }
 
-    if (_fileModified) {
+    if (fileModified) {
       /// write the file back
       file.writeAsStringSync(contents.join('\n'), flush: true);
     }
@@ -42,8 +42,8 @@ class EnvFile {
   void updateKey(String key, String value) {
     var contents = file.readAsLinesSync();
 
-    var _keyExists = false;
-    var _fileModified = false;
+    var keyExists = false;
+    var fileModified = false;
     for (var i = 0; i < contents.length; i++) {
       var row = contents[i];
       var aux = row.split('='); // key = value
@@ -53,18 +53,18 @@ class EnvFile {
         if (rowKey == key) {
           // replace existing value with the new one
           contents[i] = '$key = $value';
-          _keyExists = true;
-          _fileModified = true;
+          keyExists = true;
+          fileModified = true;
         }
       }
     }
 
-    if (!_keyExists) {
+    if (!keyExists) {
       contents.add('$key = $value');
-      _fileModified = true;
+      fileModified = true;
     }
 
-    if (_fileModified) {
+    if (fileModified) {
       /// write the file back
       file.writeAsStringSync(contents.join('\n'), flush: true);
     }

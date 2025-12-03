@@ -78,17 +78,17 @@ class BindingConstraints {
   ///
   Future<List<Map<String, dynamic>>> getDaBindingConstraintsDetails(
       Interval interval) async {
-    var start = Date.fromTZDateTime(interval.start);
+    var start = Date.containing(interval.start);
     Date end;
     if (isBeginningOfDay(interval.end)) {
-      end = Date.fromTZDateTime(interval.end.subtract(Duration(seconds: 1)));
+      end = Date.containing(interval.end.subtract(Duration(seconds: 1)));
     } else {
-      end = Date.fromTZDateTime(interval.end);
+      end = Date.containing(interval.end);
     }
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}market/da/start/${start.toString()}/end/${end.toString()}';
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Calculate the total cost of this constraint for the day.
@@ -104,19 +104,18 @@ class BindingConstraints {
   /// This is a format convenient to summarize in a table.
   Future<List<Map<String, dynamic>>> dailyConstraintCost(
       Date start, Date end) async {
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}market/da/start/${start.toString()}/end/${end.toString()}/dailycost';
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 
   /// Get all the occurrences of this constraint in the history.
   Future<List<Map<String, dynamic>>> getDaBindingConstraint(
       String name, Date start, Date end) async {
-    var _url =
+    var url =
         '$rootUrl${_isoMap[iso]!}${servicePath}market/da/constraintname/${Uri.encodeComponent(name)}/start/${start.toString()}/end/${end.toString()}';
-
-    var _response = await http.get(Uri.parse(_url));
-    return (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await http.get(Uri.parse(url));
+    return (json.decode(response.body) as List).cast<Map<String, dynamic>>();
   }
 }

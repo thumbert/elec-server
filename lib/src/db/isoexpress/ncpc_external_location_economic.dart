@@ -8,9 +8,6 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class NcpcExternalLocationEconomicArchive extends DailyIsoExpressReport {
-  @override
-  final String reportName =
-      'External Location Economic Net Commitment Period Compensation';
   final _setEq = const SetEquality();
   final _columnNames = {
     'H',
@@ -32,6 +29,8 @@ class NcpcExternalLocationEconomicArchive extends DailyIsoExpressReport {
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}NCPC/ExternalLocationEconomic/Raw/';
     this.dir = dir;
+    reportName =
+        'External Location Economic Net Commitment Period Compensation';
   }
 
   @override

@@ -216,7 +216,6 @@ List<Map<String, dynamic>> getOpResDaCurves() {
       'curveId': 'isone_opres_da_pool',
       'serviceType': 'opres',
       'market': 'da',
-      // TODO: How to implement location?  as an array?? probably
       'curve': 'pool_da',
       'unit': '\$/MWh',
       'buckets': ['7x24'],

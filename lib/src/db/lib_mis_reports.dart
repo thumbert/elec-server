@@ -136,10 +136,10 @@ class MisReport {
   }
 
   /// Get the name of the company from the report.
-  Future<String?> companyName() async {
-    var _comments = await comments();
+  Future<String> companyName() async {
+    var comments0 = await comments();
     _converter ??= CsvToListConverter();
-    var aux = _converter!.convert(_comments[2])[0];
+    var aux = _converter!.convert(comments0[2])[0];
     return aux[1];
   }
 
@@ -167,11 +167,11 @@ class MisReport {
         );
   }
 
-  Future<String?> filename() async {
-    var _comments = await comments();
+  Future<String> filename() async {
+    var comments0 = await comments();
     var regex = RegExp(r'Filename: (.*)(")');
-    var matches = regex.firstMatch(_comments[1])!;
-    return matches.group(1);
+    var matches = regex.firstMatch(comments0[1])!;
+    return matches.group(1)!;
   }
 
   /// Read an MIS report and keep only the data rows, each row becoming a map,

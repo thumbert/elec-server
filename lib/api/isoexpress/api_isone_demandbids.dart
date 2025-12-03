@@ -98,9 +98,9 @@ class DaDemandBids {
       String date, String hourending) async {
     if (hourending.length == 1) hourending = hourending.padLeft(2, '0');
     var day = Date.parse(date);
-    var _dt = parseHourEndingStamp(mmddyyyy(day), hourending);
+    var dt0 = parseHourEndingStamp(mmddyyyy(day), hourending);
     var dt = TZDateTime.fromMillisecondsSinceEpoch(
-            location, _dt.millisecondsSinceEpoch)
+            location, dt0.millisecondsSinceEpoch)
         .toIso8601String();
 
     var pipeline = <Map<String, Object>>[];

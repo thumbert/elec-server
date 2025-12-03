@@ -170,7 +170,6 @@ class FwdResAuctionResultsArchive extends IsoExpressReport {
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
-    // TODO: implement converter
     throw UnimplementedError();
   }
 }

@@ -279,5 +279,5 @@ String parseMonth(String filename) {
   if (bux[0].toLowerCase() == 'sept') bux[0] = 'sep';
   var input = bux.take(2).join(' ');
   var parser = parseTerm(input.toUpperCase())!;
-  return Month.fromTZDateTime(parser.start).toIso8601String();
+  return Month.containing(parser.start).toIso8601String();
 }

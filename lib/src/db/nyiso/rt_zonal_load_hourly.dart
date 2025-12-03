@@ -1,4 +1,4 @@
-/// Data from http://mis.nyiso.com/public/P-58Clist.htm
+// Data from http://mis.nyiso.com/public/P-58Clist.htm
 
 import 'dart:io';
 import 'dart:async';

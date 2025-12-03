@@ -69,24 +69,24 @@ class NyisoDaCongestionCompactArchive extends DailyNyisoCsvReport {
   Map<String, dynamic> processDay(Date date) {
     var out = <String, dynamic>{};
 
-    var _ptids = <int>[];
+    var ptids0 = <int>[];
     // Initially, store the congestion in a List<List<num>> [ptid][hour].
     // It gets transposed after the sorting.
-    var _congestion = <List<num>>[];
+    var congestion0 = <List<num>>[];
 
     /// Get the congestion from both the zones and the gen nodes and construct
     /// the _congestion matrix.
     var nodeTypes = [NodeType.zone, NodeType.gen];
-    for (var _nodeType in nodeTypes) {
-      nodeType = _nodeType;
+    for (var nodeType0 in nodeTypes) {
+      nodeType = nodeType0;
       var xs = readReport(date);
       if (xs.isEmpty) return out;
       var groups = groupBy(xs, (Map e) => e['PTID'] as int);
       for (var group in groups.entries) {
         if (ptids == null || ptids!.contains(group.key)) {
           // only when the ptid is in the set of ptids that are needed
-          _ptids.add(group.key);
-          _congestion.add(group.value
+          ptids0.add(group.key);
+          congestion0.add(group.value
               .map((e) => e['Marginal Cost Congestion (\$/MWHr)'] as num)
               .toList());
         }
@@ -95,38 +95,38 @@ class NyisoDaCongestionCompactArchive extends DailyNyisoCsvReport {
 
     /// insert the ptid index at position 0, so you can keep track of the
     /// ptid after you do the sorting.
-    for (var i = 0; i < _ptids.length; i++) {
-      _congestion[i].insert(0, i);
+    for (var i = 0; i < ptids0.length; i++) {
+      congestion0[i].insert(0, i);
     }
 
     /// order the congestion data
-    var ordering = naturalComparable<num>.onResultOf(
+    var ordering = naturalComparable<num>.keyOf(
             (List xs) => xs[1]) // sort by hour beginning 0
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[6]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[9]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[15]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[18]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[21]));
-    ordering.sort(_congestion);
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[2]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[3]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[4]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[6]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[9]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[12]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[15]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[18]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[21]));
+    ordering.sort(congestion0);
 
     /// Transpose the _congestion matrix into a
     /// data matrix with index [hour][ptid]
-    var hoursCount = _congestion.first.length - 1;
+    var hoursCount = congestion0.first.length - 1;
     var data = List.generate(
-        hoursCount, (i) => List<num>.generate(_ptids.length, (i) => 999.9));
+        hoursCount, (i) => List<num>.generate(ptids0.length, (i) => 999.9));
     for (var i = 0; i < hoursCount; i++) {
-      for (var j = 0; j < _ptids.length; j++) {
-        data[i][j] = _congestion[j][i + 1];
+      for (var j = 0; j < ptids0.length; j++) {
+        data[i][j] = congestion0[j][i + 1];
       }
     }
 
     out = {
       'date': date.toString(),
-      'ptids': _congestion.map((e) => _ptids[e[0] as int]).toList(),
+      'ptids': congestion0.map((e) => ptids0[e[0] as int]).toList(),
       'congestion': data.map((List<num> e) => runLenghtEncode(e)).toList(),
     };
 

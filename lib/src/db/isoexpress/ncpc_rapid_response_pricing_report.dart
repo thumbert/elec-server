@@ -8,16 +8,16 @@ import '../converters.dart';
 import '../lib_iso_express.dart';
 
 class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
-  @override
-  final String reportName = 'NCPC Rapid Response Pricing Opportunity Cost';
   final _setEq = const SetEquality();
 
-  NcpcRapidResponsePricingReportArchive({ComponentConfig? dbConfig, String? dir}) {
+  NcpcRapidResponsePricingReportArchive(
+      {ComponentConfig? dbConfig, String? dir}) {
     dbConfig ??= ComponentConfig(
-          host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
+        host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'ncpc');
     this.dbConfig = dbConfig;
     dir ??= '${baseDir}NCPC/RapidResponsePricingOpportunityCost/Raw/';
     this.dir = dir;
+    reportName = 'NCPC Rapid Response Pricing Opportunity Cost';
   }
 
   @override
@@ -31,9 +31,12 @@ class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
     var row = rows.first;
-    if (!_setEq.equals(row.keys.skip(1).toSet(), {'Operating Day',
-      'RRP NCPC Charge', 'RRP Real-Time Load Obligation',
-      'RRP NCPC Charge Rate'})) {
+    if (!_setEq.equals(row.keys.skip(1).toSet(), {
+      'Operating Day',
+      'RRP NCPC Charge',
+      'RRP Real-Time Load Obligation',
+      'RRP NCPC Charge Rate'
+    })) {
       throw ArgumentError('Report $reportName has changed format!');
     }
 
@@ -59,8 +62,8 @@ class NcpcRapidResponsePricingReportArchive extends DailyIsoExpressReport {
       await dbConfig.coll.remove({'ncpcType': 'RRP'});
     }
 
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-          keys: {'date': 1, 'ncpcType': 1});
+    await dbConfig.db
+        .createIndex(dbConfig.collectionName, keys: {'date': 1, 'ncpcType': 1});
     await dbConfig.db.close();
   }
 }

@@ -28,11 +28,11 @@ class MonthlyAssetNcpc {
   /// ```
   Future<List<Map<String, dynamic>>> getAllAssets(
       Month start, Month end) async {
-    var _url =
+    var url =
         '$rootUrl${servicePath}all/start/${start.toIso8601String()}/end/${end.toIso8601String()}';
 
-    var _response = await client.get(Uri.parse(_url));
-    var xs = (json.decode(_response.body) as List).cast<Map<String, dynamic>>();
+    var response = await client.get(Uri.parse(url));
+    var xs = (json.decode(response.body) as List).cast<Map<String, dynamic>>();
     // denormalize the table
     var out = <Map<String, dynamic>>[];
     for (var x in xs) {

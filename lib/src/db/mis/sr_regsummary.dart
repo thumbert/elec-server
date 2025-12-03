@@ -46,7 +46,7 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
     };
 
     var x0 = mis.readReportTabAsMap(file, tab: 0);
-    var tab0 = mis.MisReport.addLabels([rowsToColumns(x0)], labels, ['H']);
+    var tab0 = mis.MisReport.addLabels([collapseListOfMap(x0)], labels, ['H']);
 
     labels['tab'] = 1;
     var x1 = mis.readReportTabAsMap(file, tab: 1);
@@ -54,7 +54,7 @@ class SrRegSummaryArchive extends mis.MisReportArchive {
     var tab1 = <Map<String, dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
-      tab1.addAll(mis.MisReport.addLabels([rowsToColumns(entry.value)], labels,
+      tab1.addAll(mis.MisReport.addLabels([collapseListOfMap(entry.value)], labels,
           ['H', 'Subaccount ID', 'Subaccount Name']));
     }
 

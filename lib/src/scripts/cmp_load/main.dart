@@ -252,84 +252,84 @@ class _Analysis {
 
 }
 
-void _pageTemplate(_Analysis analysis) {
-  // final scripts = Directory(analysis.dir).listSync().where((e) => e.path.endsWith('.js'))
-  //     .map((e) => basename(e.path))
-  //     .toList();
-  final scripts = [
-    'median_shape_janfeb.js',
-    'median_shape_mar.js',
-    'median_shape_aprmay.js',
-    'median_shape_jun.js',
-    'median_shape_jul.js',
-    'shape_aprmay.js',
-  ];
-  var script = '';
-    '''
-<!doctype html>
-<html>
-  <head>
-    <title>Maine solar</title>
-    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js" charset="utf-8"></script>
-    <script *for="$script in $scripts" src="$script" async></script>
-  </head>
-  <style>
-    table {
-      font-family: arial, sans-serif;
-      border-collapse: collapse;
-      width: 100%;
-    }
-    td, th {
-      border: 1px solid #dddddd;
-      text-align: left;
-      padding: 8px;
-    }
-    tr:nth-child(even) {
-      background-color: #dddddd;
-    }
-    .flex-container {
-      display: flex;
-    }
+// void _pageTemplate(_Analysis analysis) {
+//   // final scripts = Directory(analysis.dir).listSync().where((e) => e.path.endsWith('.js'))
+//   //     .map((e) => basename(e.path))
+//   //     .toList();
+//   final scripts = [
+//     'median_shape_janfeb.js',
+//     'median_shape_mar.js',
+//     'median_shape_aprmay.js',
+//     'median_shape_jun.js',
+//     'median_shape_jul.js',
+//     'shape_aprmay.js',
+//   ];
+//   var script = '';
+//     '''
+// <!doctype html>
+// <html>
+//   <head>
+//     <title>Maine solar</title>
+//     <script src="https://cdn.plot.ly/plotly-2.26.0.min.js" charset="utf-8"></script>
+//     <script *for="$script in $scripts" src="$script" async></script>
+//   </head>
+//   <style>
+//     table {
+//       font-family: arial, sans-serif;
+//       border-collapse: collapse;
+//       width: 100%;
+//     }
+//     td, th {
+//       border: 1px solid #dddddd;
+//       text-align: left;
+//       padding: 8px;
+//     }
+//     tr:nth-child(even) {
+//       background-color: #dddddd;
+//     }
+//     .flex-container {
+//       display: flex;
+//     }
 
-    .flex-child {
-      flex: 1;
-      border: 2px solid yellow;
-    }  
+//     .flex-child {
+//       flex: 1;
+//       border: 2px solid yellow;
+//     }  
     
-    .flex-child:first-child {
-      margin-right: 20px;
-    } 
-  </style>
-  <body style="font-family:Arial">
-    <h1>Solar development in Maine</h1>
-    <h3>Residential and small commercial hourly load shape</h3>
+//     .flex-child:first-child {
+//       margin-right: 20px;
+//     } 
+//   </style>
+//   <body style="font-family:Arial">
+//     <h1>Solar development in Maine</h1>
+//     <h3>Residential and small commercial hourly load shape</h3>
     
-    <p>Median shapes year over year
-    <div class="flex-container">
-      <div id="median_shape_janfeb"></div>
-      <div id="median_shape_mar"></div>
-    </div>  
-    <div class="flex-container">
-      <div id="median_shape_aprmay"></div>
-      <div id="median_shape_jun"></div>
-    </div>  
-    <div class="flex-container">
-      <div id="median_shape_jul"></div>
-    </div>  
+//     <p>Median shapes year over year
+//     <div class="flex-container">
+//       <div id="median_shape_janfeb"></div>
+//       <div id="median_shape_mar"></div>
+//     </div>  
+//     <div class="flex-container">
+//       <div id="median_shape_aprmay"></div>
+//       <div id="median_shape_jun"></div>
+//     </div>  
+//     <div class="flex-container">
+//       <div id="median_shape_jul"></div>
+//     </div>  
 
-    <p>Individual year
-    <div id="shape_aprmay"></div>
-
-    
-    ${analysis.getTable()}
+//     <p>Individual year
+//     <div id="shape_aprmay"></div>
 
     
-    Comparison of median hourly load shape year over year
-    <div id="solar_project_count"></div>    
-  </body>
-</html>
-  ''';
-}
+//     ${analysis.getTable()}
+
+    
+//     Comparison of median hourly load shape year over year
+//     <div id="solar_project_count"></div>    
+//   </body>
+// </html>
+//   ''';
+// }
 
 
 

@@ -126,9 +126,9 @@ class CurveIds {
   /// Get the documents associated with these curveIds.  Multiple curveIds are
   /// separated by |.
   Future<List<Map<String, dynamic>>> getCurveIds(String curveIds) async {
-    var _ids = curveIds.split('|');
+    var ids = curveIds.split('|');
     var query = mongo.where
-      ..oneFrom('curveId', _ids)
+      ..oneFrom('curveId', ids)
       ..excludeFields(['_id']);
     return await coll.find(query).toList();
   }

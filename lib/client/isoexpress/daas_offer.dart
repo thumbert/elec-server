@@ -41,7 +41,7 @@ class DaasOffer {
   final num priceEir;
   final num quantity;
 
-  static fromJson(Map<String, dynamic> json) {
+  static DaasOffer fromJson(Map<String, dynamic> json) {
     return DaasOffer(
       hourBeginning:
           TZDateTime.parse(IsoNewEngland.location, json['hour_beginning']),

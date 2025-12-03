@@ -174,12 +174,3 @@ class ForwardMarks2 {
     return Bucket.atc;
   }
 }
-
-/// Get the (yyyy, mm, dd) from a date input, e.g.
-/// Return [2023, 3, 5] for input 20230305
-List<int> _ymd(int yyyymmdd) {
-  var day = yyyymmdd % 100;
-  var month = (yyyymmdd % 10000) ~/ 100;
-  var year = yyyymmdd ~/ 10000;
-  return <int>[year, month, day];
-}

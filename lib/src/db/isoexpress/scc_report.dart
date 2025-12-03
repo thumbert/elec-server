@@ -140,7 +140,7 @@ class SccReportArchive {
 
   /// Recreate the collection from scratch.
   /// Insert all the files in the archive directory.
-  setup() async {
+  Future<void> setup() async {
     if (!Directory(dir).existsSync()) {
       Directory(dir).createSync(recursive: true);
     }

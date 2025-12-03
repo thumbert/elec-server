@@ -51,7 +51,7 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     /// tab 0, participant and pool info
     var x0 = mis.readReportTabAsMap(file, tab: 0);
     var tab0 =
-        addLabels([rowsToColumns(x0)], labels, ['H', 'Trading Interval']);
+        addLabels([collapseListOfMap(x0)], labels, ['H', 'Trading Interval']);
 
     /// tab 1, subaccount info
     labels['tab'] = 1;
@@ -60,7 +60,7 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     var tab1 = <Map<String, dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
-      tab1.addAll(addLabels([rowsToColumns(entry.value)], labels,
+      tab1.addAll(addLabels([collapseListOfMap(entry.value)], labels,
           ['H', 'Subaccount ID', 'Subaccount Name', 'Trading Interval']));
     }
 

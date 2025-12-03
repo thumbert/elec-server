@@ -73,17 +73,17 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
     }
 
     /// order the congestion data
-    var ordering = naturalComparable<num>.onResultOf((List xs) => xs[1])
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[2]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[3]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[4]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[6]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[9]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[12]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[15]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[18]))
-        .thenCompare(naturalComparable<num>.onResultOf((List xs) => xs[21]));
+    var ordering = naturalComparable<num>.keyOf((List xs) => xs[1])
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[2]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[3]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[4]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[6]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[9]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[12]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[12]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[15]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[18]))
+        .thenCompare(naturalComparable<num>.keyOf((List xs) => xs[21]));
     ordering.sort(congestion);
 
     /// Transpose the _congestion matrix into a
@@ -116,7 +116,6 @@ class DaCongestionCompactArchive extends DailyIsoExpressReport {
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
-    // TODO: implement converter
     throw UnimplementedError();
   }
 }

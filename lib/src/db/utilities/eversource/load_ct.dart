@@ -92,10 +92,6 @@ class EversourceCtLoadArchive {
       ...loadKeys,
     ];
 
-    /// TODO: Check that the column names haven't changed
-    // var actualNames =
-    //     [2, 3, 4, 5, 6, 7, 8].map((i) => table.rows[3][i]).toList();
-
     for (int i = 4; i < n; i++) {
       var row = table.rows[i];
       if (row[0] != null) {
@@ -109,9 +105,9 @@ class EversourceCtLoadArchive {
           if (date == Date.utc(2018, 3, 11)) continue;
           throw ArgumentError('Unknown hour ending ${row[1]}');
         }
-        var _hourBeginning = parseHourEndingStamp(mmddyyyy(date), hE);
+        var hourBeginning0 = parseHourEndingStamp(mmddyyyy(date), hE);
         var hourBeginning = TZDateTime.fromMillisecondsSinceEpoch(
-                location, _hourBeginning.millisecondsSinceEpoch)
+                location, hourBeginning0.millisecondsSinceEpoch)
             .toIso8601String();
 
         /// in case there are empty rows at the end of the spreadsheet

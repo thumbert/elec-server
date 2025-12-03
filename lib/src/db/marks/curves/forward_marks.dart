@@ -15,9 +15,8 @@ class ForwardMarksArchive {
   ///
   ForwardMarksArchive(
       {ComponentConfig? dbConfig, this.marksAbsTolerance = 1E-6}) {
-    dbConfig ??= ComponentConfig(
+    this.dbConfig = dbConfig ?? ComponentConfig(
         host: '127.0.0.1', dbName: 'marks', collectionName: 'forward_marks');
-    this.dbConfig = dbConfig;
   }
 
   mongo.Db get db => dbConfig.db;
@@ -274,8 +273,8 @@ class ForwardMarksArchive {
     /// existing mark as of [startDate] at the beginning of the list
     /// (if it exists, as startDate could be before the first day with marks)
     if (aux.isEmpty || aux.first['fromDate'].compareTo(startDate) == 1) {
-      var _first = await getDocument(startDate, curveId, coll);
-      if (_first.isNotEmpty) aux.insert(0, _first);
+      var first = await getDocument(startDate, curveId, coll);
+      if (first.isNotEmpty) aux.insert(0, first);
     }
     return <Map<String, dynamic>>[...aux];
   }

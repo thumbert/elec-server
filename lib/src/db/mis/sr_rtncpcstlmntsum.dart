@@ -66,7 +66,7 @@ class SrRtNcpcStlmntSumArchive extends mis.MisReportArchive {
     /// tab 4, Asset SCR charges section (hourly)
     labels['tab'] = 4;
     var x4 = mis.readReportTabAsMap(file, tab: 4);
-    var tab4 = addLabels([rowsToColumns(x4)], labels, ['H']);
+    var tab4 = addLabels([collapseListOfMap(x4)], labels, ['H']);
 
     /// tab 5, Performance audit charge section
     labels['tab'] = 5;

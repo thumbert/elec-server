@@ -14,11 +14,11 @@ class EversourceLoad {
 
   /// Get hourly prices for a ptid between a start and end date.
   Future<TimeSeries<Map<String, num>>> getCtLoad(Date start, Date end) async {
-    var _url =
+    var url =
         '$rootUrl${servicePath}zone/ct/start/${start.toString()}/end/${end.toString()}';
 
-    var _response = await http.get(Uri.parse(_url));
-    var xs = json.decode(_response.body) as List;
+    var response = await http.get(Uri.parse(url));
+    var xs = json.decode(response.body) as List;
 
     var ts = TimeSeries<Map<String, num>>.fromIterable([]);
     for (var x in xs) {

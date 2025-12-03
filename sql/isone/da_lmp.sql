@@ -16,7 +16,7 @@ WHERE ptid = 4000
 AND hour_beginning >= '2025-07-01'
 AND hour_beginning < '2025-07-2';
 
---- Get the hourly MCC prices in Json compact form for MCC surfer!
+--- Get the hourly MCC prices in Json compact form for MCC ~~~surfer!
 
 
 SELECT ptid, hour_beginning, mcc

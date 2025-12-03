@@ -118,20 +118,20 @@ class NyisoTccClearingPrices extends NyisoReport {
           Month(startDate.year, startDate.month, location: location);
       var anchorMYY = formatMYY(anchorMonth);
       for (var group in groups.entries) {
-        var _startDate = Date.parse(group.key, location: location);
+        var startDate0 = Date.parse(group.key, location: location);
         late String auctionName;
         late int hourCount;
-        if (startDate == _startDate) {
+        if (startDate == startDate0) {
           /// monthly auction
           auctionName = anchorMYY;
           hourCount = Term.fromInterval(anchorMonth).hours().length;
         } else {
           /// monthly bopp auction
-          var _month =
-              Month(_startDate.year, _startDate.month, location: location);
-          var mYY = formatMYY(_month);
+          var month0 =
+              Month(startDate0.year, startDate0.month, location: location);
+          var mYY = formatMYY(month0);
           auctionName = '$mYY-bopp$anchorMYY';
-          hourCount = Term.fromInterval(_month).hours().length;
+          hourCount = Term.fromInterval(month0).hours().length;
         }
         out.addAll(group.value.map((e) => {
               'auctionName': auctionName,
@@ -201,7 +201,6 @@ class NyisoTccClearingPrices extends NyisoReport {
 
   @override
   Map<String, dynamic> converter(List<Map<String, dynamic>> rows) {
-    // TODO: implement converter
     throw UnimplementedError();
   }
 

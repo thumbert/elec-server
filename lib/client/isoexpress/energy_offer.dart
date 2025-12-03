@@ -7,10 +7,10 @@ import 'package:elec_server/src/utils/iso_timestamp.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/timezone.dart';
 
-getNewUnits() {}
+// getNewUnits() {}
 
 /// Find the units that tripped (became unavailable in RT when they were available in DA)
-getUnitsUnavailableInRt() {}
+// getUnitsUnavailableInRt() {}
 
 /// Get the energy offers from the elec-server.
 Future<List<Datum>> getEnergyOffers(
@@ -73,7 +73,7 @@ class Datum {
   final num price;
   final num quantity;
 
-  static fromJson(Map<String, dynamic> json) {
+  static Datum fromJson(Map<String, dynamic> json) {
     return Datum(
       hourBeginning:
           TZDateTime.parse(IsoNewEngland.location, json['hour_beginning']),

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 
-const String USER_AGENT = 'dart-api-client eia/v1';
+const String userAgent = 'dart-api-client eia/v1';
 
 class EiaApi {
   /// this is the api key that you request from eia

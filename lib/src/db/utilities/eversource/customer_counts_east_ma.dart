@@ -50,18 +50,18 @@ class EversourceEastMaCustomerCountsArchive {
   List<Map<String, dynamic>> readXlsx(File file) {
     var month = parseMonth(path.basename(file.path));
     var bytes = file.readAsBytesSync();
-    var _decoder = SpreadsheetDecoder.decodeBytes(bytes);
+    var decoder = SpreadsheetDecoder.decodeBytes(bytes);
 
     var res = <Map<String, dynamic>>[];
 
-    for (var sheet in _decoder.tables.keys) {
-      var service;
+    for (var sheet in decoder.tables.keys) {
+      late String service;
       if (sheet.toLowerCase().contains('default')) {
         service = 'default';
       } else if (sheet.toLowerCase().contains('comp')) {
         service = 'competitive';
       }
-      var zone;
+      late String zone;
       if (sheet.toLowerCase().contains('nema')) {
         zone = 'nema';
         if (sheet.toLowerCase().contains('primarily')) zone = 'primarily nema';
@@ -70,13 +70,10 @@ class EversourceEastMaCustomerCountsArchive {
         if (sheet.toLowerCase().contains('primarily')) zone = 'primarily sema';
       }
 
-      var rows = _decoder.tables[sheet]!.rows;
+      var rows = decoder.tables[sheet]!.rows;
       // 3 columns of data
       for (int i = 2; i < rows.length; i++) {
         if (rows[i][0] != null && rows[i][2] is num) {
-          if (zone == null || service == null) {
-            throw 'Can\'t parse the zone and service type.';
-          }
           var aux = <String, dynamic>{
             'region': 'East MA',
             'month': month,
@@ -181,5 +178,5 @@ String parseMonth(String filename) {
   if (bux[0].toLowerCase() == 'sept') bux[0] = 'sep';
   var input = bux.take(2).join(' ');
   var parser = parseTerm(input.toUpperCase())!;
-  return Month.fromTZDateTime(parser.start).toIso8601String();
+  return Month.containing(parser.start).toIso8601String();
 }

@@ -183,10 +183,10 @@ abstract class DailyPjmCsvReport extends PjmReport {
     final bytes = zipFile.readAsBytesSync();
     var zipArchive = ZipDecoder().decodeBytes(bytes);
 
-    var _file = zipArchive.findFile(basename(file.path));
-    if (_file != null) {
-      var _lines = _file.content as List<int>;
-      var csv = utf8.decoder.convert(_lines);
+    var file0 = zipArchive.findFile(basename(file.path));
+    if (file0 != null) {
+      var lines = file0.content as List<int>;
+      var csv = utf8.decoder.convert(lines);
       // print(csv);
       var xs = converter.convert(csv, eol: eol);
       if (xs.isNotEmpty) {

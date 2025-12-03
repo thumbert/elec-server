@@ -13,7 +13,7 @@ class TermCache {
   Interval? Function(Map<String, dynamic>) keyAssign;
 
   /// Split the interval and return the cache keys.  For example
-  /// keysFromInterval = (interval) => interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();
+  /// `keysFromInterval = (interval) => interval.splitLeft((dt) => Date.fromTZDateTime(dt)).cast<Date>();`
   List<Interval> Function(Interval) keysFromInterval;
 
   late Map<Interval, List<Map<String, dynamic>>?> _cache;
@@ -71,23 +71,19 @@ class DateCache extends TermCache {
   /// Loader function that gets the (expensive) data associated with an
   /// interval.  Data is further split using the [keyAssign] function and
   /// stored into the cache.
-  @override
-  Future<List<Map<String, dynamic>>> Function(Interval) loader;
 
   /// Function to partition the data returned by the [loader] into keys for
   /// storing into the cache.  Usually this function returns a Date or a Month
   /// object. e.g. keyAssign = (e) => e['date'] as Date;
-  @override
-  Interval? Function(Map<String, dynamic>) keyAssign;
 
   /// A [TermCache] using [Date]s as keys.  Each key contains data as a
   /// [List<Map<String,dynamic>>]
-  DateCache(this.loader, this.keyAssign)
+  DateCache(Future<List<Map<String, dynamic>>> Function(Interval) loader, Interval? Function(Map<String, dynamic>) keyAssign)
       : super(
             loader,
             keyAssign,
             (Interval interval) =>
-                interval.splitLeft((dt) => Date.fromTZDateTime(dt))) {
+                interval.splitLeft((dt) => Date.containing(dt))) {
     /// check that the keyAssign return type is a Date??  Must be a better way
     // if (keyAssign.runtimeType.toString() != '(Map<String, dynamic>) => Date')
     //  throw ArgumentError('Incorrect signature for keyAssign');
@@ -113,5 +109,5 @@ class MonthCache extends TermCache {
             loader,
             keyAssign,
             (Interval interval) =>
-                interval.splitLeft((dt) => Month.fromTZDateTime(dt)));
+                interval.splitLeft((dt) => Month.containing(dt)));
 }
