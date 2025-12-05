@@ -164,8 +164,8 @@ class ForwardMarksArchive {
     var aux = pc0.align(pc1);
 
     for (var x in aux) {
-      var a = x.value.item1;
-      var b = x.value.item2;
+      var a = x.value.$1;
+      var b = x.value.$2;
       if (!_setEq.equals(a.keys.toSet(), b.keys.toSet())) {
         return true;
       }
