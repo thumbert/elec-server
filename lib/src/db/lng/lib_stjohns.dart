@@ -50,7 +50,7 @@ class StJohnsVessels {
     var contents = (xs['CARGO_ACTIVITY'] as String).toLowerCase();
     if (contents.contains('lng') ||
         contents.contains('liquid') ||
-        contents.contains('liquified') ||
+        contents.contains('liquefied') ||
         contents.contains('natural gas')) {
       res = true;
     }
