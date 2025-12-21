@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2025-12-21
+- Made SQL file for ingesting EIA storage data
+
 # Release 2025-12-02
 - Fix multiple lints, 63 remaining problems...
 

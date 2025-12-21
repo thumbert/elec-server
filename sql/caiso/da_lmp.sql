@@ -1,3 +1,12 @@
+LOAD icu; SET TimeZone = 'America/Los_Angeles';
+
+SELECT * FROM lmp LIMIT 10;
+
+SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*) FROM lmp;
+
+SELECT DISTINCT node_id FROM lmp 
+-- WHERE hour_beginning == '2025-12-06 00:00:00-08:00'
+ORDER BY node_id;
 
 
 -- https://oasis.caiso.com/oasisapi/SingleZip?resultformat=6&queryname=PRC_LMP&version=12&startdatetime=20251206T08:00-0000&enddatetime=20251207T08:00-0000&market_run_id=DAM&grp_type=ALL
@@ -36,5 +45,5 @@ INSERT INTO lmp
         WHERE lmp.node_id = tmp.node_id 
         AND lmp.hour_beginning = tmp.hour_beginning
     )
-)
+);
 
