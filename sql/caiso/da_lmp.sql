@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 LOAD icu;SET TimeZone = 'America/Los_Angeles';
 
 
@@ -74,6 +75,17 @@ HAVING buckets.buckets."caiso_6x16" = TRUE
 ORDER BY node_id, day;
 
 
+=======
+LOAD icu; SET TimeZone = 'America/Los_Angeles';
+
+SELECT * FROM lmp LIMIT 10;
+
+SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*) FROM lmp;
+
+SELECT DISTINCT node_id FROM lmp 
+-- WHERE hour_beginning == '2025-12-06 00:00:00-08:00'
+ORDER BY node_id;
+>>>>>>> 32bcf4450d1a5a5087eaacb11c46ab0982f81997
 
 
 -- https://oasis.caiso.com/oasisapi/SingleZip?resultformat=6&queryname=PRC_LMP&version=12&startdatetime=20251206T08:00-0000&enddatetime=20251207T08:00-0000&market_run_id=DAM&grp_type=ALL
@@ -159,5 +171,8 @@ INSERT INTO lmp
         AND lmp.hour_beginning = tmp.hour_beginning
     )
 );
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32bcf4450d1a5a5087eaacb11c46ab0982f81997
 

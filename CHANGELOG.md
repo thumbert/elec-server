@@ -8,6 +8,10 @@
 
 # Release 2025-12-26
 - Various improvements to reduct. 
+- Made SQL file to ingest Census population data
+
+# Release 2025-12-21
+- Made SQL file for ingesting EIA storage data
 
 # Release 2025-12-02
 - Fix multiple lints, 63 remaining problems...
