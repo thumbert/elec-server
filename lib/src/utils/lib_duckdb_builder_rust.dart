@@ -32,6 +32,7 @@ String addImports(List<Column> columns) {
         break;
       case ColumnTypeDuckDB.timestamptz:
         hasTimestamptz = true;
+        hasTimestamp = true;
         break;
       default:
         break;
@@ -75,7 +76,7 @@ String makeStruct(List<Column> columns) {
     if (rustType == 'Decimal') {
       buffer.writeln('    #[serde(with = "rust_decimal::serde::float")]');
     }
-    buffer.writeln('    pub ${column.name.toSnakeCase()}: $rustType,');
+    buffer.writeln('    pub ${column.name}: $rustType,');
   }
   buffer.writeln('}');
   return buffer.toString();
@@ -135,7 +136,7 @@ String getRustType({
 /// Generate a Rust enum from a DuckDB ENUM column.
 /// Make sure that the variant name is in Pascal case.
 /// Have a custom serializer that serializes back to the original data.
-/// Have a custom deserializer that is a bit more liberal with the input 
+/// Have a custom deserializer that is a bit more liberal with the input
 /// (accepts different casing).
 ///
 /// * [columnName] the DuckDB column name,
@@ -195,11 +196,10 @@ String makeEnum(
   buffer.writeln('        let s = match self {');
   for (var value in values) {
     final variantNameRust = value.toPascalCase();
-    buffer.writeln(
-        '            $enumNameRust::$variantNameRust => "$value",');
+    buffer.writeln('            $enumNameRust::$variantNameRust => "$value",');
   }
   buffer.writeln('        };');
-  buffer.writeln('        serializer.serialize_str(&s)');
+  buffer.writeln('        serializer.serialize_str(s)');
   buffer.writeln('    }');
   buffer.writeln('}');
 
@@ -220,35 +220,65 @@ String makeEnum(
   return buffer.toString();
 }
 
-String makeQueryFunction(String tableName, List<Column> columns) {
+String makeSqlQuery(String tableName, List<Column> columns) {
   final buffer = StringBuffer();
-
   var query = 'SELECT\n    ';
   query += columns.map((c) => c.name.toSnakeCase()).join(',\n    ');
   query += '\nFROM $tableName WHERE 1=1';
+  buffer.writeln('   let mut query = String::from(r#"\n$query"#);');
 
-  buffer.writeln(
-      'pub fn get_data(conn: &Connection, query_filter: &QueryFilter) -> Result<Vec<Record>, Box<dyn std::error::Error>> {');
-  buffer.writeln('   let mut query = String::from(r#"\n$query');
-  buffer.writeln('   "#);');
-  // create the filters from the query parameters
+  // Add the SQL filter statements from the query parameters
   for (var column in columns) {
-    var variables = column.getQueryFilterVariables();
-    for (var variable in variables) {
-      var borrow = '';
-      if (['String', 'Option<String>', 'Zoned'].contains(variable.rustType)) {
-        borrow = '&';
+    for (var filterClause in column.filterClauses) {
+      var name = getQueryFilterVariableName(column,
+          clause: filterClause, language: Language.rust);
+      var borrow = '&';
+      buffer.writeln('    if let Some($name) = ${borrow}query_filter.$name {');
+      if (filterClause == FilterClause.inList) {
+        if (column.type == ColumnTypeDuckDB.varchar ||
+            column.type == ColumnTypeDuckDB.enumType ||
+            column.type == ColumnTypeDuckDB.date) {
+          // quoted values
+          buffer.writeln(
+              "        query.push_str(&format!(\"\n    ${filterClause.makeFilter(column)}\", $name.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(\"','\")));");
+        } else {
+          // unquoted values
+          buffer.writeln(
+              "        query.push_str(&format!(\"\n    ${filterClause.makeFilter(column)}\", $name.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(\",\")));");
+        }
+      } else {
+        var adder = '';
+        if (column.type == ColumnTypeDuckDB.timestamptz) {
+          adder = '.strftime("%Y-%m-%d %H:%M:%S.000%:z")';
+        }
+        buffer.writeln(
+            "        query.push_str(&format!(\"\n    ${filterClause.makeFilter(column)}\", $name$adder));");
       }
-      buffer.writeln(
-          '    if let Some(${variable.rustVariableName}) = ${borrow}query_filter.${variable.rustVariableName} {');
-      buffer.writeln(
-          "        query.push_str(&format!(\"${variable.getFilterClause()}\", ${variable.rustVariableName}));");
       buffer.writeln('    }');
     }
   }
   buffer.writeln("    query.push(';');");
 
-  // prepare and execute the query
+  return buffer.toString();
+}
+
+/// Write the Rust function that makes the query to DuckDB to extract the data.
+///
+/// Construct the SQL SELECT query to get the data from DuckDB.
+/// The query uses all the fields of struct [QueryFilter] to add all the
+/// supported AND filter clauses.
+///
+String makeQueryFunction(String tableName, List<Column> columns) {
+  final buffer = StringBuffer();
+
+  // Function signature
+  buffer.writeln(
+      'pub fn get_data(conn: &Connection, query_filter: &QueryFilter) -> Result<Vec<Record>, Box<dyn std::error::Error>> {');
+
+  // Add the SQL query
+  buffer.writeln(makeSqlQuery(tableName, columns));
+
+  // Prepare and execute the query
   buffer.writeln('    let mut stmt = conn.prepare(&query)?;');
   buffer.writeln('    let rows = stmt.query_map([], |row| {');
   for (var (i, column) in columns.indexed) {
@@ -272,20 +302,42 @@ String makeQueryFunction(String tableName, List<Column> columns) {
         }
         break;
       case ColumnTypeDuckDB.decimal:
-        buffer.writeln(
-            '        let $name: $rustType = match row.get_ref_unwrap($i) {\n'
-            '            duckdb::types::ValueRef::Decimal(v) => v,\n'
-            '            _ => Decimal::MIN,\n'
-            '        };');
+        if (column.isNullable) {
+          buffer.writeln(
+              '        let $name: $rustType = match row.get_ref_unwrap($i) {\n'
+              '            duckdb::types::ValueRef::Decimal(v) => Some(v),\n'
+              '            duckdb::types::ValueRef::Null => None,\n'
+              '            _ => None,\n'
+              '        };');
+        } else {
+          buffer.writeln(
+              '        let $name: $rustType = match row.get_ref_unwrap($i) {\n'
+              '            duckdb::types::ValueRef::Decimal(v) => v,\n'
+              '            _ => Decimal::MIN,\n'
+              '        };');
+        }
         break;
       case ColumnTypeDuckDB.enumType:
-        buffer.writeln(
-            '        let _n$i = match row.get_ref_unwrap($i).to_owned() {\n'
-            '            duckdb::types::Value::Enum(v) => v,\n'
-            '            _ => panic!("Unexpected value type for enum"),\n'
-            '        };');
-        buffer.writeln(
-            '        let $name = $rustType::from_str(&_n$i).unwrap();');
+        if (column.isNullable) {
+          final baseRustType =
+              rustType.replaceAll('Option<', '').replaceAll('>', '');
+          buffer.writeln(
+              '        let _n$i = match row.get_ref_unwrap($i).to_owned() {\n'
+              '            duckdb::types::Value::Enum(v) => Some(v),\n'
+              '            duckdb::types::Value::Null => None,\n'
+              '            v => panic!("Unexpected value type {v:?} for enum ${column.name}"),\n'
+              '        };');
+          buffer.writeln(
+              '        let $name = _n$i.map(|s| $baseRustType::from_str(&s).unwrap());');
+        } else {
+          buffer.writeln(
+              '        let _n$i = match row.get_ref_unwrap($i).to_owned() {\n'
+              '            duckdb::types::Value::Enum(v) => v,\n'
+              '            v => panic!("Unexpected value type {v:?} for enum ${column.name}"),\n'
+              '        };');
+          buffer.writeln(
+              '        let $name = $rustType::from_str(&_n$i).unwrap();');
+        }
         break;
       case ColumnTypeDuckDB.time:
         buffer.writeln(
@@ -294,18 +346,35 @@ String makeQueryFunction(String tableName, List<Column> columns) {
             '        let $name = Time::midnight() + _micros$i.microseconds();');
         break;
       case ColumnTypeDuckDB.timestamp:
-        buffer.writeln(
-            '        let _micros$i: i64 = row.get::<usize, i64>($i)?;');
-        buffer.writeln('        let $name = '
-            'Timestamp::from_microsecond(_micros$i).unwrap();');
+        if (column.isNullable) {
+          buffer.writeln(
+              '        let _micros$i: Option<i64> = row.get::<usize, Option<i64>>($i)?;');
+          buffer.writeln('        let $name = _micros$i.map(|micros| '
+              'Timestamp::from_microsecond(micros).unwrap());');
+        } else {
+          buffer.writeln(
+              '        let _micros$i: i64 = row.get::<usize, i64>($i)?;');
+          buffer.writeln('        let $name = '
+              'Timestamp::from_microsecond(_micros$i).unwrap();');
+        }
         break;
       case ColumnTypeDuckDB.timestamptz:
-        buffer.writeln(
-            '        let _micros$i: i64 = row.get::<usize, i64>($i)?;');
-        buffer.writeln('        let $name = Zoned::new(\n'
-            '                 Timestamp::from_microsecond(_micros$i).unwrap(),\n'
-            '                 TimeZone::get("${column.timezoneName}").unwrap()\n'
-            '        );');
+        if (column.isNullable) {
+          buffer.writeln(
+              '        let _micros$i: Option<i64> = row.get::<usize, Option<i64>>($i)?;');
+          buffer.writeln(
+              '        let $name = _micros$i.map(|micros| Zoned::new(\n'
+              '                 Timestamp::from_microsecond(micros).unwrap(),\n'
+              '                 TimeZone::get("${column.timezoneName}").unwrap()\n'
+              '        ));');
+        } else {
+          buffer.writeln(
+              '        let _micros$i: i64 = row.get::<usize, i64>($i)?;');
+          buffer.writeln('        let $name = Zoned::new(\n'
+              '                 Timestamp::from_microsecond(_micros$i).unwrap(),\n'
+              '                 TimeZone::get("${column.timezoneName}").unwrap()\n'
+              '        );');
+        }
         break;
       case ColumnTypeDuckDB.boolean:
       case ColumnTypeDuckDB.int16:
@@ -317,6 +386,8 @@ String makeQueryFunction(String tableName, List<Column> columns) {
       case ColumnTypeDuckDB.uint16:
       case ColumnTypeDuckDB.uint8:
       case ColumnTypeDuckDB.varchar:
+      case ColumnTypeDuckDB.float:
+      case ColumnTypeDuckDB.double:
         buffer.writeln(
             '        let $name: $rustType = row.get::<usize, $rustType>($i)?;');
         break;
@@ -340,18 +411,13 @@ String makeQueryFunction(String tableName, List<Column> columns) {
 }
 
 /// Construct the struct use to query the data.  It contains the filter fields
-/// that closely match the ones of the Record struct.  By default Date, Timestamp
-/// and Zoned fields get a range filter (start, end).
-///
-/// Sometimes, it's nice to have a partial filter on a VARCHAR, i.e., a
-/// "like" filter.  But you don't need it on all the fields.  You can specify
-/// that with the [likeFilters] parameter.  Same with the [inFilters].
+/// that closely match the ones of the Record struct.
 ///
 /// All query fields are optional.
 ///
 String makeQueryFilterStruct(List<Column> columns) {
   final buffer = StringBuffer();
-  buffer.writeln('#[derive(Default, Deserialize)]');
+  buffer.writeln('#[derive(Debug, Default, Deserialize)]');
   buffer.writeln('pub struct QueryFilter {');
   for (var column in columns) {
     final rustType = getRustType(
@@ -359,14 +425,16 @@ String makeQueryFilterStruct(List<Column> columns) {
       columnName: column.name,
       isNullable: false,
     );
-    final filters = column.getQueryFilterVariables();
-    for (var filter in filters) {
-      switch (filter.filterClause) {
+    for (var filterClause in column.filterClauses) {
+      switch (filterClause) {
         case FilterClause.equal:
           buffer.writeln('    pub ${column.name}: Option<$rustType>,');
           break;
         case FilterClause.greaterThanOrEqual:
           buffer.writeln('    pub ${column.name}_gte: Option<$rustType>,');
+          break;
+        case FilterClause.lessThan:
+          buffer.writeln('    pub ${column.name}_lt: Option<$rustType>,');
           break;
         case FilterClause.lessThanOrEqual:
           buffer.writeln('    pub ${column.name}_lte: Option<$rustType>,');
@@ -411,11 +479,10 @@ String makeQueryFilterBuilder(List<Column> columns) {
       columnName: column.name,
       isNullable: false,
     );
-    final name = column.name.toSnakeCase();
-    final filters = column.getQueryFilterVariables();
-    for (var filter in filters) {
+    final name = column.name;
+    for (var filterClause in column.filterClauses) {
       var withInto = '';
-      switch (filter.filterClause) {
+      switch (filterClause) {
         case FilterClause.equal:
           if (column.type == ColumnTypeDuckDB.varchar) {
             withInto = '.into()';
@@ -433,6 +500,13 @@ String makeQueryFilterBuilder(List<Column> columns) {
           buffer.writeln(
               '\n    pub fn ${name}_gte(mut self, value: $rustType) -> Self {');
           buffer.writeln('        self.inner.${name}_gte = Some(value);');
+          buffer.writeln('        self');
+          buffer.writeln('    }');
+          break;
+        case FilterClause.lessThan:
+          buffer.writeln(
+              '\n    pub fn ${name}_lt(mut self, value: $rustType) -> Self {');
+          buffer.writeln('        self.inner.${name}_lt = Some(value);');
           buffer.writeln('        self');
           buffer.writeln('    }');
           break;
@@ -467,6 +541,76 @@ String makeQueryFilterBuilder(List<Column> columns) {
   return buffer.toString();
 }
 
+String makeApiQueryStruct(List<Column> columns,
+    {required List<String> requiredFilters}) {
+  final buffer = StringBuffer();
+  buffer.writeln('#[derive(Debug, Deserialize)]');
+  buffer.writeln('pub struct ApiQuery {');
+  for (var column in columns) {
+    final rustType = getRustType(
+      type: column.type,
+      columnName: column.name,
+      isNullable: false,
+    );
+    for (var filterClause in column.filterClauses) {
+      switch (filterClause) {
+        case FilterClause.equal:
+          buffer.writeln('    pub ${column.name}: Option<$rustType>,');
+          break;
+        case FilterClause.greaterThanOrEqual:
+          buffer.writeln('    pub ${column.name}_gte: Option<$rustType>,');
+          break;
+        case FilterClause.lessThan:
+          buffer.writeln('    pub ${column.name}_lt: Option<$rustType>,');
+          break;
+        case FilterClause.lessThanOrEqual:
+          buffer.writeln('    pub ${column.name}_lte: Option<$rustType>,');
+          break;
+        case FilterClause.like:
+          buffer.writeln('    pub ${column.name}_like: Option<String>,');
+          break;
+        case FilterClause.inList:
+          buffer.writeln('    pub ${column.name}_in: Option<String>,');
+          break;
+      }
+    }
+  }
+  buffer.writeln('}');
+
+  return buffer.toString();
+}
+
+String makeApiEndpoint(List<Column> columns, String tableName,
+    {int maxRecordCount = 100_000}) {
+  final buffer = StringBuffer();
+
+  buffer.writeln('#[get("/$tableName")]');
+  buffer.writeln('async fn api_get_data(');
+  buffer.writeln('    db: web::Data<ProdDb>,');
+  buffer.writeln('    query: web::Query<QueryFilter>,');
+  buffer.writeln(') -> impl Responder {');
+  buffer.writeln('    let conn = db.get_connection_with_retry();');
+  buffer.writeln('    if conn.is_err() {');
+  buffer.writeln(
+      '        return HttpResponse::InternalServerError().body(format!("Error connecting to database: {}", conn.err().unwrap()));');
+  buffer.writeln('    }');
+  buffer.writeln('    let filter = query.into_inner();');
+  buffer.writeln('    match get_data(&conn, &filter) {');
+  buffer.writeln('        Ok(records) => {');
+  buffer.writeln('            if records.len() > $maxRecordCount {');
+  buffer.writeln(
+      '                return HttpResponse::BadRequest().body(format!("Too many records: {}", records.len()));  Filter your query to return at most $maxRecordCount records.');
+  buffer.writeln('            }');
+  buffer.writeln('            HttpResponse::Ok().json(records)');
+  buffer.writeln('        }');
+  buffer.writeln(
+      '        Err(e) => HttpResponse::InternalServerError().body(format!("Error: {}", e)),');
+  buffer.writeln('    }');
+  buffer.writeln('}');
+
+  return buffer.toString();
+}
+
 String makeTest() {
   final buffer = StringBuffer();
 
@@ -493,4 +637,3 @@ String makeTest() {
   buffer.writeln('}');
   return buffer.toString();
 }
-

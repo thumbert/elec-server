@@ -32,6 +32,11 @@ extension StringExtensions on String {
     return pascalCaseString;
   }
 
+  /// Converts a string to snake_case.
+  /// Examples:
+  ///  * "hello World" -> "hello_world"
+  ///  * "helloWorld" -> "hello_world"
+  ///  * "HelloWorld" -> "hello_world"
   String toSnakeCase() {
     // Insert underscore before every uppercase letter (except at the start), then lowercase
     return replaceAllMapped(

@@ -57,7 +57,7 @@ impl serde::Serialize for Sector {
             Sector::Transmission => "Transmission",
             Sector::MarketParticipant => "Market Participant",
         };
-        serializer.serialize_str(&s)
+        serializer.serialize_str(s)
     }
 }
 

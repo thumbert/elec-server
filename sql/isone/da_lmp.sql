@@ -164,8 +164,6 @@ AS (
 PIVOT tmp ON ptid USING min(lmp);
 
 
-
-
 duckdb -csv -c "
 ATTACH '~/Downloads/Archive/DuckDB/isone/dalmp.duckdb' AS dalmp;
 SELECT hour_beginning, lmp
@@ -300,6 +298,26 @@ ORDER BY hour_beginning, ptid;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- WHAT COMES BELOW IS NOT USED
 ---==========================================================================
 --- Try with a list of prices per day to see if you get any storage savings. 
 --- There are some savings, but not that much!  

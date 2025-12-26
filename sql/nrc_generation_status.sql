@@ -32,7 +32,7 @@ SELECT * FROM Changes;
 
 
 -- Get the day on day non zero changes in percent online as of a given date
-SET VARIABLE asof_date = DATE '2025-02-19';
+SET VARIABLE asof_date = DATE '2024-12-04';
 CREATE TEMP TABLE Changes AS
 SELECT ReportDt, Unit, Power, Prev_Power, Change
 FROM( 
@@ -47,6 +47,25 @@ FROM(
 WHERE Change != 0
 AND ReportDt = getvariable('asof_date')
 ORDER BY Unit;
+
+
+SET VARIABLE asof_date = DATE '2024-12-04';
+CREATE TEMP TABLE Changes AS
+    SELECT ReportDt, Unit, Power, Prev_Power, Change
+    FROM( 
+        SELECT ReportDt, 
+        Unit, 
+        Power,
+        LAG(Power) OVER (PARTITION BY Unit ORDER BY ReportDt) as Prev_Power,
+        Power - Prev_Power as Change, 
+        FROM Status 
+        WHERE ReportDt > getvariable('asof_date') - 10
+        ) AS a
+    WHERE Change != 0
+    --AND ReportDt = getvariable('asof_date')
+    AND ReportDt = (SELECT MAX(ReportDt) FROM Status)
+    ORDER BY Unit;
+
 
 
 

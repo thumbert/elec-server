@@ -1,28 +1,42 @@
 import 'package:elec_server/utils.dart';
 part 'lib_duckdb_builder_rust.dart';
 
+/// Supported target languages for code generation.
+enum Language {
+  dart,
+  rust,
+}
+
 class CodeGenerator {
-  CodeGenerator(this.sql,
-      {this.likeFilters = const <String>[],
-      this.inFilters = const <String>[],
-      this.timezoneName}) {
+  CodeGenerator(
+    this.sql, {
+    required this.language,
+    this.requiredFilters = const [],
+    this.timezoneName,
+  }) {
     tableName = getTableName(sql);
-    columns = getColumns(sql,
-        likeFilters: likeFilters,
-        inFilters: inFilters,
-        timezoneName: timezoneName);
-      }
+    columns = getColumns(sql, timezoneName: timezoneName);
+  }
 
   final String sql;
-  final List<String> likeFilters;
-  final List<String> inFilters;
+  final Language language;
   final String? timezoneName;
+  final List<String> requiredFilters;
 
   ///
   late final String tableName;
   late final List<Column> columns;
 
-  String generateDartStub() {
+  String generateCode() {
+    switch (language) {
+      case Language.dart:
+        return _generateDartStub();
+      case Language.rust:
+        return _generateRustStub();
+    }
+  }
+
+  String _generateDartStub() {
     throw UnimplementedError('Dart stub generation not implemented yet.');
   }
 
@@ -41,7 +55,7 @@ class CodeGenerator {
   ///
   ///
   /// See the test folder for examples.
-  String generateRustStub() {
+  String _generateRustStub() {
     final buffer = StringBuffer();
     buffer.writeln('// Auto-generated Rust stub for DuckDB table: $tableName');
     buffer.writeln(
@@ -76,37 +90,61 @@ class CodeGenerator {
     buffer.write('\n\n');
     buffer.write(makeTest());
 
+    buffer.write('\n\n');
+    buffer.write(makeApiQueryStruct(columns, requiredFilters: requiredFilters));
+
     return buffer.toString();
   }
 
   /// Generate HTML documentation for the query.
+  /// HTML query parameters use the Rust variable naming convention.
   String generateHtmlDocs() {
     final buffer = StringBuffer();
-    buffer.writeln('<p>The url query string has the following components:</p>');
+    buffer
+        .writeln('<p>The url query string supports the following filters:</p>');
+    buffer.writeln('<p>All filters are optional unless otherwise noted.  '
+        'If the amount of data returned is too large, the server will return '
+        'an error.</p>');
     buffer.writeln('<ul style="list-style-type: circle;">');
     for (var column in columns) {
-      final rustType = getRustType(
-        type: column.type,
-        columnName: column.name,
-        isNullable: false,
-      );
-      final filters = column.getQueryFilterVariables();
-      for (var filter in filters) {
-        switch (filter.filterClause) {
+      var comments = '';
+      if (column.type == ColumnTypeDuckDB.enumType) {
+        final variants = getEnumVariants(column.input);
+        comments =
+            '  Possible values: <span style="font-family: monospace">${variants.map((e) => '"$e"').join(', ')}</span>.';
+      }
+      if (column.isNullable) {
+        comments += '  An explicit value of <span style="font-family: monospace">NULL</span> is accepted.';
+      }
+      for (var filterClause in column.filterClauses) {
+        switch (filterClause) {
           case FilterClause.equal:
-            buffer.writeln('<li><b>${column.name}</b> $rustType,');
+            buffer.writeln('  <li><b>${column.name}</b> A filter for matching '
+                'exactly one value in column ${column.name}.$comments');
             break;
           case FilterClause.greaterThanOrEqual:
-            buffer.writeln('<li><b>${column.name}_gte</b> $rustType,');
+            buffer.writeln(
+                '  <li><b>${column.name}_gte</b> A filter for values '
+                'greater than or equal to a given value in column ${column.name}.');
+            break;
+          case FilterClause.lessThan:
+            buffer.writeln('  <li><b>${column.name}_lt</b> A filter for values '
+                'less than a given value in column ${column.name}.');
             break;
           case FilterClause.lessThanOrEqual:
-            buffer.writeln('<li><b>${column.name}_lte</b> $rustType,');
+            buffer.writeln(
+                '  <li><b>${column.name}_lte</b> A filter for values '
+                'less than or equal to a given value in column ${column.name}.');
             break;
           case FilterClause.like:
-            buffer.writeln('<li><b>${column.name}_like</b> String,');
+            buffer.writeln('  <li><b>${column.name}_like</b> A string pattern '
+                'to be used as a SQL like filter for the values in column '
+                '${column.name}.');
             break;
           case FilterClause.inList:
-            buffer.writeln('<li><b>${column.name}_in</b> Vec<$rustType>,');
+            buffer.writeln('  <li><b>${column.name}_in</b> A list of values '
+                'separated by commas.  If the values themselves contain commas, '
+                'they should be enclosed in double quotes.');
             break;
         }
       }
@@ -118,108 +156,102 @@ class CodeGenerator {
 }
 
 class Column {
-  Column(
-      {required this.name,
-      required this.type,
-      required this.isNullable,
-      required this.input});
+  Column({
+    required this.name,
+    required this.type,
+    required this.isNullable,
+    this.timezoneName,
+  }) {
+    filterClauses = Column.getDefaultFilters(type);
+    if (type == ColumnTypeDuckDB.timestamptz) {
+      if (timezoneName == null) {
+        throw StateError(
+            'timezoneName is required for TIMESTAMPTZ columns: $name');
+      }
+    } else {
+      if (timezoneName != null) {
+        throw StateError(
+            'timezoneName should only be provided for TIMESTAMPTZ columns: $name');
+      }
+    }
+  }
+  // In snake case
   final String name;
   final ColumnTypeDuckDB type;
   final bool isNullable;
-  final String input;
+  late final String? timezoneName;
 
-  // Not sure about having these flags here, but let's see how it holds up
-  bool hasInFilter = false;
-  bool hasLikeFilter = false;
-  bool hasGteFilter = false;
-  bool hasLteFilter = false;
-  String? timezoneName;
+  late final String input;
+  late final List<FilterClause> filterClauses;
 
-  /// Sometimes one variable in the Record struct will have multiple filter
-  /// variables. For example, an `as_of: Date` field will have in addition
-  /// to the simple equality filter, an gte and lte filter variable.
-  ///
-  List<QueryFilterVariable> getQueryFilterVariables() {
-    final variables = <QueryFilterVariable>[];
-    final rustType =
-        getRustType(type: type, columnName: name, isNullable: isNullable);
-
-    // Equal filter, always present
-    variables.add(QueryFilterVariable(
-      rustVariableName: name.toSnakeCase(),
-      rustType: rustType,
-      filterClause: FilterClause.equal,
-    ));
-
-    // Like filter
-    if (hasLikeFilter) {
-      variables.add(QueryFilterVariable(
-        rustVariableName: '${name.toSnakeCase()}_like',
-        rustType: rustType,
-        filterClause: FilterClause.like,
-      ));
-    }
-
-    // In filter
-    if (hasInFilter) {
-      variables.add(QueryFilterVariable(
-        rustVariableName: '${name.toSnakeCase()}_in',
-        rustType:
-            'Vec<${rustType.replaceAll("Option<", "").replaceAll(">", "")}>',
-        filterClause: FilterClause.inList,
-      ));
-    }
-
-    // Greater than or equal filter
-    if (hasGteFilter) {
-      variables.add(QueryFilterVariable(
-        rustVariableName: '${name.toSnakeCase()}_gte',
-        rustType: rustType,
-        filterClause: FilterClause.greaterThanOrEqual,
-      ));
-    }
-
-    // Less than or equal filter
-    if (hasLteFilter) {
-      variables.add(QueryFilterVariable(
-        rustVariableName: '${name.toSnakeCase()}_lte',
-        rustType: rustType,
-        filterClause: FilterClause.lessThanOrEqual,
-      ));
-    }
-
-    return variables;
+  /// Create a Column from a SQL column definition string, e.g. a line like:
+  /// ```sql
+  /// hour_beginning TIMESTAMPTZ NOT NULL,
+  /// lmp DECIMAL(18,5) NOT NULL,
+  /// ```
+  static Column from(String input, {String? timezoneName}) {
+    final type = getColumnType(input);
+    return Column(
+      name: getColumnName(input),
+      type: type,
+      isNullable: isColumnNullable(input),
+      timezoneName: type == ColumnTypeDuckDB.timestamptz ? timezoneName! : null,
+    )..input = input;
   }
-}
 
-class QueryFilterVariable {
-  QueryFilterVariable({
-    required this.rustVariableName,
-    required this.rustType,
-    required this.filterClause,
-  });
-  final String rustVariableName;
-  final String rustType;
-  final FilterClause filterClause;
+  Column copyWith({
+    String? name,
+    ColumnTypeDuckDB? type,
+    bool? isNullable,
+    List<FilterClause>? filterClauses,
+    String? timezoneName,
+  }) {
+    return Column(
+        name: name ?? this.name,
+        type: type ?? this.type,
+        isNullable: isNullable ?? this.isNullable,
+        timezoneName: timezoneName ?? this.timezoneName);
+  }
 
-  String getFilterClause() {
-    switch (filterClause) {
-      case FilterClause.equal:
-        return "AND $rustVariableName = '{}'";
-      case FilterClause.greaterThanOrEqual:
-        return "AND $rustVariableName >= '{}'";
-      case FilterClause.lessThanOrEqual:
-        return "AND $rustVariableName <= '{}'";
-      case FilterClause.like:
-        return "AND $rustVariableName LIKE '{}'";
-      case FilterClause.inList:
-        if (rustType == 'String') {
-          // probably other types in this bucket too, e.g. enums.
-          return "AND $rustVariableName IN ('{}')";
-        } else {
-          return "AND $rustVariableName IN ({})";
-        }
-    }
+  /// Get the default filters for a given DuckDB column type.
+  static List<FilterClause> getDefaultFilters(ColumnTypeDuckDB type) {
+    var filters = switch (type) {
+      ColumnTypeDuckDB.boolean => [FilterClause.equal],
+      ColumnTypeDuckDB.date ||
+      ColumnTypeDuckDB.decimal ||
+      ColumnTypeDuckDB.tinyint ||
+      ColumnTypeDuckDB.int16 ||
+      ColumnTypeDuckDB.int32 ||
+      ColumnTypeDuckDB.int64 ||
+      ColumnTypeDuckDB.uint8 ||
+      ColumnTypeDuckDB.uint16 ||
+      ColumnTypeDuckDB.uint32 ||
+      ColumnTypeDuckDB.uint64 ||
+      ColumnTypeDuckDB.uint128 =>
+        [
+          FilterClause.equal,
+          FilterClause.inList,
+          FilterClause.greaterThanOrEqual,
+          FilterClause.lessThanOrEqual,
+        ],
+      ColumnTypeDuckDB.double || ColumnTypeDuckDB.float => [
+          FilterClause.greaterThanOrEqual,
+          FilterClause.lessThan,
+        ],
+      ColumnTypeDuckDB.timestamp || ColumnTypeDuckDB.timestamptz => [
+          FilterClause.equal,
+          FilterClause.greaterThanOrEqual,
+          FilterClause.lessThan
+        ],
+      ColumnTypeDuckDB.enumType => [FilterClause.equal, FilterClause.inList],
+      ColumnTypeDuckDB.time => <FilterClause>[],
+      ColumnTypeDuckDB.varchar => [
+          FilterClause.equal,
+          FilterClause.like,
+          FilterClause.inList
+        ],
+    };
+    return filters;
   }
 }
 
@@ -227,44 +259,73 @@ enum FilterClause {
   equal,
   greaterThanOrEqual,
   lessThanOrEqual,
+  lessThan,
   like,
-  inList,
+  inList;
+
+  /// Construct the SQL filter clause string for this `Column`.
+  String makeFilter(Column column) {
+    late final String filterString;
+    switch (column.type) {
+      case ColumnTypeDuckDB.varchar ||
+            ColumnTypeDuckDB.enumType ||
+            ColumnTypeDuckDB.timestamptz ||
+            ColumnTypeDuckDB.timestamp ||
+            ColumnTypeDuckDB.date:
+        switch (this) {
+          case FilterClause.equal:
+            filterString = "AND ${column.name} = '{}'";
+            break;
+          case FilterClause.like:
+            filterString = "AND ${column.name} LIKE '{}'";
+            break;
+          case FilterClause.inList:
+            filterString = "AND ${column.name} IN ('{}')";
+            break;
+          case FilterClause.greaterThanOrEqual:
+            filterString = "AND ${column.name} >= '{}'";
+            break;
+          case FilterClause.lessThanOrEqual:
+            filterString = "AND ${column.name} <= '{}'";
+            break;
+          case FilterClause.lessThan:
+            filterString = "AND ${column.name} < '{}'";
+            break;
+        }
+      default:
+        // Numeric types and others
+        switch (this) {
+          case FilterClause.equal:
+            filterString = "AND ${column.name} = {}";
+            break;
+          case FilterClause.like:
+            filterString = "AND ${column.name} LIKE {}";
+            break;
+          case FilterClause.inList:
+            filterString = "AND ${column.name} IN ({})";
+            break;
+          case FilterClause.greaterThanOrEqual:
+            filterString = "AND ${column.name} >= {}";
+            break;
+          case FilterClause.lessThanOrEqual:
+            filterString = "AND ${column.name} <= {}";
+            break;
+          case FilterClause.lessThan:
+            filterString = "AND ${column.name} < {}";
+            break;
+        }
+        break;
+    }
+    return filterString;
+  }
 }
 
 /// Parse the SQL input and construct the columns from it.
-List<Column> getColumns(String input,
-    {List<String> likeFilters = const <String>[],
-    List<String> inFilters = const <String>[],
-    String? timezoneName}) {
+List<Column> getColumns(String input, {String? timezoneName}) {
   final columns = <Column>[];
   var aux = splitColumnDefinitions(input);
   for (var line in aux) {
-    var one = Column(
-      name: getColumnName(line),
-      type: getColumnType(line),
-      isNullable: isColumnNullable(line),
-      input: line,
-    );
-    if (one.type == ColumnTypeDuckDB.timestamptz) {
-      if (timezoneName == null) {
-        throw StateError(
-            'timezoneName argument is required for TIMESTAMPTZ columns');
-      }
-      one.timezoneName = timezoneName;
-    }
-    if (likeFilters.contains(one.name) &&
-        one.type == ColumnTypeDuckDB.varchar) {
-      one.hasLikeFilter = true;
-    }
-    if (inFilters.contains(one.name)) {
-      one.hasInFilter = true;
-    }
-    if (one.type == ColumnTypeDuckDB.date ||
-        one.type == ColumnTypeDuckDB.timestamp ||
-        one.type == ColumnTypeDuckDB.timestamptz) {
-      one.hasGteFilter = true;
-      one.hasLteFilter = true;
-    }
+    var one = Column.from(line, timezoneName: timezoneName);
     columns.add(one);
   }
 
@@ -302,16 +363,24 @@ String getTableName(String input) {
   }
 }
 
+/// Extract the column name from a column definition string.
+/// Require that the column name is in snake case for consistency.
+/// [input] is one line of SQL corresponding to a column definition.
+///
 String getColumnName(String input) {
-  final parts = input.split(RegExp(r'\s+'));
+  final parts = input.trim().split(RegExp(r'\s+'));
   if (parts.length < 2) {
     throw FormatException('Invalid column definition: $input');
+  }
+  if (parts[0] != parts[0].toSnakeCase()) {
+    throw FormatException(
+        'Column name must be in snake_case: found "${parts[0]}"');
   }
   return parts[0];
 }
 
 ColumnTypeDuckDB getColumnType(String input) {
-  final parts = input.split(RegExp(r'\s+'));
+  final parts = input.trim().split(RegExp(r'\s+'));
   if (parts.length < 2) {
     throw FormatException('Invalid column definition: $input');
   }
@@ -385,6 +454,31 @@ List<String> getEnumVariants(String input) {
       .map((m) => m.group(1) ?? '')
       .toList();
   return variantList;
+}
+
+/// Given a column and a filter clause, return the variable name for the filter.
+String getQueryFilterVariableName(Column column,
+    {required FilterClause clause, required Language language}) {
+  switch (language) {
+    case Language.dart:
+      return throw UnimplementedError(
+          'Dart filter variable name generation not implemented yet.');
+    case Language.rust:
+      switch (clause) {
+        case FilterClause.equal:
+          return column.name.toSnakeCase();
+        case FilterClause.greaterThanOrEqual:
+          return '${column.name.toSnakeCase()}_gte';
+        case FilterClause.lessThan:
+          return '${column.name.toSnakeCase()}_lt';
+        case FilterClause.lessThanOrEqual:
+          return '${column.name.toSnakeCase()}_lte';
+        case FilterClause.like:
+          return '${column.name.toSnakeCase()}_like';
+        case FilterClause.inList:
+          return '${column.name.toSnakeCase()}_in';
+      }
+  }
 }
 
 enum ColumnTypeDuckDB {
