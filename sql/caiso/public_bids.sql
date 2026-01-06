@@ -50,9 +50,11 @@ AS
         "SCH_BID_CURVETYPE"::ENUM('BIDPRICE') AS sch_bid_curve_type,
         "MINEOHSTATEOFCHARGE"::DECIMAL(9,4) AS min_eoh_state_of_charge,
         "MAXEOHSTATEOFCHARGE"::DECIMAL(9,4) AS max_eoh_state_of_charge
+    -- SELECT *    
     FROM read_csv(
-        '/home/adrian/Downloads/Archive/Caiso/PublicBids/Raw/2025/20250101_20250101_PUB_BID_DAM_v3.csv.gz',
+        '/home/adrian/Downloads/Archive/Caiso/PublicBids/Raw/2024/202401*_202401*_PUB_BID_DAM_v3.csv.gz',
         header = true,
+        types = {'SCH_BID_Y2AXISDATA': 'DECIMAL(9,4)', 'SCH_BID_Y1AXISDATA': 'DECIMAL(9,4)', 'SCH_BID_XAXISDATA': 'DECIMAL(9,4)', 'SELFSCHEDMW': 'DECIMAL(9,4)', 'RESOURCEBID_SEQ': 'UINTEGER', 'SCHEDULINGCOORDINATOR_SEQ': 'UINTEGER'},
         timestampformat = 'YYYY-MM-DD HH:MM:SS.000'
     )
     ORDER BY hour_beginning, resource_bid_seq 

@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2026-01-05
+- Moved code to reduct
+
 # Release 2025-12-26
 - Various improvements to reduct. 
 - Made SQL file to ingest Census population data

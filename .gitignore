@@ -17,6 +17,8 @@ pubspec.lock
 
 out
 
+lib/client/ex0_client.dart
+
 venv/
 
 .env/

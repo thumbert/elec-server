@@ -1,15 +1,15 @@
-<<<<<<< HEAD
 LOAD icu;SET TimeZone = 'America/Los_Angeles';
-
-
 SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*) FROM lmp;
 
-
+SELECT DISTINCT strftime(hour_beginning, '%Y-%m') AS month 
+FROM lmp 
+WHERE node_id = 'TH_NP15_GEN-APND'
+ORDER BY month;
 
 SELECT * from lmp
+SELECT * FROM read_vortex('lmp.vortex')
 WHERE node_id = 'TH_NP15_GEN_ONPEAK-APND'
 AND hour_beginning >= '2025-12-01T00:00:00-08:00'
-AND hour_beginning < '2025-12-02T00:00:00-08:00'
 ORDER BY hour_beginning;
 
 -- WHERE node_id = 'TH_NP15_GEN-APND';
@@ -75,7 +75,6 @@ HAVING buckets.buckets."caiso_6x16" = TRUE
 ORDER BY node_id, day;
 
 
-=======
 LOAD icu; SET TimeZone = 'America/Los_Angeles';
 
 SELECT * FROM lmp LIMIT 10;
@@ -85,7 +84,6 @@ SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*) FROM lmp;
 SELECT DISTINCT node_id FROM lmp 
 -- WHERE hour_beginning == '2025-12-06 00:00:00-08:00'
 ORDER BY node_id;
->>>>>>> 32bcf4450d1a5a5087eaacb11c46ab0982f81997
 
 
 -- https://oasis.caiso.com/oasisapi/SingleZip?resultformat=6&queryname=PRC_LMP&version=12&startdatetime=20251206T08:00-0000&enddatetime=20251207T08:00-0000&market_run_id=DAM&grp_type=ALL
@@ -171,8 +169,48 @@ INSERT INTO lmp
         AND lmp.hour_beginning = tmp.hour_beginning
     )
 );
-<<<<<<< HEAD
 
-=======
->>>>>>> 32bcf4450d1a5a5087eaacb11c46ab0982f81997
 
+---==========================================================================
+--- Try with a list of prices per day to see if you get any storage savings. 
+--- There are significant savings almost a factor of 5 smaller file on disk. 
+---==========================================================================
+
+ATTACH '~/Downloads/Archive/DuckDB/caiso/dalmp.duckdb' AS dalmp;
+SELECT * FROM dalmp.lmp LIMIT 10;
+
+CREATE TABLE IF NOT EXISTS lmp (
+    date DATE NOT NULL,
+    node_id VARCHAR NOT NULL,
+    lmp DECIMAL(18,5)[] NOT NULL,
+    mcc DECIMAL(18,5)[] NOT NULL,
+    mcl DECIMAL(18,5)[] NOT NULL,
+);
+
+CREATE TEMPORARY TABLE tmp AS (
+    SELECT 
+        hour_beginning::DATE AS date,
+        node_id,
+        ARRAY_AGG(lmp ORDER BY hour_beginning) AS lmp,
+        ARRAY_AGG(mcc ORDER BY hour_beginning) AS mcc,
+        ARRAY_AGG(mcl ORDER BY hour_beginning) AS mcl
+    FROM dalmp.lmp
+    WHERE hour_beginning >= '2025-01-01T00:00:00-08:00'
+    AND hour_beginning < '2026-01-01T00:00:00-08:00'
+    GROUP BY node_id, date
+    ORDER BY node_id, date
+);
+
+INSERT INTO lmp (
+    SELECT * FROM tmp 
+    WHERE NOT EXISTS (
+        SELECT * FROM lmp d
+        WHERE d.date = tmp.date
+        AND d.node_id = tmp.node_id
+        )
+)
+ORDER BY date, node_id;
+
+
+LOAD vortex;
+COPY (SELECT * FROM dalmp.lmp) TO './lmp.vortex' (FORMAT vortex);

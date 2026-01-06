@@ -275,7 +275,7 @@ class MorningReport {
       genForcedOutagesReductionMw: x['GenForcedOutagesReductionMW'],
       uncommittedAvailGenMw: x['UncommittedAvailGenMw'],
       drrCapacityMw: x['DRRCapacityMw'],
-      uncommittedAvailableDrrGenMw: x['UncommitedAvailDRRMw'],
+      uncommittedAvailableDrrGenMw: x['UncommitedAvailDRRMw'], // typo in source
       netCapacityDeliveryMw: x['NetCapDeliveryMw'],
       //
       tieFlowHighgateMw: tieDelivery
