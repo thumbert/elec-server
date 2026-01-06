@@ -97,6 +97,9 @@ class DaDemandBidArchive {
     Date(2024, 4, 29, location: IsoNewEngland.location),
     Date(2024, 8, 31, location: IsoNewEngland.location),
     Date(2024, 9, 3, location: IsoNewEngland.location),
+    // 
+    Date(2025, 5, 31, location: IsoNewEngland.location),
+    Date(2025, 8, 9, location: IsoNewEngland.location),    
   };
 
   File getFilename(Date asOfDate) => File(
