@@ -9,11 +9,23 @@ import 'package:elec_server/src/db/config.dart';
 import 'package:elec_server/src/db/hq/hq_water.dart';
 import 'package:elec_server/src/db/ieso/rt_generation.dart';
 import 'package:elec_server/src/db/ieso/rt_zonal_demand.dart';
+import 'package:elec_server/src/db/isoexpress/ara_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_5min.dart';
 import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/weather/normal_temperature.dart';
+
+AraCapacityBidOfferArchive getIsoneAraBidOfferArchive() {
+  final dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/IsoExpress/Capacity/HistoricalBidsOffers/AnnualReconfigurationAuction';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  final duckDbPath =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/isone/ara.duckdb';
+  return AraCapacityBidOfferArchive(dir: dir, duckDbPath: duckDbPath);
+}
 
 CanadianStatisticsArchive getCanadianStatisticsArchive() {
   var dir =
@@ -190,7 +202,7 @@ MraCapacityResultsArchive getIsoneMraResultsArchive() {
 }
 
 PtidArchive getIsonePtidArchive() {
-   var config = ComponentConfig(
+  var config = ComponentConfig(
     host: dotenv.env['MONGO_CONNECTION']!,
     dbName: 'isone',
     collectionName: 'pnode_table',
@@ -201,7 +213,6 @@ PtidArchive getIsonePtidArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return PtidArchive(config: config, dir: dir);
-
 }
 
 RtEnergyOfferArchive getIsoneRtEnergyOfferArchive() {

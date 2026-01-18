@@ -6,6 +6,9 @@
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
 
+# Release 2026-01-18
+- Some work on ARA masked bids
+
 # Release 2026-01-05
 - Moved code to reduct
 
