@@ -5,6 +5,7 @@
 - Zip the json files for lower disk usage.  For daily archives, keep one 
   zip file for a year worth of data.  
 - Move ISONE Monthly Asset NCPC to DuckDB
+- test
 
 # Release 2026-01-18
 - Some work on ARA masked bids
