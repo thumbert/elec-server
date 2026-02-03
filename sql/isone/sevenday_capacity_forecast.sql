@@ -5,6 +5,36 @@ FROM capacity_forecast;
 SELECT min(for_day) AS min_date, max(for_day) AS max_date
 FROM capacity_forecast;
 
+--- pick up the changes in peak load forecast
+SELECT 
+    *,
+    "2_peak_load_mw" - "3_peak_load_mw" AS diff
+FROM (
+    PIVOT
+    (
+        SELECT 
+            for_day,
+            day_index,
+            peak_load_mw
+        FROM capacity_forecast
+        WHERE day_index IN (2, 3) 
+        AND for_day >= '2026-01-16'
+        AND for_day <= '2026-01-31'
+    ) ON day_index
+    USING
+        MAX(peak_load_mw) AS peak_load_mw
+)
+ORDER BY for_day;
+
+
+SELECT for_day, day_index, peak_load_mw 
+FROM capacity_forecast
+WHERE day_index IN (2, 3) 
+AND for_day >= '2026-01-16'
+AND for_day <= '2026-01-31'
+ORDER BY for_day;
+
+
 
 
 ---====================================================================================================
@@ -12,6 +42,7 @@ FROM capacity_forecast;
 ---====================================================================================================
 
 CREATE TABLE IF NOT EXISTS capacity_forecast (
+    creation_time TIMESTAMPTZ NOT NULL,
     for_day DATE NOT NULL,
     day_index UINT8 NOT NULL,
     cso_mw INT,
@@ -51,8 +82,9 @@ AS
             CAST(city_weather -> 'DewPointF' AS INT1) AS dew_point_f
         FROM (
         SELECT 
+            creation_time,
             CAST(aux -> 'MarketDate' AS DATE) AS for_day,
-            CAST(aux -> '@Day' AS INTEGER) AS day_index,
+            CAST(aux -> 'Day' AS INTEGER) AS day_index,
             CAST(aux -> 'CsoMw' AS INTEGER) AS cso_mw,
             CAST(aux -> 'ColdWeatherOutagesMw' AS INTEGER) AS cold_weather_outages_mw,
             CAST(aux -> 'OtherGenOutagesMw' AS INTEGER) AS other_gen_outages_mw,
@@ -95,26 +127,27 @@ AS
             unnest(aux -> '$.Weather' -> '$.CityWeather[*]', recursive := true) AS city_weather,  
             FROM (
                 SELECT 
-                    unnest(CAST(sevendayforecasts.Sevendayforecast AS JSON) -> '$[0]' -> '$.MarketDay[*]') as aux
-                -- FROM read_json('~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-05-*.json.gz')
-                FROM read_json(
-                    ['~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-01.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-02.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-03.json.gz',
-                    '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-04.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-05.json.gz',
-                     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-06.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-07.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-08.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-09.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-10.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-11.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-12.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-13.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-14.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-15.json.gz',
-                        '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-16.json.gz'
-                     ])
+                    unnest(CAST(sevendayforecasts.Sevendayforecast AS JSON) -> '$[0]' -> '$.MarketDay[*]') as aux, 
+                    CAST(CAST(sevendayforecasts.Sevendayforecast AS JSON) -> '$[0]' -> '$.CreationDate' as TIMESTAMPTZ) as creation_time 
+                FROM read_json('~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2026/7dayforecast_2026-01-17.json.gz')
+                -- FROM read_json(
+                --     ['~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-01.json.gz',
+                --      '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-02.json.gz',
+                --      '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-03.json.gz',
+                --     '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-04.json.gz',
+                --      '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-05.json.gz',
+                --      '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-06.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-07.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-08.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-09.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-10.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-11.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-12.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-13.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-14.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-15.json.gz',
+                --         '~/Downloads/Archive/IsoExpress/7dayCapacityForecast/Raw/2024/7dayforecast_2024-06-16.json.gz'
+                --      ])
             )
         ) 
     ) ON city_name 

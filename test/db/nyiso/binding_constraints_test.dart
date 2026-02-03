@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:reduct/reduct.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart' as api;
@@ -160,9 +161,32 @@ Future<void> tests(String rootUrl) async {
   });
 }
 
+void generateCode() {
+  final sql = '''
+CREATE TABLE IF NOT EXISTS binding_constraints (
+    market ENUM('DA', 'RT') NOT NULL,
+    hour_beginning TIMESTAMPTZ NOT NULL,
+    limiting_facility VARCHAR NOT NULL,
+    facility_ptid INT64 NOT NULL,
+    contingency VARCHAR NOT NULL,
+    constraint_cost DECIMAL(9,4) NOT NULL,
+);
+''';
+  final generator = CodeGenerator(
+    sql,
+    timezoneName: 'America/New_York',
+    apiRoute: '/nyiso/binding_constraints',
+  );
+  print(generator.generateCode(Language.rust));
+  print(generator.generateHtmlDocs());
+  print(generator.generateCode(Language.dart));
+}
+
+
 void main() async {
   initializeTimeZones();
+  // final rootUrl = 'http://127.0.0.1:8080';
+  // tests(rootUrl);
 
-  var rootUrl = 'http://127.0.0.1:8080';
-  tests(rootUrl);
+  generateCode();
 }

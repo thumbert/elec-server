@@ -55,7 +55,7 @@ SELECT
 --- Create and update the table (version 2) -- Active
 --- Data from 2020-01 to 2025-05 was 935 MB on disk
 --- =========================================================================================
-DROP TABLE IF EXISTS dalmp;
+-- DROP TABLE IF EXISTS dalmp;
 CREATE TABLE IF NOT EXISTS dalmp (
     hour_beginning TIMESTAMPTZ NOT NULL,
     ptid INTEGER NOT NULL,
@@ -63,6 +63,9 @@ CREATE TABLE IF NOT EXISTS dalmp (
     mlc DECIMAL(9,2) NOT NULL,
     mcc DECIMAL(9,2) NOT NULL,
 );
+
+CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM '/home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/2026/202601*damlbmp_zone.csv.gz';
+CREATE TEMPORARY TABLE tmp2 AS SELECT * FROM '/home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/2026/202601*damlbmp_gen.csv.gz';
 
 LOAD zipfs;    
 CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_zone_csv.zip/*.csv';
@@ -116,15 +119,6 @@ FROM (
     )
 )
 ORDER BY hour_beginning, ptid;
-
-SELECT *
-FROM g
-WHERE hour_beginning >= '2025-10-08'
-AND hour_beginning < '2025-10-09'
-AND ptid IN (61754, 23575)
-ORDER BY hour_beginning;
-
-
 
 
 INSERT INTO dalmp
