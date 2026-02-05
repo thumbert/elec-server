@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-02-04
+- Created isone/events_calendar.sql
+
 # Release 2026-01-18
 - Some work on ARA masked bids
 
