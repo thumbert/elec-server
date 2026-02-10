@@ -1,7 +1,5 @@
 import 'package:elec/elec.dart';
-import 'package:elec/risk_system.dart';
 import 'package:elec_server/api/api_dacongestion.dart';
-import 'package:elec_server/api/api_lmp.dart';
 import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/api/api_masked_ids.dart';
 import 'package:elec_server/api/cme/api_cme.dart';
@@ -67,10 +65,6 @@ Future<Router> buildRouter() async {
         DaEnergyOffers(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
-    '/dalmp/v1/': Lmp(DbProd.isoexpress, iso: Iso.newEngland, market: Market.da).router, // <--- to be deprecated on 1/27/2024!
-    '/rtlmp/v1/': Lmp(DbProd.isoexpress, iso: Iso.newEngland, market: Market.rt).router, // <--- to be deprecated on 1/27/2024!
-    '/isone/da/v1/': Lmp(DbProd.isoexpress, iso: Iso.newEngland, market: Market.da).router,
-    '/isone/rt/v1/': Lmp(DbProd.isoexpress, iso: Iso.newEngland, market: Market.rt).router,
 
     '/isone/fuelmix/v1/': ApiIsoneFuelMix(DbProd.isoexpress).router,
     '/fwdres_auction_results/v1/':
@@ -100,9 +94,6 @@ Future<Router> buildRouter() async {
         DaCongestionCompact(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/da_energy_offers/v1/':
         DaEnergyOffers(DbProd.nyiso, iso: Iso.newYork).router,
-    '/nyiso/dalmp/v1/': Lmp(DbProd.nyiso, iso: Iso.newYork, market: Market.da).router,  // <--- to be deprecated on 1/27/2024!
-    '/nyiso/da/v1/': Lmp(DbProd.nyiso, iso: Iso.newYork, market: Market.da).router,
-    '/nyiso/rt/v1/': Lmp(DbProd.nyiso, iso: Iso.newYork, market: Market.rt).router,
     '/nyiso/masked_ids/v1/': ApiMaskedIds(DbProd.nyiso).router,
     '/nyiso/ptids/v1/': nyiso_ptids.ApiPtids(DbProd.nyiso).router,
     '/nyiso/tcc_clearing_prices/v1/':

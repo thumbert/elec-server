@@ -69,7 +69,7 @@ Future<void> tests(String rootUrl) async {
         start: Date.utc(2023, 1, 1),
         end: Date.utc(2023, 7, 27),
       );
-      expect(x.length, 98);
+      expect(x.length, 100);
       expect(x.first, ['2023-04-28', '2024-01', 3.877]);
 
       // with http
@@ -78,7 +78,7 @@ Future<void> tests(String rootUrl) async {
           '/start/2023-01-01/end/2023-07-27';
       var res = await get(Uri.parse(url));
       var y = json.decode(res.body) as List;
-      expect(y.length, 98);
+      expect(y.length, 100);
       expect(y.first, ['2023-04-28', '2024-01', 3.877]);
     });
   });
@@ -108,7 +108,7 @@ Future<void> tests(String rootUrl) async {
         location: UTC,
         bucket: Bucket.atc,
       );
-      expect(ts.length, 49);
+      expect(ts.length, 50);
       expect(ts.first, IntervalTuple<num>(Date.utc(2023, 4, 28), 3.82915));
     });
   });

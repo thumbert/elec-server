@@ -16,8 +16,6 @@ import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
-import 'package:elec_server/src/db/isoexpress/da_congestion_compact.dart';
-import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_hourly.dart';
@@ -95,18 +93,6 @@ Future<void> recreateDaBindingConstraintsIsone() async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> recreateDaLmpHourlyIsone() async {
-  var archive = DaLmpHourlyArchive();
-  await archive.setupDb();
-  var files = Directory(archive.dir).listSync().whereType<File>().toList();
-  files.sort((a, b) => a.path.compareTo(b.path));
-  await archive.dbConfig.db.open();
-  for (var file in files) {
-    var data = archive.processFile(file);
-    await archive.insertData(data);
-  }
-  await archive.dbConfig.db.close();
-}
 
 Future<void> recreateRtLmpHourlyIsone() async {
   var archive = RtLmpHourlyArchive();
@@ -121,44 +107,6 @@ Future<void> recreateRtLmpHourlyIsone() async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> recreateDaCongestionCompactIsone() async {
-  var archive = DaCongestionCompactArchive();
-  await archive.setupDb();
-  var files = Directory(archive.dir).listSync().whereType<File>().toList();
-  files.sort((a, b) => a.path.compareTo(b.path));
-  await archive.dbConfig.db.open();
-  for (var file in files) {
-    var data = archive.processFile(file);
-    await archive.insertData(data);
-  }
-  await archive.dbConfig.db.close();
-}
-
-// Future<void> recreateDaDemandBid() async {
-//   var archive = DaDemandBidArchive();
-//   await archive.setupDb();
-//   var files = Directory(archive.dir).listSync().whereType<File>().toList();
-//   files.sort((a, b) => a.path.compareTo(b.path));
-//   await archive.dbConfig.db.open();
-//   for (var file in files) {
-//     var data = archive.processFile(file);
-//     await archive.insertData(data);
-//   }
-//   await archive.dbConfig.db.close();
-// }
-
-// Future<void> recreateDaEnergyOffersIsone() async {
-//   var archive = DaEnergyOfferArchive();
-//   await archive.setupDb();
-//   var files = Directory(archive.dir).listSync().whereType<File>().toList();
-//   files.sort((a, b) => a.path.compareTo(b.path));
-//   await archive.dbConfig.db.open();
-//   for (var file in files) {
-//     var data = archive.processFile(file);
-//     await archive.insertData(data);
-//   }
-//   await archive.dbConfig.db.close();
-// }
 
 Future<void> recreateFwdResAuctionResults() async {
   var archive = FwdResAuctionResultsArchive();

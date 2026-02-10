@@ -281,26 +281,6 @@ Future<void> updateIsoneMraCapacityBidOffer(
   }
 }
 
-Future<void> updateIsoneDaLmp(
-    {required List<Month> months, required bool download}) async {
-  assert(months.first.location == IsoNewEngland.location);
-  var archive = prod.getIsoneDaLmpArchive();
-  for (var month in months) {
-    for (var day in month.days()) {
-      if (download) {
-        await archive.downloadDay(day);
-      }
-      // var file = archive.getFilename(day);
-      // var data = archive.processFile(file);
-      // await archive.insertData(data);
-    }
-    // archive.makeGzFileForMonth(month);
-    // archive.updateDuckDb(
-    //     months: [month],
-    //     pathDbFile:
-    //         '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
-  }
-}
 
 Future<void> updateIsoneDemandBids(
     {required List<Month> months, required bool download}) async {

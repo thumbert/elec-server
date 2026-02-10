@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-02-09
+- Got rid of old LMP apis.  Focusing on DuckDB for now.   
+
 # Release 2026-02-04
 - Created isone/events_calendar.sql
 

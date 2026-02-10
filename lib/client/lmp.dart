@@ -7,56 +7,83 @@ import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 
-/// A Dart client for pulling LMP prices from DuckDB supporting several
-/// regions.
-class Lmp {
-  Lmp(http.Client client, {required this.rustServer});
 
-  final String rustServer;
-
-  final _isoMap = <Iso, String>{
-    Iso.ieso: '/ieso',
-    Iso.newEngland: '/isone',
-    Iso.newYork: '/nyiso',
-  };
-
-  /// Get hourly prices for one ptid between a start and end date.
-  /// Return an hourly timeseries.
+extension CaisoLmpPriceExtension on Caiso {
   Future<TimeSeries<num>> getHourlyLmp(
-      {required Iso iso,
+      {required Market market,
+      required String locationName,
+      required LmpComponent component,
+      required Term term,
+      required String rustServer}) async {
+    final url = '$rustServer/caiso/prices/${market.name.toLowerCase()}/hourly/'
+        'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
+        '?node_ids=$locationName&components=${component.shortName()}';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
+    return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
+        Hour.beginning(
+            TZDateTime.parse(preferredTimeZoneLocation, e['hour_beginning'])),
+        e['price'])));
+  }
+}
+
+extension IesoLmpPriceExtension on Ieso {
+  Future<TimeSeries<num>> getHourlyLmp(
+      {required Market market,
+      required String locationName,
+      required LmpComponent component,
+      required Term term,
+      required String rustServer}) async {
+    final url = '$rustServer/ieso/prices/${market.name.toLowerCase()}/hourly/'
+        'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
+        '?locations=$locationName&components=${component.shortName()}';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
+    return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
+        Hour.beginning(
+            TZDateTime.parse(preferredTimeZoneLocation, e['hour_beginning'])),
+        e['price'])));
+  }
+}
+
+extension IsoneLmpPriceExtension on IsoNewEngland {
+  Future<TimeSeries<num>> getHourlyLmp(
+      {required Market market,
       required int ptid,
       required LmpComponent component,
       required Term term,
-      required Market market}) async {
-    var cmp = component.shortName();
-    var url = '$rustServer${_isoMap[iso]!}/prices/$market/hourly/'
+      required String rustServer}) async {
+    final url = '$rustServer/isone/prices/${market.name.toLowerCase()}/hourly/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?ptids=$ptid&components=$cmp';
+        '?ptids=$ptid&components=${component.shortName()}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
-
     return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
-        Hour.beginning(TZDateTime.parse(
-            iso.preferredTimeZoneLocation, e['hour_beginning'])),
+        Hour.beginning(
+            TZDateTime.parse(preferredTimeZoneLocation, e['hour_beginning'])),
         e['price'])));
   }
-
-  // Future<TimeSeries<num>> getHourlyLmpMany(
-  //     {required Iso iso,
-  //     required List<int> ptids,
-  //     required LmpComponent component,
-  //     required Term term,
-  //     required Market market}) async {
-  //   var cmp = component.toString();
-  //   var url = '$rustServer${_isoMap[iso]!}/$market/hourly/'
-  //       'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-  //       '?ptids=${ptids.join(',')}/components=$cmp';
-  //   var response = await http.get(Uri.parse(url));
-  //   var data = json.decode(response.body) as List;
-
-  //   return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
-  //       Hour.beginning(TZDateTime.parse(
-  //           iso.preferredTimeZoneLocation, e['hour_beginning'])),
-  //       e['price'])));
-  // }
 }
+
+
+extension NyisoLmpPriceExtension on NewYorkIso {
+  Future<TimeSeries<num>> getHourlyLmp(
+      {required Market market,
+      required int ptid,
+      required LmpComponent component,
+      required Term term,
+      required String rustServer}) async {
+    final url = '$rustServer/nyiso/prices/${market.name.toLowerCase()}/hourly/'
+        'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
+        '?ptids=$ptid&components=${component.shortName()}';
+    var response = await http.get(Uri.parse(url));
+    var data = json.decode(response.body) as List;
+    return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
+        Hour.beginning(
+            TZDateTime.parse(preferredTimeZoneLocation, e['hour_beginning'])),
+        e['price'])));
+  }
+}
+
+
+

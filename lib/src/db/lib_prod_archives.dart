@@ -132,14 +132,9 @@ RtSystemLoad5minArchive getRtSystemLoad5minArchive() {
 }
 
 DaLmpHourlyArchive getIsoneDaLmpArchive() {
-  var dbConfig = ComponentConfig(
-      host: '127.0.0.1', dbName: 'isoexpress', collectionName: 'da_lmp_hourly');
-  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
-      '/IsoExpress/PricingReports/DaLmpHourly/Raw/';
-  if (!Directory(dir).existsSync()) {
-    Directory(dir).createSync(recursive: true);
-  }
-  return DaLmpHourlyArchive(dbConfig: dbConfig, dir: dir);
+  var duckdbPath =
+      '${Platform.environment['HOME']}/Downloads/Archive/DuckDB/isone/dalmp.duckdb';
+  return DaLmpHourlyArchive(duckDbPath: duckdbPath);
 }
 
 DaDemandBidArchive getIsoneDemandBidsArchive() {

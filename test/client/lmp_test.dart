@@ -1,11 +1,10 @@
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:elec_server/client/lmp.dart' as client;
+import 'package:elec/elec.dart';
+import 'package:elec_server/client/lmp.dart';
 import 'package:test/test.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
-import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
@@ -13,15 +12,14 @@ import 'package:timezone/timezone.dart';
 Future<void> tests(String rootUrl) async {
   var location = getLocation('America/New_York');
 
-  group('LMP client tests: ', () {
-    var lmp = client.Lmp(http.Client(), rustServer: rootUrl);
+  group('LMP client tests ISONE: ', () {
     test('get hourly lmp prices ISONE', () async {
-      var data = await lmp.getHourlyLmp(
-          iso: Iso.newEngland,
+      var data = await IsoNewEngland().getHourlyLmp(
           ptid: 4000,
           component: LmpComponent.lmp,
           term: Term(Date.utc(2025, 1, 1), Date.utc(2025, 1, 1)),
-          market: Market.da);
+          market: Market.da,
+          rustServer: rootUrl);
       expect(data.length, 24);
       expect(data.take(3).toList(), [
         IntervalTuple<num>(
@@ -34,12 +32,12 @@ Future<void> tests(String rootUrl) async {
     });
 
     test('get hourly congestion prices ISONE', () async {
-      var data = await lmp.getHourlyLmp(
-          iso: Iso.newEngland,
+      var data = await IsoNewEngland().getHourlyLmp(
           ptid: 4000,
           component: LmpComponent.congestion,
           term: Term(Date.utc(2025, 1, 1), Date.utc(2025, 1, 1)),
-          market: Market.da);
+          market: Market.da,
+          rustServer: rootUrl);
       expect(data.length, 24);
       expect(data.take(3).toList(), [
         IntervalTuple<num>(
@@ -50,7 +48,6 @@ Future<void> tests(String rootUrl) async {
             Hour.beginning(TZDateTime(location, 2025, 1, 1, 2)), 0.0),
       ]);
     });
-    
   });
 }
 

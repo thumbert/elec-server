@@ -87,12 +87,12 @@ Future<void> tests(String rootUrl) async {
     var api = ApiCtSupplierBacklogRates(archive.dbConfig.db);
     setUp(() async => await archive.dbConfig.db.open());
     tearDown(() async => await archive.dbConfig.db.close());
-    test('get Eversource data Jan23-Mar23', () async {
+    test('get Eversource data Sep24-Oct24', () async {
       var res = await api.getAllDataForOneUtility(
-          Utility.eversource, Month.utc(2023, 1), Month.utc(2023, 3));
-      expect(res.length, 184);
+          Utility.eversource, Month.utc(2024, 9), Month.utc(2024, 10));
+      expect(res.length, 126);
       var url =
-          '$rootUrl/retail_suppliers/v1/ct/supplier_backlog_rates/utility/Eversource/start/2023-01/end/2023-03';
+          '$rootUrl/retail_suppliers/v1/ct/supplier_backlog_rates/utility/Eversource/start/2024-09/end/2024-10';
       var aux = await get(Uri.parse(url));
       var data = json.decode(aux.body) as List;
       var x0 = data.first as Map<String, dynamic>;
@@ -130,12 +130,12 @@ Future<void> tests(String rootUrl) async {
 
   group('Supplier backlog rates Client tests:', () {
     var client = CtSupplierBacklogRates(Client(), rootUrl: rootUrl);
-    test('get Eversource data Jan23-Mar23', () async {
+    test('get Eversource data Sep24-Oct24', () async {
       var data = await client.getBacklogForUtility(
           utility: Utility.eversource,
-          start: Month.utc(2023, 1),
-          end: Month.utc(2023, 3));
-      expect(data.length, 184);
+          start: Month.utc(2024, 9),
+          end: Month.utc(2024, 10));
+      expect(data.length, 126);
       var x0 = data.first;
       expect(x0.keys.toSet(), {
         'month',
@@ -147,18 +147,18 @@ Future<void> tests(String rootUrl) async {
         'summary',
       });
     });
-    test('get Eversource data Jan22-Oct23', () async {
+    test('get Eversource data Sep24-Oct24', () async {
       var data = await client.getBacklogForUtility(
           utility: Utility.eversource,
-          start: Month.utc(2022, 1),
-          end: Month.utc(2023, 10));
+          start: Month.utc(2024, 9),
+          end: Month.utc(2024, 10));
       var x0 = data
           .where((e) =>
               e['supplierName'] == 'CONSTELLATION NEWENERGY RES' &&
               e['customerClass'] == 'Residential')
           .toList();
-      expect(x0.length, 22);
-      expect(x0.last['month'], '2023-10');
+      expect(x0.length, 2);
+      expect(x0.last['month'], '2024-10');
     });
   });
 }

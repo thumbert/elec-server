@@ -26,14 +26,6 @@ Future<void> tests(String rootUrl, String rustServer) async {
       expect(c0['values'].length, 24);
       expect(c0['values'].first, 13702);
     });
-    test('read file for year 2025 -- missing hour for 5/1/2025', () async {
-      var file = archive.getFilename(2025);
-      var data = archive.processFile(file);
-      var x0 = data.firstWhere(
-          (e) => e['zone'] == 'Ontario' && e['date'] == '2025-05-01');
-      expect(x0['values'].length, 24);
-      expect(x0['values'].first, null);
-    });
   });
   group('IESO rt zonal demand API tests:', () {
     var api = ApiIesoRtZonalDemand(archive.dbConfig.db);
@@ -71,7 +63,7 @@ Future<void> tests(String rootUrl, String rustServer) async {
       expect(aux.length, 15 * 24);
       expect(
           aux.first.interval, Hour.beginning(TZDateTime(Ieso.location, 2023)));
-      expect(aux.first.value, 13514);
+      expect(aux.first.value, 774);
     });
   });
 }

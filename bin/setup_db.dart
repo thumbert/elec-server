@@ -34,7 +34,6 @@ import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
-import 'package:elec_server/src/db/isoexpress/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
 import 'package:elec_server/src/db/other/isone_ptids.dart';
 import 'package:timezone/data/latest.dart';
@@ -312,21 +311,6 @@ Future<void> insertHourlyRtZonalLoadNyiso() async {
   await archive.dbConfig.db.close();
 }
 
-Future<void> insertIsoExpress() async {
-  var location = getLocation('America/New_York');
-  // to pass tests
-  // await insertDays(
-  //     DaEnergyOfferArchive(), Term.parse('Jul17', location).days());
-
-  // to calculate hourly shaping for Hub, need Jan19-Dec19
-  var days = Term.parse('1Jun19-30Jun19', location).days();
-  await insertDays(DaLmpHourlyArchive(), days);
-  // await insertDays(DaCongestionCompactArchive(), days, download: false);
-
-  // to calculate settlement prices for calculators, Jan20-Aug20
-  // await insertDays(
-  //     DaLmpHourlyArchive(), Term.parse('Jan20-Aug20', location).days());
-}
 
 Future<void> insertMaskedAssetIdsIsone() async {
   var archive = IsoNeMaskedIdsArchive();
