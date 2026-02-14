@@ -2,6 +2,19 @@
 SELECT * from fuel_mix
 ORDER BY zoned;
 
+SELECT MIN(zoned), MAX(zoned), COUNT(*) FROM fuel_mix;
+
+SELECT 
+    strftime(zoned, '%Y-%m') AS month,
+    count(*) AS count
+FROM fuel_mix
+GROUP BY month
+ORDER BY month;
+
+
+
+
+
 
 ---==================================================================================
 ---  HQ Fuel Mix
@@ -19,16 +32,16 @@ CREATE TABLE IF NOT EXISTS fuel_mix (
 CREATE TEMPORARY TABLE tmp
 AS
     SELECT
-        date::TIMESTAMPTZ AS zoned,
-        valeurs_total::DECIMAL(9,2) AS total,
-        valeurs_hydraulique::DECIMAL(9,2) AS hydro,
-        valeurs_eolien::DECIMAL(9,2) AS wind,
-        valeurs_solaire::DECIMAL(9,2) AS solar,
-        valeurs_autres::DECIMAL(9,2) AS other,
-        valeurs_thermique::DECIMAL(9,2) AS thermal,
+        time::TIMESTAMPTZ AS zoned,
+        total::DECIMAL(9,2) AS total,
+        hydraulique::DECIMAL(9,2) AS hydro,
+        eolien::DECIMAL(9,2) AS wind,
+        solaire::DECIMAL(9,2) AS solar,
+        autres::DECIMAL(9,2) AS other,
+        thermique::DECIMAL(9,2) AS thermal,
     FROM (
-        SELECT unnest(results, recursive := true)
-        FROM read_json('~/Downloads/Archive/HQ/FuelMix/Raw/2025/fuel_mix_2025-09-15.json.gz')
+        SELECT *
+        FROM read_json('~/Downloads/Archive/HQ/FuelMix/Raw/2024/fuel_mix_2024-09-*.json.gz')
     )
     WHERE total != 0
     ORDER BY zoned

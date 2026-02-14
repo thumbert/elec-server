@@ -35,7 +35,7 @@ ORDER BY zoned;
 ---==================================================================================
 ---  HQ Total Demand
 ---==================================================================================
-CREATE TABLE IF NOT EXISTS total_demand (
+CREATE TABLE IF NOT EXISTS total_demand_prelim (
     zoned TIMESTAMPTZ NOT NULL,
     value DECIMAL(9,2) NOT NULL,
 );
@@ -47,18 +47,18 @@ AS
        valeurs_demandetotal::DECIMAL(9,2) AS value
     FROM (
         SELECT unnest(results, recursive := true)
-        FROM read_json('~/Downloads/Archive/HQ/TotalDemand/Raw/2025/total_demand_2025-09-15.json.gz')
+        FROM read_json('~/Downloads/Archive/HQ/TotalDemandPrelim/Raw/2025/total_demand_2025-09-15.json.gz')
     )
     WHERE value IS NOT NULL
     ORDER BY zoned
 ;
 
 
-INSERT INTO total_demand
+INSERT INTO total_demand_prelim
 (
     SELECT * FROM tmp t
     WHERE NOT EXISTS (
-        SELECT * FROM total_demand d
+        SELECT * FROM total_demand_prelim d
         WHERE
             d.zoned = t.zoned AND
             d.value = t.value
