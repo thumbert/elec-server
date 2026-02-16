@@ -112,6 +112,7 @@ Future<void> updateCtSupplierBacklogRatesDb(
   if (externalDownload) {
     await archive.getAllUrls();
     for (var month in months) {
+      print('Downloading backlog rates for month ${month.toIso8601String()}');
       for (var utility in Utility.values) {
         await archive.downloadFile(month, utility);
       }

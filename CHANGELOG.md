@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-02-16 
+- Fix CT suppliers backlog for 2025-12 Eversource.  The spreadsheet format changed (again)
+
 # Release 2026-02-09
 - Got rid of old LMP apis.  Focusing on DuckDB for now.   
 

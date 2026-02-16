@@ -53,6 +53,7 @@ class CtSupplierBacklogRatesArchive {
       '$monthName Residential IRAs': 'Residential IRA',
       '$monthName Residential IRA': 'Residential IRA',
       '$monthName C&I': 'C&I',
+      'December 2025 Year C&I': 'C&I',
       '$monthName StLgt': 'StreetLights',
     };
 

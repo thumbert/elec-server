@@ -9,7 +9,6 @@ import 'package:more/collection.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
-
 Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
     {bool gzip = false}) async {
   await archive.dbConfig.db.open();
@@ -57,7 +56,7 @@ Future<void> tests() async {
   // await updateIsoneDemandBids(months: months, download: true);
   // await updateIsoneDaEnergyOffers(months: months, download: false);
 
-  await updateIsonePtidTable(url: 'https://www.iso-ne.com/static-assets/documents/100028/pnode_table_2025_11_01.xlsx');
+  // await updateIsonePtidTable(url: 'https://www.iso-ne.com/static-assets/documents/100028/pnode_table_2025_11_01.xlsx');
   // await updateIsoneRtLmp(months: months, download: true);
   // await updateIsoneRtLmp5Min(
   //     months: months, ptids: [4000], reportType: 'prelim', download: false);
@@ -78,9 +77,8 @@ Future<void> tests() async {
   // await updateIsoneMraCapacityResults(months: months, download: true);
 
   // await updateCmeEnergySettlements(days, setUp: false);
-  // var months = Month.utc(2025, 6).upTo(Month.utc(2025, 6));
-  // await updateCtSupplierBacklogRatesDb(months: months,
-  //     externalDownload: true);
+  var months = Month.utc(2025, 12).upTo(Month.utc(2025, 12));
+  await updateCtSupplierBacklogRatesDb(months: months, externalDownload: false);
 
   // var years = IntegerRange(2020, 2024);
   // await updateCmpLoadArchive(years, setUp: true);
