@@ -26,7 +26,10 @@ SELECT
 FROM zu.zonal_uplift
 GROUP BY month
 ORDER BY month;
-" | qplot
+" 
+
+
+| qplot
 
 
 

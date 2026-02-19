@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-02-18
+- Add a NYISO zonal uplift client and sql file
+
 # Release 2026-02-16 
 - Fix CT suppliers backlog for 2025-12 Eversource.  The spreadsheet format changed (again)
 
