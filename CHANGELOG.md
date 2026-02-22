@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-02-22
+- Bump timezone to 0.11.0
+
 # Release 2026-02-18
 - Add a NYISO zonal uplift client and sql file
 
