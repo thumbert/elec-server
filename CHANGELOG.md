@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-02-27
+- Fix Energy Offers client.  Run the tests dude!
+
 # Release 2026-02-22
 - Bump timezone to 0.11.0
 

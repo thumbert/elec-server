@@ -146,9 +146,8 @@ List<TimeSeries<Map<String, num>>> makeTimeSeriesFromOffers(
       var one = TimeSeries<Map<String, num>>();
       for (var e in groups[segment]!) {
         if (e['unit_status'] == 'Unavailable') continue;
-        int millis = e['timestamp_s'] * 1000;
-        var start = TZDateTime.fromMillisecondsSinceEpoch(
-            IsoNewEngland.location, millis);
+        var start =
+            TZDateTime.parse(IsoNewEngland.location, e['hour_beginning']);
         one.add(IntervalTuple(Hour.beginning(start),
             {'quantity': e['quantity'], 'price': e['price']}));
       }
