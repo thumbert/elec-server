@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-03-17
+- Add extension methods to calculate daily and monthly LMPs to several ISOs.  
+
 # Release 2026-02-27
 - Fix Energy Offers client.  Run the tests dude!
 

@@ -5,7 +5,6 @@ import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec/battery.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec/shape.dart';
 import 'package:elec_server/client/lmp.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
