@@ -70,6 +70,27 @@ Future<void> tests(String rootUrl) async {
       ]);
     });
 
+    test('get daily mcc prices ISONE', () async {
+      var data = await IsoNewEngland().getDailyLmp(
+          ptid: 4000,
+          component: LmpComponent.congestion,
+          term: Term.parse('Jan26', IsoNewEngland.location),
+          market: Market.da,
+          bucket: Bucket.b5x16,
+          rustServer: rootUrl);
+      expect(data.length, 21);
+      expect(data.take(3).toList(), [
+        IntervalTuple<num>(
+            Date(2026, 1, 2, location: IsoNewEngland.location), -0.5631),
+        IntervalTuple<num>(
+            Date(2026, 1, 5, location: IsoNewEngland.location), 0.0019),
+        IntervalTuple<num>(
+            Date(2026, 1, 6, location: IsoNewEngland.location), 0.0375),
+      ]);
+    });
+
+
+
     test('get monthly lmp prices ISONE', () async {
       var data = await IsoNewEngland().getMonthlyLmp(
           ptid: 4000,

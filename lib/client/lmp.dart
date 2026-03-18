@@ -90,7 +90,7 @@ extension CaisoLmpPriceExtension on Caiso {
       required String rustServer}) async {
     final url = '$rustServer/caiso/prices/${market.name.toLowerCase()}/daily/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?node_ids=$locationName&components=${component.shortName()}'
+        '?node_ids=$locationName&component=${component.shortName()}'
         '&buckets=${bucket.name}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
@@ -108,7 +108,7 @@ extension CaisoLmpPriceExtension on Caiso {
       required String rustServer}) async {
     final url = '$rustServer/caiso/prices/${market.name.toLowerCase()}/monthly/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?node_ids=$locationName&components=${component.shortName()}'
+        '?node_ids=$locationName&component=${component.shortName()}'
         '&buckets=${bucket.name}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
@@ -145,7 +145,7 @@ extension IesoLmpPriceExtension on Ieso {
       required String rustServer}) async {
     final url = '$rustServer/ieso/prices/${market.name.toLowerCase()}/daily/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?ptids=$ptid&components=${component.shortName()}&buckets=${bucket.name}';
+        '?ptids=$ptid&component=${component.shortName()}&buckets=${bucket.name}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
     return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
@@ -180,7 +180,7 @@ extension IsoneLmpPriceExtension on IsoNewEngland {
       required String rustServer}) async {
     final url = '$rustServer/isone/prices/${market.name.toLowerCase()}/daily/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?ptids=$ptid&components=${component.shortName()}&buckets=${bucket.name}';
+        '?ptids=$ptid&component=${component.shortName()}&buckets=${bucket.name}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
     return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
@@ -197,7 +197,7 @@ extension IsoneLmpPriceExtension on IsoNewEngland {
       required String rustServer}) async {
     final url = '$rustServer/isone/prices/${market.name.toLowerCase()}/monthly/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?ptids=$ptid&components=${component.shortName()}&buckets=${bucket.name}';
+        '?ptids=$ptid&component=${component.shortName()}&buckets=${bucket.name}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
     return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
@@ -233,7 +233,7 @@ extension NyisoLmpPriceExtension on NewYorkIso {
       required String rustServer}) async {
     final url = '$rustServer/nyiso/prices/${market.name.toLowerCase()}/daily/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?ptids=$ptid&components=${component.shortName()}&buckets=${bucket.name}';
+        '?ptids=$ptid&component=${component.shortName()}&buckets=${bucket.name}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
     return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
@@ -250,7 +250,7 @@ extension NyisoLmpPriceExtension on NewYorkIso {
       required String rustServer}) async {
     final url = '$rustServer/nyiso/prices/${market.name.toLowerCase()}/monthly/'
         'start/${term.startDate.toString()}/end/${term.endDate.toString()}'
-        '?ptids=$ptid&components=${component.shortName()}&buckets=${bucket.name}';
+        '?ptids=$ptid&component=${component.shortName()}&buckets=${bucket.name}';
     var response = await http.get(Uri.parse(url));
     var data = json.decode(response.body) as List;
     return TimeSeries.fromIterable(data.map((e) => IntervalTuple<num>(
