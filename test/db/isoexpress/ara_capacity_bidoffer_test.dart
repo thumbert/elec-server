@@ -24,15 +24,16 @@ import 'package:timezone/data/latest.dart';
 void generateCode() {
   final sql = '''
 CREATE TABLE IF NOT EXISTS bids_offers (
-    capability_period VARCHAR NOT NULL,
+    capacity_period VARCHAR NOT NULL, 
     auction_type ENUM('ARA1', 'ARA2', 'ARA3') NOT NULL,
     masked_resource_id UINTEGER NOT NULL,
     masked_participant_id UINTEGER NOT NULL,
-    masked_capacity_zone_id USMALLINT NOT NULL,
-    resource_type ENUM('Import', 'Generating', 'Demand') NOT NULL,
-    bid_offer ENUM('Demand_Bid', 'Supply_Offer') NOT NULL,
-    segment UTINYINT NOT NULL,
-    quantity DECIMAL(9,4) NOT NULL,
+    masked_capacity_zone_id UINTEGER NOT NULL,
+    masked_interface_id UINTEGER,
+    resource_type ENUM('Generating', 'Demand', 'Import') NOT NULL,
+    bid_type ENUM('Demand_Bid', 'Supply_Offer') NOT NULL,
+    segment UTINYINT NOT NULL, -- 0-4
+    mw DECIMAL(9,4) NOT NULL,
     price DECIMAL(9,4) NOT NULL
 );''';
   final generator = CodeGenerator(

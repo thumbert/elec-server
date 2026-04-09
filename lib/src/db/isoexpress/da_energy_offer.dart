@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:csv/csv.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:duckdb_dart/duckdb_dart.dart';
+import 'package:elec/elec.dart';
 import 'package:elec_server/client/isoexpress/energy_offer.dart';
 import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
@@ -20,6 +21,13 @@ class DaEnergyOfferArchive {
   final String duckDbPath;
   static final log = Logger('DA Energy Offers');
   static final reportName = 'Day-Ahead Energy Market Historical Offer Report';
+
+  final missingDays = <Date>{
+    Date(2025, 5, 26, location: IsoNewEngland.location),
+    Date(2025, 5, 29, location: IsoNewEngland.location),
+    Date(2025, 5, 30, location: IsoNewEngland.location),
+    Date(2025, 9, 29, location: IsoNewEngland.location),
+  };
 
   String getUrl(Date asOfDate) =>
       'https://webservices.iso-ne.com/api/v1.1/hbdayaheadenergyoffer/day/${yyyymmdd(asOfDate)}';
@@ -61,6 +69,10 @@ class DaEnergyOfferArchive {
   List<EnergyOfferSegment> aggregateDays(List<Date> days) {
     var out = <EnergyOfferSegment>[];
     for (var date in days) {
+      if (missingDays.contains(date)) {
+        log.warning('... Missing data for $date, skipping it!');
+        continue;
+      }
       log.info('...  Working on $date');
       final file = getFilename(date);
       if (file.existsSync()) {

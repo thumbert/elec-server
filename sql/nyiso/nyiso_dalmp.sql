@@ -18,6 +18,28 @@ AND ptid = 61752
 ORDER BY hour_beginning;
 
 
+WITH unpivot_alias AS (
+    UNPIVOT dalmp
+    ON lmp
+    INTO
+        NAME component
+        VALUE price
+)
+SELECT 
+    hour_beginning, 
+    ptid,
+    component,
+    price
+FROM unpivot_alias
+WHERE hour_beginning >= '2025-10-15 00:00:00.000-04:00'
+AND hour_beginning < '2025-10-17 00:00:00.000-04:00'
+AND ptid in (61758) 
+ORDER BY component, ptid, hour_beginning; 
+    
+
+
+
+
 --- Create a compact json string by hand:  
 --- {"2025-07-01": {"4000":[...],"4001":[...]}, "2025-07-02":{...} ...}
 SELECT '{' || string_agg('"' || date || '":' || map_json, ',') || '}' AS out
