@@ -6,6 +6,34 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 
+Future<List<({String userId, String viewName})>>
+    getUniqueUserIdAndViewNamePairs({
+  required String rootUrl,
+  http.Client? client,
+}) async {
+  client ??= http.Client();
+  final uri = Uri.parse(rootUrl)
+      .replace(path: '/ui/eod_settlements/asof_date/users_views');
+  final response = await client.get(uri);
+
+  if (response.statusCode != 200) {
+    throw Exception(
+        'Failed to load unique user/view pairs: ${response.statusCode}');
+  }
+
+  final List<dynamic> jsonList = jsonDecode(response.body);
+  if (jsonList.isEmpty) {
+    throw Exception('No unique user/view pairs found');
+  }
+
+  return jsonList
+      .map((json) => (
+            userId: json[0] as String,
+            viewName: json[1] as String
+          ))
+      .toList();
+}
+
 /// Function to query records from the DuckDB table via REST API
 /// Use the [QueryFilter] to specify filtering criteria.  Note:
 /// an empty filter will return all records if [limit] is not specified.
@@ -155,41 +183,6 @@ class QueryFilter {
     this.viewName,
     this.viewNameLike,
     this.viewNameIn,
-    this.rowId,
-    this.rowIdIn,
-    this.rowIdGte,
-    this.rowIdLte,
-    this.source,
-    this.sourceLike,
-    this.sourceIn,
-    this.iceCategory,
-    this.iceCategoryLike,
-    this.iceCategoryIn,
-    this.iceHub,
-    this.iceHubLike,
-    this.iceHubIn,
-    this.iceProduct,
-    this.iceProductLike,
-    this.iceProductIn,
-    this.endurCurveName,
-    this.endurCurveNameLike,
-    this.endurCurveNameIn,
-    this.nodalContractName,
-    this.nodalContractNameLike,
-    this.nodalContractNameIn,
-    this.asOfDate,
-    this.asOfDateIn,
-    this.asOfDateGte,
-    this.asOfDateLte,
-    this.strip,
-    this.stripLike,
-    this.stripIn,
-    this.unitConversion,
-    this.unitConversionLike,
-    this.unitConversionIn,
-    this.label,
-    this.labelLike,
-    this.labelIn,
   });
 
   String? userId;
@@ -198,41 +191,6 @@ class QueryFilter {
   String? viewName;
   String? viewNameLike;
   List<String>? viewNameIn;
-  int? rowId;
-  List<int>? rowIdIn;
-  int? rowIdGte;
-  int? rowIdLte;
-  String? source;
-  String? sourceLike;
-  List<String>? sourceIn;
-  String? iceCategory;
-  String? iceCategoryLike;
-  List<String>? iceCategoryIn;
-  String? iceHub;
-  String? iceHubLike;
-  List<String>? iceHubIn;
-  String? iceProduct;
-  String? iceProductLike;
-  List<String>? iceProductIn;
-  String? endurCurveName;
-  String? endurCurveNameLike;
-  List<String>? endurCurveNameIn;
-  String? nodalContractName;
-  String? nodalContractNameLike;
-  List<String>? nodalContractNameIn;
-  Date? asOfDate;
-  List<Date>? asOfDateIn;
-  Date? asOfDateGte;
-  Date? asOfDateLte;
-  String? strip;
-  String? stripLike;
-  List<String>? stripIn;
-  String? unitConversion;
-  String? unitConversionLike;
-  List<String>? unitConversionIn;
-  String? label;
-  String? labelLike;
-  List<String>? labelIn;
 
   Map<String, String> toUriParams() {
     final params = <String, String>{};
@@ -254,117 +212,6 @@ class QueryFilter {
     if (viewNameIn != null) {
       params['view_name_in'] = viewNameIn!.map((e) => e.toString()).join(',');
     }
-    if (rowId != null) {
-      params['row_id'] = (rowId).toString();
-    }
-    if (rowIdIn != null) {
-      params['row_id_in'] = rowIdIn!.map((e) => e.toString()).join(',');
-    }
-    if (rowIdGte != null) {
-      params['row_id_gte'] = (rowIdGte).toString();
-    }
-    if (rowIdLte != null) {
-      params['row_id_lte'] = (rowIdLte).toString();
-    }
-    if (source != null) {
-      params['source'] = (source).toString();
-    }
-    if (sourceLike != null) {
-      params['source_like'] = (sourceLike).toString();
-    }
-    if (sourceIn != null) {
-      params['source_in'] = sourceIn!.map((e) => e.toString()).join(',');
-    }
-    if (iceCategory != null) {
-      params['ice_category'] = (iceCategory).toString();
-    }
-    if (iceCategoryLike != null) {
-      params['ice_category_like'] = (iceCategoryLike).toString();
-    }
-    if (iceCategoryIn != null) {
-      params['ice_category_in'] =
-          iceCategoryIn!.map((e) => e.toString()).join(',');
-    }
-    if (iceHub != null) {
-      params['ice_hub'] = (iceHub).toString();
-    }
-    if (iceHubLike != null) {
-      params['ice_hub_like'] = (iceHubLike).toString();
-    }
-    if (iceHubIn != null) {
-      params['ice_hub_in'] = iceHubIn!.map((e) => e.toString()).join(',');
-    }
-    if (iceProduct != null) {
-      params['ice_product'] = (iceProduct).toString();
-    }
-    if (iceProductLike != null) {
-      params['ice_product_like'] = (iceProductLike).toString();
-    }
-    if (iceProductIn != null) {
-      params['ice_product_in'] =
-          iceProductIn!.map((e) => e.toString()).join(',');
-    }
-    if (endurCurveName != null) {
-      params['endur_curve_name'] = (endurCurveName).toString();
-    }
-    if (endurCurveNameLike != null) {
-      params['endur_curve_name_like'] = (endurCurveNameLike).toString();
-    }
-    if (endurCurveNameIn != null) {
-      params['endur_curve_name_in'] =
-          endurCurveNameIn!.map((e) => e.toString()).join(',');
-    }
-    if (nodalContractName != null) {
-      params['nodal_contract_name'] = (nodalContractName).toString();
-    }
-    if (nodalContractNameLike != null) {
-      params['nodal_contract_name_like'] = (nodalContractNameLike).toString();
-    }
-    if (nodalContractNameIn != null) {
-      params['nodal_contract_name_in'] =
-          nodalContractNameIn!.map((e) => e.toString()).join(',');
-    }
-    if (asOfDate != null) {
-      params['as_of_date'] = asOfDate!.toIso8601String();
-    }
-    if (asOfDateIn != null) {
-      params['as_of_date_in'] =
-          asOfDateIn!.map((e) => e.toIso8601String()).join(',');
-    }
-    if (asOfDateGte != null) {
-      params['as_of_date_gte'] = asOfDateGte!.toIso8601String();
-    }
-    if (asOfDateLte != null) {
-      params['as_of_date_lte'] = asOfDateLte!.toIso8601String();
-    }
-    if (strip != null) {
-      params['strip'] = (strip).toString();
-    }
-    if (stripLike != null) {
-      params['strip_like'] = (stripLike).toString();
-    }
-    if (stripIn != null) {
-      params['strip_in'] = stripIn!.map((e) => e.toString()).join(',');
-    }
-    if (unitConversion != null) {
-      params['unit_conversion'] = (unitConversion).toString();
-    }
-    if (unitConversionLike != null) {
-      params['unit_conversion_like'] = (unitConversionLike).toString();
-    }
-    if (unitConversionIn != null) {
-      params['unit_conversion_in'] =
-          unitConversionIn!.map((e) => e.toString()).join(',');
-    }
-    if (label != null) {
-      params['label'] = (label).toString();
-    }
-    if (labelLike != null) {
-      params['label_like'] = (labelLike).toString();
-    }
-    if (labelIn != null) {
-      params['label_in'] = labelIn!.map((e) => e.toString()).join(',');
-    }
     return params;
   }
 
@@ -378,41 +225,6 @@ class QueryFilter {
     buffer.writeln('  viewName: $viewName');
     buffer.writeln('  viewNameLike: $viewNameLike');
     buffer.writeln('  viewNameIn: $viewNameIn');
-    buffer.writeln('  rowId: $rowId');
-    buffer.writeln('  rowIdIn: $rowIdIn');
-    buffer.writeln('  rowIdGte: $rowIdGte');
-    buffer.writeln('  rowIdLte: $rowIdLte');
-    buffer.writeln('  source: $source');
-    buffer.writeln('  sourceLike: $sourceLike');
-    buffer.writeln('  sourceIn: $sourceIn');
-    buffer.writeln('  iceCategory: $iceCategory');
-    buffer.writeln('  iceCategoryLike: $iceCategoryLike');
-    buffer.writeln('  iceCategoryIn: $iceCategoryIn');
-    buffer.writeln('  iceHub: $iceHub');
-    buffer.writeln('  iceHubLike: $iceHubLike');
-    buffer.writeln('  iceHubIn: $iceHubIn');
-    buffer.writeln('  iceProduct: $iceProduct');
-    buffer.writeln('  iceProductLike: $iceProductLike');
-    buffer.writeln('  iceProductIn: $iceProductIn');
-    buffer.writeln('  endurCurveName: $endurCurveName');
-    buffer.writeln('  endurCurveNameLike: $endurCurveNameLike');
-    buffer.writeln('  endurCurveNameIn: $endurCurveNameIn');
-    buffer.writeln('  nodalContractName: $nodalContractName');
-    buffer.writeln('  nodalContractNameLike: $nodalContractNameLike');
-    buffer.writeln('  nodalContractNameIn: $nodalContractNameIn');
-    buffer.writeln('  asOfDate: $asOfDate');
-    buffer.writeln('  asOfDateIn: $asOfDateIn');
-    buffer.writeln('  asOfDateGte: $asOfDateGte');
-    buffer.writeln('  asOfDateLte: $asOfDateLte');
-    buffer.writeln('  strip: $strip');
-    buffer.writeln('  stripLike: $stripLike');
-    buffer.writeln('  stripIn: $stripIn');
-    buffer.writeln('  unitConversion: $unitConversion');
-    buffer.writeln('  unitConversionLike: $unitConversionLike');
-    buffer.writeln('  unitConversionIn: $unitConversionIn');
-    buffer.writeln('  label: $label');
-    buffer.writeln('  labelLike: $labelLike');
-    buffer.writeln('  labelIn: $labelIn');
     return buffer.toString();
   }
 }

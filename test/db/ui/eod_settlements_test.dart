@@ -15,6 +15,11 @@ Future<void> tests(String rootUrl) async {
       );
       expect(records.length, 5);
     });
+    test('Get unique user/view pairs test', () async {
+      final pairs = await client.getUniqueUserIdAndViewNamePairs(rootUrl: rootUrl);
+      print(pairs);
+      expect(pairs.length, greaterThan(0));
+    });
   });
 }
 
@@ -39,6 +44,7 @@ CREATE TABLE IF NOT EXISTS views_asof_date (
   final generator = CodeGenerator(
     sql,
     apiRoute: '/ui/eod_settlements/asof_date',
+    onlyFilters: ['user_id', 'view_name']
   );
   print(generator.generateCode(Language.rust));
   print(generator.generateHtmlDocs());
