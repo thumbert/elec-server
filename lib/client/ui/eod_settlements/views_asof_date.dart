@@ -63,6 +63,40 @@ Future<List<Record>> queryRecords({
   return jsonList.map((json) => Record.fromJson(json)).toList();
 }
 
+Future<http.Response> insertRecords({
+  required List<Record> records,
+  required String rootUrl,
+  http.Client? client,
+}) async {
+  final uniquePairs = records
+      .map((r) => (userId: r.userId, viewName: r.viewName))
+      .toSet()
+      .toList();
+  if (uniquePairs.length != 1) {
+    throw Exception(
+        'All records must have the same userId and viewName. Found: $uniquePairs');
+  }
+
+  client ??= http.Client();
+  final uri = Uri.parse(rootUrl).replace(
+    path: '/ui/eod_settlements/asof_date',
+  );
+  final response = await client.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': records.first.userId,
+      'view_name': records.first.viewName,
+      'records': records.map((r) => r.toJson()).toList()}),
+  );
+  if (response.statusCode != 200) {
+    throw Exception('Failed to load records: ${response.statusCode}');
+  }
+  return response;
+}
+
+
+
 class Record {
   Record({
     required this.userId,

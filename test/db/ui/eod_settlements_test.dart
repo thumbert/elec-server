@@ -1,4 +1,6 @@
-import 'package:elec_server/client/ui/eod_settlements/views_asof_date.dart' as client;
+import 'package:date/date.dart';
+import 'package:elec_server/client/ui/eod_settlements/views_asof_date.dart'
+    as client;
 import 'package:reduct/reduct.dart';
 import 'package:timezone/data/latest.dart';
 
@@ -16,9 +18,47 @@ Future<void> tests(String rootUrl) async {
       expect(records.length, 5);
     });
     test('Get unique user/view pairs test', () async {
-      final pairs = await client.getUniqueUserIdAndViewNamePairs(rootUrl: rootUrl);
+      final pairs =
+          await client.getUniqueUserIdAndViewNamePairs(rootUrl: rootUrl);
       print(pairs);
       expect(pairs.length, greaterThan(0));
+    });
+    test('Post records test', () async {
+      final records = [
+        client.Record(
+          userId: 'bob',
+          viewName: 'mass hub',
+          rowId: 0,
+          source: 'ice',
+          iceCategory: 'power',
+          iceHub: 'Nepool MH DA (Daily)',
+          iceProduct: 'Peak Futures',
+          endurCurveName: null,
+          nodalContractName: null,
+          asOfDate: Date.utc(2026, 3, 21),
+          strip: null,
+          unitConversion: null,
+          label: 'ice 2026-03-21',
+        ),
+        client.Record(
+          userId: 'bob',
+          viewName: 'mass hub',
+          rowId: 1,
+          source: 'endur',
+          iceCategory: null,
+          iceHub: null,
+          iceProduct: null,
+          endurCurveName: 'PWR_ISONE_HUB_DA_5X16',
+          nodalContractName: null,
+          asOfDate: Date.utc(2026, 3, 21),
+          strip: null,
+          unitConversion: null,
+          label: 'endur 2026-03-21',
+        ),
+      ];
+      final response =
+          await client.insertRecords(records: records, rootUrl: rootUrl);
+      expect(response.statusCode, 200);
     });
   });
 }
@@ -41,11 +81,9 @@ CREATE TABLE IF NOT EXISTS views_asof_date (
     label VARCHAR,
 );
 ''';
-  final generator = CodeGenerator(
-    sql,
-    apiRoute: '/ui/eod_settlements/asof_date',
-    onlyFilters: ['user_id', 'view_name']
-  );
+  final generator = CodeGenerator(sql,
+      apiRoute: '/ui/eod_settlements/asof_date',
+      onlyFilters: ['user_id', 'view_name']);
   print(generator.generateCode(Language.rust));
   print(generator.generateHtmlDocs());
   print(generator.generateCode(Language.dart));
