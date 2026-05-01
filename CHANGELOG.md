@@ -7,6 +7,12 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# Release 2026-05-01
+- Add Nodal contracts client
+
+# Release 2026-04-27
+- Start ice_settlements.sql
+
 # Release 2026-04-15
 - Add ui/eod_settlements client
 
