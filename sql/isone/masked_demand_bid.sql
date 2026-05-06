@@ -54,6 +54,7 @@ ORDER BY segment;
 -- ├─────────┴──────────┤
 
 
+SELECT * FROM da_bids LIMIT 5;
 
 SELECT *
 FROM da_bids
@@ -87,10 +88,10 @@ AND maskedParticipantId in (504170, 212494);
 
 
 
---- 
+--- Get daily average MW for all participants,  aggregated over all zones
 SELECT strftime(hourBeginning, '%Y-%m-%d')::DATE as day, 
     maskedParticipantId, 
-    round(sum(mw)/24) as mw
+    sum(mw) as mw
 FROM da_bids
 WHERE hourBeginning >= '2022-01-01'
 AND hourBeginning < '2022-02-01'
@@ -100,6 +101,21 @@ AND maskedParticipantId in (504170, 212494)
 GROUP BY day, maskedParticipantId
 ORDER BY maskedParticipantId, day;
 
+--- Get daily average MW for all participants,  aggregated over all zones
+SELECT strftime(hourBeginning, '%Y-%m-%d')::DATE as day, 
+    maskedParticipantId, 
+    maskedAssetId,
+    sum(mw) as mw
+FROM da_bids
+WHERE hourBeginning >= '2022-01-01'
+AND hourBeginning < '2022-02-01'
+AND bidType in ('FIXED', 'PRICE')
+AND locationType = 'LOAD ZONE'
+AND maskedParticipantId in (504170, 212494)
+GROUP BY day, maskedParticipantId, maskedAssetId
+ORDER BY maskedParticipantId, maskedAssetId, day;
+
+
 
 SELECT strftime(hourBeginning, '%Y-%m-%d')::DATE as day, 
     maskedParticipantId, 
@@ -110,7 +126,54 @@ AND hourBeginning < '2022-02-01'
 AND bidType in ('FIXED', 'PRICE')
 AND locationType = 'LOAD ZONE'
 GROUP BY day, maskedParticipantId
-ORDER BY maskedParticipantId, day;
+ORDER BY maskedParticipantId, day
+VISUALIZE day AS x, mw AS y, maskedParticipantId AS color
+DRAW line
+SCALE ORDINAL color;
+
+
+SELECT 1 as x, 2 as y VISUALIZE x, y DRAW point;
+
+
+
+--- Get daily average MW for all participants, pivot so that each participant is a column
+duckdb -csv -c "
+ATTACH '~/Downloads/Archive/DuckDB/isone/masked_demand_bids.duckdb' AS db;
+PIVOT (
+    SELECT strftime(hourBeginning, '%Y-%m-%d')::DATE as day, 
+        maskedParticipantId, 
+        round(sum(mw)/24) as mw
+    FROM db.da_bids
+    WHERE hourBeginning >= '2023-01-01'
+    AND hourBeginning < '2026-02-01'
+    AND bidType in ('FIXED', 'PRICE')
+    AND locationType = 'LOAD ZONE'
+    -- AND maskedParticipantId in (504170, 212494)
+    GROUP BY day, maskedParticipantId
+)
+ON maskedParticipantId
+USING
+    MAX(mw) AS mw
+ORDER BY day;
+" | qplot --config='{"height": 900}'
+
+
+PIVOT (
+    SELECT strftime(hourBeginning, '%Y-%m-%d')::DATE as day, 
+        maskedParticipantId, 
+        round(sum(mw)/24) as mw
+    FROM da_bids
+    WHERE hourBeginning >= '2022-01-01'
+    AND hourBeginning < '2022-02-01'
+    AND bidType in ('FIXED', 'PRICE')
+    AND locationType = 'LOAD ZONE'
+    AND maskedParticipantId in (504170, 212494)
+    GROUP BY day, maskedParticipantId
+)
+ON maskedParticipantId
+USING
+    MAX(mw) AS mw
+ORDER BY day;
 
 
 
@@ -122,7 +185,7 @@ ORDER BY maskedParticipantId, day;
 CREATE TABLE IF NOT EXISTS da_bids (
     hourBeginning TIMESTAMPTZ NOT NULL,
     maskedParticipantId UINTEGER NOT NULL,
-    maskedAssetId UINTEGER NOT NULL,
+    maskedLocationId UINTEGER NOT NULL,
     locationType ENUM('HUB', 'LOAD ZONE', 'NETWORK NODE', 'DRR AGGREGATION ZONE') NOT NULL,
     bidType ENUM('FIXED', 'INC', 'DEC', 'PRICE') NOT NULL,
     bidID UINTEGER NOT NULL,
@@ -131,7 +194,7 @@ CREATE TABLE IF NOT EXISTS da_bids (
     mw FLOAT NOT NULL,
 );
 
-INSERT INTO da_bids
+SELECT *
 FROM read_csv(
     '~/Downloads/Archive/IsoExpress/PricingReports/DaDemandBid/month/da_demand_bids_2022-01.csv.gz', 
     header = true, 

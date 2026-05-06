@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:date/date.dart';
-import 'package:elec/time.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
 import 'package:logging/logging.dart';
@@ -49,7 +48,7 @@ Flags:
 
   /// masked data comes with a 4 months lag
   final focusMonth = currentMonth.subtract(4);
-  // final focusMonth = Month(2024, 9, location: location);
+  // final focusMonth = Month(2025, 12, location: location);
   print('Focus month: $focusMonth');
   try {
     await updateIsoneMonthlyAssetNcpc(months: [focusMonth], download: true);

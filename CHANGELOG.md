@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-05-06
+- Fix the masked da_demand_bid.dart column to be maskedLocationId not maskedAssetId
+
 # Release 2026-05-01
 - Add Nodal contracts client
 

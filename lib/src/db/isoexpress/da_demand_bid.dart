@@ -141,7 +141,7 @@ class DaDemandBidArchive {
 CREATE TABLE IF NOT EXISTS da_bids (
     hourBeginning TIMESTAMPTZ NOT NULL,
     maskedParticipantId UINTEGER NOT NULL,
-    maskedAssetId UINTEGER NOT NULL,
+    maskedLocationId UINTEGER NOT NULL,
     locationType ENUM('HUB', 'LOAD ZONE', 'NETWORK NODE', 'DRR AGGREGATION ZONE') NOT NULL,
     bidType ENUM('FIXED', 'INC', 'DEC', 'PRICE') NOT NULL,
     bidID UINTEGER NOT NULL,

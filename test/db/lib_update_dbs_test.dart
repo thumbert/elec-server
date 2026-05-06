@@ -77,8 +77,8 @@ Future<void> tests() async {
   // await updateIsoneMraCapacityResults(months: months, download: true);
 
   // await updateCmeEnergySettlements(days, setUp: false);
-  var months = Month.utc(2025, 12).upTo(Month.utc(2025, 12));
-  await updateCtSupplierBacklogRatesDb(months: months, externalDownload: false);
+  var months = Month.utc(2026, 1).upTo(Month.utc(2026, 3));
+  await updateCtSupplierBacklogRatesDb(months: months, externalDownload: true);
 
   // var years = IntegerRange(2020, 2024);
   // await updateCmpLoadArchive(years, setUp: true);
