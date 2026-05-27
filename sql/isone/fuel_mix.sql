@@ -1,3 +1,9 @@
+SELECT * FROM fuel_mix LIMIT 3;
+
+SELECT COUNT(*) FROM fuel_mix;
+
+
+
 SELECT DISTINCT fuel_category_rollup, fuel_category
 FROM fuel_mix
 ORDER BY fuel_category_rollup, fuel_category;
@@ -36,8 +42,8 @@ ORDER BY timestamp;
 CREATE TABLE IF NOT EXISTS fuel_mix (
     timestamp TIMESTAMPTZ,
     mw INT32,
-    fuel_category_rollup ENUM('Coal', 'Hydro', 'Natural Gas', 'Nuclear', 'Other', 'Renewables'),
-    fuel_category ENUM( 'Coal', 'Hydro', 'Landfill Gas', 'Natural Gas', 'Nuclear', 'Other', 'Refuse', 'Solar', 'Wind', 'Wood'),
+    fuel_category_rollup ENUM('Batteries', 'Coal', 'Hydro', 'Natural Gas', 'Nuclear', 'Oil',  'Other', 'Renewables'),
+    fuel_category ENUM('Batteries', 'Coal', 'Hydro', 'Landfill Gas', 'Natural Gas', 'Nuclear', 'Oil', 'Other', 'Refuse', 'Solar', 'Wind', 'Wood'),
     marginal_flag BOOL
 );
 
@@ -55,7 +61,8 @@ AS
         END AS marginal_flag
         FROM (
             SELECT unnest(GenFuelMixes.GenFuelMix, recursive := true)
-            FROM read_json('~/Downloads/Archive/IsoExpress/GridReports/FuelMix/Raw/genfuelmix_20200101.json')
+            FROM read_json('~/Downloads/Archive/IsoExpress/GridReports/FuelMix/Raw/2026/genfuelmix_20260514.json.gz',
+              timestampformat := '%Y-%m-%dT%H:%M:%S%z')
     )
     ORDER BY timestamp, fuel_category
 ;
@@ -72,3 +79,12 @@ WHERE NOT EXISTS (
 ORDER BY timestamp, fuel_category;
 
 
+-- DROP TYPE fuel_category_rollup;
+ALTER TABLE fuel_mix ALTER COLUMN fuel_category_rollup TYPE VARCHAR;
+CREATE TYPE fuel_category_rollup AS ENUM ('Batteries', 'Coal', 'Hydro', 'Natural Gas', 'Nuclear', 'Oil', 'Other', 'Renewables'); 
+ALTER TABLE fuel_mix ALTER COLUMN fuel_category_rollup TYPE fuel_category_rollup;
+
+
+ALTER TABLE fuel_mix ALTER COLUMN fuel_category TYPE VARCHAR;
+CREATE TYPE fuel_category AS ENUM ('Batteries', 'Coal', 'Hydro', 'Landfill Gas', 'Natural Gas', 'Nuclear', 'Oil', 'Other', 'Refuse', 'Solar', 'Wind', 'Wood'); 
+ALTER TABLE fuel_mix ALTER COLUMN fuel_category TYPE fuel_category;

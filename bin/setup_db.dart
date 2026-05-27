@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:elec/elec.dart';
-import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/isoexpress/scc_report.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
@@ -265,20 +264,6 @@ Future<void> insertForwardMarks() async {
   await archive.insertData(volatilitySurface());
   await archive.setup();
   await archive.db.close();
-}
-
-Future<void> insertFuelMixIsone(List<Date> days,
-    {bool setup = false, bool externalDownload = true}) async {
-  var archive = FuelMixReportArchive();
-  if (setup) await archive.setupDb();
-
-  await archive.dbConfig.db.open();
-  for (var day in days) {
-    if (externalDownload) await archive.downloadDay(day);
-    var data = archive.processFile(archive.getFilename(day));
-    await archive.insertData(data);
-  }
-  await archive.dbConfig.db.close();
 }
 
 Future<void> insertFwdResAuctionResults() async {

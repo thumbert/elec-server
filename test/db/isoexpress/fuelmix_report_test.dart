@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec_server/client/isoexpress/fuelmix.dart';
-import 'package:elec_server/src/db/isoexpress/fuelmix_report.dart';
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
@@ -11,42 +10,6 @@ import 'package:timezone/data/latest.dart';
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
-  var archive = FuelMixReportArchive();
-  group('FuelMix report archive db tests:', () {
-    setUp(() async => await archive.dbConfig.db.open());
-    tearDown(() async => await archive.dbConfig.db.close());
-    test('read file for 2020-01-01', () async {
-      var file = archive.getFilename(Date.utc(2020, 1, 1));
-      var data = archive.processFile(file);
-      expect(data.length, 10); // 10 different fuel types
-      var hydro = data.firstWhere((e) => e['category'] == 'Hydro');
-      expect(data.first.keys.toSet(), {
-        'date',
-        'category',
-        'mw',
-        'isMarginal',
-      });
-      expect((hydro['mw'] as List).take(3).toList(), [
-        670.25,
-        657.8333333333334,
-        687.0,
-      ]);
-      expect(hydro['isMarginal'][7],
-          true); // for hour beginning 7 hydro is marginal
-      var solar = data.firstWhere((e) => e['category'] == 'Solar');
-      expect((solar['mw'] as List).take(8).toList(), [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        3.333333333333333,
-      ]);
-    });
-  });
-
   group('FuelMix Report API tests:', () {
     setUp(() async => await DbProd.isoexpress.open());
     tearDown(() async => await DbProd.isoexpress.close());

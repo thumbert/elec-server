@@ -1,3 +1,6 @@
+SELECT * FROM da_lmp
+WHERE ptid = 4000
+AND hour_beginning >= '2026-05-13 00:00:00.000-04:00';
 
 
 SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*)
@@ -269,17 +272,15 @@ CREATE TABLE IF NOT EXISTS da_lmp (
 --- That's why we do a DISTINCT to eliminate the multiple values. 
 CREATE TEMPORARY TABLE tmp
 AS
-    SELECT 
-        BeginDate::TIMESTAMPTZ AS hour_beginning,
-        "@LocId"::UINTEGER AS ptid,
-        LmpTotal::DECIMAL(9,4) AS "lmp",
-        CongestionComponent::DECIMAL(9,4) AS "mcc",
-        LossComponent::DECIMAL(9,4) AS "mcl" 
+    SELECT DISTINCT
+        json_extract(aux, '$.BeginDate')::TIMESTAMPTZ AS hour_beginning,
+        json_extract(aux, '$.Location.@LocId')::UINTEGER AS ptid,
+        json_extract(aux, '$.LmpTotal')::DECIMAL(9,4) AS lmp,
+        json_extract(aux, '$.CongestionComponent')::DECIMAL(9,4) AS mcc,
+        json_extract(aux, '$.LossComponent')::DECIMAL(9,4) AS mcl
     FROM (
-        SELECT DISTINCT BeginDate, "@LocId", LmpTotal, CongestionComponent, LossComponent FROM (
-            SELECT unnest(HourlyLmps.HourlyLmp, recursive := true)
-            FROM read_json('~/Downloads/Archive/IsoExpress/PricingReports/DaLmpHourly/Raw/2025/WW_DALMP_ISO_2025*.json.gz')
-        )
+        SELECT unnest(HourlyLmps.HourlyLmp)::JSON as aux
+        FROM read_json('~/Downloads/Archive/IsoExpress/PricingReports/DaLmpHourly/Raw/2026/WW_DALMP_ISO_20260513.json.gz')
     )
     ORDER BY hour_beginning, ptid
 ;

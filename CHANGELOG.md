@@ -7,6 +7,10 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-05-27
+- An EPA hourly emissions client
+- Work on EPA emissions data: hourly, daily, mats  
+
 # 2026-05-06
 - Fix the masked da_demand_bid.dart column to be maskedLocationId not maskedAssetId
 
