@@ -196,7 +196,7 @@ CREATE TEMPORARY TABLE tmp AS
     )
 ;
 
-INSERT INTO bidsoffers
+INSERT INTO bidsoffers BY NAME
 (SELECT * FROM tmp t
 WHERE NOT EXISTS (
     SELECT * FROM bidsoffers b
@@ -214,7 +214,11 @@ WHERE NOT EXISTS (
     )    
 )
 ORDER BY hour_beginning, market_type, masked_customer_id;
-```
+
+
+
+
+
 
 CREATE TYPE direction_enum AS ENUM ('IMPORT','EXPORT', 'THROUGH');
 ALTER TABLE bidsoffers ADD COLUMN direction_enum_new direction_enum;

@@ -1,3 +1,5 @@
+SELECT * FROM offers;
+
 SELECT MIN(hour_beginning) AS min_hour, MAX(hour_beginning) AS max_hour, COUNT(*) AS total_rows
 FROM offers;
 
@@ -217,17 +219,6 @@ CREATE TABLE IF NOT EXISTS offers (
 
 CREATE TEMPORARY TABLE tmp
 AS
-    SELECT * 
-    FROM (
-        SELECT unnest(isone_web_services.offer_publishing.day_ahead_ancillary_services.daas_gen_offer_data, recursive := true)
-        FROM read_json('~/Downloads/Archive/IsoExpress/PricingReports/DaasOffers/Raw/2025/hbdaasenergyoffer_2025-03-*.json.gz')
-    )
-    ORDER BY local_day
-;
-SELECT * from tmp;
-
-INSERT INTO offers
-(
     SELECT 
         local_day::TIMESTAMPTZ as hour_beginning,
         masked_lead_participant_id::INTEGER as masked_lead_participant_id,
@@ -236,12 +227,23 @@ INSERT INTO offers
         tmsr_offer_price::DECIMAL(9,2) as tmsr_offer_price,
         tmnsr_offer_price::DECIMAL(9,2) as tmnsr_offer_price,
         tmor_offer_price::DECIMAL(9,2) as tmor_offer_price,
-        eir_offer_price::DECIMAL(9,2) as eir_offer_price
-    FROM tmp t
-WHERE NOT EXISTS (
+        eir_offer_price::DECIMAL(9,2) as eir_offer_price 
+    FROM (
+        SELECT unnest(isone_web_services.offer_publishing.day_ahead_ancillary_services.daas_gen_offer_data, recursive := true)
+        FROM read_json('~/Downloads/Archive/IsoExpress/PricingReports/DaasOffers/Raw/2025/hbdaasenergyoffer_2025-11-*.json.gz', 
+            timestamp_format := '%Y-%m-%dT%H:%M:%S%z'
+        )
+    )
+    ORDER BY local_day
+;
+
+INSERT INTO offers BY NAME
+(
+    SELECT * FROM tmp t
+    WHERE NOT EXISTS (
         SELECT * FROM offers o
         WHERE
-            o.hour_beginning = t.local_day AND
+            o.hour_beginning = t.hour_beginning AND
             o.masked_lead_participant_id = t.masked_lead_participant_id AND
             o.masked_asset_id = t.masked_asset_id AND
             o.tmsr_offer_price = t.tmsr_offer_price AND
