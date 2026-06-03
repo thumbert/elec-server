@@ -286,7 +286,6 @@ AS
 ;
 
 --SELECT * from tmp;
-
 INSERT INTO da_lmp
 (SELECT * FROM tmp 
 WHERE NOT EXISTS (

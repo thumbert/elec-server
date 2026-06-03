@@ -19,6 +19,22 @@ FROM emissions
 WHERE facility_name = 'Independence'
 ;
 
+LOAD ICU;
+SELECT Date, Hour, CAST(date + Hour * INTERVAL '1 hour' AS TIMESTAMPTZ) AS hour_beginning, 
+    unit_id, gross_load
+FROM emissions
+WHERE facility_name = 'Fore River Energy Center'
+AND date = '2025-11-02'
+-- AND date < '2025-03-10'
+AND unit_id = '11'
+ORDER BY date, hour, unit_id;
+
+SELECT 
+    CAST(TIMESTAMPTZ '2025-03-09' + INTERVAL '1 hour' AS TIMESTAMPTZ) AS t1, 
+    CAST(TIMESTAMPTZ '2025-03-09' + INTERVAL '2 hour' AS TIMESTAMPTZ) AS t2,
+    CAST(TIMESTAMPTZ '2025-03-09' + INTERVAL '3 hour' AS TIMESTAMPTZ) AS t3,
+    CAST(TIMESTAMPTZ '2025-03-09' + INTERVAL '23 hour' AS TIMESTAMPTZ) AS t23;
+
 
 duckdb -csv -c "
 LOAD quack; ATTACH 'quack:localhost' AS remote_db (TOKEN getenv('DUCKDB_QUACK_TOKEN'));
@@ -345,6 +361,7 @@ FROM (
         CAST("Associated Stacks" AS VARCHAR) as associated_stacks,
         CAST(Date AS DATE) as date,
         CAST(Hour AS UTINYINT) as hour,
+        -- CAST(date + Hour * INTERVAL '1 hour' AS TIMESTAMPTZ) AS hour_beginning,
         -- Fraction of the hour that the unit was operating, from 0 to 1.
         CAST("Operating Time" AS DECIMAL(3, 2)) as operating_time,
         CAST("Gross Load (MW)" AS USMALLINT) as gross_load,
