@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:csv/csv.dart';
 import 'package:path/path.dart' as path;
@@ -8,8 +9,8 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/config.dart';
 import 'package:timezone/timezone.dart';
 
-class PtidArchive extends NyisoReport {
-  PtidArchive({ComponentConfig? config, String? dir}) {
+class NyisoPtidArchive extends NyisoReport {
+  NyisoPtidArchive({ComponentConfig? config, String? dir}) {
     Map env = Platform.environment;
     config ??= ComponentConfig(
         host: '127.0.0.1', dbName: 'nyiso', collectionName: 'pnode_table');
@@ -45,39 +46,57 @@ class PtidArchive extends NyisoReport {
   List<Map<String, dynamic>> processData(Date asOfDate) {
     var out = <Map<String, dynamic>>[];
     var converter = CsvToListConverter();
-
     // add the zones
     for (var zoneName in zoneNameToPtid.keys) {
       var ptid = zoneNameToPtid[zoneName];
       out.add({
         'asOfDate': asOfDate.toString(),
+        'type': 'zone',
         'ptid': ptid,
         'name': zoneName,
         if (zonePtidToSpokenName.containsKey(ptid))
           'spokenName': zonePtidToSpokenName[ptid],
-        'type': 'zone',
       });
     }
 
-    // add the generator nodes
+    // add the generator nodes.  Note the format changed in 2026-06-01
     var file = File('$dir/generator_$asOfDate.csv');
     var content = file.readAsStringSync();
     var xs = converter.convert(content);
     if (xs.isEmpty) return out;
+    final columns = xs.first.cast<String>();
+    if (columns.length != 8) {
+      throw Exception(
+          'File format changed expected 8 columns, found ${columns.length}');
+    }
+    if (!ListEquality().equals(columns, [
+      'Generator Name',
+      'Generator PTID',
+      'Aggregation PTID',
+      'Subzone',
+      'Zone',
+      'Latitude',
+      'Longitude',
+      'Active',
+    ])) {
+      throw Exception('File format changed, unexpected columns: $columns');
+    }
 
     for (var x in xs.skip(1)) {
       var one = {
         'asOfDate': asOfDate.toString(),
-        'ptid': x[1] as int,
-        'name': x[0] as String,
         'type': 'gen',
-        'zoneName': x[3] as String,
-        'zonePtid': zoneNameToPtid[x[3] as String],
-        'subzoneName': x[2] as String,
+        'name': x[0] as String,
+        'ptid': x[1] as int,
+        'aggregationPtid': x[2].toString().isEmpty ? null : x[2] as int,
+        'subzoneName': x[3] as String,
+        'zoneName': x[4] as String,
+        'zonePtid': zoneNameToPtid[x[4] as String],
       };
-      if (x[4] is num && x[5] is num) {
-        one['lat/lon'] = [x[4] as num, x[5] as num];
+      if (x[5] is num && x[6] is num) {
+        one['lat/lon'] = [x[5] as num, x[6] as num];
       }
+      one['active'] = (x[7] as String) == 'Y';
       out.add(one);
     }
 

@@ -54,18 +54,18 @@ CREATE TABLE IF NOT EXISTS flows (
 
 CREATE TEMPORARY TABLE tmp AS
     SELECT 
-        BeginDate::TIMESTAMPTZ AS hour_beginning,
+        make_timestamptz(epoch_us(BeginDate)) AS hour_beginning,
         "@LocId"::UINTEGER AS ptid,
         ActInterchange::DECIMAL(9,2) AS Net,
         Purchase::DECIMAL(9,2) AS Purchase,
         Sale::DECIMAL(9,2) AS Sale
     FROM (
         SELECT unnest(ActualInterchanges.ActualInterchange, recursive := true)
-        FROM read_json('~/Downloads/Archive/IsoExpress/ActualInterchange/Raw/2025/act_interchange_2025*.json.gz')
+        FROM read_json('~/Downloads/Archive/IsoExpress/ActualInterchange/Raw/2026/act_interchange_20260605.json.gz')
     )
 ORDER BY hour_beginning, ptid
 ;
--- SELECT * from tmp;
+
 
 INSERT INTO flows
 (SELECT * FROM tmp 

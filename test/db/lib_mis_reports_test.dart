@@ -15,6 +15,7 @@ void tests() {
       expect(report.timestamp(), DateTime.utc(2014, 10, 24, 15, 56, 8));
       var data = report.readTabAsMap(tab: 0);
       expect(data.length, 15);
+      
     });
   });
 }

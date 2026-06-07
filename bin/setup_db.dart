@@ -202,7 +202,6 @@ Future<void> insertDays(DailyIsoExpressReport archive, List<Date> days,
   await archive.dbConfig.db.close();
 }
 
-
 Future<void> insertDaEnergyOffersNyiso() async {
   var archive = NyisoEnergyOfferArchive();
   await archive.setupDb();
@@ -295,7 +294,6 @@ Future<void> insertHourlyRtZonalLoadNyiso() async {
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> insertMaskedAssetIdsIsone() async {
   var archive = IsoNeMaskedIdsArchive();
@@ -416,7 +414,7 @@ Future<void> insertPtidTable() async {
 }
 
 Future<void> insertPtidTableNyiso() async {
-  var archive = nyiso_ptid.PtidArchive();
+  var archive = nyiso_ptid.NyisoPtidArchive();
   await archive.setupDb();
 
   await archive.downloadData();

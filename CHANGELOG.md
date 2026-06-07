@@ -7,6 +7,13 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-06-07
+- Fix read_json issue in DuckDB 1.5.3 regarding default timestamptz fields. 
+  See sql/actual_interchange.sql for an example.
+
+# 2026-06-06
+- Fix NyisoPtidTableArchive.  The file format changed. 
+
 # 2026-05-27
 - An EPA hourly emissions client
 - Work on EPA emissions data: hourly, daily, mats  

@@ -93,7 +93,6 @@ Future<void> recreateDaBindingConstraintsIsone() async {
   await archive.dbConfig.db.close();
 }
 
-
 Future<void> recreateRtLmpHourlyIsone() async {
   var archive = RtLmpHourlyArchive();
   await archive.setupDb();
@@ -106,7 +105,6 @@ Future<void> recreateRtLmpHourlyIsone() async {
   }
   await archive.dbConfig.db.close();
 }
-
 
 Future<void> recreateFwdResAuctionResults() async {
   var archive = FwdResAuctionResultsArchive();
@@ -411,7 +409,7 @@ Future<void> recreateMisTemplateArchive() async {
 }
 
 Future<void> recreatePtidTableNyiso() async {
-  var archive = nyiso_ptid.PtidArchive();
+  var archive = nyiso_ptid.NyisoPtidArchive();
   await archive.setupDb();
   await archive.db.open();
   var files = Directory(archive.dir).listSync().whereType<File>().toList();

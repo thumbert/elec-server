@@ -18,60 +18,49 @@ AND LocalTime < '2025-01-11'
 AND InterfaceName = 'PJM West';
 
 
+---=======================================================================
+
 CREATE TABLE IF NOT EXISTS ssc (
-        BeginDate TIMESTAMPTZ NOT NULL,
-        RtFlowMw DOUBLE NOT NULL,
-        LowestLimitMw DOUBLE NOT NULL,
-        DistributionFactor DOUBLE NOT NULL,
-        InterfaceName VARCHAR NOT NULL,
-        ActualMarginMw DOUBLE NOT NULL,
-        AuthorizedMarginMw DOUBLE NOT NULL,
-        BaseLimitMw DOUBLE NOT NULL,
-        SingleSourceContingencyLimitMw DOUBLE NOT NULL,
+    begin_date TIMESTAMPTZ NOT NULL,
+    rt_flow_mw DOUBLE NOT NULL,
+    lowest_limit_mw DOUBLE NOT NULL,
+    distribution_factor DOUBLE NOT NULL,
+    interface_name VARCHAR NOT NULL,
+    actual_margin_mw DOUBLE NOT NULL,
+    authorized_margin_mw DOUBLE NOT NULL,
+    base_limit_mw DOUBLE NOT NULL,
+    single_source_contingency_limit_mw DOUBLE NOT NULL
+);
+
+CREATE TEMPORARY TABLE IF NOT EXISTS tmp AS
+    SELECT 
+        make_timestamptz(epoch_us(BeginDate)) as begin_date,
+        RtFlowMw::DOUBLE as rt_flow_mw,
+        LowestLimitMw::DOUBLE as lowest_limit_mw,
+        DistributionFactor::DOUBLE as distribution_factor,
+        InterfaceName::VARCHAR as interface_name,
+        ActMarginMw::DOUBLE as actual_margin_mw,
+        AuthorizedMarginMw::DOUBLE as authorized_margin_mw,
+        BaseLimitMw::DOUBLE as base_limit_mw,
+        SingleSrcContingencyMw::DOUBLE as single_source_contingency_limit_mw
+    FROM (
+        SELECT unnest(SingleSrcContingencyLimits.SingleSrcContingencyLimit, recursive := true)
+        FROM read_json('~/Downloads/Archive/IsoExpress/SingleSourceContingency/Raw/2025/ssc_2025-01-01.json.gz')
+    )
+;
+
+INSERT INTO ssc BY NAME
+(
+    SELECT * FROM tmp t
+    WHERE NOT EXISTS (
+        SELECT * FROM ssc s
+        WHERE s.begin_date = t.begin_date
+        AND s.interface_name = t.interface_name
+    )
 );
 
 
-CREATE TEMPORARY TABLE tmp AS
-    SELECT unnest(SingleSrcContingencyLimits.SingleSrcContingencyLimit, recursive := true)
-    FROM read_json('~/Downloads/Archive/IsoExpress/SingleSourceContingency/Raw/2025/ssc_2025-*.json.gz')
-;
-SELECT * from tmp;
 
 
-INSERT INTO ssc
-    SELECT 
-        BeginDate::TIMESTAMPTZ as LocalTime,
-        RtFlowMw::DOUBLE,
-        LowestLimitMw::DOUBLE,
-        DistributionFactor::DOUBLE,
-        InterfaceName::VARCHAR,
-        ActMarginMw::DOUBLE as ActualMarginMw,
-        AuthorizedMarginMw::DOUBLE,
-        BaseLimitMw::DOUBLE,
-        SingleSrcContingencyMw::DOUBLE as SingleSourceContingencyLimitMw,
-    FROM tmp
-EXCEPT 
-    SELECT * FROM ssc;        
-
-
-
-
-
-
-
-
-
--- need to delete the data if it already exists for the day
-DELETE FROM ssc
-WHERE LocalTime >= '2025-01-10'
-AND LocalTime < '2025-01-11';
-
--- 
-INSERT INTO ssc
-SELECT * FROM tmp
-ORDER BY LocalTime;
-
-
-SELECT * FROM ssc LIMIT 5;
 
 

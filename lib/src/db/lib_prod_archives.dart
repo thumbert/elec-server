@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/db_isone.dart';
-import 'package:elec_server/db_nyiso.dart' hide PtidArchive;
+import 'package:elec_server/db_nyiso.dart' hide NyisoPtidArchive;
 import 'package:elec_server/src/db/canadian_statistics/canadian_statistics.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/config.dart';
@@ -13,6 +13,7 @@ import 'package:elec_server/src/db/isoexpress/ara_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_5min.dart';
 import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
+import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/weather/normal_temperature.dart';
 
@@ -292,6 +293,17 @@ NyisoEnergyOfferArchive getNyisoEnergyOfferArchive() {
     Directory(dir).createSync(recursive: true);
   }
   return NyisoEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
+}
+
+NyisoPtidArchive getNyisoPtidArchive() {
+  var dbConfig = ComponentConfig(
+      host: '127.0.0.1', dbName: 'nyiso', collectionName: 'pnode_table');
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/Nyiso/PnodeTable/Raw/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return NyisoPtidArchive(config: dbConfig, dir: dir);
 }
 
 // NyisoEnergyOfferArchive getNyisoMaskedIdArchive() {

@@ -101,7 +101,6 @@ Future<void> main() async {
     print(
         '${record.level.name} (${record.time.toString().substring(0, 19)}) ${record.message}');
   });
-
   dotenv.load('.env/prod.env');
 
   await tests();
