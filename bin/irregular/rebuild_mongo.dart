@@ -26,7 +26,6 @@ import 'package:elec_server/src/db/mis/sr_dalocsum.dart';
 import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 import 'package:elec_server/src/db/mis/tr_sch2tp.dart';
 import 'package:elec_server/src/db/mis/tr_sch3p2.dart';
-import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
 import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
@@ -141,30 +140,6 @@ Future<void> recreateMonthlyAssetNcpc() async {
   for (var file in files) {
     var data = archive.processFile(file);
     await archive.insertData(data);
-  }
-  await archive.dbConfig.db.close();
-}
-
-Future<void> recreateDaBindingConstraintsNyiso() async {
-  var archive = NyisoDaBindingConstraintsReportArchive();
-  await archive.setupDb();
-  var files = Directory(archive.dir)
-      .listSync()
-      .whereType<File>()
-      .where((e) => e.path.endsWith('.zip'))
-      .toList();
-  files.sort((a, b) => a.path.compareTo(b.path));
-  await archive.dbConfig.db.open();
-  for (var file in files) {
-    var yyyymm = basename(file.path).substring(0, 6);
-    var month = Month.parse(yyyymm, location: UTC);
-    var xs = <Map<String, dynamic>>[];
-    for (var date in month.days()) {
-      var dailyFile = archive.getCsvFile(date);
-      var data = archive.processFile(dailyFile);
-      xs.addAll(data);
-    }
-    await archive.insertData(xs);
   }
   await archive.dbConfig.db.close();
 }

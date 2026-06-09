@@ -23,7 +23,6 @@ import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/isone/masked_ids.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
-import 'package:elec_server/src/db/nyiso/binding_constraints.dart';
 import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
@@ -122,23 +121,6 @@ Future<void> insertDaBindingConstraintsIsone() async {
   // ];
   var days = Term.parse('12Jan22-6Mar22', UTC).days();
   await insertDays(archive, days);
-}
-
-Future<void> insertDaBindingConstraintsNyiso() async {
-  var archive = NyisoDaBindingConstraintsReportArchive();
-  // await archive.setupDb();
-  await archive.dbConfig.db.open();
-  var months = Month.utc(2021, 3).upTo(Month.utc(2022, 2));
-  for (var month in months) {
-    // http://mis.nyiso.com/public/csv/DAMLimitingConstraints/20210201DAMLimitingConstraints.csv.zip
-    await archive.downloadMonth(month);
-    for (var date in month.days()) {
-      var file = archive.getCsvFile(date);
-      var data = archive.processFile(file);
-      await archive.insertData(data);
-    }
-  }
-  await archive.dbConfig.db.close();
 }
 
 Future<void> insertDaCongestionCompactNyiso() async {

@@ -20,8 +20,6 @@ import 'package:elec_server/api/mis/api_sr_rsvcharge.dart';
 import 'package:elec_server/api/mis/api_sr_rtlocsum.dart';
 import 'package:elec_server/api/mis/api_tr_sch2tp.dart';
 import 'package:elec_server/api/mis/api_tr_sch3p2.dart';
-import 'package:elec_server/api/nyiso/api_nyiso_bindingconstraints.dart'
-    as nyiso_bc;
 import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart' as nyiso_ptids;
 import 'package:elec_server/api/nyiso/api_nyiso_tcc_clearing_prices.dart'
     as nyiso_tcc_clearing_prices;
@@ -89,11 +87,6 @@ Future<Router> buildRouter() async {
 
   await DbProd.nyiso.open();
   <String, Router>{
-    '/nyiso/bc/v1/': nyiso_bc.BindingConstraints(DbProd.nyiso).router,
-    '/nyiso/dacongestion/v1/':
-        DaCongestionCompact(DbProd.nyiso, iso: Iso.newYork).router,
-    '/nyiso/da_energy_offers/v1/':
-        DaEnergyOffers(DbProd.nyiso, iso: Iso.newYork).router,
     '/nyiso/masked_ids/v1/': ApiMaskedIds(DbProd.nyiso).router,
     '/nyiso/ptids/v1/': nyiso_ptids.ApiPtids(DbProd.nyiso).router,
     '/nyiso/tcc_clearing_prices/v1/':

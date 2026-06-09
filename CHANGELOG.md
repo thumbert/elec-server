@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-06-08
+- Add lib/client/nyiso/binding_constraints.dart
+
 # 2026-06-07
 - Fix read_json issue in DuckDB 1.5.3 regarding default timestamptz fields. 
   See sql/actual_interchange.sql for an example.
