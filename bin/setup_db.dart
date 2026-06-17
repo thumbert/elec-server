@@ -26,7 +26,6 @@ import 'package:elec_server/src/db/mis/sd_rtload.dart';
 import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
-import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart' as nyiso_ptid;
 import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
 
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
@@ -392,19 +391,6 @@ Future<void> insertPtidTable() async {
     var file = path.join(archive.dir, path.basename(url));
     await archive.insertMongo(File(file));
   }
-  await archive.db.close();
-}
-
-Future<void> insertPtidTableNyiso() async {
-  var archive = nyiso_ptid.NyisoPtidArchive();
-  await archive.setupDb();
-
-  await archive.downloadData();
-  var data = archive.processData(Date.today(location: UTC));
-  //print(data);
-
-  await archive.db.open();
-  await archive.insertData(data);
   await archive.db.close();
 }
 

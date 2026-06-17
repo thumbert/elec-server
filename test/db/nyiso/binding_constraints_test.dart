@@ -25,8 +25,6 @@ Future<void> tests(String rootUrl) async {
         limit: 5,
         rootUrl: rootUrl,
       );
-      print(records);
-
       expect(records.length, 5);
     });
   });

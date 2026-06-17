@@ -29,7 +29,6 @@ import 'package:elec_server/src/db/mis/tr_sch3p2.dart';
 import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
-import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart' as nyiso_ptid;
 import 'package:elec_server/src/db/nyiso/rt_lmp_hourly.dart';
 import 'package:elec_server/src/db/other/isone_ptids.dart' as isone_ptid;
 import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
@@ -381,22 +380,6 @@ Future<void> recreateMisTemplateArchive() async {
     await archive.insertTabData(data[1]!);
     await archive.dbConfig.db.close();
   }
-}
-
-Future<void> recreatePtidTableNyiso() async {
-  var archive = nyiso_ptid.NyisoPtidArchive();
-  await archive.setupDb();
-  await archive.db.open();
-  var files = Directory(archive.dir).listSync().whereType<File>().toList();
-  files.sort((a, b) => a.path.compareTo(b.path));
-  for (var file in files) {
-    var yyyymmdd = basename(file.path).substring(10, 20);
-    var date = Date.parse(yyyymmdd, location: UTC);
-    var data = archive.processData(date);
-    await archive.insertData(data);
-  }
-
-  await archive.db.close();
 }
 
 Future<void> recreatePtidTablePjm() async {

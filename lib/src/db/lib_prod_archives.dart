@@ -13,7 +13,6 @@ import 'package:elec_server/src/db/isoexpress/ara_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_5min.dart';
 import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
-import 'package:elec_server/src/db/nyiso/nyiso_ptid.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/weather/normal_temperature.dart';
 
@@ -295,16 +294,16 @@ NyisoEnergyOfferArchive getNyisoEnergyOfferArchive() {
   return NyisoEnergyOfferArchive(dbConfig: dbConfig, dir: dir);
 }
 
-NyisoPtidArchive getNyisoPtidArchive() {
-  var dbConfig = ComponentConfig(
-      host: '127.0.0.1', dbName: 'nyiso', collectionName: 'pnode_table');
-  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
-      '/Nyiso/PnodeTable/Raw/';
-  if (!Directory(dir).existsSync()) {
-    Directory(dir).createSync(recursive: true);
-  }
-  return NyisoPtidArchive(config: dbConfig, dir: dir);
-}
+// NyisoPtidArchive getNyisoPtidArchive() {
+//   var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+//       '/Nyiso/PnodeTable/Raw/';
+//   if (!Directory(dir).existsSync()) {
+//     Directory(dir).createSync(recursive: true);
+//   }
+//   final duckDbPath =
+//       '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/nyiso/ptid.duckdb';
+//   return NyisoPtidArchive(dir: dir);
+// }
 
 // NyisoEnergyOfferArchive getNyisoMaskedIdArchive() {
 //   var dbConfig = ComponentConfig(

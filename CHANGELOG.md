@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-06-17
+- Migrate nyiso ptid table to Rust/DuckDB
+
 # 2026-06-08
 - Add lib/client/nyiso/binding_constraints.dart
 

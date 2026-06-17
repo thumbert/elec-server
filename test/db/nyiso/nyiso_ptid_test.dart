@@ -1,87 +1,60 @@
-import 'dart:convert';
 
-import 'package:elec_server/api/nyiso/api_nyiso_ptids.dart';
-import 'package:elec_server/src/db/lib_prod_archives.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:logging/logging.dart';
+import 'package:reduct/reduct.dart';
 import 'package:test/test.dart';
-import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart';
+import 'package:elec_server/client/nyiso/ptid_table.dart' as client;
+
 
 /// See bin/setup_db.dart for setting the archive up to pass the tests
 Future<void> tests(String rootUrl) async {
-  final archive = getNyisoPtidArchive();
-  group('NYISO ptid archive db tests:', () {
-    setUp(() async => await archive.db.open());
-    tearDown(() async => await archive.dbConfig.db.close());
-    test('read latest file', () async {
-      var date = archive.lastDate();
-      var data = archive.processData(date);
-      var zoneF = data.firstWhere((e) => e['spokenName'] == 'Zone F');
-      expect(zoneF.keys.toSet(),
-          {'asOfDate', 'ptid', 'name', 'spokenName', 'type'});
-      var fitz = data.firstWhere((e) => e['ptid'] == 23598);
-      expect(fitz.keys.toSet(), {
-        'asOfDate',
-        'ptid',
-        'name',
-        'type',
-        'zoneName',
-        'zonePtid',
-        'subzoneName',
-        'lat/lon',
-      });
-    });
-  });
-  group('Ptid table API tests:', () {
-    var api = ApiPtids(archive.db);
-    setUp(() async => await archive.db.open());
-    tearDown(() async => await archive.db.close());
-    test('Get the list of available dates', () async {
-      var res = await api.getAvailableAsOfDates();
-      expect(res.isNotEmpty, true);
-    });
-    test('Get the current table', () async {
-      var res = await api.ptidTableCurrent();
-      expect(res.length > 550, true);
-    });
-
-    test('Get the list of available dates (http)', () async {
-      var res = await http.get(Uri.parse('$rootUrl/nyiso/ptids/v1/dates'),
-          headers: {'Content-Type': 'application/json'});
-      var data = json.decode(res.body) as List;
-      expect(data.first is String, true);
-    });
-    test('Get all the ptid information for one date (http)', () async {
-      var res = await http.get(Uri.parse('$rootUrl/nyiso/ptids/v1/current'),
-          headers: {'Content-Type': 'application/json'});
-      var data = json.decode(res.body);
-      expect(data.length > 550, true);
-      var fitz = data.firstWhere((e) => e['ptid'] == 23598);
-      expect(fitz.keys.toSet(), {
-        'ptid',
-        'name',
-        'type',
-        'zoneName',
-        'zonePtid',
-        'subzoneName',
-        'lat/lon',
-      });
-    });
-    test('Get the list of available dates for one ptid', () async {
-      var aux = await api.apiPtid(23598);
-      expect(aux.isNotEmpty, true);
-      var res = await http.get(Uri.parse('$rootUrl/nyiso/ptids/v1/ptid/23598'),
-          headers: {'Content-Type': 'application/json'});
-      var data = json.decode(res.body);
-      expect(data is List, true);
+  group('Client tests for nyiso/ptid_table', () {
+    test('Query records test', () async {
+      final records = await client.queryRecords(
+        filter: client.QueryFilter(),
+        limit: 5,
+        rootUrl: dotenv.env['RUST_SERVER']!,
+      );
+      expect(records.length, 5);
     });
   });
 
-  /// The client tests are moved together with the ISONE one.
 }
+
+void generateCode() {
+  final sql = '''
+CREATE TABLE IF NOT EXISTS ptid_table (
+    node_type ENUM('gen', 'zone') NOT NULL,
+    ptid INTEGER NOT NULL,
+    name VARCHAR NOT NULL,
+    aggregation_ptid INTEGER,
+    subzone VARCHAR,
+    zone VARCHAR NOT NULL,
+    latitude DOUBLE,
+    longitude DOUBLE,
+    active BOOLEAN NOT NULL
+);
+''';
+  final generator = CodeGenerator(
+    sql,
+    apiRoute: '/nyiso/ptid_table',
+    onlyFilters: ['node_type', 'zone'],
+  );
+  print(generator.generateCode(Language.rust));
+  print(generator.generateHtmlDocs());
+  print(generator.generateCode(Language.dart));
+}
+
+
 
 void main() async {
   initializeTimeZones();
-
-  var rootUrl = 'http://127.0.0.1:8080';
-  tests(rootUrl);
+  Logger.root.level = Level.FINE;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+  dotenv.load('.env/test.env');
+  await tests(dotenv.env['ROOT_URL']!);
+  // generateCode();
 }

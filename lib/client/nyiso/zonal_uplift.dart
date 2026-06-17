@@ -24,7 +24,7 @@ Future<List<Record>> queryRecords({
     queryParams['_limit'] = limit.toString();
   }
   final uri = Uri.parse(rootUrl).replace(
-    path: '//nyiso/zonal_uplift',
+    path: '/nyiso/zonal_uplift',
     queryParameters: queryParams,
   );
   final response = await client.get(uri);

@@ -544,17 +544,6 @@ Future<void> updateNyisoEnergyOffers(
   await archive.dbConfig.db.close();
 }
 
-Future<void> updateNyisoPtidTable({required bool download}) async {
-  var archive = prod.getNyisoPtidArchive();
-  if (download) {
-    await archive.downloadData();
-  }
-  await archive.db.open();
-  var data = archive.processData(archive.lastDate());
-  await archive.insertData(data);
-  await archive.db.close();
-}
-
 
 Future<void> updatePolygraphProjects({bool setUp = false}) async {
   var archive = prod.getPolygraphArchive();
