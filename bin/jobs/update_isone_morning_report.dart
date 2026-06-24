@@ -42,10 +42,10 @@ Flags:
 
   if (now.day < 5) {
     logger.info('running it for month ${month.previous}');
-    await updateIsoneMorningReport(months: [month.previous], download: true);
+    await updateIsoneMorningReport(months: [month.previous]);
   }
 
-  await updateIsoneMorningReport(months: [month], download: true);
+  await updateIsoneMorningReport(months: [month]);
   logger.info('Done at ${DateTime.now().toString()}');
   exit(0);
 }

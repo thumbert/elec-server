@@ -10,15 +10,16 @@ SET VARIABLE asof_date = CURRENT_DATE;
 SET VARIABLE asof_date = DATE '2026-06-06';
 
 CREATE TABLE IF NOT EXISTS ptid_table (
-    node_type ENUM('gen', 'zone') NOT NULL,
+    node_type ENUM('hub', 'generator', 'load', 'load_zone', 'aggregation_zone', 'reserve_zone', 'interface') NOT NULL,
     ptid INTEGER NOT NULL,
     name VARCHAR NOT NULL,
-    aggregation_ptid INTEGER,
-    subzone VARCHAR,
-    zone VARCHAR NOT NULL,
+    zone_id INTEGER,
+    reserve_id INTEGER,
+    rsp_area VARCHAR,
+    dispatch_zone VARCHAR,
+    dr_reserve_aggregation_zone_id INTEGER,
     latitude DOUBLE,
     longitude DOUBLE,
-    active BOOLEAN NOT NULL,
     "asof" DATE NOT NULL
 );
 

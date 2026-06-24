@@ -7,7 +7,7 @@ import 'package:elec_server/client/other/ptids.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:elec_server/src/db/config.dart';
-import 'package:elec_server/src/db/other/isone_ptids.dart';
+import 'package:elec_server/src/db/isone/ptid_table.dart';
 import 'package:elec_server/api/api_isone_ptids.dart';
 
 var env = Platform.environment;

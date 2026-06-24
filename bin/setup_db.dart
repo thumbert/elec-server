@@ -32,7 +32,7 @@ import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';
 import 'package:path/path.dart' as path;
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/marks/curves/forward_marks.dart';
-import 'package:elec_server/src/db/other/isone_ptids.dart';
+import 'package:elec_server/src/db/isone/ptid_table.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import '../test/db/marks/marks_special_days.dart';

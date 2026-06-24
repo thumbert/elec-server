@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 
+import 'package:date/date.dart';
 import 'package:http/http.dart' as http;
 
 /// Function to query records from the DuckDB table via REST API
@@ -11,7 +12,12 @@ import 'package:http/http.dart' as http;
 /// [rootUrl] is the base URL of the API endpoint.
 /// Optional [limit] can be provided to limit the number of records.
 ///
-Future<List<Record>> queryRecords({ required QueryFilter filter,  required String rootUrl,  int? limit,  http.Client? client, }) async {
+Future<List<Record>> queryRecords({
+  required QueryFilter filter,
+  required String rootUrl,
+  int? limit,
+  http.Client? client,
+}) async {
   client ??= http.Client();
   final queryParams = filter.toUriParams();
   if (limit != null) {
@@ -30,7 +36,7 @@ Future<List<Record>> queryRecords({ required QueryFilter filter,  required Strin
 }
 
 class Record {
-  Record({required this.nodeType, required this.ptid, required this.name, required this.aggregationPtid, required this.subzone, required this.zone, required this.latitude, required this.longitude, required this.active, });
+  Record({required this.nodeType, required this.ptid, required this.name, required this.aggregationPtid, required this.subzone, required this.zone, required this.latitude, required this.longitude, required this.active, required this.asof, });
 
   final NodeType nodeType;
   final int ptid;
@@ -41,6 +47,7 @@ class Record {
   final double? latitude;
   final double? longitude;
   final bool active;
+  final Date asof;
 
   static Record fromJson(Map<String, dynamic> json) {
     return Record(
@@ -53,6 +60,7 @@ class Record {
       latitude: json['latitude'] as double?,
       longitude: json['longitude'] as double?,
       active: json['active'] as bool,
+      asof: Date.parse(json['asof'] as String),
     );
   }
 
@@ -67,6 +75,7 @@ class Record {
       'latitude': latitude,
       'longitude': longitude,
       'active': active,
+      'asof': asof.toIso8601String(),
     };
   }
 
@@ -87,6 +96,7 @@ class Record {
         other.latitude == latitude &&
         other.longitude == longitude &&
         other.active == active &&
+        other.asof == asof &&
         true;
   }
 
@@ -102,6 +112,7 @@ class Record {
       latitude,
       longitude,
       active,
+      asof,
     ]);
   }
 }
@@ -127,8 +138,15 @@ enum NodeType {
   }
 }
 
+
 class QueryFilter {
-  QueryFilter({this.nodeType, this.nodeTypeIn, this.zone, this.zoneLike, this.zoneIn, });
+  QueryFilter({
+    this.nodeType,
+    this.nodeTypeIn,
+    this.zone,
+    this.zoneLike,
+    this.zoneIn,
+  });
 
   NodeType? nodeType;
   List<NodeType>? nodeTypeIn;
@@ -138,11 +156,21 @@ class QueryFilter {
 
   Map<String, String> toUriParams() {
     final params = <String, String>{};
-    if (nodeType != null) { params['node_type'] = nodeType.toString();}
-    if (nodeTypeIn != null) { params['node_type_in'] = nodeTypeIn!.map((e) => e.toString()).join(',');}
-    if (zone != null) { params['zone'] = zone.toString();}
-    if (zoneLike != null) { params['zone_like'] = zoneLike.toString();}
-    if (zoneIn != null) { params['zone_in'] = zoneIn!.map((e) => e.toString()).join(',');}
+    if (nodeType != null) {
+      params['node_type'] = nodeType.toString();
+    }
+    if (nodeTypeIn != null) {
+      params['node_type_in'] = nodeTypeIn!.map((e) => e.toString()).join(',');
+    }
+    if (zone != null) {
+      params['zone'] = zone.toString();
+    }
+    if (zoneLike != null) {
+      params['zone_like'] = zoneLike.toString();
+    }
+    if (zoneIn != null) {
+      params['zone_in'] = zoneIn!.map((e) => e.toString()).join(',');
+    }
     return params;
   }
 

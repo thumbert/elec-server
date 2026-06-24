@@ -61,10 +61,13 @@ Future<int> baseDownloadUrl(
         }
       }
       if (gzipFile) {
+        var gzFile = fileout;
+        if (!fileout.path.endsWith('.gz')) {
+           gzFile = File('${fileout.path}.gz');
+        }
         final content = await fileout.readAsBytes();
         final compressed = GZipCodec().encode(content);
-        final gzipFile = File('${fileout.path}.gz');
-        gzipFile.writeAsBytesSync(compressed);
+        gzFile.writeAsBytesSync(compressed);
         print('GZipped file ${fileout.path}');
       }
     } catch (e) {

@@ -323,9 +323,10 @@ Future<void> updateIsoneMorningReport(
     for (var day in month.days()) {
       print('Working on $day');
       if (day.isAfter(today)) continue;
-      var file = archive.getFile(day);
-      if (!file.existsSync() || download) {
-        var res = await baseDownloadUrl(archive.getUrl(day), file,
+      var fileGz = archive.getFile(day, format: 'gz');
+      // var file = archive.getFile(day);
+      if (!fileGz.existsSync() || download) {
+        final res = await baseDownloadUrl(archive.getUrl(day), fileGz,
             username: dotenv.env['ISONE_WS_USER'],
             password: dotenv.env['ISONE_WS_PASSWORD'],
             acceptHeader: 'application/json',

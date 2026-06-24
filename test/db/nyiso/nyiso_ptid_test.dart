@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS ptid_table (
     zone VARCHAR NOT NULL,
     latitude DOUBLE,
     longitude DOUBLE,
-    active BOOLEAN NOT NULL
+    active BOOLEAN NOT NULL,
+    "asof" DATE NOT NULL
 );
 ''';
   final generator = CodeGenerator(
@@ -55,6 +56,6 @@ void main() async {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
   dotenv.load('.env/test.env');
-  await tests(dotenv.env['ROOT_URL']!);
-  // generateCode();
+  // await tests(dotenv.env['ROOT_URL']!);
+  generateCode();
 }

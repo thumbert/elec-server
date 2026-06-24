@@ -38,7 +38,7 @@ export 'src/db/mis/sr_rtncpcstlmntsum.dart';
 export 'src/db/mis/tr_sch2tp.dart';
 export 'src/db/mis/tr_sch3p2.dart';
 
-export 'src/db/other/isone_ptids.dart';
+export 'src/db/isone/ptid_table.dart';
 
 export 'src/db/utilities/ct_supplier_backlog_rates.dart';
 export 'src/db/utilities/eversource/load_ct.dart';

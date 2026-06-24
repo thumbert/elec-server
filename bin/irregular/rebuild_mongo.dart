@@ -30,7 +30,7 @@ import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/rt_lmp_hourly.dart';
-import 'package:elec_server/src/db/other/isone_ptids.dart' as isone_ptid;
+import 'package:elec_server/src/db/isone/ptid_table.dart' as isone_ptid;
 import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 import 'package:elec_server/src/db/weather/noaa_daily_summary.dart';

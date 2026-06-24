@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-06-24
+- Add HQ fuel mix client
+
 # 2026-06-17
 - Migrate nyiso ptid table to Rust/DuckDB
 
