@@ -1,4 +1,20 @@
 
+SELECT * FROM dalmp;
+
+
+--- Get all the nodes that showed up on this day
+SELECT ptid 
+FROM (
+    SELECT ptid, MIN(hour_beginning)::DATE AS first_day
+    FROM dalmp
+    GROUP BY ptid
+    ORDER BY first_day DESC
+)
+WHERE first_day = '2026-05-01';
+
+
+
+
 SELECT min(hour_beginning), max(hour_beginning) FROM dalmp;
 
 SELECT COUNT(DISTINCT(ptid)) FROM dalmp WHERE day = '2020-01-01'; -- 574 nodes 

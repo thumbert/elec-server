@@ -6,8 +6,6 @@ import 'package:test/test.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/timezone.dart';
 
-// import 'client//hq/fuel_mix/fuel_mix.dart' as client;
-
 Future<void> tests(String rootUrl) async {
   group('Client tests for /hq/fuel_mix', () {
     test('Query records test', () async {

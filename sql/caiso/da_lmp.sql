@@ -1,16 +1,29 @@
 LOAD icu;SET TimeZone = 'America/Los_Angeles';
+SELECT * FROM lmp LIMIT 5;
+
 SELECT MIN(hour_beginning), MAX(hour_beginning), COUNT(*) FROM lmp;
 
-SELECT DISTINCT strftime(hour_beginning, '%Y-%m') AS month 
+SELECT 
+    strftime(hour_beginning, '%Y-%m') AS month,
+    COUNT(*) AS count
 FROM lmp 
 WHERE node_id = 'TH_NP15_GEN-APND'
+GROUP BY month
 ORDER BY month;
 
-SELECT * from lmp
-SELECT * FROM read_vortex('lmp.vortex')
-WHERE node_id = 'TH_NP15_GEN_ONPEAK-APND'
-AND hour_beginning >= '2025-12-01T00:00:00-08:00'
-ORDER BY hour_beginning;
+
+--- Check mghg prices.  All are >= 0 when not null.
+SELECT * FROM lmp 
+WHERE hour_beginning > '2026-04-01T00:00:00-08:00'
+AND mghg > 0
+LIMIT 5;
+
+
+SELECT * FROM lmp 
+WHERE hour_beginning > '2025-12-06T00:00:00-08:00'
+AND mghg IS NOT NULL
+LIMIT 5;
+
 
 -- WHERE node_id = 'TH_NP15_GEN-APND';
 
@@ -90,8 +103,7 @@ ORDER BY node_id;
 
 
 ---========================================================================
-LOAD icu;
-SET TimeZone = 'America/Los_Angeles';
+LOAD icu; SET TimeZone = 'America/Los_Angeles';
 
 CREATE TABLE IF NOT EXISTS lmp (
     node_id VARCHAR NOT NULL,
@@ -99,6 +111,7 @@ CREATE TABLE IF NOT EXISTS lmp (
     lmp DECIMAL(18,5) NOT NULL,
     mcc DECIMAL(18,5) NOT NULL,
     mcl DECIMAL(18,5) NOT NULL,
+    mghg DECIMAL(18,5),
 );
 CREATE INDEX IF NOT EXISTS idx_lmp_node_id ON lmp(node_id);
 
@@ -136,6 +149,28 @@ AS
         "MW"::DECIMAL(18,5) as mcl
     FROM read_csv(
             '/home/adrian/Downloads/Archive/Caiso/DaLmp/Raw/2025/20251201_20251201_PRC_LMP_DAM_MCL_v12.csv.gz',
+            header = true,
+            union_by_name = true --needed because of issue on 2026-04
+    )
+    ORDER BY node_id, hour_beginning 
+;
+
+--- this component started on 2025-12-06!
+CREATE TEMPORARY TABLE tmp_ghg (
+    node_id VARCHAR,
+    hour_beginning VARCHAR,
+    mghg DECIMAL(18,5)
+);
+
+
+CREATE TEMPORARY TABLE tmp_ghg 
+AS 
+    SELECT 
+        "NODE_ID"::STRING AS node_id,
+        "INTERVALSTARTTIME_GMT"::STRING AS hour_beginning,
+        "MW"::DECIMAL(18,5) as mghg
+    FROM read_csv(
+            '/home/adrian/Downloads/Archive/Caiso/DaLmp/Raw/2025/20251201_20251201_PRC_LMP_DAM_MGHG_v12.csv.gz',
             header = true
     )
     ORDER BY node_id, hour_beginning 
@@ -148,16 +183,21 @@ AS
         l.hour_beginning,
         l.lmp,
         m.mcc,
-        c.mcl
+        c.mcl,
+        g.mghg
     FROM tmp_lmp l
-    JOIN tmp_mcc m
+    LEFT JOIN tmp_mcc m
         ON l.node_id = m.node_id
         AND l.hour_beginning = m.hour_beginning
-    JOIN tmp_mcl c
+    LEFT JOIN tmp_mcl c
         ON l.node_id = c.node_id
         AND l.hour_beginning = c.hour_beginning
+    LEFT JOIN tmp_ghg g
+        ON l.node_id = g.node_id
+        AND l.hour_beginning = g.hour_beginning
     ORDER BY l.node_id, l.hour_beginning;
 
+select * from tmp limit 10;
 
 INSERT INTO lmp
 (
@@ -185,6 +225,7 @@ CREATE TABLE IF NOT EXISTS lmp (
     lmp DECIMAL(18,5)[] NOT NULL,
     mcc DECIMAL(18,5)[] NOT NULL,
     mcl DECIMAL(18,5)[] NOT NULL,
+    mghg DECIMAL(18,5)[] NOT NULL
 );
 
 CREATE TEMPORARY TABLE tmp AS (
@@ -193,10 +234,11 @@ CREATE TEMPORARY TABLE tmp AS (
         node_id,
         ARRAY_AGG(lmp ORDER BY hour_beginning) AS lmp,
         ARRAY_AGG(mcc ORDER BY hour_beginning) AS mcc,
-        ARRAY_AGG(mcl ORDER BY hour_beginning) AS mcl
+        ARRAY_AGG(mcl ORDER BY hour_beginning) AS mcl,
+        ARRAY_AGG(mghg ORDER BY hour_beginning) AS mghg
     FROM dalmp.lmp
-    WHERE hour_beginning >= '2025-01-01T00:00:00-08:00'
-    AND hour_beginning < '2026-01-01T00:00:00-08:00'
+    WHERE hour_beginning >= '2025-12-11T00:00:00-08:00'
+    AND hour_beginning < '2026-12-12T00:00:00-08:00'
     GROUP BY node_id, date
     ORDER BY node_id, date
 );
@@ -214,3 +256,32 @@ ORDER BY date, node_id;
 
 LOAD vortex;
 COPY (SELECT * FROM dalmp.lmp) TO './lmp.vortex' (FORMAT vortex);
+
+
+
+---========================================================================================
+--- issue with schema for 2026-04
+CREATE TEMPORARY TABLE tmp_mcl 
+AS 
+    SELECT 
+        "NODE_ID"::STRING AS node_id,
+        "INTERVALSTARTTIME_GMT"::STRING AS hour_beginning,
+        "MW"::DECIMAL(18,5) as mcl
+    FROM read_csv(
+            '/home/adrian/Downloads/Archive/Caiso/DaLmp/Raw/2026/202604*_202604*_PRC_LMP_DAM_MCL_v12.csv.gz',
+            header = true,
+            union_by_name = true --needed because of issue on 2026-04
+    )
+    ORDER BY node_id, hour_beginning 
+;
+
+
+    SELECT 
+        "NODE_ID"::STRING AS node_id,
+        "INTERVALSTARTTIME_GMT"::STRING AS hour_beginning,
+        "MW"::DECIMAL(18,5) as mcl
+    FROM read_csv(
+            '/home/adrian/Downloads/Archive/Caiso/DaLmp/Raw/2026/20260404_20260404_PRC_LMP_DAM_MCL_v12.csv.gz',
+            header = true)
+    ORDER BY node_id, hour_beginning 
+;

@@ -1,5 +1,36 @@
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:timezone/timezone.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import 'package:dotenv/dotenv.dart' as dotenv;
+
+Future<List<MraCapacityRecord>> getMraBidsOffers(Month month) async {
+  final url = '${dotenv.env['RUST_SERVER']}/isone/capacity/mra/bids_offers'
+      '/start/${month.toIso8601String()}/end/${month.toIso8601String()}';
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode != 200) {
+    throw Exception(
+        'Failed to load MRA bids/offers for ${response.statusCode}');
+  }
+  final List<dynamic> jsonList = jsonDecode(response.body);
+  return jsonList.map((e) {
+    final month =
+        Month.fromInt(e['month'] as int, location: IsoNewEngland.location);
+    return MraCapacityRecord(
+        month,
+        e['masked_asset_id'] as int,
+        e['masked_participant_id'] as int,
+        e['masked_capacity_zone_id'] as int,
+        ResourceType.parse(e['resource_type'] as String),
+        e['masked_external_interface_id'] as int?,
+        BidOffer.parse(e['bid_offer'] as String),
+        e['segment'] as int,
+        e['quantity'] as num,
+        e['price'] as num);
+  }).toList();
+}
 
 enum ResourceType {
   generating,

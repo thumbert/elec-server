@@ -8,6 +8,7 @@ import 'package:timezone/timezone.dart';
 
 Future<int> main() async {
   print('Running ... ${DateTime.now()}');
+  print('Process ID: $pid');
   initializeTimeZones();
 
   var archive = prod.getRetailSuppliersOffersArchive();

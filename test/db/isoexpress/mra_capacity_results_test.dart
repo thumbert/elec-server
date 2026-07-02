@@ -1,4 +1,5 @@
 import 'package:date/date.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec_server/client/isoexpress/mra_capacity_results.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:test/test.dart';
@@ -45,23 +46,22 @@ Future<void> tests() async {
       expect(sene.netCapacityCleared, 0);
     });
   });
-  //
-  //
-//   test('duckdb test', () {
-//     final duckFile = File(
-//         '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/energy_offers.duckdb');
-//     if (duckFile.existsSync()) {
-//       final con = Connection(duckFile.path);
-//       final query = '''
-// SELECT * FROM rt_energy_offers
-// ''';
 
-//       con.close();
-//     }
-  // });
+  group('MRA BidOffer client tests:', () {
+    test('get data for 2024-08', () async {
+      var data = await getMraClearingPriceZone(Month.utc(2024, 8));
+      expect(data.length, 4); // 4 zones
+      var x0 = data.firstWhere((e) => e.capacityZoneName == 'Southeast New England');
+      expect(x0.clearingPrice, 10.0);
+      expect(x0.supplyOffersSubmitted, 173.028);
+      expect(x0.demandBidsSubmitted, 1779.517);
+      expect(x0.netCapacityCleared, 0);
+    });
+  });
 }
 
 Future<void> main() async {
   initializeTimeZones();
+  dotenv.load('.env/test.env');
   await tests();
 }

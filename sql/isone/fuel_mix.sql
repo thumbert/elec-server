@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS fuel_mix (
 CREATE TEMPORARY TABLE tmp
 AS
     SELECT 
-        BeginDate::TIMESTAMPTZ as timestamp, 
+        make_timestamptz(epoch_us(BeginDate)) as timestamp, 
         GenMw:: INT32 as mw, 
         FuelCategoryRollup:: VARCHAR AS fuel_category_rollup, 
         FuelCategory::VARCHAR AS fuel_category,
@@ -61,8 +61,7 @@ AS
         END AS marginal_flag
         FROM (
             SELECT unnest(GenFuelMixes.GenFuelMix, recursive := true)
-            FROM read_json('~/Downloads/Archive/IsoExpress/GridReports/FuelMix/Raw/2026/genfuelmix_20260514.json.gz',
-              timestampformat := '%Y-%m-%dT%H:%M:%S%z')
+            FROM read_json('~/Downloads/Archive/IsoExpress/GridReports/FuelMix/Raw/2026/genfuelmix_20260623.json.gz')
     )
     ORDER BY timestamp, fuel_category
 ;
