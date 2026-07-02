@@ -54,41 +54,7 @@ Future<List<MraCapacityInterfaceRecord>> getMraClearingPriceInterface(Month mont
         clearingPrice: e['clearing_price'] as num);
   }).toList();
 }
-
-
-enum ResourceType {
-  generating,
-  demand,
-  import;
-
-  static ResourceType parse(String x) {
-    return switch (x.toLowerCase()) {
-      'generating' => ResourceType.generating,
-      'demand' => ResourceType.demand,
-      'import' => ResourceType.import,
-      _ => throw ArgumentError('Invalid ResourceType $x'),
-    };
-  }
-}
-
-enum BidOffer {
-  bid,
-  offer;
-
-  static BidOffer parse(String x) {
-    return switch (x.toLowerCase()) {
-      'supply_offer' => BidOffer.offer,
-      'demand_bid' => BidOffer.bid,
-      _ => throw ArgumentError('Invalid BidOffer $x'),
-    };
-  }
-}
-
-enum MraRecordType {
-  zone,
-  interface,
-}
-
+ 
 sealed class MraCapacityRecord {}
 
 class MraCapacityZoneRecord extends MraCapacityRecord {
