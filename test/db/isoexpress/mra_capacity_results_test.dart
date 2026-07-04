@@ -49,9 +49,11 @@ Future<void> tests() async {
 
   group('MRA BidOffer client tests:', () {
     test('get data for 2024-08', () async {
-      var data = await getMraClearingPriceZone(Month.utc(2024, 8));
+      var data = await getMraClearingPriceZone(Month.utc(2024, 8),
+          rootUrl: dotenv.env['RUST_SERVER']!);
       expect(data.length, 4); // 4 zones
-      var x0 = data.firstWhere((e) => e.capacityZoneName == 'Southeast New England');
+      var x0 =
+          data.firstWhere((e) => e.capacityZoneName == 'Southeast New England');
       expect(x0.clearingPrice, 10.0);
       expect(x0.supplyOffersSubmitted, 173.028);
       expect(x0.demandBidsSubmitted, 1779.517);

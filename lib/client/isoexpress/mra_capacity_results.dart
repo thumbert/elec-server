@@ -1,13 +1,12 @@
 import 'dart:convert';
 
 import 'package:date/date.dart';
-import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec/elec.dart';
 import 'package:timezone/timezone.dart';
 import 'package:http/http.dart' as http;
 
-Future<List<MraCapacityZoneRecord>> getMraClearingPriceZone(Month month) async {
-  final url = '${dotenv.env['RUST_SERVER']}/isone/capacity/mra/results/zone'
+Future<List<MraCapacityZoneRecord>> getMraClearingPriceZone(Month month, {required String rootUrl}) async {
+  final url = '$rootUrl/isone/capacity/mra/results/zone'
       '/start/${month.toIso8601String()}/end/${month.toIso8601String()}';
   final response = await http.get(Uri.parse(url));
   if (response.statusCode != 200) {
@@ -31,8 +30,8 @@ Future<List<MraCapacityZoneRecord>> getMraClearingPriceZone(Month month) async {
   }).toList();
 }
 
-Future<List<MraCapacityInterfaceRecord>> getMraClearingPriceInterface(Month month) async {
-  final url = '${dotenv.env['RUST_SERVER']}/isone/capacity/mra/results/interface'
+Future<List<MraCapacityInterfaceRecord>> getMraClearingPriceInterface(Month month, {required String rootUrl}) async {
+  final url = '$rootUrl/isone/capacity/mra/results/interface'
       '/start/${month.toIso8601String()}/end/${month.toIso8601String()}';
   final response = await http.get(Uri.parse(url));
   if (response.statusCode != 200) {
