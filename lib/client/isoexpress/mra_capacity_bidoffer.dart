@@ -4,10 +4,8 @@ import 'package:timezone/timezone.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:dotenv/dotenv.dart' as dotenv;
-
-Future<List<MraCapacityRecord>> getMraBidsOffers(Month month) async {
-  final url = '${dotenv.env['RUST_SERVER']}/isone/capacity/mra/bids_offers'
+Future<List<MraCapacityRecord>> getMraBidsOffers(Month month, {required String rootUrl}) async {
+  final url = '$rootUrl/isone/capacity/mra/bids_offers'
       '/start/${month.toIso8601String()}/end/${month.toIso8601String()}';
   final response = await http.get(Uri.parse(url));
   if (response.statusCode != 200) {

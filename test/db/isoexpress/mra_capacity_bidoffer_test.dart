@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 
-Future<void> tests(String rootUrl) async {
+Future<void> tests() async {
   var archive = getIsoneMraBidOfferArchive();
   group('MRA BidOffer archive tests:', () {
     test('read file for 2024-01', () async {
@@ -22,7 +22,8 @@ Future<void> tests(String rootUrl) async {
   });
   group('MRA BidOffer client tests:', () {
     test('get data for 2024-01', () async {
-      var data = await getMraBidsOffers(Month.utc(2024, 1));
+      var data = await getMraBidsOffers(Month.utc(2024, 1),
+          rootUrl: dotenv.env['RUST_SERVER']!);
       expect(data.length, 454);
       var xs = data.where((e) => e.maskedResourceId == 52995).toList();
       expect(xs.length, 5);
@@ -37,5 +38,5 @@ Future<void> main() async {
   initializeTimeZones();
   dotenv.load('.env/prod.env');
   DbProd();
-  await tests(dotenv.env['ROOT_URL']!);
+  await tests();
 }
