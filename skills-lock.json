@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "ggsql": {
+      "source": "posit-dev/skills",
+      "sourceType": "github",
+      "skillPath": "ggsql/ggsql/SKILL.md",
+      "computedHash": "4c3c6d82334d7db13aa38fceb672160048ba04fe15f0a20923cfac18df6a2d52"
+    }
+  }
+}

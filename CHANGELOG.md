@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-07-03
+- Some sql work for hq_fuel_mix.sql
+
 # 2026-07-02
 - Add client functions for ISONE MRA results and bids/offers.
 
