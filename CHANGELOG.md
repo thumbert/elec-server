@@ -7,6 +7,10 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-07-08
+- Add nyiso capacity prices for monthly auctions.  Download from iso. 
+- Add nyiso capacity season 
+
 # 2026-07-03
 - Some sql work for hq_fuel_mix.sql
 

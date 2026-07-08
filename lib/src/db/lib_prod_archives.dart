@@ -13,6 +13,7 @@ import 'package:elec_server/src/db/isoexpress/ara_capacity_bidoffer.dart';
 import 'package:elec_server/src/db/isoexpress/rt_lmp_5min.dart';
 import 'package:elec_server/src/db/isoexpress/rt_reserve_prices.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_load_5min.dart';
+import 'package:elec_server/src/db/nyiso/capacity_prices_monthly.dart';
 import 'package:elec_server/src/db/polygraph/polygraph_archive.dart';
 import 'package:elec_server/src/db/weather/normal_temperature.dart';
 
@@ -281,6 +282,18 @@ NormalTemperatureArchive getNormalTemperatureArchive() {
     Directory(archive.dir).createSync(recursive: true);
   }
   return archive;
+}
+
+NyisoCapacityPricesMonthlyArchive getNyisoCapacityPricesMonthlyArchive() {
+  var dir = '${Platform.environment['HOME'] ?? ''}/Downloads/Archive'
+      '/Nyiso/CapacityPrices/Monthly/CSV/';
+  if (!Directory(dir).existsSync()) {
+    Directory(dir).createSync(recursive: true);
+  }
+  return NyisoCapacityPricesMonthlyArchive(
+      dir: dir,
+      duckdbPath:
+          '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/nyiso/capacity_prices_monthly.duckdb');
 }
 
 NyisoEnergyOfferArchive getNyisoEnergyOfferArchive() {
