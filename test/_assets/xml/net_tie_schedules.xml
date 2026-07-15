@@ -1,0 +1,12 @@
+<GetNetTieSchedulesResponse>
+    <NetTieSchedules day="2010-05-07">
+        <NetTieSchedule area=".I.HQ_P1_P2345 5">
+            <HourlyValue time="2010-05-07T20:00:00-04:00" MW="1138" />
+            <HourlyValue time="2010-05-07T21:00:00-04:00" MW="1138" />
+        </NetTieSchedule>
+        <NetTieSchedule area=".I.HQHIGATE120 2">
+            <HourlyValue time="2010-05-07T10:00:00-04:00" MW="225" />
+            <HourlyValue time="2010-05-07T11:00:00-04:00" MW="225" />
+        </NetTieSchedule>
+    </NetTieSchedules>
+</GetNetTieSchedulesResponse>

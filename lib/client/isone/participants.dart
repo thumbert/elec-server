@@ -19,7 +19,7 @@ Future<List<Record>> queryRecords({ required QueryFilter filter,  required Strin
     queryParams['_limit'] = limit.toString();
   }
   final uri = Uri.parse(rootUrl).replace(
-    path: '/isone/participant_list/current',
+    path: '/isone/participant_list',
     queryParameters: queryParams,
   );
   final response = await client.get(uri);

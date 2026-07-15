@@ -7,6 +7,10 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-07-15
+- Add an example of processing an xml file with DuckDB.  
+  sql/isone/net_tie_schedules.sql.  I'm ducked! 
+
 # 2026-07-08
 - Add nyiso capacity prices for monthly auctions.  Download from iso. 
 - Add nyiso capacity season 
