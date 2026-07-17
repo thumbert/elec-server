@@ -274,7 +274,10 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     var queries =
         _config.firstWhere((e) => e['state'] == 'MA')['queries'] as List;
 
-    var browser = await puppeteer.launch();
+    var browser = await puppeteer.launch(
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    );
     var page = await browser.newPage();
 
     for (var query in queries) {

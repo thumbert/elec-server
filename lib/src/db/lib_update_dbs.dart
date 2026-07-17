@@ -80,7 +80,6 @@ Future<int> updateCompetitiveOffersDb(
         await archive.insertData(data);
       } else {
         print('No $date file for CT to process');
-        status = 1;
       }
     }
     if (states.contains('MA')) {
@@ -91,7 +90,6 @@ Future<int> updateCompetitiveOffersDb(
         await archive.insertData(data);
       } else {
         print('No $date file for MA to process');
-        status = 1;
       }
     }
   }

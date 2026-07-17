@@ -7,6 +7,10 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-07-17
+- Fix long-term standing issue with running puppeteer from a non-interacting shell.
+  See lib/src/db/utilities/retail_suppliers_offers_archive.dart
+
 # 2026-07-15
 - Add an example of processing an xml file with DuckDB.  
   sql/isone/net_tie_schedules.sql.  I'm ducked! 

@@ -67,11 +67,8 @@ Flags:
   final archive = getNyisoCapacityPricesMonthlyArchive();
 
   // process next month (usually data available by the 15th of the month)
-  // final month = Month.current(location: location).next;
-
-  final months = Month(2024, 1, location: location)
-      .upTo(Month(2026, 7, location: location));
-
+  final month = Month.current(location: location).next;
+  final months = [month];
   for (var month in months) {
     logger.info('Month to process: ${month.toString()}');
     final capabilityPeriod = CapabilityPeriod.containing(month);
