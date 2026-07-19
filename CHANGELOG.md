@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-07-18
+- Add ISONE DA binding constraints api based on DuckDB
+
 # 2026-07-17
 - Fix long-term standing issue with running puppeteer from a non-interacting shell.
   See lib/src/db/utilities/retail_suppliers_offers_archive.dart

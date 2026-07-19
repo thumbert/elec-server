@@ -10,9 +10,10 @@ A web server built using [Shelf](https://pub.dartlang.org/packages/shelf).
   static-web-server --host 127.0.0.1 --port 9000 --log-level info 
   navigate to http://127.0.0.1:9000/documentation.html and you should be able to see it
 
-
+```bash
 cp ~/Documents/repos/git/thumbert/rascal/html/docs/index.html ~/Software/Apps/public/docs   
 cp ~/Documents/repos/git/thumbert/rascal/html/docs/assets/documentation.css ~/Software/Apps/public/docs/assets   
+```
 
 ```
 duckdb -csv -c "
