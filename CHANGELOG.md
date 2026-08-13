@@ -7,6 +7,10 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-08-13
+- Revamp ISONE ptid table process.  Write to DuckDB.  Keep track of when 
+  nodes are added/terminated.  Set up daily job.
+
 # 2026-07-18
 - Add ISONE DA binding constraints api based on DuckDB
 

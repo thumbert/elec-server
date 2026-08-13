@@ -198,17 +198,21 @@ MraCapacityResultsArchive getIsoneMraResultsArchive() {
 }
 
 PtidArchive getIsonePtidArchive() {
-  var config = ComponentConfig(
+  final config = ComponentConfig(
     host: dotenv.env['MONGO_CONNECTION']!,
     dbName: 'isone',
     collectionName: 'pnode_table',
   );
-  var dir =
-      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/PnodeTable/Raw/';
+  final dir =
+      '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/PnodeTable/Raw';
   if (!Directory(dir).existsSync()) {
     Directory(dir).createSync(recursive: true);
   }
-  return PtidArchive(config: config, dir: dir);
+  return PtidArchive(
+      config: config,
+      dir: dir,
+      duckdbPath:
+          '${Platform.environment['HOME'] ?? ''}/Downloads/Archive/DuckDB/isone/ptid_table.duckdb');
 }
 
 RtEnergyOfferArchive getIsoneRtEnergyOfferArchive() {

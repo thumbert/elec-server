@@ -10,7 +10,12 @@ Future<void> tests() async {
   test('simple email', () async {
     final body = 'Break the ice!';
     var res = await sendEmail(
-        to: [to], from: from, subject: subject, body: body, isHtml: false);
+      to: [to],
+      from: from,
+      subject: subject,
+      body: body,
+      isHtml: false,
+    );
     print(res.statusCode);
     print(res.body);
   });

@@ -266,7 +266,7 @@ Future<void> recreateRtLmpHourlyNyiso() async {
 }
 
 Future<void> recreatePtidTableIsone() async {
-  var archive = isone_ptid.PtidArchive();
+  var archive = getIsonePtidArchive();
   await archive.setupDb();
   await archive.db.open();
   var files = Directory(archive.dir)

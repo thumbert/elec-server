@@ -17,7 +17,7 @@ import 'db/isoexpress/regulation_requirement_test.dart'
     as regulation_requirement;
 import 'db/isoexpress/wholesale_load_cost_report_test.dart'
     as wholesale_load_cost_report;
-import 'db/isone_ptids_test.dart' as ptids;
+import 'db/isone/ptid_table_test.dart' as ptids;
 import 'db/isone/masked_ids_test.dart' as masked_ids;
 
 import 'db/lib_mis_reports_test.dart' as mis;

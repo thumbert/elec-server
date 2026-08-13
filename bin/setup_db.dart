@@ -376,7 +376,7 @@ Future<void> insertNormalTemperatures() async {
 }
 
 Future<void> insertPtidTable() async {
-  var archive = PtidArchive();
+  var archive = getIsonePtidArchive();
   var baseUrl = 'https://www.iso-ne.com/static-assets/documents/';
   var urls = [
     '2019/02/2.6.20_pnode_table_2019_02_05.xlsx',
