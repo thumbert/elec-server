@@ -321,8 +321,8 @@ AND d.deactivated_on IS NULL;
   /// Get all the links with the xlsx files from the ISONE website.
   Future<List<String>> getLinks() async {
     final browser = await puppeteer.launch(
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: false,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--headless=new'],
     );
     late final List<String> links;
     try {
@@ -367,7 +367,7 @@ AND d.deactivated_on IS NULL;
   }
 
   /// Recreate the duckdb archive from scratch.
-  void setupDb2() {
+  void setupDuckDB() {
     if (!Directory(dir).existsSync()) {
       Directory(dir).createSync(recursive: true);
     }

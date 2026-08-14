@@ -12,7 +12,12 @@ import 'package:timezone/timezone.dart';
 /// [rootUrl] is the base URL of the API endpoint.
 /// Optional [limit] can be provided to limit the number of records.
 ///
-Future<List<Record>> queryRecords({ required QueryFilter filter,  required String rootUrl,  int? limit,  http.Client? client, }) async {
+Future<List<Record>> queryRecords({
+  required QueryFilter filter,
+  required String rootUrl,
+  int? limit,
+  http.Client? client,
+}) async {
   client ??= http.Client();
   final queryParams = filter.toUriParams();
   if (limit != null) {
@@ -31,7 +36,15 @@ Future<List<Record>> queryRecords({ required QueryFilter filter,  required Strin
 }
 
 class Record {
-  Record({required this.zoned, required this.total, required this.hydro, required this.wind, required this.solar, required this.other, required this.thermal, });
+  Record({
+    required this.zoned,
+    required this.total,
+    required this.hydro,
+    required this.wind,
+    required this.solar,
+    required this.other,
+    required this.thermal,
+  });
 
   final TZDateTime zoned;
   final int total;
@@ -43,7 +56,8 @@ class Record {
 
   static Record fromJson(Map<String, dynamic> json) {
     return Record(
-      zoned: TZDateTime.parse(getLocation('America/New_York'), json['zoned'] as String),
+      zoned: TZDateTime.parse(
+          getLocation('America/New_York'), json['zoned'] as String),
       total: json['total'] as int,
       hydro: json['hydro'] as int,
       wind: json['wind'] as int,
@@ -69,6 +83,7 @@ class Record {
   String toString() {
     return toJson().toString();
   }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -78,7 +93,7 @@ class Record {
         other.hydro == hydro &&
         other.wind == wind &&
         other.solar == solar &&
-        other.other == other &&
+        other.other == this.other &&
         other.thermal == thermal &&
         true;
   }
@@ -98,7 +113,11 @@ class Record {
 }
 
 class QueryFilter {
-  QueryFilter({this.zoned, this.zonedGte, this.zonedLt, });
+  QueryFilter({
+    this.zoned,
+    this.zonedGte,
+    this.zonedLt,
+  });
 
   TZDateTime? zoned;
   TZDateTime? zonedGte;
@@ -106,9 +125,17 @@ class QueryFilter {
 
   Map<String, String> toUriParams() {
     final params = <String, String>{};
-    if (zoned != null) { params['zoned'] = '${zoned!.toIso8601String()}[${zoned!.location.name}]';}
-    if (zonedGte != null) { params['zoned_gte'] = '${zonedGte!.toIso8601String()}[${zonedGte!.location.name}]';}
-    if (zonedLt != null) { params['zoned_lt'] = '${zonedLt!.toIso8601String()}[${zonedLt!.location.name}]';}
+    if (zoned != null) {
+      params['zoned'] = '${zoned!.toIso8601String()}[${zoned!.location.name}]';
+    }
+    if (zonedGte != null) {
+      params['zoned_gte'] =
+          '${zonedGte!.toIso8601String()}[${zonedGte!.location.name}]';
+    }
+    if (zonedLt != null) {
+      params['zoned_lt'] =
+          '${zonedLt!.toIso8601String()}[${zonedLt!.location.name}]';
+    }
     return params;
   }
 

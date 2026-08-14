@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:date/date.dart';
+import 'package:elec_server/client/isone/ptid_table.dart' as ptid;
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart' as dotenv;
@@ -8,30 +10,8 @@ import 'package:logging/logging.dart';
 import 'package:reduct/reduct.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:elec_server/src/db/config.dart';
-import 'package:elec_server/client/isone/ptid_table.dart';
 
 final env = Platform.environment;
-
-void downloadFile() async {
-  var config = ComponentConfig(
-      host: '127.0.0.1', dbName: 'isone', collectionName: 'pnode_table');
-  var dir = '${env['HOME']!}/Downloads/Archive/PnodeTable/Raw/';
-
-  var archive = getIsonePtidArchive();
-  var url =
-      'https://www.iso-ne.com/static-assets/documents/2019/02/2.6.20_pnode_table_2019_02_05.xlsx';
-  await archive.downloadFile(url);
-}
-
-void ingestionTest() async {
-  var archive = getIsonePtidArchive();
-
-  var file = File('${archive.dir}/pnode_table_2019_01_10.xlsx');
-  await archive.db.open();
-  await archive.insertMongo(file);
-  await archive.db.close();
-}
 
 Future<void> tests(String rootUrl) async {
   var archive = getIsonePtidArchive();
@@ -48,11 +28,10 @@ Future<void> tests(String rootUrl) async {
     });
 
     test('insert file for 2025-06-12', () {
-      // var file = File('${archive.dir}/pnode_table_2025_06_12.xlsx');
-      // var data = archive.readSheetNodes(file);
-      // archive.insertDuckDb(data);
-
-      archive.setupDb2();
+      var file = File('${archive.dir}/pnode_table_2025_06_12.xlsx');
+      var data = archive.readSheetNodes(file);
+      archive.insertDuckDb(data);
+      // archive.setupDuckDB();
     });
 
     test('read file for 2019-02-05', () {
@@ -110,6 +89,28 @@ Future<void> tests(String rootUrl) async {
   });
   group('Ptid table client tests:', () {
     var client = PtidsApi(http.Client(), rootUrl: rootUrl);
+    test('Query records test', () async {
+      final records = await ptid.queryRecords(
+        filter: ptid.QueryFilter(),
+        limit: 5,
+        rootUrl: dotenv.env['RUST_SERVER']!,
+      );
+      expect(records.length, 5);
+    });
+    test('get activated nodes on 2025-06-12', () async {
+      final records = await ptid.queryRecords(
+        filter: ptid.QueryFilter(activatedOn: Date.parse('2025-06-12')),
+        rootUrl: dotenv.env['RUST_SERVER']!,
+      );
+      expect(records.length, 4);
+    });
+    test('get deactivated nodes on 2025-06-12', () async {
+      final records = await ptid.queryRecords(
+        filter: ptid.QueryFilter(deactivatedOn: Date.parse('2025-06-12')),
+        rootUrl: dotenv.env['RUST_SERVER']!,
+      );
+      expect(records.length, 6);
+    });
     test('get current ptid table for isone', () async {
       var data = await client.getPtidTable(region: 'isone');
       expect(data.length > 950, true);

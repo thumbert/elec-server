@@ -1,6 +1,5 @@
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:reduct/reduct.dart';
-import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 
 

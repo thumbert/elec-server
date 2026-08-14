@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-08-14
+- Finish download_isone_ptid_table.dart job, send email, etc. 
+
 # 2026-08-13
 - Revamp ISONE ptid table process.  Write to DuckDB.  Keep track of when 
   nodes are added/terminated.  Set up daily job.
