@@ -24,7 +24,7 @@ def main():
         f = open('ttc_' + day + '.csv', 'w')
         f.write(r.text)
         f.close()
-        subprocess.run(['gzip', 'ttc_' + day + '.csv'], check=True)
+        subprocess.run(['gzip', '--force', 'ttc_' + day + '.csv'], check=True)
 
 
     logging.info('Done')

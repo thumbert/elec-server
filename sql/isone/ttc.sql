@@ -25,63 +25,48 @@ ORDER BY hour_beginning;
 
 CREATE TABLE IF NOT EXISTS ttc_limits (
     hour_beginning TIMESTAMPTZ NOT NULL,
-    ny_north_import int64 NOT NULL,
-    ny_north_export int64 NOT NULL,
-    ny_northport_import int64 NOT NULL,
-    ny_northport_export int64 NOT NULL,
-    ny_csc_import int64 NOT NULL,
-    ny_csc_export int64 NOT NULL,
-    nb_import int64 NOT NULL,
-    nb_export int64 NOT NULL,
-    hq_highgate_import int64 NOT NULL,
-    hq_highgate_export int64 NOT NULL,
-    hq_phase2_import int64 NOT NULL,
-    hq_phase2_export int64 NOT NULL,
+    interface_name VARCHAR NOT NULL,
+    flow_direction ENUM('import', 'export') NOT NULL,
+    flow int64 NOT NULL,
+    PRIMARY KEY (hour_beginning, interface_name, flow_direction)
 );
-
-
-CREATE TEMPORARY TABLE tmp1 
-AS 
-SELECT column01 AS Day,
-    column03 AS ny_north_import,
-    column04 AS	ny_north_export,
-    column05 AS	ny_northport_import,
-    column06 AS ny_northport_export,
-    column07 AS	ny_csc_import,
-    column08 AS	ny_csc_export,
-    column09 AS	nb_import,
-    column10 AS	nb_export,
-    column11 AS	hq_highgate_import,
-    column12 AS	hq_highgate_export,
-    column13 AS	hq_phase2_import,
-    column14 AS	hq_phase2_export,
-FROM read_csv('/home/adrian/Downloads/Archive/IsoExpress/Ttc/Raw/2024/ttc_202401*.csv.gz', 
-    header = false, 
-    skip = 6,
-    ignore_errors = true,
-    strict_mode = false,
-    dateformat = '%m/%d/%Y');
-
 
 CREATE TEMPORARY TABLE tmp AS
-(SELECT day + INTERVAL (idx) HOUR AS hour_beginning, 
-    * EXCLUDE (day, idx)
-FROM (
-    SELECT         
-        row_number() OVER (PARTITION BY day) - 1 AS idx, -- 0 to 23 for each day
-        *
-    FROM tmp1
+WITH source AS (
+    SELECT
+        *,
+        row_number() OVER (PARTITION BY Day) - 1 AS hour_index
+    FROM read_csv(
+        '/home/adrian/Downloads/Archive/IsoExpress/Ttc/Raw/2026/ttc_2026*.csv.gz',
+        header = true,
+        skip = 4,
+        delim = ',',
+        quote = '"',
+        escape = '"',
+        ignore_errors = true,
+        all_varchar = true
     )
-ORDER BY hour_beginning    
-);
-
-
-INSERT INTO ttc_limits
-(SELECT * FROM tmp t
-WHERE NOT EXISTS (
-    SELECT * FROM ttc_limits b
-    WHERE
-        b.hour_beginning = t.hour_beginning 
-    )    
+    WHERE H = 'D'
+), long_limits AS (
+    UNPIVOT source
+    ON COLUMNS(* EXCLUDE (H, Day, "Hour Ending", hour_index))
+    INTO NAME limit_name VALUE flow
 )
-ORDER BY hour_beginning;
+SELECT
+    (strptime(Day, '%m/%d/%Y') AT TIME ZONE 'America/New_York')
+        + hour_index * INTERVAL '1 hour'
+        AS hour_beginning,
+    trim(regexp_replace(limit_name, '\s+(Import|Export) Limit MW\s*$', ''))
+        AS interface_name,
+    lower(regexp_extract(limit_name, '(Import|Export) Limit MW\s*$', 1))
+        AS flow_direction,
+    CAST(flow AS BIGINT) AS flow
+FROM long_limits;
+
+--- ttc values overwrite existing values in ttc_limits table (upsert)
+INSERT INTO ttc_limits
+SELECT t.*
+FROM tmp t
+ORDER BY hour_beginning, interface_name, flow_direction
+ON CONFLICT (hour_beginning, interface_name, flow_direction)
+DO UPDATE SET flow = EXCLUDED.flow;
