@@ -63,7 +63,7 @@ SELECT
     CAST(flow AS BIGINT) AS flow
 FROM long_limits;
 
---- ttc values overwrite existing values in ttc_limits table (upsert)
+--- tmp values overwrite existing values in ttc_limits table (upsert)
 INSERT INTO ttc_limits
 SELECT t.*
 FROM tmp t
