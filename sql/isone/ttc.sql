@@ -1,8 +1,10 @@
 SELECT * FROM ttc_limits;
 
-SELECT hour_beginning, hq_phase2_import
+SELECT hour_beginning, mw
 FROM ttc_limits 
-WHERE hour_beginning >= '2024-01-01'
+WHERE interface_name = 'HydroQuebec Phase II'
+AND flow_direction = 'import'
+AND hour_beginning >= '2024-01-01'
 AND hour_beginning < '2024-01-05'
 ORDER BY hour_beginning;
 
@@ -22,12 +24,11 @@ ORDER BY hour_beginning;
 
 
 ---========================================================================
-
 CREATE TABLE IF NOT EXISTS ttc_limits (
     hour_beginning TIMESTAMPTZ NOT NULL,
     interface_name VARCHAR NOT NULL,
     flow_direction ENUM('import', 'export') NOT NULL,
-    flow int64 NOT NULL,
+    mw int64 NOT NULL,
     PRIMARY KEY (hour_beginning, interface_name, flow_direction)
 );
 
@@ -50,7 +51,7 @@ WITH source AS (
 ), long_limits AS (
     UNPIVOT source
     ON COLUMNS(* EXCLUDE (H, Day, "Hour Ending", hour_index))
-    INTO NAME limit_name VALUE flow
+    INTO NAME limit_name VALUE mw
 )
 SELECT
     (strptime(Day, '%m/%d/%Y') AT TIME ZONE 'America/New_York')
@@ -60,7 +61,7 @@ SELECT
         AS interface_name,
     lower(regexp_extract(limit_name, '(Import|Export) Limit MW\s*$', 1))
         AS flow_direction,
-    CAST(flow AS BIGINT) AS flow
+    CAST(mw AS BIGINT) AS mw
 FROM long_limits;
 
 --- tmp values overwrite existing values in ttc_limits table (upsert)
@@ -69,4 +70,4 @@ SELECT t.*
 FROM tmp t
 ORDER BY hour_beginning, interface_name, flow_direction
 ON CONFLICT (hour_beginning, interface_name, flow_direction)
-DO UPDATE SET flow = EXCLUDED.flow;
+DO UPDATE SET mw = EXCLUDED.mw;

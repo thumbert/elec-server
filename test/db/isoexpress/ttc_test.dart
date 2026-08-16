@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS ttc_limits (
     hour_beginning TIMESTAMPTZ NOT NULL,
     interface_name VARCHAR NOT NULL,
     flow_direction ENUM('import', 'export') NOT NULL,
-    flow int64 NOT NULL,
+    mw int64 NOT NULL,
 );
 ''';
   final generator = CodeGenerator(
