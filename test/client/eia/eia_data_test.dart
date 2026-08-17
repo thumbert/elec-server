@@ -14,7 +14,7 @@ String? getEiaKey() {
   return env['EIA_API_KEY'];
 }
 
-tests() async {
+Future<void> tests() async {
   var key = getEiaKey();
   var api = EiaApi(Client(), key);
   group('EIA client tests:', () {
@@ -31,7 +31,7 @@ tests() async {
   });
 }
 
-main() async {
+Future<void> main() async {
   await initializeTimeZone();
   await tests();
 }

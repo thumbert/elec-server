@@ -148,9 +148,9 @@ abstract class DailyPjmCsvReport extends PjmReport {
     List<Map<String, dynamic>> data;
     try {
       data = processDate(day);
-      if (data.isEmpty) return Future.value(-1);
+      if (data.isEmpty) return await Future.value(-1);
       await dbConfig.coll.remove({'date': day.toString()});
-      return dbConfig.coll.insertAll(data).then((_) {
+      return await dbConfig.coll.insertAll(data).then((_) {
         print('--->  Inserted $reportName for day $day');
         return 0;
       }).catchError((e) {

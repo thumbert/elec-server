@@ -13,7 +13,7 @@ var config = ComponentConfig(
 
 String? dir = env['HOME'] + '/Downloads/Archive/CustomerCounts/NGrid/';
 
-updateDb() async {
+Future<void> updateDb() async {
   var archive = NGridCustomerCountsArchive(dbConfig: config, dir: dir);
   // String url = 'https://www9.nationalgridus.com/energysupply/current/20170811/Monthly_Aggregation_customer count and usage.xlsx';
   //await archive.downloadFile(url);
@@ -26,7 +26,7 @@ updateDb() async {
   archive.setup();
 }
 
-apiTest() async {
+Future<void> apiTest() async {
   var api = ApiCustomerCounts(config.db);
 
   await config.db.open();
@@ -38,7 +38,7 @@ apiTest() async {
   await config.db.close();
 }
 
-main() async {
+Future<void> main() async {
   await updateDb();
 
 //  await apiTest();

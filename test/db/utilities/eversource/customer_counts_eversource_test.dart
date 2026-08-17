@@ -46,7 +46,7 @@ import 'package:timezone/standalone.dart';
 //  await config.db.close();
 //}
 
-updateDb() async {
+Future<void> updateDb() async {
   var url =
       'https://www.eversource.com/content/ct-c/about/about-us/doing-business-with-us/energy-supplier-information/wholesale-supply-(connecticut)';
   var links = await getLinks(url);
@@ -67,7 +67,7 @@ updateDb() async {
   await archive.dbConfig.db.close();
 }
 
-main() async {
+Future<void> main() async {
   await initializeTimeZone();
 
   await updateDb();

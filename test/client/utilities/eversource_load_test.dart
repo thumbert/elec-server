@@ -4,7 +4,7 @@ import 'package:date/date.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
 
-tests() async {
+Future<void> tests() async {
   var api = EversourceLoad(Client());
   var location = getLocation('America/New_York');
   group('Eveversource load test:', () {
@@ -28,7 +28,7 @@ tests() async {
   });
 }
 
-main() async {
+Future<void> main() async {
   await initializeTimeZone();
   await tests();
 }

@@ -4,13 +4,13 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/db/isoexpress/rt_system_demand_hourly.dart';
 
 /// prepare data by downloading a few reports
-prepareData() async {
+Future<void> prepareData() async {
   var archive = RtSystemDemandReportArchive();
   var days = [Date.utc(2018, 1, 1), Date.utc(2018, 1, 31)];
   await archive.downloadDays(days);
 }
 
-uploadDays() async {
+Future<void> uploadDays() async {
   var location = getLocation('America/New_York');
   var archive = RtSystemDemandReportArchive();
 //  var days = Interval(TZDateTime(location, 2016), TZDateTime(location, 2017))
@@ -27,7 +27,7 @@ uploadDays() async {
   archive.dbConfig.db.close();
 }
 
-main() async {
+Future<void> main() async {
   initializeTimeZones();
 
   //await RtSystemDemandReportArchive().setupDb();

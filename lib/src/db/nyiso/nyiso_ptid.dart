@@ -2,8 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:elec_server/src/db/config.dart';
 
 class NyisoPtidArchive {
-  NyisoPtidArchive({ComponentConfig? config, String? dir}) {
-  }
+  NyisoPtidArchive({ComponentConfig? config, String? dir});
 
   final logger = Logger('NyisoPtidArchive');
 

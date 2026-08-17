@@ -58,7 +58,7 @@ Future<void> tests() async {
   // });
 }
 
-winterStormTests() async {
+Future<void> winterStormTests() async {
   var archive = WinterStormsArchive();
 
   await archive.setupDb();

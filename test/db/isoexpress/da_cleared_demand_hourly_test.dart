@@ -10,7 +10,7 @@ import 'package:elec_server/src/db/isoexpress/rt_system_demand_hourly.dart';
 Location location = getLocation('America/New_York');
 
 /// prepare data by downloading a few reports
-prepareData() async {
+Future<void> prepareData() async {
   var archive = DaClearedDemandReportArchive();
   var days = [
     Date.utc(2015, 2, 17), // empty file
@@ -19,7 +19,7 @@ prepareData() async {
   await archive.downloadDays(days);
 }
 
-DaClearedDemandTest() async {
+Future<void> DaClearedDemandTest() async {
   group('DA Cleared Demand report', () {
     test('read da cleared demand files', () async {
       var archive = DaClearedDemandReportArchive();
@@ -31,7 +31,7 @@ DaClearedDemandTest() async {
   });
 }
 
-uploadDaysDa() async {
+Future<void> uploadDaysDa() async {
   var archive = DaClearedDemandReportArchive();
   List days = Interval(
           TZDateTime(location, 2017, 1, 1), TZDateTime(location, 2018, 1, 1))
@@ -44,7 +44,7 @@ uploadDaysDa() async {
   archive.dbConfig.db.close();
 }
 
-uploadDaysRt() async {
+Future<void> uploadDaysRt() async {
   var archive = RtSystemDemandReportArchive();
   List days = Interval(
           TZDateTime(location, 2017, 1, 5), TZDateTime(location, 2017, 12, 20))
@@ -57,7 +57,7 @@ uploadDaysRt() async {
   archive.dbConfig.db.close();
 }
 
-main() async {
+Future<void> main() async {
   initializeTimeZones();
 
   //await new DaClearedDemandReportArchive().setupDb();

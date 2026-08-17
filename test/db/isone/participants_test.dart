@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS participants (
 Future<void> main() async {
   dotenv.load('.env/prod.env');
   initializeTimeZones();
-  await tests(dotenv.env['RUST_SERVER']!);
+  // await tests(dotenv.env['RUST_SERVER']!);
 
-  // generateCode();
+  generateCode();
 }

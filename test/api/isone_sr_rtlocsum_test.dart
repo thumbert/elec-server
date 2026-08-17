@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/standalone.dart';
 
-SrRtLocSumTest(Db db) async {
+Future<void> SrRtLocSumTest(Db db) async {
   // var api = SrRtLocSum(db);
   test('get testing data', () async {
     await db.open();
@@ -14,7 +14,7 @@ SrRtLocSumTest(Db db) async {
   });
 }
 
-main() async {
+Future<void> main() async {
   await initializeTimeZone();
   Db db = Db('mongodb://localhost/mis');
   await SrRtLocSumTest(db);

@@ -6,7 +6,7 @@ import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/client/isoexpress/system_demand.dart';
 
-tests(String rootUrl) async {
+Future<void> tests(String rootUrl) async {
   group('System demand client tests: ', () {
     var location = getLocation('America/New_York');
     var client = Client();
@@ -57,7 +57,7 @@ tests(String rootUrl) async {
   });
 }
 
-main() async {
+Future<void> main() async {
   await initializeTimeZone();
 
   var rootUrl = "http://localhost:8080/"; // testing

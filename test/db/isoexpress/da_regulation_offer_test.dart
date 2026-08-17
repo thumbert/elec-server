@@ -5,7 +5,7 @@ import 'package:date/date.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:elec_server/src/db/isoexpress/da_regulation_offer.dart';
 
-tests() async {
+Future<void> tests() async {
   group('Regulation offers archive test:', () {
     var archive = RegulationOfferArchive();
     setUp(() async {
@@ -42,7 +42,7 @@ Future insertDays() async {
   archive.dbConfig.db.close();
 }
 
-main() async {
+Future<void> main() async {
   await initializeTimeZone();
 //  await DaRegulationOfferArchive().setupDb();
 

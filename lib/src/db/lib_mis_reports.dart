@@ -211,6 +211,9 @@ class MisReport {
     } else {
       _lines ??= file.readAsLinesSync();
     }
+    // On very rare occasions, there is an empty line at the end of the report.
+    // I've seen it with the SD_FCMDLYCHRGSTLDTL_ report. 
+    _lines!.removeWhere((line) => line.trim().isEmpty);
     var converter = CsvToListConverter();
     if (_lines!.isEmpty ||
         !(_lines!.last.startsWith('"T"') || _lines!.last.startsWith('T'))) {

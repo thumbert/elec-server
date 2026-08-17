@@ -5,7 +5,23 @@ SELECT min(hour_beginning) as min_hour_beginning,
        count(*) as total_count
 FROM constraints;
 
+-- get the constraints for a given day
+SET VARIABLE asof_date = DATE '2026-07-21';
+SELECT * 
+FROM constraints
+WHERE hour_beginning::DATE = getvariable('asof_date')
+ORDER BY constraint_name, hour_beginning;
+
 -- get the first date a binding constraint appears
+SELECT 
+    constraint_name, 
+    MIN(hour_beginning)::DATE AS first_appearance
+FROM constraints
+GROUP BY constraint_name
+ORDER BY first_appearance DESC
+LIMIT 20;
+
+
 SET VARIABLE asof_date = DATE '2026-06-26';
 SELECT constraint_name 
 FROM (
@@ -38,7 +54,7 @@ CREATE TEMPORARY TABLE tmp AS
         MarginalValue::DECIMAL(9,2) AS marginal_value
     FROM (
         SELECT unnest(DayAheadConstraints.DayAheadConstraint, recursive := true)
-        FROM read_json('~/Downloads/Archive/IsoExpress/GridReports/DaBindingConstraints/Raw/2026/da_binding_constraints_final_2026*.json.gz')
+        FROM read_json('~/Downloads/Archive/IsoExpress/GridReports/DaBindingConstraints/Raw/2023/da_binding_constraints_final_2023*.json.gz')
     )
 ORDER BY hour_beginning, constraint_name;
 

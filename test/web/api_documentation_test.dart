@@ -28,7 +28,7 @@ List<String> getLinks() {
 //
 // }
 
-tests(String rootUrl, Set<String> skip) async {
+Future<void> tests(String rootUrl, Set<String> skip) async {
   var links = getLinks();
   //links.forEach(print);
 
@@ -44,7 +44,7 @@ tests(String rootUrl, Set<String> skip) async {
   }
 }
 
-main() async {
+Future<void> main() async {
   String rootUrl = 'http://localhost:8080';
   var skip = <String>{}..addAll(['epa_emissions']);
 

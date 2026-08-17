@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec_server/src/db/utilities/eversource/load_ct.dart';
 
-loadTest() async {
+Future<void> loadTest() async {
   late EversourceCtLoadArchive archive;
   group('eversource ct loads', () {
     setUp(() async {
@@ -24,7 +24,7 @@ loadTest() async {
   });
 }
 
-updateDb() async {
+Future<void> updateDb() async {
   var archive = EversourceCtLoadArchive();
 
   var url =
@@ -43,7 +43,7 @@ updateDb() async {
   await archive.dbConfig.db.close();
 }
 
-main() async {
+Future<void> main() async {
   await initializeTimeZone();
   //await EversourceCtLoadArchive().setup();
 
