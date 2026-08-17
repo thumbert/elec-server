@@ -137,7 +137,7 @@ AND d.deactivated_on IS NULL;
   /// Read an XLSX file.  Note that ISO files are xls, so you will need to
   /// convert it by hand for now.
   /// filename should look like this: 'pnode_table_2017_08_03.xlsx'
-  @Deprecated('Use readXlsx2 instead')
+  @Deprecated('Use readSheetNodes instead')
   List<Map<String, dynamic>> readXlsx(File file, {String? asOfDate}) {
     var filename = path.basename(file.path);
     if (path.extension(filename).toLowerCase() != '.xlsx') {
