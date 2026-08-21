@@ -9,6 +9,7 @@
 
 # 2026-08-21
 - Change SR_RTCUSTSUM ingestion to not convert "" values to 0.0 in tab1. 
+- Small change in logging for update_isone_morning_report
 
 # 2026-08-17
 - Modify MIS report reading to allow for empty lines at the end of the CSV file
