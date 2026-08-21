@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-08-21
+- Change SR_RTCUSTSUM ingestion to not convert "" values to 0.0 in tab1. 
+
 # 2026-08-17
 - Modify MIS report reading to allow for empty lines at the end of the CSV file
 - Fix several lints

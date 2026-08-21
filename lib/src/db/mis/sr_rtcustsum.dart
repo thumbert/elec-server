@@ -60,7 +60,18 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
     var tab1 = <Map<String, dynamic>>[];
     for (var entry in grp.entries) {
       labels['Subaccount ID'] = entry.key;
-      tab1.addAll(addLabels([collapseListOfMap(entry.value)], labels,
+      var aux = collapseListOfMap(entry.value);
+      // replace missing String values with 0.0
+      for (var key in aux.keys) {
+        aux[key] = aux[key]!.map((e){
+          if (e is String) {
+            return e == '' ? 0.0 : num.parse(e);
+          } else {
+            return e;
+          }
+        }).toList();
+      }
+      tab1.addAll(addLabels([aux], labels,
           ['H', 'Subaccount ID', 'Subaccount Name', 'Trading Interval']));
     }
 
