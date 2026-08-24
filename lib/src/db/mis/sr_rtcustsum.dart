@@ -62,7 +62,8 @@ class SrRtCustSumArchive extends mis.MisReportArchive {
       labels['Subaccount ID'] = entry.key;
       var aux = collapseListOfMap(entry.value);
       // replace missing String values with 0.0
-      for (var key in aux.keys) {
+      // first 4 columns are ['H', 'Subaccount ID', 'Subaccount Name', 'Trading Interval']
+      for (var key in aux.keys.skip(4)) {
         aux[key] = aux[key]!.map((e){
           if (e is String) {
             return e == '' ? 0.0 : num.parse(e);

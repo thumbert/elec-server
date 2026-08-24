@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-08-24
+- Small fix to the SR_RTCUSTSUM ingestion
+
 # 2026-08-21
 - Change SR_RTCUSTSUM ingestion to not convert "" values to 0.0 in tab1. 
 - Small change in logging for update_isone_morning_report
