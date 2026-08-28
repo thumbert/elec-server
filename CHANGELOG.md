@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-08-27
+- Some experiments with the hq_hydro_data.sql file.
+
 # 2026-08-24
 - Small fix to the SR_RTCUSTSUM ingestion
 

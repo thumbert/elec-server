@@ -34,7 +34,7 @@ class SdDaTransactArchive extends mis.MisReportArchive {
       await dbConfig.coll.insertAll(data);
       print(
           '--->  Inserted $reportName for $date, version $version, tab $tab successfully');
-      return Future.value(0);
+      return await Future.value(0);
     } catch (e) {
       print('XXX $e');
       return Future.value(1);

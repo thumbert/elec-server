@@ -79,7 +79,7 @@ class TrSch2tpArchive extends mis.MisReportArchive {
       await dbConfig.coll.insertAll(data);
       print(
           '--->  Inserted $reportName for account $account, month $month, version $version, tab $tab successfully');
-      return Future.value(0);
+      return await Future.value(0);
     } catch (e) {
       print('XXX $e');
       return Future.value(1);
