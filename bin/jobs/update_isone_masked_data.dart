@@ -48,7 +48,7 @@ Flags:
 
   /// masked data comes with a 4 months lag
   final focusMonth = currentMonth.subtract(4);
-  // final focusMonth = Month(2025, 12, location: location);
+  // final focusMonth = Month(2026, 4, location: location);
   print('Focus month: $focusMonth');
   try {
     await updateIsoneMonthlyAssetNcpc(months: [focusMonth], download: true);
