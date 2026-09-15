@@ -31,7 +31,7 @@ class RegulationRequirementArchive {
       await dbConfig.coll.remove(<String, dynamic>{}); // empty the collection
       await dbConfig.coll.insertAll(data);
       print('---> Inserted $reportName successfully');
-      return Future.value(0);
+      return await Future.value(0);
     } catch (e) {
       print('XXX $e');
       return Future.value(1);

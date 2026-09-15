@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import '../../../docs/basket_option/main.dart' as basket;
+import '../../../docs/basket_option/web/main.dart' as basket;
 
 void main() {
   test('simulate produces positive correlated prices for each asset', () {

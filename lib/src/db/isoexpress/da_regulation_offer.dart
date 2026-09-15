@@ -77,7 +77,7 @@ class RegulationOfferArchive extends DailyIsoExpressReport {
       await dbConfig.coll.remove({'date': data.first['date']});
       await dbConfig.coll.insertAll(data);
       print('---> Inserted $reportName for ${data.first['date']} successfully');
-      return Future.value(0);
+      return await Future.value(0);
     } catch (e) {
       print('XXX $e');
       return Future.value(1);

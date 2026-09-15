@@ -1,0 +1,76 @@
+body,
+html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.menu {
+    width: 300px;
+    background: #222;
+    color: #fff;
+    padding: 0;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu a {
+    padding: 16px;
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid #333;
+    transition: background 0.2s;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: #444;
+}
+
+.content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f6f6f6;
+    height: 100vh;
+}
+
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td,
+th {
+    border: 1px solid #aaaadd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.parent {
+    text-align: left;
+}
+
+.child {
+    display: inline-block;
+    vertical-align: middle;
+}

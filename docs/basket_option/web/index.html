@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Basket option</title>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" type="text/css" href="assets/documentation.css" />
+
+    <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+    <h1 style="padding-left: 24px;">Basket option</h1>
+    <div class="container">
+        <nav class="menu">
+            <a href="#" class="active" onclick="showContent(event, 'Hedging')">Quebec</a>
+        </nav>
+        <main class="content">
+            <div id="Hedging" class="content-section active">
+                <h3>Hedging</h3>
+                <div id="actual-prices"></div>
+                <div id="hedge-performance"></div>
+                <div id="summary-table"></div>
+
+                <div id="hedging"></div>
+                <div id="payoff"></div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function showContent(evt, id) {
+            evt.preventDefault();
+            document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
+            evt.target.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+    </div>
+
+
+    <div style="height:24px"></div>
+    <div style="font-size: 12px;"><i>Report produced with /docs/basket_option/web/main.dart</i></div>
+
+    <script defer src="main.dart.js"></script>
+</body>
+
+</html>

@@ -4,7 +4,7 @@ version: 2.0.2
 publish_to: none
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
+  sdk: ">=3.13.0 <4.0.0"
 
 dependencies:
   actors: ^0.11.0
@@ -30,6 +30,8 @@ dependencies:
   mongo_dart: ^0.10.3
   more: ^4.6.1
   path: ^1.8.2
+  plotly_dart: 
+    git: https://github.com/thumbert/plotly_dart.git
   puppeteer: ^3.16.0
   reduct:
     git: https://github.com/thumbert/reduct.git
@@ -42,6 +44,7 @@ dependencies:
     git: https://github.com/thumbert/timeseries.git
   timezone: '>=0.9.2 <1.0.0'
 
+  web: ^1.1.1
   xml: ^6.3.0
 
 

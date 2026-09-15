@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
@@ -17,43 +18,59 @@ class BindingConstraints {
     coll = db.collection(collectionName);
   }
 
-  final headers = {
-    'Content-Type': 'application/json',
-  };
+  final headers = {'Content-Type': 'application/json'};
 
   Router get router {
     final router = Router();
 
     /// Get all the constraints between start/end date
-    router.get('/market/da/start/<start>/end/<end>',
-        (Request request, String start, String end) async {
+    router.get('/market/da/start/<start>/end/<end>', (
+      Request request,
+      String start,
+      String end,
+    ) async {
       var aux = await apiGetDaBindingConstraintsByDay(start, end);
       return Response.ok(json.encode(aux), headers: headers);
     });
 
     /// Get all the constraints between start/end date, return timeseries
-    router.get('/market/da/start/<start>/end/<end>/timeseries',
-        (Request request, String start, String end) async {
+    router.get('/market/da/start/<start>/end/<end>/timeseries', (
+      Request request,
+      String start,
+      String end,
+    ) async {
       var aux = await apiGetDaBindingConstraintsHourlyCost(start, end);
       return Response.ok(json.encode(aux), headers: headers);
     });
 
     /// Get the occurrences of one constraint between start/end
     router.get(
-        '/market/<market>/constraintname/<constraintname>/start/<start>/end/<end>',
-        (Request request, String market, String constraintName, String start,
-            String end) async {
-      constraintName = Uri.decodeComponent(constraintName);
-      var aux = await apiGetBindingConstraintsByName(
-          market, constraintName, start, end);
-      return Response.ok(json.encode(aux), headers: headers);
-    });
+      '/market/<market>/constraintname/<constraintname>/start/<start>/end/<end>',
+      (
+        Request request,
+        String market,
+        String constraintName,
+        String start,
+        String end,
+      ) async {
+        constraintName = Uri.decodeComponent(constraintName);
+        var aux = await apiGetBindingConstraintsByName(
+          market,
+          constraintName,
+          start,
+          end,
+        );
+        return Response.ok(json.encode(aux), headers: headers);
+      },
+    );
 
     return router;
   }
 
   Future<List<Map<String, dynamic>>> apiGetDaBindingConstraintsByDay(
-      String start, String end) async {
+    String start,
+    String end,
+  ) async {
     var query = where
       ..eq('market', 'DA')
       ..gte('date', Date.parse(start).toString())
@@ -62,8 +79,10 @@ class BindingConstraints {
     var aux = await coll.find(query).toList();
     var out = aux.map((e) => e['constraints'] as List).expand((constraints) {
       for (var constraint in constraints) {
-        var start =
-            TZDateTime.from(constraint['hourBeginning'] as DateTime, _location);
+        var start = TZDateTime.from(
+          constraint['hourBeginning'] as DateTime,
+          _location,
+        );
         constraint['hourBeginning'] = start.toString();
       }
       return constraints.cast<Map<String, dynamic>>();
@@ -72,8 +91,11 @@ class BindingConstraints {
   }
 
   Future<List<Map<String, dynamic>>> apiGetBindingConstraintsByName(
-      String market, String constraintName, String start, String end) async {
-    /// TODO: do it in Mongo
+    String market,
+    String constraintName,
+    String start,
+    String end,
+  ) async {
     var aux = await apiGetDaBindingConstraintsByDay(start, end);
     return aux.where((e) => e['Constraint Name'] == constraintName).toList();
   }
@@ -87,7 +109,9 @@ class BindingConstraints {
   /// }
   /// ```
   Future<List<Map<String, dynamic>>> apiGetDaBindingConstraintsHourlyCost(
-      String start, String end) async {
+    String start,
+    String end,
+  ) async {
     var pipeline = <Map<String, Object>>[
       {
         '\$match': {
@@ -95,11 +119,9 @@ class BindingConstraints {
             '\$lte': Date.parse(end).toString(),
             '\$gte': Date.parse(start).toString(),
           },
-        }
+        },
       },
-      {
-        '\$unwind': '\$constraints',
-      },
+      {'\$unwind': '\$constraints'},
       {
         '\$group': {
           '_id': {
@@ -107,9 +129,9 @@ class BindingConstraints {
             'hourBeginning': '\$constraints.hourBeginning',
           },
           'cost': {
-            '\$sum': '\$constraints.Marginal Value'
+            '\$sum': '\$constraints.Marginal Value',
           }, // sum over multiple contingencies
-        }
+        },
       },
       {
         '\$project': {
@@ -117,26 +139,21 @@ class BindingConstraints {
           'constraintName': '\$_id.name',
           'hourBeginning': '\$_id.hourBeginning',
           'cost': '\$cost',
-        }
+        },
       },
 
       /// need to sort by
       {
-        '\$sort': {
-          'constraintName': 1,
-          'hourBeginning': 1,
-        }
+        '\$sort': {'constraintName': 1, 'hourBeginning': 1},
       },
 
       /// group again by name, and collect into arrays
       {
         '\$group': {
-          '_id': {
-            'constraintName': '\$constraintName',
-          },
+          '_id': {'constraintName': '\$constraintName'},
           'hourBeginning': {'\$push': '\$hourBeginning'},
           'cost': {'\$push': '\$cost'},
-        }
+        },
       },
       {
         '\$project': {
@@ -144,7 +161,7 @@ class BindingConstraints {
           'constraintName': '\$_id.constraintName',
           'hourBeginning': '\$hourBeginning',
           'cost': '\$cost',
-        }
+        },
       },
     ];
 

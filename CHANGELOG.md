@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-09-15
+- Experiment with sr_dalocsum and sr_rtlocsum in DuckDB
+
 # 2026-09-09
 - Started work on docs/basket_option hedging
 
