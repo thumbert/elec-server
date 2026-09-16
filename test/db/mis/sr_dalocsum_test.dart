@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS tab1 (
   final generator = CodeGenerator(
     sql,
     timezoneName: 'America/New_York',
-    apiRoute: '/mis/sr_dalocsum/tab1',
+    apiRoute: '/isone/mis/sr_dalocsum/tab1',
     onlyFilters: ['report_date', 'account_id', 'subaccount_id', 'location_id'],
   );
   print(generator.generateCode(Language.rust));

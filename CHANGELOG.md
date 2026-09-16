@@ -7,6 +7,9 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-09-16
+- Experiment with sd_dacleared in DuckDB
+
 # 2026-09-15
 - Experiment with sr_dalocsum and sr_rtlocsum in DuckDB
 
