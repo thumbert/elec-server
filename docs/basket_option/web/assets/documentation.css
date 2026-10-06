@@ -5,7 +5,7 @@ html {
     font-family: Arial, sans-serif;
 }
 
-.container {
+.app-layout {
     display: flex;
     height: 100vh;
 }

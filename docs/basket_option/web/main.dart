@@ -1,14 +1,13 @@
 import 'dart:js_interop';
 import 'dart:math' as math;
 
+import 'package:web/web.dart' as web;
 import 'package:dama/analysis/interpolation/linear_interpolator.dart';
 import 'package:dama/distribution/lognormal_distribution.dart';
 import 'package:date/date.dart';
 import 'package:elec/finance.dart';
 import 'package:elec/risk_system.dart';
 import 'package:more/collection.dart';
-import 'package:web/web.dart' as web;
-
 import 'package:dama/distribution/multivariate_gaussian_distribution.dart';
 import 'package:dama/linear/matrix.dart';
 import 'package:dama/stat/descriptive/summary.dart';
@@ -168,7 +167,32 @@ void makePlotSimulatedPrices(
   );
 }
 
+Plotly? _pricesPlot;
+
 void makePlotPrices(({List<num> power, List<num> gas, List<num> rggi}) prices) {
+  final shapes = [
+    {
+      'type': 'line',
+      'x0': 0,
+      'y0': prices.power.first,
+      'x1': 1,
+      'y1': prices.power.first,
+      'xref': 'paper',
+      'line': {'color': 'gray', 'width': 2, 'dash': 'dash'},
+    },
+  ];
+  if (_pricesPlot != null) {
+    _pricesPlot!.update(
+      {
+        'x': [List.generate(prices.power.length, (i) => i)],
+        'y': [prices.power],
+      },
+      {'shapes': shapes},
+      [0],
+    );
+    return;
+  }
+
   var traces = [
     {
       'x': List.generate(prices.power.length, (i) => i),
@@ -211,22 +235,12 @@ void makePlotPrices(({List<num> power, List<num> gas, List<num> rggi}) prices) {
     'width': 800,
     'height': 600,
     'grid': {'rows': 2, 'columns': 1},
-    'shapes': [
-      {
-        'type': 'line',
-        'x0': 0,
-        'y0': prices.power.first,
-        'x1': 1,
-        'y1': prices.power.first,
-        'xref': 'paper',
-        'line': {'color': 'gray', 'width': 2, 'dash': 'dash'},
-      },
-    ],
+    'shapes': shapes,
   };
 
   var container =
       web.document.getElementById('actual-prices')! as web.HTMLElement;
-  Plotly(
+  _pricesPlot = Plotly(
     container: container,
     divId: 'actual-prices-plotly',
     traces: traces,
@@ -522,15 +536,14 @@ void dynamicHedgingOnePowerOption() {
     },
   );
 
-
   var container2 =
       web.document.getElementById('summary-table')! as web.HTMLElement;
   container2.innerHTML = tbl.toHtml().toJS;
 }
 
-/// Creates a plot for the Black-Scholes option pricing model and 
-/// the two approximations. 
-/// 
+// /// Creates a plot for the Black-Scholes option pricing model and
+// /// the two approximations.
+// ///
 // void makePlotBlackScholes() {
 //   /// make a plot with the true option value and approximations
 //   var option0 = BlackScholes(
@@ -546,7 +559,6 @@ void dynamicHedgingOnePowerOption() {
 //   final delta0 = option0.delta();
 //   final gamma0 = option0.gamma();
 //   final theta0 = option0.theta();
-
 //   final px = DoubleRange(38, 44, 0.1).toList();
 //   final li = LinearInterpolator.fromSlope(
 //     slope: delta0,
@@ -565,7 +577,6 @@ void dynamicHedgingOnePowerOption() {
 //         underlyingPrice: e,
 //         riskFreeRate: 0,
 //       ).value();
-
 //   var traces = [
 //     {
 //       'x': px,
@@ -619,36 +630,69 @@ void dynamicHedgingOnePowerOption() {
 //     traces: traces,
 //     layout: layout,
 //   );
-
 // }
-
 
 void main(List<String> args) {
   dynamicHedgingOnePowerOption();
 
-  // var start = (power: 41.0, gas: 3.5, rggi: 2.4);
-  // var prices = actualPrices(initialPrices: start, steps: 50);
-  // makePlotPrices(prices);
-  // var tblPrices = Table.from(
-  //   List.generate(
-  //     prices.power.length,
-  //     (i) => {
-  //       'day': i,
-  //       'Power': prices.power[i],
-  //       'Gas': prices.gas[i],
-  //       'RGGI': prices.rggi[i],
-  //       'Spark': prices.power[i] - 7 * (prices.gas[i] + prices.rggi[i]),
-  //     },
-  //   ),
-  //   options: {
-  //     'format': {
-  //       'Power': (v) => (v as num).toStringAsFixed(2),
-  //       'Gas': (v) => (v as num).toStringAsFixed(2),
-  //       'RGGI': (v) => (v as num).toStringAsFixed(2),
-  //       'Spark': (v) => (v as num).toStringAsFixed(2),
-  //     },
-  //   },
-  // );
+  final inputPower =
+      web.document.getElementById('input-power')! as web.HTMLInputElement;
+  final inputGas =
+      web.document.getElementById('input-gas')! as web.HTMLInputElement;
+  final inputRggi =
+      web.document.getElementById('input-rggi')! as web.HTMLInputElement;
+
+  ({num power, num gas, num rggi})? readStart() {
+    final power = num.tryParse(inputPower.value);
+    final gas = num.tryParse(inputGas.value);
+    final rggi = num.tryParse(inputRggi.value);
+    if (power == null || gas == null || rggi == null) return null;
+    if (power <= 0 || gas <= 0 || rggi <= 0) return null;
+    return (power: power, gas: gas, rggi: rggi);
+  }
+
+  void redraw() {
+    final start = readStart();
+    if (start == null) return;
+    makePlotPrices(actualPrices(initialPrices: start, steps: 50));
+  }
+
+  for (final input in [inputPower, inputGas, inputRggi]) {
+    input.addEventListener(
+      'input',
+      ((web.Event _) {
+        final v = num.tryParse(input.value);
+        input.classList.toggle('is-invalid', v == null || v <= 0);
+        redraw();
+      }).toJS,
+    );
+  }
+
+  var start = readStart()!;
+  var prices = actualPrices(initialPrices: start, steps: 50);
+  makePlotPrices(prices);
+
+  
+  var tblPrices = Table.from(
+    List.generate(
+      prices.power.length,
+      (i) => {
+        'day': i,
+        'Power': prices.power[i],
+        'Gas': prices.gas[i],
+        'RGGI': prices.rggi[i],
+        'Spark': prices.power[i] - 7 * (prices.gas[i] + prices.rggi[i]),
+      },
+    ),
+    options: {
+      'format': {
+        'Power': (v) => (v as num).toStringAsFixed(2),
+        'Gas': (v) => (v as num).toStringAsFixed(2),
+        'RGGI': (v) => (v as num).toStringAsFixed(2),
+        'Spark': (v) => (v as num).toStringAsFixed(2),
+      },
+    },
+  );
 
   // var tblValue = dynamicHedging(prices.power, prices.gas, prices.rggi);
   // var res = tblPrices.joinTable(Table.from(tblValue), JoinType.outer)

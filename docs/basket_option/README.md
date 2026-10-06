@@ -5,8 +5,9 @@ rm -r "/home/adrian/Software/Apps/public/docs/projects/basket_option"
 cp -r "/home/adrian/Documents/repos/git/thumbert/rascal/html/docs/projects/basket_option/web" /home/adrian/Software/Apps/public/docs/projects/basket_option
 ```
 
+If you don't have `webdev` installed, do `dart install webdev` first. 
 
 ```bash
 cd docs/basket_option
-webdev serve --auto=refresh
+webdev serve --auto=refresh web:9321
 ```

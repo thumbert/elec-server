@@ -7,6 +7,11 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-10-06
+- Small modifications to lib_mis_reports.dart on how to extract the report date 
+  and the account number.  Change the assumptions on the file name, e.g. start 
+  counting underscores from the beginning rather than the end!
+
 # 2026-09-16
 - Experiment with sd_dacleared in DuckDB
 

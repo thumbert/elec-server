@@ -130,9 +130,11 @@ class MisReport {
   MisReport(this.file);
 
   /// Get the account number from the filename.
+  /// Assume that the report name is always a two part underscore-separated 
+  /// string, e.g. SD_RTLOAD or SR_RTLOCSUM 
   String accountNumber() {
     var split = basename(file.path).split('_');
-    return split.elementAt(split.length - 3);
+    return split.elementAt(2);
   }
 
   /// Get the name of the company from the report.
@@ -144,9 +146,10 @@ class MisReport {
   }
 
   /// Get the report date (operating day) from the filename
+  /// as the 3rd element of the underscore-separated filename.
   Date forDate() {
     var split = basename(file.path).split('_');
-    var date = split.elementAt(split.length - 2).substring(0, 8);
+    var date = split.elementAt(3).substring(0, 8);
     return Date.parse(date);
   }
 
