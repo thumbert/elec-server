@@ -15,9 +15,13 @@ Future<int> main() async {
   await archive.saveCurrentRatesToFile();
 
   var status = await updateCompetitiveOffersDb(
-      days: [Date.today(location: UTC)],
-      states: ['CT', 'MA'],
-      externalDownload: false);
+    days: [Date.today(location: UTC)],
+    states: [
+      // 'CT',
+      'MA',
+    ],
+    externalDownload: false,
+  );
 
   print('Done at ${DateTime.now()}');
   exit(status);

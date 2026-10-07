@@ -11,6 +11,9 @@
 - Small modifications to lib_mis_reports.dart on how to extract the report date 
   and the account number.  Change the assumptions on the file name, e.g. start 
   counting underscores from the beginning rather than the end!
+- Fix parsing of MA retail offers.  They started to add a ¢ at the end of the 
+  number (for cuteness.)  The CT offers are now broken, they moved to a 
+  Cloudflare solution that currently does not display anything!  Yay.  
 
 # 2026-09-16
 - Experiment with sd_dacleared in DuckDB

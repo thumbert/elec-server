@@ -139,11 +139,13 @@ void repairCtOfferFile(Date date) {
 
 class RetailSuppliersOffersArchive extends IsoExpressReport {
   RetailSuppliersOffersArchive({ComponentConfig? dbConfig, String? dir}) {
-    this.dbConfig = dbConfig ??
+    this.dbConfig =
+        dbConfig ??
         ComponentConfig(
-            host: '127.0.0.1',
-            dbName: 'retail_suppliers',
-            collectionName: 'historical_offers');
+          host: '127.0.0.1',
+          dbName: 'retail_suppliers',
+          collectionName: 'historical_offers',
+        );
     this.dir = dir ?? '$baseDir../RateBoardOffers/Raw/';
     if (!Directory(this.dir).existsSync()) {
       Directory(this.dir).createSync(recursive: true);
@@ -169,10 +171,11 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
       for (var page = 1; page < 10; page++) {
         query['page'] = page.toString();
         var url = Uri(
-            scheme: 'https',
-            host: 'energizect.com',
-            path: '/ectr_search_api/offers',
-            queryParameters: query);
+          scheme: 'https',
+          host: 'energizect.com',
+          path: '/ectr_search_api/offers',
+          queryParameters: query,
+        );
         var res = await get(url);
         if (res.statusCode != 200) {
           throw StateError('Error downloading data from $url');
@@ -214,10 +217,11 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
   /// Get all the offers associated with one utility and zip
   /// The zip is only needed for the utilities that span several zones.
   ///
-  Future<List<Map<String, dynamic>>> getOnePageResidentialRatesMa(
-      {required Page page,
-      required String utilityId,
-      required String zip}) async {
+  Future<List<Map<String, dynamic>>> getOnePageResidentialRatesMa({
+    required Page page,
+    required String utilityId,
+    required String zip,
+  }) async {
     await page.goto('https://www.massenergyrates.com');
     await page.select('select#utility_id', [utilityId]);
     await page.select('select#type', ['residential']);
@@ -237,13 +241,12 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
       var supplier = xs[0].querySelector('img')!.attributes['title'];
       var termDetails = xs[1].querySelector('span')!.text;
       var countOfCycles = int.parse(termDetails.split(' ').first);
-      var planFeatures = xs[2]
-          .children
+      var planFeatures = xs[2].children
           .expand((e) => e.text.trim().split('\n'))
           .where((e) => e != '')
           .toList();
-      var rate =
-          num.parse(xs[3].querySelector('span')!.text.split(' ').first) * 10;
+      var rateText = xs[3].querySelector('span')!.text.split(' ').first;
+      var rate = num.parse(rateText.replaceAll('¢', '')) * 10;
       var one = {
         'region': 'ISONE',
         'state': 'MA',
@@ -252,8 +255,9 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
         'accountType': 'Residential',
         'rateClass': '',
         'countOfBillingCycles': countOfCycles,
-        'offerType':
-            termDetails.toLowerCase().contains('fixed') ? 'Fixed' : '?',
+        'offerType': termDetails.toLowerCase().contains('fixed')
+            ? 'Fixed'
+            : '?',
         'rate': rate,
         'rateUnit': '\$/MWh',
         'supplierName': supplier,
@@ -283,10 +287,15 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     for (var query in queries) {
       final utilityId = query['utilityId']! as String;
       final zip = query['zip']! as String;
-      print('Working on MA residential customers, utilityId: '
-          '${utilityIdToUtility[utilityId]}, zip: $zip');
+      print(
+        'Working on MA residential customers, utilityId: '
+        '${utilityIdToUtility[utilityId]}, zip: $zip',
+      );
       var offers = await getOnePageResidentialRatesMa(
-          page: page, utilityId: utilityId, zip: zip);
+        page: page,
+        utilityId: utilityId,
+        zip: zip,
+      );
       allOffers.addAll(offers);
 
       // /// Get the utility prevailing rate
@@ -313,8 +322,9 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     var xs = groupBy(allOffers, (Map e) => e['offerId'] as String);
     allOffers = [...xs.values.map((e) => e.first)];
 
-    var file =
-        File(join(dir, '${Date.today(location: UTC)}_ma_residential.json'));
+    var file = File(
+      join(dir, '${Date.today(location: UTC)}_ma_residential.json'),
+    );
     final json = JsonEncoder.withIndent('  ');
     file.writeAsStringSync(json.convert(allOffers));
   }
@@ -325,7 +335,8 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
     var allOffers = <Map<String, dynamic>>[];
 
     var file = File(
-        join(dir, '${Date.today(location: UTC)}_ma_small_commercial.json'));
+      join(dir, '${Date.today(location: UTC)}_ma_small_commercial.json'),
+    );
     if (allOffers.isNotEmpty) file.writeAsStringSync(json.encode(allOffers));
   }
 
@@ -371,7 +382,8 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
 
         await dbConfig.coll.insertAll(xs);
         print(
-            '--->  Inserted ${xs.length} new retail offers for ${state.first} successfully');
+          '--->  Inserted ${xs.length} new retail offers for ${state.first} successfully',
+        );
       } catch (e) {
         print('XXX $e');
         return Future.value(1);
@@ -397,7 +409,8 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
         await dbConfig.coll.insertAll(docs);
       } catch (e) {
         print(
-            'Error incrementing the lastDateOnWebsite field for existingOffers in ${state.first}');
+          'Error incrementing the lastDateOnWebsite field for existingOffers in ${state.first}',
+        );
       }
     }
 
@@ -419,8 +432,11 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
   @override
   Future<void> setupDb() async {
     await dbConfig.db.open();
-    await dbConfig.db.createIndex(dbConfig.collectionName,
-        keys: {'offerId': 1}, unique: true);
+    await dbConfig.db.createIndex(
+      dbConfig.collectionName,
+      keys: {'offerId': 1},
+      unique: true,
+    );
     await dbConfig.db.createIndex(dbConfig.collectionName, keys: {'region': 1});
     await dbConfig.db.close();
   }
