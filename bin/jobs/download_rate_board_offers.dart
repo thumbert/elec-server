@@ -12,7 +12,12 @@ Future<int> main() async {
   initializeTimeZones();
 
   var archive = prod.getRetailSuppliersOffersArchive();
-  await archive.saveCurrentRatesToFile();
+  await archive.saveCurrentRatesToFile(
+    states: [
+      // 'CT',
+      'MA',
+    ],
+  );
 
   var status = await updateCompetitiveOffersDb(
     days: [Date.today(location: UTC)],

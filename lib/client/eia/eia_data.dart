@@ -1,18 +1,44 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 
 const String userAgent = 'dart-api-client eia/v1';
 
+/// Return all routes: https://api.eia.gov/v2/?api_key=<YOUR_API_KEY>
+/// Everything natural gas:
+/// https://api.eia.gov/v2/natural-gas/?api_key=<YOUR_API_KEY>
+
 class EiaApi {
   /// this is the api key that you request from eia
   final String? apiKey;
   String rootUrl;
 
-  EiaApi(http.Client client, this.apiKey,
-      {this.rootUrl = 'http://api.eia.gov/series/'});
+  EiaApi(
+    http.Client client,
+    this.apiKey, {
+    this.rootUrl = 'http://api.eia.gov/v2',
+  });
+
+  Future<TimeSeries<num>> downloadWeeklyWorkingGasInUndergroundStorage() async {
+    final url =
+        '$rootUrl/natural-gas/stor/wkly/data?api_key=$apiKey'
+        '&frequency=weekly&data[0]=value'
+        '&facets[series][]=NW2_EPG0_SWO_R48_BCF&sort[0][column]=period'
+        '&sort[0][direction]=asc';
+    var aux = await http.get(Uri.parse(url));
+    if (aux.statusCode != 200) {
+      throw http.ClientException(
+        'Failed to load weekly working gas data: ${aux.statusCode}',
+        Uri.parse(url),
+      );
+    }
+    var data = json.decode(aux.body) as Map<String, dynamic>;
+
+    return TimeSeries<num>();
+  }
 
   /// Request parameters:
   ///
@@ -29,6 +55,12 @@ class EiaApi {
   Future<Map<String, dynamic>> getSeries(String id) async {
     var url = '$rootUrl?api_key=$apiKey&series_id=$id';
     var aux = await http.get(Uri.parse(url));
+    if (aux.statusCode != 200) {
+      throw http.ClientException(
+        'Failed to load series data: ${aux.statusCode}',
+        Uri.parse(url),
+      );
+    }
     var data = json.decode(aux.body) as Map;
     return (data['series'] as List).first;
   }

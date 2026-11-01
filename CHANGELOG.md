@@ -7,6 +7,10 @@
 - Move ISONE Monthly Asset NCPC to DuckDB
 - test
 
+# 2026-11-01
+- Fix download_rate_board_offers.dart for MA.  Parsing of # months in term failed
+  because of new input.
+
 # 2026-10-06
 - Small modifications to lib_mis_reports.dart on how to extract the report date 
   and the account number.  Change the assumptions on the file name, e.g. start 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:timezone/standalone.dart';
@@ -9,14 +10,15 @@ import 'package:elec_server/client/eia/eia_data.dart';
 String? getEiaKey() {
   var env = Platform.environment;
   if (!env.containsKey('EIA_API_KEY')) {
-    throw StateError('EIA_API_KEY is not set as an enviroment variable.');
+    throw StateError('EIA_API_KEY is not set as an environment variable.');
   }
   return env['EIA_API_KEY'];
 }
 
 Future<void> tests() async {
-  var key = getEiaKey();
-  var api = EiaApi(Client(), key);
+  // var key = getEiaKey();
+  final key = dotenv.env['EIA_API_KEY']!;
+  final api = EiaApi(Client(), key);
   group('EIA client tests:', () {
     test('get weekly working gas in underground storage', () async {
       var aux = await api.getSeries('NG.NW2_EPG0_SWO_R48_BCF.W');
@@ -33,5 +35,6 @@ Future<void> tests() async {
 
 Future<void> main() async {
   await initializeTimeZone();
+  dotenv.load('.env/prod.env');
   await tests();
 }

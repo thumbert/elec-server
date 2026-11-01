@@ -240,7 +240,8 @@ class RetailSuppliersOffersArchive extends IsoExpressReport {
       var xs = row.querySelectorAll('td');
       var supplier = xs[0].querySelector('img')!.attributes['title'];
       var termDetails = xs[1].querySelector('span')!.text;
-      var countOfCycles = int.parse(termDetails.split(' ').first);
+      var countOfCycles =
+          int.parse(RegExp(r'\d+').firstMatch(termDetails)!.group(0)!);
       var planFeatures = xs[2].children
           .expand((e) => e.text.trim().split('\n'))
           .where((e) => e != '')
