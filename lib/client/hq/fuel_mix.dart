@@ -3,8 +3,88 @@
 
 import 'dart:convert';
 
+import 'package:dama/stat/descriptive/summary.dart';
+import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:http/http.dart' as http;
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
+
+/// Look at the distribution of daily max-min by month
+///
+///
+List<Map<String, dynamic>> calculateDailyRangeStats(TimeSeries<num> ts) {
+  var dailyRange = ts.toDaily((es) {
+    var x = range(es);
+    return x[1] - x[0];
+  });
+  var mTs = dailyRange.toMonthly(mean);
+  mTs.forEach(print);
+
+  return [];
+}
+
+Future<TimeSeries<num>> getHydroGeneration({
+  required Term term,
+  required String rootUrl,
+}) async {
+  final records = await queryRecords(
+    filter: QueryFilter()
+      ..zonedGte = term.start
+      ..zonedLt = term.end,
+    rootUrl: rootUrl,
+  );
+
+  var ts = TimeSeries.fromIterable(
+    records.map(
+      (record) =>
+          IntervalTuple<num>(Hour.containing(record.zoned), record.hydro),
+    ),
+  );
+  ts = _cleanHydroData(ts);
+
+  return ts;
+}
+
+/// Data cleaning function for hydro time series data.
+///
+TimeSeries<num> _cleanHydroData(TimeSeries<num> ts) {
+  // crazy values
+  var hour = Hour.containing(
+    TZDateTime(IsoNewEngland.location, 2024, 3, 9, 22),
+  );
+  var ind = ts.indexOfInterval(hour);
+  if (ind != -1) {
+    ts[ind] = IntervalTuple(hour, ts[ind].value / 2);
+  }
+
+  hour = Hour.containing(TZDateTime(IsoNewEngland.location, 2024, 11, 3, 1));
+  ind = ts.indexOfInterval(hour);
+  if (ind != -1) {
+    ts[ind] = IntervalTuple(hour, ts[ind].value / 2);
+  }
+
+  hour = Hour.containing(TZDateTime(IsoNewEngland.location, 2025, 3, 8, 22));
+  ind = ts.indexOfInterval(hour);
+  if (ind != -1) {
+    ts[ind] = IntervalTuple(hour, ts[ind].value / 2);
+  }
+
+  hour = Hour.containing(TZDateTime(IsoNewEngland.location, 2025, 11, 2, 1));
+  ind = ts.indexOfInterval(hour);
+  if (ind != -1) {
+    ts[ind] = IntervalTuple(hour, ts[ind].value / 2);
+  }
+
+  hour = Hour.containing(TZDateTime(IsoNewEngland.location, 2026, 11, 1, 1));
+  ind = ts.indexOfInterval(hour);
+  if (ind != -1) {
+    // print(ts[ind]);
+    ts[ind] = IntervalTuple(hour, ts[ind].value / 2);
+  }
+
+  return ts;
+}
 
 /// Function to query records from the DuckDB table via REST API
 /// Use the [QueryFilter] to specify filtering criteria.  Note:
@@ -23,10 +103,8 @@ Future<List<Record>> queryRecords({
   if (limit != null) {
     queryParams['_limit'] = limit.toString();
   }
-  final uri = Uri.parse(rootUrl).replace(
-    path: '/hq/fuel_mix',
-    queryParameters: queryParams,
-  );
+  final uri = Uri.parse(rootUrl)
+      .replace(path: '/hq/fuel_mix', queryParameters: queryParams);
   final response = await client.get(uri);
   if (response.statusCode != 200) {
     throw Exception('Failed to load records: ${response.statusCode}');
@@ -57,7 +135,9 @@ class Record {
   static Record fromJson(Map<String, dynamic> json) {
     return Record(
       zoned: TZDateTime.parse(
-          getLocation('America/New_York'), json['zoned'] as String),
+        getLocation('America/New_York'),
+        json['zoned'] as String,
+      ),
       total: json['total'] as int,
       hydro: json['hydro'] as int,
       wind: json['wind'] as int,
@@ -100,24 +180,12 @@ class Record {
 
   @override
   int get hashCode {
-    return Object.hashAll([
-      zoned,
-      total,
-      hydro,
-      wind,
-      solar,
-      other,
-      thermal,
-    ]);
+    return Object.hashAll([zoned, total, hydro, wind, solar, other, thermal]);
   }
 }
 
 class QueryFilter {
-  QueryFilter({
-    this.zoned,
-    this.zonedGte,
-    this.zonedLt,
-  });
+  QueryFilter({this.zoned, this.zonedGte, this.zonedLt});
 
   TZDateTime? zoned;
   TZDateTime? zonedGte;

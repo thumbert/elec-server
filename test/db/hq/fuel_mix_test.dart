@@ -1,3 +1,5 @@
+import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:elec_server/client/hq/fuel_mix.dart' as client;
 import 'package:reduct/reduct.dart';
 import 'package:timezone/data/latest.dart';
@@ -25,6 +27,26 @@ Future<void> tests(String rootUrl) async {
       );
       expect(records.length, 48);
     });
+
+    test('Clean hydro data', () async {
+      final ts = await client.getHydroGeneration(
+        term: Term.parse('Jan22-Dec35', getLocation('America/New_York')),
+        rootUrl: rootUrl,
+      );
+      expect(ts.length > 2000, true);
+    });
+
+    test('Calculate daily range', () async {
+      final ts = await client.getHydroGeneration(
+        term: Term.parse('Jan22-Dec35', getLocation('America/New_York')),
+        rootUrl: rootUrl,
+      );
+      client.calculateDailyRangeStats(ts);
+
+      expect(ts.length > 2000, true);
+    });
+
+
   });
 }
 
