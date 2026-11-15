@@ -9,16 +9,19 @@ part of 'ptid_table.dart';
 /// [rootUrl] is the base URL of the API endpoint.
 /// Optional [limit] can be provided to limit the number of records.
 ///
-Future<List<Record>> queryRecords({ required QueryFilter filter,  required String rootUrl,  int? limit,  http.Client? client, }) async {
+Future<List<Record>> queryRecords({
+  required QueryFilter filter,
+  required String rootUrl,
+  int? limit,
+  http.Client? client,
+}) async {
   client ??= http.Client();
   final queryParams = filter.toUriParams();
   if (limit != null) {
     queryParams['_limit'] = limit.toString();
   }
-  final uri = Uri.parse(rootUrl).replace(
-    path: '/isone/ptid_table',
-    queryParameters: queryParams,
-  );
+  final uri = Uri.parse(rootUrl)
+      .replace(path: '/isone/ptid_table', queryParameters: queryParams);
   final response = await client.get(uri);
   if (response.statusCode != 200) {
     throw Exception('Failed to load records: ${response.statusCode}');
@@ -28,7 +31,21 @@ Future<List<Record>> queryRecords({ required QueryFilter filter,  required Strin
 }
 
 class Record {
-  Record({required this.nodeType, required this.ptid, required this.name, required this.substationName, required this.unitName, required this.unitShortName, required this.zoneId, required this.reserveId, required this.rspArea, required this.dispatchZone, required this.drReserveAggregationZoneId, required this.activatedOn, required this.deactivatedOn, });
+  Record({
+    required this.nodeType,
+    required this.ptid,
+    required this.name,
+    required this.substationName,
+    required this.unitName,
+    required this.unitShortName,
+    required this.zoneId,
+    required this.reserveId,
+    required this.rspArea,
+    required this.dispatchZone,
+    required this.drReserveAggregationZoneId,
+    required this.activatedOn,
+    required this.deactivatedOn,
+  });
 
   final NodeType nodeType;
   final int ptid;
@@ -56,9 +73,12 @@ class Record {
       reserveId: json['reserve_id'] as int?,
       rspArea: json['rsp_area'] as String?,
       dispatchZone: json['dispatch_zone'] as String?,
-      drReserveAggregationZoneId: json['dr_reserve_aggregation_zone_id'] as int?,
+      drReserveAggregationZoneId:
+          json['dr_reserve_aggregation_zone_id'] as int?,
       activatedOn: Date.parse(json['activated_on'] as String),
-      deactivatedOn: json['deactivated_on'] == null ? null : Date.parse(json['deactivated_on'] as String),
+      deactivatedOn: json['deactivated_on'] == null
+          ? null
+          : Date.parse(json['deactivated_on'] as String),
     );
   }
 
@@ -84,6 +104,7 @@ class Record {
   String toString() {
     return toJson().toString();
   }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -125,13 +146,13 @@ class Record {
 }
 
 enum NodeType {
-    aggregationZone,
-    hub,
-    interface,
-    load,
-    loadZone,
-    node,
-    reserveZone;
+  aggregationZone,
+  hub,
+  interface,
+  load,
+  loadZone,
+  node,
+  reserveZone;
 
   static NodeType parse(String value) {
     return switch (value.toLowerCase()) {
@@ -161,7 +182,18 @@ enum NodeType {
 }
 
 class QueryFilter {
-  QueryFilter({this.nodeType, this.nodeTypeIn, this.activatedOn, this.activatedOnIn, this.activatedOnGte, this.activatedOnLte, this.deactivatedOn, this.deactivatedOnIn, this.deactivatedOnGte, this.deactivatedOnLte, });
+  QueryFilter({
+    this.nodeType,
+    this.nodeTypeIn,
+    this.activatedOn,
+    this.activatedOnIn,
+    this.activatedOnGte,
+    this.activatedOnLte,
+    this.deactivatedOn,
+    this.deactivatedOnIn,
+    this.deactivatedOnGte,
+    this.deactivatedOnLte,
+  });
 
   NodeType? nodeType;
   List<NodeType>? nodeTypeIn;
@@ -176,16 +208,40 @@ class QueryFilter {
 
   Map<String, String> toUriParams() {
     final params = <String, String>{};
-    if (nodeType != null) { params['node_type'] = nodeType.toString();}
-    if (nodeTypeIn != null) { params['node_type_in'] = nodeTypeIn!.map((e) => e.toString()).join(',');}
-    if (activatedOn != null) { params['activated_on'] = activatedOn!.toIso8601String();}
-    if (activatedOnIn != null) { params['activated_on_in'] = activatedOnIn!.map((e) => e.toIso8601String()).join(',');}
-    if (activatedOnGte != null) { params['activated_on_gte'] = activatedOnGte!.toIso8601String();}
-    if (activatedOnLte != null) { params['activated_on_lte'] = activatedOnLte!.toIso8601String();}
-    if (deactivatedOn != null) { params['deactivated_on'] = deactivatedOn!.toIso8601String();}
-    if (deactivatedOnIn != null) { params['deactivated_on_in'] = deactivatedOnIn!.map((e) => e.toIso8601String()).join(',');}
-    if (deactivatedOnGte != null) { params['deactivated_on_gte'] = deactivatedOnGte!.toIso8601String();}
-    if (deactivatedOnLte != null) { params['deactivated_on_lte'] = deactivatedOnLte!.toIso8601String();}
+    if (nodeType != null) {
+      params['node_type'] = nodeType.toString();
+    }
+    if (nodeTypeIn != null) {
+      params['node_type_in'] = nodeTypeIn!.map((e) => e.toString()).join(',');
+    }
+    if (activatedOn != null) {
+      params['activated_on'] = activatedOn!.toIso8601String();
+    }
+    if (activatedOnIn != null) {
+      params['activated_on_in'] = activatedOnIn!
+          .map((e) => e.toIso8601String())
+          .join(',');
+    }
+    if (activatedOnGte != null) {
+      params['activated_on_gte'] = activatedOnGte!.toIso8601String();
+    }
+    if (activatedOnLte != null) {
+      params['activated_on_lte'] = activatedOnLte!.toIso8601String();
+    }
+    if (deactivatedOn != null) {
+      params['deactivated_on'] = deactivatedOn!.toIso8601String();
+    }
+    if (deactivatedOnIn != null) {
+      params['deactivated_on_in'] = deactivatedOnIn!
+          .map((e) => e.toIso8601String())
+          .join(',');
+    }
+    if (deactivatedOnGte != null) {
+      params['deactivated_on_gte'] = deactivatedOnGte!.toIso8601String();
+    }
+    if (deactivatedOnLte != null) {
+      params['deactivated_on_lte'] = deactivatedOnLte!.toIso8601String();
+    }
     return params;
   }
 

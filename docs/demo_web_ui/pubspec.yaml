@@ -1,0 +1,35 @@
+name: demo_web_ui
+description: Experiments with Dart on the web
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.7
+
+# Add regular dependencies here.
+dependencies:
+  # build_html: 
+  #   git: https://github.com/thumbert/build_html.git
+  # collection: ^1.19.1
+  # dama:
+  #   git: https://github.com/thumbert/dama.git
+  # date:
+  #   git: https://github.com/thumbert/date.git
+  elec_server:
+    path: ../..
+  # plotly_dart:
+  #   git: https://github.com/thumbert/plotly_dart.git
+  # timeseries:
+  #   git: https://github.com/thumbert/timeseries.git
+  # timezone: ^0.11.2
+  web: ^1.1.1
+
+dependency_overrides:
+  # elec depends on the Git version of elec_server.
+  elec_server:
+    path: ../..
+
+dev_dependencies:
+  build_runner: ^2.16.2
+  build_web_compilers: ^4.1.6
+  lints: ^6.0.0

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="scaffolded-by" content="https://github.com/dart-lang/sdk">
+    <title>ISO locations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="main.dart.js"></script>
+</head>
+
+<body>
+  
+  <main class="section">
+    <div class="container">
+      <h1 class="title is-3">ISO locations</h1>
+      <div class="is-flex is-flex-wrap-wrap is-align-items-flex-start" style="gap: 1rem">
+        <div class="field">
+          <div class="label" id="iso-label">ISO</div>
+          <div id="iso-dropdown" class="dropdown">
+            <div class="dropdown-trigger">
+              <button id="iso-button" class="button" type="button"
+                      aria-haspopup="listbox" aria-expanded="false"
+                      aria-controls="iso-menu" aria-labelledby="iso-label iso-button">
+                <span id="iso-value"></span><span class="iso-arrow" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="dropdown-menu">
+              <div id="iso-menu" class="dropdown-content" role="listbox"
+                   aria-labelledby="iso-label"></div>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="location-search">Location</label>
+          <div id="location-dropdown" class="dropdown">
+            <div class="dropdown-trigger">
+              <input id="location-search" class="input" type="text"
+                     placeholder="Search locations" autocomplete="off" disabled
+                     role="combobox" aria-autocomplete="list" aria-expanded="false"
+                     aria-controls="location-results">
+            </div>
+            <div id="location-menu" class="dropdown-menu location-menu">
+              <div id="location-results" class="dropdown-content location-results" role="listbox"></div>
+            </div>
+          </div>
+          <p id="location-status" class="help" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</body>
+</html>

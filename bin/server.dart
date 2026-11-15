@@ -1,6 +1,5 @@
 import 'package:elec/elec.dart';
 import 'package:elec_server/api/api_dacongestion.dart';
-import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/api/api_masked_ids.dart';
 import 'package:elec_server/api/cme/api_cme.dart';
 import 'package:elec_server/api/ieso/api_ieso_rtgeneration.dart';
@@ -59,8 +58,6 @@ Future<Router> buildRouter() async {
   await DbProd.isoexpress.open();
   <String, Router>{
     '/bc/v1/': BindingConstraints(DbProd.isoexpress).router,
-    '/da_energy_offers/v1/':
-        DaEnergyOffers(DbProd.isoexpress, iso: Iso.newEngland).router,
     '/da_demand_bids/v1/': DaDemandBids(DbProd.isoexpress).router,
     '/da_regulation_offers/v1/': DaRegulationOffers(DbProd.isoexpress).router,
 

@@ -9,22 +9,17 @@ import 'package:csv/csv.dart';
 import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec_server/src/db/lib_nyiso_reports.dart';
 import 'package:logging/logging.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:path/path.dart';
 import 'package:date/date.dart';
 import 'package:elec_server/src/db/config.dart';
 
 class NyisoEnergyOfferArchive extends DailyNyisoCsvReport {
   NyisoEnergyOfferArchive({ComponentConfig? dbConfig, String? dir}) {
-    dbConfig ??= ComponentConfig(
-        host: '127.0.0.1', dbName: 'nyiso', collectionName: 'da_energy_offer');
-    this.dbConfig = dbConfig;
     dir ??= '${super.dir}EnergyOffer/Raw/';
     this.dir = dir;
     reportName = 'NYISO DAM/HAM Energy Offers';
   }
 
-  mongo.Db get db => dbConfig.db;
   static final log = Logger('NYISO Energy Offers');
 
   /// for DuckDb
@@ -87,27 +82,6 @@ class NyisoEnergyOfferArchive extends DailyNyisoCsvReport {
     'Masked Bidder ID': 'INTEGER NOT NULL',
     'Regulation Movement Cost': 'FLOAT',
   };
-
-  /// Insert data into db
-  @override
-  Future<int> insertData(List<Map<String, dynamic>> data) async {
-    if (data.isEmpty) {
-      print('--->  No data to insert');
-      return Future.value(-1);
-    }
-    var groups = groupBy(data, (dynamic e) => e['date']);
-    try {
-      for (var date in groups.keys) {
-        await dbConfig.coll.remove({'date': date});
-        await dbConfig.coll.insertAll(groups[date]!);
-        print('--->  Inserted $reportName for day $date');
-      }
-      return 0;
-    } catch (e) {
-      print('xxxx ERROR xxxx $e');
-      return 1;
-    }
-  }
 
   /// One [file] for the entire month for DAM and HAM markets.
   /// Return a list of documents in this form for DAM market only:
@@ -235,7 +209,7 @@ class NyisoEnergyOfferArchive extends DailyNyisoCsvReport {
     return row;
   }
 
-  /// Get the ISO data and get it ready for DuckDb by removing inconsistencies.
+  /// Get the ISO data and get it ready for DuckDB by removing inconsistencies.
   /// Check types.
   Map<String, dynamic> cleanRow(Map<String, dynamic> row) {
     return <String, dynamic>{
@@ -376,7 +350,7 @@ class NyisoEnergyOfferArchive extends DailyNyisoCsvReport {
     };
   }
 
-  /// Create a monthly file for DuckDb.  Cleanup a bit the ISO file.
+  /// Create a monthly file for DuckDB.  Cleanup a bit the ISO file.
   int makeGzFileForMonth(Month month) {
     var file = getZipFileForMonth(month);
     var rows = readReport(getReportDate(file), eol: '\n');
@@ -535,11 +509,3 @@ FROM read_csv(
   }
 }
 
-// /// Check if this document is OK.  Throws otherwise.  May not catch all
-// /// issues.
-// void validateDocument(Map row) {
-//   if (row.containsKey('Unit Status') &&
-//       !_unitStates.contains(row['Unit Status'])) {
-//     throw StateError('Invalid unit state: ${row['Unit State']}.');
-//   }
-// }

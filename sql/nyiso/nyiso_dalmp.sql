@@ -1,6 +1,11 @@
 
 SELECT * FROM dalmp;
 
+SELECT strftime(hour_beginning, '%Y-%m') AS month, count(*)
+FROM dalmp
+GROUP BY month
+ORDER BY month;
+
 
 --- Get all the nodes that showed up on this day
 SELECT ptid 
@@ -11,8 +16,6 @@ FROM (
     ORDER BY first_day DESC
 )
 WHERE first_day = '2026-05-01';
-
-
 
 
 SELECT min(hour_beginning), max(hour_beginning) FROM dalmp;
@@ -33,7 +36,7 @@ AND hour_beginning < '2024-11-04'
 AND ptid = 61752
 ORDER BY hour_beginning;
 
-
+-- Pivot to long form
 WITH unpivot_alias AS (
     UNPIVOT dalmp
     ON lmp
@@ -52,6 +55,9 @@ AND hour_beginning < '2025-10-17 00:00:00.000-04:00'
 AND ptid in (61758) 
 ORDER BY component, ptid, hour_beginning; 
     
+-- Delete rows 
+DELETE FROM dalmp
+WHERE hour_beginning >= '2026-11-01 00:00:00.000-04:00';
 
 
 
@@ -102,58 +108,46 @@ CREATE TABLE IF NOT EXISTS dalmp (
     mcc DECIMAL(9,2) NOT NULL,
 );
 
-CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM '/home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/2026/202601*damlbmp_zone.csv.gz';
-CREATE TEMPORARY TABLE tmp2 AS SELECT * FROM '/home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/2026/202601*damlbmp_gen.csv.gz';
+--- Keep the file row number (rn) to disambiguate the two 1:00 AM rows on fall DST days.
+--- In the NYISO files, the EDT hour comes before the EST hour.
+CREATE TEMPORARY TABLE tmp1 AS SELECT row_number() OVER () AS rn, * FROM '/home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/2026/20261101damlbmp_zone.csv.gz';
+CREATE TEMPORARY TABLE tmp2 AS SELECT row_number() OVER () AS rn, * FROM '/home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/2026/20261101damlbmp_gen.csv.gz';
 
-LOAD zipfs;    
-CREATE TEMPORARY TABLE tmp1 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_zone_csv.zip/*.csv';
-CREATE TEMPORARY TABLE tmp2 AS SELECT * FROM 'zip:///home/adrian/Downloads/Archive/Nyiso/DaLmpHourly/Raw/20241101damlbmp_gen_csv.zip/*.csv';
-
---- NOTE: this messes up the ordering on the fall DST days. The two hour 1:00 AMs will be in the wrong order! 
+--- NOTE: don't parse the "Time Stamp" column directly with strptime + %Z.  On fall DST days 
+--- the ambiguous 1:00 AM resolves to EST for both rows, so the 1:00 AM EDT hour is lost.
+--- Instead, count the hours of each day in file order and add them to local midnight, 
+--- which handles both the 23 and 25 hour days correctly.
 DROP TABLE IF EXISTS tmp;
 CREATE TEMPORARY TABLE tmp AS
-(SELECT 
-    strptime("Time Stamp" || ' America/New_York' , '%m/%d/%Y %H:%M %Z')::TIMESTAMPTZ AS "hour_beginning",
-    ptid::INTEGER AS ptid,
-    "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
-    "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
-    "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
-FROM tmp1
+(
+SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
+FROM (
+    SELECT 
+        strptime("Time Stamp"[0:10] || ' America/New_York', '%m/%d/%Y %Z')::TIMESTAMPTZ AS "day",
+        ptid::INTEGER AS ptid,
+        row_number() OVER (
+            PARTITION BY ptid, "Time Stamp"[0:10]
+            ORDER BY strptime("Time Stamp", '%m/%d/%Y %H:%M'), rn) - 1 AS idx, -- 0 to 22/23/24 for each day
+        "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+        "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+        "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+    FROM tmp1
+    )
 )
 UNION 
 (
 SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
 FROM (
     SELECT 
-        strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
+        strptime("Time Stamp"[0:10] || ' America/New_York', '%m/%d/%Y %Z')::TIMESTAMPTZ AS "day",
         ptid::INTEGER AS ptid,
         row_number() OVER (
-            PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')
-            ORDER BY strptime("Time Stamp", '%m/%d/%Y %H:%M')) - 1 AS idx, -- 0 to 23 for each day
+            PARTITION BY ptid, "Time Stamp"[0:10]
+            ORDER BY strptime("Time Stamp", '%m/%d/%Y %H:%M'), rn) - 1 AS idx, -- 0 to 22/23/24 for each day
         "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
         "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
         "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
     FROM tmp2
-    )
-)
-ORDER BY hour_beginning, ptid;
-
-
-DROP TABLE IF EXISTS g;
-CREATE TEMPORARY TABLE g AS
-(
-SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
-FROM (
-    SELECT 
-        strptime("Time Stamp"[0:10], '%m/%d/%Y')::TIMESTAMPTZ AS "day",
-        ptid::INTEGER AS ptid,
-        row_number() OVER (
-            PARTITION BY ptid, strptime("Time Stamp"[0:10], '%m/%d/%Y')
-            ORDER BY strptime("Time Stamp", '%m/%d/%Y %H:%M')) - 1 AS idx, -- 0 to 23 for each day
-        "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
-        "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
-        "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
-    FROM tmp1
     )
 )
 ORDER BY hour_beginning, ptid;
@@ -167,6 +161,34 @@ WHERE NOT EXISTS (
     AND d.ptid = tmp.ptid
 ))
 ORDER BY hour_beginning, ptid;
+
+
+
+
+-- DROP TABLE IF EXISTS g;
+-- CREATE TEMPORARY TABLE g AS
+-- (
+-- SELECT day + INTERVAL (idx) HOUR AS hour_beginning, ptid, lmp, mlc, mcc
+-- FROM (
+--     SELECT 
+--         strptime("Time Stamp"[0:10] || ' America/New_York', '%m/%d/%Y %Z')::TIMESTAMPTZ AS "day",
+--         ptid::INTEGER AS ptid,
+--         row_number() OVER (
+--             PARTITION BY ptid, "Time Stamp"[0:10]
+--             ORDER BY strptime("Time Stamp", '%m/%d/%Y %H:%M'), rn) - 1 AS idx, -- 0 to 22/23/24 for each day
+--         "LBMP ($/MWHr)"::DECIMAL(9,2) AS "lmp",
+--         "Marginal Cost Losses ($/MWHr)"::DECIMAL(9,2) AS "mlc",
+--         "Marginal Cost Congestion ($/MWHr)"::DECIMAL(9,2) AS "mcc"
+--     FROM tmp1
+--     )
+-- )
+-- ORDER BY hour_beginning, ptid;
+
+
+
+
+
+
 
 
 SELECT * FROM dalmp 
