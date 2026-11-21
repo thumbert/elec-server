@@ -62,14 +62,16 @@ Future<void> main(List<String> args) async {
 
     // get the new nodes that were added in this file
     final activatedOn = Date.parse(archive.getAsOfDate(fileout.path));
-    final newNodes = await getPtidsActivatedOn(activatedOn);
+    final newNodes = await getPtidsActivatedOn(
+      activatedOn,
+      rootUrl: dotenv.env['RUST_SERVER']!,
+    );
     newNodes.sort((a, b) => a.ptid.compareTo(b.ptid));
     logger.info('Found ${newNodes.length} new nodes activated on $activatedOn');
     if (newNodes.isNotEmpty) {
       content += '<h3>New nodes activated on $activatedOn</h3>';
       content += '<table cellpadding="5" style="border-collapse:collapse">';
-      content +=
-          '<tr style="background-color:#4472C4;color:white;border-bottom:2px solid #2F528F"><th>ptid</th><th>name</th><th>substation_name</th><th>unit_name</th><th>unit_short_name</th><th>zone_id</th><th>reserve_id</th><th>rsp_area</th><th>dispatch_zone</th></tr>';
+      content += '<tr style="background-color:#4472C4;color:white;border-bottom:2px solid #2F528F"><th>ptid</th><th>name</th><th>substation_name</th><th>unit_name</th><th>unit_short_name</th><th>zone_id</th><th>reserve_id</th><th>rsp_area</th><th>dispatch_zone</th></tr>';
       for (var i = 0; i < newNodes.length; i++) {
         final record = newNodes[i];
         final bg = i.isEven ? '' : 'background-color:#F2F2F2;';
@@ -81,15 +83,18 @@ Future<void> main(List<String> args) async {
 
     // get the nodes that were deactivated in this file
     final deactivatedOn = activatedOn;
-    final deactivatedNodes = await getPtidsDeactivatedOn(deactivatedOn);
+    final deactivatedNodes = await getPtidsDeactivatedOn(
+      deactivatedOn,
+      rootUrl: dotenv.env['RUST_SERVER']!,
+    );
     deactivatedNodes.sort((a, b) => a.ptid.compareTo(b.ptid));
     logger.info(
-        'Found ${deactivatedNodes.length} nodes deactivated on $deactivatedOn');
+      'Found ${deactivatedNodes.length} nodes deactivated on $deactivatedOn',
+    );
     if (deactivatedNodes.isNotEmpty) {
       content += '<h3>Nodes deactivated on $deactivatedOn</h3>';
       content += '<table cellpadding="5" style="border-collapse:collapse">';
-      content +=
-          '<tr style="background-color:#4472C4;color:white;border-bottom:2px solid #2F528F"><th>ptid</th><th>name</th><th>substation_name</th><th>unit_name</th><th>unit_short_name</th><th>zone_id</th><th>reserve_id</th><th>rsp_area</th><th>dispatch_zone</th></tr>';
+      content += '<tr style="background-color:#4472C4;color:white;border-bottom:2px solid #2F528F"><th>ptid</th><th>name</th><th>substation_name</th><th>unit_name</th><th>unit_short_name</th><th>zone_id</th><th>reserve_id</th><th>rsp_area</th><th>dispatch_zone</th></tr>';
       for (var i = 0; i < deactivatedNodes.length; i++) {
         final record = deactivatedNodes[i];
         final bg = i.isEven ? '' : 'background-color:#F2F2F2;';
@@ -105,9 +110,7 @@ Future<void> main(List<String> args) async {
     var res = await sendEmail(
       subject: 'New ISONE ptid table downloaded!',
       body: content,
-      to: [
-        Email(dotenv.env['EMAIL_TO']!),
-      ],
+      to: [Email(dotenv.env['EMAIL_TO']!)],
       from: Email(dotenv.env['EMAIL_FROM']!),
       isHtml: true,
     );

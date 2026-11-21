@@ -82,11 +82,6 @@ Future<void> tests() async {
 
   // var years = IntegerRange(2020, 2024);
   // await updateCmpLoadArchive(years, setUp: true);
-  // await updatePolygraphProjects(setUp: false);
-
-  ///------------------------------------------------------------------
-  /// NYISO
-  // await updateNyisoEnergyOffers(months: months, download: true);
 
   ///------------------------------------------------------------------
   /// Weather

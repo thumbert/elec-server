@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:elec/elec.dart';
 import 'package:elec_server/src/db/isoexpress/fwdres_auction_results.dart';
 import 'package:elec_server/src/db/isoexpress/scc_report.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
@@ -12,18 +11,14 @@ import 'package:elec_server/src/db/nyiso/rt_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/rt_zonal_load_hourly.dart';
 import 'package:elec_server/src/db/utilities/retail_suppliers_offers_archive.dart';
 import 'package:elec_server/src/utils/convert_xls_to_xlsx.dart';
-import 'package:http/http.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
-import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
 import 'package:elec_server/src/db/isoexpress/monthly_asset_ncpc.dart';
 import 'package:elec_server/src/db/isoexpress/regulation_requirement.dart';
 import 'package:elec_server/src/db/isoexpress/wholesale_load_cost_report.dart';
 import 'package:elec_server/src/db/isone/masked_ids.dart';
 import 'package:elec_server/src/db/lib_iso_express.dart';
 import 'package:elec_server/src/db/mis/sd_rtload.dart';
-import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/pjm/pjm_ptid.dart' as pjm_ptid;
@@ -104,37 +99,6 @@ Future<void> insertCompetitiveOffers(
         var data = archive.processFile(file);
         await archive.insertData(data);
       }
-    }
-  }
-  await archive.dbConfig.db.close();
-}
-
-Future<void> insertDaBindingConstraintsIsone() async {
-  var archive = DaBindingConstraintsReportArchive();
-  // var days = [
-  //   Date.utc(2015, 2, 17), // empty file
-  //   ...Term.parse('Jan17', UTC).days(),
-  //   Date.utc(2017, 12, 31), // plenty of constraints
-  //   Date.utc(2018, 7, 10), // has duplicates
-  // ];
-  var days = Term.parse('12Jan22-6Mar22', UTC).days();
-  await insertDays(archive, days);
-}
-
-Future<void> insertDaCongestionCompactNyiso() async {
-  /// get the list of ptids to ingest
-  var client = FtrClearingPrices(Client(), iso: Iso.newYork);
-  var cp = await client.getClearingPricesForAuction('X21-6M-R5Autumn21');
-  var ptids = cp.map((e) => e['ptid'] as int).toSet();
-
-  var archive = NyisoDaCongestionCompactArchive()..ptids = ptids;
-  // await archive.setupDb();
-  await archive.dbConfig.db.open();
-  var months = Month.utc(2019, 2).upTo(Month.utc(2022, 2));
-  for (var month in months) {
-    for (var date in month.days()) {
-      var data = archive.processDay(date);
-      await archive.insertData([data]);
     }
   }
   await archive.dbConfig.db.close();

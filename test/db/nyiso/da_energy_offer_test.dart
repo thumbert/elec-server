@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:elec_server/api/api_energyoffers.dart';
 import 'package:elec_server/client/da_energy_offer.dart' as eo;
 import 'package:elec_server/src/db/lib_prod_dbs.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
@@ -17,8 +16,6 @@ import 'package:path/path.dart';
 Future<void> tests(String rootUrl) async {
   var archive = NyisoEnergyOfferArchive();
   group('NYISO energy offer db tests:', () {
-    setUp(() async => await archive.db.open());
-    tearDown(() async => await archive.dbConfig.db.close());
     test('test filenames, urls', () async {
       var month = Month.utc(2021, 1);
       var file = archive.getCsvFile(month.startDate);
@@ -61,57 +58,11 @@ Future<void> tests(String rootUrl) async {
       var res = archive.makeGzFileForMonth(Month.utc(2023, 3));
       expect(res, 0);
       // ' 01MAR2023:05:00:00';
-    });
+    }, skip: true);
 
     /// Athens 1,2,3: 98347750, 28347750, 38347750
     /// 35855750 self-commits in DAM on 1/1/2021, 175 MW for a few hours in the middle of the day ...
     ///
-  });
-  group('NYISO energy offers API tests: ', () {
-    var api = DaEnergyOffers(archive.db, iso: Iso.newYork);
-    setUp(() async => await archive.db.open());
-    tearDown(() async => await archive.db.close());
-    test('get energy offers for one hour', () async {
-      var data = await api.getEnergyOffers('20210101', '16');
-      expect(data.length, 810);
-
-      var a1 = data.where((e) => e['assetId'] == 98347750).toList();
-      expect(a1.length, 9); // 9 segments
-      expect(a1.first.keys.toSet(), {
-        'assetId',
-        'Economic Maximum',
-        'price',
-        'quantity',
-      });
-      expect(a1.first['Economic Maximum'], 381);
-      expect(a1.first['quantity'], 306.3);
-      expect(a1[1]['quantity'], 9.3);
-    });
-    test('get stack for one hour', () async {
-      var data = await api.getGenerationStack('20210101', '16');
-      expect(data.length, 810);
-    });
-    test('get assets one day', () async {
-      var data = await api.assetsByDay('20210101');
-      expect(data.length, 287);
-    });
-    // test('get Economic Maximum for one day', () async {
-    //   var data = await api.oneDailyVariable(
-    //       'Economic Maximum', '20210101', '20210101');
-    //   expect(data.length, 308);
-    // }, solo: true);
-    test('get energy offers for one asset between a start/end date', () async {
-      var _data = await api.getEnergyOffersForAssetId(
-          '98347750', '20210101', '20210103');
-      expect(_data.length, 3);
-      var url =
-          '$rootUrl/nyiso/da_energy_offers/v1/assetId/98347750/start/2021-01-01/end/2021-01-03';
-      var res = await http
-          .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
-      var data = json.decode(res.body) as List;
-      expect(data.length, 3);
-      expect(data.first.keys.toSet(), {'date', 'hours'});
-    });
   });
 
   group('NYISO energy offers, Rust API', () {

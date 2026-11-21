@@ -2,12 +2,9 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 
 import 'package:web/web.dart' as web;
-import 'package:dama/analysis/interpolation/linear_interpolator.dart';
-import 'package:dama/distribution/lognormal_distribution.dart';
 import 'package:date/date.dart';
 import 'package:elec/finance.dart';
 import 'package:elec/risk_system.dart';
-import 'package:more/collection.dart';
 import 'package:dama/distribution/multivariate_gaussian_distribution.dart';
 import 'package:dama/linear/matrix.dart';
 import 'package:dama/stat/descriptive/summary.dart';
@@ -673,26 +670,26 @@ void main(List<String> args) {
   makePlotPrices(prices);
 
   
-  var tblPrices = Table.from(
-    List.generate(
-      prices.power.length,
-      (i) => {
-        'day': i,
-        'Power': prices.power[i],
-        'Gas': prices.gas[i],
-        'RGGI': prices.rggi[i],
-        'Spark': prices.power[i] - 7 * (prices.gas[i] + prices.rggi[i]),
-      },
-    ),
-    options: {
-      'format': {
-        'Power': (v) => (v as num).toStringAsFixed(2),
-        'Gas': (v) => (v as num).toStringAsFixed(2),
-        'RGGI': (v) => (v as num).toStringAsFixed(2),
-        'Spark': (v) => (v as num).toStringAsFixed(2),
-      },
-    },
-  );
+  // var tblPrices = Table.from(
+  //   List.generate(
+  //     prices.power.length,
+  //     (i) => {
+  //       'day': i,
+  //       'Power': prices.power[i],
+  //       'Gas': prices.gas[i],
+  //       'RGGI': prices.rggi[i],
+  //       'Spark': prices.power[i] - 7 * (prices.gas[i] + prices.rggi[i]),
+  //     },
+  //   ),
+  //   options: {
+  //     'format': {
+  //       'Power': (v) => (v as num).toStringAsFixed(2),
+  //       'Gas': (v) => (v as num).toStringAsFixed(2),
+  //       'RGGI': (v) => (v as num).toStringAsFixed(2),
+  //       'Spark': (v) => (v as num).toStringAsFixed(2),
+  //     },
+  //   },
+  // );
 
   // var tblValue = dynamicHedging(prices.power, prices.gas, prices.rggi);
   // var res = tblPrices.joinTable(Table.from(tblValue), JoinType.outer)

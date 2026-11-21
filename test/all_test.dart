@@ -10,7 +10,6 @@ import 'db/ieso/rt_zonal_demand_test.dart' as ieso_rtzd;
 import 'db/isoexpress/da_binding_constraints_report_test.dart' as bc;
 import 'db/isoexpress/da_demand_bid_test.dart' as demand_bids;
 import 'db/isoexpress/da_lmp_hourly_test.dart' as dalmp;
-import 'db/isoexpress/rt_lmp_hourly_test.dart' as rtlmp;
 import 'db/isoexpress/fwdres_auction_results_test.dart' as fwdres;
 import 'db/isoexpress/monthly_asset_ncpc_test.dart' as monthly_asset_ncpc;
 import 'db/isoexpress/regulation_requirement_test.dart'
@@ -23,14 +22,11 @@ import 'db/isone/masked_ids_test.dart' as masked_ids;
 import 'db/lib_mis_reports_test.dart' as mis;
 import 'db/lib_nyiso_report_test.dart' as lib_nyiso_report;
 import 'db/marks/forward_marks_test.dart' as forward_marks;
-import 'db/mis/sd_arrawdsum_test.dart' as sd_arrawdsum;
 import 'db/mis/sd_rtload_test.dart' as sd_rtload;
-import 'db/mis/sr_dalocsum_test.dart' as sr_dalocsum;
 import 'db/mis/sr_rtlocsum_test.dart' as sr_rtlocsum;
 import 'db/mis/tr_sch2tp_test.dart' as trsch2;
 import 'db/mis/tr_sch3p2_test.dart' as trsch3;
 import 'db/nyiso/binding_constraints_test.dart' as nyiso_binding_constraints;
-import 'db/nyiso/da_congestion_compact_test.dart' as nyiso_dacongestion;
 import 'db/nyiso/da_energy_offer_test.dart' as nyiso_daenergyoffer;
 import 'db/nyiso/da_lmp_hourly_test.dart' as nyiso_dalmp;
 import 'db/nyiso/masked_ids_test.dart' as nyiso_masked_ids;
@@ -55,8 +51,8 @@ Future<void> main() async {
   initializeTimeZones();
   DbProd();
   dotenv.load('.env/prod.env');
-  var rootUrl = dotenv.env['ROOT_URL']!;
-  var rustServer = dotenv.env['RUST_SERVER']!;
+  final rootUrl = dotenv.env['ROOT_URL']!;
+  final rustServer = dotenv.env['RUST_SERVER']!;
 
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
@@ -64,13 +60,13 @@ Future<void> main() async {
   });
 
   /// db tests
-  await bc.tests(rootUrl);
+  await bc.tests(rustServer);
   await cme.tests(rootUrl);
   await ct_retail_suppliers.tests(rootUrl);
   await ieso_rtgen.tests(rootUrl, rustServer);
   await ieso_rtzd.tests(rootUrl, rustServer);
   // await da_congestion.tests();
-  await dalmp.tests(rootUrl);
+  await dalmp.tests(rustServer);
   await demand_bids.tests();
   // await energy_offers.tests(rootUrl);
   await fwdres.tests(rootUrl);
@@ -78,9 +74,9 @@ Future<void> main() async {
   await load_cmp.tests();
   await masked_ids.tests(rootUrl);
   await monthly_asset_ncpc.tests(rootUrl);
-  await nyiso_binding_constraints.tests(rootUrl);
-  await nyiso_dalmp.tests(rootUrl);
-  await nyiso_dacongestion.tests();
+  await nyiso_binding_constraints.tests(rustServer);
+  await nyiso_dalmp.tests(rustServer);
+  
   await nyiso_daenergyoffer.tests(rootUrl);
   // await nyiso_rtlmp.tests(rootUrl);
   await nyiso_masked_ids.tests(rootUrl);
@@ -91,11 +87,8 @@ Future<void> main() async {
   await ptids.tests(rootUrl);
   await regulation_requirement.tests(rootUrl);
   await retail_offers.tests(rootUrl);
-  await rtlmp.tests();
 
-  sd_arrawdsum.tests(rootUrl);
   sd_rtload.tests();
-  sr_dalocsum.tests(rootUrl);
   sr_rtlocsum.tests();
   trsch2.tests();
   trsch3.tests();

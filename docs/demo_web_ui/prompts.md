@@ -1,0 +1,2 @@
+ * Use the information in file settings.dart to create two dropdowns.  One for the ISO, 
+ and one for a location.  The ISO dropdown should be simple.  The location dropdown should allow for searching in the list of all available locations for the selected ISO.  Use Bootstrap JS to create the dropdowns.   

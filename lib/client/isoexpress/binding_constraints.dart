@@ -51,7 +51,9 @@ class Record {
   static Record fromJson(Map<String, dynamic> json) {
     return Record(
       hourBeginning: TZDateTime.parse(
-          getLocation('America/New_York'), json['hour_beginning'] as String),
+        getLocation('America/New_York'),
+        json['hour_beginning'] as String,
+      ),
       constraintName: json['constraint_name'] as String,
       contingencyName: json['contingency_name'] as String,
       marginalValue: json['marginal_value'] as num,
@@ -132,8 +134,9 @@ class QueryFilter {
       params['constraint_name_like'] = constraintNameLike.toString();
     }
     if (constraintNameIn != null) {
-      params['constraint_name_in'] =
-          constraintNameIn!.map((e) => e.toString()).join(',');
+      params['constraint_name_in'] = constraintNameIn!
+          .map((e) => e.toString())
+          .join(',');
     }
     return params;
   }

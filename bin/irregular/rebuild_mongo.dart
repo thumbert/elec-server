@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:elec_server/client/utilities/cmp/cmp.dart';
 import 'package:elec_server/src/db/lib_prod_archives.dart';
 import 'package:elec_server/src/db/lib_update_dbs.dart';
-import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:more/collection.dart';
 import 'package:path/path.dart';
@@ -11,8 +10,6 @@ import 'package:timezone/timezone.dart';
 import 'package:dotenv/dotenv.dart' as dotenv;
 
 import 'package:date/date.dart';
-import 'package:elec/elec.dart';
-import 'package:elec_server/client/ftr_clearing_prices.dart';
 import 'package:elec_server/client/weather/noaa_daily_summary.dart';
 import 'package:elec_server/src/db/cme/cme_energy_settlements.dart';
 import 'package:elec_server/src/db/isoexpress/da_binding_constraints_report.dart';
@@ -26,7 +23,6 @@ import 'package:elec_server/src/db/mis/sr_dalocsum.dart';
 import 'package:elec_server/src/db/mis/sr_rtlocsum.dart';
 import 'package:elec_server/src/db/mis/tr_sch2tp.dart';
 import 'package:elec_server/src/db/mis/tr_sch3p2.dart';
-import 'package:elec_server/src/db/nyiso/da_congestion_compact.dart';
 import 'package:elec_server/src/db/nyiso/da_energy_offer.dart';
 import 'package:elec_server/src/db/nyiso/da_lmp_hourly.dart';
 import 'package:elec_server/src/db/nyiso/rt_lmp_hourly.dart';
@@ -138,34 +134,6 @@ Future<void> recreateMonthlyAssetNcpc() async {
   for (var file in files) {
     var data = archive.processFile(file);
     await archive.insertData(data);
-  }
-  await archive.dbConfig.db.close();
-}
-
-Future<void> recreateDaCongestionCompactNyiso() async {
-  var client = FtrClearingPrices(Client(), iso: Iso.newYork);
-  var cp = await client.getClearingPricesForAuction('X21-6M-R5Autumn21');
-  var ptids = cp.map((e) => e['ptid'] as int).toSet();
-  if (ptids.isEmpty) {
-    throw StateError('Need to ingest TCC clearing prices first!');
-  }
-
-  var archive = NyisoDaCongestionCompactArchive()..ptids = ptids;
-  await archive.setupDb();
-  var files = Directory(archive.dir)
-      .listSync()
-      .whereType<File>()
-      .where((e) => e.path.endsWith('.zip'))
-      .toList();
-  files.sort((a, b) => a.path.compareTo(b.path));
-  await archive.dbConfig.db.open();
-  for (var file in files) {
-    var yyyymm = basename(file.path).substring(0, 6);
-    var month = Month.parse(yyyymm, location: UTC);
-    for (var date in month.days()) {
-      var data = archive.processDay(date);
-      await archive.insertData([data]);
-    }
   }
   await archive.dbConfig.db.close();
 }

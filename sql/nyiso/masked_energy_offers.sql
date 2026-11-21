@@ -1,16 +1,14 @@
 
-INSERT INTO da_offers
-FROM read_csv(
-    'DaEnergyOffer/month/da_energy_offers_2024-04.csv.gz', 
-    header = true, 
-    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 
+SELECT * FROM offers LIMIT 3;
 
-SELECT count(*) FROM da_offers;
+SELECT count(*) FROM offers;
 
+SELECT strftime("Date Time", '%Y-%m') AS YEARMON, COUNT(*) 
+FROM offers
+GROUP BY YEARMON
+ORDER BY YEARMON;
 
-SELECT * FROM da_offers
-LIMIT 3;
 
 
 SELECT * FROM (
@@ -296,6 +294,12 @@ FROM (
 
 
 
+
+INSERT INTO offers
+FROM read_csv(
+    'DaEnergyOffer/month/da_energy_offers_2024-04.csv.gz', 
+    header = true, 
+    timestampformat = '%Y-%m-%dT%H:%M:%S.000%z');
 
 
 
