@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 
+@Deprecated('Use the individual client classes for each region instead')
 class PtidsApi {
   PtidsApi(http.Client client,
       {this.rootUrl = 'http://localhost:8000',
