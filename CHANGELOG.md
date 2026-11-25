@@ -10,6 +10,9 @@
 # 2026-11-25
 - Add USGS water data API example
 
+# 2026-11-21
+- Add NYISO load actuals, load forecast sql files.
+
 # 2026-11-15
 - Clean up some of the test failures.  There are more to go!
 - Make an example of using Dart for Web at /docs/demo_web_ui that uses Bulma for styling
